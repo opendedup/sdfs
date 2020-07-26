@@ -120,4 +120,5 @@ service FileIOService {
     rpc CreateCopy(FileSnapshotRequest) returns (FileSnapshotResponse);
     rpc FileExists(FileExistsRequest) returns (FileExistsResponse);
     rpc MkDirAll(MkDirRequest) returns (MkDirResponse);
+    rpc Stat(FileInfoRequest) returns (FileMessageResponse);
   }

@@ -80,7 +80,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         this.mountPoint = Main.volumeMountPoint;
         if (!mountPoint.endsWith("/"))
             mountPoint = mountPoint + "/";
-        
+
         File f = new File(this.mountedVolume);
         if (!f.exists())
             f.mkdirs();
@@ -270,7 +270,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
     }
-
 
     private int getFtype(String path) throws FileIOError {
         // SDFSLogger.getLog().info("Path=" + path);
@@ -665,6 +664,34 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     @Override
+    public void stat(FileInfoRequest req, StreamObserver<FileMessageResponse> responseObserver) {
+        FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+        String internalPath = Main.volume.getPath() + File.separator + req.getFileName();
+        File f = new File(internalPath);
+        if (!f.exists()) {
+            b.setError("File not found " + req.getFileName());
+            b.setErrorCode(errorCodes.ENOENT);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        try {
+            MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
+            b.addResponse(mf.toGRPC(req.getCompact()));
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error("unable to fulfill request on file " + req.getFileName(), e);
+            b.setError("unable to fulfill request on file " + req.getFileName());
+            b.setErrorCode(errorCodes.EIO);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+    @Override
     public void getFileInfo(FileInfoRequest req, StreamObserver<FileMessageResponse> responseObserver) {
         if (req.getFileName().equals("lastClosedFile")) {
             FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
@@ -792,7 +819,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
-    public void fileExists(FileExistsRequest req,StreamObserver<FileExistsResponse> responseObserver) {
+    public void fileExists(FileExistsRequest req, StreamObserver<FileExistsResponse> responseObserver) {
         FileExistsResponse.Builder b = FileExistsResponse.newBuilder();
         try {
             File f = new File(Main.volume.getPath() + File.separator + req.getPath());
@@ -800,7 +827,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
-        } catch(Exception e) {
+        } catch (Exception e) {
             b.setError("FileExists error " + req.getPath());
             b.setErrorCode(errorCodes.EIO);
             responseObserver.onNext(b.build());
