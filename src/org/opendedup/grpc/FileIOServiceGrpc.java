@@ -430,6 +430,37 @@ public final class FileIOServiceGrpc {
     return getStatMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.FileRenameRequest,
+      org.opendedup.grpc.FileRenameResponse> getRenameMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "Rename",
+      requestType = org.opendedup.grpc.FileRenameRequest.class,
+      responseType = org.opendedup.grpc.FileRenameResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.FileRenameRequest,
+      org.opendedup.grpc.FileRenameResponse> getRenameMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.FileRenameRequest, org.opendedup.grpc.FileRenameResponse> getRenameMethod;
+    if ((getRenameMethod = FileIOServiceGrpc.getRenameMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getRenameMethod = FileIOServiceGrpc.getRenameMethod) == null) {
+          FileIOServiceGrpc.getRenameMethod = getRenameMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.FileRenameRequest, org.opendedup.grpc.FileRenameResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Rename"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.FileRenameRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.FileRenameResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("Rename"))
+              .build();
+        }
+      }
+    }
+    return getRenameMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -572,6 +603,13 @@ public final class FileIOServiceGrpc {
       asyncUnimplementedUnaryCall(getStatMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void rename(org.opendedup.grpc.FileRenameRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FileRenameResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getRenameMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -665,6 +703,13 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.FileInfoRequest,
                 org.opendedup.grpc.FileMessageResponse>(
                   this, METHODID_STAT)))
+          .addMethod(
+            getRenameMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.FileRenameRequest,
+                org.opendedup.grpc.FileRenameResponse>(
+                  this, METHODID_RENAME)))
           .build();
     }
   }
@@ -789,6 +834,14 @@ public final class FileIOServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getStatMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void rename(org.opendedup.grpc.FileRenameRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FileRenameResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getRenameMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -897,6 +950,13 @@ public final class FileIOServiceGrpc {
     public org.opendedup.grpc.FileMessageResponse stat(org.opendedup.grpc.FileInfoRequest request) {
       return blockingUnaryCall(
           getChannel(), getStatMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.FileRenameResponse rename(org.opendedup.grpc.FileRenameRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getRenameMethod(), getCallOptions(), request);
     }
   }
 
@@ -1020,6 +1080,14 @@ public final class FileIOServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getStatMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.FileRenameResponse> rename(
+        org.opendedup.grpc.FileRenameRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getRenameMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_MK_DIR = 0;
@@ -1035,6 +1103,7 @@ public final class FileIOServiceGrpc {
   private static final int METHODID_FILE_EXISTS = 10;
   private static final int METHODID_MK_DIR_ALL = 11;
   private static final int METHODID_STAT = 12;
+  private static final int METHODID_RENAME = 13;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1104,6 +1173,10 @@ public final class FileIOServiceGrpc {
         case METHODID_STAT:
           serviceImpl.stat((org.opendedup.grpc.FileInfoRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.FileMessageResponse>) responseObserver);
+          break;
+        case METHODID_RENAME:
+          serviceImpl.rename((org.opendedup.grpc.FileRenameRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.FileRenameResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -1179,6 +1252,7 @@ public final class FileIOServiceGrpc {
               .addMethod(getFileExistsMethod())
               .addMethod(getMkDirAllMethod())
               .addMethod(getStatMethod())
+              .addMethod(getRenameMethod())
               .build();
         }
       }

@@ -786,6 +786,52 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     @Override
+    public void rename(FileRenameRequest req, StreamObserver<FileRenameResponse> responseObserver) {
+        FileRenameResponse.Builder b = FileRenameResponse.newBuilder();
+        File f = new File(Main.volume.getPath() + File.separator + req.getSrc());
+        File nf = new File(Main.volume.getPath() + File.separator + req.getDest());
+        try {
+            if (!f.exists()) {
+                b.setError("Path not found [" + req.getSrc() + "]");
+                b.setErrorCode(errorCodes.EEXIST);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            if (nf.exists()) {
+                b.setError("Path already exists [" + req.getDest() + "]");
+                b.setErrorCode(errorCodes.EEXIST);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+			try {
+				this.checkInFS(nf);
+			} catch (FileIOError e) {
+				b.setError(e.getMessage());
+                b.setErrorCode(e.code);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+			}
+            MetaFileStore.rename(f.getCanonicalPath(), nf.getCanonicalPath());
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+		}  catch (Exception e) {
+            SDFSLogger.getLog().error("unable to rename " + req.getSrc() + " to " + req.getDest(), e);
+            b.setError("unable to rename " + req.getSrc() + " to " + req.getDest());
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+			
+		} finally {
+			f = null;
+		}
+    }
+
+    @Override
     public void createCopy(FileSnapshotRequest req, StreamObserver<FileSnapshotResponse> responseObserver) {
         FileSnapshotResponse.Builder b = FileSnapshotResponse.newBuilder();
         File f = new File(Main.volume.getPath() + File.separator + req.getSrc());
@@ -818,6 +864,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
     }
+
 
     public void fileExists(FileExistsRequest req, StreamObserver<FileExistsResponse> responseObserver) {
         FileExistsResponse.Builder b = FileExistsResponse.newBuilder();

@@ -106,6 +106,16 @@ message FileSnapshotResponse {
     errorCodes errorCode = 3;
 }
 
+message FileRenameRequest {
+    string src =1;
+    string dest = 2;
+}
+
+message FileRenameResponse {
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
 service FileIOService {
     // Define a RPC operation
     rpc MkDir(MkDirRequest) returns (MkDirResponse);
@@ -121,4 +131,5 @@ service FileIOService {
     rpc FileExists(FileExistsRequest) returns (FileExistsResponse);
     rpc MkDirAll(MkDirRequest) returns (MkDirResponse);
     rpc Stat(FileInfoRequest) returns (FileMessageResponse);
+    rpc Rename(FileRenameRequest) returns (FileRenameResponse);
   }

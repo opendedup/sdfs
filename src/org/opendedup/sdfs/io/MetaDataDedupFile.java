@@ -1568,7 +1568,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		FileInfoResponse.Builder b = FileInfoResponse.newBuilder();
 		b.setFileName(this.getName());
 		String fl = this.getPath().substring(Main.volume.getPath().length());
-		String pl = this.getParent().substring(Main.volume.getPath().length());
+		String pl = "";
+		if( fl.length() > 0) {
+			pl = this.getParent().substring(Main.volume.getPath().length());
+		}
 		while (fl.startsWith("/") || fl.startsWith("\\"))
 			fl = fl.substring(1, fl.length());
 		if (pl.trim().length() == 0)
@@ -1622,7 +1625,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		JsonObject dataset = new JsonObject();
 		dataset.addProperty("file.name", this.getName());
 		String fl = this.getPath().substring(Main.volume.getPath().length());
-		String pl = this.getParent().substring(Main.volume.getPath().length());
+		String pl = "";
+		if( fl.length() > 0) {
+			pl = this.getParent().substring(Main.volume.getPath().length());
+		}
 		while (fl.startsWith("/") || fl.startsWith("\\"))
 			fl = fl.substring(1, fl.length());
 		if (pl.trim().length() == 0)
