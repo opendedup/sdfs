@@ -6,4 +6,4 @@ rm -rf target/sdfs*.jar
 mvn package
 cd dbg
 sudo cp ../target/sdfs-${VERSION}-jar-with-dependencies.jar /usr/share/sdfs/lib/sdfs.jar
-sudo mount -t sdfs pool0 /media/pool0/
+sudo mount -t sdfs gcs0 /media/pool0/
