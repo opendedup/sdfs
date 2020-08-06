@@ -373,8 +373,8 @@ public class Config {
 		if (localChunkStore.hasAttribute("max-table-size")) {
 			Main.MAX_TBL_SIZE = Integer.parseInt(localChunkStore.getAttribute("max-table-size"));
 		}
-		if (localChunkStore.hasAttribute("cuckoo")) {
-			Main.CUCKOO = Boolean.parseBoolean(localChunkStore.getAttribute("cuckoo"));
+		if (localChunkStore.hasAttribute("max-chunk-age")) {
+			Main.maxAge = Long.parseLong(localChunkStore.getAttribute("max-chunk-age"));
 		}
 		if (localChunkStore.hasAttribute("cluster-id"))
 			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
@@ -410,7 +410,6 @@ public class Config {
 		if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {
 			Main.chunkStoreConfig = (Element) localChunkStore.getElementsByTagName("extended-config").item(0);
 		}
-
 		if (localChunkStore.hasAttribute("max-repl-batch-sz"))
 			Main.MAX_REPL_BATCH_SZ = Integer.parseInt(localChunkStore.getAttribute("max-repl-batch-sz"));
 		if (localChunkStore.hasAttribute("encrypt")) {

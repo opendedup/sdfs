@@ -1,8 +1,10 @@
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-export VERSION=3.10.9
-umount /media/azure0
+export VERSION=3.11.0
+sudo umount /media/pool0
+sudo rm -rf /opt/sdfs/volumes/gcs0/
 cd ../
+rm -rf target/classes/
+rm -rf target/sdfs*.jar
 mvn package
 cd dbg
-cp ../target/sdfs-${VERSION}-jar-with-dependencies.jar /usr/share/sdfs/lib/sdfs.jar
-mount -t sdfs s3 /media/azure0/
+sudo cp ../target/sdfs-${VERSION}-jar-with-dependencies.jar /usr/share/sdfs/lib/sdfs.jar
+sudo mount -t sdfs gcs0 /media/pool0/

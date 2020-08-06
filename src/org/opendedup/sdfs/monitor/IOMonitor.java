@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.opendedup.grpc.IOMonitorResponse;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.w3c.dom.Document;
@@ -214,6 +215,24 @@ public class IOMonitor implements java.io.Serializable {
 			this.qos = buf.getInt();
 		}
 	}
+
+	public IOMonitorResponse toGRPC() {
+		IOMonitorResponse.Builder b = IOMonitorResponse.newBuilder();
+		b.setVirtualBytesWritten(this.virtualBytesWritten.get()).setActualBytesWritten(this.actualBytesWritten.get())
+		.setBytesRead(this.bytesRead.get()).setDuplicateBlocks(this.duplicateBlocks.get()).setReadOpts(this.readOperations.get())
+		.setWriteOpts(this.writeOperations.get()).setMaxIops(this.iops.get()).setMaxReadOps(this.riops.get()).setMaxWriteOps(this.wiops.get())
+		.setMaxMbps(this.bps.get() / (1024 * 1024)).setMaxReadMbps(this.rbps.get() / (1024 * 1024)).setMaxWriteMbps(this.wbps.get() / (1024 * 1024))
+		.setIoQos(this.qos).setIoProfile(this.iopProfile);
+		return b.build();
+		
+	}
+
+
+
+
+
+
+
 
 	public Element toXML(Document doc) throws ParserConfigurationException {
 		Element root = doc.createElement("io-info");

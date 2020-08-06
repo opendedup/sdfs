@@ -194,6 +194,23 @@ public class MetaFileStore {
 		}
 	}
 
+	public static void mkDirs(File f, int mode) throws IOException {
+		if (f.exists()) {
+			f = null;
+			throw new IOException("folder exists");
+		}
+		f.mkdirs();
+		// SDFSLogger.getLog().info("mkdir=" + mk + " for " + f);
+		Path p = Paths.get(f.getPath());
+		try {
+			if (!OSValidator.isWindows() && mode != -1)
+				Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
+		} catch (IOException e) {
+			SDFSLogger.getLog().error("error while making dir " + f.getPath(), e);
+			throw new IOException("access denied for " + f.getPath());
+		}
+	}
+
 	public static MetaDataDedupFile getFolder(File f) {
 		WriteLock l = getMFLock.writeLock();
 		l.lock();

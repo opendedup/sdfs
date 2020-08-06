@@ -2,8 +2,6 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
-import org.jclouds.filesystem.reference.FilesystemConstants;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -89,6 +87,8 @@ import com.google.common.io.BaseEncoding;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 
 import org.opendedup.collections.HashExistsException;
+
+
 
 /**
  * 
@@ -511,28 +511,30 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
 
 			Location region = null;
-			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
+			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file") ) {
+				
+				String authFile = config.getAttribute("auth-file");
 				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
+				System.out.println(config.getAttribute("auth-file"));
 				String creds = org.apache.commons.io.IOUtils.toString(is, "UTF-8");
+				System.out.println(creds);
 				org.apache.commons.io.IOUtils.closeQuietly(is);
 				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(creds);
+				String credential = credentialSupplier.get().credential;
+				context = ContextBuilder.newBuilder(service)
+              .credentials("storage@upheld-altar-267119.iam.gserviceaccount.com", credential)
+              .buildView(BlobStoreContext.class);
+				/*
 				context = ContextBuilder.newBuilder(service).overrides(overrides)
 						.credentialsSupplier(credentialSupplier).buildView(BlobStoreContext.class);
-
+						*/
 			} else if (service.equals("google-cloud-storage")) {
 				overrides.setProperty(Constants.PROPERTY_ENDPOINT, "https://storage.googleapis.com");
 				overrides.setProperty(org.jclouds.s3.reference.S3Constants.PROPERTY_S3_VIRTUAL_HOST_BUCKETS, "false");
 				overrides.setProperty(Constants.PROPERTY_STRIP_EXPECT_HEADER, "true");
 				context = ContextBuilder.newBuilder("s3").overrides(overrides)
 						.credentials(this.accessKey, this.secretKey).buildView(BlobStoreContext.class);
-			} else if (service.equals("filesystem")) {
-				EncyptUtils.baseEncode = true;
-				SDFSLogger.getLog().info("share-path=" + config.getAttribute("share-path"));
-				overrides.setProperty(FilesystemConstants.PROPERTY_BASEDIR, config.getAttribute("share-path"));
-				context = ContextBuilder.newBuilder("filesystem").overrides(overrides)
-						.buildView(BlobStoreContext.class);
-				this.accessStore = true;
-			} else {
+			}  else {
 				SDFSLogger.getLog().debug("ca=" + this.accessKey + " cs=" + this.secretKey);
 				context = ContextBuilder.newBuilder(service).credentials(this.accessKey, this.secretKey)
 						.overrides(overrides).buildView(BlobStoreContext.class);

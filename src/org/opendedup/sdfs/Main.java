@@ -117,7 +117,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.10.9";
+	public static String version = "3.11.0";
 	public static String licenseKey = "none";
 
 	public static boolean readAhead = false;
@@ -377,4 +377,6 @@ public class Main {
 	public static boolean rebuildHashTable = false;
 
 	public static boolean enableLookupFilter = false;
+
+	public static long maxAge = -1;
 }

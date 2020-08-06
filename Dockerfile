@@ -1,4 +1,4 @@
-FROM sdfs-base:3.10.9 AS builder
+FROM sdfs-base:3.11.0 AS builder
 
 LABEL email=samsilverberg@google.com
 LABEL author="Sam Silverberg"
@@ -13,7 +13,7 @@ RUN wget https://cdn.azul.com/zulu/bin/zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.g
     mkdir -p install-packages/deb/usr/share/sdfs/bin/ && \
     cp -rf zulu11.35.13-ca-jdk11.0.5-linux_x64 install-packages/deb/usr/share/sdfs/bin/jre
 
-ENV VERSION=3.10.9
+ENV VERSION=3.11.0
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
 ENV DEBFILE="sdfs_${VERSION}_amd64.deb"
 RUN echo $DEBFILE
@@ -23,7 +23,8 @@ WORKDIR "/sdfs-build/"
 RUN mvn package && \
     cp target/lib/b2-2.1.2.jar install-packages/deb/usr/share/sdfs/lib/  && \
     cp target/lib/google-cloud-storage-2.1.2.jar install-packages/deb/usr/share/sdfs/lib/ && \
-    cp target/sdfs-${VERSION}-jar-with-dependencies.jar install-packages/deb/usr/share/sdfs/lib/sdfs.jar
+    cp target/sdfs-${VERSION}-jar-with-dependencies.jar install-packages/deb/usr/share/sdfs/lib/sdfs.jar && \
+    cp target/sdfs-${VERSION}-jar-with-dependencies.jar install-packages
 WORKDIR "/sdfs-build/install-packages/"
 RUN rm -rf *.deb *.rpm && \
     cp DEBIAN/libfuse.so.2 deb/usr/share/sdfs/bin/ && \
@@ -36,12 +37,12 @@ RUN rm -rf *.deb *.rpm && \
     cp RHEL/libjavafs.so deb/usr/share/sdfs/bin/ && \
     fpm -s dir -t rpm -n sdfs -v $VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" 
 WORKDIR "/sdfs-build/install-packages/"
-RUN echo "tar cvf - sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm" > export_data.sh && \
+RUN echo "tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm" > export_data.sh && \
     chmod 700 export_data.sh
-ENTRYPOINT tar cvf - sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm
+ENTRYPOINT tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm
 
 FROM ubuntu:18.04
-ENV VERSION=3.10.9
+ENV VERSION=3.11.0
 LABEL email=samsilverberg@google.com
 LABEL author="Sam Silverberg"
 RUN apt update && apt upgrade -y && apt install -y \

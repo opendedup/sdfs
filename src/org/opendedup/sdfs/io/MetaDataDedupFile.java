@@ -51,6 +51,9 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.grpc.FileAttributes;
+import org.opendedup.grpc.FileInfoResponse;
+import org.opendedup.grpc.FileInfoResponse.fileType;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -1561,11 +1564,73 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}
 	}
 
+	public FileInfoResponse toGRPC(boolean compact) throws IOException {
+		FileInfoResponse.Builder b = FileInfoResponse.newBuilder();
+		b.setFileName(this.getName());
+		String fl = this.getPath().substring(Main.volume.getPath().length());
+		String pl = "";
+		if( fl.length() > 0) {
+			pl = this.getParent().substring(Main.volume.getPath().length());
+		}
+		while (fl.startsWith("/") || fl.startsWith("\\"))
+			fl = fl.substring(1, fl.length());
+		if (pl.trim().length() == 0)
+			pl = "##rootDir##";
+		b.setId(Main.volume.getSerialNumber() + "/" + fl).setFilePath(fl).setParentPath(pl).setMtime(this.lastModified());
+		if(this.isFile()) {
+			b.setType(fileType.FILE);
+		} else if(this.isDedup()) {
+			b.setType(fileType.DIR);
+		}
+		b.setGroupId(this.getGroup_id()).setUserId(this.getOwner_id()).setPermissions(this.getPermissions());
+		if(!compact && this.isFile()) {
+			b.setAtime(this.getLastAccessed()).setCtime(this.getLastAccessed()).setHidden(this.hidden).setSize(this.length())
+			.setRead(this.read).setWrite(this.write).setLocalOwner(this.isFile()).setExecute(this.execute);
+			b.addIoMonitor(this.getIOMonitor().toGRPC());
+			try {
+				b.setOpen(DedupFileStore.fileOpen(this));
+			} catch (NullPointerException e) {
+				b.setOpen(false);
+			}
+			if (this.extendedAttrs.size() > 0) {
+				for (String key : this.extendedAttrs.keySet()) {
+					
+					if (key.trim().length() > 0) {
+						FileAttributes.Builder fb= FileAttributes.newBuilder();
+						fb.setKey(key.trim());
+						fb.setValue(this.extendedAttrs.get(key));
+						b.addFileAttributes(fb.build());
+					}
+				}
+			}
+			b.setFileGuild(this.getGUID()).setImporting(this.importing).setSymlink(this.symlink);
+			if(this.symlink) {
+				b.setSymlinkPath(this.getSymlinkPath());
+			} if(this.getDfGuid() != null) {
+				b.setMapGuid(this.getDfGuid());
+			} 
+		} else if(!compact && this.isDirectory()) {
+			Path p = Paths.get(this.getPath());
+			File f = new File(this.getPath());
+			b.setType(fileType.DIR);
+			BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+			b.setAtime(attrs.lastAccessTime().toMillis()).setMtime(attrs.lastModifiedTime().toMillis()).setCtime(attrs.creationTime().toMillis())
+			.setHidden(f.isHidden()).setSize(f.length()).setSymlink(this.symlink);
+			if(this.symlink) {
+				b.setSymlinkPath(this.getSymlinkPath());
+			}	
+		}
+		return b.build();
+	}
+
 	public JsonObject toJSON(boolean compact) throws IOException {
 		JsonObject dataset = new JsonObject();
 		dataset.addProperty("file.name", this.getName());
 		String fl = this.getPath().substring(Main.volume.getPath().length());
-		String pl = this.getParent().substring(Main.volume.getPath().length());
+		String pl = "";
+		if( fl.length() > 0) {
+			pl = this.getParent().substring(Main.volume.getPath().length());
+		}
 		while (fl.startsWith("/") || fl.startsWith("\\"))
 			fl = fl.substring(1, fl.length());
 		if (pl.trim().length() == 0)

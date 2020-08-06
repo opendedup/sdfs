@@ -19,7 +19,7 @@ RUN apt update && apt upgrade -y && apt install -y \
 RUN gem install fpm
 COPY pom.xml /sdfs-build/
 WORKDIR "/sdfs-build"
-ENV VERSION=3.10.9
+ENV VERSION=3.11.0
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
 WORKDIR "/sdfs-build/"
 RUN mvn dependency:copy-dependencies

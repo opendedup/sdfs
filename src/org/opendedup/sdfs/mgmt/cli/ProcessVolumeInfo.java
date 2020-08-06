@@ -2,119 +2,82 @@ package org.opendedup.sdfs.mgmt.cli;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Formatter;
 import java.util.Locale;
 
+import org.opendedup.grpc.VolumeInfoRequest;
+import org.opendedup.grpc.VolumeInfoResponse;
+import org.opendedup.grpc.VolumeServiceGrpc;
+import org.opendedup.grpc.VolumeServiceGrpc.VolumeServiceBlockingStub;
 import org.opendedup.util.StorageUnit;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 public class ProcessVolumeInfo {
-	public static void runCmd() {
-		try {
 
-			StringBuilder sb = new StringBuilder();
-			Formatter formatter = new Formatter(sb);
-			formatter.format("file=%s&cmd=volume-info", "null");
-			Document doc = MgmtServerConnection.getResponse(sb.toString());
-			Element root = doc.getDocumentElement();
-			if (root.getAttribute("status").equals("failed"))
-				System.out.println(root.getAttribute("msg"));
-			else {
-				Element dse = (Element) root.getElementsByTagName("volume")
-						.item(0);
-				long capacitySz = Long.parseLong(dse.getAttribute("capacity"));
-				double maxPFull = Double.parseDouble(dse
-						.getAttribute("maximum-percentage-full"));
-				long currentSz = Long.parseLong(dse
-						.getAttribute("current-size"));
-				if(dse.hasAttribute("files")) {
-					System.out.println("Files : " + dse.getAttribute("files"));
-				}
-				if(dse.hasAttribute("offline")) {
-					System.out.println("Volume Offline : " + dse.getAttribute("offline"));
-				}
-				long dedupSz = Long.parseLong(dse
-						.getAttribute("duplicate-bytes"));
-				long compSz = Long.parseLong(dse.getAttribute("dse-comp-size"));
-				long dseSz = Long.parseLong(dse.getAttribute("dse-size"));
-				System.out.printf("Volume Capacity : %s\n",
-						StorageUnit.of(capacitySz).format(capacitySz));
-				System.out.printf("Volume Current Logical Size : %s\n",
-						StorageUnit.of(currentSz).format(currentSz));
-				if (maxPFull < 0)
-					System.out.printf("Volume Max Percentage Full : %s\n",
-							"Unlimited");
-				else
-					System.out.printf("Volume Max Percentage Full : %s%%\n",
-							maxPFull * 100);
-				System.out.printf("Volume Duplicate Data Written : %s\n",
-						StorageUnit.of(dedupSz).format(dedupSz));
-				System.out.printf("Unique Blocks Stored: %s\n",
-						StorageUnit.of(dseSz).format(dseSz));
-				System.out.printf(
-						"Unique Blocks Stored after Compression : %s\n",
-						StorageUnit.of(compSz).format(compSz));
-				System.out.printf("Cluster Block Copies : %s\n",
-						dse.getAttribute("cluster-block-copies"));
-				if (dseSz <= 0 || capacitySz <= 0) {
-					System.out
-							.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %d%%\n",
-									0);
-				} else {
-					try {
-					double dedupRate = ((1 - ((double) dseSz / (double) currentSz)) * 100);
-					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
-							.getNumberInstance(Locale.US);
-					twoDForm.applyPattern("#.##");
-					dedupRate = Double.valueOf(twoDForm.format(dedupRate));
-					System.out
-							.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %s%%\n",
-									Double.toString(dedupRate));
-					}catch(Exception e) {
-						System.out
-						.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %d%%\n",
-								0);
-					}
-				}
-				if (compSz <= 0 || currentSz <= 0) {
-					System.out
-							.printf("Volume Actual Storage Savings (Compressed Unique Blocks Stored/Current Size): %d%%\n",
-									0);
-				} else {
-					double dedupRate = (1 - ((double) compSz / (double) currentSz)) * 100;
-					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
-							.getNumberInstance(Locale.US);
-					twoDForm.applyPattern("#.##");
-					dedupRate = Double.valueOf(twoDForm.format(dedupRate));
-					System.out
-							.printf("Volume Actual Storage Savings (Compressed Unique Blocks Stored/Current Size) : %s%%\n",
-									Double.toString(dedupRate));
-				}
-				if (compSz <= 0 || dseSz <= 0) {
-					System.out.printf("Compression Rate: %d%%\n", 0);
-				} else {
-					try {
-					double compRate = (1 - ((double) compSz / (double) dseSz)) * 100;
-					DecimalFormat twoDForm = (DecimalFormat) NumberFormat
-							.getNumberInstance(Locale.US);
-					twoDForm.applyPattern("#.##");
-					compRate = Double.valueOf(twoDForm.format(compRate));
-					System.out.printf("Compression Rate: %s%%\n",
-							Double.toString(compRate));
-					}catch(Exception e) {
-						System.out
-						.printf("Compression Rate : %d%%\n",
-								0);
-					}
-				}
-				formatter.close();
-			}
+	public static void runCmd() {
+		VolumeServiceBlockingStub volumeStub = VolumeServiceGrpc.newBlockingStub(MgmtServerConnection.channel);
+		VolumeInfoRequest req = VolumeInfoRequest.newBuilder().build();
+		VolumeInfoResponse resp = null;
+		try {
+			resp = volumeStub.getVolumeInfo(req);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(1);
 		}
 
+		long capacitySz = resp.getCapactity();
+		double maxPFull = resp.getMaxPercentageFull();
+		long currentSz = resp.getCurrentSize();
+		System.out.println("Files : " + resp.getFiles());
+		System.out.println("Volume Offline : " + resp.getOffline());
+		long dedupSz = resp.getDuplicateBytes();
+		long compSz = resp.getDseCompSize();
+		long dseSz = resp.getDseSize();
+		System.out.printf("Volume Capacity : %s\n", StorageUnit.of(capacitySz).format(capacitySz));
+		System.out.printf("Volume Current Logical Size : %s\n", StorageUnit.of(currentSz).format(currentSz));
+		if (maxPFull < 0)
+			System.out.printf("Volume Max Percentage Full : %s\n", "Unlimited");
+		else
+			System.out.printf("Volume Max Percentage Full : %s%%\n", maxPFull * 100);
+		System.out.printf("Volume Duplicate Data Written : %s\n", StorageUnit.of(dedupSz).format(dedupSz));
+		System.out.printf("Unique Blocks Stored: %s\n", StorageUnit.of(dseSz).format(dseSz));
+		System.out.printf("Unique Blocks Stored after Compression : %s\n", StorageUnit.of(compSz).format(compSz));
+		if (dseSz <= 0 || capacitySz <= 0) {
+			System.out.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %d%%\n", 0);
+		} else {
+			try {
+				double dedupRate = ((1 - ((double) dseSz / (double) currentSz)) * 100);
+				DecimalFormat twoDForm = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+				twoDForm.applyPattern("#.##");
+				dedupRate = Double.valueOf(twoDForm.format(dedupRate));
+				System.out.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %s%%\n",
+						Double.toString(dedupRate));
+			} catch (Exception e) {
+				System.out.printf("Volume Virtual Dedup Rate (Unique Blocks Stored/Current Size) : %d%%\n", 0);
+			}
+		}
+		if (compSz <= 0 || currentSz <= 0) {
+			System.out.printf("Volume Actual Storage Savings (Compressed Unique Blocks Stored/Current Size): %d%%\n",
+					0);
+		} else {
+			double dedupRate = (1 - ((double) compSz / (double) currentSz)) * 100;
+			DecimalFormat twoDForm = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+			twoDForm.applyPattern("#.##");
+			dedupRate = Double.valueOf(twoDForm.format(dedupRate));
+			System.out.printf("Volume Actual Storage Savings (Compressed Unique Blocks Stored/Current Size) : %s%%\n",
+					Double.toString(dedupRate));
+		}
+		if (compSz <= 0 || dseSz <= 0) {
+			System.out.printf("Compression Rate: %d%%\n", 0);
+		} else {
+			try {
+				double compRate = (1 - ((double) compSz / (double) dseSz)) * 100;
+				DecimalFormat twoDForm = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+				twoDForm.applyPattern("#.##");
+				compRate = Double.valueOf(twoDForm.format(compRate));
+				System.out.printf("Compression Rate: %s%%\n", Double.toString(compRate));
+			} catch (Exception e) {
+				System.out.printf("Compression Rate : %d%%\n", 0);
+			}
+		}
 	}
 
 	public static void main(String[] args) {

@@ -33,5 +33,6 @@ install-packages/deb/usr/share/sdfs/lib/b2-2.1.2.jar
 install-packages/deb/usr/share/sdfs/lib/google-cloud-storage-2.1.2.jar
 install-packages/deb/usr/share/sdfs/lib/b2-2.0.3.jar
 install-packages/windows/bin/jre/*
-*.rpm
-*.deb
+pkgs/*.rpm
+pkgs/*.deb
+pkgs/*.jar

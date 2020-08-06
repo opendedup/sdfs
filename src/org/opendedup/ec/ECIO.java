@@ -48,7 +48,7 @@ public class ECIO {
 		}
 	}
 
-	public ByteBuffer[] encode(byte[] data) {
+	public ByteBuffer[] encode(byte[] data) throws IOException {
 		ByteBuffer bk = ByteBuffer.allocate(data.length + 8 + 4);
 		bk.putInt(data.length);
 		bk.putLong(hf.hashBytes(data).asLong());

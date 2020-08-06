@@ -1,0 +1,60 @@
+syntax = "proto3";
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
+package org.opendedup.grpc;
+option java_multiple_files = true;
+import "Shutdown.proto";
+
+
+// Request payload
+message VolumeInfoRequest {
+}
+
+message VolumeInfoResponse {
+  string path = 1;
+  string name = 2;
+  int64 currentSize = 3;
+  int64 capactity = 4;
+  double maxPercentageFull = 5;
+  int64 duplicateBytes = 6;
+  double readBytes = 7;
+  int64 writeBytes = 8;
+  int64 serialNumber = 9;
+  int64 dseSize = 10;
+  int64 dseCompSize = 11;
+  double readOps = 12;
+  double writeOps = 13;
+  int64 readErrors = 14;
+  int64 writeErrors = 15;
+  int64 files = 16;
+  bool closedGracefully = 17;
+  bool allowExternalLinks =18;
+  bool usePerfMon = 19;
+  string clusterId =  20;
+  bool VolumeClustered = 21;
+  int32 readTimeoutSeconds = 22;
+  int32 writeTimeoutSeconds = 23;
+  bool compressedMetaData =24;
+  bool syncFiles = 25;
+  int64 maxPageSize = 26;
+  repeated MessageQueueInfoResponse messageQueue = 27;
+  string perfMonFile = 28;
+  bool offline = 29;
+}
+
+message MessageQueueInfoResponse {
+  string hostName = 1;
+  enum MQType {
+    RabbitMQ = 0;
+    PubSub = 1;
+  }
+  MQType mqType = 2;
+  int32 port = 3;
+  string topic = 4;
+  string authInfo = 5;
+}
+// Defining a Service, a Service can have multiple RPC operations
+service VolumeService {
+  // Define a RPC operation
+  rpc GetVolumeInfo(VolumeInfoRequest) returns (VolumeInfoResponse);
+  rpc ShutdownVolume(ShutdownRequest) returns (ShutdownResponse);
+}

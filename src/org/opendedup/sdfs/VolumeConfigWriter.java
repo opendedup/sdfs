@@ -131,6 +131,7 @@ public class VolumeConfigWriter {
 	private boolean clusterRackAware = false;
 	private boolean ext = true;
 	private boolean awsAim = false;
+	private String gcsCredsFile = null;
 	private boolean genericS3 = false;
 	private boolean atmosEnabled = false;
 	private boolean backblazeEnabled = false;
@@ -302,7 +303,9 @@ public class VolumeConfigWriter {
 
 		if (cmd.hasOption("aws-aim"))
 			this.awsAim = true;
-
+		if (cmd.hasOption("google-creds-file")) {
+			this.gcsCredsFile = cmd.getOptionValue("google-creds-file");
+		}
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd.getOptionValue("io-safe-sync"));
 		}
@@ -462,7 +465,12 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 		} else if (this.gsEnabled || this.atmosEnabled || this.backblazeEnabled) {
-			if (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key")
+			if(cmd.hasOption("google-creds-file")) {
+				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
+				this.compress = true;
+				this.readAhead = true;
+			}
+			else if (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key")
 					&& cmd.hasOption("cloud-bucket-name")) {
 				this.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
 				this.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
@@ -472,6 +480,7 @@ public class VolumeConfigWriter {
 
 			} else {
 				System.out.println("Error : Unable to create volume");
+				System.out.println("either google-creds-file and cloud-bucket-name are required or ...");
 				System.out.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
 				System.exit(-1);
 			}
@@ -832,6 +841,7 @@ public class VolumeConfigWriter {
 		} else if (this.gsEnabled) {
 			Element aws = xmldoc.createElement("google-store");
 			aws.setAttribute("enabled", "true");
+			
 			aws.setAttribute("gs-access-key", this.cloudAccessKey);
 			aws.setAttribute("gs-secret-key", this.cloudSecretKey);
 			aws.setAttribute("gs-bucket-name", this.cloudBucketName);
@@ -842,6 +852,9 @@ public class VolumeConfigWriter {
 				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("service-type", "google-cloud-storage");
 				extended.setAttribute("block-size", this.blockSize);
+				if(gcsCredsFile != null) {
+					aws.setAttribute("auth-file", gcsCredsFile);
+				}
 				if (this.dExt != null)
 					 extended.setAttribute("data-appendix", this.dExt);
 				if (!this.tcpKeepAlive)
@@ -1247,6 +1260,10 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to true to enable this volume to store to Google Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder.withLongOpt("google-creds-file")
+		.withDescription(
+				"Set to path of the GCS credentials.")
+		.hasArg().withArgName("Absolute Path to file").create());
 		options.addOption(OptionBuilder.withLongOpt("backup-volume")
 				.withDescription(
 						"When set, changed the volume attributes for better deduplication but slower randnom IO.")
