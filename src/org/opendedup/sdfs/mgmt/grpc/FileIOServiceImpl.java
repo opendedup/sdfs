@@ -2,10 +2,7 @@ package org.opendedup.sdfs.mgmt.grpc;
 
 import io.grpc.stub.StreamObserver;
 
-import org.apache.commons.io.IOUtils;
 import org.opendedup.collections.DataArchivedException;
-import org.opendedup.collections.LongByteArrayMap;
-import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
@@ -13,7 +10,6 @@ import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.mgmt.CloseFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
-import fuse.FuseException;
 import fuse.FuseFtypeConstants;
 
 import org.opendedup.sdfs.io.events.MFileDeleted;
@@ -21,7 +17,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.RestoreArchive;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
-import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -51,9 +46,6 @@ import com.google.protobuf.ByteString;
 
 import org.opendedup.sdfs.io.FileClosedException;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
