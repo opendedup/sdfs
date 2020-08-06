@@ -461,6 +461,37 @@ public final class FileIOServiceGrpc {
     return getRenameMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.CopyExtentRequest,
+      org.opendedup.grpc.CopyExtentResponse> getCopyExtentMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CopyExtent",
+      requestType = org.opendedup.grpc.CopyExtentRequest.class,
+      responseType = org.opendedup.grpc.CopyExtentResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.CopyExtentRequest,
+      org.opendedup.grpc.CopyExtentResponse> getCopyExtentMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.CopyExtentRequest, org.opendedup.grpc.CopyExtentResponse> getCopyExtentMethod;
+    if ((getCopyExtentMethod = FileIOServiceGrpc.getCopyExtentMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getCopyExtentMethod = FileIOServiceGrpc.getCopyExtentMethod) == null) {
+          FileIOServiceGrpc.getCopyExtentMethod = getCopyExtentMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.CopyExtentRequest, org.opendedup.grpc.CopyExtentResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CopyExtent"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.CopyExtentRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.CopyExtentResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("CopyExtent"))
+              .build();
+        }
+      }
+    }
+    return getCopyExtentMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -610,6 +641,13 @@ public final class FileIOServiceGrpc {
       asyncUnimplementedUnaryCall(getRenameMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void copyExtent(org.opendedup.grpc.CopyExtentRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.CopyExtentResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getCopyExtentMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -710,6 +748,13 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.FileRenameRequest,
                 org.opendedup.grpc.FileRenameResponse>(
                   this, METHODID_RENAME)))
+          .addMethod(
+            getCopyExtentMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.CopyExtentRequest,
+                org.opendedup.grpc.CopyExtentResponse>(
+                  this, METHODID_COPY_EXTENT)))
           .build();
     }
   }
@@ -842,6 +887,14 @@ public final class FileIOServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getRenameMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void copyExtent(org.opendedup.grpc.CopyExtentRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.CopyExtentResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getCopyExtentMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -957,6 +1010,13 @@ public final class FileIOServiceGrpc {
     public org.opendedup.grpc.FileRenameResponse rename(org.opendedup.grpc.FileRenameRequest request) {
       return blockingUnaryCall(
           getChannel(), getRenameMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.CopyExtentResponse copyExtent(org.opendedup.grpc.CopyExtentRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getCopyExtentMethod(), getCallOptions(), request);
     }
   }
 
@@ -1088,6 +1148,14 @@ public final class FileIOServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getRenameMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.CopyExtentResponse> copyExtent(
+        org.opendedup.grpc.CopyExtentRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getCopyExtentMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_MK_DIR = 0;
@@ -1104,6 +1172,7 @@ public final class FileIOServiceGrpc {
   private static final int METHODID_MK_DIR_ALL = 11;
   private static final int METHODID_STAT = 12;
   private static final int METHODID_RENAME = 13;
+  private static final int METHODID_COPY_EXTENT = 14;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1177,6 +1246,10 @@ public final class FileIOServiceGrpc {
         case METHODID_RENAME:
           serviceImpl.rename((org.opendedup.grpc.FileRenameRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.FileRenameResponse>) responseObserver);
+          break;
+        case METHODID_COPY_EXTENT:
+          serviceImpl.copyExtent((org.opendedup.grpc.CopyExtentRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.CopyExtentResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -1253,6 +1326,7 @@ public final class FileIOServiceGrpc {
               .addMethod(getMkDirAllMethod())
               .addMethod(getStatMethod())
               .addMethod(getRenameMethod())
+              .addMethod(getCopyExtentMethod())
               .build();
         }
       }

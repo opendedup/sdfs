@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,11 +90,15 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;
+import com.amazonaws.Request;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.auth.SignerFactory;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.handlers.RequestHandler2;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -132,10 +137,14 @@ import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
+import org.opendedup.sdfs.filestore.cloud.gcp.CustomGCPSigner;
+import org.opendedup.sdfs.filestore.cloud.gcp.GCPSessionCredentials;
 
 import com.amazonaws.services.s3.transfer.Download;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 
 /**
  *
@@ -176,8 +185,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private String accessKey = Main.cloudAccessKey;
 	private String secretKey = Main.cloudSecretKey;
 	private boolean standAlone = true;
-	private int transferSize = 10*1024*1024;
+	private int transferSize = 10 * 1024 * 1024;
 	private com.amazonaws.services.s3.model.Tier glacierTier = Tier.Standard;
+	boolean gcsSigner = false;
 	TransferManager tx = null;
 	static {
 		try {
@@ -404,13 +414,16 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		if (config.hasAttribute("secret-key")) {
 			this.secretKey = config.getAttribute("secret-key");
 		}
+
+		if (config.hasAttribute("gcs-signer")) {
+			gcsSigner = Boolean.parseBoolean(config.getAttribute("gcs-signer"));
+		}
 		this.staged_sync_location.mkdirs();
 		try {
-			if (!Main.useAim)
+			if (!Main.useAim && !config.hasAttribute("auth-file"))
 				awsCredentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
 			if (config.hasAttribute("default-bucket-location")) {
 				bucketLocation = RegionUtils.getRegion(config.getAttribute("default-bucket-location"));
-
 			} else {
 				bucketLocation = RegionUtils.getRegion("us-west-2");
 			}
@@ -420,7 +433,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (this.standAlone) {
 				if (config.hasAttribute("block-size")) {
 					int sz = (int) StringUtils.parseSize(config.getAttribute("block-size"));
-					this.transferSize =(int)Math.round(((double)sz*1.5));
+					this.transferSize = (int) Math.round(((double) sz * 1.5));
 					HashBlobArchive.MAX_LEN = sz;
 				}
 				if (config.hasAttribute("backlog-size")) {
@@ -481,8 +494,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
 				HashBlobArchive.setLocalCacheSize(sz);
 			}
-			if(config.hasAttribute("transfer-size")){
-				this.transferSize = (int)StringUtils.parseSize(config.getAttribute("transfer-size"));
+			if (config.hasAttribute("transfer-size")) {
+				this.transferSize = (int) StringUtils.parseSize(config.getAttribute("transfer-size"));
 			}
 
 			if (config.hasAttribute("metadata-version")) {
@@ -556,18 +569,51 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			}
 			ClientConfiguration clientConfig = new ClientConfiguration();
+			AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig);
 			if (config.hasAttribute("use-v4-signer")) {
 				boolean v4s = Boolean.parseBoolean(config.getAttribute("use-v4-signer"));
 
 				if (v4s) {
 					clientConfig.setSignerOverride("AWSS3V4SignerType");
 				}
-			}
-			if (config.hasAttribute("use-basic-signer")) {
+			} else if (config.hasAttribute("use-basic-signer")) {
 				boolean v4s = Boolean.parseBoolean(config.getAttribute("use-basic-signer"));
 				if (v4s) {
 					clientConfig.setSignerOverride("S3SignerType");
 				}
+			} else if (gcsSigner) {
+				this.simpleMD = true;
+				if (config.hasAttribute("auth-file")) {
+
+					String credPath = config.getAttribute("auth-file");
+					ServiceAccountCredentials sourceCredentials = ServiceAccountCredentials
+							.fromStream(new FileInputStream(credPath));
+					sourceCredentials = (ServiceAccountCredentials) sourceCredentials
+							.createScoped(Arrays.asList("https://www.googleapis.com/auth/cloud-platform"));
+
+					String projectId = sourceCredentials.getProjectId();
+					GCPSessionCredentials creds = new GCPSessionCredentials((GoogleCredentials) sourceCredentials);
+
+					SignerFactory.registerSigner("org.opendedup.sdfs.filestore.cloud.gcp.CustomGCPSigner",
+							org.opendedup.sdfs.filestore.cloud.gcp.CustomGCPSigner.class);
+					clientConfig.setSignerOverride("org.opendedup.sdfs.filestore.cloud.gcp.CustomGCPSigner");
+					builder = builder
+							.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+									"https://storage.googleapis.com", "auto"))
+							.withRequestHandlers(new RequestHandler2() {
+								@Override
+								public void beforeRequest(Request<?> request) {
+									request.addHeader("x-goog-project-id", projectId);
+								}
+							}).withCredentials(new AWSStaticCredentialsProvider(creds));
+
+				} else {
+					builder = builder
+							.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+									"https://storage.googleapis.com", "auto"))
+							.withCredentials(new AWSStaticCredentialsProvider(awsCredentials));
+				}
+
 			}
 
 			clientConfig.setMaxConnections(Main.dseIOThreads * 2);
@@ -622,7 +668,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			}
 
-			if (s3Target != null && s3Target.toLowerCase().startsWith("https")) {
+			if (s3Target != null && !gcsSigner && s3Target.toLowerCase().startsWith("https")) {
 				TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
 					@Override
 					public boolean isTrusted(X509Certificate[] certificate, String authType) {
@@ -633,31 +679,32 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 				clientConfig.getApacheHttpClientConfig().withSslSocketFactory(sf);
 			}
-			AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard().withClientConfiguration(clientConfig);
-			if (config.hasAttribute("default-bucket-location")) {
-				String bl = config.getAttribute("default-bucket-location");
-				System.out.println("bucketLocation=" + bucketLocation.toString());
-				builder = builder.withRegion(bl);
-			} else if (s3Target != null) {
-				EndpointConfiguration ep = new EndpointConfiguration(s3Target, "us-east-1");
-				builder = builder.withEndpointConfiguration(ep);
-				System.out.println("target=" + s3Target);
-			} else {
-				String bl = "us-west-2";
-				System.out.println("bucketLocation=" + bl);
-				builder = builder.withRegion(bl);
-			}
-			if (awsCredentials != null)
-				builder = builder.withCredentials(new AWSStaticCredentialsProvider(awsCredentials));
-			else
-				builder = builder.withCredentials(new InstanceProfileCredentialsProvider(false));
+			if (!gcsSigner) {
+				if (config.hasAttribute("default-bucket-location")) {
+					String bl = config.getAttribute("default-bucket-location");
+					System.out.println("bucketLocation=" + bucketLocation.toString());
+					builder = builder.withRegion(bl);
+				} else if (s3Target != null) {
+					EndpointConfiguration ep = new EndpointConfiguration(s3Target, "us-east-1");
+					builder = builder.withEndpointConfiguration(ep);
+					System.out.println("target=" + s3Target);
+				} else {
+					String bl = "us-west-2";
+					System.out.println("bucketLocation=" + bl);
+					builder = builder.withRegion(bl);
+				}
+				if (awsCredentials != null)
+					builder = builder.withCredentials(new AWSStaticCredentialsProvider(awsCredentials));
+				else
+					builder = builder.withCredentials(new InstanceProfileCredentialsProvider(false));
 
-			if (config.hasAttribute("disableDNSBucket")) {
-				builder.withPathStyleAccessEnabled(Boolean.parseBoolean(config.getAttribute("disableDNSBucket")));
-				System.out.println("disableDNSBucket=" + Boolean.parseBoolean(config.getAttribute("disableDNSBucket")));
+				if (config.hasAttribute("disableDNSBucket")) {
+					builder.withPathStyleAccessEnabled(Boolean.parseBoolean(config.getAttribute("disableDNSBucket")));
+					System.out.println(
+							"disableDNSBucket=" + Boolean.parseBoolean(config.getAttribute("disableDNSBucket")));
+				}
 			}
 			s3Service = builder.build();
-			
 
 			this.binm = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 			if (!s3Service.doesBucketExist(this.name)) {
@@ -810,7 +857,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				BucketLifecycleConfiguration configuration = new BucketLifecycleConfiguration().withRules(rules);
 				// Save configuration.
 				s3Service.setBucketLifecycleConfiguration(this.name, configuration);
-			} else if (s3Target == null) {
+			} else if (s3Target == null && !gcsSigner) {
 				s3Service.deleteBucketLifecycleConfiguration(this.name);
 			}
 			if (this.standAlone) {
@@ -893,6 +940,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				throw new IOException(e);
 			}
 		}
+
 		int size = Integer.parseInt((String) mp.get("size"));
 		if (mp.containsKey("encrypt")) {
 			encrypt = Boolean.parseBoolean((String) mp.get("encrypt"));
@@ -1022,7 +1070,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean fileExists(long id) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
@@ -1068,10 +1116,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void writeHashBlobArchive(HashBlobArchive arc, long id) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
-		
+
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		// this.s3clientLock.readLock().lock();
 		IOException e = null;
@@ -1422,7 +1470,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void getBytes(long id, File f) throws IOException, DataArchivedException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		Exception e = null;
@@ -1452,7 +1500,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public Map<String, String> getUserMetaData(String name) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		// this.s3clientLock.readLock().lock();
@@ -1865,7 +1913,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void sync() throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		HashBlobArchive.sync();
@@ -1874,9 +1922,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public void uploadFile(File f, String to, String pp, HashMap<String, String> metaData, boolean disableComp)
 			throws IOException {
-				if(this.closed){
-					throw new IOException("connection closed");
-				}
+		if (this.closed) {
+			throw new IOException("connection closed");
+		}
 		// this.s3clientLock.readLock().lock();
 		InputStream in = null;
 		while (to.startsWith(File.separator))
@@ -2088,59 +2136,73 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			throws AmazonServiceException, AmazonClientException, InterruptedException {
 		// Create a list of UploadPartResponse objects. You get one of these
 		// for each part upload.
-		List<PartETag> partETags = new ArrayList<PartETag>();
+		if (!this.gcsSigner) {
+			List<PartETag> partETags = new ArrayList<PartETag>();
 
-		// Step 1: Initialize.
-		InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(this.name, req.getKey());
-		InitiateMultipartUploadResult initResponse = this.s3Service.initiateMultipartUpload(initRequest);
+			// Step 1: Initialize.
+			InitiateMultipartUploadRequest initRequest = new InitiateMultipartUploadRequest(this.name, req.getKey());
+			InitiateMultipartUploadResult initResponse = this.s3Service.initiateMultipartUpload(initRequest);
 
-		long contentLength = file.length();
-		long partSize = this.transferSize; // Set part size to 10 MB.
+			long contentLength = file.length();
+			long partSize = this.transferSize; // Set part size to 10 MB.
 
-		try {
-			// Step 2: Upload parts.
-			long filePosition = 0;
-			for (int i = 1; filePosition < contentLength; i++) {
-				// Last part can be less than 10 MB. Adjust part size.
-				partSize = Math.min(partSize, (contentLength - filePosition));
+			try {
+				// Step 2: Upload parts.
+				long filePosition = 0;
+				for (int i = 1; filePosition < contentLength; i++) {
+					// Last part can be less than 10 MB. Adjust part size.
+					partSize = Math.min(partSize, (contentLength - filePosition));
 
-				// Create request to upload a part.
-				UploadPartRequest uploadRequest = new UploadPartRequest().withBucketName(this.name)
-						.withKey(req.getKey()).withUploadId(initResponse.getUploadId()).withPartNumber(i)
-						.withFileOffset(filePosition).withFile(file).withPartSize(partSize);
+					// Create request to upload a part.
+					UploadPartRequest uploadRequest = new UploadPartRequest().withBucketName(this.name)
+							.withKey(req.getKey()).withUploadId(initResponse.getUploadId()).withPartNumber(i)
+							.withFileOffset(filePosition).withFile(file).withPartSize(partSize);
 
-				// Upload part and add response to our list.
-				partETags.add(this.s3Service.uploadPart(uploadRequest).getPartETag());
+					// Upload part and add response to our list.
+					partETags.add(this.s3Service.uploadPart(uploadRequest).getPartETag());
 
-				filePosition += partSize;
+					filePosition += partSize;
+				}
+
+				// Step 3: Complete.
+				CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(this.name, req.getKey(),
+						initResponse.getUploadId(), partETags);
+
+				s3Service.completeMultipartUpload(compRequest);
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("unable to upload object " + req.getKey(), e);
+				s3Service.abortMultipartUpload(
+						new AbortMultipartUploadRequest(this.name, req.getKey(), initResponse.getUploadId()));
 			}
-
-			// Step 3: Complete.
-			CompleteMultipartUploadRequest compRequest = new CompleteMultipartUploadRequest(this.name, req.getKey(),
-					initResponse.getUploadId(), partETags);
-
-			s3Service.completeMultipartUpload(compRequest);
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("unable to upload object " + req.getKey(), e);
-			s3Service.abortMultipartUpload(
-					new AbortMultipartUploadRequest(this.name, req.getKey(), initResponse.getUploadId()));
+		} else {
+			s3Service.putObject(req);
 		}
 
 	}
 
 	private void multiPartDownload(String keyName, File f)
-			throws AmazonServiceException, AmazonClientException, InterruptedException {
-		try {
-			Download myDownload = tx.download(this.name, keyName, f);
-			myDownload.waitForCompletion();
-		} finally {
+			throws AmazonServiceException, AmazonClientException, InterruptedException, IOException {
+		if (this.gcsSigner) {
+			S3Object obj = s3Service.getObject(this.name, keyName);
+			BufferedInputStream in = new BufferedInputStream(obj.getObjectContent());
+			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
+			IOUtils.copy(in, out);
+			out.flush();
+			out.close();
+			in.close();
+		} else {
+			try {
+				Download myDownload = tx.download(this.name, keyName, f);
+				myDownload.waitForCompletion();
+			} finally {
 
+			}
 		}
 	}
 
 	@Override
 	public void downloadFile(String nm, File to, String pp) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		// this.s3clientLock.readLock().lock();
@@ -2260,7 +2322,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean exists(String nm, String pp) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		while (nm.startsWith(File.separator))
@@ -2284,7 +2346,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void deleteFile(String nm, String pp) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		// this.s3clientLock.readLock().lock();
@@ -2338,7 +2400,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void renameFile(String from, String to, String pp) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		while (from.startsWith(File.separator))
@@ -2456,7 +2518,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public Map<String, Long> getHashMap(long id) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		// SDFSLogger.getLog().info("downloading map for " + id);
@@ -2495,7 +2557,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean checkAccess() {
-		
+
 		Exception e = null;
 		for (int i = 0; i < 9; i++) {
 			try {
@@ -2520,7 +2582,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void setReadSpeed(int kbps) {
-		
+
 		HashBlobArchive.setReadSpeed((double) kbps, true);
 
 	}
@@ -2634,7 +2696,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean blockRestored(String id) {
-		
+
 		try {
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id + this.dExt);
 			ObjectMetadata momd = omd;
@@ -2772,7 +2834,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void checkoutObject(long id, int claims) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		if (!this.clustered)
@@ -2838,7 +2900,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean objectClaimed(String key) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		if (!this.clustered)
@@ -2858,7 +2920,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void checkoutFile(String name) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		name = FilenameUtils.separatorsToUnix(name);
@@ -2899,7 +2961,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public boolean isCheckedOut(String name, long volumeID) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		String pth = "claims/" + name + "/"
@@ -2928,7 +2990,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		if (this.clustered) {
@@ -2997,7 +3059,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void removeVolume(long volumeID) throws IOException {
-		if(this.closed){
+		if (this.closed) {
 			throw new IOException("connection closed");
 		}
 		if (volumeID == Main.DSEID)
@@ -3104,7 +3166,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void updateBucketInfo(Map<String, String> md) {
-		
+
 		try {
 			if (this.simpleMD) {
 				ObjectMetadata omd = new ObjectMetadata();
@@ -3268,14 +3330,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					 */
 				} else {
 					int claims = 0;
-					String [] sar = HashBlobArchive.getStrings(k.longValue()).split(",");
-					if(sar != null){
+					String[] sar = HashBlobArchive.getStrings(k.longValue()).split(",");
+					if (sar != null) {
 						for (String ha : sar) {
 							byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
 							if (HCServiceProxy.getHashesMap().mightContainKey(b, k.longValue()))
 								claims++;
 						}
-						if(claims == 0)
+						if (claims == 0)
 							HashBlobArchive.removeLocalArchive(k.longValue());
 					}
 				}

@@ -1603,10 +1603,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					}
 				}
 			}
-			b.setFileGuild(this.getGUID()).setMapGuid(this.getDfGuid()).setImporting(this.importing).setSymlink(this.symlink);
+			b.setFileGuild(this.getGUID()).setImporting(this.importing).setSymlink(this.symlink);
 			if(this.symlink) {
 				b.setSymlinkPath(this.getSymlinkPath());
-			}
+			} if(this.getDfGuid() != null) {
+				b.setMapGuid(this.getDfGuid());
+			} 
 		} else if(!compact && this.isDirectory()) {
 			Path p = Paths.get(this.getPath());
 			File f = new File(this.getPath());

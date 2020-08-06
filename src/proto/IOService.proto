@@ -116,6 +116,20 @@ message FileRenameResponse {
     errorCodes errorCode = 3;
 }
 
+message CopyExtentRequest {
+    string srcFile = 1;
+    string dstFile = 2;
+    int64 srcStart = 3;
+    int64 dstStart = 4;
+    int64 length = 5;
+}
+
+message CopyExtentResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+    int64 written = 3;
+}
+
 service FileIOService {
     // Define a RPC operation
     rpc MkDir(MkDirRequest) returns (MkDirResponse);
@@ -132,4 +146,5 @@ service FileIOService {
     rpc MkDirAll(MkDirRequest) returns (MkDirResponse);
     rpc Stat(FileInfoRequest) returns (FileMessageResponse);
     rpc Rename(FileRenameRequest) returns (FileRenameResponse);
+    rpc CopyExtent(CopyExtentRequest) returns (CopyExtentResponse);
   }

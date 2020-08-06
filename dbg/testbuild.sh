@@ -1,5 +1,6 @@
 export VERSION=3.11.0
 sudo umount /media/pool0
+sudo rm -rf /opt/sdfs/volumes/gcs0/
 cd ../
 rm -rf target/classes/
 rm -rf target/sdfs*.jar
