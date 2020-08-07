@@ -30,8 +30,8 @@ import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
+import com.google.common.hash.HashingInputStream;
 
-import org.jets3t.service.utils.ServiceUtils;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.apache.commons.compress.utils.IOUtils;
@@ -57,7 +57,11 @@ import org.w3c.dom.NamedNodeMap;
 
 import static java.lang.Math.toIntExact;
 
+import com.google.common.hash.Funnels;
+import com.google.common.hash.Hasher;
+import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
+import com.google.common.io.ByteStreams;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
 import com.microsoft.azure.storage.StorageException;
@@ -753,7 +757,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				blob.setMetadata(metaData);
 
 				ByteArrayInputStream in = new ByteArrayInputStream(f);
-				String mds = BaseEncoding.base64().encode(ServiceUtils.computeMD5Hash(in));
+				Hasher hasher = Hashing.md5().newHasher();
+				ByteStreams.copy(in, Funnels.asOutputStream(hasher));
+				String mds = BaseEncoding.base64().encode(hasher.hash().asBytes());
 				IOUtils.closeQuietly(in);
 				// initialize blob properties and assign md5 content generated.
 				BlobProperties blobProperties = blob.getProperties();

@@ -26,7 +26,6 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.HashFunctions;
-import org.opendedup.sdfs.filestore.S3ChunkStore;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
 import org.opendedup.util.StringUtils;
@@ -163,18 +162,6 @@ public class DSEConfigWriter {
 				this.compress = true;
 				if (!cmd.hasOption("io-chunk-size"))
 					this.chunk_size = 4;
-				if (!S3ChunkStore.checkAuth(cloudAccessKey, cloudSecretKey)) {
-					System.out.println("Error : Unable to create volume");
-					System.out
-							.println("cloud-access-key or cloud-secret-key is incorrect");
-					System.exit(-1);
-				}
-				if (!S3ChunkStore.checkBucketUnique(cloudAccessKey,
-						cloudSecretKey, cloudBucketName)) {
-					System.out.println("Error : Unable to create volume");
-					System.out.println("cloud-bucket-name is not unique");
-					System.exit(-1);
-				}
 
 			} else {
 				System.out.println("Error : Unable to create volume");

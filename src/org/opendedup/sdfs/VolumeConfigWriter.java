@@ -145,7 +145,6 @@ public class VolumeConfigWriter {
 	private boolean disableAutoGC = false;
 	private String blockSize = "30 MB";
 	private boolean minIOEnabled;
-	private boolean aliEnabled;
 	private String volumeType = "standard";
 	private String userAgentPrefix = null;
 	private boolean encryptConfig = false;
@@ -390,11 +389,7 @@ public class VolumeConfigWriter {
 			this.minIOEnabled = true;
 			this.simpleMD = true;
 		}
-		if (cmd.hasOption("ali-enabled")) {
-			this.safe_sync = false;
-			this.aliEnabled = true;
-			this.simpleMD = true;
-		}
+		
 		if (cmd.hasOption("atmos-enabled")) {
 
 			this.safe_sync = false;
@@ -427,10 +422,10 @@ public class VolumeConfigWriter {
 		if(cmd.hasOption("user-agent-prefix")) {
 			this.userAgentPrefix = cmd.getOptionValue("user-agent-prefix");
 		}
-		if (this.awsEnabled || minIOEnabled || this.aliEnabled) {
+		if (this.awsEnabled || minIOEnabled ) {
 			if (awsAim || (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key"))
 					&& cmd.hasOption("cloud-bucket-name")) {
-				if ((this.minIOEnabled|| this.aliEnabled) && !cmd.hasOption("cloud-url")) {
+				if ((this.minIOEnabled) && !cmd.hasOption("cloud-url")) {
 					System.out.println("Error : Unable to create volume");
 					System.out.println(
 							"cloud-url, cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
@@ -522,8 +517,6 @@ public class VolumeConfigWriter {
 			this.cloudUrl = cmd.getOptionValue("cloud-url");
 			this.genericS3 = true;
 			this.simpleS3 = true;
-			if(!this.aliEnabled)
-				this.disableDNSBucket = true;
 			if (!this.minIOEnabled) {
 				this.usebasicsigner = true;
 			}
@@ -775,7 +768,7 @@ public class VolumeConfigWriter {
 			cs.appendChild(aws);
 		}
 
-		else if (this.awsEnabled || this.minIOEnabled || this.aliEnabled) {
+		else if (this.awsEnabled || this.minIOEnabled ) {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-aim", Boolean.toString(this.awsAim));
@@ -786,10 +779,8 @@ public class VolumeConfigWriter {
 			aws.setAttribute("aws-bucket-name", this.cloudBucketName);
 			if (ext) {
 
-				if(this.aliEnabled)
-					aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAliChunkStore");
-				else
-					aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
+				
+				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
 
 				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("block-size", this.blockSize);
@@ -813,7 +804,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("sync-check-schedule", syncfs_schedule);
 				extended.setAttribute("use-basic-signer", Boolean.toString(this.usebasicsigner));
 				extended.setAttribute("backlog-size", this.backlogSize);
-				if (this.genericS3 || this.aliEnabled) {
+				if (this.genericS3) {
 					Element cp = xmldoc.createElement("connection-props");
 					cp.setAttribute("s3-target", this.cloudUrl);
 					extended.setAttribute("disableDNSBucket", Boolean.toString(this.disableDNSBucket));
@@ -848,12 +839,12 @@ public class VolumeConfigWriter {
 			if (ext) {
 
 
-				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
+				aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchAwsS3ChunkStore");
 				Element extended = xmldoc.createElement("extended-config");
 				extended.setAttribute("service-type", "google-cloud-storage");
 				extended.setAttribute("block-size", this.blockSize);
 				if(gcsCredsFile != null) {
-					aws.setAttribute("auth-file", gcsCredsFile);
+					extended.setAttribute("auth-file", gcsCredsFile);
 				}
 				if (this.dExt != null)
 					 extended.setAttribute("data-appendix", this.dExt);
@@ -1218,10 +1209,6 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("minio-enabled")
 				.withDescription(
 						"Set to enable this volume to store to Minio Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
-				.hasArg(false).create());
-		options.addOption(OptionBuilder.withLongOpt("ali-enabled")
-				.withDescription(
-						"Set to enable this volume to store to Alibaba Object Storage (OSS). cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("atmos-enabled")
 				.withDescription(

@@ -20,9 +20,9 @@ RUN echo $DEBFILE
 WORKDIR "/sdfs-build/install-packages/"
 RUN rm -rf deb/usr/share/sdfs/lib/*
 WORKDIR "/sdfs-build/"
-RUN mvn package && \
-    cp target/lib/b2-2.1.2.jar install-packages/deb/usr/share/sdfs/lib/  && \
-    cp target/lib/google-cloud-storage-2.1.2.jar install-packages/deb/usr/share/sdfs/lib/ && \
+RUN mvn package
+RUN cp target/lib/b2-*.jar install-packages/deb/usr/share/sdfs/lib/  && \
+    cp target/lib/google-cloud-storage-*.jar install-packages/deb/usr/share/sdfs/lib/ && \
     cp target/sdfs-${VERSION}-jar-with-dependencies.jar install-packages/deb/usr/share/sdfs/lib/sdfs.jar && \
     cp target/sdfs-${VERSION}-jar-with-dependencies.jar install-packages
 WORKDIR "/sdfs-build/install-packages/"
