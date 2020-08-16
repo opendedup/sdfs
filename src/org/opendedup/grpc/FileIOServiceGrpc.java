@@ -18,7 +18,7 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 /**
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.30.2)",
+    value = "by gRPC proto compiler (version 1.31.1)",
     comments = "Source: IOService.proto")
 public final class FileIOServiceGrpc {
 
@@ -492,6 +492,37 @@ public final class FileIOServiceGrpc {
     return getCopyExtentMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SetUserMetaDataRequest,
+      org.opendedup.grpc.SetUserMetaDataResponse> getSetUserMetaDataMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetUserMetaData",
+      requestType = org.opendedup.grpc.SetUserMetaDataRequest.class,
+      responseType = org.opendedup.grpc.SetUserMetaDataResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SetUserMetaDataRequest,
+      org.opendedup.grpc.SetUserMetaDataResponse> getSetUserMetaDataMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SetUserMetaDataRequest, org.opendedup.grpc.SetUserMetaDataResponse> getSetUserMetaDataMethod;
+    if ((getSetUserMetaDataMethod = FileIOServiceGrpc.getSetUserMetaDataMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getSetUserMetaDataMethod = FileIOServiceGrpc.getSetUserMetaDataMethod) == null) {
+          FileIOServiceGrpc.getSetUserMetaDataMethod = getSetUserMetaDataMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SetUserMetaDataRequest, org.opendedup.grpc.SetUserMetaDataResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetUserMetaData"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetUserMetaDataRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetUserMetaDataResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("SetUserMetaData"))
+              .build();
+        }
+      }
+    }
+    return getSetUserMetaDataMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -648,6 +679,13 @@ public final class FileIOServiceGrpc {
       asyncUnimplementedUnaryCall(getCopyExtentMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void setUserMetaData(org.opendedup.grpc.SetUserMetaDataRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetUserMetaDataResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetUserMetaDataMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -755,6 +793,13 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.CopyExtentRequest,
                 org.opendedup.grpc.CopyExtentResponse>(
                   this, METHODID_COPY_EXTENT)))
+          .addMethod(
+            getSetUserMetaDataMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SetUserMetaDataRequest,
+                org.opendedup.grpc.SetUserMetaDataResponse>(
+                  this, METHODID_SET_USER_META_DATA)))
           .build();
     }
   }
@@ -895,6 +940,14 @@ public final class FileIOServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getCopyExtentMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void setUserMetaData(org.opendedup.grpc.SetUserMetaDataRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetUserMetaDataResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetUserMetaDataMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -1017,6 +1070,13 @@ public final class FileIOServiceGrpc {
     public org.opendedup.grpc.CopyExtentResponse copyExtent(org.opendedup.grpc.CopyExtentRequest request) {
       return blockingUnaryCall(
           getChannel(), getCopyExtentMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SetUserMetaDataResponse setUserMetaData(org.opendedup.grpc.SetUserMetaDataRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetUserMetaDataMethod(), getCallOptions(), request);
     }
   }
 
@@ -1156,6 +1216,14 @@ public final class FileIOServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getCopyExtentMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SetUserMetaDataResponse> setUserMetaData(
+        org.opendedup.grpc.SetUserMetaDataRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetUserMetaDataMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_MK_DIR = 0;
@@ -1173,6 +1241,7 @@ public final class FileIOServiceGrpc {
   private static final int METHODID_STAT = 12;
   private static final int METHODID_RENAME = 13;
   private static final int METHODID_COPY_EXTENT = 14;
+  private static final int METHODID_SET_USER_META_DATA = 15;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1251,6 +1320,10 @@ public final class FileIOServiceGrpc {
           serviceImpl.copyExtent((org.opendedup.grpc.CopyExtentRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.CopyExtentResponse>) responseObserver);
           break;
+        case METHODID_SET_USER_META_DATA:
+          serviceImpl.setUserMetaData((org.opendedup.grpc.SetUserMetaDataRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SetUserMetaDataResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -1327,6 +1400,7 @@ public final class FileIOServiceGrpc {
               .addMethod(getStatMethod())
               .addMethod(getRenameMethod())
               .addMethod(getCopyExtentMethod())
+              .addMethod(getSetUserMetaDataMethod())
               .build();
         }
       }

@@ -35,6 +35,8 @@ enum errorCodes {
     ENNOSYS = 13;
     ENODEV = 14;
     EBADFD = 15;
+    EISDIR	= 16;
+    ENONET = 17;
 }
 
 message FileInfoResponse {

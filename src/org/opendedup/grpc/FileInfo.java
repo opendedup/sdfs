@@ -112,13 +112,14 @@ public final class FileInfo {
       "FileAttributes\022\r\n\005error\030\002 \001(\t\0221\n\terrorCo" +
       "de\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes" +
       "\",\n\016FileAttributes\022\013\n\003key\030\001 \001(\t\022\r\n\005value" +
-      "\030\002 \001(\t*\302\001\n\nerrorCodes\022\t\n\005NOERR\020\000\022\n\n\006ENOE" +
+      "\030\002 \001(\t*\332\001\n\nerrorCodes\022\t\n\005NOERR\020\000\022\n\n\006ENOE" +
       "NT\020\001\022\007\n\003EIO\020\003\022\n\n\006EAGAIN\020\004\022\n\n\006EEXIST\020\005\022\013\n" +
       "\007ENOTDIR\020\006\022\013\n\007ENODATA\020\007\022\013\n\007ENAVAIL\020\010\022\t\n\005" +
       "EPERM\020\t\022\n\n\006ENOSPC\020\n\022\n\n\006EACCES\020\013\022\r\n\tENOTE" +
       "MPTY\020\014\022\013\n\007ENNOSYS\020\r\022\n\n\006ENODEV\020\016\022\n\n\006EBADF" +
-      "D\020\017B2P\001Z.github.com/opendedup/sdfs-clien" +
-      "t-go/sdfs/;sdfsb\006proto3"
+      "D\020\017\022\n\n\006EISDIR\020\020\022\n\n\006ENONET\020\021B2P\001Z.github." +
+      "com/opendedup/sdfs-client-go/sdfs/;sdfsb" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -199,13 +199,12 @@ public class MetaFileStore {
 			f = null;
 			throw new IOException("folder exists");
 		}
-		f.mkdirs();
-		// SDFSLogger.getLog().info("mkdir=" + mk + " for " + f);
 		Path p = Paths.get(f.getPath());
 		try {
+			Files.createDirectories(p);
 			if (!OSValidator.isWindows() && mode != -1)
 				Files.setAttribute(p, "unix:mode", Integer.valueOf(mode));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while making dir " + f.getPath(), e);
 			throw new IOException("access denied for " + f.getPath());
 		}

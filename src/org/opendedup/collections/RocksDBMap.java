@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -95,12 +96,22 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	FlushOptions flo = null;
 	private ConcurrentHashMap<ByteArrayWrapper, ByteBuffer> tempHt = new ConcurrentHashMap<ByteArrayWrapper, ByteBuffer>(
 			1024, 0.75f, Main.writeThreads);
+			
+	HashSet<ByteArrayWrapper> errlookup = new HashSet<ByteArrayWrapper>();
 	static {
 		RocksDB.loadLibrary();
 	}
 
 	@Override
 	public void init(long maxSize, String fileName, double fpp) throws IOException, HashtableFullException {
+		errlookup.add(new ByteArrayWrapper(StringUtils.getHexBytes("885966f81ac7fca1f8026e82c753b5fe")));
+		errlookup.add(new ByteArrayWrapper(StringUtils.getHexBytes("df3cc67dd1c6a986d904213254554913")));
+		errlookup.add(new ByteArrayWrapper(StringUtils.getHexBytes("ccb6dd3221f8545cb21f1482e4ff306b")));
+		errlookup.add(new ByteArrayWrapper(StringUtils.getHexBytes("04122cd40394062ae8c06affba77e3f3")));
+		errlookup.add(new ByteArrayWrapper(StringUtils.getHexBytes("d3ff109f8598ad170a7b0abe19a0fb48")));
+		errlookup.add(new ByteArrayWrapper(StringUtils.getHexBytes("96e0b780601855454ade0d77d1d9c092")));
+		errlookup.add(new ByteArrayWrapper(StringUtils.getHexBytes("168f2286b07e7e21e74def8fc37a6d3b")));
+		errlookup.add(new ByteArrayWrapper(StringUtils.getHexBytes("a64edc0bda8dda292771d8386af64452")));
 
 		try {
 			this.fileName = fileName;
@@ -676,6 +687,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		return this.put(cm, true);
 	}
 
+	
+
 	@Override
 	public InsertRecord put(ChunkData cm, boolean persist) throws IOException, HashtableFullException {
 		// persist = false;
@@ -689,6 +702,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			// If the key is present in temporary hash table then update whatever exists
 			l.lock();
 			try {
+				if(errlookup.contains(new ByteArrayWrapper(cm.getHash()))) {
+					SDFSLogger.getLog().info("Sweet!!! "+ StringUtils.getHexString(cm.getHash()));
+				}
 				if (this.tempHt.containsKey(new ByteArrayWrapper(cm.getHash()))) {
 					ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(cm.getHash()));
 					bk.position(0);
@@ -1138,6 +1154,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 							}
 						}
+					} else {
+						SDFSLogger.getLog().warn("could not find "+StringUtils.getHexString(b) + " id=" + evt.getID());
 					}
 				} finally {
 					l.unlock();

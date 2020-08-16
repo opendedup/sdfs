@@ -130,6 +130,16 @@ message CopyExtentResponse {
     int64 written = 3;
 }
 
+message SetUserMetaDataRequest {
+    repeated FileAttributes fileAttributes = 1;
+    string Path =2;
+}
+
+message SetUserMetaDataResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
 service FileIOService {
     // Define a RPC operation
     rpc MkDir(MkDirRequest) returns (MkDirResponse);
@@ -147,4 +157,5 @@ service FileIOService {
     rpc Stat(FileInfoRequest) returns (FileMessageResponse);
     rpc Rename(FileRenameRequest) returns (FileRenameResponse);
     rpc CopyExtent(CopyExtentRequest) returns (CopyExtentResponse);
+    rpc SetUserMetaData(SetUserMetaDataRequest) returns (SetUserMetaDataResponse);
   }

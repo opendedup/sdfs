@@ -4,25 +4,27 @@
 package org.opendedup.grpc;
 
 /**
- * Protobuf type {@code org.opendedup.grpc.DataReadRequest}
+ * Protobuf type {@code org.opendedup.grpc.SetUserMetaDataResponse}
  */
-public  final class DataReadRequest extends
+public  final class SetUserMetaDataResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DataReadRequest)
-    DataReadRequestOrBuilder {
+    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetUserMetaDataResponse)
+    SetUserMetaDataResponseOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use DataReadRequest.newBuilder() to construct.
-  private DataReadRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use SetUserMetaDataResponse.newBuilder() to construct.
+  private SetUserMetaDataResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private DataReadRequest() {
+  private SetUserMetaDataResponse() {
+    error_ = "";
+    errorCode_ = 0;
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new DataReadRequest();
+    return new SetUserMetaDataResponse();
   }
 
   @java.lang.Override
@@ -30,7 +32,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private DataReadRequest(
+  private SetUserMetaDataResponse(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -48,19 +50,16 @@ private static final long serialVersionUID = 0L;
           case 0:
             done = true;
             break;
-          case 8: {
+          case 10: {
+            java.lang.String s = input.readStringRequireUtf8();
 
-            fileHandle_ = input.readInt64();
+            error_ = s;
             break;
           }
           case 16: {
+            int rawValue = input.readEnum();
 
-            start_ = input.readInt64();
-            break;
-          }
-          case 24: {
-
-            len_ = input.readInt32();
+            errorCode_ = rawValue;
             break;
           }
           default: {
@@ -84,45 +83,70 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_DataReadRequest_descriptor;
+    return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SetUserMetaDataResponse_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_DataReadRequest_fieldAccessorTable
+    return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SetUserMetaDataResponse_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            org.opendedup.grpc.DataReadRequest.class, org.opendedup.grpc.DataReadRequest.Builder.class);
+            org.opendedup.grpc.SetUserMetaDataResponse.class, org.opendedup.grpc.SetUserMetaDataResponse.Builder.class);
   }
 
-  public static final int FILEHANDLE_FIELD_NUMBER = 1;
-  private long fileHandle_;
+  public static final int ERROR_FIELD_NUMBER = 1;
+  private volatile java.lang.Object error_;
   /**
-   * <code>int64 fileHandle = 1;</code>
-   * @return The fileHandle.
+   * <code>string error = 1;</code>
+   * @return The error.
    */
-  public long getFileHandle() {
-    return fileHandle_;
+  public java.lang.String getError() {
+    java.lang.Object ref = error_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      error_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string error = 1;</code>
+   * @return The bytes for error.
+   */
+  public com.google.protobuf.ByteString
+      getErrorBytes() {
+    java.lang.Object ref = error_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      error_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
   }
 
-  public static final int START_FIELD_NUMBER = 2;
-  private long start_;
+  public static final int ERRORCODE_FIELD_NUMBER = 2;
+  private int errorCode_;
   /**
-   * <code>int64 start = 2;</code>
-   * @return The start.
+   * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+   * @return The enum numeric value on the wire for errorCode.
    */
-  public long getStart() {
-    return start_;
+  public int getErrorCodeValue() {
+    return errorCode_;
   }
-
-  public static final int LEN_FIELD_NUMBER = 3;
-  private int len_;
   /**
-   * <code>int32 len = 3;</code>
-   * @return The len.
+   * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+   * @return The errorCode.
    */
-  public int getLen() {
-    return len_;
+  public org.opendedup.grpc.errorCodes getErrorCode() {
+    @SuppressWarnings("deprecation")
+    org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);
+    return result == null ? org.opendedup.grpc.errorCodes.UNRECOGNIZED : result;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -139,14 +163,11 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (fileHandle_ != 0L) {
-      output.writeInt64(1, fileHandle_);
+    if (!getErrorBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
     }
-    if (start_ != 0L) {
-      output.writeInt64(2, start_);
-    }
-    if (len_ != 0) {
-      output.writeInt32(3, len_);
+    if (errorCode_ != org.opendedup.grpc.errorCodes.NOERR.getNumber()) {
+      output.writeEnum(2, errorCode_);
     }
     unknownFields.writeTo(output);
   }
@@ -157,17 +178,12 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (fileHandle_ != 0L) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt64Size(1, fileHandle_);
+    if (!getErrorBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
     }
-    if (start_ != 0L) {
+    if (errorCode_ != org.opendedup.grpc.errorCodes.NOERR.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt64Size(2, start_);
-    }
-    if (len_ != 0) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(3, len_);
+        .computeEnumSize(2, errorCode_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -179,17 +195,14 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof org.opendedup.grpc.DataReadRequest)) {
+    if (!(obj instanceof org.opendedup.grpc.SetUserMetaDataResponse)) {
       return super.equals(obj);
     }
-    org.opendedup.grpc.DataReadRequest other = (org.opendedup.grpc.DataReadRequest) obj;
+    org.opendedup.grpc.SetUserMetaDataResponse other = (org.opendedup.grpc.SetUserMetaDataResponse) obj;
 
-    if (getFileHandle()
-        != other.getFileHandle()) return false;
-    if (getStart()
-        != other.getStart()) return false;
-    if (getLen()
-        != other.getLen()) return false;
+    if (!getError()
+        .equals(other.getError())) return false;
+    if (errorCode_ != other.errorCode_) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -201,82 +214,78 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + FILEHANDLE_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getFileHandle());
-    hash = (37 * hash) + START_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getStart());
-    hash = (37 * hash) + LEN_FIELD_NUMBER;
-    hash = (53 * hash) + getLen();
+    hash = (37 * hash) + ERROR_FIELD_NUMBER;
+    hash = (53 * hash) + getError().hashCode();
+    hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+    hash = (53 * hash) + errorCode_;
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static org.opendedup.grpc.DataReadRequest parseFrom(
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.DataReadRequest parseFrom(
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.DataReadRequest parseFrom(
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.DataReadRequest parseFrom(
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.DataReadRequest parseFrom(byte[] data)
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.DataReadRequest parseFrom(
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.DataReadRequest parseFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.DataReadRequest parseFrom(
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.DataReadRequest parseDelimitedFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.DataReadRequest parseDelimitedFrom(
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.DataReadRequest parseFrom(
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.DataReadRequest parseFrom(
+  public static org.opendedup.grpc.SetUserMetaDataResponse parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -289,7 +298,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(org.opendedup.grpc.DataReadRequest prototype) {
+  public static Builder newBuilder(org.opendedup.grpc.SetUserMetaDataResponse prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -305,26 +314,26 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
-   * Protobuf type {@code org.opendedup.grpc.DataReadRequest}
+   * Protobuf type {@code org.opendedup.grpc.SetUserMetaDataResponse}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.DataReadRequest)
-      org.opendedup.grpc.DataReadRequestOrBuilder {
+      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.SetUserMetaDataResponse)
+      org.opendedup.grpc.SetUserMetaDataResponseOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_DataReadRequest_descriptor;
+      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SetUserMetaDataResponse_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_DataReadRequest_fieldAccessorTable
+      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SetUserMetaDataResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.opendedup.grpc.DataReadRequest.class, org.opendedup.grpc.DataReadRequest.Builder.class);
+              org.opendedup.grpc.SetUserMetaDataResponse.class, org.opendedup.grpc.SetUserMetaDataResponse.Builder.class);
     }
 
-    // Construct using org.opendedup.grpc.DataReadRequest.newBuilder()
+    // Construct using org.opendedup.grpc.SetUserMetaDataResponse.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -342,11 +351,9 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      fileHandle_ = 0L;
+      error_ = "";
 
-      start_ = 0L;
-
-      len_ = 0;
+      errorCode_ = 0;
 
       return this;
     }
@@ -354,17 +361,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_DataReadRequest_descriptor;
+      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SetUserMetaDataResponse_descriptor;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.DataReadRequest getDefaultInstanceForType() {
-      return org.opendedup.grpc.DataReadRequest.getDefaultInstance();
+    public org.opendedup.grpc.SetUserMetaDataResponse getDefaultInstanceForType() {
+      return org.opendedup.grpc.SetUserMetaDataResponse.getDefaultInstance();
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.DataReadRequest build() {
-      org.opendedup.grpc.DataReadRequest result = buildPartial();
+    public org.opendedup.grpc.SetUserMetaDataResponse build() {
+      org.opendedup.grpc.SetUserMetaDataResponse result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -372,11 +379,10 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.DataReadRequest buildPartial() {
-      org.opendedup.grpc.DataReadRequest result = new org.opendedup.grpc.DataReadRequest(this);
-      result.fileHandle_ = fileHandle_;
-      result.start_ = start_;
-      result.len_ = len_;
+    public org.opendedup.grpc.SetUserMetaDataResponse buildPartial() {
+      org.opendedup.grpc.SetUserMetaDataResponse result = new org.opendedup.grpc.SetUserMetaDataResponse(this);
+      result.error_ = error_;
+      result.errorCode_ = errorCode_;
       onBuilt();
       return result;
     }
@@ -415,24 +421,22 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof org.opendedup.grpc.DataReadRequest) {
-        return mergeFrom((org.opendedup.grpc.DataReadRequest)other);
+      if (other instanceof org.opendedup.grpc.SetUserMetaDataResponse) {
+        return mergeFrom((org.opendedup.grpc.SetUserMetaDataResponse)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(org.opendedup.grpc.DataReadRequest other) {
-      if (other == org.opendedup.grpc.DataReadRequest.getDefaultInstance()) return this;
-      if (other.getFileHandle() != 0L) {
-        setFileHandle(other.getFileHandle());
+    public Builder mergeFrom(org.opendedup.grpc.SetUserMetaDataResponse other) {
+      if (other == org.opendedup.grpc.SetUserMetaDataResponse.getDefaultInstance()) return this;
+      if (!other.getError().isEmpty()) {
+        error_ = other.error_;
+        onChanged();
       }
-      if (other.getStart() != 0L) {
-        setStart(other.getStart());
-      }
-      if (other.getLen() != 0) {
-        setLen(other.getLen());
+      if (other.errorCode_ != 0) {
+        setErrorCodeValue(other.getErrorCodeValue());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -449,11 +453,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      org.opendedup.grpc.DataReadRequest parsedMessage = null;
+      org.opendedup.grpc.SetUserMetaDataResponse parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (org.opendedup.grpc.DataReadRequest) e.getUnfinishedMessage();
+        parsedMessage = (org.opendedup.grpc.SetUserMetaDataResponse) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -463,92 +467,130 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private long fileHandle_ ;
+    private java.lang.Object error_ = "";
     /**
-     * <code>int64 fileHandle = 1;</code>
-     * @return The fileHandle.
+     * <code>string error = 1;</code>
+     * @return The error.
      */
-    public long getFileHandle() {
-      return fileHandle_;
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
     }
     /**
-     * <code>int64 fileHandle = 1;</code>
-     * @param value The fileHandle to set.
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string error = 1;</code>
+     * @param value The error to set.
      * @return This builder for chaining.
      */
-    public Builder setFileHandle(long value) {
-      
-      fileHandle_ = value;
+    public Builder setError(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      error_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>int64 fileHandle = 1;</code>
+     * <code>string error = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearFileHandle() {
+    public Builder clearError() {
       
-      fileHandle_ = 0L;
+      error_ = getDefaultInstance().getError();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string error = 1;</code>
+     * @param value The bytes for error to set.
+     * @return This builder for chaining.
+     */
+    public Builder setErrorBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      error_ = value;
       onChanged();
       return this;
     }
 
-    private long start_ ;
+    private int errorCode_ = 0;
     /**
-     * <code>int64 start = 2;</code>
-     * @return The start.
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public long getStart() {
-      return start_;
+    public int getErrorCodeValue() {
+      return errorCode_;
     }
     /**
-     * <code>int64 start = 2;</code>
-     * @param value The start to set.
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @param value The enum numeric value on the wire for errorCode to set.
      * @return This builder for chaining.
      */
-    public Builder setStart(long value) {
-      
-      start_ = value;
+    public Builder setErrorCodeValue(int value) {
+      errorCode_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>int64 start = 2;</code>
-     * @return This builder for chaining.
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public Builder clearStart() {
-      
-      start_ = 0L;
-      onChanged();
-      return this;
-    }
-
-    private int len_ ;
-    /**
-     * <code>int32 len = 3;</code>
-     * @return The len.
-     */
-    public int getLen() {
-      return len_;
+    public org.opendedup.grpc.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.errorCodes.UNRECOGNIZED : result;
     }
     /**
-     * <code>int32 len = 3;</code>
-     * @param value The len to set.
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @param value The errorCode to set.
      * @return This builder for chaining.
      */
-    public Builder setLen(int value) {
+    public Builder setErrorCode(org.opendedup.grpc.errorCodes value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
       
-      len_ = value;
+      errorCode_ = value.getNumber();
       onChanged();
       return this;
     }
     /**
-     * <code>int32 len = 3;</code>
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
      * @return This builder for chaining.
      */
-    public Builder clearLen() {
+    public Builder clearErrorCode() {
       
-      len_ = 0;
+      errorCode_ = 0;
       onChanged();
       return this;
     }
@@ -565,41 +607,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.DataReadRequest)
+    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.SetUserMetaDataResponse)
   }
 
-  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.DataReadRequest)
-  private static final org.opendedup.grpc.DataReadRequest DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.SetUserMetaDataResponse)
+  private static final org.opendedup.grpc.SetUserMetaDataResponse DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new org.opendedup.grpc.DataReadRequest();
+    DEFAULT_INSTANCE = new org.opendedup.grpc.SetUserMetaDataResponse();
   }
 
-  public static org.opendedup.grpc.DataReadRequest getDefaultInstance() {
+  public static org.opendedup.grpc.SetUserMetaDataResponse getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<DataReadRequest>
-      PARSER = new com.google.protobuf.AbstractParser<DataReadRequest>() {
+  private static final com.google.protobuf.Parser<SetUserMetaDataResponse>
+      PARSER = new com.google.protobuf.AbstractParser<SetUserMetaDataResponse>() {
     @java.lang.Override
-    public DataReadRequest parsePartialFrom(
+    public SetUserMetaDataResponse parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new DataReadRequest(input, extensionRegistry);
+      return new SetUserMetaDataResponse(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<DataReadRequest> parser() {
+  public static com.google.protobuf.Parser<SetUserMetaDataResponse> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<DataReadRequest> getParserForType() {
+  public com.google.protobuf.Parser<SetUserMetaDataResponse> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public org.opendedup.grpc.DataReadRequest getDefaultInstanceForType() {
+  public org.opendedup.grpc.SetUserMetaDataResponse getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

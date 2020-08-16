@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -373,6 +374,37 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     @Override
+    public void setUserMetaData(SetUserMetaDataRequest req,StreamObserver<SetUserMetaDataResponse> responseObserver) {
+        SetUserMetaDataResponse.Builder b = SetUserMetaDataResponse.newBuilder();
+        String internalPath = Main.volume.getPath() + File.separator + req.getPath();
+        File f = new File(internalPath);
+        if (!f.exists()) {
+            b.setError("File not found " + req.getPath());
+            b.setErrorCode(errorCodes.ENOENT);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        try {
+            MetaDataDedupFile mf = MetaFileStore.getMF(new File(internalPath));
+            List<FileAttributes> attrs = req.getFileAttributesList();
+            for(FileAttributes attr : attrs) {
+                mf.addXAttribute(attr.getKey(), attr.getValue());
+            }
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error("unable to fulfill request on file " + req.getPath(), e);
+            b.setError("unable to fulfill request on file " + req.getPath());
+            b.setErrorCode(errorCodes.EIO);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+    @Override
     public void unlink(UnlinkRequest request, StreamObserver<UnlinkResponse> responseObserver) {
         UnlinkResponse.Builder b = UnlinkResponse.newBuilder();
         try {
@@ -386,7 +418,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     SDFSLogger.getLog().error("unable to close file " + path, e);
                 }
             }
-            if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
+            if (this.getFtype(path) == FuseFtypeConstants.TYPE_DIR) {
+                b.setError("is a directory " + path);
+                b.setErrorCode(errorCodes.EISDIR);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            else if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
                 Path p = new File(mountedVolume + path).toPath();
                 // SDFSLogger.getLog().info("deleting symlink " + f.getPath());
                 try {
@@ -519,7 +558,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             if (!Main.safeClose)
                 return;
             if (ch != null) {
-                SDFSLogger.getLog().info("release=" + ch.getFile().getPath());
                 ch.getDedupFile().unRegisterChannel(ch, -2);
                 CloseFile.close(ch.getFile(), ch.isWrittenTo());
                 ch = null;
@@ -527,7 +565,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             } else {
-                SDFSLogger.getLog().info("channel not found");
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
@@ -543,6 +580,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
     @Override
     public void mknod(MkNodRequest request, StreamObserver<MkNodResponse> responseObserver) {
+        SDFSLogger.getLog().info("making object " + request.getPath());
         MkNodResponse.Builder b = MkNodResponse.newBuilder();
         try {
             String path = request.getPath();
@@ -660,10 +698,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             SDFSLogger.getLog().error("unable to read file " + request.getFileHandle(), e);
             b.setError("unable to read file " + request.getFileHandle());
             b.setErrorCode(errorCodes.ENODATA);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
         }
-        responseObserver.onNext(b.build());
-        responseObserver.onCompleted();
-        return;
+        
     }
 
     @Override
@@ -671,7 +710,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
         String internalPath = Main.volume.getPath() + File.separator + req.getFileName();
         File f = new File(internalPath);
+        SDFSLogger.getLog().info("looking for " + f.getPath());
         if (!f.exists()) {
+            SDFSLogger.getLog().info("File not found " + req.getFileName());
             b.setError("File not found " + req.getFileName());
             b.setErrorCode(errorCodes.ENOENT);
             responseObserver.onNext(b.build());
@@ -679,6 +720,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
         try {
+            SDFSLogger.getLog().info("found " + f.getPath());
             MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
             b.addResponse(mf.toGRPC(req.getCompact()));
             responseObserver.onNext(b.build());
@@ -855,6 +897,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         CopyExtentResponse.Builder b = CopyExtentResponse.newBuilder();
         String srcfile = req.getSrcFile();
         String dstfile = req.getDstFile();
+
         long sstart = req.getSrcStart();
         long dstart = req.getDstStart();
         long len = req.getLength();
@@ -882,6 +925,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         try {
             sdf = (SparseDedupFile) smf.getDedupFile(true);
             ddf = (SparseDedupFile) dmf.getDedupFile(true);
+            sdf.sync(true);
+            ddf.sync(true);
         } catch (Exception e) {
             SDFSLogger.getLog().error("error while setting dedupe for files",e);
             b.setErrorCode(errorCodes.EIO).setError("error while setting dedupe for files");
@@ -958,6 +1003,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                             // }
                         } catch (org.opendedup.sdfs.io.FileClosedException e) {
                             if (tries > 100) {
+                                SDFSLogger.getLog()
+                                            .warn("tried to open file 100 ties and failed " + smf.getPath());
                                 b.setErrorCode(errorCodes.EIO)
                                         .setError("tried to open file 100 ties and failed " + smf.getPath());
                                 responseObserver.onNext(b.build());
@@ -980,6 +1027,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
                 }
             } finally {
+                ddf.sync(true);
                 long el = written + dstart;
                 if (el > dmf.length()) {
                     dmf.setLength(el, false);
@@ -987,6 +1035,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 l.unlock();
             }
             b.setWritten(written);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
         } catch (Exception e) {
             SDFSLogger.getLog().error("error in copy extent src=" + srcfile + " dst=" + dstfile + " sstart=" + sstart
                     + " dstart=" + dstart + " len=" + len + " spos" + _spos + " dpos=" + _dpos, e);
@@ -995,7 +1046,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
-        } finally {
         }
 
     }

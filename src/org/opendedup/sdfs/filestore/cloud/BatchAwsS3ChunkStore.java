@@ -2325,7 +2325,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
 			// haName.replaceAll("\\", "/");
-			SDFSLogger.getLog().info("deleting " + haName);
 			boolean exists = false;
 			try {
 				exists = s3Service.doesObjectExist(this.name, haName);
@@ -2351,7 +2350,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				String haName = pp + "/" + EncyptUtils.encString(nm, Main.chunkStoreEncryptionEnabled);
 				// haName.replaceAll("\\", "/");
-				SDFSLogger.getLog().info("deleting " + haName);
 				boolean exists = false;
 				try {
 					exists = s3Service.doesObjectExist(this.name, haName);

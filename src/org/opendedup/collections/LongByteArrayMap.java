@@ -988,9 +988,9 @@ public class LongByteArrayMap implements DataMapInterface {
 		try {
 			if (!this.closed) {
 				int op = this.opens.decrementAndGet();
-				SDFSLogger.getLog().info("Opens for " + this.filePath + " = " + op);
+				SDFSLogger.getLog().debug("Opens for " + this.filePath + " = " + op);
 				if (op <= 0) {
-					SDFSLogger.getLog().info("closing " + this.filePath);
+					SDFSLogger.getLog().debug("closing " + this.filePath);
 					this.opens.set(0);
 
 					dbFile = null;
@@ -1008,7 +1008,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						
 						File df = new File(this.filePath);
 						File cf = new File(this.filePath + ".lz4");
-						SDFSLogger.getLog().info("will compress " + df.getPath() + " to " + cf.getPath());
+						SDFSLogger.getLog().debug("will compress " + df.getPath() + " to " + cf.getPath());
 						if (!df.exists()) {
 							throw new IOException(df.getPath() + " does not exist");
 						} else if (cf.exists() && df.exists()) {

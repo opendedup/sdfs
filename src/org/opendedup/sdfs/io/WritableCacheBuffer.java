@@ -600,6 +600,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 				try {
 					this.reconstructed = true;
 					this.hlAdded = true;
+					
 					SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
 				} catch (Throwable e) {
 					df.errOccured = true;

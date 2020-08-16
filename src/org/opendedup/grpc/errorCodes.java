@@ -68,6 +68,14 @@ public enum errorCodes
    * <code>EBADFD = 15;</code>
    */
   EBADFD(15),
+  /**
+   * <code>EISDIR = 16;</code>
+   */
+  EISDIR(16),
+  /**
+   * <code>ENONET = 17;</code>
+   */
+  ENONET(17),
   UNRECOGNIZED(-1),
   ;
 
@@ -131,6 +139,14 @@ public enum errorCodes
    * <code>EBADFD = 15;</code>
    */
   public static final int EBADFD_VALUE = 15;
+  /**
+   * <code>EISDIR = 16;</code>
+   */
+  public static final int EISDIR_VALUE = 16;
+  /**
+   * <code>ENONET = 17;</code>
+   */
+  public static final int ENONET_VALUE = 17;
 
 
   public final int getNumber() {
@@ -172,6 +188,8 @@ public enum errorCodes
       case 13: return ENNOSYS;
       case 14: return ENODEV;
       case 15: return EBADFD;
+      case 16: return EISDIR;
+      case 17: return ENONET;
       default: return null;
     }
   }
@@ -190,10 +208,6 @@ public enum errorCodes
 
   public final com.google.protobuf.Descriptors.EnumValueDescriptor
       getValueDescriptor() {
-    if (this == UNRECOGNIZED) {
-      throw new java.lang.IllegalStateException(
-          "Can't get the descriptor of an unrecognized enum value.");
-    }
     return getDescriptor().getValues().get(ordinal());
   }
   public final com.google.protobuf.Descriptors.EnumDescriptor
