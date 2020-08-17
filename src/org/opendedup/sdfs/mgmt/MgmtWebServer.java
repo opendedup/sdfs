@@ -164,7 +164,6 @@ public class MgmtWebServer implements Container {
 			if (Main.sdfsCliRequireAuth) {
 				String password = qry.get("password");
 				String hmac = qry.get("hmac");
-
 				if (hmac != null) {
 					String tss = qry.get("timestamp");
 					long ts = Long.parseLong(tss);

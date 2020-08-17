@@ -112,7 +112,7 @@ public class VolumeConfigWriter {
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 	String hash_db_class = Main.hashesDBClass;
 	String sdfsCliPassword = "admin";
-	String sdfsCliSalt = HashFunctions.getRandomString(6);
+	String sdfsCliSalt = HashFunctions.getRandomString(24);
 	String sdfsCliListenAddr = "localhost";
 	boolean sdfsCliSSL = true;
 	boolean sdfsCliRequireAuth = false;
@@ -168,6 +168,14 @@ public class VolumeConfigWriter {
 		}
 		if(cmd.hasOption("encrypt-config")) {
 			this.encryptConfig = true;
+		}
+		if(cmd.hasOption("sdfscli-salt")) {
+			if(cmd.getOptionValue("sdfscli-salt").length() < 6) {
+				System.out.println("--sdfscli-salt must be greater than 6 characters");
+				System.exit(-1);
+			} else {
+				sdfsCliSalt = cmd.getOptionValue("sdfscli-salt");
+			}
 		}
 		if (cmd.hasOption("sdfscli-password")) {
 			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
@@ -1228,6 +1236,11 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Sets the number of io threads to use for io operations to the dse storage provider. This is set to 8 by default but can be changed to more or less based on bandwidth and io.")
 				.hasArg().withArgName("integer").create());
+
+		options.addOption(OptionBuilder.withLongOpt("sdfscli-salt")
+				.withDescription(
+						"The Salt used to hash the sdfscli password. This is also used to encrypt JWT tokens")
+				.hasArg().withArgName("string").create());
 		options.addOption(OptionBuilder.withLongOpt("cloud-bucket-name")
 				.withDescription(
 						"Set to the value of Cloud Storage bucket name. This will need to be unique and a could be set the the access key if all else fails. aws-enabled, aws-secret-key, and aws-secret-key will also need to be set. ")

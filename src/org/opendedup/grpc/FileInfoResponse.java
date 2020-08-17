@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.FileInfoResponse}
  */
-public  final class FileInfoResponse extends
+public final class FileInfoResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileInfoResponse)
     FileInfoResponseOrBuilder {
@@ -335,6 +335,10 @@ private static final long serialVersionUID = 0L;
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -375,6 +379,7 @@ private static final long serialVersionUID = 0L;
    * <code>string fileName = 1;</code>
    * @return The fileName.
    */
+  @java.lang.Override
   public java.lang.String getFileName() {
     java.lang.Object ref = fileName_;
     if (ref instanceof java.lang.String) {
@@ -391,6 +396,7 @@ private static final long serialVersionUID = 0L;
    * <code>string fileName = 1;</code>
    * @return The bytes for fileName.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getFileNameBytes() {
     java.lang.Object ref = fileName_;
@@ -411,6 +417,7 @@ private static final long serialVersionUID = 0L;
    * <code>string filePath = 2;</code>
    * @return The filePath.
    */
+  @java.lang.Override
   public java.lang.String getFilePath() {
     java.lang.Object ref = filePath_;
     if (ref instanceof java.lang.String) {
@@ -427,6 +434,7 @@ private static final long serialVersionUID = 0L;
    * <code>string filePath = 2;</code>
    * @return The bytes for filePath.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getFilePathBytes() {
     java.lang.Object ref = filePath_;
@@ -447,14 +455,14 @@ private static final long serialVersionUID = 0L;
    * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
    * @return The enum numeric value on the wire for type.
    */
-  public int getTypeValue() {
+  @java.lang.Override public int getTypeValue() {
     return type_;
   }
   /**
    * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
    * @return The type.
    */
-  public org.opendedup.grpc.FileInfoResponse.fileType getType() {
+  @java.lang.Override public org.opendedup.grpc.FileInfoResponse.fileType getType() {
     @SuppressWarnings("deprecation")
     org.opendedup.grpc.FileInfoResponse.fileType result = org.opendedup.grpc.FileInfoResponse.fileType.valueOf(type_);
     return result == null ? org.opendedup.grpc.FileInfoResponse.fileType.UNRECOGNIZED : result;
@@ -466,6 +474,7 @@ private static final long serialVersionUID = 0L;
    * <code>string sdfsPath = 4;</code>
    * @return The sdfsPath.
    */
+  @java.lang.Override
   public java.lang.String getSdfsPath() {
     java.lang.Object ref = sdfsPath_;
     if (ref instanceof java.lang.String) {
@@ -482,6 +491,7 @@ private static final long serialVersionUID = 0L;
    * <code>string sdfsPath = 4;</code>
    * @return The bytes for sdfsPath.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSdfsPathBytes() {
     java.lang.Object ref = sdfsPath_;
@@ -502,6 +512,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 atime = 5;</code>
    * @return The atime.
    */
+  @java.lang.Override
   public long getAtime() {
     return atime_;
   }
@@ -512,6 +523,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 mtime = 6;</code>
    * @return The mtime.
    */
+  @java.lang.Override
   public long getMtime() {
     return mtime_;
   }
@@ -522,6 +534,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 ctime = 7;</code>
    * @return The ctime.
    */
+  @java.lang.Override
   public long getCtime() {
     return ctime_;
   }
@@ -532,6 +545,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool hidden = 8;</code>
    * @return The hidden.
    */
+  @java.lang.Override
   public boolean getHidden() {
     return hidden_;
   }
@@ -542,6 +556,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 size = 9;</code>
    * @return The size.
    */
+  @java.lang.Override
   public long getSize() {
     return size_;
   }
@@ -552,6 +567,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool open = 10;</code>
    * @return The open.
    */
+  @java.lang.Override
   public boolean getOpen() {
     return open_;
   }
@@ -562,6 +578,7 @@ private static final long serialVersionUID = 0L;
    * <code>string fileGuild = 11;</code>
    * @return The fileGuild.
    */
+  @java.lang.Override
   public java.lang.String getFileGuild() {
     java.lang.Object ref = fileGuild_;
     if (ref instanceof java.lang.String) {
@@ -578,6 +595,7 @@ private static final long serialVersionUID = 0L;
    * <code>string fileGuild = 11;</code>
    * @return The bytes for fileGuild.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getFileGuildBytes() {
     java.lang.Object ref = fileGuild_;
@@ -598,6 +616,7 @@ private static final long serialVersionUID = 0L;
    * <code>string mapGuid = 12;</code>
    * @return The mapGuid.
    */
+  @java.lang.Override
   public java.lang.String getMapGuid() {
     java.lang.Object ref = mapGuid_;
     if (ref instanceof java.lang.String) {
@@ -614,6 +633,7 @@ private static final long serialVersionUID = 0L;
    * <code>string mapGuid = 12;</code>
    * @return The bytes for mapGuid.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getMapGuidBytes() {
     java.lang.Object ref = mapGuid_;
@@ -634,6 +654,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool localOwner = 13;</code>
    * @return The localOwner.
    */
+  @java.lang.Override
   public boolean getLocalOwner() {
     return localOwner_;
   }
@@ -644,6 +665,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool execute = 14;</code>
    * @return The execute.
    */
+  @java.lang.Override
   public boolean getExecute() {
     return execute_;
   }
@@ -654,6 +676,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool read = 15;</code>
    * @return The read.
    */
+  @java.lang.Override
   public boolean getRead() {
     return read_;
   }
@@ -664,6 +687,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool write = 16;</code>
    * @return The write.
    */
+  @java.lang.Override
   public boolean getWrite() {
     return write_;
   }
@@ -674,6 +698,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool importing = 17;</code>
    * @return The importing.
    */
+  @java.lang.Override
   public boolean getImporting() {
     return importing_;
   }
@@ -684,6 +709,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool symlink = 18;</code>
    * @return The symlink.
    */
+  @java.lang.Override
   public boolean getSymlink() {
     return symlink_;
   }
@@ -693,12 +719,14 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
+  @java.lang.Override
   public java.util.List<org.opendedup.grpc.FileAttributes> getFileAttributesList() {
     return fileAttributes_;
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
+  @java.lang.Override
   public java.util.List<? extends org.opendedup.grpc.FileAttributesOrBuilder> 
       getFileAttributesOrBuilderList() {
     return fileAttributes_;
@@ -706,18 +734,21 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
+  @java.lang.Override
   public int getFileAttributesCount() {
     return fileAttributes_.size();
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.FileAttributes getFileAttributes(int index) {
     return fileAttributes_.get(index);
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.FileAttributesOrBuilder getFileAttributesOrBuilder(
       int index) {
     return fileAttributes_.get(index);
@@ -729,6 +760,7 @@ private static final long serialVersionUID = 0L;
    * <code>string id = 20;</code>
    * @return The id.
    */
+  @java.lang.Override
   public java.lang.String getId() {
     java.lang.Object ref = id_;
     if (ref instanceof java.lang.String) {
@@ -745,6 +777,7 @@ private static final long serialVersionUID = 0L;
    * <code>string id = 20;</code>
    * @return The bytes for id.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getIdBytes() {
     java.lang.Object ref = id_;
@@ -764,12 +797,14 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
+  @java.lang.Override
   public java.util.List<org.opendedup.grpc.FileInfoResponse> getFilesList() {
     return files_;
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
+  @java.lang.Override
   public java.util.List<? extends org.opendedup.grpc.FileInfoResponseOrBuilder> 
       getFilesOrBuilderList() {
     return files_;
@@ -777,18 +812,21 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
+  @java.lang.Override
   public int getFilesCount() {
     return files_.size();
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.FileInfoResponse getFiles(int index) {
     return files_.get(index);
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.FileInfoResponseOrBuilder getFilesOrBuilder(
       int index) {
     return files_.get(index);
@@ -800,6 +838,7 @@ private static final long serialVersionUID = 0L;
    * <code>string parentPath = 22;</code>
    * @return The parentPath.
    */
+  @java.lang.Override
   public java.lang.String getParentPath() {
     java.lang.Object ref = parentPath_;
     if (ref instanceof java.lang.String) {
@@ -816,6 +855,7 @@ private static final long serialVersionUID = 0L;
    * <code>string parentPath = 22;</code>
    * @return The bytes for parentPath.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getParentPathBytes() {
     java.lang.Object ref = parentPath_;
@@ -836,6 +876,7 @@ private static final long serialVersionUID = 0L;
    * <code>string volumeid = 23;</code>
    * @return The volumeid.
    */
+  @java.lang.Override
   public java.lang.String getVolumeid() {
     java.lang.Object ref = volumeid_;
     if (ref instanceof java.lang.String) {
@@ -852,6 +893,7 @@ private static final long serialVersionUID = 0L;
    * <code>string volumeid = 23;</code>
    * @return The bytes for volumeid.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getVolumeidBytes() {
     java.lang.Object ref = volumeid_;
@@ -871,12 +913,14 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
    */
+  @java.lang.Override
   public java.util.List<org.opendedup.grpc.IOMonitorResponse> getIoMonitorList() {
     return ioMonitor_;
   }
   /**
    * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
    */
+  @java.lang.Override
   public java.util.List<? extends org.opendedup.grpc.IOMonitorResponseOrBuilder> 
       getIoMonitorOrBuilderList() {
     return ioMonitor_;
@@ -884,18 +928,21 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
    */
+  @java.lang.Override
   public int getIoMonitorCount() {
     return ioMonitor_.size();
   }
   /**
    * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.IOMonitorResponse getIoMonitor(int index) {
     return ioMonitor_.get(index);
   }
   /**
    * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.IOMonitorResponseOrBuilder getIoMonitorOrBuilder(
       int index) {
     return ioMonitor_.get(index);
@@ -907,6 +954,7 @@ private static final long serialVersionUID = 0L;
    * <code>string symlinkPath = 25;</code>
    * @return The symlinkPath.
    */
+  @java.lang.Override
   public java.lang.String getSymlinkPath() {
     java.lang.Object ref = symlinkPath_;
     if (ref instanceof java.lang.String) {
@@ -923,6 +971,7 @@ private static final long serialVersionUID = 0L;
    * <code>string symlinkPath = 25;</code>
    * @return The bytes for symlinkPath.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSymlinkPathBytes() {
     java.lang.Object ref = symlinkPath_;
@@ -943,6 +992,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 group_id = 26;</code>
    * @return The groupId.
    */
+  @java.lang.Override
   public long getGroupId() {
     return groupId_;
   }
@@ -953,6 +1003,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 user_id = 27;</code>
    * @return The userId.
    */
+  @java.lang.Override
   public long getUserId() {
     return userId_;
   }
@@ -963,6 +1014,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 permissions = 28;</code>
    * @return The permissions.
    */
+  @java.lang.Override
   public int getPermissions() {
     return permissions_;
   }
@@ -2014,7 +2066,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
      * @return The enum numeric value on the wire for type.
      */
-    public int getTypeValue() {
+    @java.lang.Override public int getTypeValue() {
       return type_;
     }
     /**
@@ -2023,6 +2075,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setTypeValue(int value) {
+      
       type_ = value;
       onChanged();
       return this;
@@ -2031,6 +2084,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
      * @return The type.
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfoResponse.fileType getType() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfoResponse.fileType result = org.opendedup.grpc.FileInfoResponse.fileType.valueOf(type_);
@@ -2142,6 +2196,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 atime = 5;</code>
      * @return The atime.
      */
+    @java.lang.Override
     public long getAtime() {
       return atime_;
     }
@@ -2172,6 +2227,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 mtime = 6;</code>
      * @return The mtime.
      */
+    @java.lang.Override
     public long getMtime() {
       return mtime_;
     }
@@ -2202,6 +2258,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 ctime = 7;</code>
      * @return The ctime.
      */
+    @java.lang.Override
     public long getCtime() {
       return ctime_;
     }
@@ -2232,6 +2289,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool hidden = 8;</code>
      * @return The hidden.
      */
+    @java.lang.Override
     public boolean getHidden() {
       return hidden_;
     }
@@ -2262,6 +2320,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 size = 9;</code>
      * @return The size.
      */
+    @java.lang.Override
     public long getSize() {
       return size_;
     }
@@ -2292,6 +2351,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool open = 10;</code>
      * @return The open.
      */
+    @java.lang.Override
     public boolean getOpen() {
       return open_;
     }
@@ -2474,6 +2534,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool localOwner = 13;</code>
      * @return The localOwner.
      */
+    @java.lang.Override
     public boolean getLocalOwner() {
       return localOwner_;
     }
@@ -2504,6 +2565,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool execute = 14;</code>
      * @return The execute.
      */
+    @java.lang.Override
     public boolean getExecute() {
       return execute_;
     }
@@ -2534,6 +2596,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool read = 15;</code>
      * @return The read.
      */
+    @java.lang.Override
     public boolean getRead() {
       return read_;
     }
@@ -2564,6 +2627,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool write = 16;</code>
      * @return The write.
      */
+    @java.lang.Override
     public boolean getWrite() {
       return write_;
     }
@@ -2594,6 +2658,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool importing = 17;</code>
      * @return The importing.
      */
+    @java.lang.Override
     public boolean getImporting() {
       return importing_;
     }
@@ -2624,6 +2689,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool symlink = 18;</code>
      * @return The symlink.
      */
+    @java.lang.Override
     public boolean getSymlink() {
       return symlink_;
     }
@@ -3678,6 +3744,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 group_id = 26;</code>
      * @return The groupId.
      */
+    @java.lang.Override
     public long getGroupId() {
       return groupId_;
     }
@@ -3708,6 +3775,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 user_id = 27;</code>
      * @return The userId.
      */
+    @java.lang.Override
     public long getUserId() {
       return userId_;
     }
@@ -3738,6 +3806,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 permissions = 28;</code>
      * @return The permissions.
      */
+    @java.lang.Override
     public int getPermissions() {
       return permissions_;
     }

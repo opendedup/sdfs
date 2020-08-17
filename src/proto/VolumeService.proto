@@ -3,6 +3,7 @@ option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
 package org.opendedup.grpc;
 option java_multiple_files = true;
 import "Shutdown.proto";
+import "FileInfo.proto";
 
 
 // Request payload
@@ -41,6 +42,17 @@ message VolumeInfoResponse {
   bool offline = 29;
 }
 
+message AuthenticationRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticationResponse {
+  string token = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
 message MessageQueueInfoResponse {
   string hostName = 1;
   enum MQType {
@@ -55,6 +67,7 @@ message MessageQueueInfoResponse {
 // Defining a Service, a Service can have multiple RPC operations
 service VolumeService {
   // Define a RPC operation
+  rpc AuthenticateUser(AuthenticationRequest) returns (AuthenticationResponse);
   rpc GetVolumeInfo(VolumeInfoRequest) returns (VolumeInfoResponse);
   rpc ShutdownVolume(ShutdownRequest) returns (ShutdownResponse);
 }

@@ -30,6 +30,37 @@ public final class VolumeServiceGrpc {
   public static final String SERVICE_NAME = "org.opendedup.grpc.VolumeService";
 
   // Static method descriptors that strictly reflect the proto.
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.AuthenticationRequest,
+      org.opendedup.grpc.AuthenticationResponse> getAuthenticateUserMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AuthenticateUser",
+      requestType = org.opendedup.grpc.AuthenticationRequest.class,
+      responseType = org.opendedup.grpc.AuthenticationResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.AuthenticationRequest,
+      org.opendedup.grpc.AuthenticationResponse> getAuthenticateUserMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.AuthenticationRequest, org.opendedup.grpc.AuthenticationResponse> getAuthenticateUserMethod;
+    if ((getAuthenticateUserMethod = VolumeServiceGrpc.getAuthenticateUserMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getAuthenticateUserMethod = VolumeServiceGrpc.getAuthenticateUserMethod) == null) {
+          VolumeServiceGrpc.getAuthenticateUserMethod = getAuthenticateUserMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.AuthenticationRequest, org.opendedup.grpc.AuthenticationResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AuthenticateUser"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.AuthenticationRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.AuthenticationResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("AuthenticateUser"))
+              .build();
+        }
+      }
+    }
+    return getAuthenticateUserMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeInfoRequest,
       org.opendedup.grpc.VolumeInfoResponse> getGetVolumeInfoMethod;
 
@@ -148,6 +179,13 @@ public final class VolumeServiceGrpc {
      * Define a RPC operation
      * </pre>
      */
+    public void authenticateUser(org.opendedup.grpc.AuthenticationRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.AuthenticationResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getAuthenticateUserMethod(), responseObserver);
+    }
+
+    /**
+     */
     public void getVolumeInfo(org.opendedup.grpc.VolumeInfoRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeInfoResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getGetVolumeInfoMethod(), responseObserver);
@@ -162,6 +200,13 @@ public final class VolumeServiceGrpc {
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+          .addMethod(
+            getAuthenticateUserMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.AuthenticationRequest,
+                org.opendedup.grpc.AuthenticationResponse>(
+                  this, METHODID_AUTHENTICATE_USER)))
           .addMethod(
             getGetVolumeInfoMethod(),
             asyncUnaryCall(
@@ -202,6 +247,14 @@ public final class VolumeServiceGrpc {
      * Define a RPC operation
      * </pre>
      */
+    public void authenticateUser(org.opendedup.grpc.AuthenticationRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.AuthenticationResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getAuthenticateUserMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
     public void getVolumeInfo(org.opendedup.grpc.VolumeInfoRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeInfoResponse> responseObserver) {
       asyncUnaryCall(
@@ -239,6 +292,13 @@ public final class VolumeServiceGrpc {
      * Define a RPC operation
      * </pre>
      */
+    public org.opendedup.grpc.AuthenticationResponse authenticateUser(org.opendedup.grpc.AuthenticationRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getAuthenticateUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
     public org.opendedup.grpc.VolumeInfoResponse getVolumeInfo(org.opendedup.grpc.VolumeInfoRequest request) {
       return blockingUnaryCall(
           getChannel(), getGetVolumeInfoMethod(), getCallOptions(), request);
@@ -274,6 +334,14 @@ public final class VolumeServiceGrpc {
      * Define a RPC operation
      * </pre>
      */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.AuthenticationResponse> authenticateUser(
+        org.opendedup.grpc.AuthenticationRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getAuthenticateUserMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.VolumeInfoResponse> getVolumeInfo(
         org.opendedup.grpc.VolumeInfoRequest request) {
       return futureUnaryCall(
@@ -289,8 +357,9 @@ public final class VolumeServiceGrpc {
     }
   }
 
-  private static final int METHODID_GET_VOLUME_INFO = 0;
-  private static final int METHODID_SHUTDOWN_VOLUME = 1;
+  private static final int METHODID_AUTHENTICATE_USER = 0;
+  private static final int METHODID_GET_VOLUME_INFO = 1;
+  private static final int METHODID_SHUTDOWN_VOLUME = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -309,6 +378,10 @@ public final class VolumeServiceGrpc {
     @java.lang.SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_AUTHENTICATE_USER:
+          serviceImpl.authenticateUser((org.opendedup.grpc.AuthenticationRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.AuthenticationResponse>) responseObserver);
+          break;
         case METHODID_GET_VOLUME_INFO:
           serviceImpl.getVolumeInfo((org.opendedup.grpc.VolumeInfoRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeInfoResponse>) responseObserver);
@@ -378,6 +451,7 @@ public final class VolumeServiceGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new VolumeServiceFileDescriptorSupplier())
+              .addMethod(getAuthenticateUserMethod())
               .addMethod(getGetVolumeInfoMethod())
               .addMethod(getShutdownVolumeMethod())
               .build();

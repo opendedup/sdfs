@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.FileRenameRequest}
  */
-public  final class FileRenameRequest extends
+public final class FileRenameRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileRenameRequest)
     FileRenameRequestOrBuilder {
@@ -100,6 +100,7 @@ private static final long serialVersionUID = 0L;
    * <code>string src = 1;</code>
    * @return The src.
    */
+  @java.lang.Override
   public java.lang.String getSrc() {
     java.lang.Object ref = src_;
     if (ref instanceof java.lang.String) {
@@ -116,6 +117,7 @@ private static final long serialVersionUID = 0L;
    * <code>string src = 1;</code>
    * @return The bytes for src.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSrcBytes() {
     java.lang.Object ref = src_;
@@ -136,6 +138,7 @@ private static final long serialVersionUID = 0L;
    * <code>string dest = 2;</code>
    * @return The dest.
    */
+  @java.lang.Override
   public java.lang.String getDest() {
     java.lang.Object ref = dest_;
     if (ref instanceof java.lang.String) {
@@ -152,6 +155,7 @@ private static final long serialVersionUID = 0L;
    * <code>string dest = 2;</code>
    * @return The bytes for dest.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getDestBytes() {
     java.lang.Object ref = dest_;

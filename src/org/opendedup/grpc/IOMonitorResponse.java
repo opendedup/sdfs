@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.IOMonitorResponse}
  */
-public  final class IOMonitorResponse extends
+public final class IOMonitorResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.IOMonitorResponse)
     IOMonitorResponseOrBuilder {
@@ -158,6 +158,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 virtualBytesWritten = 1;</code>
    * @return The virtualBytesWritten.
    */
+  @java.lang.Override
   public long getVirtualBytesWritten() {
     return virtualBytesWritten_;
   }
@@ -168,6 +169,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 actualBytesWritten = 2;</code>
    * @return The actualBytesWritten.
    */
+  @java.lang.Override
   public long getActualBytesWritten() {
     return actualBytesWritten_;
   }
@@ -178,6 +180,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 bytesRead = 3;</code>
    * @return The bytesRead.
    */
+  @java.lang.Override
   public long getBytesRead() {
     return bytesRead_;
   }
@@ -188,6 +191,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 duplicateBlocks = 4;</code>
    * @return The duplicateBlocks.
    */
+  @java.lang.Override
   public long getDuplicateBlocks() {
     return duplicateBlocks_;
   }
@@ -198,6 +202,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 writeOpts = 5;</code>
    * @return The writeOpts.
    */
+  @java.lang.Override
   public long getWriteOpts() {
     return writeOpts_;
   }
@@ -208,6 +213,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 readOpts = 6;</code>
    * @return The readOpts.
    */
+  @java.lang.Override
   public long getReadOpts() {
     return readOpts_;
   }
@@ -218,6 +224,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxReadOps = 7;</code>
    * @return The maxReadOps.
    */
+  @java.lang.Override
   public long getMaxReadOps() {
     return maxReadOps_;
   }
@@ -228,6 +235,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxWriteOps = 8;</code>
    * @return The maxWriteOps.
    */
+  @java.lang.Override
   public long getMaxWriteOps() {
     return maxWriteOps_;
   }
@@ -238,6 +246,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxIops = 9;</code>
    * @return The maxIops.
    */
+  @java.lang.Override
   public long getMaxIops() {
     return maxIops_;
   }
@@ -248,6 +257,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxReadMbps = 10;</code>
    * @return The maxReadMbps.
    */
+  @java.lang.Override
   public long getMaxReadMbps() {
     return maxReadMbps_;
   }
@@ -258,6 +268,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxWriteMbps = 11;</code>
    * @return The maxWriteMbps.
    */
+  @java.lang.Override
   public long getMaxWriteMbps() {
     return maxWriteMbps_;
   }
@@ -268,6 +279,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxMbps = 12;</code>
    * @return The maxMbps.
    */
+  @java.lang.Override
   public long getMaxMbps() {
     return maxMbps_;
   }
@@ -278,6 +290,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 ioQos = 13;</code>
    * @return The ioQos.
    */
+  @java.lang.Override
   public int getIoQos() {
     return ioQos_;
   }
@@ -288,6 +301,7 @@ private static final long serialVersionUID = 0L;
    * <code>string ioProfile = 14;</code>
    * @return The ioProfile.
    */
+  @java.lang.Override
   public java.lang.String getIoProfile() {
     java.lang.Object ref = ioProfile_;
     if (ref instanceof java.lang.String) {
@@ -304,6 +318,7 @@ private static final long serialVersionUID = 0L;
    * <code>string ioProfile = 14;</code>
    * @return The bytes for ioProfile.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getIoProfileBytes() {
     java.lang.Object ref = ioProfile_;
@@ -858,6 +873,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 virtualBytesWritten = 1;</code>
      * @return The virtualBytesWritten.
      */
+    @java.lang.Override
     public long getVirtualBytesWritten() {
       return virtualBytesWritten_;
     }
@@ -888,6 +904,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 actualBytesWritten = 2;</code>
      * @return The actualBytesWritten.
      */
+    @java.lang.Override
     public long getActualBytesWritten() {
       return actualBytesWritten_;
     }
@@ -918,6 +935,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 bytesRead = 3;</code>
      * @return The bytesRead.
      */
+    @java.lang.Override
     public long getBytesRead() {
       return bytesRead_;
     }
@@ -948,6 +966,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 duplicateBlocks = 4;</code>
      * @return The duplicateBlocks.
      */
+    @java.lang.Override
     public long getDuplicateBlocks() {
       return duplicateBlocks_;
     }
@@ -978,6 +997,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 writeOpts = 5;</code>
      * @return The writeOpts.
      */
+    @java.lang.Override
     public long getWriteOpts() {
       return writeOpts_;
     }
@@ -1008,6 +1028,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 readOpts = 6;</code>
      * @return The readOpts.
      */
+    @java.lang.Override
     public long getReadOpts() {
       return readOpts_;
     }
@@ -1038,6 +1059,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxReadOps = 7;</code>
      * @return The maxReadOps.
      */
+    @java.lang.Override
     public long getMaxReadOps() {
       return maxReadOps_;
     }
@@ -1068,6 +1090,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxWriteOps = 8;</code>
      * @return The maxWriteOps.
      */
+    @java.lang.Override
     public long getMaxWriteOps() {
       return maxWriteOps_;
     }
@@ -1098,6 +1121,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxIops = 9;</code>
      * @return The maxIops.
      */
+    @java.lang.Override
     public long getMaxIops() {
       return maxIops_;
     }
@@ -1128,6 +1152,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxReadMbps = 10;</code>
      * @return The maxReadMbps.
      */
+    @java.lang.Override
     public long getMaxReadMbps() {
       return maxReadMbps_;
     }
@@ -1158,6 +1183,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxWriteMbps = 11;</code>
      * @return The maxWriteMbps.
      */
+    @java.lang.Override
     public long getMaxWriteMbps() {
       return maxWriteMbps_;
     }
@@ -1188,6 +1214,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxMbps = 12;</code>
      * @return The maxMbps.
      */
+    @java.lang.Override
     public long getMaxMbps() {
       return maxMbps_;
     }
@@ -1218,6 +1245,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 ioQos = 13;</code>
      * @return The ioQos.
      */
+    @java.lang.Override
     public int getIoQos() {
       return ioQos_;
     }
