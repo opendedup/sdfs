@@ -702,9 +702,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			// If the key is present in temporary hash table then update whatever exists
 			l.lock();
 			try {
-				if(errlookup.contains(new ByteArrayWrapper(cm.getHash()))) {
-					SDFSLogger.getLog().info("Sweet!!! "+ StringUtils.getHexString(cm.getHash()));
-				}
 				if (this.tempHt.containsKey(new ByteArrayWrapper(cm.getHash()))) {
 					ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(cm.getHash()));
 					bk.position(0);

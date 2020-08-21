@@ -1244,8 +1244,7 @@ public class MgmtWebServer implements Container {
 		SSLContext sslContext = null;
 
 		if (Main.sdfsCliEnabled) {
-			grpcServer = new IOServer();
-			grpcServer.start(); 
+			
 			if (useSSL) {
 				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
 				String key = keydir + File.separator + "volume.keystore";
@@ -1260,11 +1259,13 @@ public class MgmtWebServer implements Container {
 						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
 				// init KeyManager
-				sslContext = SSLContext.getInstance("TLSv1.2");
+				sslContext = SSLContext.getInstance("TLSv1.3");
 				// sslContext.init(keyManagerFactory.getKeyManagers(), new
 				// TrustManager[]{new NaiveX509TrustManager()}, null);
 				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
 			}
+			grpcServer = new IOServer();
+			grpcServer.start(useSSL); 
 			Map<String, Service> routes = new HashMap<String, Service>();
 			routes.put("/metadatasocket", new MetaDataUpdate());
 			routes.put("/ddbsocket", new DDBUpdate());

@@ -94,7 +94,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int chmod(String path, int mode) throws FuseException {
-		// SDFSLogger.getLog().info("12");
 		try {
 			File f = resolvePath(path);
 			int ftype = this.getFtype(path);
@@ -131,7 +130,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int chown(String path, int uid, int gid) throws FuseException {
-		// SDFSLogger.getLog().info("17");
 		try {
 			File f = resolvePath(path);
 			int ftype = this.getFtype(path);
@@ -213,7 +211,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int fsync(String path, long fh, boolean isDatasync) throws FuseException {
-		// SDFSLogger.getLog().info("1000");
 		if (Main.volume.isOffLine())
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 		try {
@@ -329,7 +326,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int getdir(String path, FuseDirFiller dirFiller) throws FuseException {
-		// SDFSLogger.getLog().info("1");
 		try {
 			File f = null;
 			try {
@@ -415,7 +411,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 
 	@Override
 	public int mknod(String path, int mode, int rdev) throws FuseException {
-		// SDFSLogger.getLog().info("4=" + path);
 		try {
 			File f = new File(this.mountedVolume + path);
 			try {
