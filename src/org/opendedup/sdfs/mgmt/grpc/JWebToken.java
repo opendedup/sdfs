@@ -9,13 +9,12 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
 /**
@@ -133,7 +132,7 @@ public class JWebToken {
             byte[] signedBytes = sha256Hmac.doFinal(data.getBytes(StandardCharsets.UTF_8));
             return encode(signedBytes);
         } catch (NoSuchAlgorithmException | InvalidKeyException ex) {
-            Logger.getLogger(JWebToken.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
+            SDFSLogger.getLog().error(ex.getMessage(), ex);
             return null;
         }
     }

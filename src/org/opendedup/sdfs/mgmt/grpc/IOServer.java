@@ -6,7 +6,6 @@ import org.opendedup.sdfs.Main;
 
 import io.grpc.Metadata;
 import io.grpc.Server;
-import io.grpc.ServerBuilder;
 import io.grpc.ServerCall;
 import io.grpc.ServerCall.Listener;
 import io.grpc.ServerCallHandler;
@@ -15,30 +14,54 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.Metadata.Key;
 import io.grpc.stub.StreamObserver;
-
-import org.opendedup.buse.sdfsdev.SDFSBlockDev;
 import org.opendedup.buse.sdfsdev.VolumeShutdownHook;
 import org.opendedup.grpc.*;
 import org.opendedup.hashing.HashFunctions;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.NettyServerBuilder;
+import io.netty.handler.ssl.SslContextBuilder;
+
 public class IOServer {
   private Server server;
   private Logger logger = SDFSLogger.getLog();
 
-  public void start() throws IOException {
+  private SslContextBuilder getSslContextBuilder(String certChainFilePath,String privateKeyFilePath) {
+    SslContextBuilder sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath),
+            new File(privateKeyFilePath));
+    return GrpcSslContexts.configure(sslClientContextBuilder);
+}
+
+  public void start(boolean useSSL) throws IOException {
+    String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
+    String certChainFilePath = keydir + File.separator + "tls_key.pem";
+    String privateKeyFilePath = keydir + File.separator + "tls_key.key";
+    Map<String, String> env = System.getenv();
+    if(env.containsKey("SDFS_PRIVATE_KEY")) {
+      privateKeyFilePath = env.get("SDFS_PRIVATE_KEY");
+    }
+    if (env.containsKey("SDFS_CERT_CHAIN")) {
+      certChainFilePath = env.get("SDFS_CERT_CHAIN");
+    }
     /* The port on which the server should run */
     int port = 50051;
     logger.info("Server started, listening on " + port);
-    server = ServerBuilder.forPort(port).addService(new VolumeImpl()).addService(new FileIOServiceImpl())
-        .intercept(new AuthorizationInterceptor()).build().start();
+    NettyServerBuilder b = NettyServerBuilder.forPort(port).addService(new VolumeImpl()).addService(new FileIOServiceImpl())
+    .intercept(new AuthorizationInterceptor());
+    if(useSSL) {
+      b.sslContext(getSslContextBuilder(certChainFilePath,privateKeyFilePath).build());
+    }
+    server = b.build().start();
     logger.info("Server started, listening on " + port);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
@@ -182,7 +205,7 @@ public class IOServer {
    */
   public static void main(String[] args) throws IOException, InterruptedException {
     final IOServer server = new IOServer();
-    server.start();
+    server.start(false);
     server.blockUntilShutdown();
   }
 

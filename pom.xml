@@ -116,10 +116,10 @@
             <version>1.66</version>
         </dependency>
         <dependency>
-            <groupId>org.opendedupe</groupId>
-            <artifactId>cuckcoo</artifactId>
-            <version>1.0.0</version>
-        </dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.66</version>
+        </dependency>   
         <dependency>
             <groupId>org.opendedupe</groupId>
             <artifactId>utils</artifactId>
