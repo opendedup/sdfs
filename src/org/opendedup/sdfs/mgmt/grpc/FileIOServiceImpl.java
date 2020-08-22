@@ -773,8 +773,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     }
                     b.setListGuid(guid);
                     Path dir = FileSystems.getDefault().getPath(f.getPath());
-                    DirectoryStream<Path> stream = Files.newDirectoryStream(dir);
-                    this.fileListers.put(guid, stream);
+                    DirectoryStream<Path> stream = null;
+                    if(req.getListGuid() == null) {
+                        stream = Files.newDirectoryStream(dir);
+                        this.fileListers.put(guid, stream);
+                    } else {
+                        stream = this.fileListers.get(guid);
+                    }
+                    
                     int maxFiles = 1000;
                     int cf = 0;
                     if (req.getNumberOfFiles() > 0) {
