@@ -252,8 +252,7 @@ public class DedupFileChannel {
 		} finally {
 			l.unlock();
 		}
-		if (mf.getDev() != null)
-			mf.sync();
+		
 	}
 	/**
 	 * writes data to the DedupFile

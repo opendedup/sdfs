@@ -2,7 +2,6 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
-import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,178 +27,6 @@ import org.opendedup.sdfs.io.AbstractStreamMatcher;
 
 public class Config {
 	public static boolean encrypted = false;
-
-	/**
-	 * parse the hubstore config file
-	 *
-	 * @param fileName
-	 * @throws IOException
-	 */
-	public synchronized static void parseDSEConfigFile(String fileName) throws IOException {
-		try {
-			File file = new File(fileName);
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-
-			Document doc = db.parse(file);
-			doc.getDocumentElement().normalize();
-
-			String version = Main.version;
-			if (doc.getDocumentElement().hasAttribute("version")) {
-				version = doc.getDocumentElement().getAttribute("version");
-				Main.version = version;
-			}
-
-			SDFSLogger.getLog().info("Parsing " + doc.getDocumentElement().getNodeName() + " version " + version);
-			if (doc.getElementsByTagName("license").getLength() > 0) {
-				Element license = (Element) doc.getElementsByTagName("license").item(0);
-				Main.licenseKey = license.getAttribute("key");
-			}
-			Element locations = (Element) doc.getElementsByTagName("locations").item(0);
-			SDFSLogger.getLog().info("parsing folder locations");
-			Main.chunkStore = locations.getAttribute("chunk-store");
-			Main.hashDBStore = locations.getAttribute("hash-db-store");
-			Element cbe = (Element) doc.getElementsByTagName("chunk-store").item(0);
-			if (doc.getElementsByTagName("matcher").getLength() > 0) {
-				Element matcher = (Element) doc.getElementsByTagName("matcher").item(0);
-				Main.matcher = (AbstractStreamMatcher) Class.forName(matcher.getAttribute("class")).newInstance();
-				Main.matcher.initialize(matcher);
-			}
-			Main.chunkStoreClass = "org.opendedup.sdfs.filestore.FileChunkStore";
-			if (cbe.hasAttribute("chunkstore-class")) {
-				Main.chunkStoreClass = cbe.getAttribute("chunkstore-class");
-			}
-			if (cbe.hasAttribute("max-table-scan")) {
-				Main.MAX_TBLS = Integer.parseInt(cbe.getAttribute("max-table-scan"));
-			}
-			if (cbe.hasAttribute("hashdb-class"))
-				Main.hashesDBClass = cbe.getAttribute("hashdb-class");
-			if (cbe.getElementsByTagName("extended-config").getLength() > 0) {
-				Main.chunkStoreConfig = (Element) cbe.getElementsByTagName("extended-config").item(0);
-			}
-			if (cbe.hasAttribute("low-memory")) {
-				Main.LOWMEM = Boolean.parseBoolean(cbe.getAttribute("low-memory"));
-			}
-			Main.chunkStoreAllocationSize = Long.parseLong(cbe.getAttribute("allocation-size"));
-
-			Main.chunkStorePageSize = Integer.parseInt(cbe.getAttribute("page-size"));
-			Main.CHUNK_LENGTH = Main.chunkStorePageSize;
-			if(cbe.hasAttribute("compact-on-mount")) {
-				Main.runCompact = Boolean.parseBoolean(cbe.getAttribute("compact-on-mount"));
-			}
-			if (cbe.hasAttribute("gc-class"))
-				Main.gcClass = cbe.getAttribute("gc-class");
-			Main.fDkiskSchedule = cbe.getAttribute("claim-hash-schedule");
-			if (cbe.hasAttribute("hash-type")) {
-				Main.hashType = cbe.getAttribute("hash-type");
-				SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
-			}
-			if (cbe.hasAttribute("hash-size")) {
-				short hsz = Short.parseShort(cbe.getAttribute("hash-size"));
-				if (hsz == 16)
-					Main.hashType = HashFunctionPool.TIGER_16;
-				if (hsz == 24)
-					Main.hashType = HashFunctionPool.TIGER_24;
-				SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
-			}
-			if (cbe.hasAttribute("average-chunk-size")) {
-				HashFunctionPool.avg_page_size = Integer.parseInt(cbe.getAttribute("average-chunk-size"));
-			}
-
-			if (cbe.hasAttribute("encrypt")) {
-				Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(cbe.getAttribute("encrypt"));
-				Main.chunkStoreEncryptionKey = cbe.getAttribute("encryption-key");
-			}
-			if (cbe.hasAttribute("encryption-iv"))
-				Main.chunkStoreEncryptionIV = cbe.getAttribute("encryption-iv");
-			if (cbe.hasAttribute("compress")) {
-				Main.compress = Boolean.parseBoolean(cbe.getAttribute("compress"));
-			}
-			if (cbe.hasAttribute("max-repl-batch-sz"))
-				Main.MAX_REPL_BATCH_SZ = Integer.parseInt(cbe.getAttribute("max-repl-batch-sz"));
-			int awsSz = doc.getElementsByTagName("aws").getLength();
-			int fileSz = doc.getElementsByTagName("file-store").getLength();
-			int googleSz = doc.getElementsByTagName("google-store").getLength();
-			if (cbe.hasAttribute("cluster-id"))
-				Main.DSEClusterID = cbe.getAttribute("cluster-id");
-			if (cbe.hasAttribute("cluster-member-id"))
-				Main.DSEClusterMemberID = Byte.parseByte(cbe.getAttribute("cluster-member-id"));
-			if (cbe.hasAttribute("cluster-config"))
-				Main.DSEClusterConfig = cbe.getAttribute("cluster-config");
-			if (cbe.hasAttribute("sdfs-password")) {
-				Main.sdfsPassword = cbe.getAttribute("dse-password");
-				Main.sdfsPasswordSalt = cbe.getAttribute("dse-password-salt");
-			}
-			if (cbe.hasAttribute("cluster-node-rack")) {
-				Main.DSEClusterNodeRack = cbe.getAttribute("cluster-node-rack");
-			}
-			if (cbe.hasAttribute("cluster-node-location")) {
-				Main.DSEClusterNodeLocation = cbe.getAttribute("cluster-node-location");
-			}
-			if (cbe.hasAttribute("io-threads")) {
-				Main.dseIOThreads = Integer.parseInt(cbe.getAttribute("io-threads"));
-			}
-			if (awsSz > 0) {
-				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.GoogleChunkStore";
-				Element aws = (Element) doc.getElementsByTagName("aws").item(0);
-				if (aws.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
-				Main.cloudChunkStore = Boolean.parseBoolean(aws.getAttribute("enabled"));
-				Main.cloudAccessKey = aws.getAttribute("gs-access-key");
-				Main.cloudSecretKey = aws.getAttribute("gs-secret-key");
-				Main.cloudBucket = aws.getAttribute("gs-bucket-name");
-			}
-			if (fileSz > 0) {
-				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.GoogleChunkStore";
-				Element aws = (Element) doc.getElementsByTagName("file-store").item(0);
-				if (aws.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
-				Main.cloudChunkStore = Boolean.parseBoolean(aws.getAttribute("enabled"));
-				Main.cloudBucket = aws.getAttribute("bucket-name");
-			}
-			if (googleSz > 0) {
-				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.S3ChunkStore";
-				Element aws = (Element) doc.getElementsByTagName("google-store").item(0);
-				if (aws.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = aws.getAttribute("chunkstore-class");
-				Main.cloudChunkStore = Boolean.parseBoolean(aws.getAttribute("enabled"));
-				Main.cloudAccessKey = aws.getAttribute("aws-access-key");
-				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
-				Main.cloudBucket = aws.getAttribute("aws-bucket-name");
-			}
-			int azureSz = doc.getElementsByTagName("azure-store").getLength();
-			if (azureSz > 0) {
-				Main.chunkStoreClass = "org.opendedup.sdfs.filestore.MAzureChunkStore";
-				Element azure = (Element) doc.getElementsByTagName("azure").item(0);
-				if (azure.hasAttribute("chunkstore-class"))
-					Main.chunkStoreClass = azure.getAttribute("chunkstore-class");
-				Main.cloudChunkStore = Boolean.parseBoolean(azure.getAttribute("enabled"));
-				Main.cloudAccessKey = azure.getAttribute("azure-access-key");
-				Main.cloudSecretKey = azure.getAttribute("azure-secret-key");
-				Main.cloudBucket = azure.getAttribute("azure-bucket-name");
-			}
-			File f = new File(Main.chunkStore);
-			if (!f.exists()) {
-				SDFSLogger.getLog().info("creating chunk store at " + Main.chunkStore);
-				f.mkdirs();
-
-			}
-
-			f = new File(Main.hashDBStore);
-			if (!f.exists()) {
-				SDFSLogger.getLog().info("creating hash database store at " + Main.chunkStore);
-				if (!f.mkdirs())
-					throw new IOException("Unable to create " + f.getPath());
-			}
-			if (Main.chunkStoreEncryptionEnabled)
-				SDFSLogger.getLog().info("################## Encryption is enabled ##################");
-			else
-				SDFSLogger.getLog().info("################## Encryption is NOT enabled ##################");
-		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("unable to parse config file [" + fileName + "]", e);
-			throw new IOException(e);
-		}
-	}
 
 	/**
 	 * parse the client side config file
@@ -228,10 +55,7 @@ public class Config {
 			SDFSLogger.setLevel(Integer.parseInt(gc.getAttribute("log-level")));
 		}
 		Main.fDkiskSchedule = gc.getAttribute("claim-hash-schedule");
-		Main.DSEClusterConfig = gc.getAttribute("cluster-config");
-		Main.DSEClusterID = gc.getAttribute("cluster-id");
-		Main.DSEPassword = gc.getAttribute("cluster-dse-password");
-		Main.DSEClusterVolumeList = gc.getAttribute("volume-list-file");
+
 	}
 
 	/**
@@ -252,10 +76,6 @@ public class Config {
 		if (doc.getDocumentElement().hasAttribute("version")) {
 			version = doc.getDocumentElement().getAttribute("version");
 			Main.version = version;
-		}
-		if (doc.getElementsByTagName("license").getLength() > 0) {
-			Element license = (Element) doc.getElementsByTagName("license").item(0);
-			Main.licenseKey = license.getAttribute("key");
 		}
 
 		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
@@ -352,9 +172,7 @@ public class Config {
 		if (localChunkStore.hasAttribute("fpp")) {
 			Main.fpp = Double.parseDouble(localChunkStore.getAttribute("fpp"));
 		}
-		if (localChunkStore.hasAttribute("max-scan-depth")) {
-			Main.MAX_TABLES_SCAN = Integer.parseInt(localChunkStore.getAttribute("max-scan-depth"));
-		}
+		
 		if (localChunkStore.hasAttribute("average-chunk-size")) {
 			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore.getAttribute("average-chunk-size"));
 		}
@@ -367,17 +185,10 @@ public class Config {
 		if(localChunkStore.hasAttribute("hashtable-rm-threshold")) {
 			Main.HT_RM_THRESH = Long.parseLong(localChunkStore.getAttribute("hashtable-rm-threshold"));
 		}
-		if (localChunkStore.hasAttribute("low-memory")) {
-			Main.LOWMEM = Boolean.parseBoolean(localChunkStore.getAttribute("low-memory"));
-		}
-		if (localChunkStore.hasAttribute("max-table-size")) {
-			Main.MAX_TBL_SIZE = Integer.parseInt(localChunkStore.getAttribute("max-table-size"));
-		}
+		
 		if (localChunkStore.hasAttribute("max-chunk-age")) {
 			Main.maxAge = Long.parseLong(localChunkStore.getAttribute("max-chunk-age"));
 		}
-		if (localChunkStore.hasAttribute("cluster-id"))
-			Main.DSEClusterID = localChunkStore.getAttribute("cluster-id");
 		if (localChunkStore.hasAttribute("io-threads")) {
 			Main.dseIOThreads = Integer.parseInt(localChunkStore.getAttribute("io-threads"));
 		}
@@ -387,10 +198,7 @@ public class Config {
 		if(localChunkStore.hasAttribute("enable-batch-gc")) {
 			Main.DDB_TRASH_ENABLED = Boolean.parseBoolean(localChunkStore.getAttribute("enable-batch-gc"));
 		}
-		if (localChunkStore.hasAttribute("cluster-config"))
-			Main.DSEClusterConfig = localChunkStore.getAttribute("cluster-config");
-		if (localChunkStore.hasAttribute("cluster-dse-password"))
-			Main.DSEPassword = localChunkStore.getAttribute("cluster-dse-password");
+		
 		if (localChunkStore.hasAttribute("gc-class"))
 			Main.gcClass = localChunkStore.getAttribute("gc-class");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);

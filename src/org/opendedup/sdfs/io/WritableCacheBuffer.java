@@ -440,8 +440,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 			}
 			for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
 				long archiveId=Longs.fromByteArray(e.getKey().hashloc);
-				long ci = DedupFileStore.addRef(e.getKey().hash, archiveId, e.getValue(),
-						df.mf.getLookupFilter());
+				long ci = DedupFileStore.addRef(e.getKey().hash, archiveId, e.getValue());
 				if(ci != -1 && archiveId != ci)
 					e.getKey().hashloc = Longs.toByteArray(ci);
 				if(ci == -1) {
@@ -484,8 +483,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 
 				for (Entry<HashLocPair, Integer> e : ct.entrySet()) {
 					long archiveId = Longs.fromByteArray(e.getKey().hashloc);
-					long ci = DedupFileStore.addRef(e.getKey().hash, archiveId, e.getValue(),
-							df.mf.getLookupFilter());
+					long ci = DedupFileStore.addRef(e.getKey().hash, archiveId, e.getValue());
 					if(ci != -1 && ci != archiveId ) {
 						e.getKey().hashloc = Longs.toByteArray(ci);
 					}
@@ -601,7 +599,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					this.reconstructed = true;
 					this.hlAdded = true;
 					
-					SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
+					SparseDataChunk.insertHashLocPair(ar, p);
 				} catch (Throwable e) {
 					df.errOccured = true;
 					SDFSLogger.getLog().error("Error inserting " + p, e);
@@ -642,7 +640,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 		AbstractHashEngine hc = (AbstractHashEngine) HashFunctionPool.borrowObject();
 		byte [] b = accelBuffer.toByteArray();
 		try {
-			List<Finger> fs = hc.getChunks(b, this.df.mf.getLookupFilter(),this.df.getGUID());
+			List<Finger> fs = hc.getChunks(b,this.df.getGUID());
 			AsyncChunkWriteActionListener l = new AsyncChunkWriteActionListener() {
 
 				@Override
@@ -753,7 +751,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 					else
 						df.mf.getIOMonitor().addDulicateData(dups, true);
 					this.prevDoop += dups;
-					SparseDataChunk.insertHashLocPair(ar, p, this.df.mf.getLookupFilter());
+					SparseDataChunk.insertHashLocPair(ar, p);
 				} catch (Throwable e) {
 					SDFSLogger.getLog().warn("unable to write object finger pos=" + opos + " len=" + b.length , e);
 					throw e;

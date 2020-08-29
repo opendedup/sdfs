@@ -32,8 +32,6 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
-//import org.opendedup.util.StringUtils;
-import org.opendedup.util.StringUtils;
 
 public class SparseDataChunk implements Externalizable {
 	private ReentrantReadWriteLock l = new ReentrantReadWriteLock();
@@ -166,14 +164,13 @@ public class SparseDataChunk implements Externalizable {
 
 	}
 
-	public static void insertHashLocPair(TreeMap<Integer, HashLocPair> ar, HashLocPair p, String lookupFilter)
+	public static void insertHashLocPair(TreeMap<Integer, HashLocPair> ar, HashLocPair p)
 			throws IOException {
 		int ep = p.pos + p.nlen;
 		if (ep > Main.CHUNK_LENGTH)
 			throw new IOException("Overflow ep=" + ep + " sp=" + p.pos);
 		// SDFSLogger.getLog().info("p = " + p);
 		int _ep = ep;
-		int k = 0;
 		
 		for (;;) {
 			Entry<Integer, HashLocPair> he = ar.floorEntry(_ep);
@@ -219,7 +216,6 @@ public class SparseDataChunk implements Externalizable {
 				}
 			}
 			_ep = h.pos - 1;
-			k++;
 		}
 		ar.put(p.pos, p);
 

@@ -136,7 +136,7 @@ public class ProcessBatchGetBlocks {
 		@Override
 		public void run() {
 			try {
-				HCServiceProxy.writeChunk(_hc.getName(), _hc.getData(),1,null,null);
+				HCServiceProxy.writeChunk(_hc.getName(), _hc.getData(),1,null);
 				imsz.addAndGet(_hc.getData().length);
 			} catch (IOException e) {
 				e1 = e;

@@ -108,7 +108,7 @@ public class FileReplicationService {
 		}
 	}
 
-	private File downloadDDBFile(String guid, String lookupFilter) throws Exception {
+	private File downloadDDBFile(String guid) throws Exception {
 		String sfp = Main.dedupDBStore + File.separator + guid.substring(0, 2) + File.separator + guid + File.separator
 				+ guid + ".map";
 		String dlf = guid.substring(0, 2) + "/" + guid + "/" + guid + ".map";
@@ -150,11 +150,11 @@ public class FileReplicationService {
 		service.sync.addRefresh(id);
 	}
 
-	public static LongByteArrayMap getDDB(String fname, String lookupFilter) throws IOException {
+	public static LongByteArrayMap getDDB(String fname) throws IOException {
 		try {
-			File f = service.downloadDDBFile(fname, lookupFilter);
+			File f = service.downloadDDBFile(fname);
 			SDFSLogger.getLog().info("downloaded " + f.getPath() + " size= " + f.length());
-			LongByteArrayMap m = LongByteArrayMap.getMap(fname, lookupFilter);
+			LongByteArrayMap m = LongByteArrayMap.getMap(fname);
 			service.sync.checkoutFile("ddb/" + fname);
 			return m;
 		} catch (Exception e) {
@@ -172,7 +172,7 @@ public class FileReplicationService {
 		} else {
 			return false;
 		}
-		
+
 	}
 
 	public static RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
@@ -434,7 +434,7 @@ public class FileReplicationService {
 							tries++;
 					}
 				}
-			} catch(java.nio.file.NoSuchFileException e) {
+			} catch (java.nio.file.NoSuchFileException e) {
 				SDFSLogger.getLog().debug("unable to write " + evt.sf.getDatabasePath(), e);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write " + evt.sf.getDatabasePath(), e);
@@ -473,10 +473,9 @@ public class FileReplicationService {
 					l.unlock();
 				}
 			}
-		} catch(java.nio.file.NoSuchFileException e) {
+		} catch (java.nio.file.NoSuchFileException e) {
 			SDFSLogger.getLog().debug("unable to write " + evt.sf.getPath(), e);
-		} 
-		catch (Exception e) {
+		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write " + evt.sf.getPath(), e);
 		} finally {
 			removeLock(evt.sf.getPath());
@@ -510,7 +509,7 @@ public class FileReplicationService {
 			} finally {
 				l.unlock();
 			}
-		} catch(java.nio.file.NoSuchFileException e) {
+		} catch (java.nio.file.NoSuchFileException e) {
 			SDFSLogger.getLog().debug("unable to write " + evt.mf.getPath(), e);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write " + evt.mf.getPath(), e);
@@ -542,7 +541,7 @@ public class FileReplicationService {
 						tries++;
 				}
 			}
-		}catch(java.nio.file.NoSuchFileException e) {
+		} catch (java.nio.file.NoSuchFileException e) {
 			SDFSLogger.getLog().debug("unable to write " + evt.sf, e);
 		} catch (Throwable e) {
 			SDFSLogger.getLog().error("unable to dels " + evt.sf, e);
@@ -700,7 +699,7 @@ public class FileReplicationService {
 				boolean done = false;
 				while (!done) {
 					try {
-						FileReplicationService.getDDB(mf.getDfGuid(), mf.getLookupFilter());
+						FileReplicationService.getDDB(mf.getDfGuid());
 						SDFSLogger.getLog().info("downloaded " + mf.getDfGuid());
 						LongByteArrayMap ddb = (LongByteArrayMap) mf.getDedupFile(false).bdb;
 						Set<Long> blks = new HashSet<Long>();
@@ -719,19 +718,8 @@ public class FileReplicationService {
 									ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc), p.hash);
 
 									InsertRecord ir = null;
-									if (mf.getLookupFilter() != null && Main.enableLookupFilter) {
-										long pos = HCServiceProxy.getLookupFilter(mf.getLookupFilter()).put(p.hash,
-												Longs.fromByteArray(p.hashloc));
-										if (pos != -1) {
-											ir = new InsertRecord(false, pos);
-										} else {
-											ir = HCServiceProxy.getHashesMap().put(cm, false);
-											HCServiceProxy.getLookupFilter(mf.getLookupFilter()).put(p.hash, 1,
-													Longs.fromByteArray(ir.getHashLocs()));
-										}
-									} else {
-										ir = HCServiceProxy.getHashesMap().put(cm, false);
-									}
+
+									ir = HCServiceProxy.getHashesMap().put(cm, false);
 									Main.volume.addVirtualBytesWritten(p.len, false);
 									Main.volume.addDuplicateBytes(p.len, false);
 									if (ir.getInserted())

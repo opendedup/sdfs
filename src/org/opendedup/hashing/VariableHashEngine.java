@@ -58,13 +58,13 @@ public class VariableHashEngine implements AbstractHashEngine {
 	
 	
 
-	public List<Finger> getChunks(byte [] b,String lookupFilter,String uuid) throws IOException {
+	public List<Finger> getChunks(byte [] b,String uuid) throws IOException {
 		final ArrayList<Finger> al = new ArrayList<Finger>();
 		ff.getChunkFingerprints(b, new EnhancedChunkVisitor() {
 			public void visit(long fingerprint, long chunkStart, long chunkEnd,
 					byte[] chunk) {
 				byte[] hash = getHash(chunk);
-				Finger f = new Finger(lookupFilter,uuid);
+				Finger f = new Finger(uuid);
 				f.chunk = chunk;
 				f.hash = hash;
 				f.len = (int) (chunkEnd - chunkStart);

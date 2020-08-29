@@ -43,7 +43,7 @@ public class GetCachePercentage {
 	private Element checkDedupFile() throws IOException {
 		SDFSLogger.getLog().info("Checking Cache Percentage for " + mf.getDfGuid());
 		Set<Long> blks = new HashSet<Long>();
-		LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid(), mf.getLookupFilter());
+		LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid());
 		mf.getIOMonitor().clearFileCounters(false);
 		if (ddb.getVersion() < 2)
 			throw new IOException("only files version 2 or later can be imported");

@@ -125,7 +125,7 @@ public class FileCounts {
 						.getPath());
 				String dfGuid = mf.getDfGuid();
 				if (dfGuid != null) {
-					File mapFile = LongByteArrayMap.getFile(dfGuid, mf.getLookupFilter());
+					File mapFile = LongByteArrayMap.getFile(dfGuid);
 					if(mapFile.exists()) {
 						size += mapFile.length();
 					}

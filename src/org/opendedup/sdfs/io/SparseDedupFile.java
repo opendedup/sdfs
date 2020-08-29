@@ -276,7 +276,7 @@ public class SparseDedupFile implements DedupFile {
 				if (dbf.exists() || zdbf.exists()) {
 					if (bdb == null || bdb.isClosed()) {
 
-						this.bdb = LongByteArrayMap.getMap(this.GUID, this.mf.getLookupFilter());
+						this.bdb = LongByteArrayMap.getMap(this.GUID);
 					}
 					if (Main.DDB_TRASH_ENABLED) {
 						String ext = ".map";
@@ -289,7 +289,7 @@ public class SparseDedupFile implements DedupFile {
 						this.bdb.copy(dest.getPath(), false);
 						this.bdb.vanish(false);
 						this.bdb.close();
-						LongByteArrayMap.getMap(dest, null).close();
+						LongByteArrayMap.getMap(dest).close();
 					} else {
 						this.bdb.vanish(Main.refCount);
 						this.bdb.close();
@@ -418,7 +418,7 @@ public class SparseDedupFile implements DedupFile {
 
 						try {
 							List<Finger> fs = null;
-							fs = eng.getChunks(writeBuffer.getFlushedBuffer(), this.mf.getLookupFilter(), this.GUID);
+							fs = eng.getChunks(writeBuffer.getFlushedBuffer(), this.GUID);
 							DataHashed dh = new DataHashed(this.mf, this, fs);
 							eventBus.post(dh);
 							HashMap<ByteArrayWrapper, Finger> mp = new HashMap<ByteArrayWrapper, Finger>();
@@ -1168,7 +1168,7 @@ public class SparseDedupFile implements DedupFile {
 					directory.mkdirs();
 				}
 
-				this.bdb = LongByteArrayMap.getMap(GUID, this.mf.getLookupFilter());
+				this.bdb = LongByteArrayMap.getMap(GUID);
 
 				this.closed = false;
 			}

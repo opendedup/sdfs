@@ -27,7 +27,6 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.collections.LocalLookupFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
@@ -49,9 +48,7 @@ public class HCServiceProxy {
 
 	// private static boolean initialized = false;
 	
-	public static LocalLookupFilter getLookupFilter(String filter) throws IOException {
-			return LocalLookupFilter.getLocalLookupFilter(filter);
-	}
+
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -67,9 +64,7 @@ public class HCServiceProxy {
 	}
 
 	public static synchronized boolean hashExists(byte[] hash, String guid) throws IOException, HashtableFullException {
-		if (guid != null && Main.enableLookupFilter && LocalLookupFilter.getLocalLookupFilter(guid).containsKey(hash)) {
-				return true;
-			}
+		
 		
 		long pos = hcService.hashExists(hash);
 		if (pos != -1)
@@ -115,13 +110,9 @@ public class HCServiceProxy {
 		hcService.setDseSize(sz);
 	}
 
-	public static long claimKey(byte[] key, long val, long ct, String guid) throws IOException {
-			if (guid != null && Main.enableLookupFilter) {
-				return LocalLookupFilter.getLocalLookupFilter(guid).claimKey(key, val, ct);
-				
-			} else {
+	public static long claimKey(byte[] key, long val, long ct) throws IOException {
+			
 				return hcService.claimKey(key, val, ct);
-			}
 	}
 
 	public static long getChunksFetched() {
@@ -226,13 +217,10 @@ public class HCServiceProxy {
 
 	
 
-	public static InsertRecord writeChunk(byte[] hash, byte[] aContents, int ct, String guid,String uuid)
+	public static InsertRecord writeChunk(byte[] hash, byte[] aContents, int ct, String uuid)
 			throws IOException, HashtableFullException {
 			// doop = HCServiceProxy.hcService.hashExists(hash);
-			if (guid != null && Main.enableLookupFilter) {
-						InsertRecord ir = LocalLookupFilter.getLocalLookupFilter(guid).put(hash, aContents, ct,uuid);
-						return ir;
-			} else
+			
 				return HCServiceProxy.hcService.writeChunk(hash, aContents, false, ct,uuid);
 		
 
@@ -269,37 +257,11 @@ public class HCServiceProxy {
 	 * "not implemented for remote chunkstores"); } }
 	 */
 
-	public static long hashExists(byte[] hash, boolean findAll, String guid)
+	public static long hashExists(byte[] hash)
 			throws IOException, HashtableFullException {
-			if (guid != null) {
-				long pos;
-					pos = LocalLookupFilter.getLocalLookupFilter(guid).get(hash);
-
-					if (pos != -1) {
-						return pos;
-					}
-			}
 
 			return HCServiceProxy.hcService.hashExists(hash);
 
-		
-	}
-
-	
-
-	public static long hashExists(byte[] hash, boolean findAll, byte numtowaitfor, String guid)
-			throws IOException, HashtableFullException {
-			if (guid != null) {
-				long pos;
-					pos = LocalLookupFilter.getLocalLookupFilter(guid).get(hash);
-
-					if (pos != -1) {
-						return pos;
-					}
-				
-			}
-
-			return HCServiceProxy.hcService.hashExists(hash);
 		
 	}
 
@@ -344,7 +306,6 @@ public class HCServiceProxy {
 	}
 
 	public static void close() {
-		LocalLookupFilter.closeAll();
 		hcService.close();
 		SDFSLogger.getLog().info("Deleting lock file");
 		File file = new File(Main.hashDBStore + File.separator + ".lock");

@@ -1,0 +1,22 @@
+syntax = "proto3";
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
+package org.opendedup.grpc;
+
+option java_multiple_files = true;
+
+message SDFSEvent {
+    int64 startTime = 1;
+    int64 endTime = 2;
+    string level = 3;
+    string type = 4;
+    string target = 5;
+    string shortMsg = 6;
+    string longMsg = 7;
+    double percentComplete = 8;
+    int64 maxCount = 9;
+    int64 currentCount = 10;
+    string uuid = 11;
+    string parentUuid = 12;
+    string extendedInfo = 13;
+    repeated string childrenUUid = 14;
+}

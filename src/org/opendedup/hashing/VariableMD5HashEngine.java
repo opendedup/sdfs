@@ -59,13 +59,13 @@ public class VariableMD5HashEngine implements AbstractHashEngine {
 	
 	
 
-	public List<Finger> getChunks(byte [] data,String lookupFilter,String uuid) throws IOException {
+	public List<Finger> getChunks(byte [] data,String uuid) throws IOException {
 		final ArrayList<Finger> al = new ArrayList<Finger>();
 		ff.getChunkFingerprints(data, new EnhancedChunkVisitor() {
 			public void visit(long fingerprint, long chunkStart, long chunkEnd,
 					byte[] chunk) {
 				byte[] hash = getHash(chunk);
-				Finger f = new Finger(lookupFilter,uuid);
+				Finger f = new Finger(uuid);
 				f.chunk = chunk;
 				f.hash = hash;
 				f.len = (int) (chunkEnd - chunkStart);
@@ -87,19 +87,16 @@ public class VariableMD5HashEngine implements AbstractHashEngine {
 	
 	@Override
 	public boolean isVariableLength() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
 	@Override
 	public int getMaxLen() {
-		// TODO Auto-generated method stub
 		return Main.CHUNK_LENGTH;
 	}
 
 	@Override
 	public int getMinLen() {
-		// TODO Auto-generated method stub
 		return HashFunctionPool.minLen;
 	}
 

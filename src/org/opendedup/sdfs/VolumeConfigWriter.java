@@ -72,7 +72,6 @@ public class VolumeConfigWriter {
 	String group = "0";
 	boolean simpleS3 = false;
 	String volume_capacity = null;
-	String clusterDSEPassword = "admin";
 	int avgPgSz = 8192;
 	boolean mdCompresstion = false;
 	double max_percent_full = .95;
@@ -93,8 +92,6 @@ public class VolumeConfigWriter {
 	String cacheSize = "10GB";
 	String cloudSecretKey = "";
 	String cloudBucketName = "";
-	int clusterRSPTimeout = 4000;
-	boolean lowMemory = false;
 	int maxSegSize = 32;
 	int windowSize = 48;
 	int cloudThreads = 8;
@@ -124,16 +121,11 @@ public class VolumeConfigWriter {
 	private boolean useDSECapacity = true;
 	private boolean usePerfMon = false;
 	private boolean basicS3Signer = false;
-	private String clusterID = "sdfscluster";
-	private String clusterConfig = "/etc/sdfs/jgroups.cfg.xml";
-	private byte clusterCopies = 2;
 	private String perfMonFile = "/var/log/sdfs/perf.json";
-	private boolean clusterRackAware = false;
 	private boolean ext = true;
 	private boolean awsAim = false;
 	private String gcsCredsFile = null;
 	private boolean genericS3 = false;
-	private boolean atmosEnabled = false;
 	private boolean backblazeEnabled = false;
 	private String backlogSize = "0";
 	private String cloudUrl;
@@ -149,6 +141,7 @@ public class VolumeConfigWriter {
 	private String userAgentPrefix = null;
 	private boolean encryptConfig = false;
 	private String glacierClass="standard";
+	private long maxAge=0;
 	
 
 
@@ -293,6 +286,9 @@ public class VolumeConfigWriter {
 				this.chunk_store_encryption_key = cmd.getOptionValue("chunk-store-encryption-key");
 			}
 		}
+		if(cmd.hasOption("max-chunk-age")) {
+			this.maxAge = Long.parseLong(cmd.getOptionValue("max-chunk-age")) * 86400000L;
+		}
 		if (cmd.hasOption("chunk-store-iv")) {
 			String iv = cmd.getOptionValue("chunk-store-iv");
 			this.chunk_store_iv = iv;
@@ -354,9 +350,6 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("io-meta-file-cache")) {
 			this.meta_file_cache = Integer.parseInt(cmd.getOptionValue("io-meta-file-cache"));
 		}
-		if (cmd.hasOption("low-memory")) {
-			this.lowMemory = true;
-		}
 		if (cmd.hasOption("io-claim-chunks-schedule")) {
 			this.fdisk_schedule = cmd.getOptionValue("io-claim-chunks-schedule");
 		}
@@ -396,19 +389,6 @@ public class VolumeConfigWriter {
 			this.safe_sync = false;
 			this.minIOEnabled = true;
 			this.simpleMD = true;
-		}
-		
-		if (cmd.hasOption("atmos-enabled")) {
-
-			this.safe_sync = false;
-			this.atmosEnabled = true;
-			if (!cmd.hasOption("cloud-url")) {
-				System.out.println("Error : Unable to create volume");
-				System.out
-						.println("cloud-url, cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
-			} else {
-
-			}
 		}
 		if (cmd.hasOption("backblaze-enabled")) {
 			this.backblazeEnabled = true;
@@ -467,7 +447,7 @@ public class VolumeConfigWriter {
 				System.out.println(cmd.getOptionValue("cloud-bucket-name"));
 				System.exit(-1);
 			}
-		} else if (this.gsEnabled || this.atmosEnabled || this.backblazeEnabled) {
+		} else if (this.gsEnabled || this.backblazeEnabled) {
 			if(cmd.hasOption("google-creds-file")) {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
@@ -535,33 +515,12 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("aws-disable-dns-bucket")) {
 			this.disableDNSBucket = Boolean.parseBoolean(cmd.getOptionValue("aws-disable-dns-bucket"));
 		}
-		if (cmd.hasOption("cluster-dse-password"))
-			this.clusterDSEPassword = cmd.getOptionValue("cluster-dse-password");
-		if (cmd.hasOption("cluster-id")) {
-			this.clusterID = cmd.getOptionValue("cluster-id");
-			if (StringUtils.getSpecialCharacterCount(this.clusterID) > 0) {
-				System.out.println("--cluster-id cannot contain any special characters");
-				System.exit(-1);
-			}
-
-		}
+		
 		if(cmd.hasOption("cloud-backlog-size")) {
 			this.backlogSize = cmd.getOptionValue("cloud-backlog-size");
 		}
-		if (cmd.hasOption("cluster-config"))
-			this.clusterConfig = cmd.getOptionValue("cluster-config");
-		if (cmd.hasOption("cluster-block-replicas")) {
-			this.clusterCopies = Byte.parseByte(cmd.getOptionValue("cluster-block-replicas"));
-			if (this.clusterCopies > 7)
-				System.err.println("You can only specify up to 7 replica copies of unique blocks");
-		}
-		if (cmd.hasOption("cluster-rack-aware"))
-			this.clusterRackAware = Boolean.parseBoolean(cmd.getOptionValue("cluster-rack-aware"));
-		if (cmd.hasOption("enable-replication-master")) {
-			this.sdfsCliRequireAuth = true;
-			this.sdfsCliListenAddr = "::";
-			this.sdfsCliEnabled = true;
-		}
+		
+		
 		if(cmd.hasOption("sdfscli-disable-ssl")) {
 			this.sdfsCliSSL = false;
 		}
@@ -688,17 +647,12 @@ public class VolumeConfigWriter {
 		vol.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
 		vol.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		vol.setAttribute("perf-mon-file", this.perfMonFile);
-		vol.setAttribute("cluster-id", this.clusterID);
-		vol.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
-		vol.setAttribute("cluster-response-timeout", Integer.toString(chunk_size * 1000));
-		vol.setAttribute("cluster-rack-aware", Boolean.toString(clusterRackAware));
 		vol.setAttribute("read-timeout-seconds", Integer.toString(this.read_timeout));
 		vol.setAttribute("write-timeout-seconds", Integer.toString(this.write_timeout));
 		vol.setAttribute("serial-number", Long.toString(sn));
 		vol.setAttribute("compress-metadata", Boolean.toString(this.mdCompresstion));
 		root.appendChild(vol);
 		Element cs = xmldoc.createElement("local-chunkstore");
-		cs.setAttribute("low-memory", Boolean.toString(this.lowMemory));
 		cs.setAttribute("average-chunk-size", Integer.toString(this.avgPgSz));
 		cs.setAttribute("allocation-size", Long.toString(this.chunk_store_allocation_size));
 		cs.setAttribute("gc-class", this.gc_class);
@@ -713,11 +667,9 @@ public class VolumeConfigWriter {
 		cs.setAttribute("hash-db-store", this.chunk_store_hashdb_location);
 		cs.setAttribute("chunkstore-class", this.chunk_store_class);
 		cs.setAttribute("hashdb-class", this.hash_db_class);
-		cs.setAttribute("cluster-id", this.clusterID);
-		cs.setAttribute("cluster-config", this.clusterConfig);
-		cs.setAttribute("cluster-dse-password", this.clusterDSEPassword);
 		cs.setAttribute("io-threads", Integer.toString(this.cloudThreads));
 		cs.setAttribute("compress", Boolean.toString(this.compress));
+		cs.setAttribute("max-chunk-age", Long.toString(this.maxAge));
 
 		Element sdfscli = xmldoc.createElement("sdfscli");
 		sdfscli.setAttribute("enable-auth", Boolean.toString(this.sdfsCliRequireAuth));
@@ -737,7 +689,7 @@ public class VolumeConfigWriter {
 
 
 		root.appendChild(sdfscli);
-		if (this.atmosEnabled || this.backblazeEnabled) {
+		if (this.backblazeEnabled) {
 
 			Element aws = xmldoc.createElement("file-store");
 			aws.setAttribute("enabled", "true");
@@ -747,12 +699,7 @@ public class VolumeConfigWriter {
 			aws.setAttribute("chunkstore-class", "org.opendedup.sdfs.filestore.cloud.BatchJCloudChunkStore");
 			Element extended = xmldoc.createElement("extended-config");
 
-			if (this.atmosEnabled) {
-				extended.setAttribute("service-type", "atmos");
-				Element cp = xmldoc.createElement("connection-props");
-				cp.setAttribute("jclouds.endpoint", this.cloudUrl);
-				extended.appendChild(cp);
-			}
+			
 			if (this.backblazeEnabled)
 				extended.setAttribute("service-type", "b2");
 			extended.setAttribute("block-size", this.blockSize);
@@ -950,48 +897,6 @@ public class VolumeConfigWriter {
 
 	}
 
-	public void writeGCConfigFile() throws ParserConfigurationException, IOException {
-		File dir = new File(OSValidator.getConfigPath());
-		if (!dir.exists()) {
-			System.out.println("making" + dir.getAbsolutePath());
-			dir.mkdirs();
-		}
-		File file = new File(OSValidator.getConfigPath() + this.clusterID + "-gc-cfg.xml");
-		File vlf = new File(OSValidator.getConfigPath() + this.clusterID + "-volume-list.xml");
-		// Create XML DOM document (Memory consuming).
-		Document xmldoc = null;
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		DOMImplementation impl = builder.getDOMImplementation();
-		// Document.
-		xmldoc = impl.createDocument(null, "subsystem-config", null);
-		// Root element.
-
-		Element root = xmldoc.getDocumentElement();
-		root.setAttribute("version", Main.version);
-		Element io = xmldoc.createElement("gc");
-		io.setAttribute("log-level", "1");
-		io.setAttribute("claim-hash-schedule", this.fdisk_schedule);
-		io.setAttribute("cluster-id", this.clusterID);
-		io.setAttribute("cluster-config", this.clusterConfig);
-		io.setAttribute("cluster-dse-password", this.clusterDSEPassword);
-		io.setAttribute("volume-list-file", vlf.getPath());
-		root.appendChild(io);
-		try {
-			// Prepare the DOM document for writing
-			Source source = new DOMSource(xmldoc);
-
-			Result result = new StreamResult(file);
-
-			// Write the DOM document to the file
-			Transformer xformer = TransformerFactory.newInstance().newTransformer();
-			xformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			xformer.transform(source, result);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(-1);
-		}
-	}
 
 	@SuppressWarnings("static-access")
 	public static Options buildOptions() {
@@ -1218,10 +1123,6 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set to enable this volume to store to Minio Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg(false).create());
-		options.addOption(OptionBuilder.withLongOpt("atmos-enabled")
-				.withDescription(
-						"Set to enable this volume to store to Atmo Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
-				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("backblaze-enabled")
 				.withDescription(
 						"Set to enable this volume to store to Backblaze Object Storage. cloud-url, cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
@@ -1249,9 +1150,7 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Set the user agent prefix for the client when uploading to the cloud.")
 				.hasArg().withArgName("String").create());
-		options.addOption(OptionBuilder.withLongOpt("low-memory")
-				.withDescription("Sets the volume to mimimize the amount of ram used at the expense of speed")
-				.hasArg(false).create());
+		
 		options.addOption(OptionBuilder.withLongOpt("chunk-store-compress")
 				.withDescription(
 						"Compress chunks before they are stored. By default this is set to true. Set it to  false for volumes that hold data that does not compress well, such as pictures and  movies")
@@ -1279,9 +1178,6 @@ public class VolumeConfigWriter {
 
 		options.addOption(OptionBuilder.withLongOpt("aws-aim")
 				.withDescription("Use aim authentication for access to AWS S3").create());
-
-		options.addOption(OptionBuilder.withLongOpt("enable-replication-master")
-				.withDescription("Enable this volume as a replication master").create());
 		options.addOption(OptionBuilder.withLongOpt("simple-s3")
 				.withDescription("Uses basic S3 api characteristics for cloud storage backend.").create());
 		options.addOption(OptionBuilder.withLongOpt("report-dse-size")
@@ -1298,34 +1194,15 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"If set to \"true\" this volume will log io statistics to /etc/sdfs/ directory. Defaults to \"false\"")
 				.hasArg().withArgName("true|false").create());
-		options.addOption(OptionBuilder.withLongOpt("cluster-id")
+		options.addOption(OptionBuilder.withLongOpt("max-chunk-age")
 				.withDescription(
-						"The name used to identify the cluster group. This defaults to sdfs-cluster. This name should be the same on all members of this cluster")
-				.hasArg().withArgName("String").create());
-		options.addOption(OptionBuilder.withLongOpt("cluster-config")
-				.withDescription(
-						"The jgroups configuration used to configure this cluster node. This defaults to \"/etc/sdfs/jgroups.cfg.xml\". ")
-				.hasArg().withArgName("String").create());
-		options.addOption(OptionBuilder.withLongOpt("cluster-dse-password")
-				.withDescription(
-						"The jgroups configuration used to configure this cluster node. This defaults to \"/etc/sdfs/jgroups.cfg.xml\". ")
-				.hasArg().withArgName("String").create());
-		options.addOption(OptionBuilder.withLongOpt("cluster-block-replicas")
-				.withDescription(
-						"The number copies to distribute to descrete nodes for each unique block. As an example if this value is set to"
-								+ "\"3\" the volume will attempt to write any unique block to \"3\" DSE nodes, if available.  This defaults to \"2\". ")
-				.hasArg().withArgName("Value [1-7]").create());
+						"The maximum age in days of chunks before they will stop being referenced.")
+				.hasArg().withArgName("number of days").create());
+	
 		options.addOption(OptionBuilder.withLongOpt("cloud-backlog-size")
 				.withDescription(
 						"The how much data can live in the spool for backlog. Setting to -1 makes the backlog unlimited. Setting to 0 (default) sets no backlog. Setting to <value> GB TB MB caps the backlog.")
 				.hasArg().withArgName("Value 0,-1,[TB GB MB]").create());
-		options.addOption(OptionBuilder.withLongOpt("cluster-rack-aware")
-				.withDescription(
-						"If set to true, the clustered volume will be rack aware and make the best effort to distribute blocks to multiple racks"
-								+ " based on the cluster-block-replicas. As an example, if cluster-block replicas is set to \"2\" and cluster-rack-aware is set to \"true\""
-								+ " any unique block will be sent to two different racks if present. The mkdse option --cluster-node-rack should be used to distinguish racks per dse node "
-								+ " for this cluster.")
-				.hasArg().withArgName("true|false").create());
 		options.addOption(OptionBuilder.withLongOpt("enable-batch-gc").hasArg(false).withDescription("enable batch removal of ddb files for garbage colleaction").create());
 		options.addOption(OptionBuilder.withLongOpt("ext").create());
 		options.addOption(OptionBuilder.withLongOpt("noext").create());

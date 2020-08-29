@@ -40,11 +40,9 @@ public class Finger implements Runnable {
 	public boolean noPersist;
 	public AsyncChunkWriteActionListener l;
 	public int claims = -1;
-	public String lookupFilter = null;
 	public String uuid = null;
 
-	public Finger(String lookupFilter, String uuid) {
-		this.lookupFilter = lookupFilter;
+	public Finger(String uuid) {
 		this.uuid = uuid;
 	}
 
@@ -52,7 +50,7 @@ public class Finger implements Runnable {
 		try {
 			if (Arrays.equals(this.hash, k))
 				this.hl = new InsertRecord(false, 1);
-			this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk, claims, this.lookupFilter, this.uuid);
+			this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk, claims, this.uuid);
 
 			l.commandResponse(this);
 
@@ -70,7 +68,7 @@ public class Finger implements Runnable {
 		public void run() {
 			for (Finger f : fingers) {
 				try {
-					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk, f.claims, f.lookupFilter, f.uuid);
+					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk, f.claims, f.uuid);
 
 					l.commandResponse(f);
 
@@ -85,7 +83,7 @@ public class Finger implements Runnable {
 			for (Finger f : fingers) {
 				if (Arrays.equals(f.hash, WritableCacheBuffer.bk))
 					f.hl = new InsertRecord(false, 1);
-				f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk, f.claims, f.lookupFilter, f.uuid);
+				f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk, f.claims, f.uuid);
 
 			}
 		}

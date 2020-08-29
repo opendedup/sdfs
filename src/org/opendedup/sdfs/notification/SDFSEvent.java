@@ -531,39 +531,6 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 	}
 
-	public static SDFSEvent fromXML(Element el) {
-		SDFSEvent evt = null;
-		if (el.getAttribute("type").equalsIgnoreCase(MIMPORT.type)) {
-			BlockImportEvent _evt = new BlockImportEvent(el.getAttribute("target"), el.getAttribute("short-msg"),
-					new Level(el.getAttribute("level")));
-			_evt.blocksImported = Long.parseLong(el.getAttribute("blocks-imported"));
-			_evt.bytesImported = Long.parseLong(el.getAttribute("bytes-imported"));
-			_evt.filesImported = Long.parseLong(el.getAttribute("files-imported"));
-			_evt.virtualDataImported = Long.parseLong(el.getAttribute("virtual-data-imported"));
-			evt = _evt;
-		} else {
-			evt = new SDFSEvent(new Type(el.getAttribute("type")), el.getAttribute("target"),
-					el.getAttribute("short-msg"), new Level(el.getAttribute("level")));
-		}
-		evt.maxCt = Long.parseLong(el.getAttribute("max-count"));
-		evt.curCt = Long.parseLong(el.getAttribute("current-count"));
-		evt.uid = el.getAttribute("uuid");
-		evt.startTime = Long.parseLong(el.getAttribute("start-timestamp"));
-		evt.endTime = Long.parseLong(el.getAttribute("end-timestamp"));
-		evt.puid = el.getAttribute("parent-uid");
-		evt.extendedInfo = el.getAttribute("extended-info");
-		evt.success = Boolean.parseBoolean(el.getAttribute("success"));
-		int le = el.getElementsByTagName("event").getLength();
-		if (le > 0) {
-			for (int i = 0; i < le; i++) {
-				Element _el = (Element) el.getElementsByTagName("event").item(i);
-				evt.children.add(fromXML(_el));
-			}
-		}
-		return evt;
-
-	}
-
 	public static String getEvents() {
 		synchronized (tasks) {
 			Iterator<SDFSEvent> iter = SDFSEvent.tasks.values().iterator();
@@ -635,7 +602,7 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public static String getTarget() {
 		if (Main.standAloneDSE)
-			return "Storage node " + Main.DSEClusterMemberID;
+			return "Storage node " + Main.DSEID;
 		else if (Main.volume != null)
 			return Main.volume.getName();
 		else

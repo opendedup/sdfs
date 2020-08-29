@@ -47,7 +47,6 @@ public class Main {
 	public static boolean firstRun = true;
 	public static boolean disableGC = false;
 	public static boolean logToConsole = false;
-	public static boolean LOWMEM = false;
 	public static boolean REFRESH_BLOBS=false;
 	public static int MAX_TBLS=0;
 	public static int REPLICATION_THREADS=8;
@@ -78,20 +77,7 @@ public class Main {
 
 	public static SDFSEvent mountEvent = null;
 
-	public static String DSEClusterID = "sdfscluster";
-	public static byte DSEClusterMemberID = 0;
-	public static int ClusterRSPTimeout = 1000;
-	public static String DSEClusterConfig = "/etc/sdfs/jgroups.cfg.xml";
-	public static boolean DSEClusterEnabled = false;
-	public static String DSEClusterVolumeList = "/etc/sdfs/cluster-volumes.xml";
-	public static boolean DSEClusterDirectIO = true;
-	/**
-	 * DSE Host for front end file systems
-	 */
-	public static String DSERemoteHostName = null;
-
 	public static boolean standAloneDSE = false;
-	public static long DSEID = 0;
 
 	/**
 	 * DSE Host port for front end file systems
@@ -104,25 +90,11 @@ public class Main {
 	public static boolean DSERemoteUseSSL = true;
 
 	/**
-	 * DSE Host use SSL for front end file systems
-	 */
-	public static boolean DSERemoteCompress = false;
-
-	public static String DSEPassword = "admin";
-
-	public static String DSEClusterNodeRack = "rack1";
-	public static String DSEClusterNodeLocation = "pdx";
-	public static int MAX_TABLES_SCAN=100;
-
-	/**
 	 * The Version of SDFS this is
 	 */
 	public static String version = "3.11.0";
-	public static String licenseKey = "none";
 
 	public static boolean readAhead = false;
-
-	public static int MAX_TBL_SIZE=600_000_000;
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be
@@ -158,7 +130,7 @@ public class Main {
 	 * whether encryption should be enabled for the DSE
 	 */
 	public static boolean chunkStoreEncryptionEnabled = false;
-
+	public static long DSEID = 0;
 	/**
 	 * The location where database of deduped hashes will be stores and written
 	 * to. This is used for the chunk store.

@@ -116,23 +116,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean symlink = false;
 	private String symlinkPath = null;
 	private String version = Main.version;
-	private BlockDev blkdev = null;
 	private boolean dirty = false;
 	private long attributes = 0;
 	private long retentionLock = -1;
-	private String lookupfilter = null;
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
 
-	public BlockDev getDev() {
-		return this.blkdev;
-	}
-
-	public void setDev(BlockDev dev) {
-		this.blkdev = dev;
-	}
+	
 
 	/**
 	 * 
@@ -159,17 +151,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.dirty = true;
 		Path p = Paths.get(this.path);
 		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
-	}
-
-	public void setLookupFilter(String filter) {
-		if (filter.trim().length() > 0) {
-			this.lookupfilter = filter;
-			this.extendedAttrs.put("lookup.filter", filter);
-		}
-	}
-
-	public String getLookupFilter() {
-		return this.lookupfilter;
 	}
 
 	/**
@@ -225,18 +206,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void addXAttribute(String name, String value, boolean propigateEvent, boolean write) throws IOException {
 		this.writeLock.lock();
 		try {
-			if (name.equals("lookup.filter")) {
-				if (this.extendedAttrs.containsKey("lookup.filter")) {
-					SDFSLogger.getLog().warn("cannot reset lookup filter");
-					return;
-				} else if (value.trim().length() > 0) {
-					this.lookupfilter = value;
-					extendedAttrs.put(name, value);
-				}
-			} else {
-				extendedAttrs.put(name, value);
-			}
-
+			extendedAttrs.put(name, value);
 			if (propigateEvent) {
 				this.dirty = true;
 				eventBus.post(new MMetaUpdated(this, name, value));
@@ -755,7 +725,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 						if (DedupFileStore.fileOpen(file))
 							file.getDedupFile(false).copyTo(npath, true);
 						else {
-							File sdbf = LongByteArrayMap.getFile(file.getDfGuid(), file.getLookupFilter());
+							File sdbf = LongByteArrayMap.getFile(file.getDfGuid());
 							if (sdbf.exists()) {
 								boolean lz4 = false;
 								if (sdbf.getPath().toLowerCase().endsWith(".lz4")) {
@@ -1482,9 +1452,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.importing = in.readBoolean();
 				}
-				if (this.extendedAttrs.containsKey("lookup.filter")) {
-					this.lookupfilter = this.extendedAttrs.get("lookup.filter");
-				}
+				
 
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb = new byte[vlen];
@@ -1688,9 +1656,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				dataset.addProperty("symlink", this.isSymlink());
 				dataset.addProperty("symlink-path", this.getSymlinkPath());
 			}
-			if (this.lookupfilter != null) {
-				dataset.addProperty("lookup.filter", this.lookupfilter);
-			}
+			
 		}
 		if (!compact && this.isDirectory()) {
 			Path p = Paths.get(this.getPath());
@@ -1761,9 +1727,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				root.setAttribute("symlink", Boolean.toString(this.isSymlink()));
 				root.setAttribute("symlink-path", this.getSymlinkPath());
 			}
-			if (this.lookupfilter != null) {
-				root.setAttribute("lookup-filter", this.lookupfilter);
-			}
+			
 
 			Element monEl = this.getIOMonitor().toXML(doc);
 			root.appendChild(monEl);

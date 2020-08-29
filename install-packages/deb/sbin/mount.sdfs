@@ -32,11 +32,7 @@ fi
 
 if [ ! -n "$MEM" ]; then
 if [ -n "$CFG" ] && [ -f "$CFG" ]; then
-                lm=$(echo 'cat //subsystem-config/local-chunkstore/@low-memory' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
-                bm=$(echo 'cat //subsystem-config/io/@chunk-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 th=$(echo 'cat //subsystem-config/io/@max-open-files' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
-                ac=$(echo 'cat //subsystem-config/local-chunkstore/@allocation-size' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
-                cst=$(echo 'cat //subsystem-config/local-chunkstore/@hashdb-class' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 _wb=$(echo 'cat //subsystem-config/io/@max-file-write-buffers' | xmllint --shell "$CFG" | grep -v ">" | cut -f 2 -d "=" | tr -d - | tr -d \");
                 if (( $_wb > 80 )); then
                         _wb=80;

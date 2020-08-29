@@ -35,5 +35,5 @@ public interface AbstractHashEngine {
 
 	public int getMinLen();
 	
-	public List<Finger> getChunks(byte[] byteBuffer,String lookupFilter,String uuid) throws IOException;
+	public List<Finger> getChunks(byte[] byteBuffer,String uuid) throws IOException;
 }

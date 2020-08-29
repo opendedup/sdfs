@@ -126,11 +126,11 @@ public class GetCloudFile implements Runnable {
 				MetaDataDedupFile _mf = FileReplicationService.getMF(sfile);
 				SDFSLogger.getLog().debug("downloaded " + sfile);
 				fevt.shortMsg = "Downloading Map Metadata for [" + sfile + "]";
-				SDFSLogger.getLog().debug("downloading ddb " + _mf.getDfGuid() + " lf=" + _mf.getLookupFilter());
+				SDFSLogger.getLog().debug("downloading ddb " + _mf.getDfGuid());
 				if(_mf.getDfGuid() == null) {
 					throw new IOException("File " + sfile + " has no data");
 				}
-				LongByteArrayMap mp = FileReplicationService.getDDB(_mf.getDfGuid(), _mf.getLookupFilter());
+				LongByteArrayMap mp = FileReplicationService.getDDB(_mf.getDfGuid());
 				mp.setIndexed(false);
 				mf = MetaFileStore.getMF(_mf.getPath());
 				mf.setLocalOwner(false);
@@ -163,9 +163,9 @@ public class GetCloudFile implements Runnable {
 		fevt.shortMsg = "Importing hashes for file";
 		SDFSLogger.getLog().info("Importing " + mf.getDfGuid());
 		Set<Long> blks = new HashSet<Long>();
-		LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid(), mf.getLookupFilter());
+		LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid());
 		ddb.forceClose();
-		ddb = LongByteArrayMap.getMap(mf.getDfGuid(), mf.getLookupFilter());
+		ddb = LongByteArrayMap.getMap(mf.getDfGuid());
 		ddb.setIndexed(true);
 		mf.getIOMonitor().clearFileCounters(false);
 		if (ddb.getVersion() < 2)

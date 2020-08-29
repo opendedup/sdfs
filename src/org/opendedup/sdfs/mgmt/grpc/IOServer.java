@@ -14,7 +14,6 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.Metadata.Key;
 import io.grpc.stub.StreamObserver;
-import org.opendedup.buse.sdfsdev.VolumeShutdownHook;
 import org.opendedup.grpc.*;
 import org.opendedup.hashing.HashFunctions;
 
@@ -144,7 +143,6 @@ public class IOServer {
       try {
         SDFSLogger.getLog().info("shutting down volume");
         System.out.println("shutting down volume");
-        VolumeShutdownHook.shutdown();
         System.exit(0);
         responseObserver.onNext(b.build());
         responseObserver.onCompleted();
@@ -172,15 +170,17 @@ public class IOServer {
           SDFSLogger.getLog().info("Authenticating User");
         } else {
           final String auth_token = headers.get(Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER));
+          SDFSLogger.getLog().info("Token is " + auth_token);
           if (auth_token == null) {
-            throw new StatusRuntimeException(Status.PERMISSION_DENIED);
+            throw new StatusRuntimeException(Status.UNAUTHENTICATED);
           } else {
             String[] tokens = auth_token.split(" ");
             if (tokens.length == 2 && tokens[0].toLowerCase().equals("bearer")) {
               try {
                 JWebToken token = new JWebToken(tokens[1]);
                 if (!token.isValid()) {
-                  throw new StatusRuntimeException(Status.PERMISSION_DENIED);
+                  SDFSLogger.getLog().warn("token not valid for user " + token.getAudience());
+                  throw new StatusRuntimeException(Status.UNAUTHENTICATED);
                 } else {
                   SDFSLogger.getLog().info("authenticated " + token.getAudience());
                 }
@@ -189,11 +189,16 @@ public class IOServer {
                 throw new StatusRuntimeException(Status.INTERNAL);
               }
 
+            } else {
+              SDFSLogger.getLog().error("authorization header must start with bearer and include the token");
+              throw new StatusRuntimeException(Status.UNAUTHENTICATED);
             }
 
           }
 
         }
+      } else {
+
       }
 
       return next.startCall(call, headers);

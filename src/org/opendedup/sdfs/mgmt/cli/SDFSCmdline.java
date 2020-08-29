@@ -261,17 +261,7 @@ public class SDFSCmdline {
 						.runCmd(cmd.getOptionValue("expandvolume"));
 				System.exit(0);
 			}
-			if (cmd.hasOption("partition-add")) {
-				String[] vals = cmd.getOptionValues("partition-add");
-				if (vals.length != 3) {
-					System.err
-							.println("device-name size start-on-vol-startup are required options");
-					System.exit(-1);
-				}
-				ProcessBlockDeviceAdd.runCmd(vals[0], vals[1],
-						Boolean.parseBoolean(vals[2]));
-				System.exit(0);
-			}
+			
 			if(cmd.hasOption("set-attribute")) {
 				String file = cmd.getOptionValue("file-path");
 				String[] vals = cmd.getOptionValues("set-attribute");
@@ -291,16 +281,7 @@ public class SDFSCmdline {
 				System.exit(0);
 			}
 
-			if (cmd.hasOption("partition-update")) {
-				String[] vals = cmd.getOptionValues("partition-update");
-				if (vals.length != 3) {
-					System.err
-							.println("device-name <size|autostart> <value> are required options");
-					System.exit(-1);
-				}
-				ProcessBlockDeviceUpdate.runCmd(vals[0], vals[1], vals[2]);
-				System.exit(0);
-			}
+			
 
 			if (cmd.hasOption("copy-extents")) {
 				String[] vals = cmd.getOptionValues("copy-extents");
@@ -324,25 +305,7 @@ public class SDFSCmdline {
 				ProcessCloudFile.runCmd(file,dstfile);
 				System.exit(0);
 			}
-			if (cmd.hasOption("partition-rm")) {
-				String val = cmd.getOptionValue("partition-rm");
-				ProcessBlockDeviceRm.runCmd(val);
-				System.exit(0);
-			}
-			if (cmd.hasOption("partition-start")) {
-				String val = cmd.getOptionValue("partition-start");
-				ProcessBlockDeviceStart.runCmd(val);
-				System.exit(0);
-			}
-			if (cmd.hasOption("partition-stop")) {
-				String val = cmd.getOptionValue("partition-stop");
-				ProcessBlockDeviceStop.runCmd(val);
-				System.exit(0);
-			}
-			if (cmd.hasOption("partition-list")) {
-				ProcessBlockDeviceList.runCmd();
-				System.exit(0);
-			}
+			
 			if (cmd.hasOption("shutdown")) {
 				ProcessShutdown.runCmd();
 				System.exit(0);
@@ -627,12 +590,7 @@ public class SDFSCmdline {
 				.withDescription(
 						"Compact the hashtable and clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files.")
 				.create());
-		options.addOption(OptionBuilder
-				.withLongOpt("partition-add")
-				.withDescription(
-						"Creates a partition inside this volume. This option has three aguements: device-name size(MB|GB|TB) start-on-volume-startup(true|false) \n e.g. --createdev new-dev 100GB true")
-				.hasArgs(3)
-				.withArgName("device-name size start-on-vol-startup").create());
+		
 		options.addOption(OptionBuilder
 				.withLongOpt("set-attribute")
 				.withDescription(
@@ -645,23 +603,6 @@ public class SDFSCmdline {
 						"deletes an attribute for a file \n e.g. --file-path=afile --delete-attribute name")
 				.hasArg()
 				.withArgName("name").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("partition-rm")
-				.withDescription(
-						"Removes a partition from the volume.This will delete the block device and de-reference all data in the volume.")
-				.hasArg().withArgName("device-name").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("partition-stop")
-				.withDescription("Stops an active partition within the volume.")
-				.hasArg().withArgName("device-name").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("partition-start")
-				.withDescription(
-						"Starts an inactive partition within the volume.")
-				.hasArg().withArgName("device-name").create());
-		options.addOption(OptionBuilder.withLongOpt("partition-list")
-				.withDescription("Lists all block devices within the volume.")
-				.create());
 		return options;
 	}
 

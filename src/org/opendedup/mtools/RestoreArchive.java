@@ -66,7 +66,7 @@ public class RestoreArchive implements Runnable {
 		SDFSLogger.getLog().info("Starting Archive Restore for " + f.getPath());
 		try {
 
-			LongByteArrayMap.getFile(f.getDfGuid(), f.getLookupFilter());
+			LongByteArrayMap.getFile(f.getDfGuid());
 			this.initiateArchive();
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error while restoring file [" + f.getPath() + "]", e);
@@ -90,7 +90,7 @@ public class RestoreArchive implements Runnable {
 	}
 
 	private void initiateArchive() throws IOException {
-		LongByteArrayMap ddb = LongByteArrayMap.getMap(f.getDfGuid(), f.getLookupFilter());
+		LongByteArrayMap ddb = LongByteArrayMap.getMap(f.getDfGuid());
 		
 		if (ddb.getVersion() < 2)
 			throw new IOException("only files version 2 or later can be imported");
