@@ -56,8 +56,8 @@ public class VolumeFullThread implements Runnable {
 		try {
 			if (!vol.isFull()) {
 				DiskFullEvent evt = new DiskFullEvent(msg);
-				evt.curCt = 0;
-				evt.maxCt = 1;
+				evt.setCurrentCount(0);
+				evt.setMaxCount(1);
 				evt.currentSz = vol.getCurrentSize();
 				evt.dseSz = HCServiceProxy.getDSESize();
 				evt.dskUsage = vol.pathF.getTotalSpace()

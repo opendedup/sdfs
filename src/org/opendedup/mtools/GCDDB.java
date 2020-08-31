@@ -74,7 +74,7 @@ public class GCDDB {
 				return;
 			}
 			fEvt = SDFSEvent.fdiskInfoEvent("Starting GCDDB for " + Main.volume.getName() + " file size = " + sz, evt);
-			fEvt.maxCt = sz;
+			fEvt.setMaxCount(sz);
 
 			SDFSLogger.getLog().info("entries = " + sz);
 			SDFSLogger.getLog().info("Starting GCDDB for " + Main.volume.getName());
@@ -159,7 +159,7 @@ public class GCDDB {
 				f.delete();
 				f.getParentFile().delete();
 				synchronized (fd.fEvt) {
-					fd.fEvt.curCt++;
+					fd.fEvt.addCount(1);
 				}
 			} catch (Throwable e) {
 				SDFSLogger.getLog().error("error while checking file [" + f.getPath() + "]", e);

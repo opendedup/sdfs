@@ -157,4 +157,10 @@ public interface SDFSEventOrBuilder extends
    */
   com.google.protobuf.ByteString
       getChildrenUUidBytes(int index);
+
+  /**
+   * <code>bool success = 15;</code>
+   * @return The success.
+   */
+  boolean getSuccess();
 }

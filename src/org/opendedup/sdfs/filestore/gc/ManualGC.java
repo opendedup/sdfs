@@ -56,8 +56,8 @@ public class ManualGC {
 				evt = SDFSEvent
 						.gcInfoEvent("SDFS Volume Cleanup not enabled for this volume "
 								+ Main.volume.getName());
-				evt.maxCt = 100;
-				evt.curCt = 0;
+				evt.setMaxCount(100);
+				evt.setCurrentCount(0);
 				evt.endEvent("SDFS Volume Cleanup not enabled for this volume "
 						+ Main.volume.getName());
 				try {
@@ -69,8 +69,8 @@ public class ManualGC {
 				evt = SDFSEvent
 						.gcInfoEvent("SDFS Volume Cleanup already occured in the last 1 hour for "
 								+ Main.volume.getName());
-				evt.maxCt = 100;
-				evt.curCt = 0;
+				evt.setMaxCount(100);
+				evt.setCurrentCount(0);
 				evt.endEvent("SDFS Volume Cleanup already occured in the last 1 hour for "
 						+ Main.volume.getName());
 				try {
@@ -84,8 +84,8 @@ public class ManualGC {
 								+ Main.volume.getName());
 			
 			lastGC = System.currentTimeMillis();
-			evt.maxCt = 100;
-			evt.curCt = 0;
+			evt.setMaxCount(100);
+			evt.setCurrentCount(0);
 			try {
 				if(Main.DDB_TRASH_ENABLED) {
 					new GCDDB(evt);
@@ -104,10 +104,10 @@ public class ManualGC {
 				SDFSLogger.getLog().info("Waiting 10 Seconds to run again");
 				SDFSEvent wevt = SDFSEvent.waitEvent(
 						"Waiting 10 Seconds to run again", evt);
-				wevt.maxCt = 10;
+				wevt.setMaxCount(10);
 				for (int i = 0; i < 10; i++) {
 					Thread.sleep(1000);
-					wevt.curCt++;
+					wevt.addCount(1);
 				}
 				wevt.endEvent("Done Waiting");
 				try {
@@ -138,9 +138,9 @@ public class ManualGC {
 				}else {
 					DedupFileStore.gcRunning(true);
 					try {
-					evt.curCt = 33;
+					evt.setCurrentCount(33);
 					rm = HCServiceProxy.processHashClaims(evt,compact);
-					evt.curCt = 66;
+					evt.setCurrentCount(66);
 					}finally {
 						DedupFileStore.gcRunning(false);
 					}

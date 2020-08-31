@@ -119,8 +119,8 @@ public class GetCloudFile implements Runnable {
 						SDFSEvent.deleteFileFailedEvent(f);
 					}
 				}
-				fevt.maxCt = 3;
-				fevt.curCt = 1;
+				fevt.setMaxCount(3);
+				fevt.setCurrentCount(1);
 				SDFSLogger.getLog().debug("downloading " + sfile);
 				fevt.shortMsg = "Downloading [" + sfile + "]";
 				MetaDataDedupFile _mf = FileReplicationService.getMF(sfile);
@@ -141,7 +141,7 @@ public class GetCloudFile implements Runnable {
 					SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" + mf.getDfGuid());
 
 				}
-				fevt.curCt++;
+				fevt.addCount(1);
 
 			}
 		} catch (IOException e) {
@@ -222,7 +222,7 @@ public class GetCloudFile implements Runnable {
 
 		}
 		SDFSLogger.getLog().info("Done Importing " + mf.getDfGuid());
-		fevt.curCt++;
+		fevt.addCount(1);
 	}
 
 	@Override

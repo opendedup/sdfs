@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SDFSEvent}
  */
-public  final class SDFSEvent extends
+public final class SDFSEvent extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SDFSEvent)
     SDFSEventOrBuilder {
@@ -140,6 +140,11 @@ private static final long serialVersionUID = 0L;
             childrenUUid_.add(s);
             break;
           }
+          case 120: {
+
+            success_ = input.readBool();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -181,6 +186,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 startTime = 1;</code>
    * @return The startTime.
    */
+  @java.lang.Override
   public long getStartTime() {
     return startTime_;
   }
@@ -191,6 +197,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 endTime = 2;</code>
    * @return The endTime.
    */
+  @java.lang.Override
   public long getEndTime() {
     return endTime_;
   }
@@ -201,6 +208,7 @@ private static final long serialVersionUID = 0L;
    * <code>string level = 3;</code>
    * @return The level.
    */
+  @java.lang.Override
   public java.lang.String getLevel() {
     java.lang.Object ref = level_;
     if (ref instanceof java.lang.String) {
@@ -217,6 +225,7 @@ private static final long serialVersionUID = 0L;
    * <code>string level = 3;</code>
    * @return The bytes for level.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getLevelBytes() {
     java.lang.Object ref = level_;
@@ -237,6 +246,7 @@ private static final long serialVersionUID = 0L;
    * <code>string type = 4;</code>
    * @return The type.
    */
+  @java.lang.Override
   public java.lang.String getType() {
     java.lang.Object ref = type_;
     if (ref instanceof java.lang.String) {
@@ -253,6 +263,7 @@ private static final long serialVersionUID = 0L;
    * <code>string type = 4;</code>
    * @return The bytes for type.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getTypeBytes() {
     java.lang.Object ref = type_;
@@ -273,6 +284,7 @@ private static final long serialVersionUID = 0L;
    * <code>string target = 5;</code>
    * @return The target.
    */
+  @java.lang.Override
   public java.lang.String getTarget() {
     java.lang.Object ref = target_;
     if (ref instanceof java.lang.String) {
@@ -289,6 +301,7 @@ private static final long serialVersionUID = 0L;
    * <code>string target = 5;</code>
    * @return The bytes for target.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getTargetBytes() {
     java.lang.Object ref = target_;
@@ -309,6 +322,7 @@ private static final long serialVersionUID = 0L;
    * <code>string shortMsg = 6;</code>
    * @return The shortMsg.
    */
+  @java.lang.Override
   public java.lang.String getShortMsg() {
     java.lang.Object ref = shortMsg_;
     if (ref instanceof java.lang.String) {
@@ -325,6 +339,7 @@ private static final long serialVersionUID = 0L;
    * <code>string shortMsg = 6;</code>
    * @return The bytes for shortMsg.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getShortMsgBytes() {
     java.lang.Object ref = shortMsg_;
@@ -345,6 +360,7 @@ private static final long serialVersionUID = 0L;
    * <code>string longMsg = 7;</code>
    * @return The longMsg.
    */
+  @java.lang.Override
   public java.lang.String getLongMsg() {
     java.lang.Object ref = longMsg_;
     if (ref instanceof java.lang.String) {
@@ -361,6 +377,7 @@ private static final long serialVersionUID = 0L;
    * <code>string longMsg = 7;</code>
    * @return The bytes for longMsg.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getLongMsgBytes() {
     java.lang.Object ref = longMsg_;
@@ -381,6 +398,7 @@ private static final long serialVersionUID = 0L;
    * <code>double percentComplete = 8;</code>
    * @return The percentComplete.
    */
+  @java.lang.Override
   public double getPercentComplete() {
     return percentComplete_;
   }
@@ -391,6 +409,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxCount = 9;</code>
    * @return The maxCount.
    */
+  @java.lang.Override
   public long getMaxCount() {
     return maxCount_;
   }
@@ -401,6 +420,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 currentCount = 10;</code>
    * @return The currentCount.
    */
+  @java.lang.Override
   public long getCurrentCount() {
     return currentCount_;
   }
@@ -411,6 +431,7 @@ private static final long serialVersionUID = 0L;
    * <code>string uuid = 11;</code>
    * @return The uuid.
    */
+  @java.lang.Override
   public java.lang.String getUuid() {
     java.lang.Object ref = uuid_;
     if (ref instanceof java.lang.String) {
@@ -427,6 +448,7 @@ private static final long serialVersionUID = 0L;
    * <code>string uuid = 11;</code>
    * @return The bytes for uuid.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getUuidBytes() {
     java.lang.Object ref = uuid_;
@@ -447,6 +469,7 @@ private static final long serialVersionUID = 0L;
    * <code>string parentUuid = 12;</code>
    * @return The parentUuid.
    */
+  @java.lang.Override
   public java.lang.String getParentUuid() {
     java.lang.Object ref = parentUuid_;
     if (ref instanceof java.lang.String) {
@@ -463,6 +486,7 @@ private static final long serialVersionUID = 0L;
    * <code>string parentUuid = 12;</code>
    * @return The bytes for parentUuid.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getParentUuidBytes() {
     java.lang.Object ref = parentUuid_;
@@ -483,6 +507,7 @@ private static final long serialVersionUID = 0L;
    * <code>string extendedInfo = 13;</code>
    * @return The extendedInfo.
    */
+  @java.lang.Override
   public java.lang.String getExtendedInfo() {
     java.lang.Object ref = extendedInfo_;
     if (ref instanceof java.lang.String) {
@@ -499,6 +524,7 @@ private static final long serialVersionUID = 0L;
    * <code>string extendedInfo = 13;</code>
    * @return The bytes for extendedInfo.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getExtendedInfoBytes() {
     java.lang.Object ref = extendedInfo_;
@@ -546,6 +572,17 @@ private static final long serialVersionUID = 0L;
   public com.google.protobuf.ByteString
       getChildrenUUidBytes(int index) {
     return childrenUUid_.getByteString(index);
+  }
+
+  public static final int SUCCESS_FIELD_NUMBER = 15;
+  private boolean success_;
+  /**
+   * <code>bool success = 15;</code>
+   * @return The success.
+   */
+  @java.lang.Override
+  public boolean getSuccess() {
+    return success_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -603,6 +640,9 @@ private static final long serialVersionUID = 0L;
     }
     for (int i = 0; i < childrenUUid_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 14, childrenUUid_.getRaw(i));
+    }
+    if (success_ != false) {
+      output.writeBool(15, success_);
     }
     unknownFields.writeTo(output);
   }
@@ -665,6 +705,10 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getChildrenUUidList().size();
     }
+    if (success_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(15, success_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -709,6 +753,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getExtendedInfo())) return false;
     if (!getChildrenUUidList()
         .equals(other.getChildrenUUidList())) return false;
+    if (getSuccess()
+        != other.getSuccess()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -755,6 +801,9 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + CHILDRENUUID_FIELD_NUMBER;
       hash = (53 * hash) + getChildrenUUidList().hashCode();
     }
+    hash = (37 * hash) + SUCCESS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getSuccess());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -916,6 +965,8 @@ private static final long serialVersionUID = 0L;
 
       childrenUUid_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       bitField0_ = (bitField0_ & ~0x00000001);
+      success_ = false;
+
       return this;
     }
 
@@ -961,6 +1012,7 @@ private static final long serialVersionUID = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
       }
       result.childrenUUid_ = childrenUUid_;
+      result.success_ = success_;
       onBuilt();
       return result;
     }
@@ -1066,6 +1118,9 @@ private static final long serialVersionUID = 0L;
         }
         onChanged();
       }
+      if (other.getSuccess() != false) {
+        setSuccess(other.getSuccess());
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -1101,6 +1156,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 startTime = 1;</code>
      * @return The startTime.
      */
+    @java.lang.Override
     public long getStartTime() {
       return startTime_;
     }
@@ -1131,6 +1187,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 endTime = 2;</code>
      * @return The endTime.
      */
+    @java.lang.Override
     public long getEndTime() {
       return endTime_;
     }
@@ -1541,6 +1598,7 @@ private static final long serialVersionUID = 0L;
      * <code>double percentComplete = 8;</code>
      * @return The percentComplete.
      */
+    @java.lang.Override
     public double getPercentComplete() {
       return percentComplete_;
     }
@@ -1571,6 +1629,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxCount = 9;</code>
      * @return The maxCount.
      */
+    @java.lang.Override
     public long getMaxCount() {
       return maxCount_;
     }
@@ -1601,6 +1660,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 currentCount = 10;</code>
      * @return The currentCount.
      */
+    @java.lang.Override
     public long getCurrentCount() {
       return currentCount_;
     }
@@ -1960,6 +2020,37 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       ensureChildrenUUidIsMutable();
       childrenUUid_.add(value);
+      onChanged();
+      return this;
+    }
+
+    private boolean success_ ;
+    /**
+     * <code>bool success = 15;</code>
+     * @return The success.
+     */
+    @java.lang.Override
+    public boolean getSuccess() {
+      return success_;
+    }
+    /**
+     * <code>bool success = 15;</code>
+     * @param value The success to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSuccess(boolean value) {
+      
+      success_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool success = 15;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSuccess() {
+      
+      success_ = false;
       onChanged();
       return this;
     }

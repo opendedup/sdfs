@@ -30,7 +30,6 @@ import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -50,12 +49,12 @@ public class RestoreArchive implements Runnable {
 		
 		this.f = f;
 		fEvt = SDFSEvent.archiveRestoreEvent(f);
-		fEvt.maxCt = FileCounts.getSize(new File(f.getPath()), false);
+		fEvt.setMaxCount(FileCounts.getSize(new File(f.getPath()), false));
 		if(id != -1) {
 			String req = HCServiceProxy.restoreBlock(new byte [16],id);
 			if (req != null) {
 				SDFSLogger.getLog().info("will restore " + req + " for " + f.getPath());
-				this.fEvt.maxCt++;
+				this.fEvt.addCount(1);
 				this.totalArchives.incrementAndGet();
 			}
 			this.restoreRequests.put(Long.toString(id), req);
@@ -111,7 +110,7 @@ public class RestoreArchive implements Runnable {
 						String req = HCServiceProxy.restoreBlock(p.hash,bw);
 						if (req != null) {
 							SDFSLogger.getLog().info("will restore " + req + " for " + f.getPath());
-							this.fEvt.maxCt++;
+							this.fEvt.setMaxCount(this.fEvt.getMaxCount()+1);
 							this.totalArchives.incrementAndGet();
 						}
 						this.restoreRequests.put(Long.toString(bw), req);
@@ -151,7 +150,7 @@ public class RestoreArchive implements Runnable {
 							if (HCServiceProxy.blockRestored(key.getValue())) {
 
 								al.add(key.getKey());
-								this.fEvt.curCt++;
+								this.fEvt.addCount(1);
 								this.importedArchives.incrementAndGet();
 								SDFSLogger.getLog().info("restored " + key.getValue());
 							} else {

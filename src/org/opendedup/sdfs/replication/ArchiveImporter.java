@@ -89,9 +89,9 @@ public class ArchiveImporter {
 				if (OSValidator.isWindows()) {
 
 					TFile srcRoot = new TFile(new File(srcArchive + "/"));
-					ievt.maxCt = FileCounts.getSize(srcRoot);
+					ievt.setMaxCount( FileCounts.getSize(srcRoot));
 
-					SDFSLogger.getLog().info("Tar file size is " + ievt.maxCt);
+					SDFSLogger.getLog().info("Tar file size is " + ievt.getMaxCount());
 					TFile srcFilesRoot = new TFile(new File(srcArchive
 							+ "/files/"));
 					TFile srcFiles = null;
@@ -118,7 +118,7 @@ public class ArchiveImporter {
 					TVFS.umount(mDstFiles);
 					TVFS.umount(srcRoot.getInnerArchive());
 				} else {
-					ievt.maxCt = 3;
+					ievt.setMaxCount(3);
 					File stg = null;
 					try {
 						stg = new File(new File(srcArchive).getParentFile()
@@ -135,7 +135,7 @@ public class ArchiveImporter {
 						if (xt != 0)
 							throw new IOException("expand failed in " + expFile
 									+ " exit value was " + xt);
-						ievt.curCt++;
+									ievt.addCount(1);
 						SDFSLogger.getLog().info(
 								"executed " + expFile + " exit code was " + xt);
 						File srcFilesRoot = new File(stg.getPath()
@@ -161,7 +161,7 @@ public class ArchiveImporter {
 									+ " exit value was " + xt);
 						SDFSLogger.getLog().info(
 								"executed " + cpCmd + " exit code was " + xt);
-						ievt.curCt++;
+						ievt.addCount(1);
 						srcFiles = new File(stg.getPath() + File.separator
 								+ "ddb");
 						File ddb = new File(Main.dedupDBStore + File.separator);

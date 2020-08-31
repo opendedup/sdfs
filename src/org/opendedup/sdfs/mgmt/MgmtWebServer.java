@@ -1167,7 +1167,7 @@ public class MgmtWebServer implements Container {
 			if (useSSL) {
 				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
 				String key = keydir + File.separator + "volume.keystore";
-				if (!new File(key).exists()) {
+				if (!new File(key).exists() || !IOServer.keyFileExists()) {
 					KeyGenerator.generateKey(new File(key));
 				}
 				FileInputStream keyFile = new FileInputStream(key);

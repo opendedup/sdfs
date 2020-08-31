@@ -39,6 +39,16 @@ public final class VolumeServiceOuterClass {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_MessageQueueInfoResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_CleanStoreResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_CleanStoreResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -76,16 +86,22 @@ public final class VolumeServiceOuterClass {
       "\030\002 \001(\01623.org.opendedup.grpc.MessageQueue" +
       "InfoResponse.MQType\022\014\n\004port\030\003 \001(\005\022\r\n\005top" +
       "ic\030\004 \001(\t\022\020\n\010authInfo\030\005 \001(\t\"\"\n\006MQType\022\014\n\010" +
-      "RabbitMQ\020\000\022\n\n\006PubSub\020\0012\267\002\n\rVolumeService" +
-      "\022i\n\020AuthenticateUser\022).org.opendedup.grp" +
-      "c.AuthenticationRequest\032*.org.opendedup." +
-      "grpc.AuthenticationResponse\022^\n\rGetVolume" +
-      "Info\022%.org.opendedup.grpc.VolumeInfoRequ" +
-      "est\032&.org.opendedup.grpc.VolumeInfoRespo" +
-      "nse\022[\n\016ShutdownVolume\022#.org.opendedup.gr" +
-      "pc.ShutdownRequest\032$.org.opendedup.grpc." +
-      "ShutdownResponseB2P\001Z.github.com/opended" +
-      "up/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "RabbitMQ\020\000\022\n\n\006PubSub\020\001\"\023\n\021CleanStoreRequ" +
+      "est\"g\n\022CleanStoreResponse\022\017\n\007eventID\030\001 \001" +
+      "(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.o" +
+      "rg.opendedup.grpc.errorCodes2\224\003\n\rVolumeS" +
+      "ervice\022i\n\020AuthenticateUser\022).org.opended" +
+      "up.grpc.AuthenticationRequest\032*.org.open" +
+      "dedup.grpc.AuthenticationResponse\022^\n\rGet" +
+      "VolumeInfo\022%.org.opendedup.grpc.VolumeIn" +
+      "foRequest\032&.org.opendedup.grpc.VolumeInf" +
+      "oResponse\022[\n\016ShutdownVolume\022#.org.opende" +
+      "dup.grpc.ShutdownRequest\032$.org.opendedup" +
+      ".grpc.ShutdownResponse\022[\n\nCleanStore\022%.o" +
+      "rg.opendedup.grpc.CleanStoreRequest\032&.or" +
+      "g.opendedup.grpc.CleanStoreResponseB2P\001Z" +
+      ".github.com/opendedup/sdfs-client-go/sdf" +
+      "s/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -123,6 +139,18 @@ public final class VolumeServiceOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_MessageQueueInfoResponse_descriptor,
         new java.lang.String[] { "HostName", "MqType", "Port", "Topic", "AuthInfo", });
+    internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_org_opendedup_grpc_CleanStoreResponse_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_org_opendedup_grpc_CleanStoreResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_CleanStoreResponse_descriptor,
+        new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     org.opendedup.grpc.Shutdown.getDescriptor();
     org.opendedup.grpc.FileInfo.getDescriptor();
   }

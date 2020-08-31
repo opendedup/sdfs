@@ -53,6 +53,7 @@ public class KeyGenerator {
 	public static void generateKey(File key) throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
 			IOException, NoSuchProviderException, InvalidKeyException, SignatureException {
 		key.getParentFile().mkdirs();
+		key.delete();
 		String keyFile = new File(key.getParentFile(), "tls_key").getPath();
 		KeyStore keyStore = KeyStore.getInstance("JKS");
 		keyStore.load(null, null);

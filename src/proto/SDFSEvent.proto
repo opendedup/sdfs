@@ -1,6 +1,7 @@
 syntax = "proto3";
 option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
 package org.opendedup.grpc;
+import "FileInfo.proto";
 
 option java_multiple_files = true;
 
@@ -19,4 +20,29 @@ message SDFSEvent {
     string parentUuid = 12;
     string extendedInfo = 13;
     repeated string childrenUUid = 14;
+    bool success = 15;
+}
+
+message SDFSEventRequest {
+    string uuid = 1;
+}
+
+message SDFSEventResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+    SDFSEvent event = 3;
+}
+
+message SDFSEventListRequest {
+}
+
+message SDFSEventListResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+    repeated SDFSEvent events = 3;
+}
+service SDFSEventService {
+    rpc GetEvent(SDFSEventRequest) returns (SDFSEventResponse);
+    rpc ListEvents(SDFSEventListRequest) returns (SDFSEventListResponse);
+    rpc SubscribeEvent(SDFSEventRequest) returns(stream SDFSEventResponse);
 }

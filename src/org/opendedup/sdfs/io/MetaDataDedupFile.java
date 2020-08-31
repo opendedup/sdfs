@@ -638,7 +638,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 			_mf.unmarshal();
 			_mf.sync();
-			evt.curCt = evt.curCt + 1;
+			evt.addCount(1);
 			return _mf;
 		} else {
 			if (SDFSLogger.isDebug())

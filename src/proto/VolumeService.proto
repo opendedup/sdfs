@@ -64,10 +64,21 @@ message MessageQueueInfoResponse {
   string topic = 4;
   string authInfo = 5;
 }
+
+message CleanStoreRequest {
+
+}
+
+message CleanStoreResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
 // Defining a Service, a Service can have multiple RPC operations
 service VolumeService {
   // Define a RPC operation
   rpc AuthenticateUser(AuthenticationRequest) returns (AuthenticationResponse);
   rpc GetVolumeInfo(VolumeInfoRequest) returns (VolumeInfoResponse);
   rpc ShutdownVolume(ShutdownRequest) returns (ShutdownResponse);
+  rpc CleanStore(CleanStoreRequest) returns (CleanStoreResponse);
 }

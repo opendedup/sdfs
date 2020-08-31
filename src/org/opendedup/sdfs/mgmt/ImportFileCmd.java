@@ -69,8 +69,8 @@ public class ImportFileCmd implements Runnable {
 
 	private Element importArchive() throws IOException {
 		evt = SDFSEvent.importEvent("Importing " + srcFile + " from " + server + ":" + port + " to " + destFile);
-		evt.curCt = 0;
-		evt.maxCt = 3;
+		evt.setCurrentCount(0);
+		evt.setMaxCount(3);
 		Thread th = new Thread(this);
 		th.start();
 		try {
@@ -99,14 +99,14 @@ public class ImportFileCmd implements Runnable {
 			mf = downloadMetaFile();
 			if(axa != null)
 				mf.getExtendedAttributes().putAll(axa);
-			evt.curCt++;
+			evt.addCount(1);
 			evt.shortMsg = "Importing map for " + this.destFile;
 			String ng = downloadDDB(mf.getDfGuid());
 			mf.setDfGuid(ng);
 			mf.sync();
 			MetaFileStore.removedCachedMF(mf.getPath());
 			MetaFileStore.addToCache(mf);
-			evt.curCt++;
+			evt.addCount(1);
 			MetaFileImport mi = new MetaFileImport(mf.getPath(), server, password, port, maxSz, evt, useSSL);
 			mi.runImport();
 			evt.endEvent("import of " + this.destFile + " was successful");

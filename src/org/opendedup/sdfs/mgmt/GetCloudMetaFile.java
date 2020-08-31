@@ -61,8 +61,8 @@ public class GetCloudMetaFile {
 			try {
 				Document doc = XMLUtils.getXMLDoc("cloudmfile");
 				Element root = doc.getDocumentElement();
-				fevt.maxCt = 4;
-				fevt.curCt = 1;
+				fevt.setMaxCount(4);
+				fevt.setCurrentCount(1);
 				fevt.shortMsg = "Downloading [" + file + "]";
 				mf = FileReplicationService.getMF(file);
 				mf.setLocalOwner(true);

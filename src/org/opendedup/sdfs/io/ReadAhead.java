@@ -73,7 +73,7 @@ public class ReadAhead {
 			this.df = df;
 			active.put(df.mf.getPath(), this);
 			this.evt = new ReadAheadEvent(Main.volume.getName(), df.getMetaFile());
-			this.evt.maxCt = df.mf.length();
+			this.evt.setMaxCount(df.mf.length());
 			
 		}
 	}

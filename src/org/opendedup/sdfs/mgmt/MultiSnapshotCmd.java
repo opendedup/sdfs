@@ -25,7 +25,7 @@ public class MultiSnapshotCmd implements XtendedCmd {
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		SDFSEvent mevt = SDFSEvent.snapEvent(
 				"Creating Snapshot of " + f.getPath() + " snaps=" + snaps, f);
-		mevt.maxCt = snaps;
+		mevt.setMaxCount(snaps);
 		for (int i = 0; i < snaps; i++) {
 			int index = dstPath.lastIndexOf(".");
 			if (index > 0 && index <= dstPath.length() - 2) {
@@ -70,7 +70,7 @@ public class MultiSnapshotCmd implements XtendedCmd {
 			}
 			sevt.endEvent("SUCCESS Snapshot Success: took snapshot Source ["
 					+ srcPath + "] " + "Destination [" + dstPath + "]");
-			mevt.curCt = mevt.curCt++;
+			mevt.addCount(1);
 		}
 		mevt.endEvent("SUCCESS Snapshot Success: took snapshot Source ["
 				+ srcPath + "] " + "Destination [" + dstPath + "]");
