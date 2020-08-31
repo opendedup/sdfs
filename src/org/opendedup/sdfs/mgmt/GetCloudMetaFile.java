@@ -20,7 +20,7 @@ public class GetCloudMetaFile {
 	MetaDataDedupFile mf = null;
 	private Object obj = null;
 	File df = null;
-	SDFSEvent fevt = null;
+	public SDFSEvent fevt = null;
 	static LRUCache<String, String> ck = new LRUCache<String, String>(500);
 
 	public Element getResult(String file, String dstfile, String changeid)

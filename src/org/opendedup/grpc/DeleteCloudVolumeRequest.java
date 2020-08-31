@@ -4,25 +4,25 @@
 package org.opendedup.grpc;
 
 /**
- * Protobuf type {@code org.opendedup.grpc.CleanStoreRequest}
+ * Protobuf type {@code org.opendedup.grpc.DeleteCloudVolumeRequest}
  */
-public final class CleanStoreRequest extends
+public final class DeleteCloudVolumeRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CleanStoreRequest)
-    CleanStoreRequestOrBuilder {
+    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DeleteCloudVolumeRequest)
+    DeleteCloudVolumeRequestOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use CleanStoreRequest.newBuilder() to construct.
-  private CleanStoreRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use DeleteCloudVolumeRequest.newBuilder() to construct.
+  private DeleteCloudVolumeRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private CleanStoreRequest() {
+  private DeleteCloudVolumeRequest() {
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new CleanStoreRequest();
+    return new DeleteCloudVolumeRequest();
   }
 
   @java.lang.Override
@@ -30,7 +30,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private CleanStoreRequest(
+  private DeleteCloudVolumeRequest(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -50,7 +50,7 @@ private static final long serialVersionUID = 0L;
             break;
           case 8: {
 
-            compact_ = input.readBool();
+            volumeid_ = input.readInt64();
             break;
           }
           default: {
@@ -74,26 +74,26 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor;
+    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable
+    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            org.opendedup.grpc.CleanStoreRequest.class, org.opendedup.grpc.CleanStoreRequest.Builder.class);
+            org.opendedup.grpc.DeleteCloudVolumeRequest.class, org.opendedup.grpc.DeleteCloudVolumeRequest.Builder.class);
   }
 
-  public static final int COMPACT_FIELD_NUMBER = 1;
-  private boolean compact_;
+  public static final int VOLUMEID_FIELD_NUMBER = 1;
+  private long volumeid_;
   /**
-   * <code>bool compact = 1;</code>
-   * @return The compact.
+   * <code>int64 volumeid = 1;</code>
+   * @return The volumeid.
    */
   @java.lang.Override
-  public boolean getCompact() {
-    return compact_;
+  public long getVolumeid() {
+    return volumeid_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -110,8 +110,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (compact_ != false) {
-      output.writeBool(1, compact_);
+    if (volumeid_ != 0L) {
+      output.writeInt64(1, volumeid_);
     }
     unknownFields.writeTo(output);
   }
@@ -122,9 +122,9 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (compact_ != false) {
+    if (volumeid_ != 0L) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(1, compact_);
+        .computeInt64Size(1, volumeid_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -136,13 +136,13 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof org.opendedup.grpc.CleanStoreRequest)) {
+    if (!(obj instanceof org.opendedup.grpc.DeleteCloudVolumeRequest)) {
       return super.equals(obj);
     }
-    org.opendedup.grpc.CleanStoreRequest other = (org.opendedup.grpc.CleanStoreRequest) obj;
+    org.opendedup.grpc.DeleteCloudVolumeRequest other = (org.opendedup.grpc.DeleteCloudVolumeRequest) obj;
 
-    if (getCompact()
-        != other.getCompact()) return false;
+    if (getVolumeid()
+        != other.getVolumeid()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -154,77 +154,77 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + COMPACT_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getCompact());
+    hash = (37 * hash) + VOLUMEID_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getVolumeid());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(byte[] data)
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseDelimitedFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseDelimitedFrom(
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -237,7 +237,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(org.opendedup.grpc.CleanStoreRequest prototype) {
+  public static Builder newBuilder(org.opendedup.grpc.DeleteCloudVolumeRequest prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -253,26 +253,26 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
-   * Protobuf type {@code org.opendedup.grpc.CleanStoreRequest}
+   * Protobuf type {@code org.opendedup.grpc.DeleteCloudVolumeRequest}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.CleanStoreRequest)
-      org.opendedup.grpc.CleanStoreRequestOrBuilder {
+      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.DeleteCloudVolumeRequest)
+      org.opendedup.grpc.DeleteCloudVolumeRequestOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor;
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.opendedup.grpc.CleanStoreRequest.class, org.opendedup.grpc.CleanStoreRequest.Builder.class);
+              org.opendedup.grpc.DeleteCloudVolumeRequest.class, org.opendedup.grpc.DeleteCloudVolumeRequest.Builder.class);
     }
 
-    // Construct using org.opendedup.grpc.CleanStoreRequest.newBuilder()
+    // Construct using org.opendedup.grpc.DeleteCloudVolumeRequest.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -290,7 +290,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      compact_ = false;
+      volumeid_ = 0L;
 
       return this;
     }
@@ -298,17 +298,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor;
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_descriptor;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.CleanStoreRequest getDefaultInstanceForType() {
-      return org.opendedup.grpc.CleanStoreRequest.getDefaultInstance();
+    public org.opendedup.grpc.DeleteCloudVolumeRequest getDefaultInstanceForType() {
+      return org.opendedup.grpc.DeleteCloudVolumeRequest.getDefaultInstance();
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.CleanStoreRequest build() {
-      org.opendedup.grpc.CleanStoreRequest result = buildPartial();
+    public org.opendedup.grpc.DeleteCloudVolumeRequest build() {
+      org.opendedup.grpc.DeleteCloudVolumeRequest result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -316,9 +316,9 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.CleanStoreRequest buildPartial() {
-      org.opendedup.grpc.CleanStoreRequest result = new org.opendedup.grpc.CleanStoreRequest(this);
-      result.compact_ = compact_;
+    public org.opendedup.grpc.DeleteCloudVolumeRequest buildPartial() {
+      org.opendedup.grpc.DeleteCloudVolumeRequest result = new org.opendedup.grpc.DeleteCloudVolumeRequest(this);
+      result.volumeid_ = volumeid_;
       onBuilt();
       return result;
     }
@@ -357,18 +357,18 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof org.opendedup.grpc.CleanStoreRequest) {
-        return mergeFrom((org.opendedup.grpc.CleanStoreRequest)other);
+      if (other instanceof org.opendedup.grpc.DeleteCloudVolumeRequest) {
+        return mergeFrom((org.opendedup.grpc.DeleteCloudVolumeRequest)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(org.opendedup.grpc.CleanStoreRequest other) {
-      if (other == org.opendedup.grpc.CleanStoreRequest.getDefaultInstance()) return this;
-      if (other.getCompact() != false) {
-        setCompact(other.getCompact());
+    public Builder mergeFrom(org.opendedup.grpc.DeleteCloudVolumeRequest other) {
+      if (other == org.opendedup.grpc.DeleteCloudVolumeRequest.getDefaultInstance()) return this;
+      if (other.getVolumeid() != 0L) {
+        setVolumeid(other.getVolumeid());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -385,11 +385,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      org.opendedup.grpc.CleanStoreRequest parsedMessage = null;
+      org.opendedup.grpc.DeleteCloudVolumeRequest parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (org.opendedup.grpc.CleanStoreRequest) e.getUnfinishedMessage();
+        parsedMessage = (org.opendedup.grpc.DeleteCloudVolumeRequest) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -399,33 +399,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private boolean compact_ ;
+    private long volumeid_ ;
     /**
-     * <code>bool compact = 1;</code>
-     * @return The compact.
+     * <code>int64 volumeid = 1;</code>
+     * @return The volumeid.
      */
     @java.lang.Override
-    public boolean getCompact() {
-      return compact_;
+    public long getVolumeid() {
+      return volumeid_;
     }
     /**
-     * <code>bool compact = 1;</code>
-     * @param value The compact to set.
+     * <code>int64 volumeid = 1;</code>
+     * @param value The volumeid to set.
      * @return This builder for chaining.
      */
-    public Builder setCompact(boolean value) {
+    public Builder setVolumeid(long value) {
       
-      compact_ = value;
+      volumeid_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>bool compact = 1;</code>
+     * <code>int64 volumeid = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearCompact() {
+    public Builder clearVolumeid() {
       
-      compact_ = false;
+      volumeid_ = 0L;
       onChanged();
       return this;
     }
@@ -442,41 +442,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.CleanStoreRequest)
+    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.DeleteCloudVolumeRequest)
   }
 
-  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.CleanStoreRequest)
-  private static final org.opendedup.grpc.CleanStoreRequest DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.DeleteCloudVolumeRequest)
+  private static final org.opendedup.grpc.DeleteCloudVolumeRequest DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new org.opendedup.grpc.CleanStoreRequest();
+    DEFAULT_INSTANCE = new org.opendedup.grpc.DeleteCloudVolumeRequest();
   }
 
-  public static org.opendedup.grpc.CleanStoreRequest getDefaultInstance() {
+  public static org.opendedup.grpc.DeleteCloudVolumeRequest getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<CleanStoreRequest>
-      PARSER = new com.google.protobuf.AbstractParser<CleanStoreRequest>() {
+  private static final com.google.protobuf.Parser<DeleteCloudVolumeRequest>
+      PARSER = new com.google.protobuf.AbstractParser<DeleteCloudVolumeRequest>() {
     @java.lang.Override
-    public CleanStoreRequest parsePartialFrom(
+    public DeleteCloudVolumeRequest parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new CleanStoreRequest(input, extensionRegistry);
+      return new DeleteCloudVolumeRequest(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<CleanStoreRequest> parser() {
+  public static com.google.protobuf.Parser<DeleteCloudVolumeRequest> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<CleanStoreRequest> getParserForType() {
+  public com.google.protobuf.Parser<DeleteCloudVolumeRequest> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public org.opendedup.grpc.CleanStoreRequest getDefaultInstanceForType() {
+  public org.opendedup.grpc.DeleteCloudVolumeRequest getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

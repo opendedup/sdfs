@@ -42,6 +42,58 @@ message VolumeInfoResponse {
   bool offline = 29;
 }
 
+message SystemInfo {
+  int32 activeThreads =1;
+  int32 blocksStored = 2;
+  int32 maxBlocksStored = 3;
+  int64 totalSpace = 4;
+  int64 freeSpace = 5;
+  double totalCpuLoad = 6;
+  double cpuCores = 7;
+  double sdfsCpuLoad = 8;
+  double totalMemory = 10;
+  double freeMemory = 11;
+}
+
+message SystemInfoRequest {
+
+}
+
+message SystemInfoResponse {
+  SystemInfo info = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message DSEInfo {
+  int64 maxSize = 1;
+  int64 currentSize = 2;
+  int64 entries =3;
+  int64 compressedSize = 4;
+  int64 freeBlocks = 5;
+  int64 pageSize = 6;
+  string storageType = 7;
+  int32 listenPort = 8;
+  string listenHost = 9;
+  int32 readSpeed = 10;
+  int32 writeSpeed = 11;
+  int64 cacheSize = 12;
+  int64 maxCacheSize = 13;
+  bool listenEncrypted = 14;
+  string encryptionKey = 15;
+  string encryptionIV = 16;
+  string cloudAccessKey = 17;
+  string cloudSecretKey = 18;
+}
+
+message DSERequest {}
+
+message DSEResponse {
+  DSEInfo info = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
 message AuthenticationRequest {
   string username = 1;
   string password = 2;
@@ -66,7 +118,7 @@ message MessageQueueInfoResponse {
 }
 
 message CleanStoreRequest {
-
+  bool compact =1;
 }
 
 message CleanStoreResponse {
@@ -74,11 +126,34 @@ message CleanStoreResponse {
   string error = 2;
   errorCodes errorCode = 3;
 }
+
+message DeleteCloudVolumeRequest{
+  int64 volumeid = 1;
+}
+
+message DeleteCloudVolumeResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message SetLogicalVolumeCapacityRequest {
+  int64 size = 1;
+}
+
+message SetLogicalVolumeCapacityResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
 // Defining a Service, a Service can have multiple RPC operations
 service VolumeService {
-  // Define a RPC operation
   rpc AuthenticateUser(AuthenticationRequest) returns (AuthenticationResponse);
   rpc GetVolumeInfo(VolumeInfoRequest) returns (VolumeInfoResponse);
   rpc ShutdownVolume(ShutdownRequest) returns (ShutdownResponse);
   rpc CleanStore(CleanStoreRequest) returns (CleanStoreResponse);
+  rpc DeleteCloudVolume(DeleteCloudVolumeRequest) returns (DeleteCloudVolumeResponse);
+  rpc DSEInfo(DSERequest) returns (DSEResponse);
+  rpc SystemInfo(SystemInfoRequest) returns(SystemInfoResponse);
+  rpc SetLogicalVolumeCapacity(SetLogicalVolumeCapacityRequest) returns(SetLogicalVolumeCapacityResponse);
 }

@@ -163,4 +163,38 @@ public interface SDFSEventOrBuilder extends
    * @return The success.
    */
   boolean getSuccess();
+
+  /**
+   * <code>map&lt;string, string&gt; attributes = 16;</code>
+   */
+  int getAttributesCount();
+  /**
+   * <code>map&lt;string, string&gt; attributes = 16;</code>
+   */
+  boolean containsAttributes(
+      java.lang.String key);
+  /**
+   * Use {@link #getAttributesMap()} instead.
+   */
+  @java.lang.Deprecated
+  java.util.Map<java.lang.String, java.lang.String>
+  getAttributes();
+  /**
+   * <code>map&lt;string, string&gt; attributes = 16;</code>
+   */
+  java.util.Map<java.lang.String, java.lang.String>
+  getAttributesMap();
+  /**
+   * <code>map&lt;string, string&gt; attributes = 16;</code>
+   */
+
+  java.lang.String getAttributesOrDefault(
+      java.lang.String key,
+      java.lang.String defaultValue);
+  /**
+   * <code>map&lt;string, string&gt; attributes = 16;</code>
+   */
+
+  java.lang.String getAttributesOrThrow(
+      java.lang.String key);
 }

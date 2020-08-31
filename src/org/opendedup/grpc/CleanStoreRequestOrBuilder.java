@@ -6,4 +6,10 @@ package org.opendedup.grpc;
 public interface CleanStoreRequestOrBuilder extends
     // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.CleanStoreRequest)
     com.google.protobuf.MessageOrBuilder {
+
+  /**
+   * <code>bool compact = 1;</code>
+   * @return The compact.
+   */
+  boolean getCompact();
 }

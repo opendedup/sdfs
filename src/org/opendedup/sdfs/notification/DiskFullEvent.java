@@ -51,4 +51,17 @@ public class DiskFullEvent extends SDFSEvent {
 		return el;
 	}
 
+	@Override
+    public org.opendedup.grpc.SDFSEvent toProtoBuf() {
+        org.opendedup.grpc.SDFSEvent evt = super.toProtoBuf();
+        org.opendedup.grpc.SDFSEvent.Builder b= org.opendedup.grpc.SDFSEvent.newBuilder(evt);
+		b.putAttributes("current-size", Long.toString(this.currentSz));
+		b.putAttributes("max-size", Long.toString(this.maxSz));
+		b.putAttributes("dse-size", Long.toString(this.dseSz));
+		b.putAttributes("dse-max-size", Long.toString(this.maxDseSz));
+		b.putAttributes("disk-usage", Long.toString(this.dskUsage));
+		b.putAttributes("max-disk-usage", Long.toString(this.maxDskUsage));
+        return b.build();
+    }
+
 }

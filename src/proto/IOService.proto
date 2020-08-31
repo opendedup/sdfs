@@ -140,6 +140,19 @@ message SetUserMetaDataResponse {
     errorCodes errorCode = 2;
 }
 
+message GetCloudFileRequest {
+    string file = 1;
+    string dstfile = 2;
+    bool overwrite = 3;
+    string changeid = 4;
+}
+
+message GetCloudFileResponse {
+    string eventID = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
 service FileIOService {
     // Define a RPC operation
     rpc MkDir(MkDirRequest) returns (MkDirResponse);
@@ -158,4 +171,6 @@ service FileIOService {
     rpc Rename(FileRenameRequest) returns (FileRenameResponse);
     rpc CopyExtent(CopyExtentRequest) returns (CopyExtentResponse);
     rpc SetUserMetaData(SetUserMetaDataRequest) returns (SetUserMetaDataResponse);
+    rpc GetCloudFile(GetCloudFileRequest) returns (GetCloudFileResponse);
+    rpc GetCloudMetaFile(GetCloudFileRequest) returns (GetCloudFileResponse);
   }

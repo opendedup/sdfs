@@ -21,6 +21,7 @@ message SDFSEvent {
     string extendedInfo = 13;
     repeated string childrenUUid = 14;
     bool success = 15;
+    map<string,string> attributes = 16;
 }
 
 message SDFSEventRequest {

@@ -123,6 +123,161 @@ public final class VolumeServiceGrpc {
     return getShutdownVolumeMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.CleanStoreRequest,
+      org.opendedup.grpc.CleanStoreResponse> getCleanStoreMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CleanStore",
+      requestType = org.opendedup.grpc.CleanStoreRequest.class,
+      responseType = org.opendedup.grpc.CleanStoreResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.CleanStoreRequest,
+      org.opendedup.grpc.CleanStoreResponse> getCleanStoreMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.CleanStoreRequest, org.opendedup.grpc.CleanStoreResponse> getCleanStoreMethod;
+    if ((getCleanStoreMethod = VolumeServiceGrpc.getCleanStoreMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getCleanStoreMethod = VolumeServiceGrpc.getCleanStoreMethod) == null) {
+          VolumeServiceGrpc.getCleanStoreMethod = getCleanStoreMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.CleanStoreRequest, org.opendedup.grpc.CleanStoreResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CleanStore"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.CleanStoreRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.CleanStoreResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("CleanStore"))
+              .build();
+        }
+      }
+    }
+    return getCleanStoreMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.DeleteCloudVolumeRequest,
+      org.opendedup.grpc.DeleteCloudVolumeResponse> getDeleteCloudVolumeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteCloudVolume",
+      requestType = org.opendedup.grpc.DeleteCloudVolumeRequest.class,
+      responseType = org.opendedup.grpc.DeleteCloudVolumeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.DeleteCloudVolumeRequest,
+      org.opendedup.grpc.DeleteCloudVolumeResponse> getDeleteCloudVolumeMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.DeleteCloudVolumeRequest, org.opendedup.grpc.DeleteCloudVolumeResponse> getDeleteCloudVolumeMethod;
+    if ((getDeleteCloudVolumeMethod = VolumeServiceGrpc.getDeleteCloudVolumeMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getDeleteCloudVolumeMethod = VolumeServiceGrpc.getDeleteCloudVolumeMethod) == null) {
+          VolumeServiceGrpc.getDeleteCloudVolumeMethod = getDeleteCloudVolumeMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.DeleteCloudVolumeRequest, org.opendedup.grpc.DeleteCloudVolumeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteCloudVolume"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.DeleteCloudVolumeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.DeleteCloudVolumeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("DeleteCloudVolume"))
+              .build();
+        }
+      }
+    }
+    return getDeleteCloudVolumeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.DSERequest,
+      org.opendedup.grpc.DSEResponse> getDSEInfoMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DSEInfo",
+      requestType = org.opendedup.grpc.DSERequest.class,
+      responseType = org.opendedup.grpc.DSEResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.DSERequest,
+      org.opendedup.grpc.DSEResponse> getDSEInfoMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.DSERequest, org.opendedup.grpc.DSEResponse> getDSEInfoMethod;
+    if ((getDSEInfoMethod = VolumeServiceGrpc.getDSEInfoMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getDSEInfoMethod = VolumeServiceGrpc.getDSEInfoMethod) == null) {
+          VolumeServiceGrpc.getDSEInfoMethod = getDSEInfoMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.DSERequest, org.opendedup.grpc.DSEResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DSEInfo"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.DSERequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.DSEResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("DSEInfo"))
+              .build();
+        }
+      }
+    }
+    return getDSEInfoMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SystemInfoRequest,
+      org.opendedup.grpc.SystemInfoResponse> getSystemInfoMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SystemInfo",
+      requestType = org.opendedup.grpc.SystemInfoRequest.class,
+      responseType = org.opendedup.grpc.SystemInfoResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SystemInfoRequest,
+      org.opendedup.grpc.SystemInfoResponse> getSystemInfoMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SystemInfoRequest, org.opendedup.grpc.SystemInfoResponse> getSystemInfoMethod;
+    if ((getSystemInfoMethod = VolumeServiceGrpc.getSystemInfoMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getSystemInfoMethod = VolumeServiceGrpc.getSystemInfoMethod) == null) {
+          VolumeServiceGrpc.getSystemInfoMethod = getSystemInfoMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SystemInfoRequest, org.opendedup.grpc.SystemInfoResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SystemInfo"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SystemInfoRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SystemInfoResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SystemInfo"))
+              .build();
+        }
+      }
+    }
+    return getSystemInfoMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SetLogicalVolumeCapacityRequest,
+      org.opendedup.grpc.SetLogicalVolumeCapacityResponse> getSetLogicalVolumeCapacityMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetLogicalVolumeCapacity",
+      requestType = org.opendedup.grpc.SetLogicalVolumeCapacityRequest.class,
+      responseType = org.opendedup.grpc.SetLogicalVolumeCapacityResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SetLogicalVolumeCapacityRequest,
+      org.opendedup.grpc.SetLogicalVolumeCapacityResponse> getSetLogicalVolumeCapacityMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SetLogicalVolumeCapacityRequest, org.opendedup.grpc.SetLogicalVolumeCapacityResponse> getSetLogicalVolumeCapacityMethod;
+    if ((getSetLogicalVolumeCapacityMethod = VolumeServiceGrpc.getSetLogicalVolumeCapacityMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getSetLogicalVolumeCapacityMethod = VolumeServiceGrpc.getSetLogicalVolumeCapacityMethod) == null) {
+          VolumeServiceGrpc.getSetLogicalVolumeCapacityMethod = getSetLogicalVolumeCapacityMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SetLogicalVolumeCapacityRequest, org.opendedup.grpc.SetLogicalVolumeCapacityResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetLogicalVolumeCapacity"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetLogicalVolumeCapacityRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetLogicalVolumeCapacityResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SetLogicalVolumeCapacity"))
+              .build();
+        }
+      }
+    }
+    return getSetLogicalVolumeCapacityMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -175,9 +330,6 @@ public final class VolumeServiceGrpc {
   public static abstract class VolumeServiceImplBase implements io.grpc.BindableService {
 
     /**
-     * <pre>
-     * Define a RPC operation
-     * </pre>
      */
     public void authenticateUser(org.opendedup.grpc.AuthenticationRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.AuthenticationResponse> responseObserver) {
@@ -196,6 +348,41 @@ public final class VolumeServiceGrpc {
     public void shutdownVolume(org.opendedup.grpc.ShutdownRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.ShutdownResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getShutdownVolumeMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void cleanStore(org.opendedup.grpc.CleanStoreRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.CleanStoreResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getCleanStoreMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void deleteCloudVolume(org.opendedup.grpc.DeleteCloudVolumeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.DeleteCloudVolumeResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getDeleteCloudVolumeMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void dSEInfo(org.opendedup.grpc.DSERequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.DSEResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getDSEInfoMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void systemInfo(org.opendedup.grpc.SystemInfoRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SystemInfoResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSystemInfoMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void setLogicalVolumeCapacity(org.opendedup.grpc.SetLogicalVolumeCapacityRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetLogicalVolumeCapacityResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetLogicalVolumeCapacityMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -221,6 +408,41 @@ public final class VolumeServiceGrpc {
                 org.opendedup.grpc.ShutdownRequest,
                 org.opendedup.grpc.ShutdownResponse>(
                   this, METHODID_SHUTDOWN_VOLUME)))
+          .addMethod(
+            getCleanStoreMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.CleanStoreRequest,
+                org.opendedup.grpc.CleanStoreResponse>(
+                  this, METHODID_CLEAN_STORE)))
+          .addMethod(
+            getDeleteCloudVolumeMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.DeleteCloudVolumeRequest,
+                org.opendedup.grpc.DeleteCloudVolumeResponse>(
+                  this, METHODID_DELETE_CLOUD_VOLUME)))
+          .addMethod(
+            getDSEInfoMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.DSERequest,
+                org.opendedup.grpc.DSEResponse>(
+                  this, METHODID_DSEINFO)))
+          .addMethod(
+            getSystemInfoMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SystemInfoRequest,
+                org.opendedup.grpc.SystemInfoResponse>(
+                  this, METHODID_SYSTEM_INFO)))
+          .addMethod(
+            getSetLogicalVolumeCapacityMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SetLogicalVolumeCapacityRequest,
+                org.opendedup.grpc.SetLogicalVolumeCapacityResponse>(
+                  this, METHODID_SET_LOGICAL_VOLUME_CAPACITY)))
           .build();
     }
   }
@@ -243,9 +465,6 @@ public final class VolumeServiceGrpc {
     }
 
     /**
-     * <pre>
-     * Define a RPC operation
-     * </pre>
      */
     public void authenticateUser(org.opendedup.grpc.AuthenticationRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.AuthenticationResponse> responseObserver) {
@@ -268,6 +487,46 @@ public final class VolumeServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getShutdownVolumeMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void cleanStore(org.opendedup.grpc.CleanStoreRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.CleanStoreResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getCleanStoreMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void deleteCloudVolume(org.opendedup.grpc.DeleteCloudVolumeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.DeleteCloudVolumeResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDeleteCloudVolumeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void dSEInfo(org.opendedup.grpc.DSERequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.DSEResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDSEInfoMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void systemInfo(org.opendedup.grpc.SystemInfoRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SystemInfoResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSystemInfoMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void setLogicalVolumeCapacity(org.opendedup.grpc.SetLogicalVolumeCapacityRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetLogicalVolumeCapacityResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetLogicalVolumeCapacityMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -288,9 +547,6 @@ public final class VolumeServiceGrpc {
     }
 
     /**
-     * <pre>
-     * Define a RPC operation
-     * </pre>
      */
     public org.opendedup.grpc.AuthenticationResponse authenticateUser(org.opendedup.grpc.AuthenticationRequest request) {
       return blockingUnaryCall(
@@ -309,6 +565,41 @@ public final class VolumeServiceGrpc {
     public org.opendedup.grpc.ShutdownResponse shutdownVolume(org.opendedup.grpc.ShutdownRequest request) {
       return blockingUnaryCall(
           getChannel(), getShutdownVolumeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.CleanStoreResponse cleanStore(org.opendedup.grpc.CleanStoreRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getCleanStoreMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.DeleteCloudVolumeResponse deleteCloudVolume(org.opendedup.grpc.DeleteCloudVolumeRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDeleteCloudVolumeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.DSEResponse dSEInfo(org.opendedup.grpc.DSERequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDSEInfoMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SystemInfoResponse systemInfo(org.opendedup.grpc.SystemInfoRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSystemInfoMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SetLogicalVolumeCapacityResponse setLogicalVolumeCapacity(org.opendedup.grpc.SetLogicalVolumeCapacityRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetLogicalVolumeCapacityMethod(), getCallOptions(), request);
     }
   }
 
@@ -330,9 +621,6 @@ public final class VolumeServiceGrpc {
     }
 
     /**
-     * <pre>
-     * Define a RPC operation
-     * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.AuthenticationResponse> authenticateUser(
         org.opendedup.grpc.AuthenticationRequest request) {
@@ -355,11 +643,56 @@ public final class VolumeServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getShutdownVolumeMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.CleanStoreResponse> cleanStore(
+        org.opendedup.grpc.CleanStoreRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getCleanStoreMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.DeleteCloudVolumeResponse> deleteCloudVolume(
+        org.opendedup.grpc.DeleteCloudVolumeRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDeleteCloudVolumeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.DSEResponse> dSEInfo(
+        org.opendedup.grpc.DSERequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDSEInfoMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SystemInfoResponse> systemInfo(
+        org.opendedup.grpc.SystemInfoRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSystemInfoMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SetLogicalVolumeCapacityResponse> setLogicalVolumeCapacity(
+        org.opendedup.grpc.SetLogicalVolumeCapacityRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetLogicalVolumeCapacityMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_AUTHENTICATE_USER = 0;
   private static final int METHODID_GET_VOLUME_INFO = 1;
   private static final int METHODID_SHUTDOWN_VOLUME = 2;
+  private static final int METHODID_CLEAN_STORE = 3;
+  private static final int METHODID_DELETE_CLOUD_VOLUME = 4;
+  private static final int METHODID_DSEINFO = 5;
+  private static final int METHODID_SYSTEM_INFO = 6;
+  private static final int METHODID_SET_LOGICAL_VOLUME_CAPACITY = 7;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -389,6 +722,26 @@ public final class VolumeServiceGrpc {
         case METHODID_SHUTDOWN_VOLUME:
           serviceImpl.shutdownVolume((org.opendedup.grpc.ShutdownRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.ShutdownResponse>) responseObserver);
+          break;
+        case METHODID_CLEAN_STORE:
+          serviceImpl.cleanStore((org.opendedup.grpc.CleanStoreRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.CleanStoreResponse>) responseObserver);
+          break;
+        case METHODID_DELETE_CLOUD_VOLUME:
+          serviceImpl.deleteCloudVolume((org.opendedup.grpc.DeleteCloudVolumeRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.DeleteCloudVolumeResponse>) responseObserver);
+          break;
+        case METHODID_DSEINFO:
+          serviceImpl.dSEInfo((org.opendedup.grpc.DSERequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.DSEResponse>) responseObserver);
+          break;
+        case METHODID_SYSTEM_INFO:
+          serviceImpl.systemInfo((org.opendedup.grpc.SystemInfoRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SystemInfoResponse>) responseObserver);
+          break;
+        case METHODID_SET_LOGICAL_VOLUME_CAPACITY:
+          serviceImpl.setLogicalVolumeCapacity((org.opendedup.grpc.SetLogicalVolumeCapacityRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SetLogicalVolumeCapacityResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -454,6 +807,11 @@ public final class VolumeServiceGrpc {
               .addMethod(getAuthenticateUserMethod())
               .addMethod(getGetVolumeInfoMethod())
               .addMethod(getShutdownVolumeMethod())
+              .addMethod(getCleanStoreMethod())
+              .addMethod(getDeleteCloudVolumeMethod())
+              .addMethod(getDSEInfoMethod())
+              .addMethod(getSystemInfoMethod())
+              .addMethod(getSetLogicalVolumeCapacityMethod())
               .build();
         }
       }

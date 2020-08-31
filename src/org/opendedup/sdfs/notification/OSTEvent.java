@@ -13,9 +13,6 @@ public class OSTEvent {
 	
 	public Document toXML() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("event");
-		/*
-		 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
-		 */
 		Element root = doc.getDocumentElement();
 		root.setAttribute("ev_seqno", Long.toString(ev_seqno));
 		root.setAttribute("event", event);

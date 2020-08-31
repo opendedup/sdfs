@@ -4,25 +4,25 @@
 package org.opendedup.grpc;
 
 /**
- * Protobuf type {@code org.opendedup.grpc.CleanStoreRequest}
+ * Protobuf type {@code org.opendedup.grpc.SetVolumeCapacityRequest}
  */
-public final class CleanStoreRequest extends
+public final class SetVolumeCapacityRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CleanStoreRequest)
-    CleanStoreRequestOrBuilder {
+    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetVolumeCapacityRequest)
+    SetVolumeCapacityRequestOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use CleanStoreRequest.newBuilder() to construct.
-  private CleanStoreRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use SetVolumeCapacityRequest.newBuilder() to construct.
+  private SetVolumeCapacityRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private CleanStoreRequest() {
+  private SetVolumeCapacityRequest() {
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new CleanStoreRequest();
+    return new SetVolumeCapacityRequest();
   }
 
   @java.lang.Override
@@ -30,7 +30,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private CleanStoreRequest(
+  private SetVolumeCapacityRequest(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -50,7 +50,7 @@ private static final long serialVersionUID = 0L;
             break;
           case 8: {
 
-            compact_ = input.readBool();
+            size_ = input.readInt64();
             break;
           }
           default: {
@@ -74,26 +74,26 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor;
+    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable
+    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            org.opendedup.grpc.CleanStoreRequest.class, org.opendedup.grpc.CleanStoreRequest.Builder.class);
+            org.opendedup.grpc.SetVolumeCapacityRequest.class, org.opendedup.grpc.SetVolumeCapacityRequest.Builder.class);
   }
 
-  public static final int COMPACT_FIELD_NUMBER = 1;
-  private boolean compact_;
+  public static final int SIZE_FIELD_NUMBER = 1;
+  private long size_;
   /**
-   * <code>bool compact = 1;</code>
-   * @return The compact.
+   * <code>int64 size = 1;</code>
+   * @return The size.
    */
   @java.lang.Override
-  public boolean getCompact() {
-    return compact_;
+  public long getSize() {
+    return size_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -110,8 +110,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (compact_ != false) {
-      output.writeBool(1, compact_);
+    if (size_ != 0L) {
+      output.writeInt64(1, size_);
     }
     unknownFields.writeTo(output);
   }
@@ -122,9 +122,9 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (compact_ != false) {
+    if (size_ != 0L) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(1, compact_);
+        .computeInt64Size(1, size_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -136,13 +136,13 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof org.opendedup.grpc.CleanStoreRequest)) {
+    if (!(obj instanceof org.opendedup.grpc.SetVolumeCapacityRequest)) {
       return super.equals(obj);
     }
-    org.opendedup.grpc.CleanStoreRequest other = (org.opendedup.grpc.CleanStoreRequest) obj;
+    org.opendedup.grpc.SetVolumeCapacityRequest other = (org.opendedup.grpc.SetVolumeCapacityRequest) obj;
 
-    if (getCompact()
-        != other.getCompact()) return false;
+    if (getSize()
+        != other.getSize()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -154,77 +154,77 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + COMPACT_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getCompact());
+    hash = (37 * hash) + SIZE_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getSize());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(byte[] data)
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseDelimitedFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseDelimitedFrom(
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.CleanStoreRequest parseFrom(
+  public static org.opendedup.grpc.SetVolumeCapacityRequest parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -237,7 +237,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(org.opendedup.grpc.CleanStoreRequest prototype) {
+  public static Builder newBuilder(org.opendedup.grpc.SetVolumeCapacityRequest prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -253,26 +253,26 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
-   * Protobuf type {@code org.opendedup.grpc.CleanStoreRequest}
+   * Protobuf type {@code org.opendedup.grpc.SetVolumeCapacityRequest}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.CleanStoreRequest)
-      org.opendedup.grpc.CleanStoreRequestOrBuilder {
+      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.SetVolumeCapacityRequest)
+      org.opendedup.grpc.SetVolumeCapacityRequestOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor;
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.opendedup.grpc.CleanStoreRequest.class, org.opendedup.grpc.CleanStoreRequest.Builder.class);
+              org.opendedup.grpc.SetVolumeCapacityRequest.class, org.opendedup.grpc.SetVolumeCapacityRequest.Builder.class);
     }
 
-    // Construct using org.opendedup.grpc.CleanStoreRequest.newBuilder()
+    // Construct using org.opendedup.grpc.SetVolumeCapacityRequest.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -290,7 +290,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      compact_ = false;
+      size_ = 0L;
 
       return this;
     }
@@ -298,17 +298,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor;
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_descriptor;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.CleanStoreRequest getDefaultInstanceForType() {
-      return org.opendedup.grpc.CleanStoreRequest.getDefaultInstance();
+    public org.opendedup.grpc.SetVolumeCapacityRequest getDefaultInstanceForType() {
+      return org.opendedup.grpc.SetVolumeCapacityRequest.getDefaultInstance();
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.CleanStoreRequest build() {
-      org.opendedup.grpc.CleanStoreRequest result = buildPartial();
+    public org.opendedup.grpc.SetVolumeCapacityRequest build() {
+      org.opendedup.grpc.SetVolumeCapacityRequest result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -316,9 +316,9 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.CleanStoreRequest buildPartial() {
-      org.opendedup.grpc.CleanStoreRequest result = new org.opendedup.grpc.CleanStoreRequest(this);
-      result.compact_ = compact_;
+    public org.opendedup.grpc.SetVolumeCapacityRequest buildPartial() {
+      org.opendedup.grpc.SetVolumeCapacityRequest result = new org.opendedup.grpc.SetVolumeCapacityRequest(this);
+      result.size_ = size_;
       onBuilt();
       return result;
     }
@@ -357,18 +357,18 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof org.opendedup.grpc.CleanStoreRequest) {
-        return mergeFrom((org.opendedup.grpc.CleanStoreRequest)other);
+      if (other instanceof org.opendedup.grpc.SetVolumeCapacityRequest) {
+        return mergeFrom((org.opendedup.grpc.SetVolumeCapacityRequest)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(org.opendedup.grpc.CleanStoreRequest other) {
-      if (other == org.opendedup.grpc.CleanStoreRequest.getDefaultInstance()) return this;
-      if (other.getCompact() != false) {
-        setCompact(other.getCompact());
+    public Builder mergeFrom(org.opendedup.grpc.SetVolumeCapacityRequest other) {
+      if (other == org.opendedup.grpc.SetVolumeCapacityRequest.getDefaultInstance()) return this;
+      if (other.getSize() != 0L) {
+        setSize(other.getSize());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -385,11 +385,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      org.opendedup.grpc.CleanStoreRequest parsedMessage = null;
+      org.opendedup.grpc.SetVolumeCapacityRequest parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (org.opendedup.grpc.CleanStoreRequest) e.getUnfinishedMessage();
+        parsedMessage = (org.opendedup.grpc.SetVolumeCapacityRequest) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -399,33 +399,33 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private boolean compact_ ;
+    private long size_ ;
     /**
-     * <code>bool compact = 1;</code>
-     * @return The compact.
+     * <code>int64 size = 1;</code>
+     * @return The size.
      */
     @java.lang.Override
-    public boolean getCompact() {
-      return compact_;
+    public long getSize() {
+      return size_;
     }
     /**
-     * <code>bool compact = 1;</code>
-     * @param value The compact to set.
+     * <code>int64 size = 1;</code>
+     * @param value The size to set.
      * @return This builder for chaining.
      */
-    public Builder setCompact(boolean value) {
+    public Builder setSize(long value) {
       
-      compact_ = value;
+      size_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>bool compact = 1;</code>
+     * <code>int64 size = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearCompact() {
+    public Builder clearSize() {
       
-      compact_ = false;
+      size_ = 0L;
       onChanged();
       return this;
     }
@@ -442,41 +442,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.CleanStoreRequest)
+    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.SetVolumeCapacityRequest)
   }
 
-  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.CleanStoreRequest)
-  private static final org.opendedup.grpc.CleanStoreRequest DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.SetVolumeCapacityRequest)
+  private static final org.opendedup.grpc.SetVolumeCapacityRequest DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new org.opendedup.grpc.CleanStoreRequest();
+    DEFAULT_INSTANCE = new org.opendedup.grpc.SetVolumeCapacityRequest();
   }
 
-  public static org.opendedup.grpc.CleanStoreRequest getDefaultInstance() {
+  public static org.opendedup.grpc.SetVolumeCapacityRequest getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<CleanStoreRequest>
-      PARSER = new com.google.protobuf.AbstractParser<CleanStoreRequest>() {
+  private static final com.google.protobuf.Parser<SetVolumeCapacityRequest>
+      PARSER = new com.google.protobuf.AbstractParser<SetVolumeCapacityRequest>() {
     @java.lang.Override
-    public CleanStoreRequest parsePartialFrom(
+    public SetVolumeCapacityRequest parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new CleanStoreRequest(input, extensionRegistry);
+      return new SetVolumeCapacityRequest(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<CleanStoreRequest> parser() {
+  public static com.google.protobuf.Parser<SetVolumeCapacityRequest> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<CleanStoreRequest> getParserForType() {
+  public com.google.protobuf.Parser<SetVolumeCapacityRequest> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public org.opendedup.grpc.CleanStoreRequest getDefaultInstanceForType() {
+  public org.opendedup.grpc.SetVolumeCapacityRequest getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

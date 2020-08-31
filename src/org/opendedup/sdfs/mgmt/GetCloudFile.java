@@ -38,7 +38,7 @@ public class GetCloudFile implements Runnable {
 	String sfile, dstfile;
 	boolean overwrite;
 	private Object obj = null;
-	SDFSEvent fevt = null;
+	public SDFSEvent fevt = null;
 	static LRUCache<String, String> ck = new LRUCache<String, String>(500);
 	public static LRUCache<String, Object> fack = new LRUCache<String, Object>(50);
 

@@ -98,6 +98,7 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Type WER = new Type("Write Error");
 	public transient static final Type DISCO = new Type("Storage Pool Disconnected");
 	public transient static final Type RECO = new Type("Storage Pool Reconnected");
+	public transient static final Type DELCV = new Type("Delete Cloud Volume");
 	public transient static final Level RUNNING = new Level("running");
 	public transient static final Level INFO = new Level("info");
 	public transient static final Level WARN = new Level("warning");
@@ -326,6 +327,11 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public static SDFSEvent importEvent(String shortMsg) {
 		SDFSEvent event = new SDFSEvent(IMPORT, getTarget(), shortMsg, RUNNING);
+		return event;
+	}
+
+	public static SDFSEvent deleteCloudVolumeEvent(long volumeid) {
+		SDFSEvent event = new DeleteCloudVolumeEvent(getTarget(), "Deleting Cloud Volume " +volumeid, RUNNING,volumeid);
 		return event;
 	}
 

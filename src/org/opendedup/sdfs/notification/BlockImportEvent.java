@@ -38,6 +38,17 @@ public class BlockImportEvent extends SDFSEvent {
 	}
 
 	@Override
+    public org.opendedup.grpc.SDFSEvent toProtoBuf() {
+        org.opendedup.grpc.SDFSEvent evt = super.toProtoBuf();
+        org.opendedup.grpc.SDFSEvent.Builder b= org.opendedup.grpc.SDFSEvent.newBuilder(evt);
+		b.putAttributes("blocks-imported", Long.toString(this.blocksImported));
+		b.putAttributes("bytes-imported", Long.toString(this.bytesImported));
+		b.putAttributes("files-imported", Long.toString(this.filesImported));
+		b.putAttributes("virtual-data-imported", Long.toString(this.virtualDataImported));
+        return b.build();
+    }
+
+	@Override
 	public Element toXML() throws ParserConfigurationException {
 		Element el = super.toXML();
 		el.setAttribute("blocks-imported", Long.toString(this.blocksImported));

@@ -49,4 +49,12 @@ public class ReadAheadEvent extends SDFSEvent {
 		return el;
 	}
 
+	@Override
+    public org.opendedup.grpc.SDFSEvent toProtoBuf() {
+        org.opendedup.grpc.SDFSEvent evt = super.toProtoBuf();
+        org.opendedup.grpc.SDFSEvent.Builder b= org.opendedup.grpc.SDFSEvent.newBuilder(evt);
+		b.putAttributes("file", mf.getPath());
+        return b.build();
+    }
+
 }

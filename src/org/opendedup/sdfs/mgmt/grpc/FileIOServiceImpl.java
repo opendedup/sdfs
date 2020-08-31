@@ -8,6 +8,8 @@ import org.opendedup.hashing.AbstractHashEngine;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.mgmt.CloseFile;
+import org.opendedup.sdfs.mgmt.GetCloudFile;
+import org.opendedup.sdfs.mgmt.GetCloudMetaFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 import fuse.FuseFtypeConstants;
@@ -275,6 +277,44 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
+    @Override
+    public void getCloudFile(GetCloudFileRequest request, StreamObserver<GetCloudFileResponse> responseObserver) {
+        GetCloudFileResponse.Builder b = GetCloudFileResponse.newBuilder();
+        try {
+            GetCloudFile cf = new GetCloudFile();
+            cf.getResult(request.getFile(), request.getDstfile(), request.getOverwrite(), request.getChangeid());
+            b.setEventID(cf.fevt.uid);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error("unable to fulfill request", e);
+            b.setError("unable to fulfill request");
+            b.setErrorCode(errorCodes.EIO);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        }
+    }
+
+    @Override
+    public void getCloudMetaFile(GetCloudFileRequest request, StreamObserver<GetCloudFileResponse> responseObserver) {
+        GetCloudFileResponse.Builder b = GetCloudFileResponse.newBuilder();
+        try {
+            GetCloudMetaFile cf = new GetCloudMetaFile();
+            cf.getResult(request.getFile(), request.getDstfile(), request.getChangeid());
+            b.setEventID(cf.fevt.uid);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error("unable to fulfill request", e);
+            b.setError("unable to fulfill request");
+            b.setErrorCode(errorCodes.EIO);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        }
+    }
+
     private int getFtype(String path) throws FileIOError {
         // SDFSLogger.getLog().info("Path=" + path);
         String pt = mountedVolume + path;
@@ -374,7 +414,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     @Override
-    public void setUserMetaData(SetUserMetaDataRequest req,StreamObserver<SetUserMetaDataResponse> responseObserver) {
+    public void setUserMetaData(SetUserMetaDataRequest req, StreamObserver<SetUserMetaDataResponse> responseObserver) {
         SetUserMetaDataResponse.Builder b = SetUserMetaDataResponse.newBuilder();
         String internalPath = Main.volume.getPath() + File.separator + req.getPath();
         File f = new File(internalPath);
@@ -388,7 +428,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         try {
             MetaDataDedupFile mf = MetaFileStore.getMF(new File(internalPath));
             List<FileAttributes> attrs = req.getFileAttributesList();
-            for(FileAttributes attr : attrs) {
+            for (FileAttributes attr : attrs) {
                 mf.addXAttribute(attr.getKey(), attr.getValue());
             }
             responseObserver.onNext(b.build());
@@ -424,8 +464,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
-            }
-            else if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
+            } else if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
                 Path p = new File(mountedVolume + path).toPath();
                 // SDFSLogger.getLog().info("deleting symlink " + f.getPath());
                 try {
@@ -702,7 +741,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
             return;
         }
-        
+
     }
 
     @Override
@@ -774,13 +813,13 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     b.setListGuid(guid);
                     Path dir = FileSystems.getDefault().getPath(f.getPath());
                     DirectoryStream<Path> stream = null;
-                    if(req.getListGuid() == null) {
+                    if (req.getListGuid() == null) {
                         stream = Files.newDirectoryStream(dir);
                         this.fileListers.put(guid, stream);
                     } else {
                         stream = this.fileListers.get(guid);
                     }
-                    
+
                     int maxFiles = 1000;
                     int cf = 0;
                     if (req.getNumberOfFiles() > 0) {
@@ -934,7 +973,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             sdf.sync(true);
             ddf.sync(true);
         } catch (Exception e) {
-            SDFSLogger.getLog().error("error while setting dedupe for files",e);
+            SDFSLogger.getLog().error("error while setting dedupe for files", e);
             b.setErrorCode(errorCodes.EIO).setError("error while setting dedupe for files");
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
@@ -1009,8 +1048,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                             // }
                         } catch (org.opendedup.sdfs.io.FileClosedException e) {
                             if (tries > 100) {
-                                SDFSLogger.getLog()
-                                            .warn("tried to open file 100 ties and failed " + smf.getPath());
+                                SDFSLogger.getLog().warn("tried to open file 100 ties and failed " + smf.getPath());
                                 b.setErrorCode(errorCodes.EIO)
                                         .setError("tried to open file 100 ties and failed " + smf.getPath());
                                 responseObserver.onNext(b.build());
