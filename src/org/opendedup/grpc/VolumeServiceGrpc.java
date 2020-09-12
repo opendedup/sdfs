@@ -21,7 +21,7 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.30.2)",
+    value = "by gRPC proto compiler (version 1.31.1)",
     comments = "Source: VolumeService.proto")
 public final class VolumeServiceGrpc {
 
@@ -247,35 +247,283 @@ public final class VolumeServiceGrpc {
     return getSystemInfoMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SetLogicalVolumeCapacityRequest,
-      org.opendedup.grpc.SetLogicalVolumeCapacityResponse> getSetLogicalVolumeCapacityMethod;
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SetVolumeCapacityRequest,
+      org.opendedup.grpc.SetVolumeCapacityResponse> getSetVolumeCapacityMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "SetLogicalVolumeCapacity",
-      requestType = org.opendedup.grpc.SetLogicalVolumeCapacityRequest.class,
-      responseType = org.opendedup.grpc.SetLogicalVolumeCapacityResponse.class,
+      fullMethodName = SERVICE_NAME + '/' + "SetVolumeCapacity",
+      requestType = org.opendedup.grpc.SetVolumeCapacityRequest.class,
+      responseType = org.opendedup.grpc.SetVolumeCapacityResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SetLogicalVolumeCapacityRequest,
-      org.opendedup.grpc.SetLogicalVolumeCapacityResponse> getSetLogicalVolumeCapacityMethod() {
-    io.grpc.MethodDescriptor<org.opendedup.grpc.SetLogicalVolumeCapacityRequest, org.opendedup.grpc.SetLogicalVolumeCapacityResponse> getSetLogicalVolumeCapacityMethod;
-    if ((getSetLogicalVolumeCapacityMethod = VolumeServiceGrpc.getSetLogicalVolumeCapacityMethod) == null) {
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SetVolumeCapacityRequest,
+      org.opendedup.grpc.SetVolumeCapacityResponse> getSetVolumeCapacityMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SetVolumeCapacityRequest, org.opendedup.grpc.SetVolumeCapacityResponse> getSetVolumeCapacityMethod;
+    if ((getSetVolumeCapacityMethod = VolumeServiceGrpc.getSetVolumeCapacityMethod) == null) {
       synchronized (VolumeServiceGrpc.class) {
-        if ((getSetLogicalVolumeCapacityMethod = VolumeServiceGrpc.getSetLogicalVolumeCapacityMethod) == null) {
-          VolumeServiceGrpc.getSetLogicalVolumeCapacityMethod = getSetLogicalVolumeCapacityMethod =
-              io.grpc.MethodDescriptor.<org.opendedup.grpc.SetLogicalVolumeCapacityRequest, org.opendedup.grpc.SetLogicalVolumeCapacityResponse>newBuilder()
+        if ((getSetVolumeCapacityMethod = VolumeServiceGrpc.getSetVolumeCapacityMethod) == null) {
+          VolumeServiceGrpc.getSetVolumeCapacityMethod = getSetVolumeCapacityMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SetVolumeCapacityRequest, org.opendedup.grpc.SetVolumeCapacityResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetLogicalVolumeCapacity"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetVolumeCapacity"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.SetLogicalVolumeCapacityRequest.getDefaultInstance()))
+                  org.opendedup.grpc.SetVolumeCapacityRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.SetLogicalVolumeCapacityResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SetLogicalVolumeCapacity"))
+                  org.opendedup.grpc.SetVolumeCapacityResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SetVolumeCapacity"))
               .build();
         }
       }
     }
-    return getSetLogicalVolumeCapacityMethod;
+    return getSetVolumeCapacityMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.CloudVolumesRequest,
+      org.opendedup.grpc.CloudVolumesResponse> getGetConnectedVolumesMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetConnectedVolumes",
+      requestType = org.opendedup.grpc.CloudVolumesRequest.class,
+      responseType = org.opendedup.grpc.CloudVolumesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.CloudVolumesRequest,
+      org.opendedup.grpc.CloudVolumesResponse> getGetConnectedVolumesMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.CloudVolumesRequest, org.opendedup.grpc.CloudVolumesResponse> getGetConnectedVolumesMethod;
+    if ((getGetConnectedVolumesMethod = VolumeServiceGrpc.getGetConnectedVolumesMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getGetConnectedVolumesMethod = VolumeServiceGrpc.getGetConnectedVolumesMethod) == null) {
+          VolumeServiceGrpc.getGetConnectedVolumesMethod = getGetConnectedVolumesMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.CloudVolumesRequest, org.opendedup.grpc.CloudVolumesResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetConnectedVolumes"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.CloudVolumesRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.CloudVolumesResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("GetConnectedVolumes"))
+              .build();
+        }
+      }
+    }
+    return getGetConnectedVolumesMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.GCScheduleRequest,
+      org.opendedup.grpc.GCScheduleResponse> getGetGCScheduleMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetGCSchedule",
+      requestType = org.opendedup.grpc.GCScheduleRequest.class,
+      responseType = org.opendedup.grpc.GCScheduleResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.GCScheduleRequest,
+      org.opendedup.grpc.GCScheduleResponse> getGetGCScheduleMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.GCScheduleRequest, org.opendedup.grpc.GCScheduleResponse> getGetGCScheduleMethod;
+    if ((getGetGCScheduleMethod = VolumeServiceGrpc.getGetGCScheduleMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getGetGCScheduleMethod = VolumeServiceGrpc.getGetGCScheduleMethod) == null) {
+          VolumeServiceGrpc.getGetGCScheduleMethod = getGetGCScheduleMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.GCScheduleRequest, org.opendedup.grpc.GCScheduleResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetGCSchedule"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.GCScheduleRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.GCScheduleResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("GetGCSchedule"))
+              .build();
+        }
+      }
+    }
+    return getGetGCScheduleMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SetCacheSizeRequest,
+      org.opendedup.grpc.SetCacheSizeResponse> getSetCacheSizeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetCacheSize",
+      requestType = org.opendedup.grpc.SetCacheSizeRequest.class,
+      responseType = org.opendedup.grpc.SetCacheSizeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SetCacheSizeRequest,
+      org.opendedup.grpc.SetCacheSizeResponse> getSetCacheSizeMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SetCacheSizeRequest, org.opendedup.grpc.SetCacheSizeResponse> getSetCacheSizeMethod;
+    if ((getSetCacheSizeMethod = VolumeServiceGrpc.getSetCacheSizeMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getSetCacheSizeMethod = VolumeServiceGrpc.getSetCacheSizeMethod) == null) {
+          VolumeServiceGrpc.getSetCacheSizeMethod = getSetCacheSizeMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SetCacheSizeRequest, org.opendedup.grpc.SetCacheSizeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetCacheSize"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetCacheSizeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetCacheSizeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SetCacheSize"))
+              .build();
+        }
+      }
+    }
+    return getSetCacheSizeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SetPasswordRequest,
+      org.opendedup.grpc.SetPasswordResponse> getSetPasswordMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetPassword",
+      requestType = org.opendedup.grpc.SetPasswordRequest.class,
+      responseType = org.opendedup.grpc.SetPasswordResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SetPasswordRequest,
+      org.opendedup.grpc.SetPasswordResponse> getSetPasswordMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SetPasswordRequest, org.opendedup.grpc.SetPasswordResponse> getSetPasswordMethod;
+    if ((getSetPasswordMethod = VolumeServiceGrpc.getSetPasswordMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getSetPasswordMethod = VolumeServiceGrpc.getSetPasswordMethod) == null) {
+          VolumeServiceGrpc.getSetPasswordMethod = getSetPasswordMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SetPasswordRequest, org.opendedup.grpc.SetPasswordResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetPassword"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetPasswordRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetPasswordResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SetPassword"))
+              .build();
+        }
+      }
+    }
+    return getSetPasswordMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SpeedRequest,
+      org.opendedup.grpc.SpeedResponse> getSetReadSpeedMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetReadSpeed",
+      requestType = org.opendedup.grpc.SpeedRequest.class,
+      responseType = org.opendedup.grpc.SpeedResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SpeedRequest,
+      org.opendedup.grpc.SpeedResponse> getSetReadSpeedMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SpeedRequest, org.opendedup.grpc.SpeedResponse> getSetReadSpeedMethod;
+    if ((getSetReadSpeedMethod = VolumeServiceGrpc.getSetReadSpeedMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getSetReadSpeedMethod = VolumeServiceGrpc.getSetReadSpeedMethod) == null) {
+          VolumeServiceGrpc.getSetReadSpeedMethod = getSetReadSpeedMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SpeedRequest, org.opendedup.grpc.SpeedResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetReadSpeed"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SpeedRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SpeedResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SetReadSpeed"))
+              .build();
+        }
+      }
+    }
+    return getSetReadSpeedMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SpeedRequest,
+      org.opendedup.grpc.SpeedResponse> getSetWriteSpeedMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetWriteSpeed",
+      requestType = org.opendedup.grpc.SpeedRequest.class,
+      responseType = org.opendedup.grpc.SpeedResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SpeedRequest,
+      org.opendedup.grpc.SpeedResponse> getSetWriteSpeedMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SpeedRequest, org.opendedup.grpc.SpeedResponse> getSetWriteSpeedMethod;
+    if ((getSetWriteSpeedMethod = VolumeServiceGrpc.getSetWriteSpeedMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getSetWriteSpeedMethod = VolumeServiceGrpc.getSetWriteSpeedMethod) == null) {
+          VolumeServiceGrpc.getSetWriteSpeedMethod = getSetWriteSpeedMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SpeedRequest, org.opendedup.grpc.SpeedResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetWriteSpeed"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SpeedRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SpeedResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SetWriteSpeed"))
+              .build();
+        }
+      }
+    }
+    return getSetWriteSpeedMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SyncFromVolRequest,
+      org.opendedup.grpc.SyncFromVolResponse> getSyncFromCloudVolumeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SyncFromCloudVolume",
+      requestType = org.opendedup.grpc.SyncFromVolRequest.class,
+      responseType = org.opendedup.grpc.SyncFromVolResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SyncFromVolRequest,
+      org.opendedup.grpc.SyncFromVolResponse> getSyncFromCloudVolumeMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SyncFromVolRequest, org.opendedup.grpc.SyncFromVolResponse> getSyncFromCloudVolumeMethod;
+    if ((getSyncFromCloudVolumeMethod = VolumeServiceGrpc.getSyncFromCloudVolumeMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getSyncFromCloudVolumeMethod = VolumeServiceGrpc.getSyncFromCloudVolumeMethod) == null) {
+          VolumeServiceGrpc.getSyncFromCloudVolumeMethod = getSyncFromCloudVolumeMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SyncFromVolRequest, org.opendedup.grpc.SyncFromVolResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SyncFromCloudVolume"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SyncFromVolRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SyncFromVolResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SyncFromCloudVolume"))
+              .build();
+        }
+      }
+    }
+    return getSyncFromCloudVolumeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SyncVolRequest,
+      org.opendedup.grpc.SyncVolResponse> getSyncCloudVolumeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SyncCloudVolume",
+      requestType = org.opendedup.grpc.SyncVolRequest.class,
+      responseType = org.opendedup.grpc.SyncVolResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SyncVolRequest,
+      org.opendedup.grpc.SyncVolResponse> getSyncCloudVolumeMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SyncVolRequest, org.opendedup.grpc.SyncVolResponse> getSyncCloudVolumeMethod;
+    if ((getSyncCloudVolumeMethod = VolumeServiceGrpc.getSyncCloudVolumeMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getSyncCloudVolumeMethod = VolumeServiceGrpc.getSyncCloudVolumeMethod) == null) {
+          VolumeServiceGrpc.getSyncCloudVolumeMethod = getSyncCloudVolumeMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SyncVolRequest, org.opendedup.grpc.SyncVolResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SyncCloudVolume"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SyncVolRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SyncVolResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SyncCloudVolume"))
+              .build();
+        }
+      }
+    }
+    return getSyncCloudVolumeMethod;
   }
 
   /**
@@ -380,9 +628,65 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public void setLogicalVolumeCapacity(org.opendedup.grpc.SetLogicalVolumeCapacityRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetLogicalVolumeCapacityResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetLogicalVolumeCapacityMethod(), responseObserver);
+    public void setVolumeCapacity(org.opendedup.grpc.SetVolumeCapacityRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetVolumeCapacityResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetVolumeCapacityMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void getConnectedVolumes(org.opendedup.grpc.CloudVolumesRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.CloudVolumesResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetConnectedVolumesMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void getGCSchedule(org.opendedup.grpc.GCScheduleRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.GCScheduleResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetGCScheduleMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void setCacheSize(org.opendedup.grpc.SetCacheSizeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetCacheSizeResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetCacheSizeMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void setPassword(org.opendedup.grpc.SetPasswordRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetPasswordResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetPasswordMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void setReadSpeed(org.opendedup.grpc.SpeedRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SpeedResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetReadSpeedMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void setWriteSpeed(org.opendedup.grpc.SpeedRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SpeedResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetWriteSpeedMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void syncFromCloudVolume(org.opendedup.grpc.SyncFromVolRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SyncFromVolResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSyncFromCloudVolumeMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void syncCloudVolume(org.opendedup.grpc.SyncVolRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SyncVolResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSyncCloudVolumeMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -437,12 +741,68 @@ public final class VolumeServiceGrpc {
                 org.opendedup.grpc.SystemInfoResponse>(
                   this, METHODID_SYSTEM_INFO)))
           .addMethod(
-            getSetLogicalVolumeCapacityMethod(),
+            getSetVolumeCapacityMethod(),
             asyncUnaryCall(
               new MethodHandlers<
-                org.opendedup.grpc.SetLogicalVolumeCapacityRequest,
-                org.opendedup.grpc.SetLogicalVolumeCapacityResponse>(
-                  this, METHODID_SET_LOGICAL_VOLUME_CAPACITY)))
+                org.opendedup.grpc.SetVolumeCapacityRequest,
+                org.opendedup.grpc.SetVolumeCapacityResponse>(
+                  this, METHODID_SET_VOLUME_CAPACITY)))
+          .addMethod(
+            getGetConnectedVolumesMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.CloudVolumesRequest,
+                org.opendedup.grpc.CloudVolumesResponse>(
+                  this, METHODID_GET_CONNECTED_VOLUMES)))
+          .addMethod(
+            getGetGCScheduleMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.GCScheduleRequest,
+                org.opendedup.grpc.GCScheduleResponse>(
+                  this, METHODID_GET_GCSCHEDULE)))
+          .addMethod(
+            getSetCacheSizeMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SetCacheSizeRequest,
+                org.opendedup.grpc.SetCacheSizeResponse>(
+                  this, METHODID_SET_CACHE_SIZE)))
+          .addMethod(
+            getSetPasswordMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SetPasswordRequest,
+                org.opendedup.grpc.SetPasswordResponse>(
+                  this, METHODID_SET_PASSWORD)))
+          .addMethod(
+            getSetReadSpeedMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SpeedRequest,
+                org.opendedup.grpc.SpeedResponse>(
+                  this, METHODID_SET_READ_SPEED)))
+          .addMethod(
+            getSetWriteSpeedMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SpeedRequest,
+                org.opendedup.grpc.SpeedResponse>(
+                  this, METHODID_SET_WRITE_SPEED)))
+          .addMethod(
+            getSyncFromCloudVolumeMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SyncFromVolRequest,
+                org.opendedup.grpc.SyncFromVolResponse>(
+                  this, METHODID_SYNC_FROM_CLOUD_VOLUME)))
+          .addMethod(
+            getSyncCloudVolumeMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SyncVolRequest,
+                org.opendedup.grpc.SyncVolResponse>(
+                  this, METHODID_SYNC_CLOUD_VOLUME)))
           .build();
     }
   }
@@ -522,10 +882,74 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public void setLogicalVolumeCapacity(org.opendedup.grpc.SetLogicalVolumeCapacityRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetLogicalVolumeCapacityResponse> responseObserver) {
+    public void setVolumeCapacity(org.opendedup.grpc.SetVolumeCapacityRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetVolumeCapacityResponse> responseObserver) {
       asyncUnaryCall(
-          getChannel().newCall(getSetLogicalVolumeCapacityMethod(), getCallOptions()), request, responseObserver);
+          getChannel().newCall(getSetVolumeCapacityMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void getConnectedVolumes(org.opendedup.grpc.CloudVolumesRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.CloudVolumesResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetConnectedVolumesMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void getGCSchedule(org.opendedup.grpc.GCScheduleRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.GCScheduleResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetGCScheduleMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void setCacheSize(org.opendedup.grpc.SetCacheSizeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetCacheSizeResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetCacheSizeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void setPassword(org.opendedup.grpc.SetPasswordRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetPasswordResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetPasswordMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void setReadSpeed(org.opendedup.grpc.SpeedRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SpeedResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetReadSpeedMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void setWriteSpeed(org.opendedup.grpc.SpeedRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SpeedResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetWriteSpeedMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void syncFromCloudVolume(org.opendedup.grpc.SyncFromVolRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SyncFromVolResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSyncFromCloudVolumeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void syncCloudVolume(org.opendedup.grpc.SyncVolRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SyncVolResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSyncCloudVolumeMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -597,9 +1021,65 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public org.opendedup.grpc.SetLogicalVolumeCapacityResponse setLogicalVolumeCapacity(org.opendedup.grpc.SetLogicalVolumeCapacityRequest request) {
+    public org.opendedup.grpc.SetVolumeCapacityResponse setVolumeCapacity(org.opendedup.grpc.SetVolumeCapacityRequest request) {
       return blockingUnaryCall(
-          getChannel(), getSetLogicalVolumeCapacityMethod(), getCallOptions(), request);
+          getChannel(), getSetVolumeCapacityMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.CloudVolumesResponse getConnectedVolumes(org.opendedup.grpc.CloudVolumesRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetConnectedVolumesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.GCScheduleResponse getGCSchedule(org.opendedup.grpc.GCScheduleRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetGCScheduleMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SetCacheSizeResponse setCacheSize(org.opendedup.grpc.SetCacheSizeRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetCacheSizeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SetPasswordResponse setPassword(org.opendedup.grpc.SetPasswordRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetPasswordMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SpeedResponse setReadSpeed(org.opendedup.grpc.SpeedRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetReadSpeedMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SpeedResponse setWriteSpeed(org.opendedup.grpc.SpeedRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetWriteSpeedMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SyncFromVolResponse syncFromCloudVolume(org.opendedup.grpc.SyncFromVolRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSyncFromCloudVolumeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SyncVolResponse syncCloudVolume(org.opendedup.grpc.SyncVolRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSyncCloudVolumeMethod(), getCallOptions(), request);
     }
   }
 
@@ -678,10 +1158,74 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SetLogicalVolumeCapacityResponse> setLogicalVolumeCapacity(
-        org.opendedup.grpc.SetLogicalVolumeCapacityRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SetVolumeCapacityResponse> setVolumeCapacity(
+        org.opendedup.grpc.SetVolumeCapacityRequest request) {
       return futureUnaryCall(
-          getChannel().newCall(getSetLogicalVolumeCapacityMethod(), getCallOptions()), request);
+          getChannel().newCall(getSetVolumeCapacityMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.CloudVolumesResponse> getConnectedVolumes(
+        org.opendedup.grpc.CloudVolumesRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetConnectedVolumesMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.GCScheduleResponse> getGCSchedule(
+        org.opendedup.grpc.GCScheduleRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetGCScheduleMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SetCacheSizeResponse> setCacheSize(
+        org.opendedup.grpc.SetCacheSizeRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetCacheSizeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SetPasswordResponse> setPassword(
+        org.opendedup.grpc.SetPasswordRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetPasswordMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SpeedResponse> setReadSpeed(
+        org.opendedup.grpc.SpeedRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetReadSpeedMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SpeedResponse> setWriteSpeed(
+        org.opendedup.grpc.SpeedRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetWriteSpeedMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SyncFromVolResponse> syncFromCloudVolume(
+        org.opendedup.grpc.SyncFromVolRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSyncFromCloudVolumeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SyncVolResponse> syncCloudVolume(
+        org.opendedup.grpc.SyncVolRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSyncCloudVolumeMethod(), getCallOptions()), request);
     }
   }
 
@@ -692,7 +1236,15 @@ public final class VolumeServiceGrpc {
   private static final int METHODID_DELETE_CLOUD_VOLUME = 4;
   private static final int METHODID_DSEINFO = 5;
   private static final int METHODID_SYSTEM_INFO = 6;
-  private static final int METHODID_SET_LOGICAL_VOLUME_CAPACITY = 7;
+  private static final int METHODID_SET_VOLUME_CAPACITY = 7;
+  private static final int METHODID_GET_CONNECTED_VOLUMES = 8;
+  private static final int METHODID_GET_GCSCHEDULE = 9;
+  private static final int METHODID_SET_CACHE_SIZE = 10;
+  private static final int METHODID_SET_PASSWORD = 11;
+  private static final int METHODID_SET_READ_SPEED = 12;
+  private static final int METHODID_SET_WRITE_SPEED = 13;
+  private static final int METHODID_SYNC_FROM_CLOUD_VOLUME = 14;
+  private static final int METHODID_SYNC_CLOUD_VOLUME = 15;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -739,9 +1291,41 @@ public final class VolumeServiceGrpc {
           serviceImpl.systemInfo((org.opendedup.grpc.SystemInfoRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.SystemInfoResponse>) responseObserver);
           break;
-        case METHODID_SET_LOGICAL_VOLUME_CAPACITY:
-          serviceImpl.setLogicalVolumeCapacity((org.opendedup.grpc.SetLogicalVolumeCapacityRequest) request,
-              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SetLogicalVolumeCapacityResponse>) responseObserver);
+        case METHODID_SET_VOLUME_CAPACITY:
+          serviceImpl.setVolumeCapacity((org.opendedup.grpc.SetVolumeCapacityRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SetVolumeCapacityResponse>) responseObserver);
+          break;
+        case METHODID_GET_CONNECTED_VOLUMES:
+          serviceImpl.getConnectedVolumes((org.opendedup.grpc.CloudVolumesRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.CloudVolumesResponse>) responseObserver);
+          break;
+        case METHODID_GET_GCSCHEDULE:
+          serviceImpl.getGCSchedule((org.opendedup.grpc.GCScheduleRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.GCScheduleResponse>) responseObserver);
+          break;
+        case METHODID_SET_CACHE_SIZE:
+          serviceImpl.setCacheSize((org.opendedup.grpc.SetCacheSizeRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SetCacheSizeResponse>) responseObserver);
+          break;
+        case METHODID_SET_PASSWORD:
+          serviceImpl.setPassword((org.opendedup.grpc.SetPasswordRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SetPasswordResponse>) responseObserver);
+          break;
+        case METHODID_SET_READ_SPEED:
+          serviceImpl.setReadSpeed((org.opendedup.grpc.SpeedRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SpeedResponse>) responseObserver);
+          break;
+        case METHODID_SET_WRITE_SPEED:
+          serviceImpl.setWriteSpeed((org.opendedup.grpc.SpeedRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SpeedResponse>) responseObserver);
+          break;
+        case METHODID_SYNC_FROM_CLOUD_VOLUME:
+          serviceImpl.syncFromCloudVolume((org.opendedup.grpc.SyncFromVolRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SyncFromVolResponse>) responseObserver);
+          break;
+        case METHODID_SYNC_CLOUD_VOLUME:
+          serviceImpl.syncCloudVolume((org.opendedup.grpc.SyncVolRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SyncVolResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -811,7 +1395,15 @@ public final class VolumeServiceGrpc {
               .addMethod(getDeleteCloudVolumeMethod())
               .addMethod(getDSEInfoMethod())
               .addMethod(getSystemInfoMethod())
-              .addMethod(getSetLogicalVolumeCapacityMethod())
+              .addMethod(getSetVolumeCapacityMethod())
+              .addMethod(getGetConnectedVolumesMethod())
+              .addMethod(getGetGCScheduleMethod())
+              .addMethod(getSetCacheSizeMethod())
+              .addMethod(getSetPasswordMethod())
+              .addMethod(getSetReadSpeedMethod())
+              .addMethod(getSetWriteSpeedMethod())
+              .addMethod(getSyncFromCloudVolumeMethod())
+              .addMethod(getSyncCloudVolumeMethod())
               .build();
         }
       }

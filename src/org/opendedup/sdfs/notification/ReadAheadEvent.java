@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.opendedup.sdfs.notification;
 
+import java.io.IOException;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -50,7 +52,7 @@ public class ReadAheadEvent extends SDFSEvent {
 	}
 
 	@Override
-    public org.opendedup.grpc.SDFSEvent toProtoBuf() {
+    public org.opendedup.grpc.SDFSEvent toProtoBuf() throws IOException {
         org.opendedup.grpc.SDFSEvent evt = super.toProtoBuf();
         org.opendedup.grpc.SDFSEvent.Builder b= org.opendedup.grpc.SDFSEvent.newBuilder(evt);
 		b.putAttributes("file", mf.getPath());

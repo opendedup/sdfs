@@ -18,19 +18,27 @@
  *******************************************************************************/
 package org.opendedup.sdfs.io.events;
 
+import org.opendedup.sdfs.notification.SDFSEvent;
+
 public class CloudSyncDLRequest {
 	long volumeID;
 	boolean updateHashMap;
 	boolean updateRef;
+	SDFSEvent evt;
 
-	public CloudSyncDLRequest(long volumeID,boolean updateHashMap,boolean updateRef) {
+	public CloudSyncDLRequest(long volumeID,boolean updateHashMap,boolean updateRef,SDFSEvent evt) {
 		this.volumeID = volumeID;
 		this.updateHashMap = updateHashMap;
 		this.updateRef = updateRef;
+		this.evt = evt;
 	}
 	
 	public long getVolumeID() {
 		return this.volumeID;
+	}
+
+	public SDFSEvent getEvent() {
+		return this.evt;
 	}
 	
 	public boolean isUpdateHashMap() {

@@ -49,6 +49,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.mapdb.CC;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.grpc.FileAttributes;
@@ -68,6 +69,8 @@ import org.opendedup.util.ByteUtils;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import net.jpountz.xxhash.XXHash64;
 
 import com.google.common.eventbus.EventBus;
 import com.google.gson.JsonObject;
@@ -123,8 +126,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
-
-	
 
 	/**
 	 * 
@@ -1452,7 +1453,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.importing = in.readBoolean();
 				}
-				
 
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb = new byte[vlen];
@@ -1532,6 +1532,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}
 	}
 
+	public long getHashCode() {
+		String fl = this.getPath().substring(Main.volume.getPath().length());
+		byte [] stb = fl.getBytes();
+		return HASHER.hash(stb, 0, stb.length, 6442);
+	}
+
+	private static final XXHash64 HASHER = CC.HASH_FACTORY.hash64();
+
 	public FileInfoResponse toGRPC(boolean compact) throws IOException {
 		FileInfoResponse.Builder b = FileInfoResponse.newBuilder();
 		b.setFileName(this.getName());
@@ -1550,11 +1558,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} else if(this.isDedup()) {
 			b.setType(fileType.DIR);
 		}
+		byte [] stb = fl.getBytes();
+		b.setHashcode(HASHER.hash(stb, 0, stb.length, 6442));
 		b.setGroupId(this.getGroup_id()).setUserId(this.getOwner_id()).setPermissions(this.getPermissions());
 		if(!compact && this.isFile()) {
 			b.setAtime(this.getLastAccessed()).setCtime(this.getLastAccessed()).setHidden(this.hidden).setSize(this.length())
 			.setRead(this.read).setWrite(this.write).setLocalOwner(this.isFile()).setExecute(this.execute);
-			b.addIoMonitor(this.getIOMonitor().toGRPC());
+			b.setIoMonitor(this.getIOMonitor().toGRPC());
 			try {
 				b.setOpen(DedupFileStore.fileOpen(this));
 			} catch (NullPointerException e) {

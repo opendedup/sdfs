@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.CleanStoreRequest}
  */
-public final class CleanStoreRequest extends
+public  final class CleanStoreRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CleanStoreRequest)
     CleanStoreRequestOrBuilder {
@@ -91,7 +91,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool compact = 1;</code>
    * @return The compact.
    */
-  @java.lang.Override
   public boolean getCompact() {
     return compact_;
   }
@@ -404,7 +403,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool compact = 1;</code>
      * @return The compact.
      */
-    @java.lang.Override
     public boolean getCompact() {
       return compact_;
     }

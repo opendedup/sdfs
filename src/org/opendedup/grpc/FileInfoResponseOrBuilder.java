@@ -235,28 +235,19 @@ public interface FileInfoResponseOrBuilder extends
       getVolumeidBytes();
 
   /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * @return Whether the ioMonitor field is set.
    */
-  java.util.List<org.opendedup.grpc.IOMonitorResponse> 
-      getIoMonitorList();
+  boolean hasIoMonitor();
   /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * @return The ioMonitor.
    */
-  org.opendedup.grpc.IOMonitorResponse getIoMonitor(int index);
+  org.opendedup.grpc.IOMonitorResponse getIoMonitor();
   /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
    */
-  int getIoMonitorCount();
-  /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-   */
-  java.util.List<? extends org.opendedup.grpc.IOMonitorResponseOrBuilder> 
-      getIoMonitorOrBuilderList();
-  /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-   */
-  org.opendedup.grpc.IOMonitorResponseOrBuilder getIoMonitorOrBuilder(
-      int index);
+  org.opendedup.grpc.IOMonitorResponseOrBuilder getIoMonitorOrBuilder();
 
   /**
    * <code>string symlinkPath = 25;</code>
@@ -287,4 +278,10 @@ public interface FileInfoResponseOrBuilder extends
    * @return The permissions.
    */
   int getPermissions();
+
+  /**
+   * <code>int64 hashcode = 29;</code>
+   * @return The hashcode.
+   */
+  long getHashcode();
 }

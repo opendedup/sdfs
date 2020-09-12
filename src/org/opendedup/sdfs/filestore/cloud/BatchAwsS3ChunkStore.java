@@ -118,6 +118,7 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.GlacierJobParameters;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
+import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.RestoreObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -134,6 +135,7 @@ import com.google.common.io.ByteStreams;
 
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.fsync.SyncFSScheduler;
+import org.opendedup.grpc.FileInfo;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
@@ -1678,6 +1680,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							nmd.setContentLength(sz.length);
 							nmd.setUserMetadata(md);
 							s3Service.putObject(this.name, binm, new ByteArrayInputStream(sz), nmd);
+							this.updateObject(binm, omd);
 						}
 					} catch (Exception e) {
 						try {
@@ -1956,8 +1959,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				PutObjectRequest req = new PutObjectRequest(this.name, pth, new ByteArrayInputStream(pth.getBytes()),
 						md);
 				s3Service.putObject(req);
-				if (this.simpleMD)
-					this.updateObject(pth, md);
+				this.updateObject(pth, md);
 				if (this.isClustered())
 					this.checkoutFile(pth);
 			} catch (Exception e1) {
@@ -1977,10 +1979,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				PutObjectRequest req = new PutObjectRequest(this.name, pth, new ByteArrayInputStream(pth.getBytes()),
 						md);
 				s3Service.putObject(req);
+				this.updateObject(pth, md);
 				if (this.isClustered())
 					this.checkoutFile(pth);
-				if (this.simpleMD)
-					this.updateObject(pth, md);
+				this.updateObject(pth, md);
 			} catch (Exception e1) {
 				SDFSLogger.getLog().error("error uploading", e1);
 				throw new IOException(e1);
@@ -2053,8 +2055,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						this.multiPartUpload(req, p);
 						if (this.isClustered())
 							this.checkoutFile(pth);
-						if (this.simpleMD)
-							this.updateObject(pth, md);
+						this.updateObject(pth, md);
 						SDFSLogger.getLog()
 								.debug("uploaded=" + f.getPath() + " lm=" + md.getUserMetadata().get("lastmodified"));
 					} catch (AmazonS3Exception e1) {
@@ -2087,7 +2088,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 						md.setContentLength(p.length());
 						PutObjectRequest req = new PutObjectRequest(this.name, objName, p).withMetadata(md);
+						
 						multiPartUpload(req, p);
+						this.updateObject(pth, md);
 						if (this.isClustered())
 							this.checkoutFile(pth);
 					} catch (AmazonS3Exception e1) {
@@ -2476,8 +2479,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				nobjPos = new AtomicInteger(0);
 			}
 
-			if (nsummaries.size() == 0)
+			if (nsummaries.size() == 0) {
+				nck = null;
 				return null;
+			}
 			String ky = nsummaries.get(nobjPos.get()).getKey();
 			if (!ky.endsWith(mdExt)) {
 				if (ky.length() == pfx.length()) {
@@ -3402,6 +3407,36 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			pid = this.getLongID();
 
 		return pid;
+	}
+
+	private String getRelativePath(final String parent, final String child) {
+		if (!child.startsWith(parent)) {
+			throw new IllegalArgumentException("Invalid child '" + child 
+				+ "' for parent '" + parent + "'");
+		}
+		// a String.replace() also would be fine here
+		final int parentLen = parent.length();
+		return child.substring(parentLen);
+	}
+	
+	private boolean isImmediateDescendant(final String parent, final String child) {
+		if (!child.startsWith(parent)) {
+			// maybe we just should return false
+			throw new IllegalArgumentException("Invalid child '" + child 
+				+ "' for parent '" + parent + "'");
+		}
+		final int parentLen = parent.length();
+		final String childWithoutParent = child.substring(parentLen);
+		if (childWithoutParent.contains("/")) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public FileInfo[] listFiles(String prefix, int length) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

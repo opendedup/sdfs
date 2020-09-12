@@ -77,6 +77,7 @@ import com.microsoft.azure.storage.blob.StandardBlobTier;
 import com.microsoft.azure.storage.core.Base64;
 
 import org.opendedup.collections.HashExistsException;
+import org.opendedup.grpc.FileInfo;
 
 /**
  * 
@@ -87,6 +88,7 @@ import org.opendedup.collections.HashExistsException;
  *         this chunk store since S3 charges per http request.
  * 
  */
+
 public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
 	CloudStorageAccount account;
 	CloudBlobClient serviceClient = null;
@@ -2140,6 +2142,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		while (pid < 100 && this.fileExists(pid))
 			pid = this.getLongID();
 		return pid;
+	}
+
+	@Override
+	public FileInfo[] listFiles(String prefix, int length) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

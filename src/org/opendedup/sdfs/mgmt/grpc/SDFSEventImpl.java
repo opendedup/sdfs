@@ -1,5 +1,7 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
+import java.io.IOException;
+
 import com.google.common.eventbus.Subscribe;
 
 import org.opendedup.grpc.SDFSEventListRequest;
@@ -34,49 +36,87 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
 
     @Override
     public void subscribeEvent(SDFSEventRequest request, StreamObserver<SDFSEventResponse> responseObserver) {
+        SDFSEventResponse.Builder b = SDFSEventResponse.newBuilder();
         org.opendedup.sdfs.notification.SDFSEvent evt = null;
+        SDFSEventListener l = null;
         try {
-            evt = org.opendedup.sdfs.notification.SDFSEvent.getEvent(request.getUuid());
-        } catch (NullPointerException e) {
-            SDFSEventResponse.Builder b = SDFSEventResponse.newBuilder();
+            SDFSLogger.getLog().info("Calling Event Listener");
+            
+            try {
+                SDFSLogger.getLog().info("1");
+                evt = org.opendedup.sdfs.notification.SDFSEvent.getEvent(request.getUuid());
+                SDFSLogger.getLog().info("2");
+            } catch (NullPointerException e) {
+                SDFSLogger.getLog().info("oSent Event");
+                b.setError(e.getMessage());
+                b.setErrorCode(errorCodes.ENOENT);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            l= new SDFSEventListener(evt, responseObserver, b);
+            SDFSLogger.getLog().info("3");
+            evt.registerListener(l);
+            SDFSLogger.getLog().info("4");
+            while (!evt.isDone()) {
+                try {
+                    Thread.sleep(100);
+                    SDFSLogger.getLog().info("5 " + evt.endTime);
+                } catch (InterruptedException e) {
+                    SDFSLogger.getLog().info("lSent Event");
+
+                    return;
+                }
+            }
+            SDFSLogger.getLog().info("Done");
+        } catch (Exception e) {
+            SDFSLogger.getLog().error("Unable to listen for event", e);
             b.setError(e.getMessage());
-            b.setErrorCode(errorCodes.ENOENT);
+            b.setErrorCode(errorCodes.EIO);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
-        }
-        SDFSEventListener l = new SDFSEventListener(evt, responseObserver);
-        evt.registerListener(l);
-        while (!evt.isDone()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                SDFSEventResponse.Builder b = SDFSEventResponse.newBuilder();
-                b.setError(e.getMessage());
-                b.setErrorCode(errorCodes.EIO);
-                responseObserver.onNext(b.build());
-                break;
+
+        } finally {
+            SDFSLogger.getLog().info("7");
+            if(evt != null && l != null) {
+                SDFSLogger.getLog().info("8");
+                evt.unregisterListener(l);
             }
+            SDFSLogger.getLog().info("9");
         }
-        responseObserver.onCompleted();
+
     }
 
     public class SDFSEventListener {
 
         org.opendedup.sdfs.notification.SDFSEvent evt = null;
         StreamObserver<SDFSEventResponse> responseObserver;
+        SDFSEventResponse.Builder b;
 
         public SDFSEventListener(org.opendedup.sdfs.notification.SDFSEvent evt,
-                StreamObserver<SDFSEventResponse> responseObserver) {
+                StreamObserver<SDFSEventResponse> responseObserver, SDFSEventResponse.Builder b) {
             this.evt = evt;
             this.responseObserver = responseObserver;
+            this.b = b;
             evt.registerListener(this);
         }
 
         @Subscribe
         public void nvent(org.opendedup.sdfs.notification.SDFSEvent _evt) {
-            SDFSEventResponse.Builder b = SDFSEventResponse.newBuilder();
-            b.setEvent(_evt.toProtoBuf());
+
+            try {
+                b.setEvent(_evt.toProtoBuf());
+            } catch (Exception e) {
+                SDFSLogger.getLog().info("nSent Event");
+                b.setError("Unable to marshal event");
+                b.setErrorCode(errorCodes.EIO);
+            }
             responseObserver.onNext(b.build());
+            SDFSLogger.getLog().info("Sent Event");
+            if (_evt.isDone()) {
+                responseObserver.onCompleted();
+                evt.unregisterListener(this);
+            }
         }
     }
 

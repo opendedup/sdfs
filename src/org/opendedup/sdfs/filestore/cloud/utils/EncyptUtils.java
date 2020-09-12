@@ -29,8 +29,7 @@ public class EncyptUtils {
 
 	public static String encString(String hashes, boolean enc)
 			throws IOException {
-		if (baseEncode)
-			return hashes;
+		
 		if (enc) {
 			byte[] encH = EncryptUtils.encryptCBC(hashes.getBytes());
 			if (baseEncode)
@@ -38,7 +37,9 @@ public class EncyptUtils {
 			else
 				return BaseEncoding.base64Url().encode(encH);
 
-		} else {
+		}else if (!baseEncode)
+			return hashes;
+		else {
 			return BaseEncoding.base64Url().encode(hashes.getBytes());
 
 		}
@@ -46,8 +47,7 @@ public class EncyptUtils {
 
 	public static String decString(String fname, boolean enc)
 			throws IOException {
-		if (baseEncode)
-			return fname;
+		
 		if (enc) {
 			byte[] encH;
 			if (baseEncode)
@@ -56,7 +56,9 @@ public class EncyptUtils {
 				encH = BaseEncoding.base64Url().decode(fname);
 			String st = new String(EncryptUtils.decryptCBC(encH));
 			return st;
-		} else {
+		} else if (!baseEncode)
+			return fname;
+		else {
 
 			byte[] encH;
 			encH = BaseEncoding.base64Url().decode(fname);
@@ -66,12 +68,13 @@ public class EncyptUtils {
 
 	public static String encHashArchiveName(long id, boolean enc)
 			throws IOException {
-		if (baseEncode)
-			return Long.toString(id);
+		
 		if (enc) {
 			byte[] encH = EncryptUtils.encryptCBC(Long.toString(id).getBytes());
 			return BaseEncoding.base64Url().encode(encH);
-		} else {
+		} else if (!baseEncode)
+			return Long.toString(id);
+		else {
 			return BaseEncoding.base64Url()
 					.encode(Long.toString(id).getBytes());
 		}
@@ -79,12 +82,14 @@ public class EncyptUtils {
 	
 	public static String encHashArchiveName(long id,boolean useOldKey, boolean enc)
 			throws IOException {
-		if (baseEncode)
+		if (!baseEncode)
 			return Long.toString(id);
 		if (enc) {
 			byte[] encH = EncryptUtils.encryptCBC(Long.toString(id).getBytes(),useOldKey);
 			return BaseEncoding.base64Url().encode(encH);
-		} else {
+		} else if (!baseEncode)
+			return	Long.toString(id);
+		else {
 			return BaseEncoding.base64Url()
 					.encode(Long.toString(id).getBytes());
 		}
@@ -94,14 +99,15 @@ public class EncyptUtils {
 
 	public static long decHashArchiveName(String fname, boolean enc)
 			throws IOException {
-		if (baseEncode)
-			return Long.parseLong(new String(fname));
+		
 		if (enc) {
 			byte[] encH;
 			encH = BaseEncoding.base64Url().decode(fname);
 			String st = new String(EncryptUtils.decryptCBC(encH));
 			return Long.parseLong(st);
-		} else {
+		} else if (!baseEncode)
+			return Long.parseLong(new String(fname));
+		else {
 			byte[] encH;
 
 			encH = BaseEncoding.base64Url().decode(fname);
@@ -158,6 +164,7 @@ public class EncyptUtils {
 	}
 
 	public static byte[] decBar(String fname, boolean enc) throws IOException {
+		
 		if (enc) {
 			byte[] encH = BaseEncoding.base64Url().decode(fname);
 			return EncryptUtils.decryptCBC(encH);

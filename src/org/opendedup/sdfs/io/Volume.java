@@ -328,6 +328,7 @@ public class Volume implements java.io.Serializable {
 			throw new IOException("Cannot resize volume to something less than current size. Current Size ["
 					+ this.currentSize + "] requested capacity [" + capacity + "]");
 		this.capacity = capacity;
+		Main.chunkStoreAllocationSize = capacity;
 		HCServiceProxy.setDseSize((capacity / HashFunctionPool.avg_page_size) + 8000);
 		SDFSLogger.getLog().info("Set Volume Capacity to " + capacity);
 		writer.writeConfig();

@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.GetCloudFileRequest}
  */
-public final class GetCloudFileRequest extends
+public  final class GetCloudFileRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.GetCloudFileRequest)
     GetCloudFileRequestOrBuilder {
@@ -112,7 +112,6 @@ private static final long serialVersionUID = 0L;
    * <code>string file = 1;</code>
    * @return The file.
    */
-  @java.lang.Override
   public java.lang.String getFile() {
     java.lang.Object ref = file_;
     if (ref instanceof java.lang.String) {
@@ -129,7 +128,6 @@ private static final long serialVersionUID = 0L;
    * <code>string file = 1;</code>
    * @return The bytes for file.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getFileBytes() {
     java.lang.Object ref = file_;
@@ -150,7 +148,6 @@ private static final long serialVersionUID = 0L;
    * <code>string dstfile = 2;</code>
    * @return The dstfile.
    */
-  @java.lang.Override
   public java.lang.String getDstfile() {
     java.lang.Object ref = dstfile_;
     if (ref instanceof java.lang.String) {
@@ -167,7 +164,6 @@ private static final long serialVersionUID = 0L;
    * <code>string dstfile = 2;</code>
    * @return The bytes for dstfile.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getDstfileBytes() {
     java.lang.Object ref = dstfile_;
@@ -188,7 +184,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool overwrite = 3;</code>
    * @return The overwrite.
    */
-  @java.lang.Override
   public boolean getOverwrite() {
     return overwrite_;
   }
@@ -199,7 +194,6 @@ private static final long serialVersionUID = 0L;
    * <code>string changeid = 4;</code>
    * @return The changeid.
    */
-  @java.lang.Override
   public java.lang.String getChangeid() {
     java.lang.Object ref = changeid_;
     if (ref instanceof java.lang.String) {
@@ -216,7 +210,6 @@ private static final long serialVersionUID = 0L;
    * <code>string changeid = 4;</code>
    * @return The bytes for changeid.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getChangeidBytes() {
     java.lang.Object ref = changeid_;
@@ -742,7 +735,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool overwrite = 3;</code>
      * @return The overwrite.
      */
-    @java.lang.Override
     public boolean getOverwrite() {
       return overwrite_;
     }

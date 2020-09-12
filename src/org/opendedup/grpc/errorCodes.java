@@ -13,69 +13,65 @@ public enum errorCodes
    */
   NOERR(0),
   /**
-   * <code>ENOENT = 1;</code>
+   * <code>ENOENT = 2;</code>
    */
-  ENOENT(1),
+  ENOENT(2),
   /**
-   * <code>EIO = 3;</code>
+   * <code>EIO = 5;</code>
    */
-  EIO(3),
+  EIO(5),
   /**
-   * <code>EAGAIN = 4;</code>
+   * <code>EAGAIN = 11;</code>
    */
-  EAGAIN(4),
+  EAGAIN(11),
   /**
-   * <code>EEXIST = 5;</code>
+   * <code>EEXIST = 17;</code>
    */
-  EEXIST(5),
+  EEXIST(17),
   /**
-   * <code>ENOTDIR = 6;</code>
+   * <code>ENOTDIR = 20;</code>
    */
-  ENOTDIR(6),
+  ENOTDIR(20),
   /**
-   * <code>ENODATA = 7;</code>
+   * <code>ENODATA = 61;</code>
    */
-  ENODATA(7),
+  ENODATA(61),
   /**
-   * <code>ENAVAIL = 8;</code>
+   * <code>ENAVAIL = 119;</code>
    */
-  ENAVAIL(8),
+  ENAVAIL(119),
   /**
-   * <code>EPERM = 9;</code>
+   * <code>EPERM = 1;</code>
    */
-  EPERM(9),
+  EPERM(1),
   /**
-   * <code>ENOSPC = 10;</code>
+   * <code>ENOSPC = 28;</code>
    */
-  ENOSPC(10),
+  ENOSPC(28),
   /**
-   * <code>EACCES = 11;</code>
+   * <code>EACCES = 13;</code>
    */
-  EACCES(11),
+  EACCES(13),
   /**
-   * <code>ENOTEMPTY = 12;</code>
+   * <code>ENOTEMPTY = 39;</code>
    */
-  ENOTEMPTY(12),
+  ENOTEMPTY(39),
   /**
-   * <code>ENNOSYS = 13;</code>
+   * <code>ENOSYS = 38;</code>
    */
-  ENNOSYS(13),
+  ENOSYS(38),
   /**
-   * <code>ENODEV = 14;</code>
+   * <code>ENODEV = 19;</code>
    */
-  ENODEV(14),
+  ENODEV(19),
   /**
-   * <code>EBADFD = 15;</code>
+   * <code>EBADFD = 77;</code>
    */
-  EBADFD(15),
+  EBADFD(77),
   /**
-   * <code>EISDIR = 16;</code>
+   * <code>EISDIR = 21;</code>
    */
-  EISDIR(16),
-  /**
-   * <code>ENONET = 17;</code>
-   */
-  ENONET(17),
+  EISDIR(21),
   UNRECOGNIZED(-1),
   ;
 
@@ -84,69 +80,65 @@ public enum errorCodes
    */
   public static final int NOERR_VALUE = 0;
   /**
-   * <code>ENOENT = 1;</code>
+   * <code>ENOENT = 2;</code>
    */
-  public static final int ENOENT_VALUE = 1;
+  public static final int ENOENT_VALUE = 2;
   /**
-   * <code>EIO = 3;</code>
+   * <code>EIO = 5;</code>
    */
-  public static final int EIO_VALUE = 3;
+  public static final int EIO_VALUE = 5;
   /**
-   * <code>EAGAIN = 4;</code>
+   * <code>EAGAIN = 11;</code>
    */
-  public static final int EAGAIN_VALUE = 4;
+  public static final int EAGAIN_VALUE = 11;
   /**
-   * <code>EEXIST = 5;</code>
+   * <code>EEXIST = 17;</code>
    */
-  public static final int EEXIST_VALUE = 5;
+  public static final int EEXIST_VALUE = 17;
   /**
-   * <code>ENOTDIR = 6;</code>
+   * <code>ENOTDIR = 20;</code>
    */
-  public static final int ENOTDIR_VALUE = 6;
+  public static final int ENOTDIR_VALUE = 20;
   /**
-   * <code>ENODATA = 7;</code>
+   * <code>ENODATA = 61;</code>
    */
-  public static final int ENODATA_VALUE = 7;
+  public static final int ENODATA_VALUE = 61;
   /**
-   * <code>ENAVAIL = 8;</code>
+   * <code>ENAVAIL = 119;</code>
    */
-  public static final int ENAVAIL_VALUE = 8;
+  public static final int ENAVAIL_VALUE = 119;
   /**
-   * <code>EPERM = 9;</code>
+   * <code>EPERM = 1;</code>
    */
-  public static final int EPERM_VALUE = 9;
+  public static final int EPERM_VALUE = 1;
   /**
-   * <code>ENOSPC = 10;</code>
+   * <code>ENOSPC = 28;</code>
    */
-  public static final int ENOSPC_VALUE = 10;
+  public static final int ENOSPC_VALUE = 28;
   /**
-   * <code>EACCES = 11;</code>
+   * <code>EACCES = 13;</code>
    */
-  public static final int EACCES_VALUE = 11;
+  public static final int EACCES_VALUE = 13;
   /**
-   * <code>ENOTEMPTY = 12;</code>
+   * <code>ENOTEMPTY = 39;</code>
    */
-  public static final int ENOTEMPTY_VALUE = 12;
+  public static final int ENOTEMPTY_VALUE = 39;
   /**
-   * <code>ENNOSYS = 13;</code>
+   * <code>ENOSYS = 38;</code>
    */
-  public static final int ENNOSYS_VALUE = 13;
+  public static final int ENOSYS_VALUE = 38;
   /**
-   * <code>ENODEV = 14;</code>
+   * <code>ENODEV = 19;</code>
    */
-  public static final int ENODEV_VALUE = 14;
+  public static final int ENODEV_VALUE = 19;
   /**
-   * <code>EBADFD = 15;</code>
+   * <code>EBADFD = 77;</code>
    */
-  public static final int EBADFD_VALUE = 15;
+  public static final int EBADFD_VALUE = 77;
   /**
-   * <code>EISDIR = 16;</code>
+   * <code>EISDIR = 21;</code>
    */
-  public static final int EISDIR_VALUE = 16;
-  /**
-   * <code>ENONET = 17;</code>
-   */
-  public static final int ENONET_VALUE = 17;
+  public static final int EISDIR_VALUE = 21;
 
 
   public final int getNumber() {
@@ -174,22 +166,21 @@ public enum errorCodes
   public static errorCodes forNumber(int value) {
     switch (value) {
       case 0: return NOERR;
-      case 1: return ENOENT;
-      case 3: return EIO;
-      case 4: return EAGAIN;
-      case 5: return EEXIST;
-      case 6: return ENOTDIR;
-      case 7: return ENODATA;
-      case 8: return ENAVAIL;
-      case 9: return EPERM;
-      case 10: return ENOSPC;
-      case 11: return EACCES;
-      case 12: return ENOTEMPTY;
-      case 13: return ENNOSYS;
-      case 14: return ENODEV;
-      case 15: return EBADFD;
-      case 16: return EISDIR;
-      case 17: return ENONET;
+      case 2: return ENOENT;
+      case 5: return EIO;
+      case 11: return EAGAIN;
+      case 17: return EEXIST;
+      case 20: return ENOTDIR;
+      case 61: return ENODATA;
+      case 119: return ENAVAIL;
+      case 1: return EPERM;
+      case 28: return ENOSPC;
+      case 13: return EACCES;
+      case 39: return ENOTEMPTY;
+      case 38: return ENOSYS;
+      case 19: return ENODEV;
+      case 77: return EBADFD;
+      case 21: return EISDIR;
       default: return null;
     }
   }
@@ -208,10 +199,6 @@ public enum errorCodes
 
   public final com.google.protobuf.Descriptors.EnumValueDescriptor
       getValueDescriptor() {
-    if (this == UNRECOGNIZED) {
-      throw new java.lang.IllegalStateException(
-          "Can't get the descriptor of an unrecognized enum value.");
-    }
     return getDescriptor().getValues().get(ordinal());
   }
   public final com.google.protobuf.Descriptors.EnumDescriptor

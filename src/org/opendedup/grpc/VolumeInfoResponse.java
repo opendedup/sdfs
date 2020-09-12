@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.VolumeInfoResponse}
  */
-public final class VolumeInfoResponse extends
+public  final class VolumeInfoResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.VolumeInfoResponse)
     VolumeInfoResponseOrBuilder {
@@ -248,7 +248,6 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The path.
    */
-  @java.lang.Override
   public java.lang.String getPath() {
     java.lang.Object ref = path_;
     if (ref instanceof java.lang.String) {
@@ -265,7 +264,6 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The bytes for path.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getPathBytes() {
     java.lang.Object ref = path_;
@@ -286,7 +284,6 @@ private static final long serialVersionUID = 0L;
    * <code>string name = 2;</code>
    * @return The name.
    */
-  @java.lang.Override
   public java.lang.String getName() {
     java.lang.Object ref = name_;
     if (ref instanceof java.lang.String) {
@@ -303,7 +300,6 @@ private static final long serialVersionUID = 0L;
    * <code>string name = 2;</code>
    * @return The bytes for name.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getNameBytes() {
     java.lang.Object ref = name_;
@@ -324,7 +320,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 currentSize = 3;</code>
    * @return The currentSize.
    */
-  @java.lang.Override
   public long getCurrentSize() {
     return currentSize_;
   }
@@ -335,7 +330,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 capactity = 4;</code>
    * @return The capactity.
    */
-  @java.lang.Override
   public long getCapactity() {
     return capactity_;
   }
@@ -346,7 +340,6 @@ private static final long serialVersionUID = 0L;
    * <code>double maxPercentageFull = 5;</code>
    * @return The maxPercentageFull.
    */
-  @java.lang.Override
   public double getMaxPercentageFull() {
     return maxPercentageFull_;
   }
@@ -357,7 +350,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 duplicateBytes = 6;</code>
    * @return The duplicateBytes.
    */
-  @java.lang.Override
   public long getDuplicateBytes() {
     return duplicateBytes_;
   }
@@ -368,7 +360,6 @@ private static final long serialVersionUID = 0L;
    * <code>double readBytes = 7;</code>
    * @return The readBytes.
    */
-  @java.lang.Override
   public double getReadBytes() {
     return readBytes_;
   }
@@ -379,7 +370,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 writeBytes = 8;</code>
    * @return The writeBytes.
    */
-  @java.lang.Override
   public long getWriteBytes() {
     return writeBytes_;
   }
@@ -390,7 +380,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 serialNumber = 9;</code>
    * @return The serialNumber.
    */
-  @java.lang.Override
   public long getSerialNumber() {
     return serialNumber_;
   }
@@ -401,7 +390,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 dseSize = 10;</code>
    * @return The dseSize.
    */
-  @java.lang.Override
   public long getDseSize() {
     return dseSize_;
   }
@@ -412,7 +400,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 dseCompSize = 11;</code>
    * @return The dseCompSize.
    */
-  @java.lang.Override
   public long getDseCompSize() {
     return dseCompSize_;
   }
@@ -423,7 +410,6 @@ private static final long serialVersionUID = 0L;
    * <code>double readOps = 12;</code>
    * @return The readOps.
    */
-  @java.lang.Override
   public double getReadOps() {
     return readOps_;
   }
@@ -434,7 +420,6 @@ private static final long serialVersionUID = 0L;
    * <code>double writeOps = 13;</code>
    * @return The writeOps.
    */
-  @java.lang.Override
   public double getWriteOps() {
     return writeOps_;
   }
@@ -445,7 +430,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 readErrors = 14;</code>
    * @return The readErrors.
    */
-  @java.lang.Override
   public long getReadErrors() {
     return readErrors_;
   }
@@ -456,7 +440,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 writeErrors = 15;</code>
    * @return The writeErrors.
    */
-  @java.lang.Override
   public long getWriteErrors() {
     return writeErrors_;
   }
@@ -467,7 +450,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 files = 16;</code>
    * @return The files.
    */
-  @java.lang.Override
   public long getFiles() {
     return files_;
   }
@@ -478,7 +460,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool closedGracefully = 17;</code>
    * @return The closedGracefully.
    */
-  @java.lang.Override
   public boolean getClosedGracefully() {
     return closedGracefully_;
   }
@@ -489,7 +470,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool allowExternalLinks = 18;</code>
    * @return The allowExternalLinks.
    */
-  @java.lang.Override
   public boolean getAllowExternalLinks() {
     return allowExternalLinks_;
   }
@@ -500,7 +480,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool usePerfMon = 19;</code>
    * @return The usePerfMon.
    */
-  @java.lang.Override
   public boolean getUsePerfMon() {
     return usePerfMon_;
   }
@@ -511,7 +490,6 @@ private static final long serialVersionUID = 0L;
    * <code>string clusterId = 20;</code>
    * @return The clusterId.
    */
-  @java.lang.Override
   public java.lang.String getClusterId() {
     java.lang.Object ref = clusterId_;
     if (ref instanceof java.lang.String) {
@@ -528,7 +506,6 @@ private static final long serialVersionUID = 0L;
    * <code>string clusterId = 20;</code>
    * @return The bytes for clusterId.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getClusterIdBytes() {
     java.lang.Object ref = clusterId_;
@@ -549,7 +526,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool VolumeClustered = 21;</code>
    * @return The volumeClustered.
    */
-  @java.lang.Override
   public boolean getVolumeClustered() {
     return volumeClustered_;
   }
@@ -560,7 +536,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 readTimeoutSeconds = 22;</code>
    * @return The readTimeoutSeconds.
    */
-  @java.lang.Override
   public int getReadTimeoutSeconds() {
     return readTimeoutSeconds_;
   }
@@ -571,7 +546,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 writeTimeoutSeconds = 23;</code>
    * @return The writeTimeoutSeconds.
    */
-  @java.lang.Override
   public int getWriteTimeoutSeconds() {
     return writeTimeoutSeconds_;
   }
@@ -582,7 +556,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool compressedMetaData = 24;</code>
    * @return The compressedMetaData.
    */
-  @java.lang.Override
   public boolean getCompressedMetaData() {
     return compressedMetaData_;
   }
@@ -593,7 +566,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool syncFiles = 25;</code>
    * @return The syncFiles.
    */
-  @java.lang.Override
   public boolean getSyncFiles() {
     return syncFiles_;
   }
@@ -604,7 +576,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxPageSize = 26;</code>
    * @return The maxPageSize.
    */
-  @java.lang.Override
   public long getMaxPageSize() {
     return maxPageSize_;
   }
@@ -614,14 +585,12 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
-  @java.lang.Override
   public java.util.List<org.opendedup.grpc.MessageQueueInfoResponse> getMessageQueueList() {
     return messageQueue_;
   }
   /**
    * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
-  @java.lang.Override
   public java.util.List<? extends org.opendedup.grpc.MessageQueueInfoResponseOrBuilder> 
       getMessageQueueOrBuilderList() {
     return messageQueue_;
@@ -629,21 +598,18 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
-  @java.lang.Override
   public int getMessageQueueCount() {
     return messageQueue_.size();
   }
   /**
    * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
-  @java.lang.Override
   public org.opendedup.grpc.MessageQueueInfoResponse getMessageQueue(int index) {
     return messageQueue_.get(index);
   }
   /**
    * <code>repeated .org.opendedup.grpc.MessageQueueInfoResponse messageQueue = 27;</code>
    */
-  @java.lang.Override
   public org.opendedup.grpc.MessageQueueInfoResponseOrBuilder getMessageQueueOrBuilder(
       int index) {
     return messageQueue_.get(index);
@@ -655,7 +621,6 @@ private static final long serialVersionUID = 0L;
    * <code>string perfMonFile = 28;</code>
    * @return The perfMonFile.
    */
-  @java.lang.Override
   public java.lang.String getPerfMonFile() {
     java.lang.Object ref = perfMonFile_;
     if (ref instanceof java.lang.String) {
@@ -672,7 +637,6 @@ private static final long serialVersionUID = 0L;
    * <code>string perfMonFile = 28;</code>
    * @return The bytes for perfMonFile.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getPerfMonFileBytes() {
     java.lang.Object ref = perfMonFile_;
@@ -693,7 +657,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool offline = 29;</code>
    * @return The offline.
    */
-  @java.lang.Override
   public boolean getOffline() {
     return offline_;
   }
@@ -1699,7 +1662,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 currentSize = 3;</code>
      * @return The currentSize.
      */
-    @java.lang.Override
     public long getCurrentSize() {
       return currentSize_;
     }
@@ -1730,7 +1692,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 capactity = 4;</code>
      * @return The capactity.
      */
-    @java.lang.Override
     public long getCapactity() {
       return capactity_;
     }
@@ -1761,7 +1722,6 @@ private static final long serialVersionUID = 0L;
      * <code>double maxPercentageFull = 5;</code>
      * @return The maxPercentageFull.
      */
-    @java.lang.Override
     public double getMaxPercentageFull() {
       return maxPercentageFull_;
     }
@@ -1792,7 +1752,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 duplicateBytes = 6;</code>
      * @return The duplicateBytes.
      */
-    @java.lang.Override
     public long getDuplicateBytes() {
       return duplicateBytes_;
     }
@@ -1823,7 +1782,6 @@ private static final long serialVersionUID = 0L;
      * <code>double readBytes = 7;</code>
      * @return The readBytes.
      */
-    @java.lang.Override
     public double getReadBytes() {
       return readBytes_;
     }
@@ -1854,7 +1812,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 writeBytes = 8;</code>
      * @return The writeBytes.
      */
-    @java.lang.Override
     public long getWriteBytes() {
       return writeBytes_;
     }
@@ -1885,7 +1842,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 serialNumber = 9;</code>
      * @return The serialNumber.
      */
-    @java.lang.Override
     public long getSerialNumber() {
       return serialNumber_;
     }
@@ -1916,7 +1872,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 dseSize = 10;</code>
      * @return The dseSize.
      */
-    @java.lang.Override
     public long getDseSize() {
       return dseSize_;
     }
@@ -1947,7 +1902,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 dseCompSize = 11;</code>
      * @return The dseCompSize.
      */
-    @java.lang.Override
     public long getDseCompSize() {
       return dseCompSize_;
     }
@@ -1978,7 +1932,6 @@ private static final long serialVersionUID = 0L;
      * <code>double readOps = 12;</code>
      * @return The readOps.
      */
-    @java.lang.Override
     public double getReadOps() {
       return readOps_;
     }
@@ -2009,7 +1962,6 @@ private static final long serialVersionUID = 0L;
      * <code>double writeOps = 13;</code>
      * @return The writeOps.
      */
-    @java.lang.Override
     public double getWriteOps() {
       return writeOps_;
     }
@@ -2040,7 +1992,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 readErrors = 14;</code>
      * @return The readErrors.
      */
-    @java.lang.Override
     public long getReadErrors() {
       return readErrors_;
     }
@@ -2071,7 +2022,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 writeErrors = 15;</code>
      * @return The writeErrors.
      */
-    @java.lang.Override
     public long getWriteErrors() {
       return writeErrors_;
     }
@@ -2102,7 +2052,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 files = 16;</code>
      * @return The files.
      */
-    @java.lang.Override
     public long getFiles() {
       return files_;
     }
@@ -2133,7 +2082,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool closedGracefully = 17;</code>
      * @return The closedGracefully.
      */
-    @java.lang.Override
     public boolean getClosedGracefully() {
       return closedGracefully_;
     }
@@ -2164,7 +2112,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool allowExternalLinks = 18;</code>
      * @return The allowExternalLinks.
      */
-    @java.lang.Override
     public boolean getAllowExternalLinks() {
       return allowExternalLinks_;
     }
@@ -2195,7 +2142,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool usePerfMon = 19;</code>
      * @return The usePerfMon.
      */
-    @java.lang.Override
     public boolean getUsePerfMon() {
       return usePerfMon_;
     }
@@ -2302,7 +2248,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool VolumeClustered = 21;</code>
      * @return The volumeClustered.
      */
-    @java.lang.Override
     public boolean getVolumeClustered() {
       return volumeClustered_;
     }
@@ -2333,7 +2278,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 readTimeoutSeconds = 22;</code>
      * @return The readTimeoutSeconds.
      */
-    @java.lang.Override
     public int getReadTimeoutSeconds() {
       return readTimeoutSeconds_;
     }
@@ -2364,7 +2308,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 writeTimeoutSeconds = 23;</code>
      * @return The writeTimeoutSeconds.
      */
-    @java.lang.Override
     public int getWriteTimeoutSeconds() {
       return writeTimeoutSeconds_;
     }
@@ -2395,7 +2338,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool compressedMetaData = 24;</code>
      * @return The compressedMetaData.
      */
-    @java.lang.Override
     public boolean getCompressedMetaData() {
       return compressedMetaData_;
     }
@@ -2426,7 +2368,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool syncFiles = 25;</code>
      * @return The syncFiles.
      */
-    @java.lang.Override
     public boolean getSyncFiles() {
       return syncFiles_;
     }
@@ -2457,7 +2398,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxPageSize = 26;</code>
      * @return The maxPageSize.
      */
-    @java.lang.Override
     public long getMaxPageSize() {
       return maxPageSize_;
     }
@@ -2804,7 +2744,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool offline = 29;</code>
      * @return The offline.
      */
-    @java.lang.Override
     public boolean getOffline() {
       return offline_;
     }

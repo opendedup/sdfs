@@ -8,25 +8,37 @@ public interface FileSnapshotResponseOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>string error = 2;</code>
+   * <code>string error = 1;</code>
    * @return The error.
    */
   java.lang.String getError();
   /**
-   * <code>string error = 2;</code>
+   * <code>string error = 1;</code>
    * @return The bytes for error.
    */
   com.google.protobuf.ByteString
       getErrorBytes();
 
   /**
-   * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+   * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
    * @return The enum numeric value on the wire for errorCode.
    */
   int getErrorCodeValue();
   /**
-   * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+   * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
    * @return The errorCode.
    */
   org.opendedup.grpc.errorCodes getErrorCode();
+
+  /**
+   * <code>string eventID = 3;</code>
+   * @return The eventID.
+   */
+  java.lang.String getEventID();
+  /**
+   * <code>string eventID = 3;</code>
+   * @return The bytes for eventID.
+   */
+  com.google.protobuf.ByteString
+      getEventIDBytes();
 }

@@ -17,16 +17,16 @@ public class SnapshotCmd implements Runnable {
 	String dstPath;
 	SDFSEvent evt;
 
-	public Element getResult(String cmd, String file) throws IOException {
+	public Element getResult(String dstPath, String file) throws IOException {
 		this.srcPath = file;
-		this.dstPath = cmd;
+		this.dstPath = dstPath;
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
 		evt = SDFSEvent.snapEvent("Snapshot Intiated for " + this.srcPath
 				+ " to " + this.dstPath, f);
 		Thread th = new Thread(this);
 		th.start();
 		try {
-			SDFSLogger.getLog().info(evt.toXML());
+			//SDFSLogger.getLog().info(evt.toXML());
 			return evt.toXML();
 		} catch (ParserConfigurationException e) {
 			throw new IOException(e);

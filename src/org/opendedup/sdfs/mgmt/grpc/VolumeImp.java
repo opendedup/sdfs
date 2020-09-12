@@ -10,8 +10,13 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
 import org.opendedup.sdfs.filestore.gc.ManualGC;
-import org.opendedup.sdfs.notification.SDFSEvent.Level;
+import org.opendedup.sdfs.mgmt.SetCacheSize;
+import org.opendedup.sdfs.mgmt.SetReadSpeed;
+import org.opendedup.sdfs.mgmt.SetWriteSpeed;
+import org.opendedup.sdfs.mgmt.SyncFSCmd;
+import org.opendedup.sdfs.mgmt.SyncFromConnectedVolume;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.OSValidator;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,6 +26,7 @@ import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import com.google.common.io.BaseEncoding;
 import com.sun.management.UnixOperatingSystemMXBean;
 
 class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
@@ -87,14 +93,187 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
   }
 
   @Override
-  public void setLogicalVolumeCapacity(SetLogicalVolumeCapacityRequest request,
-      StreamObserver<SetLogicalVolumeCapacityResponse> responseObserver) {
-        SetLogicalVolumeCapacityResponse.Builder b = SetLogicalVolumeCapacityResponse.newBuilder();
+  public void getConnectedVolumes(CloudVolumesRequest request, StreamObserver<CloudVolumesResponse> responseObserver) {
+    CloudVolumesResponse.Builder b = CloudVolumesResponse.newBuilder();
     try {
-      Main.volume.setCapacity(request.getSize(),true);
+      RemoteVolumeInfo[] l = FileReplicationService.getConnectedVolumes();
+      if (l != null) {
+        for (RemoteVolumeInfo vl : l) {
+          ConnectedVolumeInfo.Builder info = ConnectedVolumeInfo.newBuilder();
+          info.setId(vl.id);
+          if (vl.id == Main.DSEID) {
+            info.setLocal(true);
+          } else {
+            info.setLocal(false);
+          }
+          info.setHostname(vl.hostname);
+          info.setPort(vl.port);
+          info.setSize(vl.data);
+          info.setCompressedSize(vl.compressed);
+          if(vl.sdfsversion != null)
+            info.setSdfsVersion(vl.sdfsversion);
+          info.setLastUpdate(vl.lastupdated);
+            info.setVersion(vl.version);
+          b.addVolumeInfo(info);
+        }
+      }
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      SDFSLogger.getLog().error("unable to fulfill request", e);
+      b.setError("unable to fulfill request");
+      b.setErrorCode(errorCodes.EIO);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }
+  }
+
+  @Override
+  public void setVolumeCapacity(SetVolumeCapacityRequest request,
+      StreamObserver<SetVolumeCapacityResponse> responseObserver) {
+    SetVolumeCapacityResponse.Builder b = SetVolumeCapacityResponse.newBuilder();
+    try {
+      Main.volume.setCapacity(request.getSize(), true);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      SDFSLogger.getLog().error("unable to fulfill request", e);
+      b.setError("unable to fulfill request");
+      b.setErrorCode(errorCodes.EIO);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }
+  }
+  
+
+  @Override
+  public void getGCSchedule(GCScheduleRequest request, StreamObserver<GCScheduleResponse> responseObserver) {
+    GCScheduleResponse.Builder b = GCScheduleResponse.newBuilder();
+    try {
+      b.setSchedule(Main.fDkiskSchedule);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      SDFSLogger.getLog().error("unable to fulfill request", e);
+      b.setError("unable to fulfill request");
+      b.setErrorCode(errorCodes.EIO);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }
+  }
+
+  @Override
+  public void setPassword(SetPasswordRequest request, StreamObserver<SetPasswordResponse> responseObserver) {
+    SetPasswordResponse.Builder b = SetPasswordResponse.newBuilder();
+    String oldPassword = Main.sdfsPassword;
+    String oeCloudSecretKey = Main.eCloudSecretKey;
+    try {
+      String newPassword = request.getPassword();
+
+      String password = HashFunctions.getSHAHash(newPassword.getBytes(), Main.sdfsPasswordSalt.getBytes());
+      Main.sdfsPassword = password;
+
+      if (Main.eCloudSecretKey != null) {
+        byte[] ec = EncryptUtils.encryptCBC(Main.cloudSecretKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
+        Main.eCloudSecretKey = BaseEncoding.base64Url().encode(ec);
+      }
+      Main.volume.writeUpdate();
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      SDFSLogger.getLog().error("password could not be changed" + e.toString(), e);
+      Main.sdfsPassword = oldPassword;
+      Main.eCloudSecretKey = oeCloudSecretKey;
+      b.setError("unable to fulfill request");
+      b.setErrorCode(errorCodes.EIO);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }
+
+  }
+
+  @Override
+  public void setReadSpeed(SpeedRequest request, StreamObserver<SpeedResponse> responseObserver) {
+    SpeedResponse.Builder b = SpeedResponse.newBuilder();
+    try {
+      SetReadSpeed r = new SetReadSpeed();
+      r.setSpeed(request.getRequestedSpeed());
+      b.setEventID(r.evt.uid);
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();
     }catch (Exception e) {
+      SDFSLogger.getLog().error("unable to fulfill request", e);
+      b.setError("unable to fulfill request");
+      b.setErrorCode(errorCodes.EIO);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }
+  }
+
+  @Override
+  public void setWriteSpeed(SpeedRequest request, StreamObserver<SpeedResponse> responseObserver) {
+    SpeedResponse.Builder b = SpeedResponse.newBuilder();
+    try {
+      SetWriteSpeed r = new SetWriteSpeed();
+      r.setSpeed(request.getRequestedSpeed());
+      b.setEventID(r.evt.uid);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }catch (Exception e) {
+      SDFSLogger.getLog().error("unable to fulfill request", e);
+      b.setError("unable to fulfill request");
+      b.setErrorCode(errorCodes.EIO);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }
+  }
+
+  @Override
+  public void syncFromCloudVolume(SyncFromVolRequest request, StreamObserver<SyncFromVolResponse> responseObserver) {
+    SyncFromVolResponse.Builder b = SyncFromVolResponse.newBuilder();
+    try {
+      SyncFromConnectedVolume v = new SyncFromConnectedVolume();
+      v.syncVolume(request.getVolumeid());
+      b.setEventID(v.evt.uid);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      SDFSLogger.getLog().error("unable to fulfill request", e);
+      b.setError("unable to fulfill request");
+      b.setErrorCode(errorCodes.EIO);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }
+  }
+
+  @Override
+  public void syncCloudVolume(SyncVolRequest request, StreamObserver<SyncVolResponse> responseObserver) {
+    SyncVolResponse.Builder b = SyncVolResponse.newBuilder();
+    try {
+      SyncFSCmd f = new SyncFSCmd();
+      f.getResult();
+      b.setEventID(f.evt.uid);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    } catch (Exception e) {
+      SDFSLogger.getLog().error("unable to fulfill request", e);
+      b.setError("unable to fulfill request");
+      b.setErrorCode(errorCodes.EIO);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }
+  }
+
+  @Override
+  public void setCacheSize(SetCacheSizeRequest request, StreamObserver<SetCacheSizeResponse> responseObserver) {
+    SetCacheSizeResponse.Builder b = SetCacheSizeResponse.newBuilder();
+    try {
+      SetCacheSize scz = new SetCacheSize();
+      scz.setCache(request.getCacheSize());
+      b.setEventID(scz.evt.uid);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    } catch (Exception e) {
       SDFSLogger.getLog().error("unable to fulfill request", e);
       b.setError("unable to fulfill request");
       b.setErrorCode(errorCodes.EIO);
@@ -116,7 +295,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
         UnixOperatingSystemMXBean perf = (UnixOperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         info.setTotalCpuLoad(perf.getSystemLoadAverage());
         info.setSdfsCpuLoad(perf.getProcessCpuLoad());
-      
+
       }
       info.setFreeMemory(Runtime.getRuntime().maxMemory());
       info.setFreeMemory(Runtime.getRuntime().freeMemory());
@@ -133,20 +312,19 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   }
 
+
   @Override
   public void dSEInfo(DSERequest request, StreamObserver<DSEResponse> responseObserver) {
     DSEResponse.Builder b = DSEResponse.newBuilder();
     DSEInfo.Builder info = DSEInfo.newBuilder();
     try {
-      info.setMaxSize(HCServiceProxy.getMaxSize()
-      * HashFunctionPool.avg_page_size));
-			info.setCurrentSize(HCServiceProxy.getChunkStore().size());
+      info.setMaxSize(HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size);
+      info.setCurrentSize(HCServiceProxy.getChunkStore().size());
       info.setEntries(HCServiceProxy.getSize());
-      info.setCompressedSize(HCServiceProxy
-      .getChunkStore().compressedSize());
+      info.setCompressedSize(HCServiceProxy.getChunkStore().compressedSize());
       info.setFreeBlocks(HCServiceProxy.getFreeBlocks());
       info.setPageSize(HCServiceProxy.getPageSize());
-      info.setStorageType( Main.chunkStoreClass);
+      info.setStorageType(Main.chunkStoreClass);
       info.setListenPort(Main.sdfsCliPort);
       info.setListenHost(Main.sdfsCliListenAddr);
       info.setReadSpeed(HCServiceProxy.getReadSpeed());
@@ -156,22 +334,22 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       info.setListenEncrypted(Main.sdfsCliSSL);
       info.setEncryptionKey(Main.chunkStoreEncryptionKey);
       info.setEncryptionIV(Main.chunkStoreEncryptionIV);
-      if(Main.cloudAccessKey != null)
+      if (Main.cloudAccessKey != null)
         info.setCloudAccessKey(Main.cloudAccessKey);
-      if(Main.cloudSecretKey != null)
+      if (Main.cloudSecretKey != null)
         info.setCloudSecretKey(Main.cloudSecretKey);
       info.build();
       b.setInfo(info);
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();
 
-		} catch (Exception e) {
+    } catch (Exception e) {
       SDFSLogger.getLog().error("unable to fulfill request", e);
-			b.setError("unable to fulfill request");
+      b.setError("unable to fulfill request");
       b.setErrorCode(errorCodes.EIO);
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();
-		}
+    }
   }
 
   @Override
@@ -180,6 +358,9 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
     CleanStoreResponse.Builder b = CleanStoreResponse.newBuilder();
     th.start();
     try {
+      while(ManualGC.evt == null) {
+        Thread.sleep(1);
+      }
       b.setEventID(ManualGC.evt.uid);
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();

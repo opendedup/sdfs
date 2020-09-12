@@ -87,8 +87,7 @@ import com.google.common.io.BaseEncoding;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 
 import org.opendedup.collections.HashExistsException;
-
-
+import org.opendedup.grpc.FileInfo;
 
 /**
  * 
@@ -511,8 +510,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
 
 			Location region = null;
-			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file") ) {
-				
+			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
+
 				String authFile = config.getAttribute("auth-file");
 				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
 				System.out.println(config.getAttribute("auth-file"));
@@ -522,19 +521,19 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(creds);
 				String credential = credentialSupplier.get().credential;
 				context = ContextBuilder.newBuilder(service)
-              .credentials("storage@upheld-altar-267119.iam.gserviceaccount.com", credential)
-              .buildView(BlobStoreContext.class);
+						.credentials("storage@upheld-altar-267119.iam.gserviceaccount.com", credential)
+						.buildView(BlobStoreContext.class);
 				/*
-				context = ContextBuilder.newBuilder(service).overrides(overrides)
-						.credentialsSupplier(credentialSupplier).buildView(BlobStoreContext.class);
-						*/
+				 * context = ContextBuilder.newBuilder(service).overrides(overrides)
+				 * .credentialsSupplier(credentialSupplier).buildView(BlobStoreContext.class);
+				 */
 			} else if (service.equals("google-cloud-storage")) {
 				overrides.setProperty(Constants.PROPERTY_ENDPOINT, "https://storage.googleapis.com");
 				overrides.setProperty(org.jclouds.s3.reference.S3Constants.PROPERTY_S3_VIRTUAL_HOST_BUCKETS, "false");
 				overrides.setProperty(Constants.PROPERTY_STRIP_EXPECT_HEADER, "true");
 				context = ContextBuilder.newBuilder("s3").overrides(overrides)
 						.credentials(this.accessKey, this.secretKey).buildView(BlobStoreContext.class);
-			}  else {
+			} else {
 				SDFSLogger.getLog().debug("ca=" + this.accessKey + " cs=" + this.secretKey);
 				context = ContextBuilder.newBuilder(service).credentials(this.accessKey, this.secretKey)
 						.overrides(overrides).buildView(BlobStoreContext.class);
@@ -805,7 +804,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			if (hs != null) {
 				for (String ha : hs) {
 					if (ha != null) {
-						
+
 						byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
 						if (HCServiceProxy.getHashesMap().mightContainKey(b, id))
 							claims++;
@@ -2348,6 +2347,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		while (pid < 100 && this.fileExists(pid))
 			pid = this.getLongID();
 		return pid;
+	}
+
+	@Override
+	public FileInfo[] listFiles(String prefix, int length) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

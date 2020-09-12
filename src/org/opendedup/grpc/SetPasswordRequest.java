@@ -4,25 +4,26 @@
 package org.opendedup.grpc;
 
 /**
- * Protobuf type {@code org.opendedup.grpc.SetLogicalVolumeCapacityRequest}
+ * Protobuf type {@code org.opendedup.grpc.SetPasswordRequest}
  */
-public final class SetLogicalVolumeCapacityRequest extends
+public  final class SetPasswordRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetLogicalVolumeCapacityRequest)
-    SetLogicalVolumeCapacityRequestOrBuilder {
+    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetPasswordRequest)
+    SetPasswordRequestOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use SetLogicalVolumeCapacityRequest.newBuilder() to construct.
-  private SetLogicalVolumeCapacityRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use SetPasswordRequest.newBuilder() to construct.
+  private SetPasswordRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private SetLogicalVolumeCapacityRequest() {
+  private SetPasswordRequest() {
+    password_ = "";
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new SetLogicalVolumeCapacityRequest();
+    return new SetPasswordRequest();
   }
 
   @java.lang.Override
@@ -30,7 +31,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private SetLogicalVolumeCapacityRequest(
+  private SetPasswordRequest(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -48,9 +49,10 @@ private static final long serialVersionUID = 0L;
           case 0:
             done = true;
             break;
-          case 8: {
+          case 10: {
+            java.lang.String s = input.readStringRequireUtf8();
 
-            size_ = input.readInt64();
+            password_ = s;
             break;
           }
           default: {
@@ -74,26 +76,51 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetLogicalVolumeCapacityRequest_descriptor;
+    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetPasswordRequest_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetLogicalVolumeCapacityRequest_fieldAccessorTable
+    return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetPasswordRequest_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            org.opendedup.grpc.SetLogicalVolumeCapacityRequest.class, org.opendedup.grpc.SetLogicalVolumeCapacityRequest.Builder.class);
+            org.opendedup.grpc.SetPasswordRequest.class, org.opendedup.grpc.SetPasswordRequest.Builder.class);
   }
 
-  public static final int SIZE_FIELD_NUMBER = 1;
-  private long size_;
+  public static final int PASSWORD_FIELD_NUMBER = 1;
+  private volatile java.lang.Object password_;
   /**
-   * <code>int64 size = 1;</code>
-   * @return The size.
+   * <code>string password = 1;</code>
+   * @return The password.
    */
-  @java.lang.Override
-  public long getSize() {
-    return size_;
+  public java.lang.String getPassword() {
+    java.lang.Object ref = password_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      password_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string password = 1;</code>
+   * @return The bytes for password.
+   */
+  public com.google.protobuf.ByteString
+      getPasswordBytes() {
+    java.lang.Object ref = password_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      password_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
   }
 
   private byte memoizedIsInitialized = -1;
@@ -110,8 +137,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (size_ != 0L) {
-      output.writeInt64(1, size_);
+    if (!getPasswordBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, password_);
     }
     unknownFields.writeTo(output);
   }
@@ -122,9 +149,8 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (size_ != 0L) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt64Size(1, size_);
+    if (!getPasswordBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, password_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -136,13 +162,13 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof org.opendedup.grpc.SetLogicalVolumeCapacityRequest)) {
+    if (!(obj instanceof org.opendedup.grpc.SetPasswordRequest)) {
       return super.equals(obj);
     }
-    org.opendedup.grpc.SetLogicalVolumeCapacityRequest other = (org.opendedup.grpc.SetLogicalVolumeCapacityRequest) obj;
+    org.opendedup.grpc.SetPasswordRequest other = (org.opendedup.grpc.SetPasswordRequest) obj;
 
-    if (getSize()
-        != other.getSize()) return false;
+    if (!getPassword()
+        .equals(other.getPassword())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -154,77 +180,76 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + SIZE_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getSize());
+    hash = (37 * hash) + PASSWORD_FIELD_NUMBER;
+    hash = (53 * hash) + getPassword().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(byte[] data)
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseDelimitedFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.SetPasswordRequest parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseDelimitedFrom(
+  public static org.opendedup.grpc.SetPasswordRequest parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest parseFrom(
+  public static org.opendedup.grpc.SetPasswordRequest parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -237,7 +262,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(org.opendedup.grpc.SetLogicalVolumeCapacityRequest prototype) {
+  public static Builder newBuilder(org.opendedup.grpc.SetPasswordRequest prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -253,26 +278,26 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
-   * Protobuf type {@code org.opendedup.grpc.SetLogicalVolumeCapacityRequest}
+   * Protobuf type {@code org.opendedup.grpc.SetPasswordRequest}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.SetLogicalVolumeCapacityRequest)
-      org.opendedup.grpc.SetLogicalVolumeCapacityRequestOrBuilder {
+      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.SetPasswordRequest)
+      org.opendedup.grpc.SetPasswordRequestOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetLogicalVolumeCapacityRequest_descriptor;
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetPasswordRequest_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetLogicalVolumeCapacityRequest_fieldAccessorTable
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetPasswordRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.opendedup.grpc.SetLogicalVolumeCapacityRequest.class, org.opendedup.grpc.SetLogicalVolumeCapacityRequest.Builder.class);
+              org.opendedup.grpc.SetPasswordRequest.class, org.opendedup.grpc.SetPasswordRequest.Builder.class);
     }
 
-    // Construct using org.opendedup.grpc.SetLogicalVolumeCapacityRequest.newBuilder()
+    // Construct using org.opendedup.grpc.SetPasswordRequest.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -290,7 +315,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      size_ = 0L;
+      password_ = "";
 
       return this;
     }
@@ -298,17 +323,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetLogicalVolumeCapacityRequest_descriptor;
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetPasswordRequest_descriptor;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.SetLogicalVolumeCapacityRequest getDefaultInstanceForType() {
-      return org.opendedup.grpc.SetLogicalVolumeCapacityRequest.getDefaultInstance();
+    public org.opendedup.grpc.SetPasswordRequest getDefaultInstanceForType() {
+      return org.opendedup.grpc.SetPasswordRequest.getDefaultInstance();
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.SetLogicalVolumeCapacityRequest build() {
-      org.opendedup.grpc.SetLogicalVolumeCapacityRequest result = buildPartial();
+    public org.opendedup.grpc.SetPasswordRequest build() {
+      org.opendedup.grpc.SetPasswordRequest result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -316,9 +341,9 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.SetLogicalVolumeCapacityRequest buildPartial() {
-      org.opendedup.grpc.SetLogicalVolumeCapacityRequest result = new org.opendedup.grpc.SetLogicalVolumeCapacityRequest(this);
-      result.size_ = size_;
+    public org.opendedup.grpc.SetPasswordRequest buildPartial() {
+      org.opendedup.grpc.SetPasswordRequest result = new org.opendedup.grpc.SetPasswordRequest(this);
+      result.password_ = password_;
       onBuilt();
       return result;
     }
@@ -357,18 +382,19 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof org.opendedup.grpc.SetLogicalVolumeCapacityRequest) {
-        return mergeFrom((org.opendedup.grpc.SetLogicalVolumeCapacityRequest)other);
+      if (other instanceof org.opendedup.grpc.SetPasswordRequest) {
+        return mergeFrom((org.opendedup.grpc.SetPasswordRequest)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(org.opendedup.grpc.SetLogicalVolumeCapacityRequest other) {
-      if (other == org.opendedup.grpc.SetLogicalVolumeCapacityRequest.getDefaultInstance()) return this;
-      if (other.getSize() != 0L) {
-        setSize(other.getSize());
+    public Builder mergeFrom(org.opendedup.grpc.SetPasswordRequest other) {
+      if (other == org.opendedup.grpc.SetPasswordRequest.getDefaultInstance()) return this;
+      if (!other.getPassword().isEmpty()) {
+        password_ = other.password_;
+        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -385,11 +411,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      org.opendedup.grpc.SetLogicalVolumeCapacityRequest parsedMessage = null;
+      org.opendedup.grpc.SetPasswordRequest parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (org.opendedup.grpc.SetLogicalVolumeCapacityRequest) e.getUnfinishedMessage();
+        parsedMessage = (org.opendedup.grpc.SetPasswordRequest) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -399,33 +425,78 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private long size_ ;
+    private java.lang.Object password_ = "";
     /**
-     * <code>int64 size = 1;</code>
-     * @return The size.
+     * <code>string password = 1;</code>
+     * @return The password.
      */
-    @java.lang.Override
-    public long getSize() {
-      return size_;
+    public java.lang.String getPassword() {
+      java.lang.Object ref = password_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        password_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
     }
     /**
-     * <code>int64 size = 1;</code>
-     * @param value The size to set.
+     * <code>string password = 1;</code>
+     * @return The bytes for password.
+     */
+    public com.google.protobuf.ByteString
+        getPasswordBytes() {
+      java.lang.Object ref = password_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        password_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string password = 1;</code>
+     * @param value The password to set.
      * @return This builder for chaining.
      */
-    public Builder setSize(long value) {
-      
-      size_ = value;
+    public Builder setPassword(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      password_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>int64 size = 1;</code>
+     * <code>string password = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearSize() {
+    public Builder clearPassword() {
       
-      size_ = 0L;
+      password_ = getDefaultInstance().getPassword();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string password = 1;</code>
+     * @param value The bytes for password to set.
+     * @return This builder for chaining.
+     */
+    public Builder setPasswordBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      password_ = value;
       onChanged();
       return this;
     }
@@ -442,41 +513,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.SetLogicalVolumeCapacityRequest)
+    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.SetPasswordRequest)
   }
 
-  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.SetLogicalVolumeCapacityRequest)
-  private static final org.opendedup.grpc.SetLogicalVolumeCapacityRequest DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.SetPasswordRequest)
+  private static final org.opendedup.grpc.SetPasswordRequest DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new org.opendedup.grpc.SetLogicalVolumeCapacityRequest();
+    DEFAULT_INSTANCE = new org.opendedup.grpc.SetPasswordRequest();
   }
 
-  public static org.opendedup.grpc.SetLogicalVolumeCapacityRequest getDefaultInstance() {
+  public static org.opendedup.grpc.SetPasswordRequest getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<SetLogicalVolumeCapacityRequest>
-      PARSER = new com.google.protobuf.AbstractParser<SetLogicalVolumeCapacityRequest>() {
+  private static final com.google.protobuf.Parser<SetPasswordRequest>
+      PARSER = new com.google.protobuf.AbstractParser<SetPasswordRequest>() {
     @java.lang.Override
-    public SetLogicalVolumeCapacityRequest parsePartialFrom(
+    public SetPasswordRequest parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new SetLogicalVolumeCapacityRequest(input, extensionRegistry);
+      return new SetPasswordRequest(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<SetLogicalVolumeCapacityRequest> parser() {
+  public static com.google.protobuf.Parser<SetPasswordRequest> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<SetLogicalVolumeCapacityRequest> getParserForType() {
+  public com.google.protobuf.Parser<SetPasswordRequest> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public org.opendedup.grpc.SetLogicalVolumeCapacityRequest getDefaultInstanceForType() {
+  public org.opendedup.grpc.SetPasswordRequest getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

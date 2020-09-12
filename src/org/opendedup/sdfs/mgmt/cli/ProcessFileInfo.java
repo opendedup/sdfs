@@ -42,7 +42,7 @@ public class ProcessFileInfo {
 				System.out.printf("symlink path: %s\n", fr.getSymlinkPath());
 				System.out.printf("file type : %s\n", fr.getType());
 				if (fr.getType() == FileInfoResponse.fileType.FILE) {
-					IOMonitorResponse io = fr.getIoMonitor(0);
+					IOMonitorResponse io = fr.getIoMonitor();
 					System.out.printf("map file guid : %s\n", fr.getMapGuid());
 					System.out.printf("file open : %b\n", fr.getOpen());
 					System.out.printf("real bytes written : %d\n", io.getActualBytesWritten());

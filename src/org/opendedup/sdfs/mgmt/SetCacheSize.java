@@ -9,26 +9,35 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.w3c.dom.Element;
 
 public class SetCacheSize implements Runnable {
-	SDFSEvent evt = null;
+	public SDFSEvent evt = null;
 	String sz = null;
+	long csz;
 
 	public Element getResult(String sz) throws IOException,
 			ParserConfigurationException, Exception {
 		evt = SDFSEvent.cszEvent("Setting Cache Size");
 		this.sz = sz;
+		csz = Long.parseLong(sz);
 		Thread th = new Thread(this);
 		th.start();
-		long csz = Long.parseLong(sz);
-		HCServiceProxy.setCacheSize(csz);
-		Main.volume.writeUpdate();
+		
+		
 		return evt.toXML();
 
+	}
+
+	public void setCache(long sz) {
+		evt = SDFSEvent.cszEvent("Setting Cache Size to " + sz);
+		this.csz = sz;
+		Thread th = new Thread(this);
+		th.start();
 	}
 
 	@Override
 	public void run() {
 		try {
-			long csz = Long.parseLong(sz);
+			HCServiceProxy.setCacheSize(csz);
+			Main.volume.writeUpdate();
 			evt.endEvent("Set Cache Size to " + csz + " bytes");
 		} catch (Exception e) {
 			evt.endEvent("unable to fulfill request because " + e.getMessage(),
