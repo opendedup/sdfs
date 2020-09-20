@@ -22,7 +22,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -842,17 +841,7 @@ public class MgmtWebServer implements Container {
 							SDFSLogger.getLog().warn("volumeconfigpath", e);
 						}
 						break;
-					case "dedup":
-						try {
-							String msg = new SetDedupAllCmd().getResult(cmdOptions, file);
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", msg);
-						} catch (IOException e) {
-							result.setAttribute("status", "failed");
-							result.setAttribute("msg", e.toString());
-							SDFSLogger.getLog().warn(e);
-						}
-						break;
+			
 					case "perfmon":
 						String msg = new SetEnablePerfMonCmd().getResult(cmdOptions, file);
 						result.setAttribute("status", "success");
@@ -1119,7 +1108,6 @@ public class MgmtWebServer implements Container {
 				body.println(e.toString());
 				body.close();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				SDFSLogger.getLog().error("unable to satify request ", e1);
 			}
 			SDFSLogger.getLog().error("unable to satify request ", e);
@@ -1201,6 +1189,14 @@ public class MgmtWebServer implements Container {
 					throw new IOException(e);
 				}
 			}
+			if(Main.volume.pubsubTopic != null) {
+				try {
+					new org.opendedup.sdfs.mgmt.pubsub.MetaDataPush(Main.volume.pubsubTopic,
+					Main.volume.pubsubSubscription, Main.volume.gcpProject, Main.volume.gcpCredsPath);
+				} catch (TimeoutException e) {
+					throw new IOException(e);
+				}
+			}
 			routes.put("/uploadsocket", new MetaDataUpload());
 			routes.put("/ping", new PingService());
 			Router negotiator = new PathRouter(routes, new PingService());
@@ -1223,6 +1219,7 @@ public class MgmtWebServer implements Container {
 
 		}
 	}
+
 
 	public static void stop() {
 		try {

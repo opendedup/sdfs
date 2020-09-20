@@ -18,15 +18,13 @@
  *******************************************************************************/
 package org.opendedup.sdfs.io;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -50,7 +48,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mapdb.CC;
-import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.grpc.FileAttributes;
 import org.opendedup.grpc.FileInfoResponse;
@@ -81,9 +78,8 @@ import com.google.gson.JsonObject;
  *         from the java.io.File class. Meta-Data files are stored within the
  *         MetaDataFileStore @see com.annesam.filestore.MetaDataFileStore
  */
-public class MetaDataDedupFile implements java.io.Externalizable {
+public class MetaDataDedupFile {
 
-	private static final long serialVersionUID = -4598940197202968523L;
 	private static EventBus eventBus = new EventBus();
 	transient public static final String pathSeparator = File.pathSeparator;
 	transient public static final String separator = File.separator;
@@ -115,7 +111,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private int group_id = -1;
 	private int mode = -1;
 	private HashMap<String, String> extendedAttrs = new HashMap<String, String>();
-	private boolean dedup = Main.dedupFiles;
 	private boolean symlink = false;
 	private String symlinkPath = null;
 	private String version = Main.version;
@@ -127,14 +122,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		eventBus.register(obj);
 	}
 
-	/**
-	 * 
-	 * @return true if all chunks within the file will be deduped.
-	 */
-	public boolean isDedup() {
-		return dedup;
-	}
-
+	
 	public int getMode() throws IOException {
 		if (mode == -1) {
 			Path p = Paths.get(this.path);
@@ -154,35 +142,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
 	}
 
-	/**
-	 * 
-	 * @param dedup if true all chunks will be deduped, Otherwise chunks will be
-	 *              deduped opportunistically.
-	 * @throws IOException
-	 */
-	public void setDedup(boolean dedupNow) throws IOException, HashtableFullException {
-		setDedup(dedupNow, true);
-	}
+	
 
-	/**
-	 * 
-	 * @param propigateEvent TODO
-	 * @param dedup          if true all chunks will be deduped, Otherwise chunks
-	 *                       will be deduped opportunistically.
-	 * @throws IOException
-	 */
-	public void setDedup(boolean dedupNow, boolean propigateEvent) throws IOException, HashtableFullException {
-		if (!this.dedup && dedupNow) {
-			try {
-				this.dedup = dedupNow;
-				this.getDedupFile(true).optimize();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				SDFSLogger.getLog().error("unable to set dedup on " + this.getPath(), e);
-			}
-		}
-		this.dedup = dedupNow;
-	}
+	
 
 	/**
 	 * adds a posix extended attribute
@@ -423,10 +385,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			MetaFileStore.addToCache(mf);
 		} else {
 
-			ObjectInputStream in = null;
+			BufferedInputStream in = null;
 			try {
-				in = new ObjectInputStream(new FileInputStream(path));
-				mf = (MetaDataDedupFile) in.readObject();
+				in = new BufferedInputStream(new FileInputStream(path));
+				byte [] b = in.readAllBytes();
+				mf = new MetaDataDedupFile();
+				mf.readBytes(b);
 				mf.path = path;
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("reading in file " + mf.path + " df=" + mf.dfGuid);
@@ -491,7 +455,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.owner_id = mf.owner_id;
 		this.group_id = mf.group_id;
 		this.permissions = mf.permissions;
-		this.dedup = mf.dedup;
 		this.attributes = mf.attributes;
 		monitor = new IOMonitor(this);
 		this.dirty = true;
@@ -601,32 +564,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				f.getParentFile().mkdirs();
 			MetaDataDedupFile _mf = new MetaDataDedupFile(snaptoPath, this);
 			this.getGUID();
-			if (!this.dedup) {
-				try {
-					this.setDedup(true, true);
-					try {
-						_mf.dfGuid = DedupFileStore.cloneDedupFile(this, _mf).getGUID();
-					} catch (java.lang.NullPointerException e) {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("no dedupfile for " + this.path, e);
-					}
-				} catch (HashtableFullException e) {
-					throw new IOException(e);
-				} finally {
-					try {
-						this.setDedup(false, true);
-					} catch (HashtableFullException e) {
-						SDFSLogger.getLog().error("error while setting dedup option back to false", e);
-					}
-				}
-			} else {
+			
 				try {
 					DedupFileStore.cloneDedupFile(this, _mf);
 				} catch (java.lang.NullPointerException e) {
 					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("no dedupfile for " + this.path, e);
 				}
-			}
 			_mf.getIOMonitor().setVirtualBytesWritten(this.getIOMonitor().getVirtualBytesWritten(), true);
 			_mf.getIOMonitor().setDuplicateBlocks(
 					this.getIOMonitor().getDuplicateBlocks() + this.getIOMonitor().getActualBytesWritten(), true);
@@ -769,7 +713,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			this.group_id = Main.defaultGroup;
 			this.permissions = Main.defaultFilePermissions;
 			this.lastModified.set(System.currentTimeMillis());
-			this.dedup = Main.dedupFiles;
 			this.setLength(0, false, true);
 			this.dirty = true;
 			Main.volume.addFile();
@@ -799,7 +742,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	private boolean writeFile(boolean notify) {
 		writeLock.lock();
-		ObjectOutputStream out = null;
+		BufferedOutputStream out = null;
 		try {
 			File f = new File(this.path);
 
@@ -817,7 +760,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 						e);
 				return false;
 			}
-			if (!f.isDirectory()) {
+			if (!f.isDirectory()&& !this.isSymlink()) {
 				/*
 				 * try { throw new IOException("Writing mf ["+ f.getPath() +"] len=" +
 				 * this.length()); }catch(Exception e) {
@@ -830,8 +773,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					if (f.getParentFile() == null || !f.getParentFile().exists())
 						f.getParentFile().mkdirs();
 					FileOutputStream fout = new FileOutputStream(this.path);
-					out = new ObjectOutputStream(fout);
-					out.writeObject(this);
+					out = new BufferedOutputStream(fout);
+					out.write(this.toGRPC(false).toByteArray());
 					out.flush();
 					out.close();
 					try {
@@ -1381,156 +1324,51 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		return this.dirty;
 	}
 
-	@Override
-	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+	public void readBytes(byte [] b) throws IOException, ClassNotFoundException {
 		this.writeLock.lock();
 		try {
-
-			in.readLong();
-			this.length = in.readLong();
-			this.lastModified.set(in.readLong());
-			this.lastAccessed.set(in.readLong());
-			this.execute = in.readBoolean();
-			this.read = in.readBoolean();
-			this.write = in.readBoolean();
-			this.hidden = in.readBoolean();
-			this.ownerWriteOnly = in.readBoolean();
-			this.ownerExecOnly = in.readBoolean();
-			this.ownerReadOnly = in.readBoolean();
-			int dfgl = in.readInt();
-			if (dfgl == -1) {
+			FileInfoResponse rsp = FileInfoResponse.parseFrom(b);
+			this.length = rsp.getSize();
+			this.lastModified.set(rsp.getMtime());
+			this.lastAccessed.set(rsp.getAtime());
+			this.execute = rsp.getExecute();
+			this.read = rsp.getRead();
+			this.write = rsp.getWrite();
+			this.hidden = rsp.getHidden();
+			try{
+				this.dfGuid = rsp.getMapGuid();
+			}catch(Exception e) {
 				this.dfGuid = null;
-			} else {
-				byte[] dfb = new byte[dfgl];
-				in.readFully(dfb);
-				this.dfGuid = new String(dfb);
 			}
-			int gl = in.readInt();
-			byte[] gfb = new byte[gl];
-			in.readFully(gfb);
-			this.guid = new String(gfb);
-
-			int ml = in.readInt();
-			if (ml == -1) {
-				this.monitor = null;
-			} else {
-				byte[] mlb = new byte[ml];
-				in.readFully(mlb);
-				this.monitor = new IOMonitor(this);
-				monitor.fromByteArray(mlb);
+			this.guid = rsp.getFileGuild();
+			this.monitor = new IOMonitor(this);
+			if(rsp.getIoMonitor() != null) {
+				this.monitor.fromGrpc(rsp.getIoMonitor());
 			}
-			this.vmdk = in.readBoolean();
-			// owner id is ignored
-			this.owner_id = in.readInt();
-			// group id is ignored
-			this.group_id = in.readInt();
-			byte[] hmb = new byte[in.readInt()];
-			in.readFully(hmb);
-			this.extendedAttrs = ByteUtils.deSerializeHashMap(hmb);
-			this.dedup = in.readBoolean();
-			try {
-				if (in.available() > 0) {
-					int vlen = in.readInt();
-					byte[] vb = new byte[vlen];
-					in.readFully(vb);
-					this.version = new String(vb);
-				}
-				if (in.available() > 0) {
-					this.attributes = in.readLong();
-				}
-				if (in.available() > 0) {
-					this.mode = in.readInt();
-				}
-				if (in.available() > 0) {
-					this.deleteOnClose = in.readBoolean();
-				}
-				if (in.available() > 0) {
-					this.localowner = in.readBoolean();
-				}
-				if (in.available() > 0) {
-					this.retentionLock = in.readLong();
-				}
-				if (in.available() > 0) {
-					this.importing = in.readBoolean();
-				}
-
-				/*
-				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb = new byte[vlen];
-				 * in.readFully(vb); this.backingFile = new String(vb); this.iterWeaveCP =
-				 * in.readBoolean(); }
-				 */
-			} catch (Exception e) {
-
+			
+			this.owner_id = (int)rsp.getUserId();
+			this.group_id = (int)rsp.getGroupId();
+			this.extendedAttrs = new HashMap<String,String>();
+			for (FileAttributes attr : rsp.getFileAttributesList()) {
+				this.extendedAttrs.put(attr.getKey(), attr.getValue());
 			}
+			this.version = rsp.getVersion();
+			this.attributes = rsp.getAttributes();
+			this.mode = rsp.getMode();
+
+			this.deleteOnClose = rsp.getDeleteOnClose();
+			this.localowner = rsp.getLocalOwner();
+			this.retentionLock = rsp.getRetentionLock();
+			this.importing = rsp.getImporting();
+			
+			
 		} finally {
 			this.writeLock.unlock();
 		}
 
 	}
 
-	@Override
-	public void writeExternal(ObjectOutput out) throws IOException {
-		this.writeLock.lock();
-		try {
-			if (this.isSymlink())
-				return;
-			// SDFSLogger.getLog().info("writing out file=" + this.path + " df=" +
-			// this.dfGuid);
-			// SDFSLogger.getLog().info("writing out file=" + this.path + " df=" +
-			// this.dfGuid + " length=" + this.length);
-			out.writeLong(-1);
-			out.writeLong(length);
-			out.writeLong(lastModified.get());
-			out.writeLong(lastAccessed.get());
-			out.writeBoolean(execute);
-			out.writeBoolean(read);
-			out.writeBoolean(write);
-			out.writeBoolean(hidden);
-			out.writeBoolean(ownerWriteOnly);
-			out.writeBoolean(ownerExecOnly);
-			out.writeBoolean(ownerReadOnly);
-			if (this.dfGuid != null) {
-				byte[] dfb = this.dfGuid.getBytes();
-				out.writeInt(dfb.length);
-				out.write(dfb);
-			} else {
-				out.writeInt(-1);
-			}
-			byte[] dfb = this.guid.getBytes();
-			out.writeInt(dfb.length);
-			out.write(dfb);
-			if (this.monitor != null) {
-				byte[] mfb = this.monitor.toByteArray();
-				out.writeInt(mfb.length);
-				out.write(mfb);
-			} else {
-				out.writeInt(-1);
-			}
-			out.writeBoolean(vmdk);
-			out.writeInt(owner_id);
-			out.writeInt(group_id);
-			byte[] hmb = ByteUtils.serializeHashMap(extendedAttrs);
-			out.writeInt(hmb.length);
-			out.write(hmb);
-			out.writeBoolean(dedup);
-			byte[] vb = this.version.getBytes();
-			out.writeInt(vb.length);
-			out.write(vb);
-			out.writeLong(attributes);
-			out.writeInt(this.mode);
-			out.writeBoolean(this.deleteOnClose);
-			out.writeBoolean(this.localowner);
-			out.writeLong(this.retentionLock);
-			out.writeBoolean(this.importing);
-			/*
-			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
-			 * this.backingFile.getBytes(); out.writeInt(bb.length); out.write(bb); }
-			 * out.writeBoolean(this.iterWeaveCP);
-			 */
-		} finally {
-			this.writeLock.unlock();
-		}
-	}
+	
 
 	public long getHashCode() {
 		String fl = this.getPath().substring(Main.volume.getPath().length());
@@ -1555,7 +1393,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		b.setId(Main.volume.getSerialNumber() + "/" + fl).setFilePath(fl).setParentPath(pl).setMtime(this.lastModified());
 		if(this.isFile()) {
 			b.setType(fileType.FILE);
-		} else if(this.isDedup()) {
+		} else if(this.isDirectory()) {
 			b.setType(fileType.DIR);
 		}
 		byte [] stb = fl.getBytes();
@@ -1564,7 +1402,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		if(!compact && this.isFile()) {
 			b.setAtime(this.getLastAccessed()).setCtime(this.getLastAccessed()).setHidden(this.hidden).setSize(this.length())
 			.setRead(this.read).setWrite(this.write).setLocalOwner(this.isFile()).setExecute(this.execute);
-			b.setIoMonitor(this.getIOMonitor().toGRPC());
+			b.setIoMonitor(this.getIOMonitor().toGRPC()).setLocalOwner(this.localowner).setAttributes(this.attributes)
+			.setVersion(this.version).setMode(this.getMode()).setDeleteOnClose(this.deleteOnClose);
 			try {
 				b.setOpen(DedupFileStore.fileOpen(this));
 			} catch (NullPointerException e) {
@@ -1593,7 +1432,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			b.setType(fileType.DIR);
 			BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 			b.setAtime(attrs.lastAccessTime().toMillis()).setMtime(attrs.lastModifiedTime().toMillis()).setCtime(attrs.creationTime().toMillis())
-			.setHidden(f.isHidden()).setSize(f.length()).setSymlink(this.symlink);
+			.setHidden(f.isHidden()).setSize(f.length()).setSymlink(this.symlink).setMode(this.getMode());
 			if(this.symlink) {
 				b.setSymlinkPath(this.getSymlinkPath());
 			}	
@@ -1659,7 +1498,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			}
 			dataset.addProperty("file.guid", this.getGUID());
 			dataset.addProperty("dedupe.map.guid", this.getDfGuid());
-			dataset.addProperty("dedupe", this.isDedup());
 			dataset.addProperty("vmdk", this.isVmdk());
 			dataset.addProperty("importing", this.importing);
 			if (symlink) {
@@ -1709,7 +1547,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			}
 			root.setAttribute("file-guid", this.getGUID());
 			root.setAttribute("dedup-map-guid", this.getDfGuid());
-			root.setAttribute("dedup", Boolean.toString(this.isDedup()));
 			root.setAttribute("vmdk", Boolean.toString(this.isVmdk()));
 			root.setAttribute("localowner", Boolean.toString(this.isLocalOwner()));
 			root.setAttribute("execute", Boolean.toString(this.execute));

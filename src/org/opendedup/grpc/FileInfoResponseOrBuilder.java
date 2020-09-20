@@ -284,4 +284,40 @@ public interface FileInfoResponseOrBuilder extends
    * @return The hashcode.
    */
   long getHashcode();
+
+  /**
+   * <code>int64 retentionLock = 30;</code>
+   * @return The retentionLock.
+   */
+  long getRetentionLock();
+
+  /**
+   * <code>int64 attributes = 31;</code>
+   * @return The attributes.
+   */
+  long getAttributes();
+
+  /**
+   * <code>string version = 32;</code>
+   * @return The version.
+   */
+  java.lang.String getVersion();
+  /**
+   * <code>string version = 32;</code>
+   * @return The bytes for version.
+   */
+  com.google.protobuf.ByteString
+      getVersionBytes();
+
+  /**
+   * <code>int32 mode = 33;</code>
+   * @return The mode.
+   */
+  int getMode();
+
+  /**
+   * <code>bool delete_on_close = 34;</code>
+   * @return The deleteOnClose.
+   */
+  boolean getDeleteOnClose();
 }

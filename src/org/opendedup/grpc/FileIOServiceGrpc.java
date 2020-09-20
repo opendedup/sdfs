@@ -988,6 +988,37 @@ public final class FileIOServiceGrpc {
     return getGetCloudMetaFileMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.StatFSRequest,
+      org.opendedup.grpc.StatFSResponse> getStatFSMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "StatFS",
+      requestType = org.opendedup.grpc.StatFSRequest.class,
+      responseType = org.opendedup.grpc.StatFSResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.StatFSRequest,
+      org.opendedup.grpc.StatFSResponse> getStatFSMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.StatFSRequest, org.opendedup.grpc.StatFSResponse> getStatFSMethod;
+    if ((getStatFSMethod = FileIOServiceGrpc.getStatFSMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getStatFSMethod = FileIOServiceGrpc.getStatFSMethod) == null) {
+          FileIOServiceGrpc.getStatFSMethod = getStatFSMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.StatFSRequest, org.opendedup.grpc.StatFSResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "StatFS"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.StatFSRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.StatFSResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("StatFS"))
+              .build();
+        }
+      }
+    }
+    return getStatFSMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -1256,6 +1287,13 @@ public final class FileIOServiceGrpc {
       asyncUnimplementedUnaryCall(getGetCloudMetaFileMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void statFS(org.opendedup.grpc.StatFSRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.StatFSResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getStatFSMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -1475,6 +1513,13 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.GetCloudFileRequest,
                 org.opendedup.grpc.GetCloudFileResponse>(
                   this, METHODID_GET_CLOUD_META_FILE)))
+          .addMethod(
+            getStatFSMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.StatFSRequest,
+                org.opendedup.grpc.StatFSResponse>(
+                  this, METHODID_STAT_FS)))
           .build();
     }
   }
@@ -1743,6 +1788,14 @@ public final class FileIOServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getGetCloudMetaFileMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void statFS(org.opendedup.grpc.StatFSRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.StatFSResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getStatFSMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -1977,6 +2030,13 @@ public final class FileIOServiceGrpc {
     public org.opendedup.grpc.GetCloudFileResponse getCloudMetaFile(org.opendedup.grpc.GetCloudFileRequest request) {
       return blockingUnaryCall(
           getChannel(), getGetCloudMetaFileMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.StatFSResponse statFS(org.opendedup.grpc.StatFSRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getStatFSMethod(), getCallOptions(), request);
     }
   }
 
@@ -2244,6 +2304,14 @@ public final class FileIOServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getGetCloudMetaFileMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.StatFSResponse> statFS(
+        org.opendedup.grpc.StatFSRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getStatFSMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_XATTR_SIZE = 0;
@@ -2277,6 +2345,7 @@ public final class FileIOServiceGrpc {
   private static final int METHODID_SET_USER_META_DATA = 28;
   private static final int METHODID_GET_CLOUD_FILE = 29;
   private static final int METHODID_GET_CLOUD_META_FILE = 30;
+  private static final int METHODID_STAT_FS = 31;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -2419,6 +2488,10 @@ public final class FileIOServiceGrpc {
           serviceImpl.getCloudMetaFile((org.opendedup.grpc.GetCloudFileRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.GetCloudFileResponse>) responseObserver);
           break;
+        case METHODID_STAT_FS:
+          serviceImpl.statFS((org.opendedup.grpc.StatFSRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.StatFSResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -2511,6 +2584,7 @@ public final class FileIOServiceGrpc {
               .addMethod(getSetUserMetaDataMethod())
               .addMethod(getGetCloudFileMethod())
               .addMethod(getGetCloudMetaFileMethod())
+              .addMethod(getStatFSMethod())
               .build();
         }
       }

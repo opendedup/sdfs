@@ -18,4 +18,10 @@ public interface FileOpenRequestOrBuilder extends
    */
   com.google.protobuf.ByteString
       getPathBytes();
+
+  /**
+   * <code>int32 flags = 2;</code>
+   * @return The flags.
+   */
+  int getFlags();
 }

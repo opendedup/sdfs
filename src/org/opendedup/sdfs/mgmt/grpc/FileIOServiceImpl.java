@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,11 +62,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     private static final int BLOCK_SIZE = 32768;
     private static final int NAME_LENGTH = 2048;
 
-    private LoadingCache<String, DirectoryStream<Path>> fileListers = CacheBuilder.newBuilder().maximumSize(100)
-            .expireAfterAccess(5, TimeUnit.MINUTES).build(new CacheLoader<String, DirectoryStream<Path>>() {
+    private LoadingCache<String, Iterator<Path>> fileListers = CacheBuilder.newBuilder().maximumSize(100)
+            .expireAfterAccess(5, TimeUnit.MINUTES).build(new CacheLoader<String, Iterator<Path>>() {
 
                 @Override
-                public DirectoryStream<Path> load(String key) throws Exception {
+                public Iterator<Path> load(String key) throws Exception {
                     throw new IOException("Key Not Found [" + key + "]");
                 }
 
@@ -197,7 +198,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
         try {
-            MetaFileStore.mkDir(f, -1);
+            MetaFileStore.mkDir(f, request.getMode());
             try {
                 eventBus.post(new MFileWritten(MetaFileStore.getMF(f), true));
                 responseObserver.onNext(b.build());
@@ -291,7 +292,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
-        } catch (Exception e) {
+        }catch (NullPointerException e) {
+            SDFSLogger.getLog().error("unable to fulfill request", e);
+            b.setError("file not found " +request.getFile());
+            b.setErrorCode(errorCodes.ENOENT);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } 
+        catch (Exception e) {
             SDFSLogger.getLog().error("unable to fulfill request", e);
             b.setError("unable to fulfill request");
             b.setErrorCode(errorCodes.EIO);
@@ -655,6 +663,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 SDFSLogger.getLog().debug("creating file " + f.getPath());
                 MetaDataDedupFile mf = MetaFileStore.getMF(f);
                 mf.unmarshal();
+                try {
+					mf.setMode(request.getMode());
+				} finally {
+					f = null;
+				}
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
@@ -1466,17 +1479,15 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             if (f.isDirectory()) {
 
                 try {
-                    String guid = UUID.randomUUID().toString();
-                    if (req.getListGuid() != null) {
-                        guid = req.getListGuid();
-                    }
-                    b.setListGuid(guid);
+                    String guid = null;
                     Path dir = FileSystems.getDefault().getPath(f.getPath());
-                    DirectoryStream<Path> stream = null;
-                    if (req.getListGuid().isEmpty()) {
-                        stream = Files.newDirectoryStream(dir);
+                    Iterator<Path> stream = null;
+                    if (req.getListGuid().isEmpty() || req.getListGuid().trim().length() == 0) {
+                        guid = UUID.randomUUID().toString();
+                        stream = Files.newDirectoryStream(dir).iterator();
                         this.fileListers.put(guid, stream);
                     } else {
+                        guid = req.getListGuid();
                         stream = this.fileListers.get(guid);
                     }
 
@@ -1486,7 +1497,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         maxFiles = req.getNumberOfFiles();
                     }
                     b.setMaxNumberOfFiles(maxFiles);
-                    for (Path p : stream) {
+                    while (stream.hasNext()){
+                        Path p = stream.next();
                         File _mf = p.toFile();
                         MetaDataDedupFile mf = MetaFileStore.getNCMF(_mf);
                         try {
@@ -1830,6 +1842,33 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return this.message;
         }
 
+    }
+    @Override
+    public void statFS(StatFSRequest request, StreamObserver<StatFSResponse> responseObserver) {
+        StatFSResponse.Builder b = StatFSResponse.newBuilder();
+        StatFS.Builder bs = StatFS.newBuilder();
+        
+		try {
+			long blocks = Main.volume.getTotalBlocks();
+			long used = Main.volume.getUsedBlocks();
+			if (used > blocks)
+				used = blocks;
+            bs.setBsize(Main.volume.getBlockSize()).setBlocks(blocks).setBfree(blocks-used).setNamelen(NAME_LENGTH)
+            .setType(0).setFsid(Main.volume.getSerialNumber());
+            b.setStat(bs);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+		} catch (Exception e) {
+            SDFSLogger.getLog().error("unable to stat", e);
+            b.setError("unable to stat");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+		} finally {
+
+		}
     }
 
 }

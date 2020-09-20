@@ -334,6 +334,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       info.setListenEncrypted(Main.sdfsCliSSL);
       info.setEncryptionKey(Main.chunkStoreEncryptionKey);
       info.setEncryptionIV(Main.chunkStoreEncryptionIV);
+      info.setBucketName(HCServiceProxy.getChunkStore().getName());
       if (Main.cloudAccessKey != null)
         info.setCloudAccessKey(Main.cloudAccessKey);
       if (Main.cloudSecretKey != null)

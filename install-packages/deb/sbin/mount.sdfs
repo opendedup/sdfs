@@ -10,7 +10,7 @@ EXEC="/usr/share/sdfs/jsvc"
 BASEPATH="/usr/share/sdfs"
 PF="sdfs-ncfg.pid"
 if [[ {$1:0:1} == '-' ]]; then
-while getopts ":v:" opt; do
+while getopts ":v:z" opt; do
   case $opt in
     v)
       CFG="/etc/sdfs/$OPTARG-volume-cfg.xml"
@@ -23,6 +23,7 @@ while getopts ":v:" opt; do
       echo "Option -$OPTARG requires an argument." >&2
       exit 1
       ;;
+    
   esac
 done
 else

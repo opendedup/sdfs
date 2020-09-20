@@ -223,7 +223,7 @@ public final class VolumeServiceOuterClass {
       "endedup.grpc.errorCodes\"\204\001\n\022SystemInfoRe" +
       "sponse\022,\n\004info\030\001 \001(\0132\036.org.opendedup.grp" +
       "c.SystemInfo\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode" +
-      "\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"\201" +
+      "\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"\225" +
       "\003\n\007DSEInfo\022\017\n\007maxSize\030\001 \001(\003\022\023\n\013currentSi" +
       "ze\030\002 \001(\003\022\017\n\007entries\030\003 \001(\003\022\026\n\016compressedS" +
       "ize\030\004 \001(\003\022\022\n\nfreeBlocks\030\005 \001(\003\022\020\n\010pageSiz" +
@@ -233,89 +233,90 @@ public final class VolumeServiceOuterClass {
       "\030\014 \001(\003\022\024\n\014maxCacheSize\030\r \001(\003\022\027\n\017listenEn" +
       "crypted\030\016 \001(\010\022\025\n\rencryptionKey\030\017 \001(\t\022\024\n\014" +
       "encryptionIV\030\020 \001(\t\022\026\n\016cloudAccessKey\030\021 \001" +
-      "(\t\022\026\n\016cloudSecretKey\030\022 \001(\t\"\014\n\nDSERequest" +
-      "\"z\n\013DSEResponse\022)\n\004info\030\001 \001(\0132\033.org.open" +
-      "dedup.grpc.DSEInfo\022\r\n\005error\030\002 \001(\t\0221\n\terr" +
-      "orCode\030\003 \001(\0162\036.org.opendedup.grpc.errorC" +
-      "odes\";\n\025AuthenticationRequest\022\020\n\010usernam" +
-      "e\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\"i\n\026Authenticat" +
-      "ionResponse\022\r\n\005token\030\001 \001(\t\022\r\n\005error\030\002 \001(" +
-      "\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grp" +
-      "c.errorCodes\"\304\001\n\030MessageQueueInfoRespons" +
-      "e\022\020\n\010hostName\030\001 \001(\t\022C\n\006mqType\030\002 \001(\01623.or" +
-      "g.opendedup.grpc.MessageQueueInfoRespons" +
-      "e.MQType\022\014\n\004port\030\003 \001(\005\022\r\n\005topic\030\004 \001(\t\022\020\n" +
-      "\010authInfo\030\005 \001(\t\"\"\n\006MQType\022\014\n\010RabbitMQ\020\000\022" +
-      "\n\n\006PubSub\020\001\"$\n\021CleanStoreRequest\022\017\n\007comp" +
-      "act\030\001 \001(\010\"g\n\022CleanStoreResponse\022\017\n\007event" +
-      "ID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001" +
-      "(\0162\036.org.opendedup.grpc.errorCodes\"(\n\023Se" +
-      "tCacheSizeRequest\022\021\n\tcacheSize\030\001 \001(\003\"i\n\024" +
-      "SetCacheSizeResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n" +
-      "\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.op" +
-      "endedup.grpc.errorCodes\",\n\030DeleteCloudVo" +
-      "lumeRequest\022\020\n\010volumeid\030\001 \001(\003\"n\n\031DeleteC" +
-      "loudVolumeResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005e" +
-      "rror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.open" +
-      "dedup.grpc.errorCodes\"(\n\030SetVolumeCapaci" +
-      "tyRequest\022\014\n\004size\030\001 \001(\003\"]\n\031SetVolumeCapa" +
-      "cityResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode" +
-      "\030\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"&" +
-      "\n\022SetPasswordRequest\022\020\n\010password\030\001 \001(\t\"W" +
-      "\n\023SetPasswordResponse\022\r\n\005error\030\001 \001(\t\0221\n\t" +
-      "errorCode\030\002 \001(\0162\036.org.opendedup.grpc.err" +
-      "orCodes\"&\n\014SpeedRequest\022\026\n\016requestedSpee" +
-      "d\030\001 \001(\005\"b\n\rSpeedResponse\022\017\n\007eventID\030\001 \001(" +
-      "\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.or" +
-      "g.opendedup.grpc.errorCodes\"&\n\022SyncFromV" +
-      "olRequest\022\020\n\010volumeid\030\001 \001(\003\"h\n\023SyncFromV" +
-      "olResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001" +
+      "(\t\022\026\n\016cloudSecretKey\030\022 \001(\t\022\022\n\nbucketName" +
+      "\030\023 \001(\t\"\014\n\nDSERequest\"z\n\013DSEResponse\022)\n\004i" +
+      "nfo\030\001 \001(\0132\033.org.opendedup.grpc.DSEInfo\022\r" +
+      "\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.o" +
+      "pendedup.grpc.errorCodes\";\n\025Authenticati" +
+      "onRequest\022\020\n\010username\030\001 \001(\t\022\020\n\010password\030" +
+      "\002 \001(\t\"i\n\026AuthenticationResponse\022\r\n\005token" +
+      "\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\016" +
+      "2\036.org.opendedup.grpc.errorCodes\"\353\001\n\030Mes" +
+      "sageQueueInfoResponse\022\020\n\010hostName\030\001 \001(\t\022" +
+      "C\n\006mqType\030\002 \001(\01623.org.opendedup.grpc.Mes" +
+      "sageQueueInfoResponse.MQType\022\014\n\004port\030\003 \001" +
+      "(\005\022\r\n\005topic\030\004 \001(\t\022\020\n\010authInfo\030\005 \001(\t\022\024\n\014s" +
+      "ubScription\030\006 \001(\t\022\017\n\007project\030\007 \001(\t\"\"\n\006MQ" +
+      "Type\022\014\n\010RabbitMQ\020\000\022\n\n\006PubSub\020\001\"$\n\021CleanS" +
+      "toreRequest\022\017\n\007compact\030\001 \001(\010\"g\n\022CleanSto" +
+      "reResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001" +
       "(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.gr" +
-      "pc.errorCodes\"\020\n\016SyncVolRequest\"d\n\017SyncV" +
-      "olResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001" +
-      "(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.gr" +
-      "pc.errorCodes2\235\014\n\rVolumeService\022i\n\020Authe" +
-      "nticateUser\022).org.opendedup.grpc.Authent" +
-      "icationRequest\032*.org.opendedup.grpc.Auth" +
-      "enticationResponse\022^\n\rGetVolumeInfo\022%.or" +
-      "g.opendedup.grpc.VolumeInfoRequest\032&.org" +
-      ".opendedup.grpc.VolumeInfoResponse\022[\n\016Sh" +
-      "utdownVolume\022#.org.opendedup.grpc.Shutdo" +
-      "wnRequest\032$.org.opendedup.grpc.ShutdownR" +
-      "esponse\022[\n\nCleanStore\022%.org.opendedup.gr" +
-      "pc.CleanStoreRequest\032&.org.opendedup.grp" +
-      "c.CleanStoreResponse\022p\n\021DeleteCloudVolum" +
-      "e\022,.org.opendedup.grpc.DeleteCloudVolume" +
-      "Request\032-.org.opendedup.grpc.DeleteCloud" +
-      "VolumeResponse\022J\n\007DSEInfo\022\036.org.opendedu" +
-      "p.grpc.DSERequest\032\037.org.opendedup.grpc.D" +
-      "SEResponse\022[\n\nSystemInfo\022%.org.opendedup" +
-      ".grpc.SystemInfoRequest\032&.org.opendedup." +
-      "grpc.SystemInfoResponse\022p\n\021SetVolumeCapa" +
-      "city\022,.org.opendedup.grpc.SetVolumeCapac" +
-      "ityRequest\032-.org.opendedup.grpc.SetVolum" +
-      "eCapacityResponse\022h\n\023GetConnectedVolumes" +
-      "\022\'.org.opendedup.grpc.CloudVolumesReques" +
-      "t\032(.org.opendedup.grpc.CloudVolumesRespo" +
-      "nse\022^\n\rGetGCSchedule\022%.org.opendedup.grp" +
-      "c.GCScheduleRequest\032&.org.opendedup.grpc" +
-      ".GCScheduleResponse\022a\n\014SetCacheSize\022\'.or" +
-      "g.opendedup.grpc.SetCacheSizeRequest\032(.o" +
-      "rg.opendedup.grpc.SetCacheSizeResponse\022^" +
-      "\n\013SetPassword\022&.org.opendedup.grpc.SetPa" +
-      "sswordRequest\032\'.org.opendedup.grpc.SetPa" +
-      "sswordResponse\022S\n\014SetReadSpeed\022 .org.ope" +
-      "ndedup.grpc.SpeedRequest\032!.org.opendedup" +
-      ".grpc.SpeedResponse\022T\n\rSetWriteSpeed\022 .o" +
-      "rg.opendedup.grpc.SpeedRequest\032!.org.ope" +
-      "ndedup.grpc.SpeedResponse\022f\n\023SyncFromClo" +
-      "udVolume\022&.org.opendedup.grpc.SyncFromVo" +
-      "lRequest\032\'.org.opendedup.grpc.SyncFromVo" +
-      "lResponse\022Z\n\017SyncCloudVolume\022\".org.opend" +
-      "edup.grpc.SyncVolRequest\032#.org.opendedup" +
-      ".grpc.SyncVolResponseB2P\001Z.github.com/op" +
-      "endedup/sdfs-client-go/sdfs/;sdfsb\006proto" +
-      "3"
+      "pc.errorCodes\"(\n\023SetCacheSizeRequest\022\021\n\t" +
+      "cacheSize\030\001 \001(\003\"i\n\024SetCacheSizeResponse\022" +
+      "\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
+      "Code\030\003 \001(\0162\036.org.opendedup.grpc.errorCod" +
+      "es\",\n\030DeleteCloudVolumeRequest\022\020\n\010volume" +
+      "id\030\001 \001(\003\"n\n\031DeleteCloudVolumeResponse\022\017\n" +
+      "\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCo" +
+      "de\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes" +
+      "\"(\n\030SetVolumeCapacityRequest\022\014\n\004size\030\001 \001" +
+      "(\003\"]\n\031SetVolumeCapacityResponse\022\r\n\005error" +
+      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
+      "p.grpc.errorCodes\"&\n\022SetPasswordRequest\022" +
+      "\020\n\010password\030\001 \001(\t\"W\n\023SetPasswordResponse" +
+      "\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org" +
+      ".opendedup.grpc.errorCodes\"&\n\014SpeedReque" +
+      "st\022\026\n\016requestedSpeed\030\001 \001(\005\"b\n\rSpeedRespo" +
+      "nse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\te" +
+      "rrorCode\030\003 \001(\0162\036.org.opendedup.grpc.erro" +
+      "rCodes\"&\n\022SyncFromVolRequest\022\020\n\010volumeid" +
+      "\030\001 \001(\003\"h\n\023SyncFromVolResponse\022\017\n\007eventID" +
+      "\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\016" +
+      "2\036.org.opendedup.grpc.errorCodes\"\020\n\016Sync" +
+      "VolRequest\"d\n\017SyncVolResponse\022\017\n\007eventID" +
+      "\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\016" +
+      "2\036.org.opendedup.grpc.errorCodes2\235\014\n\rVol" +
+      "umeService\022i\n\020AuthenticateUser\022).org.ope" +
+      "ndedup.grpc.AuthenticationRequest\032*.org." +
+      "opendedup.grpc.AuthenticationResponse\022^\n" +
+      "\rGetVolumeInfo\022%.org.opendedup.grpc.Volu" +
+      "meInfoRequest\032&.org.opendedup.grpc.Volum" +
+      "eInfoResponse\022[\n\016ShutdownVolume\022#.org.op" +
+      "endedup.grpc.ShutdownRequest\032$.org.opend" +
+      "edup.grpc.ShutdownResponse\022[\n\nCleanStore" +
+      "\022%.org.opendedup.grpc.CleanStoreRequest\032" +
+      "&.org.opendedup.grpc.CleanStoreResponse\022" +
+      "p\n\021DeleteCloudVolume\022,.org.opendedup.grp" +
+      "c.DeleteCloudVolumeRequest\032-.org.opended" +
+      "up.grpc.DeleteCloudVolumeResponse\022J\n\007DSE" +
+      "Info\022\036.org.opendedup.grpc.DSERequest\032\037.o" +
+      "rg.opendedup.grpc.DSEResponse\022[\n\nSystemI" +
+      "nfo\022%.org.opendedup.grpc.SystemInfoReque" +
+      "st\032&.org.opendedup.grpc.SystemInfoRespon" +
+      "se\022p\n\021SetVolumeCapacity\022,.org.opendedup." +
+      "grpc.SetVolumeCapacityRequest\032-.org.open" +
+      "dedup.grpc.SetVolumeCapacityResponse\022h\n\023" +
+      "GetConnectedVolumes\022\'.org.opendedup.grpc" +
+      ".CloudVolumesRequest\032(.org.opendedup.grp" +
+      "c.CloudVolumesResponse\022^\n\rGetGCSchedule\022" +
+      "%.org.opendedup.grpc.GCScheduleRequest\032&" +
+      ".org.opendedup.grpc.GCScheduleResponse\022a" +
+      "\n\014SetCacheSize\022\'.org.opendedup.grpc.SetC" +
+      "acheSizeRequest\032(.org.opendedup.grpc.Set" +
+      "CacheSizeResponse\022^\n\013SetPassword\022&.org.o" +
+      "pendedup.grpc.SetPasswordRequest\032\'.org.o" +
+      "pendedup.grpc.SetPasswordResponse\022S\n\014Set" +
+      "ReadSpeed\022 .org.opendedup.grpc.SpeedRequ" +
+      "est\032!.org.opendedup.grpc.SpeedResponse\022T" +
+      "\n\rSetWriteSpeed\022 .org.opendedup.grpc.Spe" +
+      "edRequest\032!.org.opendedup.grpc.SpeedResp" +
+      "onse\022f\n\023SyncFromCloudVolume\022&.org.opende" +
+      "dup.grpc.SyncFromVolRequest\032\'.org.opende" +
+      "dup.grpc.SyncFromVolResponse\022Z\n\017SyncClou" +
+      "dVolume\022\".org.opendedup.grpc.SyncVolRequ" +
+      "est\032#.org.opendedup.grpc.SyncVolResponse" +
+      "B2P\001Z.github.com/opendedup/sdfs-client-g" +
+      "o/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -388,7 +389,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_DSEInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSEInfo_descriptor,
-        new java.lang.String[] { "MaxSize", "CurrentSize", "Entries", "CompressedSize", "FreeBlocks", "PageSize", "StorageType", "ListenPort", "ListenHost", "ReadSpeed", "WriteSpeed", "CacheSize", "MaxCacheSize", "ListenEncrypted", "EncryptionKey", "EncryptionIV", "CloudAccessKey", "CloudSecretKey", });
+        new java.lang.String[] { "MaxSize", "CurrentSize", "Entries", "CompressedSize", "FreeBlocks", "PageSize", "StorageType", "ListenPort", "ListenHost", "ReadSpeed", "WriteSpeed", "CacheSize", "MaxCacheSize", "ListenEncrypted", "EncryptionKey", "EncryptionIV", "CloudAccessKey", "CloudSecretKey", "BucketName", });
     internal_static_org_opendedup_grpc_DSERequest_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_org_opendedup_grpc_DSERequest_fieldAccessorTable = new
@@ -418,7 +419,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_MessageQueueInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_MessageQueueInfoResponse_descriptor,
-        new java.lang.String[] { "HostName", "MqType", "Port", "Topic", "AuthInfo", });
+        new java.lang.String[] { "HostName", "MqType", "Port", "Topic", "AuthInfo", "SubScription", "Project", });
     internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor =
       getDescriptor().getMessageTypes().get(16);
     internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable = new

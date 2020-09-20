@@ -36,35 +36,20 @@ public class MountSDFS implements Daemon, Runnable {
 
 	public static Options buildOptions() {
 		Options options = new Options();
-		options.addOption(
-				"o",
-				true,
+		options.addOption("o", true,
 				"fuse mount options.\nWill default to: \ndirect_io,big_writes,allow_other,fsname=SDFS");
-		options.addOption("cfr", false,
-				"Restores files from cloud storage if the backend cloud store supports it");
+		options.addOption("r", false, "Restores files from cloud storage if the backend cloud store supports it");
 		options.addOption("d", false, "debug output");
-		options.addOption("s", false, "Run single threaded");
 		options.addOption("p", true, "port to use for sdfs cli");
-		options.addOption("cc", false, "Runs Consistency Check");
+		options.addOption("l", true, "Compact Volume on Disk");
+		options.addOption("c", false, "Runs Consistency Check");
 		options.addOption("e", true, "password to decrypt config");
-		options.addOption("nm", false, "disable drive mount");
-		options.addOption("m", true,
-				"mount point for SDFS file system \n e.g. /media/dedup");
+		options.addOption("n", false, "disable drive mount");
+		options.addOption("m", true, "mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
-		options.addOption("vc", true,
-				"sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
-		options.addOption(
-				"forcecompact",
-				false,
-				"sdfs volume will be compacted even if it is missing blocks. This option is used in conjunction with -c");
-		options.addOption(
-				"rv",
-				true,
-				"comma separated list of remote volumes that should also be accounted for when doing garbage collection. "
-						+ "If not entered the volume will attempt to identify other volumes in the cluster.");
+		options.addOption("f", true, "sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
 		options.addOption("h", false, "displays available options");
-		options.addOption("nossl", false,
-				"If set ssl will not be used sdfscli traffic.");
+		options.addOption("s", false, "If set ssl will not be used sdfscli traffic.");
 		return options;
 	}
 
@@ -73,8 +58,7 @@ public class MountSDFS implements Daemon, Runnable {
 		setup(args);
 		try {
 
-			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(),
-					Main.volumeMountPoint), log);
+			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(), Main.volumeMountPoint), log);
 			System.exit(0);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -83,11 +67,8 @@ public class MountSDFS implements Daemon, Runnable {
 
 	private static void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter
-				.printHelp(
-						"mount.sdfs -o <fuse options> -m <mount point> "
-								+ "-r <path to chunk store routing file> -[v|vc] <volume name to mount | path to volume config file> -p <TCP Management Port> -rv <comma separated list of remote volumes> ",
-						options);
+		formatter.printHelp("mount.sdfs",
+				options);
 	}
 
 	private static void checkJavaVersion() {
@@ -97,8 +78,7 @@ public class MountSDFS implements Daemon, Runnable {
 		Float f = Float.valueOf(sVersion);
 		if (f.floatValue() < (float) 1.7) {
 			System.out.println("Java version must be 1.7 or newer");
-			System.out
-					.println("To get Java 7 go to https://jdk7.dev.java.net/");
+			System.out.println("To get Java 7 go to https://jdk7.dev.java.net/");
 			System.exit(-1);
 		}
 	}
@@ -118,10 +98,10 @@ public class MountSDFS implements Daemon, Runnable {
 			printHelp(options);
 			System.exit(1);
 		}
-		if (cmd.hasOption("nm")) {
+		if (cmd.hasOption("n")) {
 			nm = true;
 		}
-		if (cmd.hasOption("cc")) {
+		if (cmd.hasOption("c")) {
 			Main.runConsistancyCheck = true;
 		}
 		if (cmd.hasOption("d")) {
@@ -130,18 +110,8 @@ public class MountSDFS implements Daemon, Runnable {
 		if (cmd.hasOption("e")) {
 			password = cmd.getOptionValue("e");
 		}
-		if (cmd.hasOption("s")) {
-			fal.add("-s");
-		}
 		if (cmd.hasOption("p")) {
 			port = Integer.parseInt(cmd.getOptionValue("p"));
-		}
-		if (cmd.hasOption("rv")) {
-			StringTokenizer st = new StringTokenizer(cmd.getOptionValue("rv"),
-					",");
-			while (st.hasMoreTokens()) {
-				volumes.add(st.nextToken());
-			}
 		}
 		if (!cmd.hasOption("m")) {
 			fal.add(args[1]);
@@ -152,32 +122,28 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 
 		String volname = "SDFS";
-		if (cmd.hasOption("c")) {
+		if (cmd.hasOption("l")) {
 			Main.runCompact = true;
-			if (cmd.hasOption("forcecompact"))
-				Main.forceCompact = true;
+			Main.forceCompact = true;
 		}
-		if (cmd.hasOption("cfr")) {
+		if (cmd.hasOption("r")) {
 			Main.syncDL = true;
 			Main.runConsistancyCheck = true;
 		}
 
 		if (cmd.hasOption("v")) {
-			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim()
-					+ "-volume-cfg.xml");
+			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim() + "-volume-cfg.xml");
 			volname = f.getName();
 			if (!f.exists()) {
-				System.out.println("Volume configuration file " + f.getPath()
-						+ " does not exist");
+				System.out.println("Volume configuration file " + f.getPath() + " does not exist");
 				System.exit(-1);
 			}
 			volumeConfigFile = f.getPath();
-		} else if (cmd.hasOption("vc")) {
-			File f = new File(cmd.getOptionValue("vc").trim());
+		} else if (cmd.hasOption("f")) {
+			File f = new File(cmd.getOptionValue("f").trim());
 			volname = f.getName();
 			if (!f.exists()) {
-				System.out.println("Volume configuration file " + f.getPath()
-						+ " does not exist");
+				System.out.println("Volume configuration file " + f.getPath() + " does not exist");
 				System.exit(-1);
 			}
 			volumeConfigFile = f.getPath();
@@ -185,60 +151,63 @@ public class MountSDFS implements Daemon, Runnable {
 			File f = new File("/etc/sdfs/" + args[0].trim() + "-volume-cfg.xml");
 			volname = f.getName();
 			if (!f.exists()) {
-				System.out.println("Volume configuration file " + f.getPath()
-						+ " does not exist");
+				System.out.println("Volume configuration file " + f.getPath() + " does not exist");
 				System.exit(-1);
 			}
 			volumeConfigFile = f.getPath();
 		}
-		if (cmd.hasOption("nossl")) {
+		if (cmd.hasOption("s")) {
 			useSSL = false;
 		}
 
 		if (volumeConfigFile == null) {
-			System.out
-					.println("error : volume or path to volume configuration file not defined");
+			System.out.println("error : volume or path to volume configuration file not defined");
 			printHelp(options);
 			System.exit(-1);
 		}
 		if (OSValidator.isUnix())
 			Main.logPath = "/var/log/sdfs/" + volname + ".log";
 		if (OSValidator.isWindows())
-			Main.logPath = Main.volume.getPath() + "\\log\\"
-					+ Main.volume.getName() + ".log";
+			Main.logPath = Main.volume.getPath() + "\\log\\" + Main.volume.getName() + ".log";
 		sdfsService = new SDFSService(volumeConfigFile, volumes);
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
 		try {
-			sdfsService.start(useSSL, port,password);
+			sdfsService.start(useSSL, port, password);
 		} catch (Throwable e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);
 		}
-		shutdownHook = new ShutdownHook(sdfsService,
-				cmd.getOptionValue("m"));
+		shutdownHook = new ShutdownHook(sdfsService, cmd.getOptionValue("m"));
 		mountOptions = cmd.getOptionValue("m");
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
-		if (cmd.hasOption("o")) {
-			fal.add("-o");
-			fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
-					+ volumeConfigFile
-					+ ":"
-					+ Main.sdfsCliPort
-					+ ","
-					+ cmd.getOptionValue("o"));
+		if (nm) {
+			System.out.println("volume mounted");
+			while (!SDFSService.isStopped()) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+
+				}
+			}
 		} else {
-			fal.add("-o");
-			fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
-					+ volumeConfigFile + ":" + Main.sdfsCliPort);
-		}
-		sFal = new String[fal.size()];
-		fal.toArray(sFal);
-		for (int i = 0; i < sFal.length; i++) {
-			SDFSLogger.getLog().info("Mount Option : " + sFal[i]);
+			if (cmd.hasOption("o")) {
+				fal.add("-o");
+				fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
+						+ volumeConfigFile + ":" + Main.sdfsCliPort + "," + cmd.getOptionValue("o"));
+			} else {
+				fal.add("-o");
+				fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
+						+ volumeConfigFile + ":" + Main.sdfsCliPort);
+			}
+			sFal = new String[fal.size()];
+			fal.toArray(sFal);
+			for (int i = 0; i < sFal.length; i++) {
+				SDFSLogger.getLog().info("Mount Option : " + sFal[i]);
+			}
 		}
 	}
 
@@ -255,10 +224,10 @@ public class MountSDFS implements Daemon, Runnable {
 
 	@Override
 	public void start() throws Exception {
-		if(!nm) {
-		MountSDFS sd = new MountSDFS();
-		Thread th = new Thread(sd);
-		th.start();
+		if (!nm) {
+			MountSDFS sd = new MountSDFS();
+			Thread th = new Thread(sd);
+			th.start();
 		}
 	}
 
@@ -279,9 +248,8 @@ public class MountSDFS implements Daemon, Runnable {
 	@Override
 	public void run() {
 		try {
-			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(),
-					Main.volumeMountPoint), log);
-			if(shutdownHook != null)
+			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(), Main.volumeMountPoint), log);
+			if (shutdownHook != null)
 				shutdownHook.shutdown();
 			System.exit(0);
 		} catch (Exception e) {

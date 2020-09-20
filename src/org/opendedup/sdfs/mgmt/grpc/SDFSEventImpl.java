@@ -40,14 +40,10 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
         org.opendedup.sdfs.notification.SDFSEvent evt = null;
         SDFSEventListener l = null;
         try {
-            SDFSLogger.getLog().info("Calling Event Listener");
             
             try {
-                SDFSLogger.getLog().info("1");
                 evt = org.opendedup.sdfs.notification.SDFSEvent.getEvent(request.getUuid());
-                SDFSLogger.getLog().info("2");
             } catch (NullPointerException e) {
-                SDFSLogger.getLog().info("oSent Event");
                 b.setError(e.getMessage());
                 b.setErrorCode(errorCodes.ENOENT);
                 responseObserver.onNext(b.build());
@@ -55,34 +51,39 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
                 return;
             }
             l= new SDFSEventListener(evt, responseObserver, b);
-            SDFSLogger.getLog().info("3");
             evt.registerListener(l);
-            SDFSLogger.getLog().info("4");
             while (!evt.isDone()) {
                 try {
                     Thread.sleep(100);
-                    SDFSLogger.getLog().info("5 " + evt.endTime);
                 } catch (InterruptedException e) {
-                    SDFSLogger.getLog().info("lSent Event");
-
                     return;
                 }
             }
-            SDFSLogger.getLog().info("Done");
+           
+            int i = 0;
+            while (!l.evtsent) {
+                Thread.sleep(100);
+                i++;
+                if(i>10) {
+                    break;
+                }
+            }
+            if (!l.evtsent) {
+                
+                b.setEvent(evt.toProtoBuf());
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
         } catch (Exception e) {
             SDFSLogger.getLog().error("Unable to listen for event", e);
             b.setError(e.getMessage());
             b.setErrorCode(errorCodes.EIO);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
-
         } finally {
-            SDFSLogger.getLog().info("7");
             if(evt != null && l != null) {
-                SDFSLogger.getLog().info("8");
                 evt.unregisterListener(l);
             }
-            SDFSLogger.getLog().info("9");
         }
 
     }
@@ -92,6 +93,7 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
         org.opendedup.sdfs.notification.SDFSEvent evt = null;
         StreamObserver<SDFSEventResponse> responseObserver;
         SDFSEventResponse.Builder b;
+        boolean evtsent;
 
         public SDFSEventListener(org.opendedup.sdfs.notification.SDFSEvent evt,
                 StreamObserver<SDFSEventResponse> responseObserver, SDFSEventResponse.Builder b) {
@@ -117,6 +119,7 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
                 responseObserver.onCompleted();
                 evt.unregisterListener(this);
             }
+            evtsent = true;
         }
     }
 

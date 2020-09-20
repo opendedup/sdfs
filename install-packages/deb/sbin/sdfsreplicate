@@ -1,1 +1,0 @@
-/usr/share/sdfs/bin/jre/bin/java -classpath /usr/share/sdfs/lib/sdfs.jar:/usr/share/sdfs/lib/* org.opendedup.sdfs.replication.ReplicationService "$@"

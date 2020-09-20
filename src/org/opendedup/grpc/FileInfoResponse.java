@@ -28,6 +28,7 @@ private static final long serialVersionUID = 0L;
     parentPath_ = "";
     volumeid_ = "";
     symlinkPath_ = "";
+    version_ = "";
   }
 
   @java.lang.Override
@@ -230,6 +231,32 @@ private static final long serialVersionUID = 0L;
           case 232: {
 
             hashcode_ = input.readInt64();
+            break;
+          }
+          case 240: {
+
+            retentionLock_ = input.readInt64();
+            break;
+          }
+          case 248: {
+
+            attributes_ = input.readInt64();
+            break;
+          }
+          case 258: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            version_ = s;
+            break;
+          }
+          case 264: {
+
+            mode_ = input.readInt32();
+            break;
+          }
+          case 272: {
+
+            deleteOnClose_ = input.readBool();
             break;
           }
           default: {
@@ -970,6 +997,82 @@ private static final long serialVersionUID = 0L;
     return hashcode_;
   }
 
+  public static final int RETENTIONLOCK_FIELD_NUMBER = 30;
+  private long retentionLock_;
+  /**
+   * <code>int64 retentionLock = 30;</code>
+   * @return The retentionLock.
+   */
+  public long getRetentionLock() {
+    return retentionLock_;
+  }
+
+  public static final int ATTRIBUTES_FIELD_NUMBER = 31;
+  private long attributes_;
+  /**
+   * <code>int64 attributes = 31;</code>
+   * @return The attributes.
+   */
+  public long getAttributes() {
+    return attributes_;
+  }
+
+  public static final int VERSION_FIELD_NUMBER = 32;
+  private volatile java.lang.Object version_;
+  /**
+   * <code>string version = 32;</code>
+   * @return The version.
+   */
+  public java.lang.String getVersion() {
+    java.lang.Object ref = version_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      version_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string version = 32;</code>
+   * @return The bytes for version.
+   */
+  public com.google.protobuf.ByteString
+      getVersionBytes() {
+    java.lang.Object ref = version_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      version_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int MODE_FIELD_NUMBER = 33;
+  private int mode_;
+  /**
+   * <code>int32 mode = 33;</code>
+   * @return The mode.
+   */
+  public int getMode() {
+    return mode_;
+  }
+
+  public static final int DELETE_ON_CLOSE_FIELD_NUMBER = 34;
+  private boolean deleteOnClose_;
+  /**
+   * <code>bool delete_on_close = 34;</code>
+   * @return The deleteOnClose.
+   */
+  public boolean getDeleteOnClose() {
+    return deleteOnClose_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -1070,6 +1173,21 @@ private static final long serialVersionUID = 0L;
     }
     if (hashcode_ != 0L) {
       output.writeInt64(29, hashcode_);
+    }
+    if (retentionLock_ != 0L) {
+      output.writeInt64(30, retentionLock_);
+    }
+    if (attributes_ != 0L) {
+      output.writeInt64(31, attributes_);
+    }
+    if (!getVersionBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 32, version_);
+    }
+    if (mode_ != 0) {
+      output.writeInt32(33, mode_);
+    }
+    if (deleteOnClose_ != false) {
+      output.writeBool(34, deleteOnClose_);
     }
     unknownFields.writeTo(output);
   }
@@ -1187,6 +1305,25 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeInt64Size(29, hashcode_);
     }
+    if (retentionLock_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(30, retentionLock_);
+    }
+    if (attributes_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(31, attributes_);
+    }
+    if (!getVersionBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, version_);
+    }
+    if (mode_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(33, mode_);
+    }
+    if (deleteOnClose_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(34, deleteOnClose_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -1262,6 +1399,16 @@ private static final long serialVersionUID = 0L;
         != other.getPermissions()) return false;
     if (getHashcode()
         != other.getHashcode()) return false;
+    if (getRetentionLock()
+        != other.getRetentionLock()) return false;
+    if (getAttributes()
+        != other.getAttributes()) return false;
+    if (!getVersion()
+        .equals(other.getVersion())) return false;
+    if (getMode()
+        != other.getMode()) return false;
+    if (getDeleteOnClose()
+        != other.getDeleteOnClose()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1352,6 +1499,19 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + HASHCODE_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         getHashcode());
+    hash = (37 * hash) + RETENTIONLOCK_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getRetentionLock());
+    hash = (37 * hash) + ATTRIBUTES_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getAttributes());
+    hash = (37 * hash) + VERSION_FIELD_NUMBER;
+    hash = (53 * hash) + getVersion().hashCode();
+    hash = (37 * hash) + MODE_FIELD_NUMBER;
+    hash = (53 * hash) + getMode();
+    hash = (37 * hash) + DELETE_ON_CLOSE_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getDeleteOnClose());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1557,6 +1717,16 @@ private static final long serialVersionUID = 0L;
 
       hashcode_ = 0L;
 
+      retentionLock_ = 0L;
+
+      attributes_ = 0L;
+
+      version_ = "";
+
+      mode_ = 0;
+
+      deleteOnClose_ = false;
+
       return this;
     }
 
@@ -1633,6 +1803,11 @@ private static final long serialVersionUID = 0L;
       result.userId_ = userId_;
       result.permissions_ = permissions_;
       result.hashcode_ = hashcode_;
+      result.retentionLock_ = retentionLock_;
+      result.attributes_ = attributes_;
+      result.version_ = version_;
+      result.mode_ = mode_;
+      result.deleteOnClose_ = deleteOnClose_;
       onBuilt();
       return result;
     }
@@ -1822,6 +1997,22 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getHashcode() != 0L) {
         setHashcode(other.getHashcode());
+      }
+      if (other.getRetentionLock() != 0L) {
+        setRetentionLock(other.getRetentionLock());
+      }
+      if (other.getAttributes() != 0L) {
+        setAttributes(other.getAttributes());
+      }
+      if (!other.getVersion().isEmpty()) {
+        version_ = other.version_;
+        onChanged();
+      }
+      if (other.getMode() != 0) {
+        setMode(other.getMode());
+      }
+      if (other.getDeleteOnClose() != false) {
+        setDeleteOnClose(other.getDeleteOnClose());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -3664,6 +3855,202 @@ private static final long serialVersionUID = 0L;
     public Builder clearHashcode() {
       
       hashcode_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long retentionLock_ ;
+    /**
+     * <code>int64 retentionLock = 30;</code>
+     * @return The retentionLock.
+     */
+    public long getRetentionLock() {
+      return retentionLock_;
+    }
+    /**
+     * <code>int64 retentionLock = 30;</code>
+     * @param value The retentionLock to set.
+     * @return This builder for chaining.
+     */
+    public Builder setRetentionLock(long value) {
+      
+      retentionLock_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 retentionLock = 30;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearRetentionLock() {
+      
+      retentionLock_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long attributes_ ;
+    /**
+     * <code>int64 attributes = 31;</code>
+     * @return The attributes.
+     */
+    public long getAttributes() {
+      return attributes_;
+    }
+    /**
+     * <code>int64 attributes = 31;</code>
+     * @param value The attributes to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAttributes(long value) {
+      
+      attributes_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 attributes = 31;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearAttributes() {
+      
+      attributes_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object version_ = "";
+    /**
+     * <code>string version = 32;</code>
+     * @return The version.
+     */
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        version_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string version = 32;</code>
+     * @return The bytes for version.
+     */
+    public com.google.protobuf.ByteString
+        getVersionBytes() {
+      java.lang.Object ref = version_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        version_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string version = 32;</code>
+     * @param value The version to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVersion(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      version_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string version = 32;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearVersion() {
+      
+      version_ = getDefaultInstance().getVersion();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string version = 32;</code>
+     * @param value The bytes for version to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVersionBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      version_ = value;
+      onChanged();
+      return this;
+    }
+
+    private int mode_ ;
+    /**
+     * <code>int32 mode = 33;</code>
+     * @return The mode.
+     */
+    public int getMode() {
+      return mode_;
+    }
+    /**
+     * <code>int32 mode = 33;</code>
+     * @param value The mode to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMode(int value) {
+      
+      mode_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 mode = 33;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMode() {
+      
+      mode_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private boolean deleteOnClose_ ;
+    /**
+     * <code>bool delete_on_close = 34;</code>
+     * @return The deleteOnClose.
+     */
+    public boolean getDeleteOnClose() {
+      return deleteOnClose_;
+    }
+    /**
+     * <code>bool delete_on_close = 34;</code>
+     * @param value The deleteOnClose to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDeleteOnClose(boolean value) {
+      
+      deleteOnClose_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool delete_on_close = 34;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDeleteOnClose() {
+      
+      deleteOnClose_ = false;
       onChanged();
       return this;
     }

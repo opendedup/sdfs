@@ -72,6 +72,12 @@ message FileInfoResponse {
     int64 user_id =27;
     int32 permissions=28;
     int64 hashcode=29;
+    int64 retentionLock = 30;
+    int64 attributes = 31;
+    string version = 32;
+    int32 mode = 33;
+    bool delete_on_close = 34;
+
 }
 
 message IOMonitorResponse {
@@ -89,6 +95,9 @@ message IOMonitorResponse {
     int64 maxMbps = 12;
     int32 ioQos = 13;
     string ioProfile = 14;
+    int64 maxRbps = 15;
+    int64 maxWbps = 16;
+    int64 maxBps = 17;
 }
 
 message WFileAttributesRequest {

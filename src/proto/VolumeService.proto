@@ -116,6 +116,7 @@ message DSEInfo {
   string encryptionIV = 16;
   string cloudAccessKey = 17;
   string cloudSecretKey = 18;
+  string bucketName = 19;
 }
 
 message DSERequest {}
@@ -147,7 +148,10 @@ message MessageQueueInfoResponse {
   int32 port = 3;
   string topic = 4;
   string authInfo = 5;
+  string subScription = 6;
+  string project = 7;
 }
+
 
 message CleanStoreRequest {
   bool compact =1;

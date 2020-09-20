@@ -19,6 +19,7 @@ message DataWriteResponse {
 
 message MkDirRequest {
     string path = 1;
+    int32 mode = 2;
 }
 
 message MkDirResponse {
@@ -68,6 +69,8 @@ message FileCloseResponse {
 
 message MkNodRequest {
     string path = 1;
+    int32 mode = 2;
+    int32 rdev =3;
 }
 
 message MkNodResponse {
@@ -77,6 +80,7 @@ message MkNodResponse {
 
 message FileOpenRequest {
     string path = 1;
+    int32 flags =2;
 }
 
 message FileExistsRequest {
@@ -367,4 +371,6 @@ service FileIOService {
     rpc SetUserMetaData(SetUserMetaDataRequest) returns (SetUserMetaDataResponse);
     rpc GetCloudFile(GetCloudFileRequest) returns (GetCloudFileResponse);
     rpc GetCloudMetaFile(GetCloudFileRequest) returns (GetCloudFileResponse);
+    rpc StatFS(StatFSRequest) returns (StatFSResponse);
   }
+

@@ -18,4 +18,10 @@ public interface MkDirRequestOrBuilder extends
    */
   com.google.protobuf.ByteString
       getPathBytes();
+
+  /**
+   * <code>int32 mode = 2;</code>
+   * @return The mode.
+   */
+  int getMode();
 }

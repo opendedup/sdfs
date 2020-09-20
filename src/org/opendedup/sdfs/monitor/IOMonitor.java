@@ -175,6 +175,7 @@ public class IOMonitor implements java.io.Serializable {
 		Main.volume.addDuplicateBytes(len, true);
 	}
 
+	/*
 	public byte[] toByteArray() {
 		byte[] ip = this.iopProfile.getBytes();
 		ByteBuffer buf = ByteBuffer.wrap(new byte[8 + 8 + 8 + 8 + 4 + ip.length
@@ -215,14 +216,30 @@ public class IOMonitor implements java.io.Serializable {
 			this.qos = buf.getInt();
 		}
 	}
+	*/
+
+	public void fromGrpc(IOMonitorResponse r) {
+		this.virtualBytesWritten.set(r.getVirtualBytesWritten());
+		this.actualBytesWritten.set(r.getActualBytesWritten());
+		this.bytesRead.set(r.getBytesRead());
+		this.duplicateBlocks.set(r.getDuplicateBlocks());
+		this.iopProfile = r.getIoProfile();
+		this.riops.set(r.getMaxReadOps());
+		this.wiops.set(r.getMaxWriteOps());
+		this.iops.set(r.getMaxIops());
+		this.rbps.set(r.getMaxRbps());
+		this.wbps.set(r.getMaxWbps());
+		this.bps.set(r.getMaxBps());
+		this.qos = r.getIoQos();
+	}
 
 	public IOMonitorResponse toGRPC() {
 		IOMonitorResponse.Builder b = IOMonitorResponse.newBuilder();
 		b.setVirtualBytesWritten(this.virtualBytesWritten.get()).setActualBytesWritten(this.actualBytesWritten.get())
-		.setBytesRead(this.bytesRead.get()).setDuplicateBlocks(this.duplicateBlocks.get()).setReadOpts(this.readOperations.get())
+		.setBytesRead(this.bytesRead.get()).setDuplicateBlocks(this.duplicateBlocks.get()).setReadOpts(this.riops.get())
 		.setWriteOpts(this.writeOperations.get()).setMaxIops(this.iops.get()).setMaxReadOps(this.riops.get()).setMaxWriteOps(this.wiops.get())
 		.setMaxMbps(this.bps.get() / (1024 * 1024)).setMaxReadMbps(this.rbps.get() / (1024 * 1024)).setMaxWriteMbps(this.wbps.get() / (1024 * 1024))
-		.setIoQos(this.qos).setIoProfile(this.iopProfile);
+		.setIoQos(this.qos).setIoProfile(this.iopProfile).setMaxMbps(this.bps.get()).setMaxRbps(this.rbps.get()).setMaxWbps(this.wbps.get());
 		return b.build();
 		
 	}

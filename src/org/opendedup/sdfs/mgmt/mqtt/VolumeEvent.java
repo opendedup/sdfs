@@ -9,14 +9,14 @@ public class VolumeEvent implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	long volumeID;
-	long volumeTS;
-	long internalTS;
-	String actionType;
-	long sequence;
+	public long volumeID;
+	public long volumeTS;
+	public long internalTS;
+	public String actionType;
+	public long sequence;
 	transient JsonObject obj;
-	String target;
-	String jsonStr;
+	public String target;
+	public String jsonStr;
 	private static transient final String MFD = "mfileDelete";
 	private static transient final String MFU = "mfileWritten";
 	private static transient final String DBU = "sfileWritten";

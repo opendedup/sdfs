@@ -31,6 +31,8 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.ec.ECIO;
 import org.opendedup.grpc.FileInfo;
+import org.opendedup.grpc.FileInfoResponse;
+import org.opendedup.grpc.Stat;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractBatchStore;
@@ -1624,7 +1626,13 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 	}
 
 	@Override
-	public FileInfo[] listFiles(String prefix, int length) throws IOException {
+	public String[] listFiles(String prefix, int length, String marker) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FileInfoResponse getAttr(String name) throws NullPointerException, IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

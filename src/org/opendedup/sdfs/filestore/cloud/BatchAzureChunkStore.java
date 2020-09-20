@@ -30,7 +30,6 @@ import java.util.StringTokenizer;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
-import com.google.common.hash.HashingInputStream;
 
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
@@ -78,6 +77,8 @@ import com.microsoft.azure.storage.core.Base64;
 
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.grpc.FileInfo;
+import org.opendedup.grpc.FileInfoResponse;
+import org.opendedup.grpc.Stat;
 
 /**
  * 
@@ -1980,6 +1981,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			return ninfo;
 		}
 	}
+	
 
 	@Override
 	public byte[] getBytes(long id, int from, int to) throws IOException, DataArchivedException {
@@ -2145,7 +2147,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	@Override
-	public FileInfo[] listFiles(String prefix, int length) throws IOException {
+	public String[] listFiles(String prefix, int length, String marker) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FileInfoResponse getAttr(String name) throws NullPointerException, IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

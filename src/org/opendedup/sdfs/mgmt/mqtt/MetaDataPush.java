@@ -72,7 +72,6 @@ public class MetaDataPush {
 		}
 		new MetaDataSubscriber(this.channel, this.topic);
 		SDFSLogger.getLog().info(String.format("Connected to MQTT %s:%d", host, port));
-
 	}
 
 	private ReentrantLock getLock(String st) {

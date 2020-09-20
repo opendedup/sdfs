@@ -22,6 +22,7 @@ private static final long serialVersionUID = 0L;
     encryptionIV_ = "";
     cloudAccessKey_ = "";
     cloudSecretKey_ = "";
+    bucketName_ = "";
   }
 
   @java.lang.Override
@@ -148,6 +149,12 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             cloudSecretKey_ = s;
+            break;
+          }
+          case 154: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            bucketName_ = s;
             break;
           }
           default: {
@@ -518,6 +525,42 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int BUCKETNAME_FIELD_NUMBER = 19;
+  private volatile java.lang.Object bucketName_;
+  /**
+   * <code>string bucketName = 19;</code>
+   * @return The bucketName.
+   */
+  public java.lang.String getBucketName() {
+    java.lang.Object ref = bucketName_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      bucketName_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string bucketName = 19;</code>
+   * @return The bytes for bucketName.
+   */
+  public com.google.protobuf.ByteString
+      getBucketNameBytes() {
+    java.lang.Object ref = bucketName_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      bucketName_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -585,6 +628,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getCloudSecretKeyBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 18, cloudSecretKey_);
+    }
+    if (!getBucketNameBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 19, bucketName_);
     }
     unknownFields.writeTo(output);
   }
@@ -661,6 +707,9 @@ private static final long serialVersionUID = 0L;
     if (!getCloudSecretKeyBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, cloudSecretKey_);
     }
+    if (!getBucketNameBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(19, bucketName_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -712,6 +761,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getCloudAccessKey())) return false;
     if (!getCloudSecretKey()
         .equals(other.getCloudSecretKey())) return false;
+    if (!getBucketName()
+        .equals(other.getBucketName())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -768,6 +819,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getCloudAccessKey().hashCode();
     hash = (37 * hash) + CLOUDSECRETKEY_FIELD_NUMBER;
     hash = (53 * hash) + getCloudSecretKey().hashCode();
+    hash = (37 * hash) + BUCKETNAME_FIELD_NUMBER;
+    hash = (53 * hash) + getBucketName().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -937,6 +990,8 @@ private static final long serialVersionUID = 0L;
 
       cloudSecretKey_ = "";
 
+      bucketName_ = "";
+
       return this;
     }
 
@@ -981,6 +1036,7 @@ private static final long serialVersionUID = 0L;
       result.encryptionIV_ = encryptionIV_;
       result.cloudAccessKey_ = cloudAccessKey_;
       result.cloudSecretKey_ = cloudSecretKey_;
+      result.bucketName_ = bucketName_;
       onBuilt();
       return result;
     }
@@ -1087,6 +1143,10 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getCloudSecretKey().isEmpty()) {
         cloudSecretKey_ = other.cloudSecretKey_;
+        onChanged();
+      }
+      if (!other.getBucketName().isEmpty()) {
+        bucketName_ = other.bucketName_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -1930,6 +1990,82 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       cloudSecretKey_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object bucketName_ = "";
+    /**
+     * <code>string bucketName = 19;</code>
+     * @return The bucketName.
+     */
+    public java.lang.String getBucketName() {
+      java.lang.Object ref = bucketName_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        bucketName_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string bucketName = 19;</code>
+     * @return The bytes for bucketName.
+     */
+    public com.google.protobuf.ByteString
+        getBucketNameBytes() {
+      java.lang.Object ref = bucketName_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        bucketName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string bucketName = 19;</code>
+     * @param value The bucketName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBucketName(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      bucketName_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string bucketName = 19;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearBucketName() {
+      
+      bucketName_ = getDefaultInstance().getBucketName();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string bucketName = 19;</code>
+     * @param value The bytes for bucketName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBucketNameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      bucketName_ = value;
       onChanged();
       return this;
     }

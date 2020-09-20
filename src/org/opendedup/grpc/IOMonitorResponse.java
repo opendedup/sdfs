@@ -120,6 +120,21 @@ private static final long serialVersionUID = 0L;
             ioProfile_ = s;
             break;
           }
+          case 120: {
+
+            maxRbps_ = input.readInt64();
+            break;
+          }
+          case 128: {
+
+            maxWbps_ = input.readInt64();
+            break;
+          }
+          case 136: {
+
+            maxBps_ = input.readInt64();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -318,6 +333,36 @@ private static final long serialVersionUID = 0L;
     }
   }
 
+  public static final int MAXRBPS_FIELD_NUMBER = 15;
+  private long maxRbps_;
+  /**
+   * <code>int64 maxRbps = 15;</code>
+   * @return The maxRbps.
+   */
+  public long getMaxRbps() {
+    return maxRbps_;
+  }
+
+  public static final int MAXWBPS_FIELD_NUMBER = 16;
+  private long maxWbps_;
+  /**
+   * <code>int64 maxWbps = 16;</code>
+   * @return The maxWbps.
+   */
+  public long getMaxWbps() {
+    return maxWbps_;
+  }
+
+  public static final int MAXBPS_FIELD_NUMBER = 17;
+  private long maxBps_;
+  /**
+   * <code>int64 maxBps = 17;</code>
+   * @return The maxBps.
+   */
+  public long getMaxBps() {
+    return maxBps_;
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -373,6 +418,15 @@ private static final long serialVersionUID = 0L;
     }
     if (!getIoProfileBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 14, ioProfile_);
+    }
+    if (maxRbps_ != 0L) {
+      output.writeInt64(15, maxRbps_);
+    }
+    if (maxWbps_ != 0L) {
+      output.writeInt64(16, maxWbps_);
+    }
+    if (maxBps_ != 0L) {
+      output.writeInt64(17, maxBps_);
     }
     unknownFields.writeTo(output);
   }
@@ -438,6 +492,18 @@ private static final long serialVersionUID = 0L;
     if (!getIoProfileBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, ioProfile_);
     }
+    if (maxRbps_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(15, maxRbps_);
+    }
+    if (maxWbps_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(16, maxWbps_);
+    }
+    if (maxBps_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(17, maxBps_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -481,6 +547,12 @@ private static final long serialVersionUID = 0L;
         != other.getIoQos()) return false;
     if (!getIoProfile()
         .equals(other.getIoProfile())) return false;
+    if (getMaxRbps()
+        != other.getMaxRbps()) return false;
+    if (getMaxWbps()
+        != other.getMaxWbps()) return false;
+    if (getMaxBps()
+        != other.getMaxBps()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -532,6 +604,15 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getIoQos();
     hash = (37 * hash) + IOPROFILE_FIELD_NUMBER;
     hash = (53 * hash) + getIoProfile().hashCode();
+    hash = (37 * hash) + MAXRBPS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getMaxRbps());
+    hash = (37 * hash) + MAXWBPS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getMaxWbps());
+    hash = (37 * hash) + MAXBPS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getMaxBps());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -693,6 +774,12 @@ private static final long serialVersionUID = 0L;
 
       ioProfile_ = "";
 
+      maxRbps_ = 0L;
+
+      maxWbps_ = 0L;
+
+      maxBps_ = 0L;
+
       return this;
     }
 
@@ -733,6 +820,9 @@ private static final long serialVersionUID = 0L;
       result.maxMbps_ = maxMbps_;
       result.ioQos_ = ioQos_;
       result.ioProfile_ = ioProfile_;
+      result.maxRbps_ = maxRbps_;
+      result.maxWbps_ = maxWbps_;
+      result.maxBps_ = maxBps_;
       onBuilt();
       return result;
     }
@@ -823,6 +913,15 @@ private static final long serialVersionUID = 0L;
       if (!other.getIoProfile().isEmpty()) {
         ioProfile_ = other.ioProfile_;
         onChanged();
+      }
+      if (other.getMaxRbps() != 0L) {
+        setMaxRbps(other.getMaxRbps());
+      }
+      if (other.getMaxWbps() != 0L) {
+        setMaxWbps(other.getMaxWbps());
+      }
+      if (other.getMaxBps() != 0L) {
+        setMaxBps(other.getMaxBps());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1315,6 +1414,96 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       ioProfile_ = value;
+      onChanged();
+      return this;
+    }
+
+    private long maxRbps_ ;
+    /**
+     * <code>int64 maxRbps = 15;</code>
+     * @return The maxRbps.
+     */
+    public long getMaxRbps() {
+      return maxRbps_;
+    }
+    /**
+     * <code>int64 maxRbps = 15;</code>
+     * @param value The maxRbps to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaxRbps(long value) {
+      
+      maxRbps_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 maxRbps = 15;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaxRbps() {
+      
+      maxRbps_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long maxWbps_ ;
+    /**
+     * <code>int64 maxWbps = 16;</code>
+     * @return The maxWbps.
+     */
+    public long getMaxWbps() {
+      return maxWbps_;
+    }
+    /**
+     * <code>int64 maxWbps = 16;</code>
+     * @param value The maxWbps to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaxWbps(long value) {
+      
+      maxWbps_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 maxWbps = 16;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaxWbps() {
+      
+      maxWbps_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long maxBps_ ;
+    /**
+     * <code>int64 maxBps = 17;</code>
+     * @return The maxBps.
+     */
+    public long getMaxBps() {
+      return maxBps_;
+    }
+    /**
+     * <code>int64 maxBps = 17;</code>
+     * @param value The maxBps to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaxBps(long value) {
+      
+      maxBps_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 maxBps = 17;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaxBps() {
+      
+      maxBps_ = 0L;
       onChanged();
       return this;
     }
