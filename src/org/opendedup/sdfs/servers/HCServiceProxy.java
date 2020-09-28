@@ -141,8 +141,12 @@ public class HCServiceProxy {
 				}
 
 				if (Main.syncDL) {
-					SDFSEvent evt = SDFSEvent.syncVolEvent("Syncing from [" + Main.DSEID + "]");
-					eventBus.post(new CloudSyncDLRequest(Main.DSEID, true, false,evt));
+					long vol = Main.DSEID;
+					if(Main.syncDLAll) {
+						vol = -1;
+					}
+					SDFSEvent evt = SDFSEvent.syncVolEvent("Syncing from [" + vol + "]");
+					eventBus.post(new CloudSyncDLRequest(vol, true, false,evt));
 				}
 				touchRunFile();
 			

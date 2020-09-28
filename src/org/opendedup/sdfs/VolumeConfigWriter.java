@@ -305,8 +305,8 @@ public class VolumeConfigWriter {
 
 		if (cmd.hasOption("aws-aim"))
 			this.awsAim = true;
-		if (cmd.hasOption("google-creds-file")) {
-			this.gcsCredsFile = cmd.getOptionValue("google-creds-file");
+		if (cmd.hasOption("gcs-creds-file")) {
+			this.gcsCredsFile = cmd.getOptionValue("gcs-creds-file");
 		}
 		if (cmd.hasOption("io-safe-sync")) {
 			this.safe_sync = Boolean.parseBoolean(cmd.getOptionValue("io-safe-sync"));
@@ -447,7 +447,7 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 		} else if (this.gsEnabled || this.backblazeEnabled) {
-			if (cmd.hasOption("google-creds-file")) {
+			if (cmd.hasOption("gcs-creds-file")) {
 				this.cloudBucketName = cmd.getOptionValue("cloud-bucket-name");
 				this.compress = true;
 				this.readAhead = true;
@@ -459,11 +459,6 @@ public class VolumeConfigWriter {
 				this.compress = true;
 				this.readAhead = true;
 
-			} else {
-				System.out.println("Error : Unable to create volume");
-				System.out.println("either google-creds-file and cloud-bucket-name are required or ...");
-				System.out.println("cloud-access-key, cloud-secret-key, and cloud-bucket-name are required.");
-				System.exit(-1);
 			}
 		}
 
@@ -670,15 +665,18 @@ public class VolumeConfigWriter {
 		vol.setAttribute("write-timeout-seconds", Integer.toString(this.write_timeout));
 		vol.setAttribute("serial-number", Long.toString(sn));
 		vol.setAttribute("compress-metadata", Boolean.toString(this.mdCompresstion));
-		Element pbm = xmldoc.createElement("gcp-pubsub");
-		pbm.setAttribute("project-id", this.gcpProject);
-		pbm.setAttribute("topic", this.topic);
-		pbm.setAttribute("subscription", this.subscription);
-		if (this.gcsCredsFile != null) {
-			pbm.setAttribute("auth-file", this.gcsCredsFile);
+		if (this.gcpProject != null) {
+			Element pbm = xmldoc.createElement("gcp-pubsub");
+			pbm.setAttribute("project-id", this.gcpProject);
+			pbm.setAttribute("topic", this.topic);
+			pbm.setAttribute("subscription", this.subscription);
+			if (this.gcsCredsFile != null) {
+				pbm.setAttribute("auth-file", this.gcsCredsFile);
+			}
+			vol.appendChild(pbm);
 		}
-		xmldoc.appendChild(pbm);
 		root.appendChild(vol);
+
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("average-chunk-size", Integer.toString(this.avgPgSz));
 		cs.setAttribute("allocation-size", Long.toString(this.chunk_store_allocation_size));
@@ -1151,7 +1149,7 @@ public class VolumeConfigWriter {
 				"Set to true to enable this volume to store to Google Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
 		options.addOption(
-				OptionBuilder.withLongOpt("google-creds-file").withDescription("Set to path of the GCS credentials.")
+				OptionBuilder.withLongOpt("gcs-creds-file").withDescription("Set to path of the GCS credentials.")
 						.hasArg().withArgName("Absolute Path to file").create());
 		options.addOption(OptionBuilder.withLongOpt("backup-volume")
 				.withDescription(

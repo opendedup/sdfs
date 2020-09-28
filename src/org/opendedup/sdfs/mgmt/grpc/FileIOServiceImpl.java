@@ -28,7 +28,6 @@ import org.opendedup.sdfs.io.WritableCacheBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -556,7 +555,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             }
-
             DedupFileChannel ch = this.getFileChannel(request.getFileHandle());
             ByteBuffer buf = ByteBuffer.allocate(request.getLen());
             request.getData().copyTo(buf);
@@ -721,7 +719,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     @Override
     public void read(DataReadRequest request, StreamObserver<DataReadResponse> responseObserver) {
         DataReadResponse.Builder b = DataReadResponse.newBuilder();
+        SDFSLogger.getLog().info("Reading");
         if (Main.volume.isOffLine()) {
+            SDFSLogger.getLog().info("Reading 1");
             b.setError("Volume Offline");
             b.setErrorCode(errorCodes.ENODEV);
             responseObserver.onNext(b.build());
@@ -729,9 +729,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
         try {
+            SDFSLogger.getLog().info("Reading 2");
             ByteBuffer buf = ByteBuffer.allocate(request.getLen());
             DedupFileChannel ch = this.getFileChannel((Long) request.getFileHandle());
             int read = ch.read(buf, 0, buf.capacity(), request.getStart());
+            SDFSLogger.getLog().info("Read " + read);
             if (read == -1)
                 read = 0;
             buf.position(0);
@@ -741,12 +743,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
             return;
         } catch (FileIOError e) {
+            SDFSLogger.getLog().info("Reading 3");
             b.setError(e.message);
             b.setErrorCode(e.code);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
         } catch (DataArchivedException e) {
+            SDFSLogger.getLog().info("Readin 4");
             SDFSLogger.getLog().warn("Data is archived");
             b.setError("Data is archived");
             b.setErrorCode(errorCodes.ENODATA);

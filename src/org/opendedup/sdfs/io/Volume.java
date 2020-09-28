@@ -520,6 +520,8 @@ public class Volume {
 			if(this.gcpCredsPath != null) {
 				pbm.setAttribute("auth-file", this.gcpCredsPath);
 			}
+			doc.adoptNode(pbm);
+			root.appendChild(pbm);
 		}
 		return root;
 	}
@@ -583,6 +585,8 @@ public class Volume {
 			if(this.gcpCredsPath != null) {
 				pbm.setAttribute("auth-file", this.gcpCredsPath);
 			}
+			doc.adoptNode(pbm);
+			root.appendChild(pbm);
 		}
 		return doc;
 	}

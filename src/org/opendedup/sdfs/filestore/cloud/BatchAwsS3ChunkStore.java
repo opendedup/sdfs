@@ -22,7 +22,6 @@ import java.io.BufferedInputStream;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -578,9 +577,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			} else if (gcsSigner) {
 				System.out.println("Target is GCS Storage");
-				if (config.hasAttribute("auth-file")) {
-
-					String credPath = config.getAttribute("auth-file");
+				Map<String, String> env = System.getenv();
+				if (config.hasAttribute("auth-file") || env.containsKey("GOOGLE_APPLICATION_CREDENTIALS")) {
+					String credPath = null;
+					if(config.hasAttribute("auth-file")){
+						credPath = config.getAttribute("auth-file");
+					} else {
+						credPath = env.get("GOOGLE_APPLICATION_CREDENTIALS");
+					}
+					 
 					ServiceAccountCredentials sourceCredentials = ServiceAccountCredentials
 							.fromStream(new FileInputStream(credPath));
 					sourceCredentials = (ServiceAccountCredentials) sourceCredentials
@@ -2373,10 +2378,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					String fname = EncyptUtils.decString(pt, encrypt);
 					nobjPos.incrementAndGet();
 					return fname;
-					/*
-					 * this.downloadFile(fname, new File(to.getPath() + File.separator + fname),
-					 * pp);
-					 */
+					
 				}
 			} else {
 				nobjPos.incrementAndGet();

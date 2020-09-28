@@ -160,7 +160,6 @@ public class MountSDFS {
 		try {
 			sdfsService.start(useSSL, port, password);
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);

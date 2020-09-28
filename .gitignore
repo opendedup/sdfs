@@ -26,8 +26,6 @@ windows-exe/.vs/SDFSCli/v15/Browse.VC.db
 windows-exe/.vs/SDFSCli/v15/.suo
 windows-exe/.vs/SDFSCli/v15/ipch/48cd406675cd87b5.ipch
 windows-exe/.vs/SDFSCli/v15/Solution.VC.db-shm
-install-packages/docker_run.sh
-install-packages/docker_build.sh
 install-packages/deb/usr/share/sdfs/lib/b2-2.0.3.jar
 install-packages/deb/usr/share/sdfs/lib/b2-2.1.2.jar
 install-packages/deb/usr/share/sdfs/lib/google-cloud-storage-2.1.2.jar

@@ -35,6 +35,7 @@ public class Main {
 	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
+	public static boolean useLegacy = false;
 
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout
@@ -53,6 +54,7 @@ public class Main {
 
 	public static boolean COMPRESS_METADATA = false;
 	public static boolean syncDL = false;
+	public static boolean syncDLAll = false;
 
 	public static StandAloneGCScheduler pFullSched = null;
 

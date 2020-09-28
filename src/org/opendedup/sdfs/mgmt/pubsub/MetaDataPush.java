@@ -227,7 +227,7 @@ public class MetaDataPush {
 	}
 
 	private static class MetaDataSubscriber {
-		private final Subscription subscription;
+		private Subscription subscription;
 		private final ConcurrentHashMap<String, PSMsg> updateMap = new ConcurrentHashMap<String, PSMsg>();
 		private ReentrantLock iLock = new ReentrantLock(true);
 		long updateTime = 20000;
@@ -241,13 +241,21 @@ public class MetaDataPush {
 				stubSettings.setCredentialsProvider(FixedCredentialsProvider.create(creds));
 			}
 			SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient.create(stubSettings.build().createStub());
-			ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(project, "sdfs"+subName);
+			if (!subName.startsWith("sdfs")) {
+				subName = "sdfs" + subName;
+			}
+			ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(project, subName);
 			TopicName tn = TopicName.of(project, topic);
 
 			Subscription.Builder b = Subscription.newBuilder().setName(subscriptionName.toString())
 					.setTopic(tn.toString()).setEnableMessageOrdering(true).setAckDeadlineSeconds(600);
+			try {
 			subscription = subscriptionAdminClient.createSubscription(b.build());
+			
 			SDFSLogger.getLog().info("Created a subscription with ordering: " + subscription.getAllFields());
+			}catch (io.grpc.StatusRuntimeException e) {
+
+			}
 
 			new UpdateProcessor(this);
 			MessageReceiver receiver = (PubsubMessage message, AckReplyConsumer consumer) -> {

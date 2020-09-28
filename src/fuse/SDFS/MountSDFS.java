@@ -4,7 +4,6 @@ import java.io.File;
 
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.StringTokenizer;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -50,6 +49,7 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("f", true, "sdfs volume configuration file to mount \ne.g. /etc/sdfs/dedup-volume-cfg.xml");
 		options.addOption("h", false, "displays available options");
 		options.addOption("s", false, "If set ssl will not be used sdfscli traffic.");
+		options.addOption("w", false, "Sync With All Files in Cloud.");
 		return options;
 	}
 
@@ -130,7 +130,10 @@ public class MountSDFS implements Daemon, Runnable {
 			Main.syncDL = true;
 			Main.runConsistancyCheck = true;
 		}
-
+		if (cmd.hasOption("w")) {
+			Main.syncDL = true;
+			Main.syncDLAll = true;
+		}
 		if (cmd.hasOption("v")) {
 			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim() + "-volume-cfg.xml");
 			volname = f.getName();
@@ -176,7 +179,6 @@ public class MountSDFS implements Daemon, Runnable {
 		try {
 			sdfsService.start(useSSL, port, password);
 		} catch (Throwable e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);
@@ -241,6 +243,7 @@ public class MountSDFS implements Daemon, Runnable {
 			Process p = Runtime.getRuntime().exec("umount " + mountOptions);
 			p.waitFor();
 		} catch (Exception e) {
+
 		}
 		SDFSLogger.getLog().info("SDFS Shut Down Cleanly");
 	}
@@ -253,7 +256,6 @@ public class MountSDFS implements Daemon, Runnable {
 				shutdownHook.shutdown();
 			System.exit(0);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

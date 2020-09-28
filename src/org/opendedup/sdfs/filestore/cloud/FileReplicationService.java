@@ -613,7 +613,7 @@ public class FileReplicationService {
 				while (fname != null) {
 					req.getEvent().setMaxCount(req.getEvent().getMaxCount() + 1);
 					String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);
-					if (this.sync.isCheckedOut("files/" + efs, req.getVolumeID())) {
+					if (req.getVolumeID() == -1 || this.sync.isCheckedOut("files/" + efs, req.getVolumeID())) {
 						File f = new File(Main.volume.getPath() + File.separator + fname);
 						if (fname.endsWith(DM)) {
 							f = f.getParentFile();
@@ -625,7 +625,6 @@ public class FileReplicationService {
 						SDFSLogger.getLog().info("not checked out " + fname);
 					}
 					fname = this.sync.getNextName("files", req.getVolumeID());
-
 				}
 				executor.shutdown();
 				// Wait for everything to finish.
@@ -637,6 +636,7 @@ public class FileReplicationService {
 				SDFSLogger.getLog().info("Metadata File download errors: " + MetaFileDownloader.fer.get());
 				this.sync.clearIter();
 				Main.syncDL = false;
+				Main.syncDLAll = false;
 
 				if (MetaFileDownloader.downloadSyncException != null) {
 					throw MetaFileDownloader.downloadSyncException;
