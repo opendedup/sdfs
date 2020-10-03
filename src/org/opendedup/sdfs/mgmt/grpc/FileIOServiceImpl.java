@@ -28,12 +28,14 @@ import org.opendedup.sdfs.io.WritableCacheBuffer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,12 +58,14 @@ import org.opendedup.grpc.*;
 
 public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     AtomicLong nextHandleNo = new AtomicLong(1000);
+    private static final int BLOCK_SIZE = 32768;
+    private static final int NAME_LENGTH = 2048;
 
-    private LoadingCache<String, DirectoryStream<Path>> fileListers = CacheBuilder.newBuilder().maximumSize(100)
-            .expireAfterAccess(5, TimeUnit.MINUTES).build(new CacheLoader<String, DirectoryStream<Path>>() {
+    private LoadingCache<String, Iterator<Path>> fileListers = CacheBuilder.newBuilder().maximumSize(100)
+            .expireAfterAccess(5, TimeUnit.MINUTES).build(new CacheLoader<String, Iterator<Path>>() {
 
                 @Override
-                public DirectoryStream<Path> load(String key) throws Exception {
+                public Iterator<Path> load(String key) throws Exception {
                     throw new IOException("Key Not Found [" + key + "]");
                 }
 
@@ -193,7 +197,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
         try {
-            MetaFileStore.mkDir(f, -1);
+            MetaFileStore.mkDir(f, request.getMode());
             try {
                 eventBus.post(new MFileWritten(MetaFileStore.getMF(f), true));
                 responseObserver.onNext(b.build());
@@ -287,7 +291,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
-        } catch (Exception e) {
+        }catch (NullPointerException e) {
+            SDFSLogger.getLog().error("unable to fulfill request", e);
+            b.setError("file not found " +request.getFile());
+            b.setErrorCode(errorCodes.ENOENT);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } 
+        catch (Exception e) {
             SDFSLogger.getLog().error("unable to fulfill request", e);
             b.setError("unable to fulfill request");
             b.setErrorCode(errorCodes.EIO);
@@ -477,7 +488,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 } catch (IOException e) {
                     SDFSLogger.getLog().warn("unable to delete symlink " + p);
                     b.setError("unable to delete symlink " + p);
-                    b.setErrorCode(errorCodes.ENNOSYS);
+                    b.setErrorCode(errorCodes.ENOSYS);
                     responseObserver.onNext(b.build());
                     responseObserver.onCompleted();
                     return;
@@ -544,7 +555,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             }
-
             DedupFileChannel ch = this.getFileChannel(request.getFileHandle());
             ByteBuffer buf = ByteBuffer.allocate(request.getLen());
             request.getData().copyTo(buf);
@@ -651,6 +661,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 SDFSLogger.getLog().debug("creating file " + f.getPath());
                 MetaDataDedupFile mf = MetaFileStore.getMF(f);
                 mf.unmarshal();
+                try {
+					mf.setMode(request.getMode());
+				} finally {
+					f = null;
+				}
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
@@ -704,7 +719,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     @Override
     public void read(DataReadRequest request, StreamObserver<DataReadResponse> responseObserver) {
         DataReadResponse.Builder b = DataReadResponse.newBuilder();
+        SDFSLogger.getLog().info("Reading");
         if (Main.volume.isOffLine()) {
+            SDFSLogger.getLog().info("Reading 1");
             b.setError("Volume Offline");
             b.setErrorCode(errorCodes.ENODEV);
             responseObserver.onNext(b.build());
@@ -712,9 +729,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
         try {
+            SDFSLogger.getLog().info("Reading 2");
             ByteBuffer buf = ByteBuffer.allocate(request.getLen());
             DedupFileChannel ch = this.getFileChannel((Long) request.getFileHandle());
             int read = ch.read(buf, 0, buf.capacity(), request.getStart());
+            SDFSLogger.getLog().info("Read " + read);
             if (read == -1)
                 read = 0;
             buf.position(0);
@@ -724,12 +743,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
             return;
         } catch (FileIOError e) {
+            SDFSLogger.getLog().info("Reading 3");
             b.setError(e.message);
             b.setErrorCode(e.code);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
         } catch (DataArchivedException e) {
+            SDFSLogger.getLog().info("Readin 4");
             SDFSLogger.getLog().warn("Data is archived");
             b.setError("Data is archived");
             b.setErrorCode(errorCodes.ENODATA);
@@ -776,6 +797,662 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     @Override
+    public void chmod(ChmodRequest req, StreamObserver<ChmodResponse> responseObserver) {
+        ChmodResponse.Builder b = ChmodResponse.newBuilder();
+        String internalPath = Main.volume.getPath() + File.separator + req.getPath();
+        File f = new File(internalPath);
+        String path = req.getPath();
+        int mode = req.getMode();
+        if (!f.exists()) {
+            SDFSLogger.getLog().info("File not found " + req.getPath());
+            b.setError("File not found " + req.getPath());
+            b.setErrorCode(errorCodes.ENOENT);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } else {
+            try {
+                int ftype = this.getFtype(path);
+                if (ftype == FuseFtypeConstants.TYPE_SYMLINK || ftype == FuseFtypeConstants.TYPE_DIR) {
+                    Path p = Paths.get(f.getCanonicalPath());
+
+                    try {
+                        Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                    } catch (IOException e) {
+                        SDFSLogger.getLog().warn("access denied for " + path, e);
+                        b.setError("access denied for " + path);
+                        b.setErrorCode(errorCodes.EACCES);
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                    } finally {
+                        path = null;
+                    }
+                } else {
+
+                    try {
+                        MetaDataDedupFile mf = MetaFileStore.getMF(f);
+                        mf.setMode(mode);
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                    } catch (Exception e) {
+                        SDFSLogger.getLog().warn("access denied for " + path, e);
+                        b.setError("access denied for " + path);
+                        b.setErrorCode(errorCodes.EACCES);
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                    } finally {
+                    }
+                }
+            } catch (FileIOError e) {
+                SDFSLogger.getLog().warn("unable", e);
+                b.setError(e.message);
+                b.setErrorCode(e.code);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            } catch (Exception e) {
+                SDFSLogger.getLog().error("unable to chmod " + req.getPath(), e);
+                b.setError("unable to chmod " + req.getPath());
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+
+        }
+
+    }
+
+    @Override
+    public void chown(ChownRequest req, StreamObserver<ChownResponse> responseObserver) {
+        ChownResponse.Builder b = ChownResponse.newBuilder();
+        String path = req.getPath();
+        int uid = req.getUid();
+        int gid = req.getGid();
+        try {
+            File f = resolvePath(path);
+            int ftype = this.getFtype(path);
+            if (ftype == FuseFtypeConstants.TYPE_SYMLINK || ftype == FuseFtypeConstants.TYPE_DIR) {
+                Path p = Paths.get(f.getCanonicalPath());
+                try {
+                    Files.setAttribute(p, "unix:uid", Integer.valueOf(uid), LinkOption.NOFOLLOW_LINKS);
+                    Files.setAttribute(p, "unix:gid", Integer.valueOf(gid), LinkOption.NOFOLLOW_LINKS);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                } catch (IOException e) {
+                    SDFSLogger.getLog().warn("access denied for " + path, e);
+                    b.setError("access denied for " + path);
+                    b.setErrorCode(errorCodes.EACCES);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                } finally {
+                    path = null;
+                }
+            } else {
+
+                try {
+                    MetaDataDedupFile mf = MetaFileStore.getMF(f);
+                    mf.setOwner_id(uid);
+                    mf.setGroup_id(gid);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                } catch (Exception e) {
+                    SDFSLogger.getLog().warn("access denied for " + path, e);
+                    b.setError("access denied for " + path);
+                    b.setErrorCode(errorCodes.EACCES);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                } finally {
+
+                }
+            }
+        } catch (FileIOError e) {
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error(path, e);
+            b.setError("unable to chown " + req.getPath());
+            b.setErrorCode(errorCodes.EIO);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        }
+
+    }
+
+    @Override
+    public void flush(FlushRequest req, StreamObserver<FlushResponse> responseObserver) {
+        FlushResponse.Builder b = FlushResponse.newBuilder();
+        String path = req.getPath();
+        long fh = req.getFd();
+        try {
+            if (Main.volume.isOffLine()) {
+                b.setError("volume offline");
+                b.setErrorCode(errorCodes.ENAVAIL);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            DedupFileChannel ch = this.getFileChannel(path, (Long) fh);
+            ch.force(true);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+
+        } catch (Exception e) {
+            SDFSLogger.getLog().error("unable to sync file [" + path + "]", e);
+            b.setError("unable to sync file [" + path + "]");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+    @Override
+    public void fsync(FsyncRequest request, StreamObserver<FsyncResponse> responseObserver) {
+        FsyncResponse.Builder b = FsyncResponse.newBuilder();
+        String path = request.getPath();
+        long fh = request.getFh();
+        if (Main.volume.isOffLine()) {
+            b.setError("volume offline");
+            b.setErrorCode(errorCodes.ENAVAIL);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        try {
+            if (Main.safeSync) {
+                DedupFileChannel ch = this.getFileChannel(path, (Long) fh);
+                ch.force(true);
+            }
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+
+        } catch (Exception e) {
+            SDFSLogger.getLog().error("unable to fsync file [" + path + "]", e);
+            b.setError("unable to fsync file [" + path + "]");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+    @Override
+    public void getAttr(StatRequest request, StreamObserver<StatResponse> responseObserver) {
+        StatResponse.Builder b = StatResponse.newBuilder();
+        Stat.Builder sb = Stat.newBuilder();
+        String path = request.getPath();
+        try {
+            int ftype = this.getFtype(path);
+            // SDFSLogger.getLog().info("1 " + path + " " + ftype);
+            if (ftype == FuseFtypeConstants.TYPE_SYMLINK) {
+                // SDFSLogger.getLog().info("poop " + path);
+                Path p = null;
+                BasicFileAttributes attrs = null;
+                try {
+                    p = Paths.get(this.mountedVolume + path);
+                    int uid = 0;
+                    int gid = 0;
+                    int mode = 0000;
+                    try {
+                        uid = (Integer) Files.getAttribute(p, "unix:uid", LinkOption.NOFOLLOW_LINKS);
+                        gid = (Integer) Files.getAttribute(p, "unix:gid", LinkOption.NOFOLLOW_LINKS);
+                        mode = (Integer) Files.getAttribute(p, "unix:mode", LinkOption.NOFOLLOW_LINKS);
+                    } catch (Exception e) {
+                        SDFSLogger.getLog().error("unable to parse sylink " + path, e);
+                    }
+                    sb.setUid(uid);
+                    sb.setGid(gid);
+                    sb.setMode(mode);
+
+                    long fileLength = 0;
+                    attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+                    fileLength = attrs.size();
+                    sb.setUid(uid);
+                    sb.setGid(gid);
+                    sb.setMode(mode);
+                    sb.setAtime(attrs.lastAccessTime().toMillis() / 1000L);
+                    sb.setMtim(attrs.lastModifiedTime().toMillis() / 1000L);
+                    sb.setCtim(attrs.creationTime().toMillis() / 1000L);
+                    sb.setBlksize(BLOCK_SIZE);
+                    sb.setDev(p.hashCode());
+                    sb.setBlocks((fileLength * NAME_LENGTH + BLOCK_SIZE - 1) / BLOCK_SIZE);
+                    sb.setIno(p.hashCode());
+                    sb.setNlink(0);
+                    sb.setSize(fileLength);
+                    sb.setRdev(1);
+                    b.setStat(sb.build());
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("unable to parse symlink " + path, e);
+                    b.setError("unable to parse symlink [" + path + "]");
+                    b.setErrorCode(errorCodes.EACCES);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+            } else {
+                File f = resolvePath(path);
+                Path p = null;
+                try {
+
+                    p = Paths.get(f.getCanonicalPath());
+                    if (ftype == FuseFtypeConstants.TYPE_DIR) {
+                        int uid = (Integer) Files.getAttribute(p, "unix:uid");
+                        int gid = (Integer) Files.getAttribute(p, "unix:gid");
+                        int mode = (Integer) Files.getAttribute(p, "unix:mode");
+                        MetaDataDedupFile mf = MetaFileStore.getFolder(f);
+
+                        long fileLength = f.length();
+                        sb.setUid(uid);
+                        sb.setGid(gid);
+                        sb.setMode(mode);
+                        sb.setAtime(mf.getLastAccessed() / 1000L);
+                        sb.setMtim(mf.lastModified() / 1000L);
+                        sb.setCtim(0);
+                        sb.setBlksize(BLOCK_SIZE);
+                        sb.setDev(mf.getHashCode());
+                        sb.setBlocks((fileLength * NAME_LENGTH + BLOCK_SIZE - 1) / BLOCK_SIZE);
+                        sb.setIno(mf.getHashCode());
+                        sb.setNlink(0);
+                        sb.setSize(fileLength);
+                        sb.setRdev(1);
+                        b.setStat(sb.build());
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                        return;
+
+                    } else {
+                        MetaDataDedupFile mf = MetaFileStore.getMF(f);
+                        int uid = mf.getOwner_id();
+                        int gid = mf.getGroup_id();
+                        int mode = mf.getMode();
+
+                        long fileLength = mf.length();
+                        long actualBytes = (mf.getIOMonitor().getActualBytesWritten() * 2) / 1024;
+                        if (actualBytes == 0 && mf.getIOMonitor().getActualBytesWritten() > 0)
+                            actualBytes = (Main.CHUNK_LENGTH * 2) / 1024;
+                        sb.setUid(uid);
+                        sb.setGid(gid);
+                        sb.setMode(mode);
+                        sb.setAtime(mf.getLastAccessed() / 1000L);
+                        sb.setMtim(mf.lastModified() / 1000L);
+                        sb.setCtim(0);
+                        sb.setBlksize(BLOCK_SIZE);
+                        sb.setDev(mf.getHashCode());
+                        sb.setBlocks(actualBytes);
+                        sb.setIno(mf.getHashCode());
+                        sb.setNlink(0);
+                        sb.setSize(fileLength);
+                        sb.setRdev(1);
+                        b.setStat(sb.build());
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                        return;
+
+                    }
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error(
+                            "unable to parse attributes " + path + " at physical path " + f.getCanonicalPath(), e);
+                    b.setError("unable to parse attributes " + path);
+                    b.setErrorCode(errorCodes.EACCES);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                } finally {
+                    f = null;
+                    p = null;
+                }
+            }
+        } catch (FileIOError e) {
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            b.setError("unable to parse attributes " + path);
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+    }
+
+    @Override
+    public void readLink(LinkRequest request, StreamObserver<LinkResponse> responseObserver) {
+        LinkResponse.Builder b = LinkResponse.newBuilder();
+        String path = request.getPath();
+        try {
+            Path p = Paths.get(this.mountedVolume + path);
+            String lpath = Files.readSymbolicLink(p).toString();
+            if (new File(lpath).getPath().startsWith(this.mountedVolume))
+                lpath = this.mountPoint + lpath.substring(this.mountedVolume.length());
+            b.setLinkPath(lpath);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            b.setError("unable to parse attributes " + path);
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+    @Override
+    public void symLink(SymLinkRequest request, StreamObserver<SymLinkResponse> responseObserver) {
+        SymLinkResponse.Builder b = SymLinkResponse.newBuilder();
+        String from = request.getFrom();
+        String to = request.getTo();
+        try {
+            File src = null;
+            File fr = new File(mountedVolume + from);
+            if (fr.getCanonicalPath().startsWith(this.mountPoint)) {
+                from = from.substring(mountPoint.length());
+                this.resolvePath(from);
+                src = new File(mountedVolume + from);
+            } else if (!Main.allowExternalSymlinks) {
+                b.setError("external symlinks are not allowed " + from + " to " + to);
+                b.setErrorCode(errorCodes.EACCES);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            } else {
+                src = new File(from);
+            }
+            File dst = new File(mountedVolume + to);
+            try {
+                this.checkInFS(dst);
+            } catch (FileIOError e) {
+                b.setError(e.message);
+                b.setErrorCode(e.code);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            if (dst.exists()) {
+                b.setErrorCode(errorCodes.EEXIST);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            Path srcP = Paths.get(src.getCanonicalPath());
+            Path dstP = Paths.get(dst.getCanonicalPath());
+            // SDFSLogger.getLog().info(
+            // "symlink " + src.getCanonicalPath() + " to " + dst.getCanonicalPath());
+            try {
+                Files.createSymbolicLink(dstP, srcP);
+                eventBus.post(new MFileWritten(MetaFileStore.getMF(dst.getCanonicalPath()), true));
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            } catch (IOException e) {
+                b.setError("error linking " + from + " to " + to);
+                b.setErrorCode(errorCodes.EACCES);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+
+            }
+        } catch (FileIOError e) {
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error(from, e);
+            b.setError("error linking " + from + " to " + to);
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+    @Override
+    public void truncate(TruncateRequest request, StreamObserver<TruncateResponse> responseObserver) {
+        TruncateResponse.Builder b = TruncateResponse.newBuilder();
+        String path = request.getPath();
+        long size = request.getLength();
+        try {
+            DedupFileChannel ch = this.getFileChannel(path, -1);
+            ch.truncateFile(size);
+            ch.getDedupFile().unRegisterChannel(ch, -1);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (FileIOError e) {
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error(path, e);
+            b.setError("error truncating " + path);
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+    @Override
+    public void utime(UtimeRequest request, StreamObserver<UtimeResponse> responseObserver) {
+        UtimeResponse.Builder b = UtimeResponse.newBuilder();
+        String path = request.getPath();
+        long atime = request.getAtime();
+        long mtime = request.getMtime();
+        try {
+            File f = this.resolvePath(path);
+            if (f.isFile()) {
+                MetaDataDedupFile mf = MetaFileStore.getMF(f);
+                mf.setLastAccessed(atime * 1000L);
+                mf.setLastModified(mtime * 1000L);
+            } else {
+                Path p = f.toPath();
+                Files.setLastModifiedTime(p, FileTime.fromMillis(mtime * 1000L));
+                MetaDataDedupFile mf = MetaFileStore.getMF(f);
+                if (mf.isFile())
+                    mf.setDirty(true);
+                try {
+                    eventBus.post(new MFileWritten(mf, true));
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("unable to post mfilewritten " + path, e);
+                }
+            }
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (FileIOError e) {
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error(path, e);
+            b.setError("error in utime " + path);
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+    }
+
+    @Override
+    public void getXAttr(GetXAttrRequest request, StreamObserver<GetXAttrResponse> responseObserver) {
+        GetXAttrResponse.Builder b = GetXAttrResponse.newBuilder();
+        String path = request.getPath();
+        String name = request.getAttr();
+        try {
+            this.resolvePath(path);
+            int ftype = this.getFtype(path);
+            if (ftype != FuseFtypeConstants.TYPE_SYMLINK) {
+
+                File f = this.resolvePath(path);
+                MetaDataDedupFile mf = MetaFileStore.getMF(f);
+                String st = mf.getXAttribute(name);
+                if (st != null)
+                    b.setValue(st);
+                else {
+                    b.setError("not entity " + name + " in " + path);
+                    b.setErrorCode(errorCodes.ENODATA);
+
+                }
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+
+            } else {
+                b.setError("cannot get extended attributes for symlink " + path);
+                b.setErrorCode(errorCodes.ENOENT);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
+        } catch (FileIOError e) {
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error(path, e);
+            b.setError("error in utime " + path);
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+    }
+
+    @Override
+    public void getXAttrSize(GetXAttrSizeRequest request, StreamObserver<GetXAttrSizeResponse> responseObserver) {
+        GetXAttrSizeResponse.Builder b = GetXAttrSizeResponse.newBuilder();
+        String path = request.getPath();
+        String name = request.getAttr();
+        try {
+            this.resolvePath(path);
+            int ftype = this.getFtype(path);
+            if (ftype != FuseFtypeConstants.TYPE_SYMLINK) {
+
+                File f = this.resolvePath(path);
+                MetaDataDedupFile mf = MetaFileStore.getMF(f);
+                String st = mf.getXAttribute(name);
+                if (st != null)
+                    b.setLength(st.getBytes().length);
+                else {
+                    b.setError("not entity " + name + " in " + path);
+                    b.setErrorCode(errorCodes.ENODATA);
+
+                }
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+
+            } else {
+                b.setError("cannot get extended attributes for symlink " + path);
+                b.setErrorCode(errorCodes.ENOENT);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
+        } catch (FileIOError e) {
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error(path, e);
+            b.setError("error in utime " + path);
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+    @Override
+    public void setXAttr(SetXAttrRequest request, StreamObserver<SetXAttrResponse> responseObserver) {
+        SetXAttrResponse.Builder b = SetXAttrResponse.newBuilder();
+        String path = request.getPath();
+        String name = request.getAttr();
+        String value = request.getValue();
+        try {
+            File f = this.resolvePath(path);
+            MetaDataDedupFile mf = MetaFileStore.getMF(f);
+            mf.addXAttribute(name, value);
+            if (mf.isFile())
+                mf.setDirty(true);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (FileIOError e) {
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error(path, e);
+            b.setError("error in setxattr " + path);
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+
+    @Override
+    public void removeXAttr(RemoveXAttrRequest request, StreamObserver<RemoveXAttrResponse> responseObserver) {
+        RemoveXAttrResponse.Builder b = RemoveXAttrResponse.newBuilder();
+        String path = request.getPath();
+        String name = request.getAttr();
+        try {
+            File f = this.resolvePath(path);
+            if (!f.exists()) {
+                b.setError("cannot get extended attributes for " + path);
+                b.setErrorCode(errorCodes.ENOENT);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            MetaDataDedupFile mf = MetaFileStore.getMF(f);
+            mf.removeXAttribute(name);
+            if (mf.isFile())
+                mf.setDirty(true);
+        } catch (FileIOError e) {
+            b.setError(e.message);
+            b.setErrorCode(e.code);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        } catch (Exception e) {
+            SDFSLogger.getLog().error(path, e);
+            b.setError("error in setxattr " + path);
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+    }
+    
+
+    @Override
     public void getFileInfo(FileInfoRequest req, StreamObserver<FileMessageResponse> responseObserver) {
         if (req.getFileName().equals("lastClosedFile")) {
             FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
@@ -806,17 +1483,15 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             if (f.isDirectory()) {
 
                 try {
-                    String guid = UUID.randomUUID().toString();
-                    if (req.getListGuid() != null) {
-                        guid = req.getListGuid();
-                    }
-                    b.setListGuid(guid);
+                    String guid = null;
                     Path dir = FileSystems.getDefault().getPath(f.getPath());
-                    DirectoryStream<Path> stream = null;
-                    if (req.getListGuid() == null) {
-                        stream = Files.newDirectoryStream(dir);
+                    Iterator<Path> stream = null;
+                    if (req.getListGuid().isEmpty() || req.getListGuid().trim().length() == 0) {
+                        guid = UUID.randomUUID().toString();
+                        stream = Files.newDirectoryStream(dir).iterator();
                         this.fileListers.put(guid, stream);
                     } else {
+                        guid = req.getListGuid();
                         stream = this.fileListers.get(guid);
                     }
 
@@ -826,7 +1501,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         maxFiles = req.getNumberOfFiles();
                     }
                     b.setMaxNumberOfFiles(maxFiles);
-                    for (Path p : stream) {
+                    while (stream.hasNext()){
+                        Path p = stream.next();
                         File _mf = p.toFile();
                         MetaDataDedupFile mf = MetaFileStore.getNCMF(_mf);
                         try {
@@ -1170,6 +1846,33 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return this.message;
         }
 
+    }
+    @Override
+    public void statFS(StatFSRequest request, StreamObserver<StatFSResponse> responseObserver) {
+        StatFSResponse.Builder b = StatFSResponse.newBuilder();
+        StatFS.Builder bs = StatFS.newBuilder();
+        
+		try {
+			long blocks = Main.volume.getTotalBlocks();
+			long used = Main.volume.getUsedBlocks();
+			if (used > blocks)
+				used = blocks;
+            bs.setBsize(Main.volume.getBlockSize()).setBlocks(blocks).setBfree(blocks-used).setNamelen(NAME_LENGTH)
+            .setType(0).setFsid(Main.volume.getSerialNumber());
+            b.setStat(bs);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+		} catch (Exception e) {
+            SDFSLogger.getLog().error("unable to stat", e);
+            b.setError("unable to stat");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+		} finally {
+
+		}
     }
 
 }

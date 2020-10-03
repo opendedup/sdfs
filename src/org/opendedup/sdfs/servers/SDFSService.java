@@ -64,8 +64,7 @@ public class SDFSService {
 
 	public void start(boolean useSSL, int port, String password) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile, password);
-		
-		if (useSSL) {
+		if(!useSSL){
 			useSSL = Main.sdfsCliSSL;
 		}
 		if (port != -1)

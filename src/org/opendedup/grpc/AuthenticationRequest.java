@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.AuthenticationRequest}
  */
-public final class AuthenticationRequest extends
+public  final class AuthenticationRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.AuthenticationRequest)
     AuthenticationRequestOrBuilder {
@@ -100,7 +100,6 @@ private static final long serialVersionUID = 0L;
    * <code>string username = 1;</code>
    * @return The username.
    */
-  @java.lang.Override
   public java.lang.String getUsername() {
     java.lang.Object ref = username_;
     if (ref instanceof java.lang.String) {
@@ -117,7 +116,6 @@ private static final long serialVersionUID = 0L;
    * <code>string username = 1;</code>
    * @return The bytes for username.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getUsernameBytes() {
     java.lang.Object ref = username_;
@@ -138,7 +136,6 @@ private static final long serialVersionUID = 0L;
    * <code>string password = 2;</code>
    * @return The password.
    */
-  @java.lang.Override
   public java.lang.String getPassword() {
     java.lang.Object ref = password_;
     if (ref instanceof java.lang.String) {
@@ -155,7 +152,6 @@ private static final long serialVersionUID = 0L;
    * <code>string password = 2;</code>
    * @return The bytes for password.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getPasswordBytes() {
     java.lang.Object ref = password_;

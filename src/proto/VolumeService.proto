@@ -59,6 +59,38 @@ message SystemInfoRequest {
 
 }
 
+message ConnectedVolumeInfo {
+  int64 id = 1;
+  bool local = 2;
+  string hostname = 3;
+  int32 port = 4;
+  int64 size = 5;
+  int64 compressedSize = 6;
+  string sdfsVersion = 7;
+  int64 lastUpdate = 8;
+  int32 version = 9;
+}
+
+message GCScheduleRequest {
+
+}
+
+message GCScheduleResponse {
+  string schedule = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message CloudVolumesRequest {
+
+}
+
+message CloudVolumesResponse {
+  repeated ConnectedVolumeInfo volumeInfo = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
 message SystemInfoResponse {
   SystemInfo info = 1;
   string error = 2;
@@ -84,6 +116,7 @@ message DSEInfo {
   string encryptionIV = 16;
   string cloudAccessKey = 17;
   string cloudSecretKey = 18;
+  string bucketName = 19;
 }
 
 message DSERequest {}
@@ -115,13 +148,26 @@ message MessageQueueInfoResponse {
   int32 port = 3;
   string topic = 4;
   string authInfo = 5;
+  string subScription = 6;
+  string project = 7;
 }
+
 
 message CleanStoreRequest {
   bool compact =1;
 }
 
 message CleanStoreResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message SetCacheSizeRequest {
+  int64 cacheSize = 1;
+}
+
+message SetCacheSizeResponse {
   string eventID = 1;
   string error = 2;
   errorCodes errorCode = 3;
@@ -137,14 +183,55 @@ message DeleteCloudVolumeResponse {
   errorCodes errorCode = 3;
 }
 
-message SetLogicalVolumeCapacityRequest {
+message SetVolumeCapacityRequest {
   int64 size = 1;
 }
 
-message SetLogicalVolumeCapacityResponse {
+message SetVolumeCapacityResponse {
   string error = 1;
   errorCodes errorCode = 2;
 }
+
+message SetPasswordRequest {
+  string password = 1;
+}
+
+message SetPasswordResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
+message SpeedRequest {
+  int32 requestedSpeed = 1;
+}
+
+message SpeedResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message SyncFromVolRequest {
+  int64 volumeid = 1;
+}
+
+message SyncFromVolResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message SyncVolRequest {
+
+}
+
+message SyncVolResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+
 
 // Defining a Service, a Service can have multiple RPC operations
 service VolumeService {
@@ -155,5 +242,13 @@ service VolumeService {
   rpc DeleteCloudVolume(DeleteCloudVolumeRequest) returns (DeleteCloudVolumeResponse);
   rpc DSEInfo(DSERequest) returns (DSEResponse);
   rpc SystemInfo(SystemInfoRequest) returns(SystemInfoResponse);
-  rpc SetLogicalVolumeCapacity(SetLogicalVolumeCapacityRequest) returns(SetLogicalVolumeCapacityResponse);
+  rpc SetVolumeCapacity(SetVolumeCapacityRequest) returns(SetVolumeCapacityResponse);
+  rpc GetConnectedVolumes(CloudVolumesRequest) returns(CloudVolumesResponse);
+  rpc GetGCSchedule(GCScheduleRequest) returns(GCScheduleResponse);
+  rpc SetCacheSize(SetCacheSizeRequest) returns (SetCacheSizeResponse);
+  rpc SetPassword(SetPasswordRequest) returns (SetPasswordResponse);
+  rpc SetReadSpeed(SpeedRequest) returns (SpeedResponse);
+  rpc SetWriteSpeed(SpeedRequest) returns (SpeedResponse);
+  rpc SyncFromCloudVolume(SyncFromVolRequest) returns (SyncFromVolResponse);
+  rpc SyncCloudVolume(SyncVolRequest) returns (SyncVolResponse);
 }

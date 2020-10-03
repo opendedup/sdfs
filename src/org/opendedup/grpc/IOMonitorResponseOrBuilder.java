@@ -96,4 +96,22 @@ public interface IOMonitorResponseOrBuilder extends
    */
   com.google.protobuf.ByteString
       getIoProfileBytes();
+
+  /**
+   * <code>int64 maxRbps = 15;</code>
+   * @return The maxRbps.
+   */
+  long getMaxRbps();
+
+  /**
+   * <code>int64 maxWbps = 16;</code>
+   * @return The maxWbps.
+   */
+  long getMaxWbps();
+
+  /**
+   * <code>int64 maxBps = 17;</code>
+   * @return The maxBps.
+   */
+  long getMaxBps();
 }

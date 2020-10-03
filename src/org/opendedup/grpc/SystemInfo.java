@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SystemInfo}
  */
-public final class SystemInfo extends
+public  final class SystemInfo extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SystemInfo)
     SystemInfoOrBuilder {
@@ -136,7 +136,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 activeThreads = 1;</code>
    * @return The activeThreads.
    */
-  @java.lang.Override
   public int getActiveThreads() {
     return activeThreads_;
   }
@@ -147,7 +146,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 blocksStored = 2;</code>
    * @return The blocksStored.
    */
-  @java.lang.Override
   public int getBlocksStored() {
     return blocksStored_;
   }
@@ -158,7 +156,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 maxBlocksStored = 3;</code>
    * @return The maxBlocksStored.
    */
-  @java.lang.Override
   public int getMaxBlocksStored() {
     return maxBlocksStored_;
   }
@@ -169,7 +166,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 totalSpace = 4;</code>
    * @return The totalSpace.
    */
-  @java.lang.Override
   public long getTotalSpace() {
     return totalSpace_;
   }
@@ -180,7 +176,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 freeSpace = 5;</code>
    * @return The freeSpace.
    */
-  @java.lang.Override
   public long getFreeSpace() {
     return freeSpace_;
   }
@@ -191,7 +186,6 @@ private static final long serialVersionUID = 0L;
    * <code>double totalCpuLoad = 6;</code>
    * @return The totalCpuLoad.
    */
-  @java.lang.Override
   public double getTotalCpuLoad() {
     return totalCpuLoad_;
   }
@@ -202,7 +196,6 @@ private static final long serialVersionUID = 0L;
    * <code>double cpuCores = 7;</code>
    * @return The cpuCores.
    */
-  @java.lang.Override
   public double getCpuCores() {
     return cpuCores_;
   }
@@ -213,7 +206,6 @@ private static final long serialVersionUID = 0L;
    * <code>double sdfsCpuLoad = 8;</code>
    * @return The sdfsCpuLoad.
    */
-  @java.lang.Override
   public double getSdfsCpuLoad() {
     return sdfsCpuLoad_;
   }
@@ -224,7 +216,6 @@ private static final long serialVersionUID = 0L;
    * <code>double totalMemory = 10;</code>
    * @return The totalMemory.
    */
-  @java.lang.Override
   public double getTotalMemory() {
     return totalMemory_;
   }
@@ -235,7 +226,6 @@ private static final long serialVersionUID = 0L;
    * <code>double freeMemory = 11;</code>
    * @return The freeMemory.
    */
-  @java.lang.Override
   public double getFreeMemory() {
     return freeMemory_;
   }
@@ -712,7 +702,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 activeThreads = 1;</code>
      * @return The activeThreads.
      */
-    @java.lang.Override
     public int getActiveThreads() {
       return activeThreads_;
     }
@@ -743,7 +732,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 blocksStored = 2;</code>
      * @return The blocksStored.
      */
-    @java.lang.Override
     public int getBlocksStored() {
       return blocksStored_;
     }
@@ -774,7 +762,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 maxBlocksStored = 3;</code>
      * @return The maxBlocksStored.
      */
-    @java.lang.Override
     public int getMaxBlocksStored() {
       return maxBlocksStored_;
     }
@@ -805,7 +792,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 totalSpace = 4;</code>
      * @return The totalSpace.
      */
-    @java.lang.Override
     public long getTotalSpace() {
       return totalSpace_;
     }
@@ -836,7 +822,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 freeSpace = 5;</code>
      * @return The freeSpace.
      */
-    @java.lang.Override
     public long getFreeSpace() {
       return freeSpace_;
     }
@@ -867,7 +852,6 @@ private static final long serialVersionUID = 0L;
      * <code>double totalCpuLoad = 6;</code>
      * @return The totalCpuLoad.
      */
-    @java.lang.Override
     public double getTotalCpuLoad() {
       return totalCpuLoad_;
     }
@@ -898,7 +882,6 @@ private static final long serialVersionUID = 0L;
      * <code>double cpuCores = 7;</code>
      * @return The cpuCores.
      */
-    @java.lang.Override
     public double getCpuCores() {
       return cpuCores_;
     }
@@ -929,7 +912,6 @@ private static final long serialVersionUID = 0L;
      * <code>double sdfsCpuLoad = 8;</code>
      * @return The sdfsCpuLoad.
      */
-    @java.lang.Override
     public double getSdfsCpuLoad() {
       return sdfsCpuLoad_;
     }
@@ -960,7 +942,6 @@ private static final long serialVersionUID = 0L;
      * <code>double totalMemory = 10;</code>
      * @return The totalMemory.
      */
-    @java.lang.Override
     public double getTotalMemory() {
       return totalMemory_;
     }
@@ -991,7 +972,6 @@ private static final long serialVersionUID = 0L;
      * <code>double freeMemory = 11;</code>
      * @return The freeMemory.
      */
-    @java.lang.Override
     public double getFreeMemory() {
       return freeMemory_;
     }

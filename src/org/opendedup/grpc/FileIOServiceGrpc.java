@@ -18,7 +18,7 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 /**
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.30.2)",
+    value = "by gRPC proto compiler (version 1.31.1)",
     comments = "Source: IOService.proto")
 public final class FileIOServiceGrpc {
 
@@ -27,6 +27,409 @@ public final class FileIOServiceGrpc {
   public static final String SERVICE_NAME = "org.opendedup.grpc.FileIOService";
 
   // Static method descriptors that strictly reflect the proto.
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.GetXAttrSizeRequest,
+      org.opendedup.grpc.GetXAttrSizeResponse> getGetXAttrSizeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetXAttrSize",
+      requestType = org.opendedup.grpc.GetXAttrSizeRequest.class,
+      responseType = org.opendedup.grpc.GetXAttrSizeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.GetXAttrSizeRequest,
+      org.opendedup.grpc.GetXAttrSizeResponse> getGetXAttrSizeMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.GetXAttrSizeRequest, org.opendedup.grpc.GetXAttrSizeResponse> getGetXAttrSizeMethod;
+    if ((getGetXAttrSizeMethod = FileIOServiceGrpc.getGetXAttrSizeMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getGetXAttrSizeMethod = FileIOServiceGrpc.getGetXAttrSizeMethod) == null) {
+          FileIOServiceGrpc.getGetXAttrSizeMethod = getGetXAttrSizeMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.GetXAttrSizeRequest, org.opendedup.grpc.GetXAttrSizeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetXAttrSize"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.GetXAttrSizeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.GetXAttrSizeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("GetXAttrSize"))
+              .build();
+        }
+      }
+    }
+    return getGetXAttrSizeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.FsyncRequest,
+      org.opendedup.grpc.FsyncResponse> getFsyncMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "Fsync",
+      requestType = org.opendedup.grpc.FsyncRequest.class,
+      responseType = org.opendedup.grpc.FsyncResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.FsyncRequest,
+      org.opendedup.grpc.FsyncResponse> getFsyncMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.FsyncRequest, org.opendedup.grpc.FsyncResponse> getFsyncMethod;
+    if ((getFsyncMethod = FileIOServiceGrpc.getFsyncMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getFsyncMethod = FileIOServiceGrpc.getFsyncMethod) == null) {
+          FileIOServiceGrpc.getFsyncMethod = getFsyncMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.FsyncRequest, org.opendedup.grpc.FsyncResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Fsync"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.FsyncRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.FsyncResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("Fsync"))
+              .build();
+        }
+      }
+    }
+    return getFsyncMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SetXAttrRequest,
+      org.opendedup.grpc.SetXAttrResponse> getSetXAttrMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetXAttr",
+      requestType = org.opendedup.grpc.SetXAttrRequest.class,
+      responseType = org.opendedup.grpc.SetXAttrResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SetXAttrRequest,
+      org.opendedup.grpc.SetXAttrResponse> getSetXAttrMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SetXAttrRequest, org.opendedup.grpc.SetXAttrResponse> getSetXAttrMethod;
+    if ((getSetXAttrMethod = FileIOServiceGrpc.getSetXAttrMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getSetXAttrMethod = FileIOServiceGrpc.getSetXAttrMethod) == null) {
+          FileIOServiceGrpc.getSetXAttrMethod = getSetXAttrMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SetXAttrRequest, org.opendedup.grpc.SetXAttrResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetXAttr"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetXAttrRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SetXAttrResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("SetXAttr"))
+              .build();
+        }
+      }
+    }
+    return getSetXAttrMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.RemoveXAttrRequest,
+      org.opendedup.grpc.RemoveXAttrResponse> getRemoveXAttrMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "RemoveXAttr",
+      requestType = org.opendedup.grpc.RemoveXAttrRequest.class,
+      responseType = org.opendedup.grpc.RemoveXAttrResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.RemoveXAttrRequest,
+      org.opendedup.grpc.RemoveXAttrResponse> getRemoveXAttrMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.RemoveXAttrRequest, org.opendedup.grpc.RemoveXAttrResponse> getRemoveXAttrMethod;
+    if ((getRemoveXAttrMethod = FileIOServiceGrpc.getRemoveXAttrMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getRemoveXAttrMethod = FileIOServiceGrpc.getRemoveXAttrMethod) == null) {
+          FileIOServiceGrpc.getRemoveXAttrMethod = getRemoveXAttrMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.RemoveXAttrRequest, org.opendedup.grpc.RemoveXAttrResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RemoveXAttr"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.RemoveXAttrRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.RemoveXAttrResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("RemoveXAttr"))
+              .build();
+        }
+      }
+    }
+    return getRemoveXAttrMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.GetXAttrRequest,
+      org.opendedup.grpc.GetXAttrResponse> getGetXAttrMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetXAttr",
+      requestType = org.opendedup.grpc.GetXAttrRequest.class,
+      responseType = org.opendedup.grpc.GetXAttrResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.GetXAttrRequest,
+      org.opendedup.grpc.GetXAttrResponse> getGetXAttrMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.GetXAttrRequest, org.opendedup.grpc.GetXAttrResponse> getGetXAttrMethod;
+    if ((getGetXAttrMethod = FileIOServiceGrpc.getGetXAttrMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getGetXAttrMethod = FileIOServiceGrpc.getGetXAttrMethod) == null) {
+          FileIOServiceGrpc.getGetXAttrMethod = getGetXAttrMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.GetXAttrRequest, org.opendedup.grpc.GetXAttrResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetXAttr"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.GetXAttrRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.GetXAttrResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("GetXAttr"))
+              .build();
+        }
+      }
+    }
+    return getGetXAttrMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.UtimeRequest,
+      org.opendedup.grpc.UtimeResponse> getUtimeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "Utime",
+      requestType = org.opendedup.grpc.UtimeRequest.class,
+      responseType = org.opendedup.grpc.UtimeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.UtimeRequest,
+      org.opendedup.grpc.UtimeResponse> getUtimeMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.UtimeRequest, org.opendedup.grpc.UtimeResponse> getUtimeMethod;
+    if ((getUtimeMethod = FileIOServiceGrpc.getUtimeMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getUtimeMethod = FileIOServiceGrpc.getUtimeMethod) == null) {
+          FileIOServiceGrpc.getUtimeMethod = getUtimeMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.UtimeRequest, org.opendedup.grpc.UtimeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Utime"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.UtimeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.UtimeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("Utime"))
+              .build();
+        }
+      }
+    }
+    return getUtimeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.TruncateRequest,
+      org.opendedup.grpc.TruncateResponse> getTruncateMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "Truncate",
+      requestType = org.opendedup.grpc.TruncateRequest.class,
+      responseType = org.opendedup.grpc.TruncateResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.TruncateRequest,
+      org.opendedup.grpc.TruncateResponse> getTruncateMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.TruncateRequest, org.opendedup.grpc.TruncateResponse> getTruncateMethod;
+    if ((getTruncateMethod = FileIOServiceGrpc.getTruncateMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getTruncateMethod = FileIOServiceGrpc.getTruncateMethod) == null) {
+          FileIOServiceGrpc.getTruncateMethod = getTruncateMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.TruncateRequest, org.opendedup.grpc.TruncateResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Truncate"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.TruncateRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.TruncateResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("Truncate"))
+              .build();
+        }
+      }
+    }
+    return getTruncateMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SymLinkRequest,
+      org.opendedup.grpc.SymLinkResponse> getSymLinkMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SymLink",
+      requestType = org.opendedup.grpc.SymLinkRequest.class,
+      responseType = org.opendedup.grpc.SymLinkResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SymLinkRequest,
+      org.opendedup.grpc.SymLinkResponse> getSymLinkMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SymLinkRequest, org.opendedup.grpc.SymLinkResponse> getSymLinkMethod;
+    if ((getSymLinkMethod = FileIOServiceGrpc.getSymLinkMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getSymLinkMethod = FileIOServiceGrpc.getSymLinkMethod) == null) {
+          FileIOServiceGrpc.getSymLinkMethod = getSymLinkMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SymLinkRequest, org.opendedup.grpc.SymLinkResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SymLink"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SymLinkRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SymLinkResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("SymLink"))
+              .build();
+        }
+      }
+    }
+    return getSymLinkMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.LinkRequest,
+      org.opendedup.grpc.LinkResponse> getReadLinkMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ReadLink",
+      requestType = org.opendedup.grpc.LinkRequest.class,
+      responseType = org.opendedup.grpc.LinkResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.LinkRequest,
+      org.opendedup.grpc.LinkResponse> getReadLinkMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.LinkRequest, org.opendedup.grpc.LinkResponse> getReadLinkMethod;
+    if ((getReadLinkMethod = FileIOServiceGrpc.getReadLinkMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getReadLinkMethod = FileIOServiceGrpc.getReadLinkMethod) == null) {
+          FileIOServiceGrpc.getReadLinkMethod = getReadLinkMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.LinkRequest, org.opendedup.grpc.LinkResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ReadLink"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.LinkRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.LinkResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("ReadLink"))
+              .build();
+        }
+      }
+    }
+    return getReadLinkMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.StatRequest,
+      org.opendedup.grpc.StatResponse> getGetAttrMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetAttr",
+      requestType = org.opendedup.grpc.StatRequest.class,
+      responseType = org.opendedup.grpc.StatResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.StatRequest,
+      org.opendedup.grpc.StatResponse> getGetAttrMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.StatRequest, org.opendedup.grpc.StatResponse> getGetAttrMethod;
+    if ((getGetAttrMethod = FileIOServiceGrpc.getGetAttrMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getGetAttrMethod = FileIOServiceGrpc.getGetAttrMethod) == null) {
+          FileIOServiceGrpc.getGetAttrMethod = getGetAttrMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.StatRequest, org.opendedup.grpc.StatResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetAttr"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.StatRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.StatResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("GetAttr"))
+              .build();
+        }
+      }
+    }
+    return getGetAttrMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.FlushRequest,
+      org.opendedup.grpc.FlushResponse> getFlushMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "Flush",
+      requestType = org.opendedup.grpc.FlushRequest.class,
+      responseType = org.opendedup.grpc.FlushResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.FlushRequest,
+      org.opendedup.grpc.FlushResponse> getFlushMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.FlushRequest, org.opendedup.grpc.FlushResponse> getFlushMethod;
+    if ((getFlushMethod = FileIOServiceGrpc.getFlushMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getFlushMethod = FileIOServiceGrpc.getFlushMethod) == null) {
+          FileIOServiceGrpc.getFlushMethod = getFlushMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.FlushRequest, org.opendedup.grpc.FlushResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Flush"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.FlushRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.FlushResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("Flush"))
+              .build();
+        }
+      }
+    }
+    return getFlushMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.ChownRequest,
+      org.opendedup.grpc.ChownResponse> getChownMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "Chown",
+      requestType = org.opendedup.grpc.ChownRequest.class,
+      responseType = org.opendedup.grpc.ChownResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.ChownRequest,
+      org.opendedup.grpc.ChownResponse> getChownMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.ChownRequest, org.opendedup.grpc.ChownResponse> getChownMethod;
+    if ((getChownMethod = FileIOServiceGrpc.getChownMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getChownMethod = FileIOServiceGrpc.getChownMethod) == null) {
+          FileIOServiceGrpc.getChownMethod = getChownMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.ChownRequest, org.opendedup.grpc.ChownResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Chown"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.ChownRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.ChownResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("Chown"))
+              .build();
+        }
+      }
+    }
+    return getChownMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.ChmodRequest,
+      org.opendedup.grpc.ChmodResponse> getChmodMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "Chmod",
+      requestType = org.opendedup.grpc.ChmodRequest.class,
+      responseType = org.opendedup.grpc.ChmodResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.ChmodRequest,
+      org.opendedup.grpc.ChmodResponse> getChmodMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.ChmodRequest, org.opendedup.grpc.ChmodResponse> getChmodMethod;
+    if ((getChmodMethod = FileIOServiceGrpc.getChmodMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getChmodMethod = FileIOServiceGrpc.getChmodMethod) == null) {
+          FileIOServiceGrpc.getChmodMethod = getChmodMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.ChmodRequest, org.opendedup.grpc.ChmodResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Chmod"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.ChmodRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.ChmodResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("Chmod"))
+              .build();
+        }
+      }
+    }
+    return getChmodMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.MkDirRequest,
       org.opendedup.grpc.MkDirResponse> getMkDirMethod;
 
@@ -585,6 +988,37 @@ public final class FileIOServiceGrpc {
     return getGetCloudMetaFileMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.StatFSRequest,
+      org.opendedup.grpc.StatFSResponse> getStatFSMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "StatFS",
+      requestType = org.opendedup.grpc.StatFSRequest.class,
+      responseType = org.opendedup.grpc.StatFSResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.StatFSRequest,
+      org.opendedup.grpc.StatFSResponse> getStatFSMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.StatFSRequest, org.opendedup.grpc.StatFSResponse> getStatFSMethod;
+    if ((getStatFSMethod = FileIOServiceGrpc.getStatFSMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getStatFSMethod = FileIOServiceGrpc.getStatFSMethod) == null) {
+          FileIOServiceGrpc.getStatFSMethod = getStatFSMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.StatFSRequest, org.opendedup.grpc.StatFSResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "StatFS"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.StatFSRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.StatFSResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("StatFS"))
+              .build();
+        }
+      }
+    }
+    return getStatFSMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -637,6 +1071,97 @@ public final class FileIOServiceGrpc {
      * <pre>
      * Define a RPC operation
      * </pre>
+     */
+    public void getXAttrSize(org.opendedup.grpc.GetXAttrSizeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.GetXAttrSizeResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetXAttrSizeMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void fsync(org.opendedup.grpc.FsyncRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FsyncResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getFsyncMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void setXAttr(org.opendedup.grpc.SetXAttrRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetXAttrResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetXAttrMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void removeXAttr(org.opendedup.grpc.RemoveXAttrRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.RemoveXAttrResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getRemoveXAttrMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void getXAttr(org.opendedup.grpc.GetXAttrRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.GetXAttrResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetXAttrMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void utime(org.opendedup.grpc.UtimeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.UtimeResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getUtimeMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void truncate(org.opendedup.grpc.TruncateRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.TruncateResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getTruncateMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void symLink(org.opendedup.grpc.SymLinkRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SymLinkResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSymLinkMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void readLink(org.opendedup.grpc.LinkRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.LinkResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getReadLinkMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void getAttr(org.opendedup.grpc.StatRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.StatResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetAttrMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void flush(org.opendedup.grpc.FlushRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FlushResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getFlushMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void chown(org.opendedup.grpc.ChownRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.ChownResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getChownMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void chmod(org.opendedup.grpc.ChmodRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.ChmodResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getChmodMethod(), responseObserver);
+    }
+
+    /**
      */
     public void mkDir(org.opendedup.grpc.MkDirRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.MkDirResponse> responseObserver) {
@@ -762,8 +1287,106 @@ public final class FileIOServiceGrpc {
       asyncUnimplementedUnaryCall(getGetCloudMetaFileMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void statFS(org.opendedup.grpc.StatFSRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.StatFSResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getStatFSMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+          .addMethod(
+            getGetXAttrSizeMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.GetXAttrSizeRequest,
+                org.opendedup.grpc.GetXAttrSizeResponse>(
+                  this, METHODID_GET_XATTR_SIZE)))
+          .addMethod(
+            getFsyncMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.FsyncRequest,
+                org.opendedup.grpc.FsyncResponse>(
+                  this, METHODID_FSYNC)))
+          .addMethod(
+            getSetXAttrMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SetXAttrRequest,
+                org.opendedup.grpc.SetXAttrResponse>(
+                  this, METHODID_SET_XATTR)))
+          .addMethod(
+            getRemoveXAttrMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.RemoveXAttrRequest,
+                org.opendedup.grpc.RemoveXAttrResponse>(
+                  this, METHODID_REMOVE_XATTR)))
+          .addMethod(
+            getGetXAttrMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.GetXAttrRequest,
+                org.opendedup.grpc.GetXAttrResponse>(
+                  this, METHODID_GET_XATTR)))
+          .addMethod(
+            getUtimeMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.UtimeRequest,
+                org.opendedup.grpc.UtimeResponse>(
+                  this, METHODID_UTIME)))
+          .addMethod(
+            getTruncateMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.TruncateRequest,
+                org.opendedup.grpc.TruncateResponse>(
+                  this, METHODID_TRUNCATE)))
+          .addMethod(
+            getSymLinkMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SymLinkRequest,
+                org.opendedup.grpc.SymLinkResponse>(
+                  this, METHODID_SYM_LINK)))
+          .addMethod(
+            getReadLinkMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.LinkRequest,
+                org.opendedup.grpc.LinkResponse>(
+                  this, METHODID_READ_LINK)))
+          .addMethod(
+            getGetAttrMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.StatRequest,
+                org.opendedup.grpc.StatResponse>(
+                  this, METHODID_GET_ATTR)))
+          .addMethod(
+            getFlushMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.FlushRequest,
+                org.opendedup.grpc.FlushResponse>(
+                  this, METHODID_FLUSH)))
+          .addMethod(
+            getChownMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.ChownRequest,
+                org.opendedup.grpc.ChownResponse>(
+                  this, METHODID_CHOWN)))
+          .addMethod(
+            getChmodMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.ChmodRequest,
+                org.opendedup.grpc.ChmodResponse>(
+                  this, METHODID_CHMOD)))
           .addMethod(
             getMkDirMethod(),
             asyncUnaryCall(
@@ -890,6 +1513,13 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.GetCloudFileRequest,
                 org.opendedup.grpc.GetCloudFileResponse>(
                   this, METHODID_GET_CLOUD_META_FILE)))
+          .addMethod(
+            getStatFSMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.StatFSRequest,
+                org.opendedup.grpc.StatFSResponse>(
+                  this, METHODID_STAT_FS)))
           .build();
     }
   }
@@ -912,6 +1542,110 @@ public final class FileIOServiceGrpc {
      * <pre>
      * Define a RPC operation
      * </pre>
+     */
+    public void getXAttrSize(org.opendedup.grpc.GetXAttrSizeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.GetXAttrSizeResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetXAttrSizeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void fsync(org.opendedup.grpc.FsyncRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FsyncResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getFsyncMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void setXAttr(org.opendedup.grpc.SetXAttrRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SetXAttrResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetXAttrMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void removeXAttr(org.opendedup.grpc.RemoveXAttrRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.RemoveXAttrResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getRemoveXAttrMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void getXAttr(org.opendedup.grpc.GetXAttrRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.GetXAttrResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetXAttrMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void utime(org.opendedup.grpc.UtimeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.UtimeResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getUtimeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void truncate(org.opendedup.grpc.TruncateRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.TruncateResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getTruncateMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void symLink(org.opendedup.grpc.SymLinkRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SymLinkResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSymLinkMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void readLink(org.opendedup.grpc.LinkRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.LinkResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getReadLinkMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void getAttr(org.opendedup.grpc.StatRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.StatResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetAttrMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void flush(org.opendedup.grpc.FlushRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FlushResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getFlushMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void chown(org.opendedup.grpc.ChownRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.ChownResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getChownMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void chmod(org.opendedup.grpc.ChmodRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.ChmodResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getChmodMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
      */
     public void mkDir(org.opendedup.grpc.MkDirRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.MkDirResponse> responseObserver) {
@@ -1054,6 +1788,14 @@ public final class FileIOServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getGetCloudMetaFileMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void statFS(org.opendedup.grpc.StatFSRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.StatFSResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getStatFSMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -1074,6 +1816,97 @@ public final class FileIOServiceGrpc {
      * <pre>
      * Define a RPC operation
      * </pre>
+     */
+    public org.opendedup.grpc.GetXAttrSizeResponse getXAttrSize(org.opendedup.grpc.GetXAttrSizeRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetXAttrSizeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.FsyncResponse fsync(org.opendedup.grpc.FsyncRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getFsyncMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SetXAttrResponse setXAttr(org.opendedup.grpc.SetXAttrRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetXAttrMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.RemoveXAttrResponse removeXAttr(org.opendedup.grpc.RemoveXAttrRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getRemoveXAttrMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.GetXAttrResponse getXAttr(org.opendedup.grpc.GetXAttrRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetXAttrMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.UtimeResponse utime(org.opendedup.grpc.UtimeRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getUtimeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.TruncateResponse truncate(org.opendedup.grpc.TruncateRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getTruncateMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SymLinkResponse symLink(org.opendedup.grpc.SymLinkRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSymLinkMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.LinkResponse readLink(org.opendedup.grpc.LinkRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getReadLinkMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.StatResponse getAttr(org.opendedup.grpc.StatRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetAttrMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.FlushResponse flush(org.opendedup.grpc.FlushRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getFlushMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.ChownResponse chown(org.opendedup.grpc.ChownRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getChownMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.ChmodResponse chmod(org.opendedup.grpc.ChmodRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getChmodMethod(), getCallOptions(), request);
+    }
+
+    /**
      */
     public org.opendedup.grpc.MkDirResponse mkDir(org.opendedup.grpc.MkDirRequest request) {
       return blockingUnaryCall(
@@ -1198,6 +2031,13 @@ public final class FileIOServiceGrpc {
       return blockingUnaryCall(
           getChannel(), getGetCloudMetaFileMethod(), getCallOptions(), request);
     }
+
+    /**
+     */
+    public org.opendedup.grpc.StatFSResponse statFS(org.opendedup.grpc.StatFSRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getStatFSMethod(), getCallOptions(), request);
+    }
   }
 
   /**
@@ -1218,6 +2058,110 @@ public final class FileIOServiceGrpc {
      * <pre>
      * Define a RPC operation
      * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.GetXAttrSizeResponse> getXAttrSize(
+        org.opendedup.grpc.GetXAttrSizeRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetXAttrSizeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.FsyncResponse> fsync(
+        org.opendedup.grpc.FsyncRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getFsyncMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SetXAttrResponse> setXAttr(
+        org.opendedup.grpc.SetXAttrRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetXAttrMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.RemoveXAttrResponse> removeXAttr(
+        org.opendedup.grpc.RemoveXAttrRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getRemoveXAttrMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.GetXAttrResponse> getXAttr(
+        org.opendedup.grpc.GetXAttrRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetXAttrMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.UtimeResponse> utime(
+        org.opendedup.grpc.UtimeRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getUtimeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.TruncateResponse> truncate(
+        org.opendedup.grpc.TruncateRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getTruncateMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SymLinkResponse> symLink(
+        org.opendedup.grpc.SymLinkRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSymLinkMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.LinkResponse> readLink(
+        org.opendedup.grpc.LinkRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getReadLinkMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.StatResponse> getAttr(
+        org.opendedup.grpc.StatRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetAttrMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.FlushResponse> flush(
+        org.opendedup.grpc.FlushRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getFlushMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.ChownResponse> chown(
+        org.opendedup.grpc.ChownRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getChownMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.ChmodResponse> chmod(
+        org.opendedup.grpc.ChmodRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getChmodMethod(), getCallOptions()), request);
+    }
+
+    /**
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.MkDirResponse> mkDir(
         org.opendedup.grpc.MkDirRequest request) {
@@ -1360,26 +2304,48 @@ public final class FileIOServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getGetCloudMetaFileMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.StatFSResponse> statFS(
+        org.opendedup.grpc.StatFSRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getStatFSMethod(), getCallOptions()), request);
+    }
   }
 
-  private static final int METHODID_MK_DIR = 0;
-  private static final int METHODID_RM_DIR = 1;
-  private static final int METHODID_UNLINK = 2;
-  private static final int METHODID_WRITE = 3;
-  private static final int METHODID_READ = 4;
-  private static final int METHODID_RELEASE = 5;
-  private static final int METHODID_MKNOD = 6;
-  private static final int METHODID_OPEN = 7;
-  private static final int METHODID_GET_FILE_INFO = 8;
-  private static final int METHODID_CREATE_COPY = 9;
-  private static final int METHODID_FILE_EXISTS = 10;
-  private static final int METHODID_MK_DIR_ALL = 11;
-  private static final int METHODID_STAT = 12;
-  private static final int METHODID_RENAME = 13;
-  private static final int METHODID_COPY_EXTENT = 14;
-  private static final int METHODID_SET_USER_META_DATA = 15;
-  private static final int METHODID_GET_CLOUD_FILE = 16;
-  private static final int METHODID_GET_CLOUD_META_FILE = 17;
+  private static final int METHODID_GET_XATTR_SIZE = 0;
+  private static final int METHODID_FSYNC = 1;
+  private static final int METHODID_SET_XATTR = 2;
+  private static final int METHODID_REMOVE_XATTR = 3;
+  private static final int METHODID_GET_XATTR = 4;
+  private static final int METHODID_UTIME = 5;
+  private static final int METHODID_TRUNCATE = 6;
+  private static final int METHODID_SYM_LINK = 7;
+  private static final int METHODID_READ_LINK = 8;
+  private static final int METHODID_GET_ATTR = 9;
+  private static final int METHODID_FLUSH = 10;
+  private static final int METHODID_CHOWN = 11;
+  private static final int METHODID_CHMOD = 12;
+  private static final int METHODID_MK_DIR = 13;
+  private static final int METHODID_RM_DIR = 14;
+  private static final int METHODID_UNLINK = 15;
+  private static final int METHODID_WRITE = 16;
+  private static final int METHODID_READ = 17;
+  private static final int METHODID_RELEASE = 18;
+  private static final int METHODID_MKNOD = 19;
+  private static final int METHODID_OPEN = 20;
+  private static final int METHODID_GET_FILE_INFO = 21;
+  private static final int METHODID_CREATE_COPY = 22;
+  private static final int METHODID_FILE_EXISTS = 23;
+  private static final int METHODID_MK_DIR_ALL = 24;
+  private static final int METHODID_STAT = 25;
+  private static final int METHODID_RENAME = 26;
+  private static final int METHODID_COPY_EXTENT = 27;
+  private static final int METHODID_SET_USER_META_DATA = 28;
+  private static final int METHODID_GET_CLOUD_FILE = 29;
+  private static final int METHODID_GET_CLOUD_META_FILE = 30;
+  private static final int METHODID_STAT_FS = 31;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1398,6 +2364,58 @@ public final class FileIOServiceGrpc {
     @java.lang.SuppressWarnings("unchecked")
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_GET_XATTR_SIZE:
+          serviceImpl.getXAttrSize((org.opendedup.grpc.GetXAttrSizeRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.GetXAttrSizeResponse>) responseObserver);
+          break;
+        case METHODID_FSYNC:
+          serviceImpl.fsync((org.opendedup.grpc.FsyncRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.FsyncResponse>) responseObserver);
+          break;
+        case METHODID_SET_XATTR:
+          serviceImpl.setXAttr((org.opendedup.grpc.SetXAttrRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SetXAttrResponse>) responseObserver);
+          break;
+        case METHODID_REMOVE_XATTR:
+          serviceImpl.removeXAttr((org.opendedup.grpc.RemoveXAttrRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.RemoveXAttrResponse>) responseObserver);
+          break;
+        case METHODID_GET_XATTR:
+          serviceImpl.getXAttr((org.opendedup.grpc.GetXAttrRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.GetXAttrResponse>) responseObserver);
+          break;
+        case METHODID_UTIME:
+          serviceImpl.utime((org.opendedup.grpc.UtimeRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.UtimeResponse>) responseObserver);
+          break;
+        case METHODID_TRUNCATE:
+          serviceImpl.truncate((org.opendedup.grpc.TruncateRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.TruncateResponse>) responseObserver);
+          break;
+        case METHODID_SYM_LINK:
+          serviceImpl.symLink((org.opendedup.grpc.SymLinkRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SymLinkResponse>) responseObserver);
+          break;
+        case METHODID_READ_LINK:
+          serviceImpl.readLink((org.opendedup.grpc.LinkRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.LinkResponse>) responseObserver);
+          break;
+        case METHODID_GET_ATTR:
+          serviceImpl.getAttr((org.opendedup.grpc.StatRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.StatResponse>) responseObserver);
+          break;
+        case METHODID_FLUSH:
+          serviceImpl.flush((org.opendedup.grpc.FlushRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.FlushResponse>) responseObserver);
+          break;
+        case METHODID_CHOWN:
+          serviceImpl.chown((org.opendedup.grpc.ChownRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.ChownResponse>) responseObserver);
+          break;
+        case METHODID_CHMOD:
+          serviceImpl.chmod((org.opendedup.grpc.ChmodRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.ChmodResponse>) responseObserver);
+          break;
         case METHODID_MK_DIR:
           serviceImpl.mkDir((org.opendedup.grpc.MkDirRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.MkDirResponse>) responseObserver);
@@ -1470,6 +2488,10 @@ public final class FileIOServiceGrpc {
           serviceImpl.getCloudMetaFile((org.opendedup.grpc.GetCloudFileRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.GetCloudFileResponse>) responseObserver);
           break;
+        case METHODID_STAT_FS:
+          serviceImpl.statFS((org.opendedup.grpc.StatFSRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.StatFSResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -1531,6 +2553,19 @@ public final class FileIOServiceGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new FileIOServiceFileDescriptorSupplier())
+              .addMethod(getGetXAttrSizeMethod())
+              .addMethod(getFsyncMethod())
+              .addMethod(getSetXAttrMethod())
+              .addMethod(getRemoveXAttrMethod())
+              .addMethod(getGetXAttrMethod())
+              .addMethod(getUtimeMethod())
+              .addMethod(getTruncateMethod())
+              .addMethod(getSymLinkMethod())
+              .addMethod(getReadLinkMethod())
+              .addMethod(getGetAttrMethod())
+              .addMethod(getFlushMethod())
+              .addMethod(getChownMethod())
+              .addMethod(getChmodMethod())
               .addMethod(getMkDirMethod())
               .addMethod(getRmDirMethod())
               .addMethod(getUnlinkMethod())
@@ -1549,6 +2584,7 @@ public final class FileIOServiceGrpc {
               .addMethod(getSetUserMetaDataMethod())
               .addMethod(getGetCloudFileMethod())
               .addMethod(getGetCloudMetaFileMethod())
+              .addMethod(getStatFSMethod())
               .build();
         }
       }

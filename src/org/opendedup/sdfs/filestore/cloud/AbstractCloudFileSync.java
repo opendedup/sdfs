@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.opendedup.grpc.FileInfoResponse;
+
 public interface AbstractCloudFileSync {
 	public abstract void uploadFile(File f, String to, String parentPath,HashMap<String,String> md,boolean disableComp)
 			throws IOException;
@@ -33,6 +35,10 @@ public interface AbstractCloudFileSync {
 
 	public abstract void renameFile(String from, String to, String parentPath)
 			throws IOException;
+
+	public abstract String[] listFiles(String prefix,int length,String marker) throws IOException;
+
+	public abstract FileInfoResponse getAttr(String name) throws NullPointerException, IOException;
 	
 	public abstract RemoteVolumeInfo[] getConnectedVolumes()throws IOException;
 

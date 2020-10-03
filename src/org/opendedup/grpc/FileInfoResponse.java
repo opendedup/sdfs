@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.FileInfoResponse}
  */
-public final class FileInfoResponse extends
+public  final class FileInfoResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileInfoResponse)
     FileInfoResponseOrBuilder {
@@ -27,8 +27,8 @@ private static final long serialVersionUID = 0L;
     files_ = java.util.Collections.emptyList();
     parentPath_ = "";
     volumeid_ = "";
-    ioMonitor_ = java.util.Collections.emptyList();
     symlinkPath_ = "";
+    version_ = "";
   }
 
   @java.lang.Override
@@ -195,12 +195,16 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 194: {
-            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-              ioMonitor_ = new java.util.ArrayList<org.opendedup.grpc.IOMonitorResponse>();
-              mutable_bitField0_ |= 0x00000004;
+            org.opendedup.grpc.IOMonitorResponse.Builder subBuilder = null;
+            if (ioMonitor_ != null) {
+              subBuilder = ioMonitor_.toBuilder();
             }
-            ioMonitor_.add(
-                input.readMessage(org.opendedup.grpc.IOMonitorResponse.parser(), extensionRegistry));
+            ioMonitor_ = input.readMessage(org.opendedup.grpc.IOMonitorResponse.parser(), extensionRegistry);
+            if (subBuilder != null) {
+              subBuilder.mergeFrom(ioMonitor_);
+              ioMonitor_ = subBuilder.buildPartial();
+            }
+
             break;
           }
           case 202: {
@@ -224,6 +228,37 @@ private static final long serialVersionUID = 0L;
             permissions_ = input.readInt32();
             break;
           }
+          case 232: {
+
+            hashcode_ = input.readInt64();
+            break;
+          }
+          case 240: {
+
+            retentionLock_ = input.readInt64();
+            break;
+          }
+          case 248: {
+
+            attributes_ = input.readInt64();
+            break;
+          }
+          case 258: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            version_ = s;
+            break;
+          }
+          case 264: {
+
+            mode_ = input.readInt32();
+            break;
+          }
+          case 272: {
+
+            deleteOnClose_ = input.readBool();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -244,9 +279,6 @@ private static final long serialVersionUID = 0L;
       }
       if (((mutable_bitField0_ & 0x00000002) != 0)) {
         files_ = java.util.Collections.unmodifiableList(files_);
-      }
-      if (((mutable_bitField0_ & 0x00000004) != 0)) {
-        ioMonitor_ = java.util.Collections.unmodifiableList(ioMonitor_);
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -335,10 +367,6 @@ private static final long serialVersionUID = 0L;
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalStateException(
-            "Can't get the descriptor of an unrecognized enum value.");
-      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -379,7 +407,6 @@ private static final long serialVersionUID = 0L;
    * <code>string fileName = 1;</code>
    * @return The fileName.
    */
-  @java.lang.Override
   public java.lang.String getFileName() {
     java.lang.Object ref = fileName_;
     if (ref instanceof java.lang.String) {
@@ -396,7 +423,6 @@ private static final long serialVersionUID = 0L;
    * <code>string fileName = 1;</code>
    * @return The bytes for fileName.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getFileNameBytes() {
     java.lang.Object ref = fileName_;
@@ -417,7 +443,6 @@ private static final long serialVersionUID = 0L;
    * <code>string filePath = 2;</code>
    * @return The filePath.
    */
-  @java.lang.Override
   public java.lang.String getFilePath() {
     java.lang.Object ref = filePath_;
     if (ref instanceof java.lang.String) {
@@ -434,7 +459,6 @@ private static final long serialVersionUID = 0L;
    * <code>string filePath = 2;</code>
    * @return The bytes for filePath.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getFilePathBytes() {
     java.lang.Object ref = filePath_;
@@ -455,14 +479,14 @@ private static final long serialVersionUID = 0L;
    * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
    * @return The enum numeric value on the wire for type.
    */
-  @java.lang.Override public int getTypeValue() {
+  public int getTypeValue() {
     return type_;
   }
   /**
    * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
    * @return The type.
    */
-  @java.lang.Override public org.opendedup.grpc.FileInfoResponse.fileType getType() {
+  public org.opendedup.grpc.FileInfoResponse.fileType getType() {
     @SuppressWarnings("deprecation")
     org.opendedup.grpc.FileInfoResponse.fileType result = org.opendedup.grpc.FileInfoResponse.fileType.valueOf(type_);
     return result == null ? org.opendedup.grpc.FileInfoResponse.fileType.UNRECOGNIZED : result;
@@ -474,7 +498,6 @@ private static final long serialVersionUID = 0L;
    * <code>string sdfsPath = 4;</code>
    * @return The sdfsPath.
    */
-  @java.lang.Override
   public java.lang.String getSdfsPath() {
     java.lang.Object ref = sdfsPath_;
     if (ref instanceof java.lang.String) {
@@ -491,7 +514,6 @@ private static final long serialVersionUID = 0L;
    * <code>string sdfsPath = 4;</code>
    * @return The bytes for sdfsPath.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getSdfsPathBytes() {
     java.lang.Object ref = sdfsPath_;
@@ -512,7 +534,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 atime = 5;</code>
    * @return The atime.
    */
-  @java.lang.Override
   public long getAtime() {
     return atime_;
   }
@@ -523,7 +544,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 mtime = 6;</code>
    * @return The mtime.
    */
-  @java.lang.Override
   public long getMtime() {
     return mtime_;
   }
@@ -534,7 +554,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 ctime = 7;</code>
    * @return The ctime.
    */
-  @java.lang.Override
   public long getCtime() {
     return ctime_;
   }
@@ -545,7 +564,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool hidden = 8;</code>
    * @return The hidden.
    */
-  @java.lang.Override
   public boolean getHidden() {
     return hidden_;
   }
@@ -556,7 +574,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 size = 9;</code>
    * @return The size.
    */
-  @java.lang.Override
   public long getSize() {
     return size_;
   }
@@ -567,7 +584,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool open = 10;</code>
    * @return The open.
    */
-  @java.lang.Override
   public boolean getOpen() {
     return open_;
   }
@@ -578,7 +594,6 @@ private static final long serialVersionUID = 0L;
    * <code>string fileGuild = 11;</code>
    * @return The fileGuild.
    */
-  @java.lang.Override
   public java.lang.String getFileGuild() {
     java.lang.Object ref = fileGuild_;
     if (ref instanceof java.lang.String) {
@@ -595,7 +610,6 @@ private static final long serialVersionUID = 0L;
    * <code>string fileGuild = 11;</code>
    * @return The bytes for fileGuild.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getFileGuildBytes() {
     java.lang.Object ref = fileGuild_;
@@ -616,7 +630,6 @@ private static final long serialVersionUID = 0L;
    * <code>string mapGuid = 12;</code>
    * @return The mapGuid.
    */
-  @java.lang.Override
   public java.lang.String getMapGuid() {
     java.lang.Object ref = mapGuid_;
     if (ref instanceof java.lang.String) {
@@ -633,7 +646,6 @@ private static final long serialVersionUID = 0L;
    * <code>string mapGuid = 12;</code>
    * @return The bytes for mapGuid.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getMapGuidBytes() {
     java.lang.Object ref = mapGuid_;
@@ -654,7 +666,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool localOwner = 13;</code>
    * @return The localOwner.
    */
-  @java.lang.Override
   public boolean getLocalOwner() {
     return localOwner_;
   }
@@ -665,7 +676,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool execute = 14;</code>
    * @return The execute.
    */
-  @java.lang.Override
   public boolean getExecute() {
     return execute_;
   }
@@ -676,7 +686,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool read = 15;</code>
    * @return The read.
    */
-  @java.lang.Override
   public boolean getRead() {
     return read_;
   }
@@ -687,7 +696,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool write = 16;</code>
    * @return The write.
    */
-  @java.lang.Override
   public boolean getWrite() {
     return write_;
   }
@@ -698,7 +706,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool importing = 17;</code>
    * @return The importing.
    */
-  @java.lang.Override
   public boolean getImporting() {
     return importing_;
   }
@@ -709,7 +716,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool symlink = 18;</code>
    * @return The symlink.
    */
-  @java.lang.Override
   public boolean getSymlink() {
     return symlink_;
   }
@@ -719,14 +725,12 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
-  @java.lang.Override
   public java.util.List<org.opendedup.grpc.FileAttributes> getFileAttributesList() {
     return fileAttributes_;
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
-  @java.lang.Override
   public java.util.List<? extends org.opendedup.grpc.FileAttributesOrBuilder> 
       getFileAttributesOrBuilderList() {
     return fileAttributes_;
@@ -734,21 +738,18 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
-  @java.lang.Override
   public int getFileAttributesCount() {
     return fileAttributes_.size();
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
-  @java.lang.Override
   public org.opendedup.grpc.FileAttributes getFileAttributes(int index) {
     return fileAttributes_.get(index);
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
    */
-  @java.lang.Override
   public org.opendedup.grpc.FileAttributesOrBuilder getFileAttributesOrBuilder(
       int index) {
     return fileAttributes_.get(index);
@@ -760,7 +761,6 @@ private static final long serialVersionUID = 0L;
    * <code>string id = 20;</code>
    * @return The id.
    */
-  @java.lang.Override
   public java.lang.String getId() {
     java.lang.Object ref = id_;
     if (ref instanceof java.lang.String) {
@@ -777,7 +777,6 @@ private static final long serialVersionUID = 0L;
    * <code>string id = 20;</code>
    * @return The bytes for id.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getIdBytes() {
     java.lang.Object ref = id_;
@@ -797,14 +796,12 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
-  @java.lang.Override
   public java.util.List<org.opendedup.grpc.FileInfoResponse> getFilesList() {
     return files_;
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
-  @java.lang.Override
   public java.util.List<? extends org.opendedup.grpc.FileInfoResponseOrBuilder> 
       getFilesOrBuilderList() {
     return files_;
@@ -812,21 +809,18 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
-  @java.lang.Override
   public int getFilesCount() {
     return files_.size();
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
-  @java.lang.Override
   public org.opendedup.grpc.FileInfoResponse getFiles(int index) {
     return files_.get(index);
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
    */
-  @java.lang.Override
   public org.opendedup.grpc.FileInfoResponseOrBuilder getFilesOrBuilder(
       int index) {
     return files_.get(index);
@@ -838,7 +832,6 @@ private static final long serialVersionUID = 0L;
    * <code>string parentPath = 22;</code>
    * @return The parentPath.
    */
-  @java.lang.Override
   public java.lang.String getParentPath() {
     java.lang.Object ref = parentPath_;
     if (ref instanceof java.lang.String) {
@@ -855,7 +848,6 @@ private static final long serialVersionUID = 0L;
    * <code>string parentPath = 22;</code>
    * @return The bytes for parentPath.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getParentPathBytes() {
     java.lang.Object ref = parentPath_;
@@ -876,7 +868,6 @@ private static final long serialVersionUID = 0L;
    * <code>string volumeid = 23;</code>
    * @return The volumeid.
    */
-  @java.lang.Override
   public java.lang.String getVolumeid() {
     java.lang.Object ref = volumeid_;
     if (ref instanceof java.lang.String) {
@@ -893,7 +884,6 @@ private static final long serialVersionUID = 0L;
    * <code>string volumeid = 23;</code>
    * @return The bytes for volumeid.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getVolumeidBytes() {
     java.lang.Object ref = volumeid_;
@@ -909,43 +899,26 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int IOMONITOR_FIELD_NUMBER = 24;
-  private java.util.List<org.opendedup.grpc.IOMonitorResponse> ioMonitor_;
+  private org.opendedup.grpc.IOMonitorResponse ioMonitor_;
   /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * @return Whether the ioMonitor field is set.
    */
-  @java.lang.Override
-  public java.util.List<org.opendedup.grpc.IOMonitorResponse> getIoMonitorList() {
-    return ioMonitor_;
+  public boolean hasIoMonitor() {
+    return ioMonitor_ != null;
   }
   /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * @return The ioMonitor.
    */
-  @java.lang.Override
-  public java.util.List<? extends org.opendedup.grpc.IOMonitorResponseOrBuilder> 
-      getIoMonitorOrBuilderList() {
-    return ioMonitor_;
+  public org.opendedup.grpc.IOMonitorResponse getIoMonitor() {
+    return ioMonitor_ == null ? org.opendedup.grpc.IOMonitorResponse.getDefaultInstance() : ioMonitor_;
   }
   /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+   * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
    */
-  @java.lang.Override
-  public int getIoMonitorCount() {
-    return ioMonitor_.size();
-  }
-  /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-   */
-  @java.lang.Override
-  public org.opendedup.grpc.IOMonitorResponse getIoMonitor(int index) {
-    return ioMonitor_.get(index);
-  }
-  /**
-   * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-   */
-  @java.lang.Override
-  public org.opendedup.grpc.IOMonitorResponseOrBuilder getIoMonitorOrBuilder(
-      int index) {
-    return ioMonitor_.get(index);
+  public org.opendedup.grpc.IOMonitorResponseOrBuilder getIoMonitorOrBuilder() {
+    return getIoMonitor();
   }
 
   public static final int SYMLINKPATH_FIELD_NUMBER = 25;
@@ -954,7 +927,6 @@ private static final long serialVersionUID = 0L;
    * <code>string symlinkPath = 25;</code>
    * @return The symlinkPath.
    */
-  @java.lang.Override
   public java.lang.String getSymlinkPath() {
     java.lang.Object ref = symlinkPath_;
     if (ref instanceof java.lang.String) {
@@ -971,7 +943,6 @@ private static final long serialVersionUID = 0L;
    * <code>string symlinkPath = 25;</code>
    * @return The bytes for symlinkPath.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getSymlinkPathBytes() {
     java.lang.Object ref = symlinkPath_;
@@ -992,7 +963,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 group_id = 26;</code>
    * @return The groupId.
    */
-  @java.lang.Override
   public long getGroupId() {
     return groupId_;
   }
@@ -1003,7 +973,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 user_id = 27;</code>
    * @return The userId.
    */
-  @java.lang.Override
   public long getUserId() {
     return userId_;
   }
@@ -1014,9 +983,94 @@ private static final long serialVersionUID = 0L;
    * <code>int32 permissions = 28;</code>
    * @return The permissions.
    */
-  @java.lang.Override
   public int getPermissions() {
     return permissions_;
+  }
+
+  public static final int HASHCODE_FIELD_NUMBER = 29;
+  private long hashcode_;
+  /**
+   * <code>int64 hashcode = 29;</code>
+   * @return The hashcode.
+   */
+  public long getHashcode() {
+    return hashcode_;
+  }
+
+  public static final int RETENTIONLOCK_FIELD_NUMBER = 30;
+  private long retentionLock_;
+  /**
+   * <code>int64 retentionLock = 30;</code>
+   * @return The retentionLock.
+   */
+  public long getRetentionLock() {
+    return retentionLock_;
+  }
+
+  public static final int ATTRIBUTES_FIELD_NUMBER = 31;
+  private long attributes_;
+  /**
+   * <code>int64 attributes = 31;</code>
+   * @return The attributes.
+   */
+  public long getAttributes() {
+    return attributes_;
+  }
+
+  public static final int VERSION_FIELD_NUMBER = 32;
+  private volatile java.lang.Object version_;
+  /**
+   * <code>string version = 32;</code>
+   * @return The version.
+   */
+  public java.lang.String getVersion() {
+    java.lang.Object ref = version_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      version_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string version = 32;</code>
+   * @return The bytes for version.
+   */
+  public com.google.protobuf.ByteString
+      getVersionBytes() {
+    java.lang.Object ref = version_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      version_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int MODE_FIELD_NUMBER = 33;
+  private int mode_;
+  /**
+   * <code>int32 mode = 33;</code>
+   * @return The mode.
+   */
+  public int getMode() {
+    return mode_;
+  }
+
+  public static final int DELETE_ON_CLOSE_FIELD_NUMBER = 34;
+  private boolean deleteOnClose_;
+  /**
+   * <code>bool delete_on_close = 34;</code>
+   * @return The deleteOnClose.
+   */
+  public boolean getDeleteOnClose() {
+    return deleteOnClose_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -1102,8 +1156,8 @@ private static final long serialVersionUID = 0L;
     if (!getVolumeidBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 23, volumeid_);
     }
-    for (int i = 0; i < ioMonitor_.size(); i++) {
-      output.writeMessage(24, ioMonitor_.get(i));
+    if (ioMonitor_ != null) {
+      output.writeMessage(24, getIoMonitor());
     }
     if (!getSymlinkPathBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 25, symlinkPath_);
@@ -1116,6 +1170,24 @@ private static final long serialVersionUID = 0L;
     }
     if (permissions_ != 0) {
       output.writeInt32(28, permissions_);
+    }
+    if (hashcode_ != 0L) {
+      output.writeInt64(29, hashcode_);
+    }
+    if (retentionLock_ != 0L) {
+      output.writeInt64(30, retentionLock_);
+    }
+    if (attributes_ != 0L) {
+      output.writeInt64(31, attributes_);
+    }
+    if (!getVersionBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 32, version_);
+    }
+    if (mode_ != 0) {
+      output.writeInt32(33, mode_);
+    }
+    if (deleteOnClose_ != false) {
+      output.writeBool(34, deleteOnClose_);
     }
     unknownFields.writeTo(output);
   }
@@ -1210,9 +1282,9 @@ private static final long serialVersionUID = 0L;
     if (!getVolumeidBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, volumeid_);
     }
-    for (int i = 0; i < ioMonitor_.size(); i++) {
+    if (ioMonitor_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(24, ioMonitor_.get(i));
+        .computeMessageSize(24, getIoMonitor());
     }
     if (!getSymlinkPathBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(25, symlinkPath_);
@@ -1228,6 +1300,29 @@ private static final long serialVersionUID = 0L;
     if (permissions_ != 0) {
       size += com.google.protobuf.CodedOutputStream
         .computeInt32Size(28, permissions_);
+    }
+    if (hashcode_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(29, hashcode_);
+    }
+    if (retentionLock_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(30, retentionLock_);
+    }
+    if (attributes_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(31, attributes_);
+    }
+    if (!getVersionBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, version_);
+    }
+    if (mode_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(33, mode_);
+    }
+    if (deleteOnClose_ != false) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeBoolSize(34, deleteOnClose_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -1289,8 +1384,11 @@ private static final long serialVersionUID = 0L;
         .equals(other.getParentPath())) return false;
     if (!getVolumeid()
         .equals(other.getVolumeid())) return false;
-    if (!getIoMonitorList()
-        .equals(other.getIoMonitorList())) return false;
+    if (hasIoMonitor() != other.hasIoMonitor()) return false;
+    if (hasIoMonitor()) {
+      if (!getIoMonitor()
+          .equals(other.getIoMonitor())) return false;
+    }
     if (!getSymlinkPath()
         .equals(other.getSymlinkPath())) return false;
     if (getGroupId()
@@ -1299,6 +1397,18 @@ private static final long serialVersionUID = 0L;
         != other.getUserId()) return false;
     if (getPermissions()
         != other.getPermissions()) return false;
+    if (getHashcode()
+        != other.getHashcode()) return false;
+    if (getRetentionLock()
+        != other.getRetentionLock()) return false;
+    if (getAttributes()
+        != other.getAttributes()) return false;
+    if (!getVersion()
+        .equals(other.getVersion())) return false;
+    if (getMode()
+        != other.getMode()) return false;
+    if (getDeleteOnClose()
+        != other.getDeleteOnClose()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -1372,9 +1482,9 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getParentPath().hashCode();
     hash = (37 * hash) + VOLUMEID_FIELD_NUMBER;
     hash = (53 * hash) + getVolumeid().hashCode();
-    if (getIoMonitorCount() > 0) {
+    if (hasIoMonitor()) {
       hash = (37 * hash) + IOMONITOR_FIELD_NUMBER;
-      hash = (53 * hash) + getIoMonitorList().hashCode();
+      hash = (53 * hash) + getIoMonitor().hashCode();
     }
     hash = (37 * hash) + SYMLINKPATH_FIELD_NUMBER;
     hash = (53 * hash) + getSymlinkPath().hashCode();
@@ -1386,6 +1496,22 @@ private static final long serialVersionUID = 0L;
         getUserId());
     hash = (37 * hash) + PERMISSIONS_FIELD_NUMBER;
     hash = (53 * hash) + getPermissions();
+    hash = (37 * hash) + HASHCODE_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getHashcode());
+    hash = (37 * hash) + RETENTIONLOCK_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getRetentionLock());
+    hash = (37 * hash) + ATTRIBUTES_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getAttributes());
+    hash = (37 * hash) + VERSION_FIELD_NUMBER;
+    hash = (53 * hash) + getVersion().hashCode();
+    hash = (37 * hash) + MODE_FIELD_NUMBER;
+    hash = (53 * hash) + getMode();
+    hash = (37 * hash) + DELETE_ON_CLOSE_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+        getDeleteOnClose());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -1516,7 +1642,6 @@ private static final long serialVersionUID = 0L;
               .alwaysUseFieldBuilders) {
         getFileAttributesFieldBuilder();
         getFilesFieldBuilder();
-        getIoMonitorFieldBuilder();
       }
     }
     @java.lang.Override
@@ -1577,10 +1702,10 @@ private static final long serialVersionUID = 0L;
       volumeid_ = "";
 
       if (ioMonitorBuilder_ == null) {
-        ioMonitor_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
+        ioMonitor_ = null;
       } else {
-        ioMonitorBuilder_.clear();
+        ioMonitor_ = null;
+        ioMonitorBuilder_ = null;
       }
       symlinkPath_ = "";
 
@@ -1589,6 +1714,18 @@ private static final long serialVersionUID = 0L;
       userId_ = 0L;
 
       permissions_ = 0;
+
+      hashcode_ = 0L;
+
+      retentionLock_ = 0L;
+
+      attributes_ = 0L;
+
+      version_ = "";
+
+      mode_ = 0;
+
+      deleteOnClose_ = false;
 
       return this;
     }
@@ -1657,10 +1794,6 @@ private static final long serialVersionUID = 0L;
       result.parentPath_ = parentPath_;
       result.volumeid_ = volumeid_;
       if (ioMonitorBuilder_ == null) {
-        if (((bitField0_ & 0x00000004) != 0)) {
-          ioMonitor_ = java.util.Collections.unmodifiableList(ioMonitor_);
-          bitField0_ = (bitField0_ & ~0x00000004);
-        }
         result.ioMonitor_ = ioMonitor_;
       } else {
         result.ioMonitor_ = ioMonitorBuilder_.build();
@@ -1669,6 +1802,12 @@ private static final long serialVersionUID = 0L;
       result.groupId_ = groupId_;
       result.userId_ = userId_;
       result.permissions_ = permissions_;
+      result.hashcode_ = hashcode_;
+      result.retentionLock_ = retentionLock_;
+      result.attributes_ = attributes_;
+      result.version_ = version_;
+      result.mode_ = mode_;
+      result.deleteOnClose_ = deleteOnClose_;
       onBuilt();
       return result;
     }
@@ -1840,31 +1979,8 @@ private static final long serialVersionUID = 0L;
         volumeid_ = other.volumeid_;
         onChanged();
       }
-      if (ioMonitorBuilder_ == null) {
-        if (!other.ioMonitor_.isEmpty()) {
-          if (ioMonitor_.isEmpty()) {
-            ioMonitor_ = other.ioMonitor_;
-            bitField0_ = (bitField0_ & ~0x00000004);
-          } else {
-            ensureIoMonitorIsMutable();
-            ioMonitor_.addAll(other.ioMonitor_);
-          }
-          onChanged();
-        }
-      } else {
-        if (!other.ioMonitor_.isEmpty()) {
-          if (ioMonitorBuilder_.isEmpty()) {
-            ioMonitorBuilder_.dispose();
-            ioMonitorBuilder_ = null;
-            ioMonitor_ = other.ioMonitor_;
-            bitField0_ = (bitField0_ & ~0x00000004);
-            ioMonitorBuilder_ = 
-              com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                 getIoMonitorFieldBuilder() : null;
-          } else {
-            ioMonitorBuilder_.addAllMessages(other.ioMonitor_);
-          }
-        }
+      if (other.hasIoMonitor()) {
+        mergeIoMonitor(other.getIoMonitor());
       }
       if (!other.getSymlinkPath().isEmpty()) {
         symlinkPath_ = other.symlinkPath_;
@@ -1878,6 +1994,25 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getPermissions() != 0) {
         setPermissions(other.getPermissions());
+      }
+      if (other.getHashcode() != 0L) {
+        setHashcode(other.getHashcode());
+      }
+      if (other.getRetentionLock() != 0L) {
+        setRetentionLock(other.getRetentionLock());
+      }
+      if (other.getAttributes() != 0L) {
+        setAttributes(other.getAttributes());
+      }
+      if (!other.getVersion().isEmpty()) {
+        version_ = other.version_;
+        onChanged();
+      }
+      if (other.getMode() != 0) {
+        setMode(other.getMode());
+      }
+      if (other.getDeleteOnClose() != false) {
+        setDeleteOnClose(other.getDeleteOnClose());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -2066,7 +2201,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
      * @return The enum numeric value on the wire for type.
      */
-    @java.lang.Override public int getTypeValue() {
+    public int getTypeValue() {
       return type_;
     }
     /**
@@ -2075,7 +2210,6 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setTypeValue(int value) {
-      
       type_ = value;
       onChanged();
       return this;
@@ -2084,7 +2218,6 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
      * @return The type.
      */
-    @java.lang.Override
     public org.opendedup.grpc.FileInfoResponse.fileType getType() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfoResponse.fileType result = org.opendedup.grpc.FileInfoResponse.fileType.valueOf(type_);
@@ -2196,7 +2329,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 atime = 5;</code>
      * @return The atime.
      */
-    @java.lang.Override
     public long getAtime() {
       return atime_;
     }
@@ -2227,7 +2359,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 mtime = 6;</code>
      * @return The mtime.
      */
-    @java.lang.Override
     public long getMtime() {
       return mtime_;
     }
@@ -2258,7 +2389,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 ctime = 7;</code>
      * @return The ctime.
      */
-    @java.lang.Override
     public long getCtime() {
       return ctime_;
     }
@@ -2289,7 +2419,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool hidden = 8;</code>
      * @return The hidden.
      */
-    @java.lang.Override
     public boolean getHidden() {
       return hidden_;
     }
@@ -2320,7 +2449,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 size = 9;</code>
      * @return The size.
      */
-    @java.lang.Override
     public long getSize() {
       return size_;
     }
@@ -2351,7 +2479,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool open = 10;</code>
      * @return The open.
      */
-    @java.lang.Override
     public boolean getOpen() {
       return open_;
     }
@@ -2534,7 +2661,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool localOwner = 13;</code>
      * @return The localOwner.
      */
-    @java.lang.Override
     public boolean getLocalOwner() {
       return localOwner_;
     }
@@ -2565,7 +2691,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool execute = 14;</code>
      * @return The execute.
      */
-    @java.lang.Override
     public boolean getExecute() {
       return execute_;
     }
@@ -2596,7 +2721,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool read = 15;</code>
      * @return The read.
      */
-    @java.lang.Override
     public boolean getRead() {
       return read_;
     }
@@ -2627,7 +2751,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool write = 16;</code>
      * @return The write.
      */
-    @java.lang.Override
     public boolean getWrite() {
       return write_;
     }
@@ -2658,7 +2781,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool importing = 17;</code>
      * @return The importing.
      */
-    @java.lang.Override
     public boolean getImporting() {
       return importing_;
     }
@@ -2689,7 +2811,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool symlink = 18;</code>
      * @return The symlink.
      */
-    @java.lang.Override
     public boolean getSymlink() {
       return symlink_;
     }
@@ -3423,239 +3544,118 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.util.List<org.opendedup.grpc.IOMonitorResponse> ioMonitor_ =
-      java.util.Collections.emptyList();
-    private void ensureIoMonitorIsMutable() {
-      if (!((bitField0_ & 0x00000004) != 0)) {
-        ioMonitor_ = new java.util.ArrayList<org.opendedup.grpc.IOMonitorResponse>(ioMonitor_);
-        bitField0_ |= 0x00000004;
-       }
-    }
-
-    private com.google.protobuf.RepeatedFieldBuilderV3<
+    private org.opendedup.grpc.IOMonitorResponse ioMonitor_;
+    private com.google.protobuf.SingleFieldBuilderV3<
         org.opendedup.grpc.IOMonitorResponse, org.opendedup.grpc.IOMonitorResponse.Builder, org.opendedup.grpc.IOMonitorResponseOrBuilder> ioMonitorBuilder_;
+    /**
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return Whether the ioMonitor field is set.
+     */
+    public boolean hasIoMonitor() {
+      return ioMonitorBuilder_ != null || ioMonitor_ != null;
+    }
+    /**
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return The ioMonitor.
+     */
+    public org.opendedup.grpc.IOMonitorResponse getIoMonitor() {
+      if (ioMonitorBuilder_ == null) {
+        return ioMonitor_ == null ? org.opendedup.grpc.IOMonitorResponse.getDefaultInstance() : ioMonitor_;
+      } else {
+        return ioMonitorBuilder_.getMessage();
+      }
+    }
+    /**
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     */
+    public Builder setIoMonitor(org.opendedup.grpc.IOMonitorResponse value) {
+      if (ioMonitorBuilder_ == null) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ioMonitor_ = value;
+        onChanged();
+      } else {
+        ioMonitorBuilder_.setMessage(value);
+      }
 
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public java.util.List<org.opendedup.grpc.IOMonitorResponse> getIoMonitorList() {
-      if (ioMonitorBuilder_ == null) {
-        return java.util.Collections.unmodifiableList(ioMonitor_);
-      } else {
-        return ioMonitorBuilder_.getMessageList();
-      }
+      return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public int getIoMonitorCount() {
-      if (ioMonitorBuilder_ == null) {
-        return ioMonitor_.size();
-      } else {
-        return ioMonitorBuilder_.getCount();
-      }
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public org.opendedup.grpc.IOMonitorResponse getIoMonitor(int index) {
-      if (ioMonitorBuilder_ == null) {
-        return ioMonitor_.get(index);
-      } else {
-        return ioMonitorBuilder_.getMessage(index);
-      }
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
      */
     public Builder setIoMonitor(
-        int index, org.opendedup.grpc.IOMonitorResponse value) {
-      if (ioMonitorBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureIoMonitorIsMutable();
-        ioMonitor_.set(index, value);
-        onChanged();
-      } else {
-        ioMonitorBuilder_.setMessage(index, value);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public Builder setIoMonitor(
-        int index, org.opendedup.grpc.IOMonitorResponse.Builder builderForValue) {
-      if (ioMonitorBuilder_ == null) {
-        ensureIoMonitorIsMutable();
-        ioMonitor_.set(index, builderForValue.build());
-        onChanged();
-      } else {
-        ioMonitorBuilder_.setMessage(index, builderForValue.build());
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public Builder addIoMonitor(org.opendedup.grpc.IOMonitorResponse value) {
-      if (ioMonitorBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureIoMonitorIsMutable();
-        ioMonitor_.add(value);
-        onChanged();
-      } else {
-        ioMonitorBuilder_.addMessage(value);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public Builder addIoMonitor(
-        int index, org.opendedup.grpc.IOMonitorResponse value) {
-      if (ioMonitorBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        ensureIoMonitorIsMutable();
-        ioMonitor_.add(index, value);
-        onChanged();
-      } else {
-        ioMonitorBuilder_.addMessage(index, value);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public Builder addIoMonitor(
         org.opendedup.grpc.IOMonitorResponse.Builder builderForValue) {
       if (ioMonitorBuilder_ == null) {
-        ensureIoMonitorIsMutable();
-        ioMonitor_.add(builderForValue.build());
+        ioMonitor_ = builderForValue.build();
         onChanged();
       } else {
-        ioMonitorBuilder_.addMessage(builderForValue.build());
+        ioMonitorBuilder_.setMessage(builderForValue.build());
       }
+
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
      */
-    public Builder addIoMonitor(
-        int index, org.opendedup.grpc.IOMonitorResponse.Builder builderForValue) {
+    public Builder mergeIoMonitor(org.opendedup.grpc.IOMonitorResponse value) {
       if (ioMonitorBuilder_ == null) {
-        ensureIoMonitorIsMutable();
-        ioMonitor_.add(index, builderForValue.build());
+        if (ioMonitor_ != null) {
+          ioMonitor_ =
+            org.opendedup.grpc.IOMonitorResponse.newBuilder(ioMonitor_).mergeFrom(value).buildPartial();
+        } else {
+          ioMonitor_ = value;
+        }
         onChanged();
       } else {
-        ioMonitorBuilder_.addMessage(index, builderForValue.build());
+        ioMonitorBuilder_.mergeFrom(value);
       }
+
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public Builder addAllIoMonitor(
-        java.lang.Iterable<? extends org.opendedup.grpc.IOMonitorResponse> values) {
-      if (ioMonitorBuilder_ == null) {
-        ensureIoMonitorIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, ioMonitor_);
-        onChanged();
-      } else {
-        ioMonitorBuilder_.addAllMessages(values);
-      }
-      return this;
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
      */
     public Builder clearIoMonitor() {
       if (ioMonitorBuilder_ == null) {
-        ioMonitor_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
+        ioMonitor_ = null;
         onChanged();
       } else {
-        ioMonitorBuilder_.clear();
+        ioMonitor_ = null;
+        ioMonitorBuilder_ = null;
       }
+
       return this;
     }
     /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
      */
-    public Builder removeIoMonitor(int index) {
-      if (ioMonitorBuilder_ == null) {
-        ensureIoMonitorIsMutable();
-        ioMonitor_.remove(index);
-        onChanged();
-      } else {
-        ioMonitorBuilder_.remove(index);
-      }
-      return this;
+    public org.opendedup.grpc.IOMonitorResponse.Builder getIoMonitorBuilder() {
+      
+      onChanged();
+      return getIoMonitorFieldBuilder().getBuilder();
     }
     /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
      */
-    public org.opendedup.grpc.IOMonitorResponse.Builder getIoMonitorBuilder(
-        int index) {
-      return getIoMonitorFieldBuilder().getBuilder(index);
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public org.opendedup.grpc.IOMonitorResponseOrBuilder getIoMonitorOrBuilder(
-        int index) {
-      if (ioMonitorBuilder_ == null) {
-        return ioMonitor_.get(index);  } else {
-        return ioMonitorBuilder_.getMessageOrBuilder(index);
-      }
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public java.util.List<? extends org.opendedup.grpc.IOMonitorResponseOrBuilder> 
-         getIoMonitorOrBuilderList() {
+    public org.opendedup.grpc.IOMonitorResponseOrBuilder getIoMonitorOrBuilder() {
       if (ioMonitorBuilder_ != null) {
-        return ioMonitorBuilder_.getMessageOrBuilderList();
+        return ioMonitorBuilder_.getMessageOrBuilder();
       } else {
-        return java.util.Collections.unmodifiableList(ioMonitor_);
+        return ioMonitor_ == null ?
+            org.opendedup.grpc.IOMonitorResponse.getDefaultInstance() : ioMonitor_;
       }
     }
     /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
      */
-    public org.opendedup.grpc.IOMonitorResponse.Builder addIoMonitorBuilder() {
-      return getIoMonitorFieldBuilder().addBuilder(
-          org.opendedup.grpc.IOMonitorResponse.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public org.opendedup.grpc.IOMonitorResponse.Builder addIoMonitorBuilder(
-        int index) {
-      return getIoMonitorFieldBuilder().addBuilder(
-          index, org.opendedup.grpc.IOMonitorResponse.getDefaultInstance());
-    }
-    /**
-     * <code>repeated .org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
-     */
-    public java.util.List<org.opendedup.grpc.IOMonitorResponse.Builder> 
-         getIoMonitorBuilderList() {
-      return getIoMonitorFieldBuilder().getBuilderList();
-    }
-    private com.google.protobuf.RepeatedFieldBuilderV3<
+    private com.google.protobuf.SingleFieldBuilderV3<
         org.opendedup.grpc.IOMonitorResponse, org.opendedup.grpc.IOMonitorResponse.Builder, org.opendedup.grpc.IOMonitorResponseOrBuilder> 
         getIoMonitorFieldBuilder() {
       if (ioMonitorBuilder_ == null) {
-        ioMonitorBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+        ioMonitorBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
             org.opendedup.grpc.IOMonitorResponse, org.opendedup.grpc.IOMonitorResponse.Builder, org.opendedup.grpc.IOMonitorResponseOrBuilder>(
-                ioMonitor_,
-                ((bitField0_ & 0x00000004) != 0),
+                getIoMonitor(),
                 getParentForChildren(),
                 isClean());
         ioMonitor_ = null;
@@ -3744,7 +3744,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 group_id = 26;</code>
      * @return The groupId.
      */
-    @java.lang.Override
     public long getGroupId() {
       return groupId_;
     }
@@ -3775,7 +3774,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 user_id = 27;</code>
      * @return The userId.
      */
-    @java.lang.Override
     public long getUserId() {
       return userId_;
     }
@@ -3806,7 +3804,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 permissions = 28;</code>
      * @return The permissions.
      */
-    @java.lang.Override
     public int getPermissions() {
       return permissions_;
     }
@@ -3828,6 +3825,232 @@ private static final long serialVersionUID = 0L;
     public Builder clearPermissions() {
       
       permissions_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private long hashcode_ ;
+    /**
+     * <code>int64 hashcode = 29;</code>
+     * @return The hashcode.
+     */
+    public long getHashcode() {
+      return hashcode_;
+    }
+    /**
+     * <code>int64 hashcode = 29;</code>
+     * @param value The hashcode to set.
+     * @return This builder for chaining.
+     */
+    public Builder setHashcode(long value) {
+      
+      hashcode_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 hashcode = 29;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearHashcode() {
+      
+      hashcode_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long retentionLock_ ;
+    /**
+     * <code>int64 retentionLock = 30;</code>
+     * @return The retentionLock.
+     */
+    public long getRetentionLock() {
+      return retentionLock_;
+    }
+    /**
+     * <code>int64 retentionLock = 30;</code>
+     * @param value The retentionLock to set.
+     * @return This builder for chaining.
+     */
+    public Builder setRetentionLock(long value) {
+      
+      retentionLock_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 retentionLock = 30;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearRetentionLock() {
+      
+      retentionLock_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long attributes_ ;
+    /**
+     * <code>int64 attributes = 31;</code>
+     * @return The attributes.
+     */
+    public long getAttributes() {
+      return attributes_;
+    }
+    /**
+     * <code>int64 attributes = 31;</code>
+     * @param value The attributes to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAttributes(long value) {
+      
+      attributes_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 attributes = 31;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearAttributes() {
+      
+      attributes_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object version_ = "";
+    /**
+     * <code>string version = 32;</code>
+     * @return The version.
+     */
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        version_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string version = 32;</code>
+     * @return The bytes for version.
+     */
+    public com.google.protobuf.ByteString
+        getVersionBytes() {
+      java.lang.Object ref = version_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        version_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string version = 32;</code>
+     * @param value The version to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVersion(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      version_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string version = 32;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearVersion() {
+      
+      version_ = getDefaultInstance().getVersion();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string version = 32;</code>
+     * @param value The bytes for version to set.
+     * @return This builder for chaining.
+     */
+    public Builder setVersionBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      version_ = value;
+      onChanged();
+      return this;
+    }
+
+    private int mode_ ;
+    /**
+     * <code>int32 mode = 33;</code>
+     * @return The mode.
+     */
+    public int getMode() {
+      return mode_;
+    }
+    /**
+     * <code>int32 mode = 33;</code>
+     * @param value The mode to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMode(int value) {
+      
+      mode_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 mode = 33;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMode() {
+      
+      mode_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private boolean deleteOnClose_ ;
+    /**
+     * <code>bool delete_on_close = 34;</code>
+     * @return The deleteOnClose.
+     */
+    public boolean getDeleteOnClose() {
+      return deleteOnClose_;
+    }
+    /**
+     * <code>bool delete_on_close = 34;</code>
+     * @param value The deleteOnClose to set.
+     * @return This builder for chaining.
+     */
+    public Builder setDeleteOnClose(boolean value) {
+      
+      deleteOnClose_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>bool delete_on_close = 34;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearDeleteOnClose() {
+      
+      deleteOnClose_ = false;
       onChanged();
       return this;
     }

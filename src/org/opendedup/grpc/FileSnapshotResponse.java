@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.FileSnapshotResponse}
  */
-public final class FileSnapshotResponse extends
+public  final class FileSnapshotResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileSnapshotResponse)
     FileSnapshotResponseOrBuilder {
@@ -18,6 +18,7 @@ private static final long serialVersionUID = 0L;
   private FileSnapshotResponse() {
     error_ = "";
     errorCode_ = 0;
+    eventID_ = "";
   }
 
   @java.lang.Override
@@ -50,16 +51,22 @@ private static final long serialVersionUID = 0L;
           case 0:
             done = true;
             break;
-          case 18: {
+          case 10: {
             java.lang.String s = input.readStringRequireUtf8();
 
             error_ = s;
             break;
           }
-          case 24: {
+          case 16: {
             int rawValue = input.readEnum();
 
             errorCode_ = rawValue;
+            break;
+          }
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            eventID_ = s;
             break;
           }
           default: {
@@ -94,13 +101,12 @@ private static final long serialVersionUID = 0L;
             org.opendedup.grpc.FileSnapshotResponse.class, org.opendedup.grpc.FileSnapshotResponse.Builder.class);
   }
 
-  public static final int ERROR_FIELD_NUMBER = 2;
+  public static final int ERROR_FIELD_NUMBER = 1;
   private volatile java.lang.Object error_;
   /**
-   * <code>string error = 2;</code>
+   * <code>string error = 1;</code>
    * @return The error.
    */
-  @java.lang.Override
   public java.lang.String getError() {
     java.lang.Object ref = error_;
     if (ref instanceof java.lang.String) {
@@ -114,10 +120,9 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string error = 2;</code>
+   * <code>string error = 1;</code>
    * @return The bytes for error.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getErrorBytes() {
     java.lang.Object ref = error_;
@@ -132,23 +137,59 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int ERRORCODE_FIELD_NUMBER = 3;
+  public static final int ERRORCODE_FIELD_NUMBER = 2;
   private int errorCode_;
   /**
-   * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+   * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
    * @return The enum numeric value on the wire for errorCode.
    */
-  @java.lang.Override public int getErrorCodeValue() {
+  public int getErrorCodeValue() {
     return errorCode_;
   }
   /**
-   * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+   * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
    * @return The errorCode.
    */
-  @java.lang.Override public org.opendedup.grpc.errorCodes getErrorCode() {
+  public org.opendedup.grpc.errorCodes getErrorCode() {
     @SuppressWarnings("deprecation")
     org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);
     return result == null ? org.opendedup.grpc.errorCodes.UNRECOGNIZED : result;
+  }
+
+  public static final int EVENTID_FIELD_NUMBER = 3;
+  private volatile java.lang.Object eventID_;
+  /**
+   * <code>string eventID = 3;</code>
+   * @return The eventID.
+   */
+  public java.lang.String getEventID() {
+    java.lang.Object ref = eventID_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      eventID_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string eventID = 3;</code>
+   * @return The bytes for eventID.
+   */
+  public com.google.protobuf.ByteString
+      getEventIDBytes() {
+    java.lang.Object ref = eventID_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      eventID_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
   }
 
   private byte memoizedIsInitialized = -1;
@@ -166,10 +207,13 @@ private static final long serialVersionUID = 0L;
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
     if (!getErrorBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, error_);
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
     }
     if (errorCode_ != org.opendedup.grpc.errorCodes.NOERR.getNumber()) {
-      output.writeEnum(3, errorCode_);
+      output.writeEnum(2, errorCode_);
+    }
+    if (!getEventIDBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, eventID_);
     }
     unknownFields.writeTo(output);
   }
@@ -181,11 +225,14 @@ private static final long serialVersionUID = 0L;
 
     size = 0;
     if (!getErrorBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, error_);
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
     }
     if (errorCode_ != org.opendedup.grpc.errorCodes.NOERR.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
-        .computeEnumSize(3, errorCode_);
+        .computeEnumSize(2, errorCode_);
+    }
+    if (!getEventIDBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, eventID_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -205,6 +252,8 @@ private static final long serialVersionUID = 0L;
     if (!getError()
         .equals(other.getError())) return false;
     if (errorCode_ != other.errorCode_) return false;
+    if (!getEventID()
+        .equals(other.getEventID())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -220,6 +269,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getError().hashCode();
     hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
     hash = (53 * hash) + errorCode_;
+    hash = (37 * hash) + EVENTID_FIELD_NUMBER;
+    hash = (53 * hash) + getEventID().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -357,6 +408,8 @@ private static final long serialVersionUID = 0L;
 
       errorCode_ = 0;
 
+      eventID_ = "";
+
       return this;
     }
 
@@ -385,6 +438,7 @@ private static final long serialVersionUID = 0L;
       org.opendedup.grpc.FileSnapshotResponse result = new org.opendedup.grpc.FileSnapshotResponse(this);
       result.error_ = error_;
       result.errorCode_ = errorCode_;
+      result.eventID_ = eventID_;
       onBuilt();
       return result;
     }
@@ -440,6 +494,10 @@ private static final long serialVersionUID = 0L;
       if (other.errorCode_ != 0) {
         setErrorCodeValue(other.getErrorCodeValue());
       }
+      if (!other.getEventID().isEmpty()) {
+        eventID_ = other.eventID_;
+        onChanged();
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -471,7 +529,7 @@ private static final long serialVersionUID = 0L;
 
     private java.lang.Object error_ = "";
     /**
-     * <code>string error = 2;</code>
+     * <code>string error = 1;</code>
      * @return The error.
      */
     public java.lang.String getError() {
@@ -487,7 +545,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string error = 2;</code>
+     * <code>string error = 1;</code>
      * @return The bytes for error.
      */
     public com.google.protobuf.ByteString
@@ -504,7 +562,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string error = 2;</code>
+     * <code>string error = 1;</code>
      * @param value The error to set.
      * @return This builder for chaining.
      */
@@ -519,7 +577,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string error = 2;</code>
+     * <code>string error = 1;</code>
      * @return This builder for chaining.
      */
     public Builder clearError() {
@@ -529,7 +587,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string error = 2;</code>
+     * <code>string error = 1;</code>
      * @param value The bytes for error to set.
      * @return This builder for chaining.
      */
@@ -547,35 +605,33 @@ private static final long serialVersionUID = 0L;
 
     private int errorCode_ = 0;
     /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
      * @return The enum numeric value on the wire for errorCode.
      */
-    @java.lang.Override public int getErrorCodeValue() {
+    public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
      * @param value The enum numeric value on the wire for errorCode to set.
      * @return This builder for chaining.
      */
     public Builder setErrorCodeValue(int value) {
-      
       errorCode_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
      * @return The errorCode.
      */
-    @java.lang.Override
     public org.opendedup.grpc.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.errorCodes.UNRECOGNIZED : result;
     }
     /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
      * @param value The errorCode to set.
      * @return This builder for chaining.
      */
@@ -589,12 +645,88 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
      * @return This builder for chaining.
      */
     public Builder clearErrorCode() {
       
       errorCode_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object eventID_ = "";
+    /**
+     * <code>string eventID = 3;</code>
+     * @return The eventID.
+     */
+    public java.lang.String getEventID() {
+      java.lang.Object ref = eventID_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        eventID_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string eventID = 3;</code>
+     * @return The bytes for eventID.
+     */
+    public com.google.protobuf.ByteString
+        getEventIDBytes() {
+      java.lang.Object ref = eventID_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        eventID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string eventID = 3;</code>
+     * @param value The eventID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEventID(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      eventID_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string eventID = 3;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearEventID() {
+      
+      eventID_ = getDefaultInstance().getEventID();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string eventID = 3;</code>
+     * @param value The bytes for eventID to set.
+     * @return This builder for chaining.
+     */
+    public Builder setEventIDBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      eventID_ = value;
       onChanged();
       return this;
     }

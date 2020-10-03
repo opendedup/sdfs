@@ -154,6 +154,156 @@ public final class IOService {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_GetCloudFileResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_ChmodRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_ChmodRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_ChmodResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_ChmodResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_ChownRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_ChownRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_ChownResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_ChownResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_FlushRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_FlushRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_FlushResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_FlushResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_Stat_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_Stat_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_StatRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_StatRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_StatResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_StatResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_LinkRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_LinkRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_LinkResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_LinkResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_StatFS_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_StatFS_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_StatFSRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_StatFSRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_StatFSResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_StatFSResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_SymLinkRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_SymLinkRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_SymLinkResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_SymLinkResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_TruncateRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_TruncateRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_TruncateResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_TruncateResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_UtimeRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_UtimeRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_UtimeResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_UtimeResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_GetXAttrRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_GetXAttrRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_GetXAttrResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_GetXAttrResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_SetXAttrRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_SetXAttrRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_SetXAttrResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_SetXAttrResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_RemoveXAttrRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_RemoveXAttrRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_RemoveXAttrResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_RemoveXAttrResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_GetXAttrSizeRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_GetXAttrSizeRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_GetXAttrSizeResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_GetXAttrSizeResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_FsyncRequest_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_FsyncRequest_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_FsyncResponse_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_FsyncResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -168,97 +318,189 @@ public final class IOService {
       "eHandle\030\001 \001(\003\022\r\n\005start\030\002 \001(\003\022\013\n\003len\030\003 \001(" +
       "\005\022\014\n\004data\030\004 \001(\014\"U\n\021DataWriteResponse\022\r\n\005" +
       "error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.ope" +
-      "ndedup.grpc.errorCodes\"\034\n\014MkDirRequest\022\014" +
-      "\n\004path\030\001 \001(\t\"Q\n\rMkDirResponse\022\r\n\005error\030\001" +
-      " \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup." +
-      "grpc.errorCodes\"\034\n\014RmDirRequest\022\014\n\004path\030" +
-      "\001 \001(\t\"Q\n\rRmDirResponse\022\r\n\005error\030\001 \001(\t\0221\n" +
-      "\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc.er" +
-      "rorCodes\"\035\n\rUnlinkRequest\022\014\n\004path\030\001 \001(\t\"" +
-      "R\n\016UnlinkResponse\022\r\n\005error\030\001 \001(\t\0221\n\terro" +
-      "rCode\030\002 \001(\0162\036.org.opendedup.grpc.errorCo" +
-      "des\"A\n\017DataReadRequest\022\022\n\nfileHandle\030\001 \001" +
-      "(\003\022\r\n\005start\030\002 \001(\003\022\013\n\003len\030\003 \001(\005\"p\n\020DataRe" +
-      "adResponse\022\014\n\004data\030\001 \001(\014\022\014\n\004read\030\002 \001(\005\022\r" +
-      "\n\005error\030\003 \001(\t\0221\n\terrorCode\030\004 \001(\0162\036.org.o" +
-      "pendedup.grpc.errorCodes\"&\n\020FileCloseReq" +
-      "uest\022\022\n\nfileHandle\030\001 \001(\003\"U\n\021FileCloseRes" +
-      "ponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162" +
-      "\036.org.opendedup.grpc.errorCodes\"\034\n\014MkNod" +
-      "Request\022\014\n\004path\030\001 \001(\t\"Q\n\rMkNodResponse\022\r" +
-      "\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.o" +
-      "pendedup.grpc.errorCodes\"\037\n\017FileOpenRequ" +
-      "est\022\014\n\004path\030\001 \001(\t\"!\n\021FileExistsRequest\022\014" +
-      "\n\004path\030\001 \001(\t\"f\n\022FileExistsResponse\022\016\n\006ex" +
-      "ists\030\001 \001(\010\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003" +
-      " \001(\0162\036.org.opendedup.grpc.errorCodes\"h\n\020" +
-      "FileOpenResponse\022\022\n\nfileHandle\030\001 \001(\003\022\r\n\005" +
-      "error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.ope" +
-      "ndedup.grpc.errorCodes\"0\n\023FileSnapshotRe" +
-      "quest\022\013\n\003src\030\001 \001(\t\022\014\n\004dest\030\002 \001(\t\"X\n\024File" +
-      "SnapshotResponse\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
+      "ndedup.grpc.errorCodes\"*\n\014MkDirRequest\022\014" +
+      "\n\004path\030\001 \001(\t\022\014\n\004mode\030\002 \001(\005\"Q\n\rMkDirRespo" +
+      "nse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\"\034\n\014RmDirRe" +
+      "quest\022\014\n\004path\030\001 \001(\t\"Q\n\rRmDirResponse\022\r\n\005" +
+      "error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.ope" +
+      "ndedup.grpc.errorCodes\"\035\n\rUnlinkRequest\022" +
+      "\014\n\004path\030\001 \001(\t\"R\n\016UnlinkResponse\022\r\n\005error" +
+      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
+      "p.grpc.errorCodes\"A\n\017DataReadRequest\022\022\n\n" +
+      "fileHandle\030\001 \001(\003\022\r\n\005start\030\002 \001(\003\022\013\n\003len\030\003" +
+      " \001(\005\"p\n\020DataReadResponse\022\014\n\004data\030\001 \001(\014\022\014" +
+      "\n\004read\030\002 \001(\005\022\r\n\005error\030\003 \001(\t\0221\n\terrorCode" +
+      "\030\004 \001(\0162\036.org.opendedup.grpc.errorCodes\"&" +
+      "\n\020FileCloseRequest\022\022\n\nfileHandle\030\001 \001(\003\"U" +
+      "\n\021FileCloseResponse\022\r\n\005error\030\001 \001(\t\0221\n\ter" +
+      "rorCode\030\002 \001(\0162\036.org.opendedup.grpc.error" +
+      "Codes\"8\n\014MkNodRequest\022\014\n\004path\030\001 \001(\t\022\014\n\004m" +
+      "ode\030\002 \001(\005\022\014\n\004rdev\030\003 \001(\005\"Q\n\rMkNodResponse" +
+      "\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org" +
+      ".opendedup.grpc.errorCodes\".\n\017FileOpenRe" +
+      "quest\022\014\n\004path\030\001 \001(\t\022\r\n\005flags\030\002 \001(\005\"!\n\021Fi" +
+      "leExistsRequest\022\014\n\004path\030\001 \001(\t\"f\n\022FileExi" +
+      "stsResponse\022\016\n\006exists\030\001 \001(\010\022\r\n\005error\030\002 \001" +
+      "(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.gr" +
+      "pc.errorCodes\"h\n\020FileOpenResponse\022\022\n\nfil" +
+      "eHandle\030\001 \001(\003\022\r\n\005error\030\002 \001(\t\0221\n\terrorCod" +
+      "e\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"" +
+      "0\n\023FileSnapshotRequest\022\013\n\003src\030\001 \001(\t\022\014\n\004d" +
+      "est\030\002 \001(\t\"i\n\024FileSnapshotResponse\022\r\n\005err" +
+      "or\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opende" +
+      "dup.grpc.errorCodes\022\017\n\007eventID\030\003 \001(\t\".\n\021" +
+      "FileRenameRequest\022\013\n\003src\030\001 \001(\t\022\014\n\004dest\030\002" +
+      " \001(\t\"V\n\022FileRenameResponse\022\r\n\005error\030\002 \001(" +
+      "\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grp" +
+      "c.errorCodes\"i\n\021CopyExtentRequest\022\017\n\007src" +
+      "File\030\001 \001(\t\022\017\n\007dstFile\030\002 \001(\t\022\020\n\010srcStart\030" +
+      "\003 \001(\003\022\020\n\010dstStart\030\004 \001(\003\022\016\n\006length\030\005 \001(\003\"" +
+      "g\n\022CopyExtentResponse\022\r\n\005error\030\001 \001(\t\0221\n\t" +
+      "errorCode\030\002 \001(\0162\036.org.opendedup.grpc.err" +
+      "orCodes\022\017\n\007written\030\003 \001(\003\"b\n\026SetUserMetaD" +
+      "ataRequest\022:\n\016fileAttributes\030\001 \003(\0132\".org" +
+      ".opendedup.grpc.FileAttributes\022\014\n\004Path\030\002" +
+      " \001(\t\"[\n\027SetUserMetaDataResponse\022\r\n\005error" +
+      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
+      "p.grpc.errorCodes\"Y\n\023GetCloudFileRequest" +
+      "\022\014\n\004file\030\001 \001(\t\022\017\n\007dstfile\030\002 \001(\t\022\021\n\toverw" +
+      "rite\030\003 \001(\010\022\020\n\010changeid\030\004 \001(\t\"i\n\024GetCloud" +
+      "FileResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002" +
+      " \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup." +
+      "grpc.errorCodes\"*\n\014ChmodRequest\022\014\n\004path\030" +
+      "\001 \001(\t\022\014\n\004mode\030\002 \001(\005\"Q\n\rChmodResponse\022\r\n\005" +
+      "error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.ope" +
+      "ndedup.grpc.errorCodes\"6\n\014ChownRequest\022\014" +
+      "\n\004path\030\001 \001(\t\022\013\n\003uid\030\002 \001(\005\022\013\n\003gid\030\003 \001(\005\"Q" +
+      "\n\rChownResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorC" +
+      "ode\030\002 \001(\0162\036.org.opendedup.grpc.errorCode" +
+      "s\"(\n\014FlushRequest\022\014\n\004path\030\001 \001(\t\022\n\n\002fd\030\002 " +
+      "\001(\003\"Q\n\rFlushResponse\022\r\n\005error\030\001 \001(\t\0221\n\te" +
+      "rrorCode\030\002 \001(\0162\036.org.opendedup.grpc.erro" +
+      "rCodes\"\277\001\n\004Stat\022\013\n\003dev\030\001 \001(\003\022\013\n\003ino\030\002 \001(" +
+      "\003\022\014\n\004mode\030\003 \001(\005\022\r\n\005nlink\030\004 \001(\005\022\013\n\003uid\030\005 " +
+      "\001(\005\022\013\n\003gid\030\006 \001(\005\022\014\n\004rdev\030\007 \001(\005\022\014\n\004size\030\010" +
+      " \001(\003\022\017\n\007blksize\030\t \001(\005\022\016\n\006blocks\030\n \001(\003\022\r\n" +
+      "\005atime\030\013 \001(\003\022\014\n\004mtim\030\014 \001(\003\022\014\n\004ctim\030\r \001(\003" +
+      "\"\033\n\013StatRequest\022\014\n\004path\030\001 \001(\t\"x\n\014StatRes" +
+      "ponse\022&\n\004stat\030\001 \001(\0132\030.org.opendedup.grpc" +
+      ".Stat\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162" +
+      "\036.org.opendedup.grpc.errorCodes\"\033\n\013LinkR" +
+      "equest\022\014\n\004path\030\001 \001(\t\"b\n\014LinkResponse\022\020\n\010" +
+      "linkPath\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCo" +
+      "de\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes" +
+      "\"\260\001\n\006StatFS\022\r\n\005bsize\030\001 \001(\005\022\016\n\006blocks\030\002 \001" +
+      "(\003\022\r\n\005bfree\030\003 \001(\003\022\016\n\006bavail\030\004 \001(\003\022\r\n\005fil" +
+      "es\030\005 \001(\003\022\r\n\005ffree\030\006 \001(\003\022\014\n\004fsid\030\007 \001(\003\022\017\n" +
+      "\007namelen\030\010 \001(\005\022\016\n\006frsize\030\t \001(\005\022\r\n\005flags\030" +
+      "\n \001(\005\022\014\n\004type\030\013 \001(\005\"\017\n\rStatFSRequest\"|\n\016" +
+      "StatFSResponse\022(\n\004stat\030\001 \001(\0132\032.org.opend" +
+      "edup.grpc.StatFS\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
       "Code\030\003 \001(\0162\036.org.opendedup.grpc.errorCod" +
-      "es\".\n\021FileRenameRequest\022\013\n\003src\030\001 \001(\t\022\014\n\004" +
-      "dest\030\002 \001(\t\"V\n\022FileRenameResponse\022\r\n\005erro" +
-      "r\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opended" +
-      "up.grpc.errorCodes\"i\n\021CopyExtentRequest\022" +
-      "\017\n\007srcFile\030\001 \001(\t\022\017\n\007dstFile\030\002 \001(\t\022\020\n\010src" +
-      "Start\030\003 \001(\003\022\020\n\010dstStart\030\004 \001(\003\022\016\n\006length\030" +
-      "\005 \001(\003\"g\n\022CopyExtentResponse\022\r\n\005error\030\001 \001" +
-      "(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup.gr" +
-      "pc.errorCodes\022\017\n\007written\030\003 \001(\003\"b\n\026SetUse" +
-      "rMetaDataRequest\022:\n\016fileAttributes\030\001 \003(\013" +
-      "2\".org.opendedup.grpc.FileAttributes\022\014\n\004" +
-      "Path\030\002 \001(\t\"[\n\027SetUserMetaDataResponse\022\r\n" +
-      "\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.op" +
-      "endedup.grpc.errorCodes\"Y\n\023GetCloudFileR" +
-      "equest\022\014\n\004file\030\001 \001(\t\022\017\n\007dstfile\030\002 \001(\t\022\021\n" +
-      "\toverwrite\030\003 \001(\010\022\020\n\010changeid\030\004 \001(\t\"i\n\024Ge" +
-      "tCloudFileResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005e" +
-      "rror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.open" +
-      "dedup.grpc.errorCodes2\314\014\n\rFileIOService\022" +
-      "L\n\005MkDir\022 .org.opendedup.grpc.MkDirReque" +
-      "st\032!.org.opendedup.grpc.MkDirResponse\022L\n" +
-      "\005RmDir\022 .org.opendedup.grpc.RmDirRequest" +
-      "\032!.org.opendedup.grpc.RmDirResponse\022O\n\006U" +
-      "nlink\022!.org.opendedup.grpc.UnlinkRequest" +
-      "\032\".org.opendedup.grpc.UnlinkResponse\022T\n\005" +
-      "Write\022$.org.opendedup.grpc.DataWriteRequ" +
-      "est\032%.org.opendedup.grpc.DataWriteRespon" +
-      "se\022Q\n\004Read\022#.org.opendedup.grpc.DataRead" +
-      "Request\032$.org.opendedup.grpc.DataReadRes" +
-      "ponse\022V\n\007Release\022$.org.opendedup.grpc.Fi" +
-      "leCloseRequest\032%.org.opendedup.grpc.File" +
-      "CloseResponse\022L\n\005Mknod\022 .org.opendedup.g" +
-      "rpc.MkNodRequest\032!.org.opendedup.grpc.Mk" +
-      "NodResponse\022Q\n\004Open\022#.org.opendedup.grpc" +
-      ".FileOpenRequest\032$.org.opendedup.grpc.Fi" +
-      "leOpenResponse\022[\n\013GetFileInfo\022#.org.open" +
-      "dedup.grpc.FileInfoRequest\032\'.org.opended" +
-      "up.grpc.FileMessageResponse\022_\n\nCreateCop" +
-      "y\022\'.org.opendedup.grpc.FileSnapshotReque" +
-      "st\032(.org.opendedup.grpc.FileSnapshotResp" +
-      "onse\022[\n\nFileExists\022%.org.opendedup.grpc." +
-      "FileExistsRequest\032&.org.opendedup.grpc.F" +
-      "ileExistsResponse\022O\n\010MkDirAll\022 .org.open" +
-      "dedup.grpc.MkDirRequest\032!.org.opendedup." +
-      "grpc.MkDirResponse\022T\n\004Stat\022#.org.opended" +
-      "up.grpc.FileInfoRequest\032\'.org.opendedup." +
-      "grpc.FileMessageResponse\022W\n\006Rename\022%.org" +
-      ".opendedup.grpc.FileRenameRequest\032&.org." +
-      "opendedup.grpc.FileRenameResponse\022[\n\nCop" +
-      "yExtent\022%.org.opendedup.grpc.CopyExtentR" +
-      "equest\032&.org.opendedup.grpc.CopyExtentRe" +
-      "sponse\022j\n\017SetUserMetaData\022*.org.opendedu" +
-      "p.grpc.SetUserMetaDataRequest\032+.org.open" +
-      "dedup.grpc.SetUserMetaDataResponse\022a\n\014Ge" +
-      "tCloudFile\022\'.org.opendedup.grpc.GetCloud" +
-      "FileRequest\032(.org.opendedup.grpc.GetClou" +
-      "dFileResponse\022e\n\020GetCloudMetaFile\022\'.org." +
-      "opendedup.grpc.GetCloudFileRequest\032(.org" +
-      ".opendedup.grpc.GetCloudFileResponseB2P\001" +
-      "Z.github.com/opendedup/sdfs-client-go/sd" +
-      "fs/;sdfsb\006proto3"
+      "es\"*\n\016SymLinkRequest\022\014\n\004from\030\001 \001(\t\022\n\n\002to" +
+      "\030\002 \001(\t\"S\n\017SymLinkResponse\022\r\n\005error\030\001 \001(\t" +
+      "\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc" +
+      ".errorCodes\"/\n\017TruncateRequest\022\014\n\004path\030\001" +
+      " \001(\t\022\016\n\006length\030\002 \001(\003\"T\n\020TruncateResponse" +
+      "\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org" +
+      ".opendedup.grpc.errorCodes\":\n\014UtimeReque" +
+      "st\022\014\n\004path\030\001 \001(\t\022\r\n\005atime\030\002 \001(\003\022\r\n\005mtime" +
+      "\030\003 \001(\003\"Q\n\rUtimeResponse\022\r\n\005error\030\001 \001(\t\0221" +
+      "\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc.e" +
+      "rrorCodes\"-\n\017GetXAttrRequest\022\014\n\004attr\030\001 \001" +
+      "(\t\022\014\n\004path\030\002 \001(\t\"c\n\020GetXAttrResponse\022\r\n\005" +
+      "value\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030" +
+      "\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"<\n" +
+      "\017SetXAttrRequest\022\014\n\004attr\030\001 \001(\t\022\r\n\005value\030" +
+      "\002 \001(\t\022\014\n\004path\030\003 \001(\t\"\305\001\n\020SetXAttrResponse" +
+      "\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org" +
+      ".opendedup.grpc.errorCodes\022=\n\005flags\030\003 \001(" +
+      "\0162..org.opendedup.grpc.SetXAttrResponse." +
+      "flagsenum\"0\n\tflagsenum\022\020\n\014XATTR_CREATE\020\000" +
+      "\022\021\n\rXATTR_REPLACE\020\001\"0\n\022RemoveXAttrReques" +
+      "t\022\014\n\004attr\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\"W\n\023RemoveX" +
+      "AttrResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode" +
+      "\030\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"1" +
+      "\n\023GetXAttrSizeRequest\022\014\n\004attr\030\001 \001(\t\022\014\n\004p" +
+      "ath\030\002 \001(\t\"h\n\024GetXAttrSizeResponse\022\016\n\006len" +
+      "gth\030\001 \001(\005\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 " +
+      "\001(\0162\036.org.opendedup.grpc.errorCodes\":\n\014F" +
+      "syncRequest\022\014\n\004path\030\001 \001(\t\022\n\n\002fh\030\002 \001(\003\022\020\n" +
+      "\010datasync\030\003 \001(\010\"Q\n\rFsyncResponse\022\r\n\005erro" +
+      "r\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opended" +
+      "up.grpc.errorCodes2\334\025\n\rFileIOService\022a\n\014" +
+      "GetXAttrSize\022\'.org.opendedup.grpc.GetXAt" +
+      "trSizeRequest\032(.org.opendedup.grpc.GetXA" +
+      "ttrSizeResponse\022L\n\005Fsync\022 .org.opendedup" +
+      ".grpc.FsyncRequest\032!.org.opendedup.grpc." +
+      "FsyncResponse\022U\n\010SetXAttr\022#.org.opendedu" +
+      "p.grpc.SetXAttrRequest\032$.org.opendedup.g" +
+      "rpc.SetXAttrResponse\022^\n\013RemoveXAttr\022&.or" +
+      "g.opendedup.grpc.RemoveXAttrRequest\032\'.or" +
+      "g.opendedup.grpc.RemoveXAttrResponse\022U\n\010" +
+      "GetXAttr\022#.org.opendedup.grpc.GetXAttrRe" +
+      "quest\032$.org.opendedup.grpc.GetXAttrRespo" +
+      "nse\022L\n\005Utime\022 .org.opendedup.grpc.UtimeR" +
+      "equest\032!.org.opendedup.grpc.UtimeRespons" +
+      "e\022U\n\010Truncate\022#.org.opendedup.grpc.Trunc" +
+      "ateRequest\032$.org.opendedup.grpc.Truncate" +
+      "Response\022R\n\007SymLink\022\".org.opendedup.grpc" +
+      ".SymLinkRequest\032#.org.opendedup.grpc.Sym" +
+      "LinkResponse\022M\n\010ReadLink\022\037.org.opendedup" +
+      ".grpc.LinkRequest\032 .org.opendedup.grpc.L" +
+      "inkResponse\022L\n\007GetAttr\022\037.org.opendedup.g" +
+      "rpc.StatRequest\032 .org.opendedup.grpc.Sta" +
+      "tResponse\022L\n\005Flush\022 .org.opendedup.grpc." +
+      "FlushRequest\032!.org.opendedup.grpc.FlushR" +
+      "esponse\022L\n\005Chown\022 .org.opendedup.grpc.Ch" +
+      "ownRequest\032!.org.opendedup.grpc.ChownRes" +
+      "ponse\022L\n\005Chmod\022 .org.opendedup.grpc.Chmo" +
+      "dRequest\032!.org.opendedup.grpc.ChmodRespo" +
+      "nse\022L\n\005MkDir\022 .org.opendedup.grpc.MkDirR" +
+      "equest\032!.org.opendedup.grpc.MkDirRespons" +
+      "e\022L\n\005RmDir\022 .org.opendedup.grpc.RmDirReq" +
+      "uest\032!.org.opendedup.grpc.RmDirResponse\022" +
+      "O\n\006Unlink\022!.org.opendedup.grpc.UnlinkReq" +
+      "uest\032\".org.opendedup.grpc.UnlinkResponse" +
+      "\022T\n\005Write\022$.org.opendedup.grpc.DataWrite" +
+      "Request\032%.org.opendedup.grpc.DataWriteRe" +
+      "sponse\022Q\n\004Read\022#.org.opendedup.grpc.Data" +
+      "ReadRequest\032$.org.opendedup.grpc.DataRea" +
+      "dResponse\022V\n\007Release\022$.org.opendedup.grp" +
+      "c.FileCloseRequest\032%.org.opendedup.grpc." +
+      "FileCloseResponse\022L\n\005Mknod\022 .org.opended" +
+      "up.grpc.MkNodRequest\032!.org.opendedup.grp" +
+      "c.MkNodResponse\022Q\n\004Open\022#.org.opendedup." +
+      "grpc.FileOpenRequest\032$.org.opendedup.grp" +
+      "c.FileOpenResponse\022[\n\013GetFileInfo\022#.org." +
+      "opendedup.grpc.FileInfoRequest\032\'.org.ope" +
+      "ndedup.grpc.FileMessageResponse\022_\n\nCreat" +
+      "eCopy\022\'.org.opendedup.grpc.FileSnapshotR" +
+      "equest\032(.org.opendedup.grpc.FileSnapshot" +
+      "Response\022[\n\nFileExists\022%.org.opendedup.g" +
+      "rpc.FileExistsRequest\032&.org.opendedup.gr" +
+      "pc.FileExistsResponse\022O\n\010MkDirAll\022 .org." +
+      "opendedup.grpc.MkDirRequest\032!.org.opende" +
+      "dup.grpc.MkDirResponse\022T\n\004Stat\022#.org.ope" +
+      "ndedup.grpc.FileInfoRequest\032\'.org.opende" +
+      "dup.grpc.FileMessageResponse\022W\n\006Rename\022%" +
+      ".org.opendedup.grpc.FileRenameRequest\032&." +
+      "org.opendedup.grpc.FileRenameResponse\022[\n" +
+      "\nCopyExtent\022%.org.opendedup.grpc.CopyExt" +
+      "entRequest\032&.org.opendedup.grpc.CopyExte" +
+      "ntResponse\022j\n\017SetUserMetaData\022*.org.open" +
+      "dedup.grpc.SetUserMetaDataRequest\032+.org." +
+      "opendedup.grpc.SetUserMetaDataResponse\022a" +
+      "\n\014GetCloudFile\022\'.org.opendedup.grpc.GetC" +
+      "loudFileRequest\032(.org.opendedup.grpc.Get" +
+      "CloudFileResponse\022e\n\020GetCloudMetaFile\022\'." +
+      "org.opendedup.grpc.GetCloudFileRequest\032(" +
+      ".org.opendedup.grpc.GetCloudFileResponse" +
+      "\022O\n\006StatFS\022!.org.opendedup.grpc.StatFSRe" +
+      "quest\032\".org.opendedup.grpc.StatFSRespons" +
+      "eB2P\001Z.github.com/opendedup/sdfs-client-" +
+      "go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -282,7 +524,7 @@ public final class IOService {
     internal_static_org_opendedup_grpc_MkDirRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_MkDirRequest_descriptor,
-        new java.lang.String[] { "Path", });
+        new java.lang.String[] { "Path", "Mode", });
     internal_static_org_opendedup_grpc_MkDirResponse_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_org_opendedup_grpc_MkDirResponse_fieldAccessorTable = new
@@ -342,7 +584,7 @@ public final class IOService {
     internal_static_org_opendedup_grpc_MkNodRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_MkNodRequest_descriptor,
-        new java.lang.String[] { "Path", });
+        new java.lang.String[] { "Path", "Mode", "Rdev", });
     internal_static_org_opendedup_grpc_MkNodResponse_descriptor =
       getDescriptor().getMessageTypes().get(13);
     internal_static_org_opendedup_grpc_MkNodResponse_fieldAccessorTable = new
@@ -354,7 +596,7 @@ public final class IOService {
     internal_static_org_opendedup_grpc_FileOpenRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_FileOpenRequest_descriptor,
-        new java.lang.String[] { "Path", });
+        new java.lang.String[] { "Path", "Flags", });
     internal_static_org_opendedup_grpc_FileExistsRequest_descriptor =
       getDescriptor().getMessageTypes().get(15);
     internal_static_org_opendedup_grpc_FileExistsRequest_fieldAccessorTable = new
@@ -384,7 +626,7 @@ public final class IOService {
     internal_static_org_opendedup_grpc_FileSnapshotResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_FileSnapshotResponse_descriptor,
-        new java.lang.String[] { "Error", "ErrorCode", });
+        new java.lang.String[] { "Error", "ErrorCode", "EventID", });
     internal_static_org_opendedup_grpc_FileRenameRequest_descriptor =
       getDescriptor().getMessageTypes().get(20);
     internal_static_org_opendedup_grpc_FileRenameRequest_fieldAccessorTable = new
@@ -433,6 +675,186 @@ public final class IOService {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_GetCloudFileResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_ChmodRequest_descriptor =
+      getDescriptor().getMessageTypes().get(28);
+    internal_static_org_opendedup_grpc_ChmodRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_ChmodRequest_descriptor,
+        new java.lang.String[] { "Path", "Mode", });
+    internal_static_org_opendedup_grpc_ChmodResponse_descriptor =
+      getDescriptor().getMessageTypes().get(29);
+    internal_static_org_opendedup_grpc_ChmodResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_ChmodResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_ChownRequest_descriptor =
+      getDescriptor().getMessageTypes().get(30);
+    internal_static_org_opendedup_grpc_ChownRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_ChownRequest_descriptor,
+        new java.lang.String[] { "Path", "Uid", "Gid", });
+    internal_static_org_opendedup_grpc_ChownResponse_descriptor =
+      getDescriptor().getMessageTypes().get(31);
+    internal_static_org_opendedup_grpc_ChownResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_ChownResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_FlushRequest_descriptor =
+      getDescriptor().getMessageTypes().get(32);
+    internal_static_org_opendedup_grpc_FlushRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_FlushRequest_descriptor,
+        new java.lang.String[] { "Path", "Fd", });
+    internal_static_org_opendedup_grpc_FlushResponse_descriptor =
+      getDescriptor().getMessageTypes().get(33);
+    internal_static_org_opendedup_grpc_FlushResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_FlushResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_Stat_descriptor =
+      getDescriptor().getMessageTypes().get(34);
+    internal_static_org_opendedup_grpc_Stat_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_Stat_descriptor,
+        new java.lang.String[] { "Dev", "Ino", "Mode", "Nlink", "Uid", "Gid", "Rdev", "Size", "Blksize", "Blocks", "Atime", "Mtim", "Ctim", });
+    internal_static_org_opendedup_grpc_StatRequest_descriptor =
+      getDescriptor().getMessageTypes().get(35);
+    internal_static_org_opendedup_grpc_StatRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_StatRequest_descriptor,
+        new java.lang.String[] { "Path", });
+    internal_static_org_opendedup_grpc_StatResponse_descriptor =
+      getDescriptor().getMessageTypes().get(36);
+    internal_static_org_opendedup_grpc_StatResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_StatResponse_descriptor,
+        new java.lang.String[] { "Stat", "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_LinkRequest_descriptor =
+      getDescriptor().getMessageTypes().get(37);
+    internal_static_org_opendedup_grpc_LinkRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_LinkRequest_descriptor,
+        new java.lang.String[] { "Path", });
+    internal_static_org_opendedup_grpc_LinkResponse_descriptor =
+      getDescriptor().getMessageTypes().get(38);
+    internal_static_org_opendedup_grpc_LinkResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_LinkResponse_descriptor,
+        new java.lang.String[] { "LinkPath", "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_StatFS_descriptor =
+      getDescriptor().getMessageTypes().get(39);
+    internal_static_org_opendedup_grpc_StatFS_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_StatFS_descriptor,
+        new java.lang.String[] { "Bsize", "Blocks", "Bfree", "Bavail", "Files", "Ffree", "Fsid", "Namelen", "Frsize", "Flags", "Type", });
+    internal_static_org_opendedup_grpc_StatFSRequest_descriptor =
+      getDescriptor().getMessageTypes().get(40);
+    internal_static_org_opendedup_grpc_StatFSRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_StatFSRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_org_opendedup_grpc_StatFSResponse_descriptor =
+      getDescriptor().getMessageTypes().get(41);
+    internal_static_org_opendedup_grpc_StatFSResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_StatFSResponse_descriptor,
+        new java.lang.String[] { "Stat", "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_SymLinkRequest_descriptor =
+      getDescriptor().getMessageTypes().get(42);
+    internal_static_org_opendedup_grpc_SymLinkRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_SymLinkRequest_descriptor,
+        new java.lang.String[] { "From", "To", });
+    internal_static_org_opendedup_grpc_SymLinkResponse_descriptor =
+      getDescriptor().getMessageTypes().get(43);
+    internal_static_org_opendedup_grpc_SymLinkResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_SymLinkResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_TruncateRequest_descriptor =
+      getDescriptor().getMessageTypes().get(44);
+    internal_static_org_opendedup_grpc_TruncateRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_TruncateRequest_descriptor,
+        new java.lang.String[] { "Path", "Length", });
+    internal_static_org_opendedup_grpc_TruncateResponse_descriptor =
+      getDescriptor().getMessageTypes().get(45);
+    internal_static_org_opendedup_grpc_TruncateResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_TruncateResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_UtimeRequest_descriptor =
+      getDescriptor().getMessageTypes().get(46);
+    internal_static_org_opendedup_grpc_UtimeRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_UtimeRequest_descriptor,
+        new java.lang.String[] { "Path", "Atime", "Mtime", });
+    internal_static_org_opendedup_grpc_UtimeResponse_descriptor =
+      getDescriptor().getMessageTypes().get(47);
+    internal_static_org_opendedup_grpc_UtimeResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_UtimeResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_GetXAttrRequest_descriptor =
+      getDescriptor().getMessageTypes().get(48);
+    internal_static_org_opendedup_grpc_GetXAttrRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_GetXAttrRequest_descriptor,
+        new java.lang.String[] { "Attr", "Path", });
+    internal_static_org_opendedup_grpc_GetXAttrResponse_descriptor =
+      getDescriptor().getMessageTypes().get(49);
+    internal_static_org_opendedup_grpc_GetXAttrResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_GetXAttrResponse_descriptor,
+        new java.lang.String[] { "Value", "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_SetXAttrRequest_descriptor =
+      getDescriptor().getMessageTypes().get(50);
+    internal_static_org_opendedup_grpc_SetXAttrRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_SetXAttrRequest_descriptor,
+        new java.lang.String[] { "Attr", "Value", "Path", });
+    internal_static_org_opendedup_grpc_SetXAttrResponse_descriptor =
+      getDescriptor().getMessageTypes().get(51);
+    internal_static_org_opendedup_grpc_SetXAttrResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_SetXAttrResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", "Flags", });
+    internal_static_org_opendedup_grpc_RemoveXAttrRequest_descriptor =
+      getDescriptor().getMessageTypes().get(52);
+    internal_static_org_opendedup_grpc_RemoveXAttrRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_RemoveXAttrRequest_descriptor,
+        new java.lang.String[] { "Attr", "Path", });
+    internal_static_org_opendedup_grpc_RemoveXAttrResponse_descriptor =
+      getDescriptor().getMessageTypes().get(53);
+    internal_static_org_opendedup_grpc_RemoveXAttrResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_RemoveXAttrResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_GetXAttrSizeRequest_descriptor =
+      getDescriptor().getMessageTypes().get(54);
+    internal_static_org_opendedup_grpc_GetXAttrSizeRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_GetXAttrSizeRequest_descriptor,
+        new java.lang.String[] { "Attr", "Path", });
+    internal_static_org_opendedup_grpc_GetXAttrSizeResponse_descriptor =
+      getDescriptor().getMessageTypes().get(55);
+    internal_static_org_opendedup_grpc_GetXAttrSizeResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_GetXAttrSizeResponse_descriptor,
+        new java.lang.String[] { "Length", "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_FsyncRequest_descriptor =
+      getDescriptor().getMessageTypes().get(56);
+    internal_static_org_opendedup_grpc_FsyncRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_FsyncRequest_descriptor,
+        new java.lang.String[] { "Path", "Fh", "Datasync", });
+    internal_static_org_opendedup_grpc_FsyncResponse_descriptor =
+      getDescriptor().getMessageTypes().get(57);
+    internal_static_org_opendedup_grpc_FsyncResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_FsyncResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
     org.opendedup.grpc.FileInfo.getDescriptor();
   }
 

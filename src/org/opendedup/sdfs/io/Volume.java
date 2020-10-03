@@ -46,13 +46,12 @@ import org.w3c.dom.Element;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-public class Volume implements java.io.Serializable {
+public class Volume {
 
 	/**
 	 * Represents the mounted volume associated with file system
 	 */
 
-	private static final long serialVersionUID = 5505952237500542215L;
 	public long capacity;
 	String name;
 	AtomicLong currentSize = new AtomicLong(0);
@@ -92,6 +91,10 @@ public class Volume implements java.io.Serializable {
 	public String rabbitMQUser = null;
 	public String rabbitMQPassword = null;
 	public int rabbitMQPort = 5672;
+	public String pubsubTopic =null;
+	public String pubsubSubscription = null;
+	public String gcpProject = null;
+	public String gcpCredsPath = null;
 
 	public boolean isClustered() {
 		return this.clustered;
@@ -284,6 +287,26 @@ public class Volume implements java.io.Serializable {
 			}
 			
 		}
+		if (vol.getElementsByTagName("gcp-pubsub").getLength() > 0) {
+			SDFSLogger.getLog().info("Reading Pubsub Settings");
+			Element el = (Element) vol.getElementsByTagName("gcp-pubsub").item(0);
+			if(el.hasAttribute("topic")) {
+				this.pubsubTopic = el.getAttribute("topic");
+			}else {
+				this.pubsubTopic = "sdfsvolume";
+			}
+			if(el.hasAttribute("subscription")) {
+				this.pubsubSubscription = el.getAttribute("subscription");
+			}else {
+				this.pubsubSubscription = Long.toString(serialNumber);
+			}
+			this.gcpProject = el.getAttribute("project-id");
+			if(el.hasAttribute("auth-file")) {
+				this.gcpCredsPath = el.getAttribute("auth-file");
+			} else {
+				this.gcpCredsPath = null;
+			}
+		}
 	}
 
 	public Volume() {
@@ -328,6 +351,7 @@ public class Volume implements java.io.Serializable {
 			throw new IOException("Cannot resize volume to something less than current size. Current Size ["
 					+ this.currentSize + "] requested capacity [" + capacity + "]");
 		this.capacity = capacity;
+		Main.chunkStoreAllocationSize = capacity;
 		HCServiceProxy.setDseSize((capacity / HashFunctionPool.avg_page_size) + 8000);
 		SDFSLogger.getLog().info("Set Volume Capacity to " + capacity);
 		writer.writeConfig();
@@ -488,6 +512,17 @@ public class Volume implements java.io.Serializable {
 			doc.adoptNode(rmq);
 			root.appendChild(rmq);
 		}
+		if (this.gcpProject != null) {
+			Element pbm = doc.createElement("gcp-pubsub");
+			pbm.setAttribute("project-id", this.gcpProject);
+			pbm.setAttribute("topic", this.pubsubTopic);
+			pbm.setAttribute("subscription", this.pubsubSubscription);
+			if(this.gcpCredsPath != null) {
+				pbm.setAttribute("auth-file", this.gcpCredsPath);
+			}
+			doc.adoptNode(pbm);
+			root.appendChild(pbm);
+		}
 		return root;
 	}
 
@@ -542,6 +577,17 @@ public class Volume implements java.io.Serializable {
 			doc.adoptNode(rmq);
 			root.appendChild(rmq);
 		}
+		if (this.gcpProject != null) {
+			Element pbm = doc.createElement("gcp-pubsub");
+			pbm.setAttribute("project-id", this.gcpProject);
+			pbm.setAttribute("topic", this.pubsubTopic);
+			pbm.setAttribute("subscription", this.pubsubSubscription);
+			if(this.gcpCredsPath != null) {
+				pbm.setAttribute("auth-file", this.gcpCredsPath);
+			}
+			doc.adoptNode(pbm);
+			root.appendChild(pbm);
+		}
 		return doc;
 	}
 
@@ -560,6 +606,12 @@ public class Volume implements java.io.Serializable {
 		if (this.rabbitMQNode != null) {
 			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setHostName(this.rabbitMQNode).setMqType(MQType.RabbitMQ)
 			.setPort(this.rabbitMQPort).setTopic(this.rabbitMQTopic);
+			b.addMessageQueue(mb);
+		}
+		if(this.gcpProject != null) {
+			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setMqType(MQType.PubSub)
+			.setTopic(this.pubsubTopic).setSubScription(this.pubsubSubscription).setAuthInfo(this.gcpCredsPath)
+			.setProject(this.gcpProject);
 			b.addMessageQueue(mb);
 		}
 		return b.build();

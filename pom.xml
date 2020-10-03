@@ -24,6 +24,7 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+       
         <repository>
             <snapshots>
                 <enabled>false</enabled>
@@ -73,7 +74,7 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-pubsub</artifactId>
-            <version>1.108.0</version>
+            <version>1.108.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.auth</groupId>
@@ -84,6 +85,11 @@
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-storage</artifactId>
             <version>1.111.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.perfmark</groupId>
+            <artifactId>perfmark-api</artifactId>
+            <version>0.23.0</version>
         </dependency>
         <dependency>
             <groupId>org.xerial.snappy</groupId>
@@ -245,13 +251,39 @@
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
-            <artifactId>grpc-all</artifactId>
-            <version>1.30.2</version>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>1.31.1</version>
+          </dependency>
+          <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.31.1</version>
+          </dependency>
+          <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.31.1</version>
+          </dependency>
+          <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty</artifactId>
+            <version>1.31.1</version>
         </dependency>
+          <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
+            <version>1.31.1</version>
+        </dependency>
+          <dependency> <!-- necessary for Java 9+ -->
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>annotations-api</artifactId>
+            <version>6.0.53</version>
+            <scope>provided</scope>
+          </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>protoc-gen-grpc-java</artifactId>
-            <version>1.30.2</version>
+            <version>1.31.1</version>
             <type>pom</type>
         </dependency>
         <dependency>
@@ -297,22 +329,6 @@
                         <goals>
                             <goal>compile</goal>
                             <goal>compile-custom</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>                        <!--  bind to the packaging phase -->
-                        <goals>
-                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>

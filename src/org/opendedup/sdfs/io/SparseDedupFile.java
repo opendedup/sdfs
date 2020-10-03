@@ -414,7 +414,6 @@ public class SparseDedupFile implements DedupFile {
 					int dups = 0;
 					int retries = 0;
 					while (!allInserted) {
-						
 
 						try {
 							List<Finger> fs = null;
@@ -549,9 +548,9 @@ public class SparseDedupFile implements DedupFile {
 							}
 							writeBuffer.setDoop(dups);
 							allInserted = writeBuffer.setAR(ar);
-							if(!allInserted) {
+							if (!allInserted) {
 								retries++;
-								if(retries > 10) {
+								if (retries > 10) {
 									throw new IOException("Unable to write retried " + retries);
 								}
 								SDFSLogger.getLog().warn("Data was not all inserted, will retry");
@@ -635,18 +634,11 @@ public class SparseDedupFile implements DedupFile {
 		try {
 			// updatelock.lock();
 			long filePosition = writeBuffer.getFilePosition();
-			if (this.bdb.getVersion() > 0) {
-				chunk = new SparseDataChunk(doop, writeBuffer.getFingers(), false, this.bdb.getVersion());
-				chunk.setRecontructed(chunk.isRecontructed());
-				// SDFSLogger.getLog().info("Hash Size =" + hash.length +
-				// " hashloc len = " + writeBuffer.getHashLoc().length);
-			} else {
-				if (mf.isDedup() || doop > 0) {
-					chunk = new SparseDataChunk(doop, writeBuffer.getFingers(), false, this.bdb.getVersion());
-				} else {
-					chunk = new SparseDataChunk(doop, writeBuffer.getFingers(), true, this.bdb.getVersion());
-				}
-			}
+			chunk = new SparseDataChunk(doop, writeBuffer.getFingers(), false, this.bdb.getVersion());
+			chunk.setRecontructed(chunk.isRecontructed());
+			// SDFSLogger.getLog().info("Hash Size =" + hash.length +
+			// " hashloc len = " + writeBuffer.getHashLoc().length);
+
 			bdb.put(filePosition, chunk);
 			eventBus.post(new SFileWritten(this, filePosition));
 		} catch (Exception e) {
@@ -811,7 +803,11 @@ public class SparseDedupFile implements DedupFile {
 				if (SDFSLogger.isDebug())
 					wt = System.currentTimeMillis() - tm;
 				HCServiceProxy.sync();
-				this.bdb.sync();
+				try {
+					this.bdb.sync();
+				} catch (Exception e) {
+
+				}
 				if (SDFSLogger.isDebug())
 					st = System.currentTimeMillis() - tm - wt;
 				if (SDFSLogger.isDebug())

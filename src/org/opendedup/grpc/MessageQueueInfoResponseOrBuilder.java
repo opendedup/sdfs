@@ -59,4 +59,28 @@ public interface MessageQueueInfoResponseOrBuilder extends
    */
   com.google.protobuf.ByteString
       getAuthInfoBytes();
+
+  /**
+   * <code>string subScription = 6;</code>
+   * @return The subScription.
+   */
+  java.lang.String getSubScription();
+  /**
+   * <code>string subScription = 6;</code>
+   * @return The bytes for subScription.
+   */
+  com.google.protobuf.ByteString
+      getSubScriptionBytes();
+
+  /**
+   * <code>string project = 7;</code>
+   * @return The project.
+   */
+  java.lang.String getProject();
+  /**
+   * <code>string project = 7;</code>
+   * @return The bytes for project.
+   */
+  com.google.protobuf.ByteString
+      getProjectBytes();
 }

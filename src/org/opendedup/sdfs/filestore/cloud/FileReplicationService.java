@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 
@@ -25,6 +26,7 @@ import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
+import org.opendedup.grpc.SDFSEvent;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.SyncFS;
 import org.opendedup.sdfs.Main;
@@ -44,6 +46,7 @@ import org.opendedup.sdfs.io.events.SFileDeleted;
 import org.opendedup.sdfs.io.events.SFileSync;
 import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.sdfs.io.events.VolumeWritten;
+import org.opendedup.sdfs.notification.SDFSEvent.Level;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.OSValidator;
 
@@ -181,6 +184,10 @@ public class FileReplicationService {
 
 	public static void removeVolume(long id) throws IOException {
 		service.sync.removeVolume(id);
+	}
+
+	public static String getNextName(String pp, long id) throws IOException {
+		return service.sync.getNextName(pp, id);
 	}
 
 	private ReentrantLock getLock(String st) {
@@ -580,48 +587,71 @@ public class FileReplicationService {
 		}
 	}
 
+	ReentrantLock synclock = new ReentrantLock();
+
 	@Subscribe
 	public void downloadAll(CloudSyncDLRequest req) {
-		SDFSLogger.getLog().info("##################### Syncing Files from cloud now ########################");
-		executor = new ThreadPoolExecutor(Main.dseIOThreads, Main.dseIOThreads, 10, TimeUnit.SECONDS, worksQueue,
-				new ThreadPoolExecutor.CallerRunsPolicy());
-
+		if (!synclock.tryLock()) {
+			req.getEvent().endEvent("Could Not run syncronization because a syncronization is already occuring",
+					org.opendedup.sdfs.notification.SDFSEvent.WARN);
+			return;
+		}
 		try {
-			this.sync.clearIter();
-			MetaFileDownloader.reset();
-			DDBDownloader.reset();
-			String fname = this.sync.getNextName("files", req.getVolumeID());
-			while (fname != null) {
-				String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);
-				if (this.sync.isCheckedOut("files/" + efs, req.getVolumeID())) {
-					File f = new File(Main.volume.getPath() + File.separator + fname);
-					if (fname.endsWith(DM)) {
-						f = f.getParentFile();
-						f.mkdirs();
+
+			SDFSLogger.getLog().info("##################### Syncing Files from cloud now ########################");
+			executor = new ThreadPoolExecutor(Main.dseIOThreads, Main.dseIOThreads, 10, TimeUnit.SECONDS, worksQueue,
+					new ThreadPoolExecutor.CallerRunsPolicy());
+			req.getEvent().shortMsg = "Syncing Files From Cloud Volume [" + req.getVolumeID() + "]";
+
+			try {
+				this.sync.clearIter();
+				MetaFileDownloader.reset();
+				DDBDownloader.reset();
+				req.getEvent().setMaxCount(2);
+				String fname = this.sync.getNextName("files", req.getVolumeID());
+				req.getEvent().setCurrentCount(1);
+				while (fname != null) {
+					req.getEvent().setMaxCount(req.getEvent().getMaxCount() + 1);
+					String efs = EncyptUtils.encString(fname, Main.chunkStoreEncryptionEnabled);
+					if (req.getVolumeID() == -1 || this.sync.isCheckedOut("files/" + efs, req.getVolumeID())) {
+						File f = new File(Main.volume.getPath() + File.separator + fname);
+						if (fname.endsWith(DM)) {
+							f = f.getParentFile();
+							f.mkdirs();
+						} else {
+							executor.execute(new MetaFileDownloader(fname, f, sync, req.getEvent()));
+						}
 					} else {
-						executor.execute(new MetaFileDownloader(fname, f, sync));
+						SDFSLogger.getLog().info("not checked out " + fname);
 					}
-				} else {
-					SDFSLogger.getLog().info("not checked out " + fname);
+					fname = this.sync.getNextName("files", req.getVolumeID());
 				}
-				fname = this.sync.getNextName("files", req.getVolumeID());
-			}
-			executor.shutdown();
-			// Wait for everything to finish.
-			while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-				SDFSLogger.getLog().info("Awaiting file download completion of threads.");
-			}
-			if (MetaFileDownloader.downloadSyncException != null)
-				throw MetaFileDownloader.downloadSyncException;
-			this.sync.clearIter();
+				executor.shutdown();
+				// Wait for everything to finish.
+				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+					SDFSLogger.getLog().info("Awaiting file download completion of threads.");
+				}
+				SDFSLogger.getLog().info("################# done syncing files from cloud #######################");
+				SDFSLogger.getLog().info("Metadata Files downloaded : " + MetaFileDownloader.fdl.get());
+				SDFSLogger.getLog().info("Metadata File download errors: " + MetaFileDownloader.fer.get());
+				this.sync.clearIter();
+				Main.syncDL = false;
+				Main.syncDLAll = false;
 
-			SDFSLogger.getLog().info("################# done syncing files from cloud #######################");
-			SDFSLogger.getLog().info("Metadata Files downloaded : " + MetaFileDownloader.fdl.get());
-			SDFSLogger.getLog().info("Metadata File download errors: " + MetaFileDownloader.fer.get());
-			Main.syncDL = false;
+				if (MetaFileDownloader.downloadSyncException != null) {
+					throw MetaFileDownloader.downloadSyncException;
+				} else {
+					req.getEvent().endEvent("Sync Done Files downloaded : " + MetaFileDownloader.fdl.get());
+				}
 
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to sync", e);
+			} catch (Exception e) {
+				req.getEvent().endEvent("Error Occured During Sync Please Check Logs",
+							org.opendedup.sdfs.notification.SDFSEvent.ERROR);
+				SDFSLogger.getLog().error("unable to sync", e);
+
+			}
+		} finally {
+			synclock.unlock();
 		}
 
 	}
@@ -631,6 +661,7 @@ public class FileReplicationService {
 		AbstractCloudFileSync sync;
 		String fname;
 		File to;
+		org.opendedup.sdfs.notification.SDFSEvent evt;
 		private static AtomicInteger fer = new AtomicInteger();
 		private static AtomicInteger fdl = new AtomicInteger();
 
@@ -640,10 +671,12 @@ public class FileReplicationService {
 			downloadSyncException = null;
 		}
 
-		MetaFileDownloader(String fname, File to, AbstractCloudFileSync sync) {
+		MetaFileDownloader(String fname, File to, AbstractCloudFileSync sync,
+				org.opendedup.sdfs.notification.SDFSEvent evt) {
 			this.sync = sync;
 			this.to = to;
 			this.fname = fname;
+			this.evt = evt;
 		}
 
 		@Override
@@ -664,6 +697,7 @@ public class FileReplicationService {
 					Main.volume.addFile();
 					SDFSLogger.getLog().debug("downloaded " + to.getPath() + " sz=" + to.length());
 					done = true;
+					evt.addCount(1);
 					fdl.incrementAndGet();
 				} catch (Exception e) {
 					if (tries > maxTries) {
@@ -701,7 +735,9 @@ public class FileReplicationService {
 					try {
 						FileReplicationService.getDDB(mf.getDfGuid());
 						SDFSLogger.getLog().info("downloaded " + mf.getDfGuid());
-						LongByteArrayMap ddb = (LongByteArrayMap) mf.getDedupFile(false).bdb;
+
+						LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid());
+
 						Set<Long> blks = new HashSet<Long>();
 						if (ddb.getVersion() < 2)
 							throw new IOException("only files version 2 or later can be imported");

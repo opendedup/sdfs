@@ -18,11 +18,8 @@
  *******************************************************************************/
 package org.opendedup.collections;
 
-import java.io.Externalizable;
 
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.nio.ByteBuffer;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -33,13 +30,12 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 
-public class SparseDataChunk implements Externalizable {
+public class SparseDataChunk {
 	private ReentrantReadWriteLock l = new ReentrantReadWriteLock();
 	private int doop;
 	private int prevdoop;
 	// private int RAWDL;
 	private long fpos;
-	private static final long serialVersionUID = -2782607786999940224L;
 	public int len = 0;
 	public byte flags = 0;
 	public static final int RECONSTRUCTED = 1; // 0001
@@ -297,20 +293,7 @@ public class SparseDataChunk implements Externalizable {
 		return ar;
 	}
 
-	@Override
-	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-		byte[] b = new byte[in.readInt()];
-		this.marshall(b);
-
-	}
-
-	@Override
-	public void writeExternal(ObjectOutput out) throws IOException {
-		byte[] b = this.getBytes();
-		out.writeInt(b.length);
-		out.write(b);
-
-	}
+	
 
 	public int getPrevdoop() {
 		return prevdoop;

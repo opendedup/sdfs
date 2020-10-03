@@ -21,26 +21,18 @@ WORKDIR "/sdfs-build/install-packages/"
 RUN rm -rf deb/usr/share/sdfs/lib/*
 WORKDIR "/sdfs-build/"
 RUN mvn package
-RUN cp target/lib/b2-*.jar install-packages/deb/usr/share/sdfs/lib/  && \
-    cp target/lib/google-cloud-storage-*.jar install-packages/deb/usr/share/sdfs/lib/ && \
-    cp target/sdfs-${VERSION}-jar-with-dependencies.jar install-packages/deb/usr/share/sdfs/lib/sdfs.jar && \
-    cp target/sdfs-${VERSION}-jar-with-dependencies.jar install-packages
+RUN cp target/lib/*.jar install-packages/deb/usr/share/sdfs/lib/ && \
+    cp target/sdfs-${VERSION}.jar install-packages/deb/usr/share/sdfs/lib/sdfs.jar && \
+    cp target/sdfs-${VERSION}.jar install-packages
 WORKDIR "/sdfs-build/install-packages/"
 RUN rm -rf *.deb *.rpm && \
-    cp DEBIAN/libfuse.so.2 deb/usr/share/sdfs/bin/ && \
-    cp DEBIAN/libulockmgr.so.1 deb/usr/share/sdfs/bin/ && \
-    cp DEBIAN/libjavafs.so deb/usr/share/sdfs/bin/ && \
     cp ../src/readme.txt deb/usr/share/sdfs/ && \
     fpm -s dir -t deb -n sdfs -v $VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -d libxml2-utils -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" && \
-    cp RHEL/libfuse.so.2 deb/usr/share/sdfs/bin/ && \
-    cp RHEL/libulockmgr.so.1 deb/usr/share/sdfs/bin/ && \
-    cp RHEL/libjavafs.so deb/usr/share/sdfs/bin/ && \
     fpm -s dir -t rpm -n sdfs -v $VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" 
 WORKDIR "/sdfs-build/install-packages/"
 RUN echo "tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm" > export_data.sh && \
     chmod 700 export_data.sh
-ENTRYPOINT tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm
-
+ENTRYPOINT tar cvf - sdfs-${VERSION}.jar sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm
 FROM ubuntu:18.04
 ENV VERSION=3.11.0
 LABEL email=samsilverberg@google.com
@@ -62,10 +54,7 @@ COPY --from=0 /sdfs-build/install-packages/sdfs_${VERSION}_amd64.deb .
 RUN dpkg -i sdfs_${VERSION}_amd64.deb && \
     rm sdfs_${VERSION}_amd64.deb
 COPY --from=0 /sdfs-build/install-packages/docker_run.sh /usr/share/sdfs/docker_run.sh
-
 RUN chmod 700 /usr/share/sdfs/docker_run.sh
 ENV DOCKER_DETATCH="-nodetach"
 ENV CAPACITY=1TB
 CMD ["/usr/share/sdfs/docker_run.sh"]
-
-

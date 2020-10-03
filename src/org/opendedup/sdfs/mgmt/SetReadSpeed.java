@@ -10,12 +10,12 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.w3c.dom.Element;
 
 public class SetReadSpeed implements Runnable {
-	SDFSEvent evt = null;
-	String sz = null;
+	public SDFSEvent evt = null;
+	int csz = 0;
 
 	public Element getResult(String sz) throws IOException,
 			ParserConfigurationException {
-		this.sz = sz;
+		csz = Integer.parseInt(sz);
 		evt = SDFSEvent.rspEvent("Setting Read Speed");
 		Thread th = new Thread(this);
 		th.start();
@@ -23,11 +23,16 @@ public class SetReadSpeed implements Runnable {
 
 	}
 
+	public void setSpeed(int speedInKbs) {
+		this.csz = speedInKbs;
+		evt = SDFSEvent.rspEvent("Setting Read Speed");
+		Thread th = new Thread(this);
+		th.start();
+	}
+
 	@Override
 	public void run() {
 		try {
-
-			int csz = Integer.parseInt(sz);
 			HCServiceProxy.setReadSpeed(csz);
 			evt.endEvent("Set Read Speed to " + csz + " KB/s");
 

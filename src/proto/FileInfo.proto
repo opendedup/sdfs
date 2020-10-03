@@ -21,22 +21,21 @@ message FileMessageResponse {
 
 enum errorCodes {
     NOERR=0;
-    ENOENT =1;
-    EIO =3;
-    EAGAIN=4;
-    EEXIST=5;
-    ENOTDIR=6;
-    ENODATA=7;
-    ENAVAIL=8;
-    EPERM = 9;
-    ENOSPC = 10;
-    EACCES = 11;
-    ENOTEMPTY = 12;
-    ENNOSYS = 13;
-    ENODEV = 14;
-    EBADFD = 15;
-    EISDIR	= 16;
-    ENONET = 17;
+    ENOENT =2;
+    EIO =5;
+    EAGAIN=11;
+    EEXIST=17;
+    ENOTDIR=20;
+    ENODATA=61;
+    ENAVAIL=119;
+    EPERM = 1;
+    ENOSPC = 28;
+    EACCES = 13;
+    ENOTEMPTY = 39;
+    ENOSYS = 38;
+    ENODEV = 19;
+    EBADFD = 77;
+    EISDIR	= 21;
 }
 
 message FileInfoResponse {
@@ -67,11 +66,18 @@ message FileInfoResponse {
     repeated FileInfoResponse files = 21;
     string parentPath = 22;
     string volumeid = 23;
-    repeated IOMonitorResponse ioMonitor = 24;
+    IOMonitorResponse ioMonitor = 24;
     string symlinkPath = 25;
     int64 group_id = 26;
     int64 user_id =27;
     int32 permissions=28;
+    int64 hashcode=29;
+    int64 retentionLock = 30;
+    int64 attributes = 31;
+    string version = 32;
+    int32 mode = 33;
+    bool delete_on_close = 34;
+
 }
 
 message IOMonitorResponse {
@@ -89,6 +95,9 @@ message IOMonitorResponse {
     int64 maxMbps = 12;
     int32 ioQos = 13;
     string ioProfile = 14;
+    int64 maxRbps = 15;
+    int64 maxWbps = 16;
+    int64 maxBps = 17;
 }
 
 message WFileAttributesRequest {

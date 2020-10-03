@@ -150,4 +150,16 @@ public interface DSEInfoOrBuilder extends
    */
   com.google.protobuf.ByteString
       getCloudSecretKeyBytes();
+
+  /**
+   * <code>string bucketName = 19;</code>
+   * @return The bucketName.
+   */
+  java.lang.String getBucketName();
+  /**
+   * <code>string bucketName = 19;</code>
+   * @return The bytes for bucketName.
+   */
+  com.google.protobuf.ByteString
+      getBucketNameBytes();
 }

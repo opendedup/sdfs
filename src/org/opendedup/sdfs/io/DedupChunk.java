@@ -29,8 +29,7 @@ import java.util.TreeMap;
  * @author annesam Base class for storing byte arrays associated with dedup
  *         files into memory.
  */
-public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
-	private static final long serialVersionUID = -5440311151699047048L;
+public class DedupChunk implements DedupChunkInterface {
 	private int length;
 	private long position;
 	private boolean newChunk = false;

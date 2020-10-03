@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.IOMonitorResponse}
  */
-public final class IOMonitorResponse extends
+public  final class IOMonitorResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.IOMonitorResponse)
     IOMonitorResponseOrBuilder {
@@ -120,6 +120,21 @@ private static final long serialVersionUID = 0L;
             ioProfile_ = s;
             break;
           }
+          case 120: {
+
+            maxRbps_ = input.readInt64();
+            break;
+          }
+          case 128: {
+
+            maxWbps_ = input.readInt64();
+            break;
+          }
+          case 136: {
+
+            maxBps_ = input.readInt64();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -158,7 +173,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 virtualBytesWritten = 1;</code>
    * @return The virtualBytesWritten.
    */
-  @java.lang.Override
   public long getVirtualBytesWritten() {
     return virtualBytesWritten_;
   }
@@ -169,7 +183,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 actualBytesWritten = 2;</code>
    * @return The actualBytesWritten.
    */
-  @java.lang.Override
   public long getActualBytesWritten() {
     return actualBytesWritten_;
   }
@@ -180,7 +193,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 bytesRead = 3;</code>
    * @return The bytesRead.
    */
-  @java.lang.Override
   public long getBytesRead() {
     return bytesRead_;
   }
@@ -191,7 +203,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 duplicateBlocks = 4;</code>
    * @return The duplicateBlocks.
    */
-  @java.lang.Override
   public long getDuplicateBlocks() {
     return duplicateBlocks_;
   }
@@ -202,7 +213,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 writeOpts = 5;</code>
    * @return The writeOpts.
    */
-  @java.lang.Override
   public long getWriteOpts() {
     return writeOpts_;
   }
@@ -213,7 +223,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 readOpts = 6;</code>
    * @return The readOpts.
    */
-  @java.lang.Override
   public long getReadOpts() {
     return readOpts_;
   }
@@ -224,7 +233,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxReadOps = 7;</code>
    * @return The maxReadOps.
    */
-  @java.lang.Override
   public long getMaxReadOps() {
     return maxReadOps_;
   }
@@ -235,7 +243,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxWriteOps = 8;</code>
    * @return The maxWriteOps.
    */
-  @java.lang.Override
   public long getMaxWriteOps() {
     return maxWriteOps_;
   }
@@ -246,7 +253,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxIops = 9;</code>
    * @return The maxIops.
    */
-  @java.lang.Override
   public long getMaxIops() {
     return maxIops_;
   }
@@ -257,7 +263,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxReadMbps = 10;</code>
    * @return The maxReadMbps.
    */
-  @java.lang.Override
   public long getMaxReadMbps() {
     return maxReadMbps_;
   }
@@ -268,7 +273,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxWriteMbps = 11;</code>
    * @return The maxWriteMbps.
    */
-  @java.lang.Override
   public long getMaxWriteMbps() {
     return maxWriteMbps_;
   }
@@ -279,7 +283,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxMbps = 12;</code>
    * @return The maxMbps.
    */
-  @java.lang.Override
   public long getMaxMbps() {
     return maxMbps_;
   }
@@ -290,7 +293,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 ioQos = 13;</code>
    * @return The ioQos.
    */
-  @java.lang.Override
   public int getIoQos() {
     return ioQos_;
   }
@@ -301,7 +303,6 @@ private static final long serialVersionUID = 0L;
    * <code>string ioProfile = 14;</code>
    * @return The ioProfile.
    */
-  @java.lang.Override
   public java.lang.String getIoProfile() {
     java.lang.Object ref = ioProfile_;
     if (ref instanceof java.lang.String) {
@@ -318,7 +319,6 @@ private static final long serialVersionUID = 0L;
    * <code>string ioProfile = 14;</code>
    * @return The bytes for ioProfile.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getIoProfileBytes() {
     java.lang.Object ref = ioProfile_;
@@ -331,6 +331,36 @@ private static final long serialVersionUID = 0L;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
+  }
+
+  public static final int MAXRBPS_FIELD_NUMBER = 15;
+  private long maxRbps_;
+  /**
+   * <code>int64 maxRbps = 15;</code>
+   * @return The maxRbps.
+   */
+  public long getMaxRbps() {
+    return maxRbps_;
+  }
+
+  public static final int MAXWBPS_FIELD_NUMBER = 16;
+  private long maxWbps_;
+  /**
+   * <code>int64 maxWbps = 16;</code>
+   * @return The maxWbps.
+   */
+  public long getMaxWbps() {
+    return maxWbps_;
+  }
+
+  public static final int MAXBPS_FIELD_NUMBER = 17;
+  private long maxBps_;
+  /**
+   * <code>int64 maxBps = 17;</code>
+   * @return The maxBps.
+   */
+  public long getMaxBps() {
+    return maxBps_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -388,6 +418,15 @@ private static final long serialVersionUID = 0L;
     }
     if (!getIoProfileBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 14, ioProfile_);
+    }
+    if (maxRbps_ != 0L) {
+      output.writeInt64(15, maxRbps_);
+    }
+    if (maxWbps_ != 0L) {
+      output.writeInt64(16, maxWbps_);
+    }
+    if (maxBps_ != 0L) {
+      output.writeInt64(17, maxBps_);
     }
     unknownFields.writeTo(output);
   }
@@ -453,6 +492,18 @@ private static final long serialVersionUID = 0L;
     if (!getIoProfileBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, ioProfile_);
     }
+    if (maxRbps_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(15, maxRbps_);
+    }
+    if (maxWbps_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(16, maxWbps_);
+    }
+    if (maxBps_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(17, maxBps_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -496,6 +547,12 @@ private static final long serialVersionUID = 0L;
         != other.getIoQos()) return false;
     if (!getIoProfile()
         .equals(other.getIoProfile())) return false;
+    if (getMaxRbps()
+        != other.getMaxRbps()) return false;
+    if (getMaxWbps()
+        != other.getMaxWbps()) return false;
+    if (getMaxBps()
+        != other.getMaxBps()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -547,6 +604,15 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getIoQos();
     hash = (37 * hash) + IOPROFILE_FIELD_NUMBER;
     hash = (53 * hash) + getIoProfile().hashCode();
+    hash = (37 * hash) + MAXRBPS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getMaxRbps());
+    hash = (37 * hash) + MAXWBPS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getMaxWbps());
+    hash = (37 * hash) + MAXBPS_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getMaxBps());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -708,6 +774,12 @@ private static final long serialVersionUID = 0L;
 
       ioProfile_ = "";
 
+      maxRbps_ = 0L;
+
+      maxWbps_ = 0L;
+
+      maxBps_ = 0L;
+
       return this;
     }
 
@@ -748,6 +820,9 @@ private static final long serialVersionUID = 0L;
       result.maxMbps_ = maxMbps_;
       result.ioQos_ = ioQos_;
       result.ioProfile_ = ioProfile_;
+      result.maxRbps_ = maxRbps_;
+      result.maxWbps_ = maxWbps_;
+      result.maxBps_ = maxBps_;
       onBuilt();
       return result;
     }
@@ -839,6 +914,15 @@ private static final long serialVersionUID = 0L;
         ioProfile_ = other.ioProfile_;
         onChanged();
       }
+      if (other.getMaxRbps() != 0L) {
+        setMaxRbps(other.getMaxRbps());
+      }
+      if (other.getMaxWbps() != 0L) {
+        setMaxWbps(other.getMaxWbps());
+      }
+      if (other.getMaxBps() != 0L) {
+        setMaxBps(other.getMaxBps());
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -873,7 +957,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 virtualBytesWritten = 1;</code>
      * @return The virtualBytesWritten.
      */
-    @java.lang.Override
     public long getVirtualBytesWritten() {
       return virtualBytesWritten_;
     }
@@ -904,7 +987,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 actualBytesWritten = 2;</code>
      * @return The actualBytesWritten.
      */
-    @java.lang.Override
     public long getActualBytesWritten() {
       return actualBytesWritten_;
     }
@@ -935,7 +1017,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 bytesRead = 3;</code>
      * @return The bytesRead.
      */
-    @java.lang.Override
     public long getBytesRead() {
       return bytesRead_;
     }
@@ -966,7 +1047,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 duplicateBlocks = 4;</code>
      * @return The duplicateBlocks.
      */
-    @java.lang.Override
     public long getDuplicateBlocks() {
       return duplicateBlocks_;
     }
@@ -997,7 +1077,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 writeOpts = 5;</code>
      * @return The writeOpts.
      */
-    @java.lang.Override
     public long getWriteOpts() {
       return writeOpts_;
     }
@@ -1028,7 +1107,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 readOpts = 6;</code>
      * @return The readOpts.
      */
-    @java.lang.Override
     public long getReadOpts() {
       return readOpts_;
     }
@@ -1059,7 +1137,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxReadOps = 7;</code>
      * @return The maxReadOps.
      */
-    @java.lang.Override
     public long getMaxReadOps() {
       return maxReadOps_;
     }
@@ -1090,7 +1167,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxWriteOps = 8;</code>
      * @return The maxWriteOps.
      */
-    @java.lang.Override
     public long getMaxWriteOps() {
       return maxWriteOps_;
     }
@@ -1121,7 +1197,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxIops = 9;</code>
      * @return The maxIops.
      */
-    @java.lang.Override
     public long getMaxIops() {
       return maxIops_;
     }
@@ -1152,7 +1227,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxReadMbps = 10;</code>
      * @return The maxReadMbps.
      */
-    @java.lang.Override
     public long getMaxReadMbps() {
       return maxReadMbps_;
     }
@@ -1183,7 +1257,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxWriteMbps = 11;</code>
      * @return The maxWriteMbps.
      */
-    @java.lang.Override
     public long getMaxWriteMbps() {
       return maxWriteMbps_;
     }
@@ -1214,7 +1287,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxMbps = 12;</code>
      * @return The maxMbps.
      */
-    @java.lang.Override
     public long getMaxMbps() {
       return maxMbps_;
     }
@@ -1245,7 +1317,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 ioQos = 13;</code>
      * @return The ioQos.
      */
-    @java.lang.Override
     public int getIoQos() {
       return ioQos_;
     }
@@ -1343,6 +1414,96 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       ioProfile_ = value;
+      onChanged();
+      return this;
+    }
+
+    private long maxRbps_ ;
+    /**
+     * <code>int64 maxRbps = 15;</code>
+     * @return The maxRbps.
+     */
+    public long getMaxRbps() {
+      return maxRbps_;
+    }
+    /**
+     * <code>int64 maxRbps = 15;</code>
+     * @param value The maxRbps to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaxRbps(long value) {
+      
+      maxRbps_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 maxRbps = 15;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaxRbps() {
+      
+      maxRbps_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long maxWbps_ ;
+    /**
+     * <code>int64 maxWbps = 16;</code>
+     * @return The maxWbps.
+     */
+    public long getMaxWbps() {
+      return maxWbps_;
+    }
+    /**
+     * <code>int64 maxWbps = 16;</code>
+     * @param value The maxWbps to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaxWbps(long value) {
+      
+      maxWbps_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 maxWbps = 16;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaxWbps() {
+      
+      maxWbps_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private long maxBps_ ;
+    /**
+     * <code>int64 maxBps = 17;</code>
+     * @return The maxBps.
+     */
+    public long getMaxBps() {
+      return maxBps_;
+    }
+    /**
+     * <code>int64 maxBps = 17;</code>
+     * @param value The maxBps to set.
+     * @return This builder for chaining.
+     */
+    public Builder setMaxBps(long value) {
+      
+      maxBps_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int64 maxBps = 17;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearMaxBps() {
+      
+      maxBps_ = 0L;
       onChanged();
       return this;
     }

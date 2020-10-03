@@ -10,16 +10,24 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.w3c.dom.Element;
 
 public class SetWriteSpeed implements Runnable {
-	SDFSEvent evt = null;
-	String sz = null;
+	public SDFSEvent evt = null;
+	int csz;
 
 	public Element getResult(String sz) throws IOException,
 			ParserConfigurationException {
 		evt = SDFSEvent.wspEvent("Setting Write Speed");
-		this.sz = sz;
+		csz = Integer.parseInt(sz);
 		Thread th = new Thread(this);
 		th.run();
 		return evt.toXML();
+
+	}
+
+	public void setSpeed(int speedInKbs) {
+		csz = speedInKbs;
+		evt = SDFSEvent.wspEvent("Setting Write Speed to " + speedInKbs);
+		Thread th = new Thread(this);
+		th.run();
 
 	}
 
@@ -27,7 +35,6 @@ public class SetWriteSpeed implements Runnable {
 	public void run() {
 		try {
 
-			int csz = Integer.parseInt(sz);
 			HCServiceProxy.setWriteSpeed(csz);
 			evt.endEvent("Set Write Speed to " + csz + " KB/s");
 

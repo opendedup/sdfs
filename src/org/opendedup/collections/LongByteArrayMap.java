@@ -902,7 +902,9 @@ public class LongByteArrayMap implements DataMapInterface {
 		FileChannel srcC = null;
 		FileChannel dstC = null;
 		try {
+			try{
 			this.sync();
+			}catch(Exception e) {}
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("copying to " + destFilePath);
 			File dest = new File(destFilePath);

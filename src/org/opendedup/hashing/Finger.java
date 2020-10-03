@@ -62,7 +62,6 @@ public class Finger implements Runnable {
 	public static class FingerPersister implements Runnable {
 		public AsyncChunkWriteActionListener l;
 		public List<Finger> fingers;
-		public boolean dedup;
 
 		@Override
 		public void run() {

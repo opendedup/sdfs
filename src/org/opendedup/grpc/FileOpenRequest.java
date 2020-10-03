@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.FileOpenRequest}
  */
-public final class FileOpenRequest extends
+public  final class FileOpenRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileOpenRequest)
     FileOpenRequestOrBuilder {
@@ -55,6 +55,11 @@ private static final long serialVersionUID = 0L;
             path_ = s;
             break;
           }
+          case 16: {
+
+            flags_ = input.readInt32();
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -93,7 +98,6 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The path.
    */
-  @java.lang.Override
   public java.lang.String getPath() {
     java.lang.Object ref = path_;
     if (ref instanceof java.lang.String) {
@@ -110,7 +114,6 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The bytes for path.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getPathBytes() {
     java.lang.Object ref = path_;
@@ -123,6 +126,16 @@ private static final long serialVersionUID = 0L;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
+  }
+
+  public static final int FLAGS_FIELD_NUMBER = 2;
+  private int flags_;
+  /**
+   * <code>int32 flags = 2;</code>
+   * @return The flags.
+   */
+  public int getFlags() {
+    return flags_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -142,6 +155,9 @@ private static final long serialVersionUID = 0L;
     if (!getPathBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, path_);
     }
+    if (flags_ != 0) {
+      output.writeInt32(2, flags_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -153,6 +169,10 @@ private static final long serialVersionUID = 0L;
     size = 0;
     if (!getPathBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, path_);
+    }
+    if (flags_ != 0) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt32Size(2, flags_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -171,6 +191,8 @@ private static final long serialVersionUID = 0L;
 
     if (!getPath()
         .equals(other.getPath())) return false;
+    if (getFlags()
+        != other.getFlags()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -184,6 +206,8 @@ private static final long serialVersionUID = 0L;
     hash = (19 * hash) + getDescriptor().hashCode();
     hash = (37 * hash) + PATH_FIELD_NUMBER;
     hash = (53 * hash) + getPath().hashCode();
+    hash = (37 * hash) + FLAGS_FIELD_NUMBER;
+    hash = (53 * hash) + getFlags();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -319,6 +343,8 @@ private static final long serialVersionUID = 0L;
       super.clear();
       path_ = "";
 
+      flags_ = 0;
+
       return this;
     }
 
@@ -346,6 +372,7 @@ private static final long serialVersionUID = 0L;
     public org.opendedup.grpc.FileOpenRequest buildPartial() {
       org.opendedup.grpc.FileOpenRequest result = new org.opendedup.grpc.FileOpenRequest(this);
       result.path_ = path_;
+      result.flags_ = flags_;
       onBuilt();
       return result;
     }
@@ -397,6 +424,9 @@ private static final long serialVersionUID = 0L;
       if (!other.getPath().isEmpty()) {
         path_ = other.path_;
         onChanged();
+      }
+      if (other.getFlags() != 0) {
+        setFlags(other.getFlags());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -499,6 +529,36 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       path_ = value;
+      onChanged();
+      return this;
+    }
+
+    private int flags_ ;
+    /**
+     * <code>int32 flags = 2;</code>
+     * @return The flags.
+     */
+    public int getFlags() {
+      return flags_;
+    }
+    /**
+     * <code>int32 flags = 2;</code>
+     * @param value The flags to set.
+     * @return This builder for chaining.
+     */
+    public Builder setFlags(int value) {
+      
+      flags_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 flags = 2;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearFlags() {
+      
+      flags_ = 0;
       onChanged();
       return this;
     }

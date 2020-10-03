@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.DSEInfo}
  */
-public final class DSEInfo extends
+public  final class DSEInfo extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DSEInfo)
     DSEInfoOrBuilder {
@@ -22,6 +22,7 @@ private static final long serialVersionUID = 0L;
     encryptionIV_ = "";
     cloudAccessKey_ = "";
     cloudSecretKey_ = "";
+    bucketName_ = "";
   }
 
   @java.lang.Override
@@ -150,6 +151,12 @@ private static final long serialVersionUID = 0L;
             cloudSecretKey_ = s;
             break;
           }
+          case 154: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            bucketName_ = s;
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -188,7 +195,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxSize = 1;</code>
    * @return The maxSize.
    */
-  @java.lang.Override
   public long getMaxSize() {
     return maxSize_;
   }
@@ -199,7 +205,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 currentSize = 2;</code>
    * @return The currentSize.
    */
-  @java.lang.Override
   public long getCurrentSize() {
     return currentSize_;
   }
@@ -210,7 +215,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 entries = 3;</code>
    * @return The entries.
    */
-  @java.lang.Override
   public long getEntries() {
     return entries_;
   }
@@ -221,7 +225,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 compressedSize = 4;</code>
    * @return The compressedSize.
    */
-  @java.lang.Override
   public long getCompressedSize() {
     return compressedSize_;
   }
@@ -232,7 +235,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 freeBlocks = 5;</code>
    * @return The freeBlocks.
    */
-  @java.lang.Override
   public long getFreeBlocks() {
     return freeBlocks_;
   }
@@ -243,7 +245,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 pageSize = 6;</code>
    * @return The pageSize.
    */
-  @java.lang.Override
   public long getPageSize() {
     return pageSize_;
   }
@@ -254,7 +255,6 @@ private static final long serialVersionUID = 0L;
    * <code>string storageType = 7;</code>
    * @return The storageType.
    */
-  @java.lang.Override
   public java.lang.String getStorageType() {
     java.lang.Object ref = storageType_;
     if (ref instanceof java.lang.String) {
@@ -271,7 +271,6 @@ private static final long serialVersionUID = 0L;
    * <code>string storageType = 7;</code>
    * @return The bytes for storageType.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getStorageTypeBytes() {
     java.lang.Object ref = storageType_;
@@ -292,7 +291,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 listenPort = 8;</code>
    * @return The listenPort.
    */
-  @java.lang.Override
   public int getListenPort() {
     return listenPort_;
   }
@@ -303,7 +301,6 @@ private static final long serialVersionUID = 0L;
    * <code>string listenHost = 9;</code>
    * @return The listenHost.
    */
-  @java.lang.Override
   public java.lang.String getListenHost() {
     java.lang.Object ref = listenHost_;
     if (ref instanceof java.lang.String) {
@@ -320,7 +317,6 @@ private static final long serialVersionUID = 0L;
    * <code>string listenHost = 9;</code>
    * @return The bytes for listenHost.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getListenHostBytes() {
     java.lang.Object ref = listenHost_;
@@ -341,7 +337,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 readSpeed = 10;</code>
    * @return The readSpeed.
    */
-  @java.lang.Override
   public int getReadSpeed() {
     return readSpeed_;
   }
@@ -352,7 +347,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 writeSpeed = 11;</code>
    * @return The writeSpeed.
    */
-  @java.lang.Override
   public int getWriteSpeed() {
     return writeSpeed_;
   }
@@ -363,7 +357,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 cacheSize = 12;</code>
    * @return The cacheSize.
    */
-  @java.lang.Override
   public long getCacheSize() {
     return cacheSize_;
   }
@@ -374,7 +367,6 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxCacheSize = 13;</code>
    * @return The maxCacheSize.
    */
-  @java.lang.Override
   public long getMaxCacheSize() {
     return maxCacheSize_;
   }
@@ -385,7 +377,6 @@ private static final long serialVersionUID = 0L;
    * <code>bool listenEncrypted = 14;</code>
    * @return The listenEncrypted.
    */
-  @java.lang.Override
   public boolean getListenEncrypted() {
     return listenEncrypted_;
   }
@@ -396,7 +387,6 @@ private static final long serialVersionUID = 0L;
    * <code>string encryptionKey = 15;</code>
    * @return The encryptionKey.
    */
-  @java.lang.Override
   public java.lang.String getEncryptionKey() {
     java.lang.Object ref = encryptionKey_;
     if (ref instanceof java.lang.String) {
@@ -413,7 +403,6 @@ private static final long serialVersionUID = 0L;
    * <code>string encryptionKey = 15;</code>
    * @return The bytes for encryptionKey.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getEncryptionKeyBytes() {
     java.lang.Object ref = encryptionKey_;
@@ -434,7 +423,6 @@ private static final long serialVersionUID = 0L;
    * <code>string encryptionIV = 16;</code>
    * @return The encryptionIV.
    */
-  @java.lang.Override
   public java.lang.String getEncryptionIV() {
     java.lang.Object ref = encryptionIV_;
     if (ref instanceof java.lang.String) {
@@ -451,7 +439,6 @@ private static final long serialVersionUID = 0L;
    * <code>string encryptionIV = 16;</code>
    * @return The bytes for encryptionIV.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getEncryptionIVBytes() {
     java.lang.Object ref = encryptionIV_;
@@ -472,7 +459,6 @@ private static final long serialVersionUID = 0L;
    * <code>string cloudAccessKey = 17;</code>
    * @return The cloudAccessKey.
    */
-  @java.lang.Override
   public java.lang.String getCloudAccessKey() {
     java.lang.Object ref = cloudAccessKey_;
     if (ref instanceof java.lang.String) {
@@ -489,7 +475,6 @@ private static final long serialVersionUID = 0L;
    * <code>string cloudAccessKey = 17;</code>
    * @return The bytes for cloudAccessKey.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getCloudAccessKeyBytes() {
     java.lang.Object ref = cloudAccessKey_;
@@ -510,7 +495,6 @@ private static final long serialVersionUID = 0L;
    * <code>string cloudSecretKey = 18;</code>
    * @return The cloudSecretKey.
    */
-  @java.lang.Override
   public java.lang.String getCloudSecretKey() {
     java.lang.Object ref = cloudSecretKey_;
     if (ref instanceof java.lang.String) {
@@ -527,7 +511,6 @@ private static final long serialVersionUID = 0L;
    * <code>string cloudSecretKey = 18;</code>
    * @return The bytes for cloudSecretKey.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getCloudSecretKeyBytes() {
     java.lang.Object ref = cloudSecretKey_;
@@ -536,6 +519,42 @@ private static final long serialVersionUID = 0L;
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
       cloudSecretKey_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int BUCKETNAME_FIELD_NUMBER = 19;
+  private volatile java.lang.Object bucketName_;
+  /**
+   * <code>string bucketName = 19;</code>
+   * @return The bucketName.
+   */
+  public java.lang.String getBucketName() {
+    java.lang.Object ref = bucketName_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      bucketName_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string bucketName = 19;</code>
+   * @return The bytes for bucketName.
+   */
+  public com.google.protobuf.ByteString
+      getBucketNameBytes() {
+    java.lang.Object ref = bucketName_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      bucketName_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -609,6 +628,9 @@ private static final long serialVersionUID = 0L;
     }
     if (!getCloudSecretKeyBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 18, cloudSecretKey_);
+    }
+    if (!getBucketNameBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 19, bucketName_);
     }
     unknownFields.writeTo(output);
   }
@@ -685,6 +707,9 @@ private static final long serialVersionUID = 0L;
     if (!getCloudSecretKeyBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, cloudSecretKey_);
     }
+    if (!getBucketNameBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(19, bucketName_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -736,6 +761,8 @@ private static final long serialVersionUID = 0L;
         .equals(other.getCloudAccessKey())) return false;
     if (!getCloudSecretKey()
         .equals(other.getCloudSecretKey())) return false;
+    if (!getBucketName()
+        .equals(other.getBucketName())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -792,6 +819,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getCloudAccessKey().hashCode();
     hash = (37 * hash) + CLOUDSECRETKEY_FIELD_NUMBER;
     hash = (53 * hash) + getCloudSecretKey().hashCode();
+    hash = (37 * hash) + BUCKETNAME_FIELD_NUMBER;
+    hash = (53 * hash) + getBucketName().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -961,6 +990,8 @@ private static final long serialVersionUID = 0L;
 
       cloudSecretKey_ = "";
 
+      bucketName_ = "";
+
       return this;
     }
 
@@ -1005,6 +1036,7 @@ private static final long serialVersionUID = 0L;
       result.encryptionIV_ = encryptionIV_;
       result.cloudAccessKey_ = cloudAccessKey_;
       result.cloudSecretKey_ = cloudSecretKey_;
+      result.bucketName_ = bucketName_;
       onBuilt();
       return result;
     }
@@ -1113,6 +1145,10 @@ private static final long serialVersionUID = 0L;
         cloudSecretKey_ = other.cloudSecretKey_;
         onChanged();
       }
+      if (!other.getBucketName().isEmpty()) {
+        bucketName_ = other.bucketName_;
+        onChanged();
+      }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
       return this;
@@ -1147,7 +1183,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxSize = 1;</code>
      * @return The maxSize.
      */
-    @java.lang.Override
     public long getMaxSize() {
       return maxSize_;
     }
@@ -1178,7 +1213,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 currentSize = 2;</code>
      * @return The currentSize.
      */
-    @java.lang.Override
     public long getCurrentSize() {
       return currentSize_;
     }
@@ -1209,7 +1243,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 entries = 3;</code>
      * @return The entries.
      */
-    @java.lang.Override
     public long getEntries() {
       return entries_;
     }
@@ -1240,7 +1273,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 compressedSize = 4;</code>
      * @return The compressedSize.
      */
-    @java.lang.Override
     public long getCompressedSize() {
       return compressedSize_;
     }
@@ -1271,7 +1303,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 freeBlocks = 5;</code>
      * @return The freeBlocks.
      */
-    @java.lang.Override
     public long getFreeBlocks() {
       return freeBlocks_;
     }
@@ -1302,7 +1333,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 pageSize = 6;</code>
      * @return The pageSize.
      */
-    @java.lang.Override
     public long getPageSize() {
       return pageSize_;
     }
@@ -1409,7 +1439,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 listenPort = 8;</code>
      * @return The listenPort.
      */
-    @java.lang.Override
     public int getListenPort() {
       return listenPort_;
     }
@@ -1516,7 +1545,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 readSpeed = 10;</code>
      * @return The readSpeed.
      */
-    @java.lang.Override
     public int getReadSpeed() {
       return readSpeed_;
     }
@@ -1547,7 +1575,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 writeSpeed = 11;</code>
      * @return The writeSpeed.
      */
-    @java.lang.Override
     public int getWriteSpeed() {
       return writeSpeed_;
     }
@@ -1578,7 +1605,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 cacheSize = 12;</code>
      * @return The cacheSize.
      */
-    @java.lang.Override
     public long getCacheSize() {
       return cacheSize_;
     }
@@ -1609,7 +1635,6 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxCacheSize = 13;</code>
      * @return The maxCacheSize.
      */
-    @java.lang.Override
     public long getMaxCacheSize() {
       return maxCacheSize_;
     }
@@ -1640,7 +1665,6 @@ private static final long serialVersionUID = 0L;
      * <code>bool listenEncrypted = 14;</code>
      * @return The listenEncrypted.
      */
-    @java.lang.Override
     public boolean getListenEncrypted() {
       return listenEncrypted_;
     }
@@ -1966,6 +1990,82 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       cloudSecretKey_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object bucketName_ = "";
+    /**
+     * <code>string bucketName = 19;</code>
+     * @return The bucketName.
+     */
+    public java.lang.String getBucketName() {
+      java.lang.Object ref = bucketName_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        bucketName_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string bucketName = 19;</code>
+     * @return The bytes for bucketName.
+     */
+    public com.google.protobuf.ByteString
+        getBucketNameBytes() {
+      java.lang.Object ref = bucketName_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        bucketName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string bucketName = 19;</code>
+     * @param value The bucketName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBucketName(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      bucketName_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string bucketName = 19;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearBucketName() {
+      
+      bucketName_ = getDefaultInstance().getBucketName();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string bucketName = 19;</code>
+     * @param value The bytes for bucketName to set.
+     * @return This builder for chaining.
+     */
+    public Builder setBucketNameBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      bucketName_ = value;
       onChanged();
       return this;
     }

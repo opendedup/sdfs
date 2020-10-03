@@ -16,8 +16,10 @@ import io.grpc.Metadata.Key;
 
 import java.io.File;
 import java.io.IOException;
-
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import io.grpc.netty.GrpcSslContexts;
@@ -54,7 +56,7 @@ public class IOServer {
     return true;
   }
 
-  public void start(boolean useSSL) throws IOException {
+  public void start(boolean useSSL,String host,int port) throws IOException {
     String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
     String certChainFilePath = keydir + File.separator + "tls_key.pem";
     String privateKeyFilePath = keydir + File.separator + "tls_key.key";
@@ -66,15 +68,15 @@ public class IOServer {
       certChainFilePath = env.get("SDFS_CERT_CHAIN");
     }
     /* The port on which the server should run */
-    int port = 50051;
-    logger.info("Server started, listening on " + port);
-    NettyServerBuilder b = NettyServerBuilder.forPort(port).addService(new VolumeImpl())
+    logger.info("Server started, listening on " + host + ":"+port  + " tls = " + useSSL + " threads=" + Main.writeThreads);
+    SocketAddress address = new InetSocketAddress(host, port);
+    NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
         .addService(new FileIOServiceImpl()).intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl());
     if (useSSL) {
       b.sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath).build());
     }
     server = b.build().start();
-    logger.info("Server started, listening on " + port);
+    logger.info("Server started, listening on " + host + ":"+port + " tls = " + useSSL);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
@@ -112,7 +114,7 @@ public class IOServer {
    */
   public static void main(String[] args) throws IOException, InterruptedException {
     final IOServer server = new IOServer();
-    server.start(false);
+    server.start(false,"localhost",6442);
     server.blockUntilShutdown();
   }
 
@@ -122,13 +124,13 @@ public class IOServer {
     public <ReqT, RespT> Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers,
         ServerCallHandler<ReqT, RespT> next) {
       if (Main.sdfsCliRequireAuth) {
-        SDFSLogger.getLog().info(call.getMethodDescriptor().getFullMethodName());
+        SDFSLogger.getLog().debug(call.getMethodDescriptor().getFullMethodName());
         if (call.getMethodDescriptor().getFullMethodName()
             .equals("org.opendedup.grpc.VolumeService/AuthenticateUser")) {
-          SDFSLogger.getLog().info("Authenticating User");
+          SDFSLogger.getLog().debug("Authenticating User");
         } else {
           final String auth_token = headers.get(Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER));
-          SDFSLogger.getLog().info("Token is " + auth_token);
+          SDFSLogger.getLog().debug("Token is " + auth_token);
           if (auth_token == null) {
             throw new StatusRuntimeException(Status.UNAUTHENTICATED);
           } else {
@@ -140,7 +142,7 @@ public class IOServer {
                   SDFSLogger.getLog().warn("token not valid for user " + token.getAudience());
                   throw new StatusRuntimeException(Status.UNAUTHENTICATED);
                 } else {
-                  SDFSLogger.getLog().info("authenticated " + token.getAudience());
+                  SDFSLogger.getLog().debug("authenticated " + token.getAudience());
                 }
               } catch (Exception e) {
                 SDFSLogger.getLog().error("unable to authenticate user", e);

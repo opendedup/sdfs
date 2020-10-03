@@ -43,6 +43,7 @@ public class GetCloudFile implements Runnable {
 	public static LRUCache<String, Object> fack = new LRUCache<String, Object>(50);
 
 	public Element getResult(String file, String dstfile, boolean overwrite, String changeid) throws IOException {
+		fevt = SDFSEvent.cfEvent(file);
 		synchronized (ck) {
 			if (changeid != null && ck.containsKey(changeid)) {
 				try {
@@ -50,8 +51,11 @@ public class GetCloudFile implements Runnable {
 					Document doc = XMLUtils.getXMLDoc("cloudfile");
 					Element root = doc.getDocumentElement();
 					root.setAttribute("action", "ignored");
+					fevt.endEvent("ignoring file");
 					return (Element) root.cloneNode(true);
+					
 				} catch (Exception e) {
+					fevt.endEvent("unable to download file " + file, SDFSEvent.ERROR);
 					throw new IOException(e);
 				}
 
@@ -67,7 +71,6 @@ public class GetCloudFile implements Runnable {
 		this.sfile = file;
 		this.dstfile = dstfile;
 		this.overwrite = overwrite;
-		fevt = SDFSEvent.cfEvent(file);
 		Thread th = new Thread(this);
 		th.start();
 		try {

@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.MessageQueueInfoResponse}
  */
-public final class MessageQueueInfoResponse extends
+public  final class MessageQueueInfoResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.MessageQueueInfoResponse)
     MessageQueueInfoResponseOrBuilder {
@@ -20,6 +20,8 @@ private static final long serialVersionUID = 0L;
     mqType_ = 0;
     topic_ = "";
     authInfo_ = "";
+    subScription_ = "";
+    project_ = "";
   }
 
   @java.lang.Override
@@ -79,6 +81,18 @@ private static final long serialVersionUID = 0L;
             java.lang.String s = input.readStringRequireUtf8();
 
             authInfo_ = s;
+            break;
+          }
+          case 50: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            subScription_ = s;
+            break;
+          }
+          case 58: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            project_ = s;
             break;
           }
           default: {
@@ -183,10 +197,6 @@ private static final long serialVersionUID = 0L;
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalStateException(
-            "Can't get the descriptor of an unrecognized enum value.");
-      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -227,7 +237,6 @@ private static final long serialVersionUID = 0L;
    * <code>string hostName = 1;</code>
    * @return The hostName.
    */
-  @java.lang.Override
   public java.lang.String getHostName() {
     java.lang.Object ref = hostName_;
     if (ref instanceof java.lang.String) {
@@ -244,7 +253,6 @@ private static final long serialVersionUID = 0L;
    * <code>string hostName = 1;</code>
    * @return The bytes for hostName.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getHostNameBytes() {
     java.lang.Object ref = hostName_;
@@ -265,14 +273,14 @@ private static final long serialVersionUID = 0L;
    * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
    * @return The enum numeric value on the wire for mqType.
    */
-  @java.lang.Override public int getMqTypeValue() {
+  public int getMqTypeValue() {
     return mqType_;
   }
   /**
    * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
    * @return The mqType.
    */
-  @java.lang.Override public org.opendedup.grpc.MessageQueueInfoResponse.MQType getMqType() {
+  public org.opendedup.grpc.MessageQueueInfoResponse.MQType getMqType() {
     @SuppressWarnings("deprecation")
     org.opendedup.grpc.MessageQueueInfoResponse.MQType result = org.opendedup.grpc.MessageQueueInfoResponse.MQType.valueOf(mqType_);
     return result == null ? org.opendedup.grpc.MessageQueueInfoResponse.MQType.UNRECOGNIZED : result;
@@ -284,7 +292,6 @@ private static final long serialVersionUID = 0L;
    * <code>int32 port = 3;</code>
    * @return The port.
    */
-  @java.lang.Override
   public int getPort() {
     return port_;
   }
@@ -295,7 +302,6 @@ private static final long serialVersionUID = 0L;
    * <code>string topic = 4;</code>
    * @return The topic.
    */
-  @java.lang.Override
   public java.lang.String getTopic() {
     java.lang.Object ref = topic_;
     if (ref instanceof java.lang.String) {
@@ -312,7 +318,6 @@ private static final long serialVersionUID = 0L;
    * <code>string topic = 4;</code>
    * @return The bytes for topic.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getTopicBytes() {
     java.lang.Object ref = topic_;
@@ -333,7 +338,6 @@ private static final long serialVersionUID = 0L;
    * <code>string authInfo = 5;</code>
    * @return The authInfo.
    */
-  @java.lang.Override
   public java.lang.String getAuthInfo() {
     java.lang.Object ref = authInfo_;
     if (ref instanceof java.lang.String) {
@@ -350,7 +354,6 @@ private static final long serialVersionUID = 0L;
    * <code>string authInfo = 5;</code>
    * @return The bytes for authInfo.
    */
-  @java.lang.Override
   public com.google.protobuf.ByteString
       getAuthInfoBytes() {
     java.lang.Object ref = authInfo_;
@@ -359,6 +362,78 @@ private static final long serialVersionUID = 0L;
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
       authInfo_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int SUBSCRIPTION_FIELD_NUMBER = 6;
+  private volatile java.lang.Object subScription_;
+  /**
+   * <code>string subScription = 6;</code>
+   * @return The subScription.
+   */
+  public java.lang.String getSubScription() {
+    java.lang.Object ref = subScription_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      subScription_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string subScription = 6;</code>
+   * @return The bytes for subScription.
+   */
+  public com.google.protobuf.ByteString
+      getSubScriptionBytes() {
+    java.lang.Object ref = subScription_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      subScription_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int PROJECT_FIELD_NUMBER = 7;
+  private volatile java.lang.Object project_;
+  /**
+   * <code>string project = 7;</code>
+   * @return The project.
+   */
+  public java.lang.String getProject() {
+    java.lang.Object ref = project_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      project_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string project = 7;</code>
+   * @return The bytes for project.
+   */
+  public com.google.protobuf.ByteString
+      getProjectBytes() {
+    java.lang.Object ref = project_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      project_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -394,6 +469,12 @@ private static final long serialVersionUID = 0L;
     if (!getAuthInfoBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 5, authInfo_);
     }
+    if (!getSubScriptionBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 6, subScription_);
+    }
+    if (!getProjectBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 7, project_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -420,6 +501,12 @@ private static final long serialVersionUID = 0L;
     if (!getAuthInfoBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, authInfo_);
     }
+    if (!getSubScriptionBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, subScription_);
+    }
+    if (!getProjectBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, project_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -444,6 +531,10 @@ private static final long serialVersionUID = 0L;
         .equals(other.getTopic())) return false;
     if (!getAuthInfo()
         .equals(other.getAuthInfo())) return false;
+    if (!getSubScription()
+        .equals(other.getSubScription())) return false;
+    if (!getProject()
+        .equals(other.getProject())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -465,6 +556,10 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getTopic().hashCode();
     hash = (37 * hash) + AUTHINFO_FIELD_NUMBER;
     hash = (53 * hash) + getAuthInfo().hashCode();
+    hash = (37 * hash) + SUBSCRIPTION_FIELD_NUMBER;
+    hash = (53 * hash) + getSubScription().hashCode();
+    hash = (37 * hash) + PROJECT_FIELD_NUMBER;
+    hash = (53 * hash) + getProject().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -608,6 +703,10 @@ private static final long serialVersionUID = 0L;
 
       authInfo_ = "";
 
+      subScription_ = "";
+
+      project_ = "";
+
       return this;
     }
 
@@ -639,6 +738,8 @@ private static final long serialVersionUID = 0L;
       result.port_ = port_;
       result.topic_ = topic_;
       result.authInfo_ = authInfo_;
+      result.subScription_ = subScription_;
+      result.project_ = project_;
       onBuilt();
       return result;
     }
@@ -703,6 +804,14 @@ private static final long serialVersionUID = 0L;
       }
       if (!other.getAuthInfo().isEmpty()) {
         authInfo_ = other.authInfo_;
+        onChanged();
+      }
+      if (!other.getSubScription().isEmpty()) {
+        subScription_ = other.subScription_;
+        onChanged();
+      }
+      if (!other.getProject().isEmpty()) {
+        project_ = other.project_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -815,7 +924,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
      * @return The enum numeric value on the wire for mqType.
      */
-    @java.lang.Override public int getMqTypeValue() {
+    public int getMqTypeValue() {
       return mqType_;
     }
     /**
@@ -824,7 +933,6 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setMqTypeValue(int value) {
-      
       mqType_ = value;
       onChanged();
       return this;
@@ -833,7 +941,6 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
      * @return The mqType.
      */
-    @java.lang.Override
     public org.opendedup.grpc.MessageQueueInfoResponse.MQType getMqType() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.MessageQueueInfoResponse.MQType result = org.opendedup.grpc.MessageQueueInfoResponse.MQType.valueOf(mqType_);
@@ -869,7 +976,6 @@ private static final long serialVersionUID = 0L;
      * <code>int32 port = 3;</code>
      * @return The port.
      */
-    @java.lang.Override
     public int getPort() {
       return port_;
     }
@@ -1043,6 +1149,158 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       authInfo_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object subScription_ = "";
+    /**
+     * <code>string subScription = 6;</code>
+     * @return The subScription.
+     */
+    public java.lang.String getSubScription() {
+      java.lang.Object ref = subScription_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        subScription_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string subScription = 6;</code>
+     * @return The bytes for subScription.
+     */
+    public com.google.protobuf.ByteString
+        getSubScriptionBytes() {
+      java.lang.Object ref = subScription_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        subScription_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string subScription = 6;</code>
+     * @param value The subScription to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSubScription(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      subScription_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string subScription = 6;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearSubScription() {
+      
+      subScription_ = getDefaultInstance().getSubScription();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string subScription = 6;</code>
+     * @param value The bytes for subScription to set.
+     * @return This builder for chaining.
+     */
+    public Builder setSubScriptionBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      subScription_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object project_ = "";
+    /**
+     * <code>string project = 7;</code>
+     * @return The project.
+     */
+    public java.lang.String getProject() {
+      java.lang.Object ref = project_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        project_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string project = 7;</code>
+     * @return The bytes for project.
+     */
+    public com.google.protobuf.ByteString
+        getProjectBytes() {
+      java.lang.Object ref = project_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        project_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string project = 7;</code>
+     * @param value The project to set.
+     * @return This builder for chaining.
+     */
+    public Builder setProject(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      project_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string project = 7;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearProject() {
+      
+      project_ = getDefaultInstance().getProject();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string project = 7;</code>
+     * @param value The bytes for project to set.
+     * @return This builder for chaining.
+     */
+    public Builder setProjectBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      project_ = value;
       onChanged();
       return this;
     }

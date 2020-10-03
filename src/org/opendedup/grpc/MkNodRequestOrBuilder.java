@@ -18,4 +18,16 @@ public interface MkNodRequestOrBuilder extends
    */
   com.google.protobuf.ByteString
       getPathBytes();
+
+  /**
+   * <code>int32 mode = 2;</code>
+   * @return The mode.
+   */
+  int getMode();
+
+  /**
+   * <code>int32 rdev = 3;</code>
+   * @return The rdev.
+   */
+  int getRdev();
 }

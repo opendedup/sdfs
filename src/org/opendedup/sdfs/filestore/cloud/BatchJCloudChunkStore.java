@@ -9,8 +9,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
@@ -29,6 +27,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -87,8 +86,10 @@ import com.google.common.io.BaseEncoding;
 import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 
 import org.opendedup.collections.HashExistsException;
-
-
+import org.opendedup.grpc.CloudMetaData;
+import org.opendedup.grpc.FileInfo;
+import org.opendedup.grpc.FileInfoResponse;
+import org.opendedup.grpc.Stat;
 
 /**
  * 
@@ -256,57 +257,44 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 
 	@Override
 	public Map<String, String> getUserMetaData(String obj) throws IOException {
-		if (this.accessStore || this.atmosStore || b2Store) {
-			if (blobStore.blobExists(this.name, obj + mdExt)) {
-				if (this.b2Store) {
-					BlobStore st = null;
-					try {
-						st = bPool.borrowObject();
-
-						Blob blob = st.getBlob(this.name, obj + mdExt);
-						ObjectInputStream in = new ObjectInputStream(blob.getPayload().openStream());
-						@SuppressWarnings("unchecked")
-						Map<String, String> md = (Map<String, String>) in.readObject();
-						blob.getPayload().release();
-						IOUtils.closeQuietly(blob.getPayload());
-						return md;
-					} catch (Exception e) {
-						// SDFSLogger.getLog().error("unable to borrow
-						// object",e);
-						throw new IOException(e);
-					} finally {
-						if (st != null)
-							bPool.returnObject(st);
+		if (blobStore.blobExists(this.name, obj + mdExt)) {
+			if (this.b2Store) {
+				BlobStore st = null;
+				try {
+					st = bPool.borrowObject();
+					Blob blob = st.getBlob(this.name, obj + mdExt);
+					BufferedInputStream in = new BufferedInputStream(blob.getPayload().openStream());
+					CloudMetaData.Builder bl = CloudMetaData.newBuilder().mergeFrom(in.readAllBytes());
+					Map<String, String> md = new HashMap<String, String>();
+					for (Entry<String, String> entry : bl.build().getAttributesMap().entrySet()) {
+						md.put(entry.getKey(), entry.getValue());
 					}
-				} else {
-					Blob blob = blobStore.getBlob(this.name, obj + mdExt);
-
-					ObjectInputStream in = new ObjectInputStream(blob.getPayload().openStream());
-					try {
-						@SuppressWarnings("unchecked")
-						Map<String, String> md = (Map<String, String>) in.readObject();
-						blob.getPayload().release();
-						IOUtils.closeQuietly(blob.getPayload());
-						return md;
-					} catch (ClassNotFoundException e) {
-						throw new IOException(e);
-					}
+					blob.getPayload().release();
+					IOUtils.closeQuietly(blob.getPayload());
+					return md;
+				} catch (Exception e) {
+					// SDFSLogger.getLog().error("unable to borrow
+					// object",e);
+					throw new IOException(e);
+				} finally {
+					if (st != null)
+						bPool.returnObject(st);
 				}
 			} else {
-				return new HashMap<String, String>();
+				Blob blob = blobStore.getBlob(this.name, obj + mdExt);
+
+				BufferedInputStream in = new BufferedInputStream(blob.getPayload().openStream());
+				CloudMetaData.Builder bl = CloudMetaData.newBuilder().mergeFrom(in.readAllBytes());
+				Map<String, String> md = new HashMap<String, String>();
+				for (Entry<String,String> entry : bl.build().getAttributesMap().entrySet()) {
+					md.put(entry.getKey(),entry.getValue());
+				}
+				blob.getPayload().release();
+				IOUtils.closeQuietly(blob.getPayload());
+				return md;
 			}
 		} else {
-			BlobMetadata omd = blobStore.blobMetadata(this.name, obj);
-
-			Map<String, String> md = new HashMap<String, String>();
-			if (omd != null) {
-				Map<String, String> zk = omd.getUserMetadata();
-				for (String key : zk.keySet()) {
-					md.put(key.toLowerCase(), zk.get(key));
-				}
-			}
-			return md;
-
+			return new HashMap<String, String>();
 		}
 	}
 
@@ -511,8 +499,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			overrides.setProperty(Constants.PROPERTY_RETRY_DELAY_START, "0");
 
 			Location region = null;
-			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file") ) {
-				
+			if (service.equals("google-cloud-storage") && config.hasAttribute("auth-file")) {
+
 				String authFile = config.getAttribute("auth-file");
 				InputStream is = new FileInputStream(config.getAttribute("auth-file"));
 				System.out.println(config.getAttribute("auth-file"));
@@ -522,19 +510,19 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(creds);
 				String credential = credentialSupplier.get().credential;
 				context = ContextBuilder.newBuilder(service)
-              .credentials("storage@upheld-altar-267119.iam.gserviceaccount.com", credential)
-              .buildView(BlobStoreContext.class);
+						.credentials("storage@upheld-altar-267119.iam.gserviceaccount.com", credential)
+						.buildView(BlobStoreContext.class);
 				/*
-				context = ContextBuilder.newBuilder(service).overrides(overrides)
-						.credentialsSupplier(credentialSupplier).buildView(BlobStoreContext.class);
-						*/
+				 * context = ContextBuilder.newBuilder(service).overrides(overrides)
+				 * .credentialsSupplier(credentialSupplier).buildView(BlobStoreContext.class);
+				 */
 			} else if (service.equals("google-cloud-storage")) {
 				overrides.setProperty(Constants.PROPERTY_ENDPOINT, "https://storage.googleapis.com");
 				overrides.setProperty(org.jclouds.s3.reference.S3Constants.PROPERTY_S3_VIRTUAL_HOST_BUCKETS, "false");
 				overrides.setProperty(Constants.PROPERTY_STRIP_EXPECT_HEADER, "true");
 				context = ContextBuilder.newBuilder("s3").overrides(overrides)
 						.credentials(this.accessKey, this.secretKey).buildView(BlobStoreContext.class);
-			}  else {
+			} else {
 				SDFSLogger.getLog().debug("ca=" + this.accessKey + " cs=" + this.secretKey);
 				context = ContextBuilder.newBuilder(service).credentials(this.accessKey, this.secretKey)
 						.overrides(overrides).buildView(BlobStoreContext.class);
@@ -805,7 +793,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			if (hs != null) {
 				for (String ha : hs) {
 					if (ha != null) {
-						
+
 						byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
 						if (HCServiceProxy.getHashesMap().mightContainKey(b, id))
 							claims++;
@@ -1322,38 +1310,25 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	private void updateObject(String id, Map<String, String> md) throws IOException {
-		if (accessStore || this.atmosStore || b2Store) {
-			ByteArrayOutputStream bo = new ByteArrayOutputStream();
-			ObjectOutputStream o = new ObjectOutputStream(bo);
-			o.writeObject(md);
-			if (blobStore.blobExists(name, id + mdExt)) {
-				blobStore.removeBlob(name, id + mdExt + ".ck");
-				blobStore.removeBlob(name, id + mdExt + ".ck");
-				Blob b = blobStore.blobBuilder(id + mdExt + ".ck").payload(bo.toByteArray()).build();
-				this.writeBlob(b, false);
-				blobStore.removeBlob(name, id + mdExt);
-				b = blobStore.blobBuilder(id + mdExt).payload(bo.toByteArray()).build();
-				this.writeBlob(b, false);
-				blobStore.removeBlob(name, id + mdExt + ".ck");
-			} else {
-				Blob b = blobStore.blobBuilder(id + mdExt).payload(bo.toByteArray()).build();
-				this.writeBlob(b, false);
-			}
+		ByteArrayOutputStream bo = new ByteArrayOutputStream();
+		CloudMetaData.Builder bl = CloudMetaData.newBuilder();
+		bl.setDate(System.currentTimeMillis());
+		bl.putAllAttributes(md);
+		byte[] bt = bl.build().toByteArray();
+		if (blobStore.blobExists(name, id + mdExt)) {
+			blobStore.removeBlob(name, id + mdExt + ".ck");
+			blobStore.removeBlob(name, id + mdExt + ".ck");
+			Blob b = blobStore.blobBuilder(id + mdExt + ".ck").payload(bt).build();
+			this.writeBlob(b, false);
+			blobStore.removeBlob(name, id + mdExt);
+			b = blobStore.blobBuilder(id + mdExt).payload(bt).build();
+			this.writeBlob(b, false);
+			blobStore.removeBlob(name, id + mdExt + ".ck");
 		} else {
-			try {
-				ContentMetadata dmd = blobStore.blobMetadata(this.name, id).getContentMetadata();
-				blobStore.copyBlob(this.name, id, this.name, id,
-						CopyOptions.builder().contentMetadata(dmd).userMetadata(md).build());
-			} catch (Exception e) {
-				ContentMetadata dmd = blobStore.blobMetadata(this.name, id).getContentMetadata();
-				blobStore.copyBlob(this.name, id, this.name, id + ".ck",
-						CopyOptions.builder().contentMetadata(dmd).userMetadata(md).build());
-				blobStore.removeBlob(name, id);
-				blobStore.copyBlob(this.name, id + ".ck", this.name, id,
-						CopyOptions.builder().contentMetadata(dmd).userMetadata(md).build());
-				blobStore.removeBlob(name, id + ".ck");
-			}
+			Blob b = blobStore.blobBuilder(id + mdExt).payload(bt).build();
+			this.writeBlob(b, false);
 		}
+
 	}
 
 	@Override
@@ -2348,6 +2323,18 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		while (pid < 100 && this.fileExists(pid))
 			pid = this.getLongID();
 		return pid;
+	}
+
+	@Override
+	public String[] listFiles(String prefix, int length, String marker) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FileInfoResponse getAttr(String name) throws NullPointerException, IOException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
