@@ -14,7 +14,7 @@ steps:
       - --dockerfile=Dockerfile
 - name: gcr.io/cloud-builders/docker
   entrypoint: 'bash'
-  args: [ '-c', 'docker run --rm gcr.io/hybrics/hybrics-build:${VERSION} | tar --extract --verbose -C pkgs/']
+  args: [ '-c', 'docker run --rm gcr.io/hybrics/hybrics-build:$BRANCH_NAME | tar --extract --verbose -C pkgs/']
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
   args: [ '-c', "gsutil cp pkgs/*.* gs://hybricsbinaries/pkgs/" ]
