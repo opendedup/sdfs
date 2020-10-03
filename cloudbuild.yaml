@@ -12,11 +12,12 @@ steps:
       - --cache=true
       - --cache-ttl=10h
       - --dockerfile=Dockerfile
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['run','--rm', 'gcr.io/$PROJECT_ID/hybrics-build:$BRANCH_NAME','|', 'tar', '--extract', '--verbose', '-C', 'pkgs/']
-- name: 'gcr.io/cloud-builders/gcloud'
+- name: gcr.io/cloud-builders/docker
   entrypoint: 'bash'
-  args: ['buildscripts/build.sh']
+  args: [ '-c', 'docker run --rm gcr.io/hybrics/hybrics-build:${VERSION} | tar --extract --verbose -C pkgs/']
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args: [ '-c', "gsutil cp pkgs/*.* gs://hybricsbinaries/pkgs/" ]
 timeout: 10800s
 options:
   machineType: 'N1_HIGHCPU_32'
