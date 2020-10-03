@@ -12,6 +12,9 @@ steps:
       - --cache=true
       - --cache-ttl=10h
       - --dockerfile=Dockerfile
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args: [ '-c', "mkdir pkgs/" ]
 - name: gcr.io/cloud-builders/docker
   entrypoint: 'bash'
   args: [ '-c', 'docker run --rm gcr.io/hybrics/hybrics-build:$BRANCH_NAME | tar --extract --verbose -C pkgs/']
