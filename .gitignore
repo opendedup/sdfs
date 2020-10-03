@@ -36,3 +36,4 @@ install-packages/windows/bin/jre/*
 pkgs/*.rpm
 pkgs/*.deb
 pkgs/*.jar
+.project
