@@ -12,6 +12,8 @@ steps:
       - --cache=true
       - --cache-ttl=10h
       - --dockerfile=Dockerfile
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['run','--rm', 'gcr.io/$PROJECT_ID/hybrics-build:$BRANCH_NAME','|', 'tar', '--extract', '--verbose', '-C', 'pkgs/']
 - name: 'gcr.io/cloud-builders/gcloud'
   entrypoint: 'bash'
   args: ['buildscripts/build.sh']
