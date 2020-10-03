@@ -2059,31 +2059,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	}
 
-	public static void main(String[] args) {
-		String storageConnectionString = "DefaultEndpointsProtocol=http;" + "AccountName=" + args[0] + ";"
-				+ "AccountKey=" + args[1];
-		try {
-			// Retrieve storage account from connection-string.
-			CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
-
-			// Create the blob client.
-			CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
-
-			// Get a reference to a container.
-			// The container name must be lower case
-			CloudBlobContainer container = blobClient.getContainerReference(args[2]);
-			CloudBlockBlob kblob = container.getBlockBlobReference("blocks/MTEwMjE4ODc4MjM0MzY3NzM=");
-			kblob.downloadAttributes();
-			System.out.println(kblob.getProperties().getStandardBlobTier());
-			System.out.println(kblob.getProperties().getRehydrationStatus());
-
-		} catch (Exception e) {
-			// Output the stack trace.
-			e.printStackTrace();
-		}
-
-	}
-
 	@Override
 	public void setDseSize(long sz) {
 		// TODO Auto-generated method stub
