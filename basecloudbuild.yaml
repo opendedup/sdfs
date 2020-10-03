@@ -1,6 +1,13 @@
 steps:
 - name: gcr.io/kaniko-project/executor:latest
   args:
+    - --destination=gcr.io/$PROJECT_ID/hybrics-base:$BRANCH_NAME
+    - --cache=true
+    - --cache-ttl=10h
+    - --dockerfile=Dockerfile.base
+    - --cleanup
+- name: gcr.io/kaniko-project/executor:latest
+  args:
     - --destination=gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME
     - --cache=false
     - --cache-ttl=10h
