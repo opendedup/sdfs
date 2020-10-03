@@ -1,4 +1,4 @@
-FROM hybrics-base:3.11.0 AS builder
+FROM gcr.io/hybrics/hybrics-base:3.11.0 AS builder
 
 LABEL email=samsilverberg@google.com
 LABEL author="Sam Silverberg"
