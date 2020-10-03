@@ -160,10 +160,17 @@ public class WinSDFS implements DokanOperations {
 		return nextHandleNo++;
 	}
 
+	private void checkLocal(String fileName) throws DokanOperationException {
+		if(!new File(mountedVolume + fileName).getPath().startsWith(mountedVolume)) {
+			log.error("access denied to " +new File(mountedVolume + fileName).getPath());
+			throw new DokanOperationException(WinError.ERROR_ACCESS_DENIED); 
+		}
+	}
 	@Override
 	public long onCreateFile(String fileName, int desiredAccess, int shareMode, int creationDisposition,
 			int flagsAndAttributes, int createOptions, DokanFileInfo fileInfo) throws DokanOperationException {
 		try {
+			this.checkLocal(fileName);
 			CreateFileThread sn = new CreateFileThread(fileName, desiredAccess, shareMode, creationDisposition,
 					createOptions, flagsAndAttributes, fileInfo, this);
 			int z = 0;
@@ -779,7 +786,7 @@ public class WinSDFS implements DokanOperations {
 	}
 
 	protected static DedupFileChannel getFileChannel(String path, long handleNo) throws DokanOperationException {
-		Long k = new Long(handleNo);
+		Long k = Long.valueOf(handleNo);
 		
 		DedupFileChannel ch = dedupChannels.get(k);
 		if (ch == null) {
@@ -991,12 +998,12 @@ public class WinSDFS implements DokanOperations {
 		@Override
 		public void run() {
 			try {
-				Long k = new Long(handleNo);
+				Long k = Long.valueOf(handleNo);
 				DedupFileChannel ch = dedupChannels.remove(k);
 				if (ch != null) {
 					ch.getDedupFile().unRegisterChannel(ch, -1);
 					if (ch.getFile() != null && ch.getFile().deleteOnClose) {
-						MetaFileStore.removeMetaFile(ch.getFile().getPath(), true, true);
+						MetaFileStore.removeMetaFile(ch.getFile().getPath(), true, true,true);
 						log.debug("Deleted file on close");
 					}
 				}
@@ -1035,7 +1042,7 @@ public class WinSDFS implements DokanOperations {
 			      for (Path p : stream) {
 			    	  File _mf = p.toFile();
 			    	  try {
-			    	  MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(_mf.getPath()));
+			    		  MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(_mf.getPath()));
 						MetaDataFileInfo fi = new MetaDataFileInfo(_mf.getName(), mf);
 						log.debug(fi.toString());
 						al.add(fi.toWin32FindData());
@@ -1111,7 +1118,7 @@ public class WinSDFS implements DokanOperations {
 				}
 				File f = resolvePath(fileName);
 
-				if (!MetaFileStore.removeMetaFile(f.getPath(), true, false)) {
+				if (!MetaFileStore.removeMetaFile(f.getPath(), true, false,true)) {
 					log.warn("unable to delete file " + f.getPath());
 					throw new DokanOperationException(ERROR_FILE_NOT_FOUND);
 				}
@@ -1140,7 +1147,7 @@ public class WinSDFS implements DokanOperations {
 			try {
 				File f = resolvePath(path);
 
-				if (!MetaFileStore.removeMetaFile(f.getPath(), true, false)) {
+				if (!MetaFileStore.removeMetaFile(f.getPath(), true, false,true)) {
 					log.error("unable to delete folder " + f.getPath());
 					throw new DokanOperationException(WinError.ERROR_DIR_NOT_EMPTY);
 				}

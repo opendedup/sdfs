@@ -135,7 +135,9 @@ public class ProcessArchiveOutCmd {
 			m.releaseConnection();
 			rslt.arPath = nf.getPath();
 			return rslt;
-		} finally {
+		} catch(Exception e) {
+			throw new IOException(e);
+		}finally {
 			if (in != null)
 				in.close();
 			if (m != null)

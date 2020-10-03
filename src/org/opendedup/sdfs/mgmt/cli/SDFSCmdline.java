@@ -30,13 +30,17 @@ public class SDFSCmdline {
 				MgmtServerConnection.useSSL = false;
 			if (cmd.hasOption("server"))
 				MgmtServerConnection.server = cmd.getOptionValue("server");
-			if (cmd.hasOption("password"))
-				MgmtServerConnection.password = cmd.getOptionValue("password");
+			
 			
 			if (cmd.hasOption("port"))
 				MgmtServerConnection.port = Integer.parseInt(cmd
 						.getOptionValue("port"));
-
+			
+			if (cmd.hasOption("password"))
+				MgmtServerConnection.baseHmac = MgmtServerConnection.initAuth(cmd.getOptionValue("password"),MgmtServerConnection.server,MgmtServerConnection.port,MgmtServerConnection.useSSL);
+			else
+				MgmtServerConnection.baseHmac = MgmtServerConnection.initAuth("admin",MgmtServerConnection.server,MgmtServerConnection.port,MgmtServerConnection.useSSL);
+			
 			if (cmd.hasOption("file-info")) {
 				if (cmd.hasOption("file-path")) {
 					ProcessFileInfo.runCmd(cmd.getOptionValue("file-path"));
@@ -47,7 +51,17 @@ public class SDFSCmdline {
 							.warn("file info request failed. --file-path option is required");
 					System.exit(1);
 				}
-
+			}
+			if (cmd.hasOption("file-cache-info")) {
+				if (cmd.hasOption("file-path")) {
+					ProcessCacheFileInfo.runCmd(cmd.getOptionValue("file-path"));
+					System.exit(0);
+				} else {
+					SDFSLogger
+							.getBasicLog()
+							.warn("file info request failed. --file-path option is required");
+					System.exit(1);
+				}
 			}
 			if (cmd.hasOption("restore-from-archive")) {
 				if (cmd.hasOption("file-path")) {
@@ -75,6 +89,8 @@ public class SDFSCmdline {
 			}
 			if (cmd.hasOption("list-cloud-volumes"))
 				ProcessConnectedVolumes.runCmd();
+			if (cmd.hasOption("list-raid-buckets"))
+				ProcessRaidBuckets.runCmd();
 			if (cmd.hasOption("cluster-volume-remove")) {
 				ProcessClusterVolumeRemove.runCmd(cmd
 						.getOptionValue("cluster-volume-remove"));
@@ -124,6 +140,10 @@ public class SDFSCmdline {
 				ProcessVolumeInfo.runCmd();
 				System.exit(0);
 			}
+			if (cmd.hasOption("sync-fs-size")) {
+				ProcessSyncFSsize.runCmd();
+				System.exit(0);
+			}
 			if (cmd.hasOption("cluster-redundancy-check")) {
 				ProcessClusterRedundancyCheck.runCmd();
 				System.exit(0);
@@ -134,6 +154,10 @@ public class SDFSCmdline {
 			}
 			if (cmd.hasOption("perfmon-on")) {
 				ProcessSetPerfmonCmd.runCmd(cmd.getOptionValue("perfmon-on"));
+			}
+			if (cmd.hasOption("delete-file")) {
+				ProcessDeleteFileCmd.execute(cmd.getOptionValue("delete-file"), true);
+				System.exit(0);
 			}
 			if (cmd.hasOption("import-archive")) {
 				String server = cmd.getOptionValue("replication-master");
@@ -205,8 +229,13 @@ public class SDFSCmdline {
 				System.exit(0);
 			}
 			if (cmd.hasOption("cleanstore")) {
-				ProcessCleanStore.runCmd();
+				ProcessCleanStore.runCmd(false);
 				System.exit(0);
+			}
+			if (cmd.hasOption("compactcleanstore")) {
+				ProcessCleanStore.runCmd(true);
+				System.exit(0);
+				
 			}
 			if (cmd.hasOption("fdisk")) {
 				ProcessFdisk.runCmd(cmd.getOptionValue("fdisk"));
@@ -232,17 +261,7 @@ public class SDFSCmdline {
 						.runCmd(cmd.getOptionValue("expandvolume"));
 				System.exit(0);
 			}
-			if (cmd.hasOption("partition-add")) {
-				String[] vals = cmd.getOptionValues("partition-add");
-				if (vals.length != 3) {
-					System.err
-							.println("device-name size start-on-vol-startup are required options");
-					System.exit(-1);
-				}
-				ProcessBlockDeviceAdd.runCmd(vals[0], vals[1],
-						Boolean.parseBoolean(vals[2]));
-				System.exit(0);
-			}
+			
 			if(cmd.hasOption("set-attribute")) {
 				String file = cmd.getOptionValue("file-path");
 				String[] vals = cmd.getOptionValues("set-attribute");
@@ -262,16 +281,7 @@ public class SDFSCmdline {
 				System.exit(0);
 			}
 
-			if (cmd.hasOption("partition-update")) {
-				String[] vals = cmd.getOptionValues("partition-update");
-				if (vals.length != 3) {
-					System.err
-							.println("device-name <size|autostart> <value> are required options");
-					System.exit(-1);
-				}
-				ProcessBlockDeviceUpdate.runCmd(vals[0], vals[1], vals[2]);
-				System.exit(0);
-			}
+			
 
 			if (cmd.hasOption("copy-extents")) {
 				String[] vals = cmd.getOptionValues("copy-extents");
@@ -295,25 +305,7 @@ public class SDFSCmdline {
 				ProcessCloudFile.runCmd(file,dstfile);
 				System.exit(0);
 			}
-			if (cmd.hasOption("partition-rm")) {
-				String val = cmd.getOptionValue("partition-rm");
-				ProcessBlockDeviceRm.runCmd(val);
-				System.exit(0);
-			}
-			if (cmd.hasOption("partition-start")) {
-				String val = cmd.getOptionValue("partition-start");
-				ProcessBlockDeviceStart.runCmd(val);
-				System.exit(0);
-			}
-			if (cmd.hasOption("partition-stop")) {
-				String val = cmd.getOptionValue("partition-stop");
-				ProcessBlockDeviceStop.runCmd(val);
-				System.exit(0);
-			}
-			if (cmd.hasOption("partition-list")) {
-				ProcessBlockDeviceList.runCmd();
-				System.exit(0);
-			}
+			
 			if (cmd.hasOption("shutdown")) {
 				ProcessShutdown.runCmd();
 				System.exit(0);
@@ -359,6 +351,11 @@ public class SDFSCmdline {
 						"list sdfs volumes that use this bucket.")
 				.create());
 		options.addOption(OptionBuilder
+				.withLongOpt("list-raid-buckets")
+				.withDescription(
+						"list buckets connected to cloud raid volume")
+				.create());
+		options.addOption(OptionBuilder
 				.withLongOpt("sync-remote-cloud-volume")
 				.withDescription(
 						"downloads metadata from specified volume id.")
@@ -385,6 +382,12 @@ public class SDFSCmdline {
 								+ "\n e.g. --file-info --file-path=<path to file or folder>")
 				.hasArg(false).create());
 		options.addOption(OptionBuilder
+				.withLongOpt("file-cache-info")
+				.withDescription(
+						"Returns io file cache info for a specific file. "
+								+ "\n e.g. --file-cache-info --file-path=<path to file or folder>")
+				.hasArg(false).create());
+		options.addOption(OptionBuilder
 				.withLongOpt("restore-from-archive")
 				.withDescription(
 						"Restores archived data blocks within file from glacier. "
@@ -395,6 +398,11 @@ public class SDFSCmdline {
 				.withDescription(
 						"Returns Dedup Storage Engine Statitics. "
 								+ "\n e.g. --dse-info").hasArg(false).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("delete-file")
+				.withDescription(
+						"Delete file forcefully."
+								+ "\n e.g. --delete-file <filename>").hasArg(true).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-dse-info")
 				.withDescription(
@@ -425,6 +433,11 @@ public class SDFSCmdline {
 						"Removes an unassociated volume in the cluster. "
 								+ "\n e.g. --cluster-volume-remove <vol-name>")
 				.hasArg(true).create());
+		options.addOption(OptionBuilder
+				.withLongOpt("sync-fs-size")
+				.withDescription(
+						"sync File system usage")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder
 				.withLongOpt("cluster-volume-add")
 				.withDescription(
@@ -570,15 +583,14 @@ public class SDFSCmdline {
 		options.addOption(OptionBuilder
 				.withLongOpt("cleanstore")
 				.withDescription(
-						"Clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files. This command only works"
-								+ "if the dedup storage engine is local and not in network mode")
+						"Clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files.")
 				.create());
 		options.addOption(OptionBuilder
-				.withLongOpt("partition-add")
+				.withLongOpt("compactcleanstore")
 				.withDescription(
-						"Creates a partition inside this volume. This option has three aguements: device-name size(MB|GB|TB) start-on-volume-startup(true|false) \n e.g. --createdev new-dev 100GB true")
-				.hasArgs(3)
-				.withArgName("device-name size start-on-vol-startup").create());
+						"Compact the hashtable and clean the dedup storage engine of data that is older than defined minutes and is unclaimed by current files.")
+				.create());
+		
 		options.addOption(OptionBuilder
 				.withLongOpt("set-attribute")
 				.withDescription(
@@ -591,23 +603,6 @@ public class SDFSCmdline {
 						"deletes an attribute for a file \n e.g. --file-path=afile --delete-attribute name")
 				.hasArg()
 				.withArgName("name").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("partition-rm")
-				.withDescription(
-						"Removes a partition from the volume.This will delete the block device and de-reference all data in the volume.")
-				.hasArg().withArgName("device-name").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("partition-stop")
-				.withDescription("Stops an active partition within the volume.")
-				.hasArg().withArgName("device-name").create());
-		options.addOption(OptionBuilder
-				.withLongOpt("partition-start")
-				.withDescription(
-						"Starts an inactive partition within the volume.")
-				.hasArg().withArgName("device-name").create());
-		options.addOption(OptionBuilder.withLongOpt("partition-list")
-				.withDescription("Lists all block devices within the volume.")
-				.create());
 		return options;
 	}
 

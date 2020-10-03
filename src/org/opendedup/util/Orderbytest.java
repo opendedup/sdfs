@@ -28,7 +28,7 @@ public class Orderbytest {
 		ArrayList<Long> al = new ArrayList<Long>();
 		Random r = new Random();
 		for (int i = 0; i < 15; i++) {
-			al.add(new Long(r.nextLong()));
+			al.add(Long.valueOf(r.nextLong()));
 		}
 		Collections.sort(al, new CustomComparator());
 		for (int i = 0; i < al.size(); i++) {

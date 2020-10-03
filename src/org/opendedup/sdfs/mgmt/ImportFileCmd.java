@@ -9,7 +9,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -33,8 +35,9 @@ public class ImportFileCmd implements Runnable {
 	String server;
 	String password;
 	int port;
-	int maxSz= 0;
+	int maxSz = 0;
 	boolean useSSL = false;
+	boolean hmac = false;
 	SDFSEvent evt;
 
 	public Element getResult(String srcFile, String destFile, String serverURL, int maxSz)
@@ -42,25 +45,32 @@ public class ImportFileCmd implements Runnable {
 		URL url = new URL(serverURL);
 		server = url.getHost();
 		port = url.getPort();
-		if(url.getProtocol().equalsIgnoreCase("https"))
+		if (url.getProtocol().equalsIgnoreCase("https"))
 			this.useSSL = true;
 		this.srcFile = srcFile;
 		this.destFile = destFile;
 		this.maxSz = maxSz;
+		SDFSLogger.getLog().info("connecting to " +serverURL + " srcfile=" + srcFile + " destFile=" + destFile);
+		@SuppressWarnings("deprecation")
 		List<NameValuePair> params = URLEncodedUtils.parse(new URI(serverURL), "UTF-8");
 		for (NameValuePair param : params) {
-			  if(param.getName().equalsIgnoreCase("password"))
-				  this.password = param.getValue();
+			if (param.getName().equalsIgnoreCase("hmac")) {
+				this.password = param.getValue();
+				this.hmac = true;
+			}
+			if (param.getName().equalsIgnoreCase("password")) {
+				this.password = MgmtServerConnection.initAuth(param.getValue(),server,port,this.useSSL);
+				this.hmac = true;
+			}
 		}
-		
+
 		return importArchive();
 	}
 
 	private Element importArchive() throws IOException {
-		evt = SDFSEvent.importEvent("Importing " + srcFile + " from " + server
-				+ ":" + port + " to " + destFile);
-		evt.curCt = 0;
-		evt.maxCt = 3;
+		evt = SDFSEvent.importEvent("Importing " + srcFile + " from " + server + ":" + port + " to " + destFile);
+		evt.setCurrentCount(0);
+		evt.setMaxCount(3);
 		Thread th = new Thread(this);
 		th.start();
 		try {
@@ -75,105 +85,122 @@ public class ImportFileCmd implements Runnable {
 		String sc = " not successful";
 		MetaDataDedupFile mf = null;
 		try {
-			evt.shortMsg = "Importing " + this.srcFile +  " to " + this.destFile;
+			evt.shortMsg = "Importing " + this.srcFile + " to " + this.destFile;
+			Map<String,String> axa = null;
+			if(new File(this.destFile).exists()) {
+				MetaDataDedupFile _mf = MetaFileStore.getMF(this.destFile);
+				Map<String,String> xa = _mf.getExtendedAttributes();
+				if(xa != null && xa.containsKey("netbackup.data")) {
+					axa = new HashMap<String,String>();
+					axa.putAll(xa);
+				}
+			}
+			MetaFileStore.removeMetaFile(this.destFile);
 			mf = downloadMetaFile();
-			evt.curCt++;
+			if(axa != null)
+				mf.getExtendedAttributes().putAll(axa);
+			evt.addCount(1);
 			evt.shortMsg = "Importing map for " + this.destFile;
-			String ng =downloadDDB(mf.getDfGuid());
+			String ng = downloadDDB(mf.getDfGuid());
 			mf.setDfGuid(ng);
 			mf.sync();
 			MetaFileStore.removedCachedMF(mf.getPath());
-			evt.curCt++;
-			MetaFileImport mi = new MetaFileImport(mf.getPath(), server, password, port, maxSz, evt,
-			useSSL);
+			MetaFileStore.addToCache(mf);
+			evt.addCount(1);
+			MetaFileImport mi = new MetaFileImport(mf.getPath(), server, password, port, maxSz, evt, useSSL);
 			mi.runImport();
 			evt.endEvent("import of " + this.destFile + " was successful");
 			sc = "successful";
 		} catch (Throwable e) {
-			if(mf != null) {
+			if (mf != null) {
 				mf.clearRetentionLock();
 				MetaFileStore.removeMetaFile(mf.getPath());
 				mf = null;
 			}
-			evt.endEvent(
-					"Unable to import archive [" + srcFile + "] "
-							+ "Destination [" + destFile + "]", SDFSEvent.ERROR, e);
-			SDFSLogger.getLog().error(
-					"Unable to import archive [" + srcFile + "] "
-							+ "Destination [" + destFile + "] because :"
-							+ e.toString(), e);
+			evt.endEvent("Unable to import archive [" + srcFile + "] " + "Destination [" + destFile + "]",
+					SDFSEvent.ERROR, e);
+			SDFSLogger.getLog().error("Unable to import archive [" + srcFile + "] " + "Destination [" + destFile
+					+ "] because :" + e.toString(), e);
 
 		} finally {
 			SDFSLogger.getLog().info("Exited Replication task [" + sc + "]");
 		}
 
 	}
-	
+
 	private MetaDataDedupFile downloadMetaFile() throws Exception {
-		String fp = MgmtWebServer.METADATA_PATH + URLEncoder.encode(this.srcFile,"UTF-8");
+		String fp = MgmtWebServer.METADATA_PATH + URLEncoder.encode(this.srcFile, "UTF-8");
 		GetMethod mtd = null;
-		try{
-			mtd = MgmtServerConnection.connectAndGet(server, port, password, "", fp, useSSL);
-		BufferedInputStream bis = new BufferedInputStream(mtd.getResponseBodyAsStream());
-		String pt = Main.volume.getPath() + File.separator + this.destFile;
-		File _f = new File(pt);
-		/*
-		if(_f.exists()) {
-			MetaDataDedupFile _mf = MetaFileStore.getMF(_f);
-			_mf.clearRetentionLock();
-			MetaFileStore.removeMetaFile(pt);
-		}*/
-		BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(_f));
-		MetaFileStore.removedCachedMF(_f.getPath());
-		IOUtils.copy(bis, bout);
-		IOUtils.closeQuietly(bis);
-		IOUtils.closeQuietly(bout);
-		MetaFileStore.removedCachedMF(_f.getPath());
-		return MetaFileStore.getMF(_f);
-	} finally {
-		if (mtd != null) {
-			try {
-				mtd.releaseConnection();
-			} catch (Exception e) {
+		try {
+			if (hmac) {
+				String url = MgmtServerConnection.createAuthUrl("", password);
+				mtd = MgmtServerConnection.connectAndGetHMAC(server, port, url, fp, useSSL);
+			}
+			else
+				mtd = MgmtServerConnection.connectAndGet(server, port, password, "", fp, useSSL);
+			BufferedInputStream bis = new BufferedInputStream(mtd.getResponseBodyAsStream());
+			String pt = Main.volume.getPath() + File.separator + this.destFile;
+			File _f = new File(pt);
+			/*
+			 * if(_f.exists()) { MetaDataDedupFile _mf = MetaFileStore.getMF(_f);
+			 * _mf.clearRetentionLock(); MetaFileStore.removeMetaFile(pt); }
+			 */
+			BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(_f));
+			MetaFileStore.removedCachedMF(_f.getPath());
+			IOUtils.copy(bis, bout);
+			IOUtils.closeQuietly(bis);
+			IOUtils.closeQuietly(bout);
+			MetaFileStore.removedCachedMF(_f.getPath());
+			return MetaFileStore.getMF(_f);
+		} finally {
+			if (mtd != null) {
+				try {
+					mtd.releaseConnection();
+				} catch (Exception e) {
+				}
 			}
 		}
+
 	}
-		
-	}
-	
+
 	private String downloadDDB(String guid) throws Exception {
 		SDFSLogger.getLog().info("getting " + guid);
 		String fp = MgmtWebServer.MAPDATA_PATH + guid;
 		GetMethod mtd = null;
-		try{
-		 mtd = MgmtServerConnection.connectAndGet(server, port, password, "", fp, useSSL);
-		BufferedInputStream bis = new BufferedInputStream(mtd.getResponseBodyAsStream());
-		
-		String ng = UUID.randomUUID().toString();
-		String path = Main.dedupDBStore + File.separator
-				+ ng.substring(0, 2) + File.separator + ng + File.separator;
-		File gd = new File(path);
-		gd.mkdirs();
-		boolean comp = Boolean.parseBoolean(mtd.getResponseHeader("metadatacomp").getValue());
-		String pt = path + ng + ".map";
-		if(comp)
-			pt = pt+".lz4";
-		File _f = new File(pt);
-		BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(_f));
-		IOUtils.copy(bis, bout);
-		IOUtils.closeQuietly(bis);
-		IOUtils.closeQuietly(bout);
-		SDFSLogger.getLog().info("downloaded " + _f.getPath() + " size=" + _f.length());
-		return ng;
-	} finally {
-		if (mtd != null) {
-			try {
-				mtd.releaseConnection();
-			} catch (Exception e) {
+		try {
+			if (hmac) {
+					String url = MgmtServerConnection.createAuthUrl("", password);
+					mtd = MgmtServerConnection.connectAndGetHMAC(server, port, url, fp, useSSL);
+			}
+				
+			else
+				mtd = MgmtServerConnection.connectAndGet(server, port, password, "", fp, useSSL);
+			BufferedInputStream bis = new BufferedInputStream(mtd.getResponseBodyAsStream());
+			String ng = UUID.randomUUID().toString();
+			String path = Main.dedupDBStore + File.separator + ng.substring(0, 2) + File.separator + ng
+					+ File.separator;
+			File gd = new File(path);
+			gd.mkdirs();
+			boolean comp = Boolean.parseBoolean(mtd.getResponseHeader("metadatacomp").getValue());
+			String pt = path + ng + ".map";
+			if (comp)
+				pt = pt + ".lz4";
+			File _f = new File(pt);
+			BufferedOutputStream bout = new BufferedOutputStream(new FileOutputStream(_f));
+			IOUtils.copy(bis, bout);
+			IOUtils.closeQuietly(bis);
+			IOUtils.closeQuietly(bout);
+			SDFSLogger.getLog().info("downloaded " + _f.getPath() + " size=" + _f.length());
+			return ng;
+		} finally {
+			if (mtd != null) {
+				try {
+					mtd.releaseConnection();
+				} catch (Exception e) {
+				}
 			}
 		}
-	}
-		
+
 	}
 
 }

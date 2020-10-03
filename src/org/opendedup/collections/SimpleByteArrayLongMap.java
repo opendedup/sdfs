@@ -28,6 +28,10 @@ import java.nio.channels.FileChannel;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -40,12 +44,12 @@ import org.opendedup.util.StringUtils;
 public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	// MappedByteBuffer keys = null;
 	private static int MAGIC_NUMBER = 6442;
+	private static final AtomicLong counter = new AtomicLong();
 	private int version = -1;
 	private int size = 0;
 	private int offset = 16;
 	private String path = null;
 	private FileChannel kFC = null;
-	RandomAccessFile rf = null;
 	private ReentrantReadWriteLock hashlock = new ReentrantReadWriteLock();
 	public static final byte[] FREE = new byte[HashFunctionPool.hashLength];
 	transient protected int EL = HashFunctionPool.hashLength + 4;
@@ -53,6 +57,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	BitSet mapped = null;
 	private int iterPos = 0;
 	private int currentSz = 0;
+	private long ct = 0;
 
 	static {
 		Arrays.fill(FREE, (byte) 0);
@@ -86,6 +91,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	}
 
 	private ReentrantLock iterlock = new ReentrantLock();
+	private Iterator<Entry<ByteArrayWrapper, Long>> iter = null;
 
 	/*
 	 * (non-Javadoc)
@@ -94,9 +100,15 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	 */
 	@Override
 	public void iterInit() {
+		try{
+		this.setUp();
+		}catch(Exception e) {}
 		this.iterlock.lock();
 		this.iterPos = 0;
 		this.iterlock.unlock();
+		if (bw != null && bw.size() > 0) {
+			iter = bw.entrySet().iterator();
+		}
 	}
 
 	/*
@@ -122,6 +134,16 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	 */
 	@Override
 	public KeyValuePair next() throws IOException, MapClosedException {
+		if (this.closed)
+			throw new MapClosedException();
+		if (iter != null) {
+			KeyValuePair kv = null;
+			if (iter.hasNext()) {
+				Entry<ByteArrayWrapper, Long> e = iter.next();
+				kv = new KeyValuePair(e.getKey().getData(), e.getValue());
+			}
+			return kv;
+		}
 		while (iterPos < this.kFC.size()) {
 			Lock l = this.hashlock.writeLock();
 			l.lock();
@@ -169,60 +191,104 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	/**
 	 * initializes the Object set of this hash table.
 	 * 
-	 * @param initialCapacity
-	 *            an <code>int</code> value
+	 * @param initialCapacity an <code>int</code> value
 	 * @return an <code>int</code> value
 	 * @throws IOException
 	 */
 	public void setUp() throws IOException {
-		boolean nf = false;
-		if (!new File(path).exists()) {
-			nf = true;
-			mapped = new BitSet(size);
-		}
-		rf = new RandomAccessFile(path, "rw");
-		this.kFC = FileChannel.open(new File(path).toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE,
-				StandardOpenOption.SPARSE, StandardOpenOption.READ);
-		if (version != 0) {
-			if (nf) {
-				ByteBuffer nbf = ByteBuffer.allocate(16);
-				nbf.putInt(MAGIC_NUMBER);
-				nbf.putInt(this.version);
-				nbf.position(0);
-				this.kFC.write(nbf);
-				EL = HashFunctionPool.hashLength + 8;
-				this.offset = 16;
-				rf.setLength((EL * size) + offset);
-			} else {
-				ByteBuffer nbf = ByteBuffer.allocate(16);
-				this.kFC.read(nbf);
-				nbf.position(0);
-				int mn = nbf.getInt();
-				int vr = nbf.getInt();
-				if (mn == MAGIC_NUMBER) {
-					EL = HashFunctionPool.hashLength + 8;
-					this.version = vr;
-					this.offset = 16;
+		Lock l = this.hashlock.writeLock();
+		l.lock();
+		RandomAccessFile rf = null;
+		try {
+			if (this.closed) {
+				boolean nf = false;
+				if (!new File(path).exists()) {
+					nf = true;
+					mapped = new BitSet(size);
+				}
+				this.ct = counter.incrementAndGet();
+				if (SDFSLogger.isDebug()) {
+					try {
+						throw new IOException("debug");
+					} catch (Exception e) {
+						SDFSLogger.getLog().debug("Opening [" + this.path + "] ct=[" + this.ct + "]", e);
+					}
+				}
+				rf = new RandomAccessFile(path, "rw");
+				this.kFC = FileChannel.open(new File(path).toPath(), StandardOpenOption.CREATE,
+						StandardOpenOption.WRITE, StandardOpenOption.SPARSE, StandardOpenOption.READ);
+				SDFSLogger.getLog().debug("Correctly opened [" + this.path + "] ct=[" + this.ct + "]");
 
+				if (version != 0) {
+					if (nf || new File(path).length() <= 16) {
+						ByteBuffer nbf = ByteBuffer.allocate(16);
+						nbf.putInt(MAGIC_NUMBER);
+						nbf.putInt(this.version);
+						nbf.position(0);
+						this.kFC.write(nbf);
+						EL = HashFunctionPool.hashLength + 8;
+						this.offset = 16;
+						rf.setLength((EL * size) + offset);
+					} else {
+						ByteBuffer nbf = ByteBuffer.allocate(16);
+						this.kFC.read(nbf);
+						nbf.position(0);
+						int mn = nbf.getInt();
+						int vr = nbf.getInt();
+						if (mn == MAGIC_NUMBER) {
+							EL = HashFunctionPool.hashLength + 8;
+							this.version = vr;
+							this.offset = 16;
+
+						} else {
+							EL = HashFunctionPool.hashLength + 4;
+							this.version = 0;
+							this.offset = 0;
+						}
+						size = (int) (new File(path).length() - offset) / EL;
+					}
 				} else {
 					EL = HashFunctionPool.hashLength + 4;
 					this.version = 0;
 					this.offset = 0;
+					if (nf || new File(path).length() == 0) {
+						rf.setLength((EL * size) + offset);
+					} else {
+						size = (int) (new File(path).length() - offset) / EL;
+					}
 				}
-				size = (int) (new File(path).length() - offset) / EL;
-			}
-		} else {
-			EL = HashFunctionPool.hashLength + 4;
-			this.version = 0;
-			this.offset = 0;
-			if (!nf) {
-				size = (int) (new File(path).length() - offset) / EL;
+				vb = ByteBuffer.allocateDirect(EL);
+				this.closed = false;
+				SDFSLogger.getLog().debug("Opened [" + this.path + "] ct=[" + this.ct + "]");
+				try {
+					rf.close();
+				} catch (Exception e1) {
+					SDFSLogger.getLog().debug("unable to close rf for " + this.path, e1);
+
+				}
 			} else {
-				rf.setLength((EL * size) + offset);
+				SDFSLogger.getLog().debug("Already Opened [" + this.path + "] ct=[" + this.ct + "]");
 			}
+
+		} catch (Exception e) {
+			try {
+				this.kFC.close();
+			} catch (Exception e1) {
+				SDFSLogger.getLog().debug("unable to close kFC for " + this.path, e1);
+			}
+			try {
+				rf.close();
+			} catch (Exception e1) {
+				SDFSLogger.getLog().debug("unable to close rf for " + this.path, e1);
+
+			}
+			this.closed = true;
+			SDFSLogger.getLog().error("unable to open " + this.path, e);
+			throw new IOException(e);
+		} finally {
+			l.unlock();
+
 		}
-		vb = ByteBuffer.allocateDirect(EL);
-		this.closed = false;
 	}
 
 	/*
@@ -265,8 +331,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	/**
 	 * Locates the index of <tt>obj</tt>.
 	 * 
-	 * @param obj
-	 *            an <code>Object</code> value
+	 * @param obj an <code>Object</code> value
 	 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
 	 * @throws IOException
 	 */
@@ -295,10 +360,8 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	/**
 	 * Locates the index of non-null <tt>obj</tt>.
 	 * 
-	 * @param obj
-	 *            target key, know to be non-null
-	 * @param index
-	 *            we start from
+	 * @param obj   target key, know to be non-null
+	 * @param index we start from
 	 * @param hash
 	 * @param cur
 	 * @return
@@ -334,7 +397,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		return -1;
 	}
 
-	boolean closed = false;
+	boolean closed = true;
 
 	/*
 	 * (non-Javadoc)
@@ -384,13 +447,10 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	 * Looks for a slot using double hashing for a non-null key values and inserts
 	 * the value in the slot
 	 * 
-	 * @param key
-	 *            non-null key value
-	 * @param index
-	 *            natural index
+	 * @param key   non-null key value
+	 * @param index natural index
 	 * @param hash
-	 * @param cur
-	 *            value of first matched slot
+	 * @param cur   value of first matched slot
 	 * @return
 	 * @throws IOException
 	 */
@@ -436,6 +496,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	}
 
 	ByteBuffer vb = null;
+	HashMap<ByteArrayWrapper, Long> bw = new HashMap<ByteArrayWrapper, Long>();
 
 	/*
 	 * (non-Javadoc)
@@ -464,6 +525,9 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 			} else {
 				vb.putLong(value);
 			}
+			if (bw != null) {
+				bw.put(new ByteArrayWrapper(key), value);
+			}
 			vb.position(0);
 			this.kFC.write(vb, pos + offset);
 			vb.position(0);
@@ -473,9 +537,14 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 			return pos > -1 ? true : false;
 		} catch (MapClosedException e) {
 			throw e;
+		} catch (IllegalStateException e) {
+			SDFSLogger.getLog().fatal("error inserting record", e);
+			throw e;
+		} catch (NullPointerException e) {
+			SDFSLogger.getLog().fatal("error inserting record", e);
+			return false;
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("error inserting record", e);
-			e.printStackTrace();
 			return false;
 		} finally {
 			l.unlock();
@@ -537,26 +606,36 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		Lock l = this.hashlock.writeLock();
 		l.lock();
 		try {
-			this.closed = true;
-			try {
-				this.kFC.close();
-			} catch (Exception e) {
-
+			if (!this.closed) {
+				this.ct = counter.decrementAndGet();
+				if (SDFSLogger.isDebug()) {
+					try {
+						throw new IOException("debug");
+					} catch (Exception e) {
+						SDFSLogger.getLog().debug("Closing [" + this.path + "] ct=[" + this.ct + "]", e);
+					}
+				}
+				this.closed = true;
+				try {
+					this.kFC.close();
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("unable to close kFC for " + this.path, e);
+				}
+				if (bw != null)
+					bw.clear();
+				bw = null;
+				this.mapped = null;
+				SDFSLogger.getLog().debug("Closed [" + this.path + "] ct=[" + this.ct + "]");
+			} else {
+				SDFSLogger.getLog().debug("Already Closed [" + this.path + "] ct=[" + counter.get() + "]");
 			}
-			try {
-				this.rf.close();
-			} catch (Exception e) {
-
-			}
-			this.mapped = null;
 		} finally {
 			l.unlock();
-			SDFSLogger.getLog().debug("closed " + this.path);
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
-		SimpleMapInterface b = new SimpleByteArrayLongMap("c:\\tmp\\-3581905307694103699.map", 10000000, 1);
+		SimpleMapInterface b = new SimpleByteArrayLongMap(args[0], 10000000, 1);
 		b.iterInit();
 		KeyValuePair p = b.next();
 		int i = 0;
@@ -568,8 +647,26 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 			p = b.next();
 
 		}
+
 		System.out.println("sz=" + i);
 		System.out.println(b.get(key));
+		@SuppressWarnings("resource")
+		FileChannel fc = new RandomAccessFile(args[1], "rw").getChannel();
+		long len = fc.size();
+		long pos = 0;
+		while (pos < len) {
+			ByteBuffer buf = ByteBuffer.allocateDirect(4 + 16 + 4);
+			fc.read(buf);
+			buf.flip();
+			buf.getInt();
+			byte[] hash = new byte[16];
+			buf.get(hash);
+			System.out.println("key=" + StringUtils.getHexString(hash) + " value=" + pos);
+			int nlen = buf.getInt();
+			pos = fc.position() + nlen;
+			fc.position(fc.position() + nlen);
+		}
+		fc.close();
 
 		/*
 		 * Random rnd = new Random(); byte[] hash = null; int val = -33; byte[] hash1 =

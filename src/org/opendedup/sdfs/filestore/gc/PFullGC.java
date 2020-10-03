@@ -22,7 +22,6 @@ import java.text.DecimalFormat;
 
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.concurrent.locks.Lock;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -61,7 +60,7 @@ public class PFullGC implements GCControllerImpl {
 			task.longMsg = "Running Garbage Collection because percentage full is "
 					+ this.calcPFull() + " and threshold is " + this.nextPFull;
 			try {
-				ManualGC.clearChunks();
+				ManualGC.clearChunks(false);
 				this.prevPFull = calcPFull();
 				this.nextPFull = this.calcNxtRun();
 				double pFull = (this.prevPFull * 100);
@@ -89,22 +88,14 @@ public class PFullGC implements GCControllerImpl {
 	}
 
 	private double calcPFull() {
-		Lock l = null;
-		try {
-			if (!Main.chunkStoreLocal) {
-				l = HCServiceProxy.cs.getLock("fdisk");
-			}
+			
 			double pFull = 0;
 			if (HCServiceProxy.getSize() > 0) {
 				pFull = (double) HCServiceProxy.getSize()
-						/ (double) HCServiceProxy.getMaxSize();
+						/ (double) (HCServiceProxy.getMaxSize()*10);
 			}
 
 			return pFull;
-		} finally {
-			if (l != null)
-				l.unlock();
-		}
 	}
 
 	private double calcNxtRun() {

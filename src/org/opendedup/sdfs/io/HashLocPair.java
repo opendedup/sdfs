@@ -41,6 +41,7 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 	public int offset;
 	public int nlen;
 	private boolean dup = false;
+	public boolean inserted = false;
 
 	public byte[] asArray() throws IOException {
 		ByteBuffer bf = ByteBuffer.wrap(new byte[BAL]);

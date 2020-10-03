@@ -11,9 +11,9 @@ import org.opendedup.util.OSValidator;
 import org.w3c.dom.Element;
 
 /**
- * 
+ *
  * @author Sam Silverberg Global constants used for SDFS classes.
- * 
+ *
  */
 public class Main {
 	static {
@@ -21,15 +21,22 @@ public class Main {
 			Main.chunkStore = System.getenv("programfiles") + File.separator
 					+ "sdfs" + File.separator;
 		}
+
 	}
+
+	public static int hlVersion = 0;
 	public static boolean checkArchiveOnOpen = false;
-	public static boolean checkArchiveOnRead = false;
+	public static boolean checkArchiveOnRead = true;
 	public static int hashSeed=6442;
 	public static double fpp = .01;
 	public static String logSize="10MB";
+	public static boolean ignoreDSEHTSize = true;
 	public static boolean CUCKOO =false;
+	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
+	public static boolean useLegacy = false;
+
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout
 	public static int readTimeoutSeconds = -1; // 1 hour timeout
@@ -37,55 +44,42 @@ public class Main {
 	public static boolean runConsistancyCheck = false;
 	public static boolean blockDev = false;
 	public static AbstractStreamMatcher matcher = null;
-	
+
 	public static boolean firstRun = true;
 	public static boolean disableGC = false;
 	public static boolean logToConsole = false;
-	public static boolean LOWMEM = false;
 	public static boolean REFRESH_BLOBS=false;
 	public static int MAX_TBLS=0;
 	public static int REPLICATION_THREADS=8;
 
 	public static boolean COMPRESS_METADATA = false;
 	public static boolean syncDL = false;
+	public static boolean syncDLAll = false;
 
 	public static StandAloneGCScheduler pFullSched = null;
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
 	public static byte MAPVERSION = 0;
-	
+	public static int MAX_OPEN_SST_FILES=-1;
 	public static String sdfsPassword = "";
 	public static boolean readAheadMap = true;
 	public static String sdfsPasswordSalt = "";
 	public static boolean allowExternalSymlinks = true;
-	
+
 	public static boolean sdfsCliSSL = true;
 	public static boolean sdfsCliRequireAuth = false;
 	public static int sdfsCliPort = 6442;
 	public static boolean sdfsCliEnabled = true;
 	public static String sdfsCliListenAddr = "localhost";
 	public static boolean runCompact = false;
+	public static boolean INLINE_REF_INSERT = false;
 	public static byte [] decKey = null;
-
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
 
 	public static SDFSEvent mountEvent = null;
 
-	public static String DSEClusterID = "sdfs-cluster";
-	public static byte DSEClusterMemberID = 0;
-	public static int ClusterRSPTimeout = 1000;
-	public static String DSEClusterConfig = "/etc/sdfs/jgroups.cfg.xml";
-	public static boolean DSEClusterEnabled = false;
-	public static String DSEClusterVolumeList = "/etc/sdfs/cluster-volumes.xml";
-	public static boolean DSEClusterDirectIO = true;
-	/**
-	 * DSE Host for front end file systems
-	 */
-	public static String DSERemoteHostName = null;
-
 	public static boolean standAloneDSE = false;
-	public static long DSEID = 0;
 
 	/**
 	 * DSE Host port for front end file systems
@@ -98,24 +92,11 @@ public class Main {
 	public static boolean DSERemoteUseSSL = true;
 
 	/**
-	 * DSE Host use SSL for front end file systems
-	 */
-	public static boolean DSERemoteCompress = false;
-
-	public static String DSEPassword = "admin";
-
-	public static String DSEClusterNodeRack = "rack1";
-	public static String DSEClusterNodeLocation = "pdx";
-	public static int MAX_TABLES_SCAN=100;
-
-	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.4.9.0";
+	public static String version = "3.11.0";
 
 	public static boolean readAhead = false;
-	
-	public static int MAX_TBL_SIZE=600_000_000;
 
 	/**
 	 * The location where the actual blocks of deduplicated data will be
@@ -135,7 +116,7 @@ public class Main {
 
 	// public static String hashesDBClass =
 	// "com.opendedup.collections.FileBasedCSMap";
-	public static String hashesDBClass = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
+	public static String hashesDBClass = "org.opendedup.collections.RocksDBMap";
 	/**
 	 * Future implementation of pluggable garbageCollector
 	 */
@@ -144,14 +125,14 @@ public class Main {
 	/**
 	 * Secret Key to Encrypt chunks in DSE.
 	 */
-	public static String chunkStoreEncryptionKey = "Password";
-	public static String eChunkStoreEncryptionKey = "Password";
+	public static String chunkStoreEncryptionKey = "nw";
+	public static String eChunkStoreEncryptionKey = null;
 	public static String chunkStoreEncryptionIV = "5d212ccaff6611eb4307c6ec3c9f8795";
 	/**
 	 * whether encryption should be enabled for the DSE
 	 */
 	public static boolean chunkStoreEncryptionEnabled = false;
-
+	public static long DSEID = 0;
 	/**
 	 * The location where database of deduped hashes will be stores and written
 	 * to. This is used for the chunk store.
@@ -161,8 +142,11 @@ public class Main {
 	 * The location where dedup file maps will be stored. Dedup file maps are
 	 * database files and the virtual representation of a file on disk. This is
 	 * used on the client.
-	 */
+	*/
 	public static String dedupDBStore = null;
+	public static String lookupfilterStore = null;
+	public static String dedupDBTrashStore = null;
+	public static boolean DDB_TRASH_ENABLED = false;
 	/**
 	 * The location where the model of the virtual file structure will be held.
 	 * The virtual file structure maps what will be presented as the filesystem
@@ -186,16 +170,7 @@ public class Main {
 	 */
 	public static int CHUNK_LENGTH = 16 * 1024;
 	public static int MIN_CHUNK_LENGTH = (4*1024)-1;
-	/**
-	 * The version of the communication protocol being used for client <-> chunk
-	 * store network communication.
-	 */
-	public static String PROTOCOL_VERSION = "1.1";
-	/**
-	 * The ping time used to keep client to chunk store network pipes open. This
-	 * is used on the client.
-	 */
-	public static int PING_TIME = 15 * 1000;
+
 
 	/**
 	 * The maximum number of writable chunks @see
@@ -258,35 +233,14 @@ public class Main {
 	 */
 	public static int defaultGroup = 0;
 
-	/**
-	 * The port the chunk store uses to listen of TCP and UDP connections. This
-	 * is used on the chunk store.
-	 */
-	public static int serverPort = 2222;
-	/**
-	 * The host name or IP that the chunk store network port will listen on.
-	 * This is used on the chunk store.
-	 */
-	public static String serverHostName = "0.0.0.0";
 
-	/**
-	 * The host name or IP that the chunk store network port will listen on.
-	 * This is used on the chunk store.
-	 */
-	public static boolean serverUseSSL = false;
-
-	/**
-	 * The maximum number of results that a specific query will return if H2 is
-	 * being used. This is used on the chunk store and the client.
-	 */
-	public static int maxReturnResults = 3000;
 	/**
 	 * The Volume object. This is used on the client.
 	 */
 	public static Volume volume;
 
 	/**
-	 * 
+	 *
 	 */
 	public static double gcPFIncrement = .05;
 
@@ -296,9 +250,10 @@ public class Main {
 	public static String volumeMountPoint;
 
 	/**
-	 * Enable the DSE Network Server
+	 * The Threshold for removing unreferenced data from the hashtable
 	 */
-	public static boolean enableNetworkDSEServer = false;
+	public static long HT_RM_THRESH=15 * 60 * 1000;
+
 
 	/**
 	 * Determines whether dedup file map will be closed when the filesystem
@@ -329,7 +284,7 @@ public class Main {
 	 */
 	public static boolean cloudChunkStore = false;
 	/**
-	 * 
+	 *
 	 */
 	public static String cloudBucket = null;
 	/**
@@ -374,16 +329,8 @@ public class Main {
 	 */
 	public static int chunkStorePageSize = 4096;
 
-	/**
-	 * If the Dedup Storage Engine is remote or local
-	 */
-	public static boolean chunkStoreLocal = false;
 
-	/**
-	 * If the Dedup Storage Engine is remote or local
-	 */
-	public static boolean enableNetworkChunkStore = false;
-	
+
 	public static boolean disableAutoGC = false;
 
 	/**
@@ -395,11 +342,15 @@ public class Main {
 
 	/**
 	 * FDisk Schedule in cron format
-	 * 
+	 *
 	 * @see org.opendedup.sdfs.FDISKJob
 	 */
 	public static String fDkiskSchedule = "0 59 23 * * ?";
 
 	public static boolean closedGracefully = true;
+	public static boolean rebuildHashTable = false;
 
+	public static boolean enableLookupFilter = false;
+	public static String sdfsUserName = "admin";
+	public static long maxAge = -1;
 }

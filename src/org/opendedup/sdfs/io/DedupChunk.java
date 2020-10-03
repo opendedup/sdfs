@@ -20,6 +20,8 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
+
 import java.util.TreeMap;
 
 /**
@@ -27,8 +29,7 @@ import java.util.TreeMap;
  * @author annesam Base class for storing byte arrays associated with dedup
  *         files into memory.
  */
-public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
-	private static final long serialVersionUID = -5440311151699047048L;
+public class DedupChunk implements DedupChunkInterface {
 	private int length;
 	private long position;
 	private boolean newChunk = false;
@@ -210,12 +211,6 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public void flush() throws BufferClosedException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void write(byte[] b, int pos) throws BufferClosedException,
 			IOException {
 		// TODO Auto-generated method stub
@@ -289,9 +284,9 @@ public class DedupChunk implements java.io.Serializable, DedupChunkInterface {
 	}
 
 	@Override
-	public void setAR(TreeMap<Integer,HashLocPair> al) {
+	public boolean setAR(TreeMap<Integer,HashLocPair> al) {
 		this.ar = al;
-
+		return true;
 	}
 
 	@Override

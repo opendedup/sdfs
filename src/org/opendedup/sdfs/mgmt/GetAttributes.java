@@ -19,6 +19,9 @@ import org.w3c.dom.Element;
 
 public class GetAttributes {
 
+
+	
+	
 	public Element getResult(String cmd, String file, boolean shortList) throws IOException {
 		if (file.equals("lastClosedFile")) {
 			try {
@@ -29,7 +32,7 @@ public class GetAttributes {
 				root.appendChild(fe);
 				return (Element) root.cloneNode(true);
 			} catch (Exception e) {
-				//SDFSLogger.getLog().error("unable to fulfill request on file " + file, e);
+				SDFSLogger.getLog().debug("unable to fulfill request on file " + file, e);
 				throw new IOException("request to fetch attributes failed because " + e.toString());
 			}
 		}
@@ -77,6 +80,7 @@ public class GetAttributes {
 
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
+				
 				Document doc = XMLUtils.getXMLDoc("files");
 				Element fe = mf.toXML(doc);
 				Element root = doc.getDocumentElement();
@@ -88,6 +92,9 @@ public class GetAttributes {
 			}
 		}
 	}
+	
+	
+	
 	
 	
 

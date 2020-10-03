@@ -3,9 +3,9 @@
 ; Sets the theme path
 
 
-!define VERSION '3.4.9'
-!define MUI_PRODUCT "SDFS Cloud File System"
+!define VERSION '3.10.4'
 
+!define MUI_PRODUCT "SDFS Cloud File System"
 
 ;--------------------------------
 ;Include Modern UI
@@ -20,6 +20,8 @@
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "sdfs.ico"
 !define MUI_HEADERIMAGE_RIGHT
+!define SF_USELECTED  0
+
 ;--------------------------------
 ;General
   ;Name and file
@@ -35,6 +37,18 @@
   BrandingText "${MUI_PRODUCT} ${VERSION}"
   
 
+!macro SecUnSelect SecId
+  Push $0
+  IntOp $0 ${SF_USELECTED} | ${SF_RO}
+  SectionSetFlags ${SecId} $0
+  SectionSetText  ${SecId} ""
+  Pop $0
+!macroend
+
+!define UnSelectSection '!insertmacro SecUnSelect'
+
+
+
 
 ;--------------------------------
 
@@ -46,7 +60,6 @@
 ;--------------------------------
 ;Pages
 
-  !insertmacro MUI_PAGE_LICENSE "gnulicense.txt"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
@@ -61,38 +74,32 @@
 
 
   ;--------------------------------
-;Version Information
-
-  VIProductVersion "3.4.9.0"
+  ;Version Information
+  VIProductVersion "3.10.4.0"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "3.4.9.0"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.4.9.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" 3.10.4.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.10.4.0"
 ;--------------------------------
 ;Installer Sections
 
-Function .onInit
- ${If} ${RunningX64}
-    
-  ${Else}
-	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows for x64."
-      Abort
-  ${EndIf}
-FunctionEnd
+
+
 
 
 Section "SDFS Setup" SecMain
-  
   SetOutPath "$INSTDIR"
   SectionIn RO
   File *
   SetOutPath "$INSTDIR\bin"
   File /r bin\*
   SetOutPath "$INSTDIR\lib"
-  File ..\deb\usr\share\sdfs\lib\*
+  File ..\..\target\sdfs-${VERSION}-jar-with-dependencies.jar
+  File ..\..\target\lib\b2-2.0.3.jar
+  File ..\..\target\lib\google-cloud-storage-2.1.2.jar
   SetOutPath "$INSTDIR\etc"
   File etc\*
   ;Store installation folder
@@ -100,7 +107,6 @@ Section "SDFS Setup" SecMain
   ${EnvVarUpdate} $0 "PATH" "A" "HKLM" $INSTDIR 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
-
   ; Write the uninstall keys for Windows
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS" "DisplayName" "SDFS ${VERSION}  (remove only)"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS" "UninstallString" '"$INSTDIR\Uninstall.exe"'
@@ -124,19 +130,34 @@ Function .onInstSuccess
   noreboot:
 FunctionEnd
  
- 
 Function un.onUninstSuccess
   MessageBox MB_OK "You have successfully uninstalled ${MUI_PRODUCT}."
 FunctionEnd
   
-
+Function .onInit
+ ${If} ${RunningX64}
+    
+  ${Else}
+	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows for x64."
+      Abort
+  ${EndIf}
+  IfFileExists "$INSTDIR\*.*" file_found done 
+  file_found:
+	MessageBox MB_YESNO "Upgrade Existing Setup to ${VERSION}?" IDNO noupgrade
+	RMDir /r "$INSTDIR\bin"
+	RMDir /r "$INSTDIR\lib"
+	${UnSelectSection} ${SecDokan}
+	Goto done
+  noupgrade:
+	Quit
+  done:
+FunctionEnd
 ;--------------------------------
 ;Descriptions
-
-  ;Language strings
+;Language strings
   LangString DESC_SecMain ${LANG_ENGLISH} "SDFS Volume Binaries Setup."
   LangString DESC_SecDokan ${LANG_ENGLISH} "Dokan Windows FileSystem Driver."
-  ;Assign language strings to sections
+;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecMain} $(DESC_SecMain)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDokan} $(DESC_SecDokan)

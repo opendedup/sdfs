@@ -27,7 +27,8 @@ public class HashChunk implements Externalizable {
 	private byte[] data;
 	// whether or not the data is compressed
 	private boolean compressed;
-
+	private long ct;
+	private String uuid;
 	public HashChunk() {
 
 	}
@@ -47,10 +48,16 @@ public class HashChunk implements Externalizable {
 	 * @param compressed
 	 *            whether or not the data is compressed
 	 */
-	public HashChunk(byte[] name, byte[] data, boolean compressed) {
+	public HashChunk(byte[] name, byte[] data, boolean compressed,long ct,String uuid) {
 		this.name = name;
 		this.data = data;
 		this.compressed = compressed;
+		this.ct = ct;
+		this.uuid = uuid;
+	}
+	
+	public String getUUID() {
+		return this.uuid;
 	}
 
 	/**
@@ -59,6 +66,10 @@ public class HashChunk implements Externalizable {
 	 */
 	public boolean isCompressed() {
 		return this.compressed;
+	}
+	
+	public long getCT() {
+		return this.ct;
 	}
 
 	/**

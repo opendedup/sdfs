@@ -2,6 +2,7 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -32,8 +33,8 @@ import com.google.common.cache.RemovalNotification;
 public class CopyExtents {
 	SDFSEvent evt;
 
-	private static LoadingCache<String, DedupFileChannel> writeChannels = CacheBuilder.newBuilder().maximumSize(30)
-			.concurrencyLevel(64).expireAfterAccess(60, TimeUnit.SECONDS)
+	protected static LoadingCache<String, DedupFileChannel> writeChannels = CacheBuilder.newBuilder().maximumSize(Main.maxOpenFiles*2)
+			.concurrencyLevel(64).expireAfterAccess(120, TimeUnit.SECONDS)
 			.removalListener(new RemovalListener<String, DedupFileChannel>() {
 				public void onRemoval(RemovalNotification<String, DedupFileChannel> removal) {
 					DedupFileChannel ck = removal.getValue();
@@ -80,6 +81,7 @@ public class CopyExtents {
 			len = smf.length();
 		SparseDedupFile sdf = (SparseDedupFile) smf.getDedupFile(true);
 		SparseDedupFile ddf = (SparseDedupFile) dmf.getDedupFile(true);
+		ddf.setReconstructed(true);
 		long _spos = -1;
 		long _dpos = -1;
 		try {
@@ -100,11 +102,29 @@ public class CopyExtents {
 					int _so = (int) (_sstart - _spos);
 					int _do = (int) (_dstart - _dpos);
 					boolean insdone = false;
+					DedupFileChannel ch = null;
+					int tries = 0;
 					while (!insdone) {
 						try {
+							ch = sdf.getChannel(-1);
 							SparseDataChunk sdc = sdf.getSparseDataChunk(_spos);
+							/*
+							if(sdc.getFingers().size() == 0) {
+								int _nlen = 4 *1024;
+								if(_nlen > _rem) {
+									_nlen = (int)_rem;
+								}
+								dc.writeFile(ByteBuffer.allocate(_nlen), _nlen, 0, _dpos, true);
+								//ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
+								//ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
+								//ddf.mf.setLastModified(System.currentTimeMillis());
+								written += _nlen;
+								if(written >= len)
+									insdone = true;
+							} else {
+							*/
 							WritableCacheBuffer ddc = (WritableCacheBuffer) ddf.getWriteBuffer(_dpos);
-
+							ddc.writeAccelBuffer();
 							HashLocPair p = sdc.getWL(_so);
 
 							if (p.nlen > _rem) {
@@ -128,15 +148,27 @@ public class CopyExtents {
 								} else
 									throw e;
 							}
-							ddf.mf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
-							ddf.mf.getIOMonitor().addDulicateData(p.nlen, true);
-							ddf.mf.setLastModified(System.currentTimeMillis());
+							dmf.getIOMonitor().addVirtualBytesWritten(p.nlen, true);
+							dmf.getIOMonitor().addDulicateData(p.nlen, true);
+							dmf.setLastModified(System.currentTimeMillis());
 							written += p.nlen;
 							insdone = true;
+							
+							//}
 						} catch (org.opendedup.sdfs.io.FileClosedException e) {
+							if(tries > 100) 
+								throw new IOException("tried to open file 100 ties and failed " + smf.getPath());
 							insdone = false;
 						} catch (Exception e) {
 							throw e;
+						} finally {
+							if(ch != null) {
+								try {
+									sdf.unRegisterChannel(ch, -1);
+								}catch(Exception e) {
+									
+								}
+							}
 						}
 					}
 

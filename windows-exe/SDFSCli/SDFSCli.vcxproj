@@ -85,8 +85,8 @@
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
     <ReferencePath>$(ReferencePath)</ReferencePath>
-    <IncludePath>C:\Users\samsilverberg\Documents\GitHub\ost\src\windows\curl-7.45.0-win64\curl-7.45.0-win64\include;C:\Users\samsilverberg\Documents\GitHub\ost\src\windows\tinyxml2-3.0.0;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\samsilverberg\Documents\GitHub\ost\src\windows\curl-7.45.0-win64\curl-7.45.0-win64\lib;C:\Users\samsilverberg\Documents\GitHub\ost\src\windows\tinyxml2-3.0.0\tinyxml2\bin\x64-Release-Dll;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\samsi\Documents\GitHub\ost\src\windows\curl-7.45.0-win64\curl-7.45.0-win64\include;C:\Users\samsi\Documents\GitHub\ost\src\windows\tinyxml2-3.0.0;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\samsi\Documents\GitHub\ost\src\windows\curl-7.45.0-win64\curl-7.45.0-win64\lib;C:\Users\samsi\Documents\GitHub\ost\src\windows\tinyxml2-3.0.0\tinyxml2\bin\x64-Release-Dll;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -29,7 +29,7 @@ public class ConsistancyCheck {
 					Main.mountEvent);
 			CommandLineProgressBar bar = new CommandLineProgressBar(
 					"Scanning DSE", map.getSize(), System.out);
-			evt.maxCt = map.getSize();
+			evt.setMaxCount(map.getSize());
 			ArrayList<HashFetcher> al = new ArrayList<HashFetcher>();
 			for (int i = 0; i < Main.writeThreads; i++) {
 				HashFetcher hf = new HashFetcher();

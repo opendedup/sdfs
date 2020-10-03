@@ -20,13 +20,11 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
-import java.util.ArrayList;
 
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
@@ -37,25 +35,23 @@ public interface HashChunkServiceInterface {
 	/**
 	 * @return the chunksFetched
 	 */
-	public abstract String restoreBlock(byte[] hash) throws IOException;
+	public abstract String restoreBlock(byte[] hash,long id) throws IOException;
 
 	public abstract boolean blockRestored(String id) throws IOException;
 	
-	public abstract boolean mightContainKey(byte [] key);
+	public abstract boolean mightContainKey(byte [] key,long id);
 
 	public abstract long getChunksFetched();
 
 	public abstract AbstractChunkStore getChuckStore();
 	
-	public abstract boolean claimKey(byte [] key,long val,long ct) throws IOException;
+	public abstract long claimKey(byte [] key,long val,long ct) throws IOException;
 	
 
 	public abstract InsertRecord writeChunk(byte[] hash, byte[] aContents,
-			boolean compressed) throws IOException, HashtableFullException;
+			boolean compressed,long ct,String uuid) throws IOException, HashtableFullException;
 
-	public abstract void remoteFetchChunks(ArrayList<String> al, String server,
-			String password, int port, boolean useSSL) throws IOException,
-			HashtableFullException;
+	
 
 	public abstract long hashExists(byte[] hash) throws IOException,
 			HashtableFullException;
@@ -68,10 +64,7 @@ public interface HashChunkServiceInterface {
 
 	public abstract byte getHashRoute(byte[] hash);
 
-	public abstract long processHashClaims(SDFSEvent evt) throws IOException;
-
-	public abstract long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
-			throws IOException;
+	public abstract long processHashClaims(SDFSEvent evt,boolean compact) throws IOException;
 
 	public abstract void commitChunks();
 
@@ -115,6 +108,8 @@ public interface HashChunkServiceInterface {
 
 	public abstract void setCacheSize(long sz) throws IOException;
 	
+	public abstract void setDseSize(long sz) throws IOException;
+
 	public abstract RemoteVolumeInfo[] getConnectedVolumes() throws IOException;
 
 	void clearRefMap() throws IOException;

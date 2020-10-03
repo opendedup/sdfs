@@ -2,8 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
-
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -22,12 +20,13 @@ import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
-import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.LRUCache;
+import org.opendedup.util.XMLUtils;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.primitives.Longs;
@@ -36,18 +35,42 @@ public class GetCloudFile implements Runnable {
 
 	MetaDataDedupFile mf = null;
 	MetaDataDedupFile sdf = null;
-	SparseDedupFile sdd = null;
 	String sfile, dstfile;
 	boolean overwrite;
-	
-	File df = null;
-	SDFSEvent fevt = null;
+	private Object obj = null;
+	public SDFSEvent fevt = null;
+	static LRUCache<String, String> ck = new LRUCache<String, String>(500);
+	public static LRUCache<String, Object> fack = new LRUCache<String, Object>(50);
 
-	public Element getResult(String file, String dstfile, boolean overwrite) throws IOException {
+	public Element getResult(String file, String dstfile, boolean overwrite, String changeid) throws IOException {
+		fevt = SDFSEvent.cfEvent(file);
+		synchronized (ck) {
+			if (changeid != null && ck.containsKey(changeid)) {
+				try {
+					SDFSLogger.getLog().debug("ignoring " + changeid + " " + file);
+					Document doc = XMLUtils.getXMLDoc("cloudfile");
+					Element root = doc.getDocumentElement();
+					root.setAttribute("action", "ignored");
+					fevt.endEvent("ignoring file");
+					return (Element) root.cloneNode(true);
+					
+				} catch (Exception e) {
+					fevt.endEvent("unable to download file " + file, SDFSEvent.ERROR);
+					throw new IOException(e);
+				}
+
+			}
+			ck.put(changeid, file);
+			if (fack.containsKey(file)) {
+				obj = fack.get(file);
+			} else {
+				obj = new Object();
+				fack.put(file, obj);
+			}
+		}
 		this.sfile = file;
 		this.dstfile = dstfile;
 		this.overwrite = overwrite;
-		fevt = SDFSEvent.cfEvent(file);
 		Thread th = new Thread(this);
 		th.start();
 		try {
@@ -55,9 +78,9 @@ public class GetCloudFile implements Runnable {
 		} catch (ParserConfigurationException e) {
 			throw new IOException(e);
 		}
-		
+
 	}
-	
+
 	private void downloadFile() throws IOException {
 		if (dstfile != null && sfile.contentEquals(dstfile) && !overwrite)
 			throw new IOException("local filename in the same as source name");
@@ -72,38 +95,62 @@ public class GetCloudFile implements Runnable {
 			if (!overwrite && f.exists() && MetaDataDedupFile.getFile(f.getPath()).isLocalOwner())
 				throw new IOException("File [" + sfile + "] already exists and is owned locally.");
 			else {
-				fevt.maxCt = 3;
-				fevt.curCt = 1;
+				MetaFileStore.removedCachedMF(new File(Main.volume.getPath() + File.separator + sfile).getPath());
+				if (df != null) {
+					MetaFileStore.removedCachedMF(df.getPath());
+				}
+				if (f.exists()) {
+					if (df == null) {
+						MetaFileStore.removeMetaFile(new File(Main.volume.getPath() + File.separator + sfile).getPath(),
+								true, true,false);
+						SDFSLogger.getLog()
+								.debug("Removed " + new File(Main.volume.getPath() + File.separator + sfile).getPath());
+					}
+					try {
+						MetaFileStore.getMF(f);
+						MetaFileStore.getMF(f).clearRetentionLock();
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn("File [" + f.getPath() + "] retention lock could not be removed ", e);
+					}
+					boolean removed = MetaFileStore.removeMetaFile(f.getPath(), true, true,false);
+					SDFSLogger.getLog().info("removed " + f.getPath() + " success=" + removed);
+
+					if (removed) {
+						SDFSEvent.deleteFileEvent(f);
+
+					} else {
+						SDFSEvent.deleteFileFailedEvent(f);
+					}
+				}
+				fevt.setMaxCount(3);
+				fevt.setCurrentCount(1);
+				SDFSLogger.getLog().debug("downloading " + sfile);
 				fevt.shortMsg = "Downloading [" + sfile + "]";
-				mf = FileReplicationService.getMF(sfile);
-				mf.setLocalOwner(false);
+				MetaDataDedupFile _mf = FileReplicationService.getMF(sfile);
+				SDFSLogger.getLog().debug("downloaded " + sfile);
 				fevt.shortMsg = "Downloading Map Metadata for [" + sfile + "]";
-				
-				LongByteArrayMap ddb = null;
-				FileReplicationService.getDDB(mf.getDfGuid());
+				SDFSLogger.getLog().debug("downloading ddb " + _mf.getDfGuid());
+				if(_mf.getDfGuid() == null) {
+					throw new IOException("File " + sfile + " has no data");
+				}
+				LongByteArrayMap mp = FileReplicationService.getDDB(_mf.getDfGuid());
+				mp.setIndexed(false);
+				mf = MetaFileStore.getMF(_mf.getPath());
+				mf.setLocalOwner(false);
+				SDFSLogger.getLog().info("downloaded ddb " + mf.getDfGuid());
 				if (df != null) {
 					sdf = mf.snapshot(df.getPath(), overwrite, fevt);
-					sdd = sdf.getDedupFile(false);
-					DedupFileChannel ch = sdd.getChannel(-1);
-					ddb = (LongByteArrayMap) sdd.bdb;
-					sdd.unRegisterChannel(ch, -1);
-
 				} else {
-					sdd = mf.getDedupFile(false);
-					DedupFileChannel ch = sdd.getChannel(-1);
-					ddb = (LongByteArrayMap) sdd.bdb;
-					sdd.unRegisterChannel(ch, -1);
-				}
-				fevt.curCt++;
-				if (ddb.getVersion() < 3)
-					throw new IOException("only files version 3 or later can be imported");
+					SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" + mf.getDfGuid());
 
-				
+				}
+				fevt.addCount(1);
+
 			}
 		} catch (IOException e) {
 
 			if (sdf != null) {
-				MetaFileStore.removeMetaFile(sdf.getPath(), true, true);
+				sdf.deleteStub(true);
 			}
 			throw e;
 		} catch (Exception e) {
@@ -114,19 +161,24 @@ public class GetCloudFile implements Runnable {
 		}
 	}
 
-	private void checkDedupFile(SparseDedupFile sdb, SDFSEvent fevt) throws IOException {
+	private void checkDedupFile(SDFSEvent fevt) throws IOException {
+
 		fevt.shortMsg = "Importing hashes for file";
-		//SDFSLogger.getLog().info("Importing " + sdb.getGUID());
+		SDFSLogger.getLog().info("Importing " + mf.getDfGuid());
 		Set<Long> blks = new HashSet<Long>();
-		DedupFileChannel ch = sdb.getChannel(-1);
-		LongByteArrayMap ddb = (LongByteArrayMap) sdb.bdb;
+		LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid());
+		ddb.forceClose();
+		ddb = LongByteArrayMap.getMap(mf.getDfGuid());
+		ddb.setIndexed(true);
 		mf.getIOMonitor().clearFileCounters(false);
-		if (ddb.getVersion() < 3)
-			throw new IOException("only files version 3 or later can be imported");
+		if (ddb.getVersion() < 2)
+			throw new IOException("only files version 2 or later can be imported");
 		try {
+			long ct = 0;
 			ddb.iterInit();
 			for (;;) {
-				LongKeyValue kv = ddb.nextKeyValue(Main.refCount);
+				LongKeyValue kv = ddb.nextKeyValue(false);
+				ct++;
 				if (kv == null)
 					break;
 				SparseDataChunk ck = kv.getValue();
@@ -134,6 +186,7 @@ public class GetCloudFile implements Runnable {
 				TreeMap<Integer, HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al.values()) {
 					ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc), p.hash);
+					cm.references = 1;
 					InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
 					mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
 					if (ir.getInserted()) {
@@ -142,46 +195,62 @@ public class GetCloudFile implements Runnable {
 					} else {
 						mf.getIOMonitor().addDulicateData(p.nlen, false);
 						if (!Arrays.equals(p.hashloc, ir.getHashLocs())) {
-							SDFSLogger.getLog().info("z " + Longs.fromByteArray( ir.getHashLocs()) + " " +Longs.fromByteArray( p.hashloc) );
+							SDFSLogger.getLog().debug("importing " + Longs.fromByteArray( ir.getHashLocs()) + " "
+							 +Longs.fromByteArray( p.hashloc) );
 							p.hashloc = ir.getHashLocs();
 							blks.add(Longs.fromByteArray(ir.getHashLocs()));
 							dirty = true;
 						}
 					}
-					
-					
+
 				}
 				if (dirty)
 					ddb.put(kv.getKey(), ck);
 			}
-			
-			//SDFSLogger.getLog().info("new objects of size " + blks.size());
+
+			SDFSLogger.getLog().info("new objects of size " + blks.size() + " iter count is " + ct);
 			for (Long l : blks) {
-				SDFSLogger.getLog().info("importing " + l);
+				SDFSLogger.getLog().debug("importing " + l);
 				HashBlobArchive.claimBlock(l);
 			}
 		} catch (Throwable e) {
 			SDFSLogger.getLog().warn("error while checking file [" + ddb + "]", e);
 			throw new IOException(e);
 		} finally {
-			sdd.unRegisterChannel(ch, -1);
+			try {
+				ddb.forceClose();
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("error closing file [" + mf.getPath() + "]", e);
+			}
+
 		}
-		fevt.curCt++;
+		SDFSLogger.getLog().info("Done Importing " + mf.getDfGuid());
+		fevt.addCount(1);
 	}
 
 	@Override
 	public void run() {
 		try {
-			this.downloadFile();
-			this.checkDedupFile(sdd, fevt);
-			fevt.endEvent("imported [" + mf.getPath() + "]");
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to process file " + mf.getPath(), e);
-			fevt.endEvent("unable to process file " + mf.getPath(), SDFSEvent.ERROR);
-		} finally {
-			if (df != null && mf != null) {
-				MetaFileStore.removeMetaFile(mf.getPath(), true, true);
+			synchronized (obj) {
+				this.downloadFile();
+				this.checkDedupFile(fevt);
+				fevt.endEvent("imported [" + mf.getPath() + "]");
 			}
+		} catch (Exception e) {
+			String pth = "";
+			if (mf != null)
+				pth = mf.getPath();
+			try {
+				File f = new File(Main.volume.getPath() + File.separator + sfile);
+				if (f.exists()) {
+					
+						f.delete();
+				}
+			} catch (Exception e1) {
+
+			}
+			SDFSLogger.getLog().error("unable to process file " + pth, e);
+			fevt.endEvent("unable to process file " + pth, SDFSEvent.ERROR);
 		}
 
 	}

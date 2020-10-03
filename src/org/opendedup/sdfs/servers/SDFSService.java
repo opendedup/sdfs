@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -20,24 +20,22 @@ package org.opendedup.sdfs.servers;
 
 import java.util.ArrayList;
 
+import java.util.Properties;
+
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.VariableHashEngine;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.BloomFDisk;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
-import org.opendedup.sdfs.network.NetworkDSEServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
 
 public class SDFSService {
 	String configFile;
 
-	private NetworkDSEServer ndServer = null;
 	private ArrayList<String> volumes;
 	private static boolean stopped = false;
 
@@ -49,14 +47,24 @@ public class SDFSService {
 
 		this.configFile = configFile;
 		this.volumes = volumes;
-		System.out.println("Running Program SDFS Version " + Main.version);
+		String ts = "";
+		Properties props = new Properties();
+		try {
+			props.load(this.getClass().getResourceAsStream("/version.properties"));
+			Main.version = props.getProperty("version");
+			ts = props.getProperty("timestamp");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		System.out.println("Running Program SDFS Version " + Main.version + " build date " + ts);
 
 		System.out.println("reading config file = " + this.configFile);
 	}
 
-	public void start(boolean useSSL, int port,String password) throws Exception {
-		Config.parseSDFSConfigFile(this.configFile,password);
-		if(useSSL) {
+	public void start(boolean useSSL, int port, String password) throws Exception {
+		Config.parseSDFSConfigFile(this.configFile, password);
+		if(!useSSL){
 			useSSL = Main.sdfsCliSSL;
 		}
 		if (port != -1)
@@ -71,36 +79,15 @@ public class SDFSService {
 		Main.mountEvent = SDFSEvent
 				.mountEvent("SDFS Version [" + Main.version + "] Mounting Volume from " + this.configFile);
 		if (HashFunctionPool.max_hash_cluster > 1)
-			SDFSLogger.getLog().info("HashFunction Min Block Size=" + VariableHashEngine.minLen + " Max Block Size="
-					+ VariableHashEngine.maxLen);
+			SDFSLogger.getLog().info("HashFunction Min Block Size=" + HashFunctionPool.minLen + " Max Block Size="
+					+ HashFunctionPool.maxLen);
 		Main.DSEID = Main.volume.getSerialNumber();
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");
 		MgmtWebServer.start(useSSL);
-		
-		if (Main.chunkStoreLocal) {
-			try {
 
-				if (Main.volume == null && !Main.runCompact) {
-					ndServer = new NetworkDSEServer();
-					new Thread(ndServer).start();
-				}
-			} catch (Exception e) {
-				SDFSLogger.getLog().error("Unable to initialize volume ", e);
-				System.err.println("Unable to initialize Hash Chunk Service");
-				e.printStackTrace();
-				System.exit(-1);
-			}
-			if (Main.runCompact) {
-				this.stop();
-				System.exit(0);
-			}
-
-			Main.pFullSched = new StandAloneGCScheduler();
-		}
-
-		Main.mountEvent.endEvent("Volume Mounted");
+		Main.pFullSched = new StandAloneGCScheduler();
 		try {
 			if (Main.volume.getName() == null)
 				Main.volume.setName(configFile);
@@ -110,6 +97,7 @@ public class SDFSService {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
 		Main.volume.init();
+		Main.mountEvent.endEvent("Volume Mounted");
 		SDFSLogger.getLog().debug("############### SDFSService Started ##################");
 	}
 
@@ -120,7 +108,7 @@ public class SDFSService {
 		SDFSLogger.getLog().info("Stopping FDISK scheduler");
 
 		try {
-			BloomFDisk.closed = true;
+			// BloomFDisk.closed = true;
 			Main.pFullSched.close();
 			Main.pFullSched = null;
 
@@ -148,8 +136,8 @@ public class SDFSService {
 		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
 		 */
 		try {
-		MgmtWebServer.stop();
-		}catch(Exception e) {
+			MgmtWebServer.stop();
+		} catch (Exception e) {
 			System.out.println("Web Server did not close correctly");
 			SDFSLogger.getLog().error("Web server did not close correctly", e);
 		}
@@ -159,29 +147,21 @@ public class SDFSService {
 				p.waitFor();
 			}
 		} catch (Exception e) {
-			
-		}
-		if (Main.chunkStoreLocal) {
-			SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
-			try {
-			HCServiceProxy.close();
-			}catch(Exception e) {
-				System.out.println("HashStore did not close correctly");
-				SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
-			}
-			SDFSLogger.getLog().info("######### HashStore Closed ###################");
-			Main.volume.setClosedGracefully(true);
-			try {
-				Config.writeSDFSConfigFile(configFile);
-			} catch (Exception e) {
 
-			}
-			if (Main.enableNetworkChunkStore && !Main.runCompact) {
-				try {
-					ndServer.close();
-				} catch (Exception e) {
-				}
-			}
+		}
+		SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
+		try {
+			HCServiceProxy.close();
+		} catch (Exception e) {
+			System.out.println("HashStore did not close correctly");
+			SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
+		}
+		SDFSLogger.getLog().info("######### HashStore Closed ###################");
+		Main.volume.setClosedGracefully(true);
+		try {
+			Config.writeSDFSConfigFile(configFile);
+		} catch (Exception e) {
+
 		}
 		try {
 			Main.volume.setClosedGracefully(true);

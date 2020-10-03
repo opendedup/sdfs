@@ -2,7 +2,6 @@ package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
 
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -12,6 +11,11 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -21,12 +25,21 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.commons.io.IOUtils;
 import org.opendedup.collections.DataArchivedException;
+import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.LongKeyValue;
+import org.opendedup.collections.SparseDataChunk;
+import org.opendedup.hashing.AbstractHashEngine;
+import org.opendedup.hashing.HashFunctionPool;
+import org.opendedup.sdfs.io.events.MFileWritten;
+import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.DedupFileChannel;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.events.MFileDeleted;
+import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.util.XMLUtils;
 import org.simpleframework.http.Method;
 import org.simpleframework.http.Request;
@@ -36,6 +49,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.eventbus.EventBus;
+import com.google.common.primitives.Longs;
 
 import fuse.Errno;
 import fuse.FuseException;
@@ -44,8 +58,11 @@ import fuse.FuseFtypeConstants;
 public class Io {
 	AtomicLong nextHandleNo = new AtomicLong(1000);
 	ConcurrentHashMap<Long, DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long, DedupFileChannel>();
+	private static Map<String, BERefresh> refreshmap = new HashMap<String, BERefresh>();
 	public final String mountedVolume;
+	public final String connicalMountedVolume;
 	public final String mountPoint;
+	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 
 	private static EventBus eventBus = new EventBus();
 
@@ -53,13 +70,28 @@ public class Io {
 		eventBus.register(obj);
 	}
 
-	public Io(String mountedVolume, String mountPoint) {
+	private void checkInFS(File f) throws FuseException {
+		try {
+
+			if (!f.getCanonicalPath().startsWith(connicalMountedVolume)) {
+				SDFSLogger.getLog()
+						.warn("Path is not in mounted [" + mountedVolume + "]folder " + f.getCanonicalPath());
+				throw new FuseException("data not in path " + f.getCanonicalPath()).initErrno(Errno.EACCES);
+			}
+		} catch (IOException e) {
+			SDFSLogger.getLog().warn("Path is not in mounted folder", e);
+			throw new FuseException("data not in path " + f.getPath()).initErrno(Errno.EACCES);
+		}
+	}
+
+	public Io(String mountedVolume, String mountPoint) throws IOException {
 
 		SDFSLogger.getLog().info("mounting " + mountedVolume + " to " + mountPoint);
 
 		if (!mountedVolume.endsWith("/"))
 			mountedVolume = mountedVolume + "/";
 		this.mountedVolume = mountedVolume;
+		this.connicalMountedVolume = new File(this.mountedVolume).getCanonicalPath();
 		if (!mountPoint.endsWith("/"))
 			mountPoint = mountPoint + "/";
 
@@ -90,6 +122,7 @@ public class Io {
 			try {
 				MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
 				ch = mf.getDedupFile(false).getChannel(-2);
+
 				try {
 					if (this.dedupChannels.containsKey(handleNo)) {
 						ch.getDedupFile().unRegisterChannel(ch, -2);
@@ -97,13 +130,26 @@ public class Io {
 					} else {
 						this.dedupChannels.put(handleNo, ch);
 					}
+					// SDFSLogger.getLog().info("Getting attributes for " + f.getPath());
+					if (mf != null) {
+						if (mf.getName().equalsIgnoreCase("BEOST_SInf.img")
+								|| mf.getName().equalsIgnoreCase("BEOST_SInf-Bak.img")
+								|| mf.getName().equalsIgnoreCase("BEOST_SMap.img")) {
+							synchronized (refreshmap) {
+								if (!refreshmap.containsKey(mf.getName())) {
+									refreshmap.put(mf.getName(), new BERefresh(f.getPath()));
+								}
+							}
+
+						}
+					}
 				} catch (Exception e) {
 
 				} finally {
 					SDFSLogger.getLog().debug("number of channels is " + this.dedupChannels.size());
 				}
 			} catch (Exception e) {
-				SDFSLogger.getLog().error("unable to open file" + f.getPath(), e);
+				SDFSLogger.getLog().debug("unable to open file" + f.getPath(), e);
 				throw new FuseException("unable to open file " + path).initErrno(Errno.EINVAL);
 			}
 		}
@@ -113,7 +159,7 @@ public class Io {
 	private DedupFileChannel getFileChannel(long handleNo) throws FuseException {
 		DedupFileChannel ch = this.dedupChannels.get(handleNo);
 		if (ch == null) {
-			SDFSLogger.getLog().error("unable to read file " + handleNo);
+			SDFSLogger.getLog().debug("unable to read file " + handleNo);
 			throw new FuseException("error reading " + handleNo).initErrno(Errno.EBADFD);
 		}
 		return ch;
@@ -147,10 +193,10 @@ public class Io {
 		try {
 			ByteBuffer buf = ByteBuffer.allocate(len);
 			req.getByteChannel().read(buf);
-			
+
 			if (buf.position() != len) {
 				SDFSLogger.getLog().warn("length is " + len + " buffer size " + buf.position());
-				
+
 				throw new FuseException().initErrno(Errno.EIO);
 			}
 			buf.position(0);
@@ -158,11 +204,11 @@ public class Io {
 			rsp.setCode(200);
 			rsp.close();
 		} catch (FuseException e) {
-			SDFSLogger.getLog().error("error during write",e);
+			SDFSLogger.getLog().error("error during write", e);
 			this.printError(req, rsp, e.getErrno(), e);
 
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error during write",e);
+			SDFSLogger.getLog().error("error during write", e);
 			this.printError(req, rsp, -1, e);
 		}
 
@@ -249,8 +295,94 @@ public class Io {
 		throw new FuseException().initErrno(Errno.ENOENT);
 	}
 
+	public int mkdir(String path) throws FuseException {
+		try {
+			File f = new File(this.mountedVolume + path);
+			try {
+				this.checkInFS(f);
+			} catch (FuseException e) {
+				SDFSLogger.getLog().warn("unable", e);
+				throw e;
+			}
+			// SDFSLogger.getLog().info("3 " + f.getCanonicalPath());
+			if (Main.volume.isOffLine())
+				throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
+			if (Main.volume.isFull())
+				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
+			if (f.exists()) {
+				f = null;
+				throw new FuseException("folder exists").initErrno(Errno.EPERM);
+			}
+			try {
+				MetaFileStore.mkDir(f, -1);
+				try {
+					eventBus.post(new MFileWritten(MetaFileStore.getMF(f), true));
+				} catch (Exception e) {
+					SDFSLogger.getLog().error("unable to post mfilewritten " + path, e);
+				}
+			} catch (IOException e) {
+				SDFSLogger.getLog().error("error while making dir " + path, e);
+				throw new FuseException("access denied for " + path).initErrno(Errno.EACCES);
+			} finally {
+				path = null;
+			}
+		} catch (FuseException e) {
+			throw e;
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(path, e);
+			throw new FuseException().initErrno(Errno.EACCES);
+		}
+		return 0;
+	}
+
+	public int rmdir(String path) throws FuseException {
+		// SDFSLogger.getLog().info("197 " + path);
+		try {
+			if (this.getFtype(path) == FuseFtypeConstants.TYPE_SYMLINK) {
+
+				File f = new File(mountedVolume + path);
+
+				// SDFSLogger.getLog().info("deleting symlink " + f.getCanonicalPath());
+				if (!f.delete()) {
+					f = null;
+					throw new FuseException().initErrno(Errno.EACCES);
+				}
+				return 0;
+			} else {
+				File f = resolvePath(path);
+				if (f.getName().equals(".") || f.getName().equals(".."))
+					return 0;
+				else {
+					try {
+
+						if (MetaFileStore.removeMetaFile(f.getCanonicalPath(), false, false, true))
+							return 0;
+						else {
+
+							if (SDFSLogger.isDebug())
+								SDFSLogger.getLog().debug("unable to delete folder " + f.getCanonicalPath());
+							throw new FuseException().initErrno(Errno.ENOTEMPTY);
+						}
+
+					} catch (FuseException e) {
+						throw e;
+					} catch (Exception e) {
+						SDFSLogger.getLog().debug("unable to delete folder " + f.getCanonicalPath());
+						throw new FuseException().initErrno(Errno.EACCES);
+					}
+
+				}
+			}
+		} catch (FuseException e) {
+			throw e;
+		} catch (Exception e) {
+			SDFSLogger.getLog().error(path, e);
+			throw new FuseException().initErrno(Errno.EACCES);
+		}
+	}
+
 	public void unlink(String path) throws FuseException {
-		// SDFSLogger.getLog().info("22222 " + path);
+		SDFSLogger.getLog().info("Deleting=" + path);
 		// Thread.currentThread().setName("19
 		// "+Long.toString(System.currentTimeMillis()));
 		try {
@@ -281,7 +413,7 @@ public class Io {
 				File f = this.resolvePath(path);
 				try {
 					MetaFileStore.getMF(f).clearRetentionLock();
-					if (MetaFileStore.removeMetaFile(f.getPath(), true, true)) {
+					if (MetaFileStore.removeMetaFile(f.getPath(), true, true, true)) {
 						// SDFSLogger.getLog().info("deleted file " +
 						// f.getPath());
 						return;
@@ -315,10 +447,8 @@ public class Io {
 		try {
 			if (Main.volume.isFull())
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
-			/*
-			 * log.info("writing data to  " +path + " at " + offset +
-			 * " and length of " + buf.capacity());
-			 */
+
+			SDFSLogger.getLog().debug("writing data to  " + fh + " at " + offset + " and length of " + buf.capacity());
 			// byte[] b = new byte[buf.capacity()];
 			// buf.position(0);
 			// buf.get(b);
@@ -327,7 +457,17 @@ public class Io {
 			// buf.capacity() + "==" + new String(b) + "==/n/n");
 
 			DedupFileChannel ch = this.getFileChannel(fh);
+
 			try {
+				SDFSLogger.getLog()
+						.debug("Writing " + ch.openFile().getPath() + " pos=" + offset + " len=" + buf.capacity());
+				/*
+				 * byte[] k = new byte[buf.capacity()]; buf.get(k); buf.position(0);
+				 * Files.write(Paths.get("c:/temp/" + ch.openFile().getName()), new
+				 * String(offset + "," + buf.capacity() + "," +
+				 * StringUtils.byteToHexString(eng.getHash(k)) + "\n") .getBytes(),
+				 * StandardOpenOption.APPEND,StandardOpenOption.CREATE);
+				 */
 				ch.writeFile(buf, buf.capacity(), 0, offset, true);
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("unable to write to file" + fh, e);
@@ -357,7 +497,7 @@ public class Io {
 				try {
 
 					int read = this.read(fh, bf, start);
-					//SDFSLogger.getLog().info("Bytes read is " + read);
+					// SDFSLogger.getLog().info("Bytes read is " + read);
 					byte[] k = null;
 					if (read == len)
 						k = bf.array();
@@ -400,6 +540,11 @@ public class Io {
 				this.mknod(path[1]);
 				result.setAttribute("status", "success");
 				result.setAttribute("msg", "file create");
+				break;
+			case "createdir":
+				this.mkdir(path[1]);
+				result.setAttribute("status", "success");
+				result.setAttribute("msg", "directory create");
 				break;
 			case "openfile":
 				long hndl = this.open(path[1]);
@@ -467,6 +612,10 @@ public class Io {
 				this.unlink(path[1]);
 				result.setAttribute("status", "success");
 				result.setAttribute("msg", "file deleted " + path[1]);
+			} else if (type.equalsIgnoreCase("folder")) {
+				this.rmdir(path[1]);
+				result.setAttribute("status", "success");
+				result.setAttribute("msg", "folder " + path[1]);
 			} else {
 				throw new Exception("process not implemented " + type);
 			}
@@ -510,23 +659,23 @@ public class Io {
 			throw new FuseException("Volume Offline").initErrno(Errno.ENODEV);
 		try {
 			DedupFileChannel ch = this.getFileChannel((Long) fh);
+			SDFSLogger.getLog()
+					.debug("Reading " + ch.openFile().getPath() + " pos=" + offset + " len=" + buf.capacity());
 			int read = ch.read(buf, 0, buf.capacity(), offset);
 			/*
-			 * if (buf.position() < buf.capacity()) { byte[] k = new
-			 * byte[buf.capacity() - buf.position()]; buf.put(k); //
-			 * SDFSLogger.getLog().info("zzz=" //
-			 * +(buf.capacity()-buf.position())); } byte[] b = new
-			 * byte[buf.capacity()]; buf.position(0); buf.get(b);
-			 * buf.position(0);
+			 * if (buf.position() < buf.capacity()) { byte[] k = new byte[buf.capacity() -
+			 * buf.position()]; buf.put(k); // SDFSLogger.getLog().info("zzz=" //
+			 * +(buf.capacity()-buf.position())); } byte[] b = new byte[buf.capacity()];
+			 * buf.position(0); buf.get(b); buf.position(0);
 			 * 
-			 * SDFSLogger.getLog().info("read " + path + " len" + buf.capacity()
-			 * + "offset " + offset + "read" + read + "==" + new String(b) +
-			 * "==\n\n");
+			 * SDFSLogger.getLog().info("read " + path + " len" + buf.capacity() + "offset "
+			 * + offset + "read" + read + "==" + new String(b) + "==\n\n");
 			 */
 			if (read == -1)
 				read = 0;
 			return read;
 		} catch (DataArchivedException e) {
+			SDFSLogger.getLog().warn("Data is archived");
 			throw new FuseException("File Archived").initErrno(Errno.ENODATA);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to read file " + fh, e);
@@ -535,12 +684,14 @@ public class Io {
 	}
 
 	public void release(long fh) throws FuseException {
-		// SDFSLogger.getLog().info("199 " + path);
+
 		try {
 			DedupFileChannel ch = this.dedupChannels.remove(fh);
+
 			if (!Main.safeClose)
 				return;
 			if (ch != null) {
+				SDFSLogger.getLog().info("release=" + ch.getFile().getPath());
 				ch.getDedupFile().unRegisterChannel(ch, -2);
 				CloseFile.close(ch.getFile(), ch.isWrittenTo());
 				ch = null;
@@ -554,10 +705,11 @@ public class Io {
 	}
 
 	private void mknod(String path) throws FuseException {
-
+		SDFSLogger.getLog().info("mknod=" + path);
 		try {
 			path = URLDecoder.decode(path, "UTF-8");
 			File f = new File(this.mountedVolume + path);
+
 			if (Main.volume.isOffLine())
 				throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 			if (Main.volume.isFull()) {
@@ -573,12 +725,11 @@ public class Io {
 				mf.unmarshal();
 				// SDFSLogger.getLog().info("44=");
 				/*
-				 * // Wait up to 5 seconds for file to be created int z = 5000;
-				 * int i = 0; while (!f.exists()) { i++; if (i == z) { throw new
-				 * FuseException("file creation timed out for " +
-				 * path).initErrno(Errno.EBUSY); } else { try { Thread.sleep(1);
-				 * } catch (InterruptedException e) { throw new FuseException(
-				 * "file creation interrupted for " + path)
+				 * // Wait up to 5 seconds for file to be created int z = 5000; int i = 0; while
+				 * (!f.exists()) { i++; if (i == z) { throw new
+				 * FuseException("file creation timed out for " + path).initErrno(Errno.EBUSY);
+				 * } else { try { Thread.sleep(1); } catch (InterruptedException e) { throw new
+				 * FuseException( "file creation interrupted for " + path)
 				 * .initErrno(Errno.EACCES); } }
 				 * 
 				 * }
@@ -599,7 +750,7 @@ public class Io {
 	}
 
 	public long open(String path) throws FuseException {
-		// SDFSLogger.getLog().info("555=" + path);
+		SDFSLogger.getLog().info("open=" + path);
 		if (Main.volume.isOffLine())
 			throw new FuseException("volume offline").initErrno(Errno.ENAVAIL);
 		try {
@@ -607,13 +758,72 @@ public class Io {
 			long z = this.nextHandleNo.incrementAndGet();
 			this.getFileChannel(path, z);
 			// SDFSLogger.getLog().info("555=" + path + " z=" + z);
+
 			return z;
 		} catch (FuseException e) {
+			SDFSLogger.getLog().debug("error while opening file " + path, e);
 			throw e;
 		} catch (Exception e) {
-			SDFSLogger.getLog().error("error while opening file", e);
+			SDFSLogger.getLog().error("error while opening file " + path, e);
 			throw new FuseException("error opending " + path).initErrno(Errno.ENODATA);
 		}
+	}
+
+	private static class BERefresh implements Runnable {
+		String path;
+		long interval = 1 * 60 * 1000;
+
+		private BERefresh(String path) {
+			this.path = path;
+			Thread th = new Thread(this);
+			th.start();
+		}
+
+		@Override
+		public void run() {
+			SDFSLogger.getLog().info("running refresher for " + this.path);
+			for (;;) {
+				try {
+					SparseDedupFile df = MetaFileStore.getMF(path).getDedupFile(true);
+					DedupFileChannel ch = df.getChannel(-1);
+					LongByteArrayMap mp = (LongByteArrayMap) df.bdb;
+					Set<Long> blks = new LinkedHashSet<Long>();
+					mp.iterInit();
+					LongKeyValue kv = mp.nextKeyValue(false);
+
+					while (kv != null) {
+						SparseDataChunk ck = kv.getValue();
+						TreeMap<Integer, HashLocPair> al = ck.getFingers();
+						for (HashLocPair p : al.values()) {
+							long pos = Longs.fromByteArray(p.hashloc);
+							if (pos > 100 || pos < -100) {
+								blks.add(pos);
+							}
+						}
+						if (blks.size() < 10) {
+							kv = mp.nextKeyValue(false);
+						} else {
+							kv = null;
+						}
+					}
+					for (Long id : blks) {
+						FileReplicationService.refreshArchive(id);
+					}
+					df.unRegisterChannel(ch, -1);
+					SDFSLogger.getLog().debug("finished readahead for " + path);
+				} catch (Exception e) {
+					SDFSLogger.getLog().debug("unable to readahead " + path, e);
+				} finally {
+					try {
+						Thread.sleep(interval);
+					} catch (InterruptedException e) {
+
+					}
+				}
+			}
+
+		}
+
 	}
 
 }

@@ -1,0 +1,254 @@
+syntax = "proto3";
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
+package org.opendedup.grpc;
+option java_multiple_files = true;
+import "Shutdown.proto";
+import "FileInfo.proto";
+
+
+// Request payload
+message VolumeInfoRequest {
+}
+
+message VolumeInfoResponse {
+  string path = 1;
+  string name = 2;
+  int64 currentSize = 3;
+  int64 capactity = 4;
+  double maxPercentageFull = 5;
+  int64 duplicateBytes = 6;
+  double readBytes = 7;
+  int64 writeBytes = 8;
+  int64 serialNumber = 9;
+  int64 dseSize = 10;
+  int64 dseCompSize = 11;
+  double readOps = 12;
+  double writeOps = 13;
+  int64 readErrors = 14;
+  int64 writeErrors = 15;
+  int64 files = 16;
+  bool closedGracefully = 17;
+  bool allowExternalLinks =18;
+  bool usePerfMon = 19;
+  string clusterId =  20;
+  bool VolumeClustered = 21;
+  int32 readTimeoutSeconds = 22;
+  int32 writeTimeoutSeconds = 23;
+  bool compressedMetaData =24;
+  bool syncFiles = 25;
+  int64 maxPageSize = 26;
+  repeated MessageQueueInfoResponse messageQueue = 27;
+  string perfMonFile = 28;
+  bool offline = 29;
+}
+
+message SystemInfo {
+  int32 activeThreads =1;
+  int32 blocksStored = 2;
+  int32 maxBlocksStored = 3;
+  int64 totalSpace = 4;
+  int64 freeSpace = 5;
+  double totalCpuLoad = 6;
+  double cpuCores = 7;
+  double sdfsCpuLoad = 8;
+  double totalMemory = 10;
+  double freeMemory = 11;
+}
+
+message SystemInfoRequest {
+
+}
+
+message ConnectedVolumeInfo {
+  int64 id = 1;
+  bool local = 2;
+  string hostname = 3;
+  int32 port = 4;
+  int64 size = 5;
+  int64 compressedSize = 6;
+  string sdfsVersion = 7;
+  int64 lastUpdate = 8;
+  int32 version = 9;
+}
+
+message GCScheduleRequest {
+
+}
+
+message GCScheduleResponse {
+  string schedule = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message CloudVolumesRequest {
+
+}
+
+message CloudVolumesResponse {
+  repeated ConnectedVolumeInfo volumeInfo = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message SystemInfoResponse {
+  SystemInfo info = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message DSEInfo {
+  int64 maxSize = 1;
+  int64 currentSize = 2;
+  int64 entries =3;
+  int64 compressedSize = 4;
+  int64 freeBlocks = 5;
+  int64 pageSize = 6;
+  string storageType = 7;
+  int32 listenPort = 8;
+  string listenHost = 9;
+  int32 readSpeed = 10;
+  int32 writeSpeed = 11;
+  int64 cacheSize = 12;
+  int64 maxCacheSize = 13;
+  bool listenEncrypted = 14;
+  string encryptionKey = 15;
+  string encryptionIV = 16;
+  string cloudAccessKey = 17;
+  string cloudSecretKey = 18;
+  string bucketName = 19;
+}
+
+message DSERequest {}
+
+message DSEResponse {
+  DSEInfo info = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message AuthenticationRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message AuthenticationResponse {
+  string token = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message MessageQueueInfoResponse {
+  string hostName = 1;
+  enum MQType {
+    RabbitMQ = 0;
+    PubSub = 1;
+  }
+  MQType mqType = 2;
+  int32 port = 3;
+  string topic = 4;
+  string authInfo = 5;
+  string subScription = 6;
+  string project = 7;
+}
+
+
+message CleanStoreRequest {
+  bool compact =1;
+}
+
+message CleanStoreResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message SetCacheSizeRequest {
+  int64 cacheSize = 1;
+}
+
+message SetCacheSizeResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message DeleteCloudVolumeRequest{
+  int64 volumeid = 1;
+}
+
+message DeleteCloudVolumeResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message SetVolumeCapacityRequest {
+  int64 size = 1;
+}
+
+message SetVolumeCapacityResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
+message SetPasswordRequest {
+  string password = 1;
+}
+
+message SetPasswordResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
+message SpeedRequest {
+  int32 requestedSpeed = 1;
+}
+
+message SpeedResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message SyncFromVolRequest {
+  int64 volumeid = 1;
+}
+
+message SyncFromVolResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message SyncVolRequest {
+
+}
+
+message SyncVolResponse {
+  string eventID = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+
+
+// Defining a Service, a Service can have multiple RPC operations
+service VolumeService {
+  rpc AuthenticateUser(AuthenticationRequest) returns (AuthenticationResponse);
+  rpc GetVolumeInfo(VolumeInfoRequest) returns (VolumeInfoResponse);
+  rpc ShutdownVolume(ShutdownRequest) returns (ShutdownResponse);
+  rpc CleanStore(CleanStoreRequest) returns (CleanStoreResponse);
+  rpc DeleteCloudVolume(DeleteCloudVolumeRequest) returns (DeleteCloudVolumeResponse);
+  rpc DSEInfo(DSERequest) returns (DSEResponse);
+  rpc SystemInfo(SystemInfoRequest) returns(SystemInfoResponse);
+  rpc SetVolumeCapacity(SetVolumeCapacityRequest) returns(SetVolumeCapacityResponse);
+  rpc GetConnectedVolumes(CloudVolumesRequest) returns(CloudVolumesResponse);
+  rpc GetGCSchedule(GCScheduleRequest) returns(GCScheduleResponse);
+  rpc SetCacheSize(SetCacheSizeRequest) returns (SetCacheSizeResponse);
+  rpc SetPassword(SetPasswordRequest) returns (SetPasswordResponse);
+  rpc SetReadSpeed(SpeedRequest) returns (SpeedResponse);
+  rpc SetWriteSpeed(SpeedRequest) returns (SpeedResponse);
+  rpc SyncFromCloudVolume(SyncFromVolRequest) returns (SyncFromVolResponse);
+  rpc SyncCloudVolume(SyncVolRequest) returns (SyncVolResponse);
+}

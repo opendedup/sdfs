@@ -4,7 +4,7 @@ What is this?
 
 System Requirements
   
-  * x64 Linux Distribution. The application was tested and developed on ubuntu 9.1
+  * x64 Linux Distribution. The application was tested and developed on ubuntu 16.04
   * Fuse 2.7+ (with command line switch -o direct_io,allow_other,fsname=SDFS). Fuse 2.8 is preferred - Debian Packages
     for this are available at http://code.google.com/p/dedupfilesystem-sdfs/downloads/list
   * 2 GB of Available RAM

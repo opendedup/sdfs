@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import java.io.SyncFailedException;
 
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.sdfs.filestore.ChunkData;
 
 public interface AbstractShard {
@@ -85,8 +84,6 @@ public interface AbstractShard {
 
 	public abstract long claimRecords() throws IOException;
 
-	public abstract long claimRecords(LargeBloomFilter bf) throws IOException;
-
 	public abstract void sync() throws SyncFailedException, IOException;
 
 	void clearRefMap() throws IOException;
@@ -97,15 +94,13 @@ public interface AbstractShard {
 
 	void vanish();
 
-	long claimRecords(LargeBloomFilter nbf, LargeBloomFilter lbf) throws IOException;
-
 	boolean isClosed();
 
 	int maxSize();
 
 	int avail();
 
-	void put(byte[] key, long value, long claims) throws HashtableFullException, IOException;
+	InsertRecord put(byte[] key, long value, long claims) throws HashtableFullException, IOException;
 
 	boolean isMaxed();
 

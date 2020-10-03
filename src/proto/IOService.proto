@@ -1,0 +1,376 @@
+syntax = "proto3";
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
+package org.opendedup.grpc;
+
+option java_multiple_files = true;
+import "FileInfo.proto";
+
+message DataWriteRequest {
+    int64 fileHandle = 1;
+    int64 start =2;
+    int32 len = 3;
+    bytes data = 4;
+}
+
+message DataWriteResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message MkDirRequest {
+    string path = 1;
+    int32 mode = 2;
+}
+
+message MkDirResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message RmDirRequest {
+    string path = 1;
+}
+
+message RmDirResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message UnlinkRequest {
+    string path = 1;
+}
+
+message UnlinkResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message DataReadRequest {
+    int64 fileHandle = 1;
+    int64 start =2;
+    int32 len = 3;
+}
+
+message DataReadResponse {
+    bytes data = 1;
+    int32 read = 2;
+    string error = 3;
+    errorCodes errorCode = 4;
+}
+
+message FileCloseRequest {
+    int64 fileHandle = 1;
+}
+
+message FileCloseResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message MkNodRequest {
+    string path = 1;
+    int32 mode = 2;
+    int32 rdev =3;
+}
+
+message MkNodResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message FileOpenRequest {
+    string path = 1;
+    int32 flags =2;
+}
+
+message FileExistsRequest {
+    string path = 1;
+}
+
+message FileExistsResponse {
+    bool exists = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+
+}
+
+message FileOpenResponse {
+    int64 fileHandle = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message FileSnapshotRequest {
+    string src =1;
+    string dest = 2;
+}
+
+message FileSnapshotResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+    string eventID = 3;
+}
+
+message FileRenameRequest {
+    string src =1;
+    string dest = 2;
+}
+
+message FileRenameResponse {
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message CopyExtentRequest {
+    string srcFile = 1;
+    string dstFile = 2;
+    int64 srcStart = 3;
+    int64 dstStart = 4;
+    int64 length = 5;
+}
+
+message CopyExtentResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+    int64 written = 3;
+}
+
+message SetUserMetaDataRequest {
+    repeated FileAttributes fileAttributes = 1;
+    string Path =2;
+}
+
+message SetUserMetaDataResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message GetCloudFileRequest {
+    string file = 1;
+    string dstfile = 2;
+    bool overwrite = 3;
+    string changeid = 4;
+}
+
+message GetCloudFileResponse {
+    string eventID = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message ChmodRequest {
+    string path = 1;
+    int32 mode = 2;
+}
+
+message ChmodResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message ChownRequest {
+    string path = 1;
+    int32 uid = 2;
+    int32 gid = 3;
+}
+
+message ChownResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message FlushRequest {
+    string path = 1;
+    int64 fd = 2;
+}
+
+message FlushResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message Stat {
+    int64 dev = 1; /* ID of device containing file */
+    int64 ino = 2; /* Inode number */
+    int32 mode = 3; /* File type and mode */
+    int32 nlink = 4; /* Number of hard links */
+    int32 uid = 5; /* User ID of owner */
+    int32 gid = 6; /* Group ID of owner */
+    int32 rdev = 7; /* Device ID (if special file) */
+    int64 size = 8; /* Total size, in bytes */
+    int32 blksize = 9; /* Block size for filesystem I/O */
+    int64 blocks = 10; /* Number of 512B blocks allocated */
+    int64 atime = 11; /* Time of last access */
+    int64 mtim = 12; /* Time of last modification */
+    int64 ctim = 13; /* Time of last status change */
+}
+
+message StatRequest {
+    string path =1;
+}
+
+message StatResponse {
+    Stat stat = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message LinkRequest {
+    string path = 1;
+}
+
+message LinkResponse {
+    string linkPath = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message StatFS {
+    int32 bsize = 1;/* Optimal transfer block size */
+    int64 blocks = 2;/* Total data blocks in filesystem */
+    int64 bfree = 3;/* Free blocks in filesystem */
+    int64 bavail = 4;/* Free blocks available to unprivileged user */
+    int64 files = 5; /* Total inodes in filesystem */
+    int64 ffree = 6; /* Free inodes in filesystem */
+    int64 fsid = 7; /* Filesystem ID */ 
+    int32 namelen = 8; /* Maximum length of filenames */
+    int32 frsize = 9; /* Fragment size (since Linux 2.6) */
+    int32 flags = 10;  /* Mount flags of filesystem */
+    int32 type = 11; /* Type of filesystem (see below) */
+}
+
+message StatFSRequest {}
+
+message StatFSResponse {
+    StatFS stat = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message SymLinkRequest {
+    string from =1;
+    string to = 2;
+}
+
+message SymLinkResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message TruncateRequest {
+    string path = 1;
+    int64 length = 2;
+}
+
+message TruncateResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message UtimeRequest {
+    string path = 1;
+    int64 atime = 2;
+    int64 mtime = 3;
+}
+
+message UtimeResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message GetXAttrRequest {
+    string attr = 1;
+    string path = 2;
+}
+
+message GetXAttrResponse {
+    string value = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message SetXAttrRequest {
+    string attr = 1;
+    string value = 2;
+    string path = 3;
+}
+
+message SetXAttrResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+    enum flagsenum {
+        XATTR_CREATE =0;
+        XATTR_REPLACE =1;
+    }
+    flagsenum flags = 3;
+
+}
+
+message RemoveXAttrRequest {
+    string attr = 1;
+    string path = 2;
+}
+
+message RemoveXAttrResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message GetXAttrSizeRequest {
+    string attr = 1;
+    string path = 2;
+}
+
+message GetXAttrSizeResponse {
+    int32 length =1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+message FsyncRequest {
+    string path = 1;
+    int64 fh = 2;
+    bool datasync = 3;
+}
+
+message FsyncResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+service FileIOService {
+    // Define a RPC operation
+    rpc GetXAttrSize(GetXAttrSizeRequest) returns (GetXAttrSizeResponse);
+    rpc Fsync(FsyncRequest) returns (FsyncResponse);
+    rpc SetXAttr(SetXAttrRequest) returns (SetXAttrResponse);
+    rpc RemoveXAttr(RemoveXAttrRequest) returns (RemoveXAttrResponse);
+    rpc GetXAttr(GetXAttrRequest) returns (GetXAttrResponse);
+    rpc Utime(UtimeRequest) returns (UtimeResponse);
+    rpc Truncate(TruncateRequest) returns (TruncateResponse);
+    rpc SymLink(SymLinkRequest) returns (SymLinkResponse);
+    rpc ReadLink(LinkRequest) returns (LinkResponse);
+    rpc GetAttr(StatRequest) returns (StatResponse);
+    rpc Flush(FlushRequest) returns (FlushResponse);
+    rpc Chown(ChownRequest) returns (ChownResponse);
+    rpc Chmod(ChmodRequest) returns (ChmodResponse);
+    rpc MkDir(MkDirRequest) returns (MkDirResponse);
+    rpc RmDir(RmDirRequest) returns (RmDirResponse);
+    rpc Unlink(UnlinkRequest) returns (UnlinkResponse);
+    rpc Write(DataWriteRequest) returns (DataWriteResponse);
+    rpc Read(DataReadRequest) returns (DataReadResponse);
+    rpc Release(FileCloseRequest) returns (FileCloseResponse);
+    rpc Mknod(MkNodRequest) returns (MkNodResponse);
+    rpc Open(FileOpenRequest) returns (FileOpenResponse);
+    rpc GetFileInfo(FileInfoRequest) returns (FileMessageResponse);
+    rpc CreateCopy(FileSnapshotRequest) returns (FileSnapshotResponse);
+    rpc FileExists(FileExistsRequest) returns (FileExistsResponse);
+    rpc MkDirAll(MkDirRequest) returns (MkDirResponse);
+    rpc Stat(FileInfoRequest) returns (FileMessageResponse);
+    rpc Rename(FileRenameRequest) returns (FileRenameResponse);
+    rpc CopyExtent(CopyExtentRequest) returns (CopyExtentResponse);
+    rpc SetUserMetaData(SetUserMetaDataRequest) returns (SetUserMetaDataResponse);
+    rpc GetCloudFile(GetCloudFileRequest) returns (GetCloudFileResponse);
+    rpc GetCloudMetaFile(GetCloudFileRequest) returns (GetCloudFileResponse);
+    rpc StatFS(StatFSRequest) returns (StatFSResponse);
+  }
+

@@ -23,7 +23,7 @@ public class RestoreArchiveCmd {
 		if (!f.exists())
 			throw new IOException("Path not found [" + srcPath + "]");
 		MetaDataDedupFile mf = MetaFileStore.getMF(f);
-		RestoreArchive ar = new RestoreArchive(mf);
+		RestoreArchive ar = new RestoreArchive(mf,-1);
 		Thread th = new Thread(ar);
 		th.start();
 		try {

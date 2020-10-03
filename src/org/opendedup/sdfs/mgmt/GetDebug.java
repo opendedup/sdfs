@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 
@@ -14,6 +15,7 @@ import org.w3c.dom.Element;
 
 import com.sun.management.UnixOperatingSystemMXBean;
 
+@SuppressWarnings("restriction")
 public class GetDebug {
 
 	public Element getResult(String cmd, String file) throws IOException {

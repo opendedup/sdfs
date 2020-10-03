@@ -67,23 +67,23 @@ public class ArchiveOutCmd implements Runnable {
 			SDFSEvent sevt = SDFSEvent.snapEvent("Creating Snapshot of "
 					+ srcPath, f);
 
-			evt.maxCt = 4;
+			evt.setMaxCount(4);
 			evt.addChild(sevt);
 			MetaDataDedupFile mf = null;
 			mf = MetaFileStore.snapshot(f.getPath(), af.getPath(), false, sevt);
-			evt.curCt = 2;
+			evt.setCurrentCount(2);
 
 			SDFSEvent eevt = SDFSEvent.archiveOutEvent("Archiving out "
 					+ srcPath);
 			sevt.endEvent("Created Snapshot of " + srcPath);
 			evt.addChild(eevt);
 			SDFSLogger.getLog().debug("Created replication snapshot");
-			eevt.maxCt = 3;
-			eevt.curCt = 0;
+			eevt.setMaxCount(3);
+			eevt.setCurrentCount(4);
 			mf.copyTo(nf.getPath(), true, true);
-			eevt.curCt = 1;
-			MetaFileStore.removeMetaFile(af.getPath(), true,false);
-			eevt.curCt = 2;
+			eevt.setCurrentCount(1);
+			MetaFileStore.removeMetaFile(af.getPath(), true,false,true);
+			eevt.setCurrentCount(2);
 			SDFSLogger.getLog().debug("Copied out replication snapshot");
 			if (OSValidator.isWindows()) {
 				TFile dest = new TFile(nf.getPath() + ".tar.gz");
@@ -104,8 +104,8 @@ public class ArchiveOutCmd implements Runnable {
 						, null, nf);
 				p.waitFor();
 			}
-			eevt.curCt = 3;
-			evt.curCt = 4;
+			eevt.setCurrentCount(3);
+			evt.setCurrentCount(4);
 
 			if (nft.exists())
 				evt.endEvent("Archive Out of " + srcPath + " to "
@@ -119,7 +119,7 @@ public class ArchiveOutCmd implements Runnable {
 					"Unable to archive out [" + srcPath + "] because :"
 							+ e.toString(), e);
 			try {
-				MetaFileStore.removeMetaFile(af.getPath(), true,false);
+				MetaFileStore.removeMetaFile(af.getPath(), true,false,true);
 			} catch(Exception e1) {
 				
 			}

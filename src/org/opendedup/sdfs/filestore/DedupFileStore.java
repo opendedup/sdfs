@@ -2,6 +2,7 @@ package org.opendedup.sdfs.filestore;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -62,10 +63,7 @@ public class DedupFileStore {
 	static {
 		if (Main.maxInactiveFileTime > 0 && !Main.blockDev) {
 			openFileMonitor = new OpenFileMonitor(10000, Main.maxInactiveFileTime);
-		} else if (Main.blockDev) {
-			// openFileMonitor = new OpenFileMonitor(1000,
-			// Main.maxInactiveFileTime);
-		}
+		} 
 
 	}
 
@@ -115,13 +113,13 @@ public class DedupFileStore {
 		}
 	}
 
-	public static boolean addRef(byte[] entry, long val,int ct) throws IOException {
+	public static long addRef(byte[] entry, long val,int ct) throws IOException {
 		if (val == 1 || val == 0)
-			return true;
+			return 1;
 		
 		try {
 			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
-				return true;
+				return 1;
 			else {
 				gcLock.readLock().lock();
 				try {
@@ -145,13 +143,13 @@ public class DedupFileStore {
 		}
 	}
 	
-	public static boolean removeRef(byte[] entry, long val,int ct) throws IOException {
+	public static long removeRef(byte[] entry, long val,int ct) throws IOException {
 		if (val == 1|| val == 0)
-			return true;
+			return 1;
 		
 		try {
 			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
-				return true;
+				return 1;
 			else {
 				gcLock.readLock().lock();
 				try {
@@ -225,15 +223,23 @@ public class DedupFileStore {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("adding dedupfile " + df.getMetaFile().getPath());
 			//SDFSLogger.getLog().info("adding " + df.getGUID() + "pth=" + df.getMetaFile().getPath());
-			if (openFile.size() >= Main.maxOpenFiles)
+			if (openFile.size() >= Main.maxOpenFiles) {
+				SDFSLogger.getLog().warn("open files reached " + openFile.size());
+				for(Entry<String, SparseDedupFile> en : openFile.entrySet()) {
+					SDFSLogger.getLog().warn("path=" + en.getValue().mf.getPath() + " guid="+en.getKey());
+				}
 				throw new IOException(
 						"maximum number of files reached [" + Main.maxOpenFiles + "]. Too many open files");
+			}
 			openFile.put(df.getGUID(), df);
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("dedupfile cache size is " + openFile.size());
 		} else {
 			throw new IOException("DedupFileStore is closed");
 		}
+	}
+	public static SparseDedupFile get(String guid) {
+		return openFile.get(guid);
 	}
 
 	/**

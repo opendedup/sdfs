@@ -33,7 +33,9 @@ public class ChunkData {
 	private AbstractChunkStore writeStore = null;
 	public boolean recoverd = false;
 	public boolean blank;
-
+	public long references =-1;
+	public String uuid;
+	
 	public ChunkData() {
 		this.blank = true;
 	}
@@ -61,9 +63,10 @@ public class ChunkData {
 		cPos = buf.getLong();
 	}
 
-	public ChunkData(byte[] hash, int chunkLen, byte[] chunk) {
+	public ChunkData(byte[] hash, int chunkLen, byte[] chunk,String uuid) {
 		long tm = System.currentTimeMillis();
 		this.added = tm;
+		this.uuid = uuid;
 		this.lastClaimed = tm;
 		this.numClaimed = 1;
 		this.mDelete = false;
@@ -112,7 +115,7 @@ public class ChunkData {
 			if (this.mDelete) {
 				chunk = new byte[cLen];
 			}
-			this.cPos = writeStore.writeChunk(hash, chunk, cLen);
+			this.cPos = writeStore.writeChunk(hash, chunk, cLen,this.uuid);
 			if (clear)
 				this.chunk = null;
 		}

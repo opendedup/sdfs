@@ -91,7 +91,7 @@ public class MetaFileImport implements Serializable {
 		startTime = System.currentTimeMillis();
 		File f = new File(path);
 		SDFSLogger.getLog().info("getting file counts for  " + f.getPath());
-		levt.maxCt = FileCounts.getDBFileSize(f, false);
+		levt.setMaxCount(FileCounts.getDBFileSize(f, false));
 		SDFSLogger.getLog().info("got file counts");
 		this.server = server;
 		this.password = password;
@@ -221,7 +221,7 @@ public class MetaFileImport implements Serializable {
 						throw new ReplicationCanceledException("MetaFile Import Canceled");
 					if (this.lastException != null)
 						throw this.lastException;
-					levt.curCt += (mp.getIterPos() - prevpos);
+					levt.addCount(mp.getIterPos() - prevpos);
 					prevpos = mp.getIterPos();
 					ck = mp.nextValue(false);
 					if (ck != null) {
@@ -237,7 +237,7 @@ public class MetaFileImport implements Serializable {
 								if (Main.refCount && Arrays.areEqual(WritableCacheBuffer.bk, p.hash))
 									pos = 1;
 								else
-									pos = HCServiceProxy.hashExists(p.hash, false);
+									pos = HCServiceProxy.hashExists(p.hash);
 								boolean exists = false;
 								if (pos != -1) {
 									p.hashloc = Longs.toByteArray(pos);
@@ -273,7 +273,7 @@ public class MetaFileImport implements Serializable {
 				
 				Main.volume.updateCurrentSize(mf.length(), true);
 				if (corruption) {
-					MetaFileStore.removeMetaFile(mf.getPath(), true,true);
+					MetaFileStore.removeMetaFile(mf.getPath(), true,true,true);
 					throw new IOException(
 							"Unable to continue MetaFile Import because there are too many missing blocks");
 				}

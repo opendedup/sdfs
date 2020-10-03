@@ -24,39 +24,32 @@ import java.io.IOException;
 
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.opendedup.collections.DataArchivedException;
-import org.opendedup.collections.LongByteArrayMap;
-import org.opendedup.collections.LongKeyValue;
-import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
-import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.notification.ReadAheadEvent;
-import org.opendedup.sdfs.servers.HCServiceProxy;
-
-import com.google.common.primitives.Longs;
 
 
-public class ReadAhead implements Runnable {
+
+public class ReadAhead {
 	SparseDedupFile df;
 	ReadAheadEvent evt = null;
 	boolean closeWhenDone;
-	private DedupFileChannel ch = null;
 	private static transient BlockingQueue<Runnable> worksQueue = new SynchronousQueue<Runnable>();
-	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(16,
-			Main.readAheadThreads, 10, TimeUnit.SECONDS, worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
+	protected static transient ThreadPoolExecutor executor = new ThreadPoolExecutor(1,
+			Main.readAheadThreads, 10, TimeUnit.SECONDS, worksQueue);
 	public HashMap<String, ReadAhead> active = new HashMap<String, ReadAhead>();
+	private long ep;
+	private long sp;
+	private int readAheadBuffers = Main.readAheadThreads;
+	//private static int MAX_READAHEAD_BUFFERS = Main.readAheadThreads;
 
 	public static ReadAhead getReadAhead(SparseDedupFile df) throws ExecutionException, IOException {
 		if (Main.readAhead)
@@ -71,94 +64,73 @@ public class ReadAhead implements Runnable {
 	}
 
 	public ReadAhead(SparseDedupFile df, boolean closeWhenDone) throws IOException {
-		if((df.mf.length()/2) > HashBlobArchive.getLocalCacheSize()) {
-			SDFSLogger.getLog().warn("unable to readahead " + df.mf.getPath() + " because probable "
-					+ "deduped file lenth " + (df.mf.length()/2) + " is greater than cache of " +HashBlobArchive.getLocalCacheSize());
-			return;
-		}
 			
 		synchronized (active) {
 			SDFSLogger.getLog().debug("initiating readahead for " + df.mf.getPath());
 			if(active.containsKey(df.getMetaFile().getPath()))
 				return;
-			if (closeWhenDone) {
-				this.ch = df.getChannel(-1);
-			}
+			
 			this.df = df;
 			active.put(df.mf.getPath(), this);
 			this.evt = new ReadAheadEvent(Main.volume.getName(), df.getMetaFile());
-			this.evt.maxCt = df.mf.length();
-			Thread th = new Thread(this);
-			th.start();
+			this.evt.setMaxCount(df.mf.length());
+			
+		}
+	}
+	/* Function to identify start of range */
+	public synchronized void cacheFromRange(long startPos) {
+		this.sp = this.df.getChuckPosition(startPos);
+		if(ep >= df.mf.length())
+			return;
+		long _ep = this.sp + (Main.CHUNK_LENGTH * readAheadBuffers);
+
+		if(_ep > (ep + (2*Main.CHUNK_LENGTH))) {
+			while(ep > _ep) {
+				try {
+				CacheWriteBuffer cb = new CacheWriteBuffer(df,ep);
+				Thread th = new Thread(cb);
+				executor.execute(th);
+				ep +=Main.CHUNK_LENGTH; 
+				if(ep >= df.mf.length())
+					return;
+				}catch(Exception e) {
+					SDFSLogger.getLog().warn("while readahead",e);
+				}
+			}
 		}
 	}
 	
 	public static void readAhead() {}
-	private static AtomicInteger ct = new AtomicInteger();
 
-	private static class CacheChunk implements Runnable {
+	private static class CacheWriteBuffer implements Runnable {
 		long pos;
-
+		SparseDedupFile df = null;
+		
+		public CacheWriteBuffer(SparseDedupFile df, long pos) {
+			this.df = df;
+			this.pos = pos;
+		}
+		
 		public void run() {
 			try {
-				int vt = ct.incrementAndGet();
-				SDFSLogger.getLog().debug("active gets is " +vt);
-				HCServiceProxy.cacheData(pos);
+				SDFSLogger.getLog().debug("active gets is " + df.mf.getPath() + " pos = " + pos);
+				WritableCacheBuffer bf = (WritableCacheBuffer) df.getWriteBuffer(pos);
+				bf.getReadChunk(0, 1);
 			} catch (IOException e) {
 				SDFSLogger.getLog()
 						.debug("error caching chunk [" + pos + "] ", e);
 			}  catch (DataArchivedException e) {
 				SDFSLogger.getLog()
 						.debug("error caching chunk [" + pos + "] ", e);
+			} catch (FileClosedException e) {
+				SDFSLogger.getLog()
+				.debug("error caching chunk [" + pos + "] ", e);
+			} catch (BufferClosedException e) {
+				SDFSLogger.getLog()
+				.debug("error caching chunk [" + pos + "] ", e);
 			}
-			ct.decrementAndGet();
-		}
-	}
-
-	@Override
-	public void run() {
-		try {
-			LongByteArrayMap mp =(LongByteArrayMap) df.bdb;
-			mp.iterInit();
-			Set<Long> blks = new LinkedHashSet<Long>();
-			for (;;) {
-				LongKeyValue kv = mp.nextKeyValue(false);
-				if (kv == null)
-					break;
-				SparseDataChunk ck = kv.getValue();
-				TreeMap<Integer,HashLocPair> al = ck.getFingers();
-				for (HashLocPair p : al.values()) {
-					long pos = Longs.fromByteArray(p.hashloc);
-					if(pos >100 || pos <-100) {
-						blks.add(pos);
-					}
-				}
-			}
-			for(Long l : blks) {
-				CacheChunk ck = new CacheChunk();
-				ck.pos = l;
-				executor.execute(ck);
-			}
-			if(evt.maxCt==0)
-				evt.maxCt=1;
-			evt.endEvent(df.getMetaFile().getPath() + " Cached");
-		} catch (IOException e) {
-			SDFSLogger.getLog().warn("unable to cache " +df.mf.getPath(),e);
-		} catch (FileClosedException e) {
-			SDFSLogger.getLog().warn("unable to cache " +df.mf.getPath(),e);
-		} finally {
-			try {
-			if (ch != null)
-				df.unRegisterChannel(ch, -1);
-			}catch(Exception e) {}
 			
-			try {
-				synchronized (active) {
-					active.remove(df.mf.getPath());
-				}
-			}catch(Exception e) {}
 		}
-
 	}
 
 }

@@ -1,117 +1,85 @@
 package org.opendedup.sdfs.mgmt.cli;
 
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Formatter;
+import java.util.Iterator;
 import java.util.Locale;
 
 import org.opendedup.util.StorageUnit;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.opendedup.grpc.FileInfoRequest;
+import org.opendedup.grpc.FileInfoResponse;
+import org.opendedup.grpc.FileMessageResponseOrBuilder;
+import org.opendedup.grpc.IOMonitorResponse;
+import org.opendedup.grpc.FileIOServiceGrpc;
+import org.opendedup.grpc.errorCodes;
+import org.opendedup.grpc.FileIOServiceGrpc.FileIOServiceBlockingStub;
 
 public class ProcessFileInfo {
 	public static void runCmd(String file) {
 		try {
-			file = URLEncoder.encode(file, "UTF-8");
-			StringBuilder sb = new StringBuilder();
-			Formatter formatter = new Formatter(sb);
-			formatter.format("file=%s&cmd=info", file);
-			Document doc = MgmtServerConnection.getResponse(sb.toString());
-			Element root = doc.getDocumentElement();
-			formatter.close();
-			if (root.getAttribute("status").equals("failed"))
-				System.out.println(root.getAttribute("msg"));
-			else {
-				Element files = (Element) root.getElementsByTagName("files")
-						.item(0);
-				for (int i = 0; i < files.getElementsByTagName("file-info")
-						.getLength(); i++) {
-					Element fileEl = (Element) files.getElementsByTagName(
-							"file-info").item(i);
-					System.out.println("#");
-					System.out.printf("file name : %s\n",
-							URLDecoder.decode(fileEl.getAttribute("file-name"),"UTF-8"));
-					System.out.printf("sdfs path : %s\n",
-							URLDecoder.decode(fileEl.getAttribute("sdfs-path"),"UTF-8"));
-					if (fileEl.hasAttribute("symlink")) {
-						System.out.printf("symlink : %s\n",
-								fileEl.getAttribute("symlink"));
-						System.out.printf("symlink path: %s\n",
-								fileEl.getAttribute("symlink-path"));
-					}
-					System.out.printf("file type : %s\n",
-							fileEl.getAttribute("type"));
-					if (fileEl.getAttribute("type").equalsIgnoreCase("file")) {
-						Element ioEl = (Element) fileEl.getElementsByTagName(
-								"io-info").item(0);
-						System.out.printf("dedup file : %s\n",
-								fileEl.getAttribute("dedup"));
-						System.out.printf("map file guid : %s\n",
-								fileEl.getAttribute("dedup-map-guid"));
-						System.out.printf("file open : %s\n",
-								fileEl.getAttribute("open"));
-						System.out.printf("real bytes written : %s\n",
-								ioEl.getAttribute("actual-bytes-written"));
-						System.out
-								.printf("format real data written : %s\n",
-										StorageUnit
-												.of(Long.parseLong(ioEl
-														.getAttribute("actual-bytes-written")))
-												.format(Long.parseLong(ioEl
-														.getAttribute("actual-bytes-written"))));
-						System.out.printf("virtual bytes written : %s\n",
-								ioEl.getAttribute("virtual-bytes-written"));
-						System.out
-								.printf("format virtual data written : %s\n",
-										StorageUnit
-												.of(Long.parseLong(ioEl
-														.getAttribute("virtual-bytes-written")))
-												.format(Long.parseLong(ioEl
-														.getAttribute("virtual-bytes-written"))));
-						System.out.printf("duplicate data bytes: %s\n",
-								ioEl.getAttribute("duplicate-blocks"));
-						System.out
-								.printf("format duplicate data : %s\n",
-										StorageUnit
-												.of(Long.parseLong(ioEl
-														.getAttribute("duplicate-blocks")))
-												.format(Long.parseLong(ioEl
-														.getAttribute("duplicate-blocks"))));
-						System.out.printf("bytes read : %s\n",
-								ioEl.getAttribute("bytes-read"));
-						System.out.printf(
-								"format data read: %s\n",
-								StorageUnit.of(
-										Long.parseLong(ioEl
-												.getAttribute("bytes-read")))
-										.format(Long.parseLong(ioEl
-												.getAttribute("bytes-read"))));
+			FileIOServiceBlockingStub fileIOStub = FileIOServiceGrpc.newBlockingStub(MgmtServerConnection.channel);
+			FileInfoRequest req = FileInfoRequest.newBuilder().setCompact(false).setFileName(file).build();
+			FileMessageResponseOrBuilder resp = null;
+			try {
+				resp = fileIOStub.getFileInfo(req);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			if (resp.getErrorCode() != errorCodes.NOERR) {
+				System.err.println(resp.getError());
+				System.err.println(resp.getErrorCode());
+				System.exit(1);
+			}
+			Iterator<FileInfoResponse> iter = resp.getResponseList().iterator();
+			while (iter.hasNext()) {
+				FileInfoResponse fr = iter.next();
+				System.out.println("#");
+				System.out.printf("file name : %s\n", fr.getFilePath());
+				System.out.printf("sdfs path : %s\n", fr.getSdfsPath());
+				System.out.printf("logical size: %d\n",fr.getSize());
+				System.out.printf("symlink : %s\n", fr.getSymlink());
+				System.out.printf("symlink path: %s\n", fr.getSymlinkPath());
+				System.out.printf("file type : %s\n", fr.getType());
+				if (fr.getType() == FileInfoResponse.fileType.FILE) {
+					IOMonitorResponse io = fr.getIoMonitor();
+					System.out.printf("map file guid : %s\n", fr.getMapGuid());
+					System.out.printf("file open : %b\n", fr.getOpen());
+					System.out.printf("real bytes written : %d\n", io.getActualBytesWritten());
+					System.out.printf("format real data written : %s\n",
+							StorageUnit.of(io.getActualBytesWritten())
+									.format(io.getActualBytesWritten()));
+					System.out.printf("virtual bytes written : %d\n", io.getVirtualBytesWritten());
+					System.out.printf("format virtual data written : %s\n",
+							StorageUnit.of(io.getVirtualBytesWritten())
+									.format(io.getVirtualBytesWritten()));
+					System.out.printf("duplicate data bytes: %d\n", io.getDuplicateBlocks());
+					System.out.printf("format duplicate data : %s\n",
+							StorageUnit.of(io.getDuplicateBlocks())
+									.format(io.getDuplicateBlocks()));
+					System.out.printf("bytes read : %d\n", io.getBytesRead());
+					System.out.printf("format data read: %s\n",
+							StorageUnit.of(io.getBytesRead())
+									.format(io.getBytesRead()));
 
-						long realBytes = Long.parseLong(ioEl
-								.getAttribute("actual-bytes-written"));
-						long dedupBytes = Long.parseLong(ioEl
-								.getAttribute("duplicate-blocks"));
-						if (dedupBytes == 0 || realBytes == 0) {
+					long realBytes = io.getActualBytesWritten();
+					long dedupBytes = io.getDuplicateBlocks();
+					if (dedupBytes == 0) {
+						System.out.printf("dedup rate : %d%%\n", 100);
+					} else if (realBytes == 0) {
+						System.out.printf("dedup rate : %d%%\n", 0);
+					} else {
+						double dedupRate = (((double) dedupBytes / (double) (dedupBytes + realBytes)) * 100);
+						if (Double.isFinite(dedupRate)) {
+							DecimalFormat twoDForm = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+							twoDForm.applyPattern("#.##");
+							dedupRate = Double.valueOf(twoDForm.format(dedupRate));
 
-							System.out.printf("dedup rate : %d%%\n", 0);
+							System.out.printf("dedup rate : %s%%\n", Double.toString(dedupRate));
 						} else {
-							double dedupRate = (((double) dedupBytes / (double) (dedupBytes + realBytes)) * 100);
-							if (Double.isFinite(dedupRate)) {
-								DecimalFormat twoDForm = (DecimalFormat) NumberFormat
-										.getNumberInstance(Locale.US);
-								twoDForm.applyPattern("#.##");
-								dedupRate = Double.valueOf(twoDForm
-										.format(dedupRate));
-
-								System.out.printf("dedup rate : %s%%\n",
-										Double.toString(dedupRate));
-							} else {
-								System.out.printf("dedup rate : %s%%\n", "100");
-							}
-
+							System.out.printf("dedup rate : %s%%\n", "100");
 						}
+
 					}
 				}
 			}
@@ -119,6 +87,7 @@ public class ProcessFileInfo {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(1);
 		}
 
 	}

@@ -18,6 +18,9 @@
  *******************************************************************************/
 package org.opendedup.hashing;
 
+import java.io.IOException;
+import java.util.List;
+
 import org.opendedup.sdfs.Main;
 
 import com.google.common.hash.HashFunction;
@@ -72,5 +75,10 @@ public class Murmur3HashEngine implements AbstractHashEngine {
 		this.seed = seed;
 		hf = Hashing.murmur3_128(seed);
 		
+	}
+
+	@Override
+	public List<Finger> getChunks(byte [] b,String uuid) throws IOException {
+		throw new IOException("not supported");
 	}
 }

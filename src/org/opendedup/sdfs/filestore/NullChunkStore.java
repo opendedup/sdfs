@@ -91,7 +91,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len)
+	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
 			throws IOException {
 		this.sz.addAndGet(chunk.length);
 		return 0;
@@ -135,6 +135,12 @@ public class NullChunkStore implements AbstractChunkStore {
 
 	@Override
 	public void setCacheSize(long bps) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setDseSize(long bps) {
 		// TODO Auto-generated method stub
 
 	}
@@ -198,6 +204,12 @@ public class NullChunkStore implements AbstractChunkStore {
 	public void clearCounters() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public long getAllObjSummary(String pp, long id) throws IOException {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

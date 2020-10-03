@@ -20,6 +20,8 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
+
 import java.util.TreeMap;
 
 import org.opendedup.collections.DataArchivedException;
@@ -101,13 +103,11 @@ public interface DedupChunkInterface {
 
 	public boolean isClosed();
 
-	public void flush() throws BufferClosedException, IOException;
-
 	public boolean isBatchProcessed();
 
 	public boolean isBatchwritten();
 
-	public void setAR(TreeMap<Integer,HashLocPair> al);
+	public boolean setAR(TreeMap<Integer,HashLocPair> al);
 
 	public void setBatchwritten(boolean written);
 
@@ -135,8 +135,6 @@ public interface DedupChunkInterface {
 
 	public abstract String toString();
 
-	public abstract void open();
-
 	public abstract void close() throws IOException;
 
 	public abstract void persist();
@@ -146,5 +144,7 @@ public interface DedupChunkInterface {
 	public abstract void setPrevDoop(int prevDoop);
 
 	public abstract int hashCode();
+
+	void open();
 
 }

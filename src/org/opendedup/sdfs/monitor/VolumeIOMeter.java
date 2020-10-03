@@ -19,6 +19,7 @@
 package org.opendedup.sdfs.monitor;
 
 import java.io.IOException;
+
 import java.lang.management.ManagementFactory;
 
 import org.apache.log4j.Level;
@@ -32,6 +33,7 @@ import org.slf4j.MDC;
 
 import com.sun.management.UnixOperatingSystemMXBean;
 
+@SuppressWarnings("restriction")
 public class VolumeIOMeter implements Runnable {
 
 	private Volume vol;
@@ -108,7 +110,6 @@ public class VolumeIOMeter implements Runnable {
 		MDC.put("totalMemory", Long.toString(perf.getTotalPhysicalMemorySize()));
 		MDC.put("freeSwap", Long.toString(perf.getFreeSwapSpaceSize()));
 		MDC.put("totalSwap", Long.toString(perf.getTotalSwapSpaceSize()));
-		log.info(vol.getName());
 		MDC.clear();
 	}
 

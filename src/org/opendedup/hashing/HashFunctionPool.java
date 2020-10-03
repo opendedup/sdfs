@@ -34,26 +34,45 @@ public class HashFunctionPool {
 	public static final String TIGER_24 = "tiger24";
 	public static final String MURMUR3_16 = "murmur3_128";
 	public static final String VARIABLE_MURMUR3 = "VARIABLE_MURMUR3";
+	public static final String VARIABLE_SIP = "VARIABLE_SIP";
+	public static final String VARIABLE_SIP2 = "VARIABLE_SIP2";
+	public static final String VARIABLE_SHA256 = "VARIABLE_SHA256";
+	public static final String VARIABLE_SHA256_160 = "VARIABLE_SHA256_160";
+	public static final String VARIABLE_HWY_160 = "VARIABLE_HWY_160";
+	public static final String VARIABLE_HWY_128 = "VARIABLE_HWY_128";
+	public static final String VARIABLE_HWY_256 = "VARIABLE_HWY_256";
+	public static final String VARIABLE_MD5 = "VARIABLE_MD5";
 	public static int hashLength = 16;
 	public static int max_hash_cluster = 1;
 	// public static int min_page_size = Main.CHUNK_LENGTH;
 	public static int avg_page_size = 4096;
+	public static int minLen = Main.MIN_CHUNK_LENGTH;
+	public static int maxLen = Main.CHUNK_LENGTH;
+	public static long bytesPerWindow = 48;
 
 	static {
 		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
 			hashLength = Tiger16HashEngine.getHashLenth();
 		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hashLength = Murmur3HashEngine.getHashLenth();
-		} else if (Main.hashType.equalsIgnoreCase(VARIABLE_MURMUR3)) {
-			hashLength = VariableHashEngine.getHashLenth();
-			if(Main.chunkStoreLocal)
-				Main.MAPVERSION = 3;
-			else
-				Main.MAPVERSION = 2;
-			max_hash_cluster = VariableHashEngine.getMaxCluster();
+		} else if (Main.hashType.toUpperCase().startsWith("VARIABLE_")) {
+			if(Main.hashType.endsWith("256")) {
+				hashLength = 32;
+			}
+			else if(Main.hashType.endsWith("160")) {
+				hashLength = 18;
+			}
+			else if(Main.hashType.endsWith("128")) {
+				hashLength = 16;
+			}else
+				hashLength = 16;
+			Main.MAPVERSION = 3;
+			max_hash_cluster = Main.CHUNK_LENGTH / HashFunctionPool.minLen;
 		}
-		SDFSLogger.getLog().info("Set hashtype to " + Main.hashType);
+		SDFSLogger.getLog().info("Set hashtype to " + Main.hashType + " hash length = " + hashLength + " maxhashcluster= " + max_hash_cluster + " chunk-length=" + Main.CHUNK_LENGTH + " minlen=" + minLen);
 	}
+	
+	
 
 	public static AbstractHashEngine borrowObject() throws IOException {
 		AbstractHashEngine hc = null;
@@ -85,7 +104,8 @@ public class HashFunctionPool {
 	}
 
 	public static AbstractHashEngine getHashEngine()
-			throws NoSuchAlgorithmException, NoSuchProviderException {
+			 {
+		try {
 		AbstractHashEngine hc = null;
 		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
 			hc = new Tiger16HashEngine();
@@ -94,7 +114,33 @@ public class HashFunctionPool {
 		} else if (Main.hashType.equalsIgnoreCase("VARIABLE_MURMUR3")) {
 			hc = new VariableHashEngine();
 		}
+		else if (Main.hashType.equalsIgnoreCase("VARIABLE_SIP") || Main.hashType.equalsIgnoreCase("VARIABLE_SIP2")) {
+			hc = new VariableMD5HashEngine();
+		}
+		else if (Main.hashType.equalsIgnoreCase(VARIABLE_SHA256)) {
+			hc = new VariableSha256HashEngine(VariableSha256HashEngine.HASHTYPE.HASH256);
+		}
+		else if (Main.hashType.equalsIgnoreCase(VARIABLE_SHA256_160)) {
+			hc = new VariableSha256HashEngine(VariableSha256HashEngine.HASHTYPE.HASH160);
+		}
+		else if (Main.hashType.equalsIgnoreCase(VARIABLE_HWY_128)) {
+			hc = new VariableHighwayHashEngine(VariableHighwayHashEngine.HASHTYPE.HASH128);
+		}
+		else if (Main.hashType.equalsIgnoreCase(VARIABLE_HWY_160)) {
+			hc = new VariableHighwayHashEngine(VariableHighwayHashEngine.HASHTYPE.HASH160);
+		}
+		else if (Main.hashType.equalsIgnoreCase(VARIABLE_HWY_256)) {
+			hc = new VariableHighwayHashEngine(VariableHighwayHashEngine.HASHTYPE.HASH256);
+		}
+		else if (Main.hashType.equalsIgnoreCase(VARIABLE_MD5)) {
+			hc = new VariableMD5HashEngine();
+		}
 		return hc;
+		}catch(Exception e) {
+			SDFSLogger.getLog().fatal("unable to get engine", e);
+			System.exit(5);
+			return null;
+		}
 	}
 
 }

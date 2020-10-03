@@ -20,11 +20,13 @@ package org.opendedup.util;
 
 import java.io.File;
 
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.attribute.PosixFileAttributes;
 
+import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -123,14 +125,11 @@ public class FileCounts {
 						.getPath());
 				String dfGuid = mf.getDfGuid();
 				if (dfGuid != null) {
-					File mapFile = new File(Main.dedupDBStore + File.separator
-							+ dfGuid.substring(0, 2) + File.separator + dfGuid
-							+ File.separator + dfGuid + ".map");
-					if(!mapFile.exists())
-						mapFile = new File(Main.dedupDBStore + File.separator
-								+ dfGuid.substring(0, 2) + File.separator + dfGuid
-								+ File.separator + dfGuid + ".map.lz4");
-					size += mapFile.length();
+					File mapFile = LongByteArrayMap.getFile(dfGuid);
+					if(mapFile.exists()) {
+						size += mapFile.length();
+					}
+					
 				}
 			}
 		}

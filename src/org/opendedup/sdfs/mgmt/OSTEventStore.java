@@ -1,7 +1,7 @@
 package org.opendedup.sdfs.mgmt;
 
 import java.io.File;
-
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -102,9 +102,12 @@ public class OSTEventStore {
 				if(evt != null)
 					SDFSLogger.getLog().debug("getting event id " + id + " data=" + evt.event + " payload=" + evt.payload);
 				*/
-				return XMLUtils.toXMLElement(dir.getPath() + id + ".xml");
+					return XMLUtils.toXMLElement(dir.getPath() + id + ".xml");
+					
 			}
-		} catch (Exception e) {
+		} catch(FileNotFoundException e) {
+			throw new IOException("request to fetch attributes failed because " + e.toString());
+		}catch (Exception e) {
 			SDFSLogger.getLog().error("unable to fulfill request on id " + id, e);
 			throw new IOException("request to fetch attributes failed because " + e.toString());
 		}

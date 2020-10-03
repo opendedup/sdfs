@@ -21,18 +21,17 @@ package org.opendedup.sdfs.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.jgroups.Address;
+import org.opendedup.grpc.MessageQueueInfoResponse;
+import org.opendedup.grpc.VolumeInfoResponse;
+import org.opendedup.grpc.MessageQueueInfoResponse.MQType;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.cluster.VolumeSocket;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -44,18 +43,16 @@ import org.opendedup.util.StringUtils;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-public class Volume implements java.io.Serializable {
+public class Volume {
 
 	/**
 	 * Represents the mounted volume associated with file system
 	 */
 
-	private static final long serialVersionUID = 5505952237500542215L;
-	long capacity;
+	public long capacity;
 	String name;
 	AtomicLong currentSize = new AtomicLong(0);
 	String path;
@@ -81,26 +78,29 @@ public class Volume implements java.io.Serializable {
 	private transient VolumeIOMeter ioMeter = null;
 	private String configPath = null;
 	private String uuid = null;
-	private byte clusterCopies = 2;
-	private boolean clusterRackAware = false;
-	public Address host = null;
+	
 	AtomicLong writeErrors = new AtomicLong(0);
 	AtomicLong readErrors = new AtomicLong(0);
 	private long serialNumber = 0;
 	private boolean volumeFull = false;
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
-	public ArrayList<BlockDev> devices = new ArrayList<BlockDev>();
-	public transient VolumeSocket soc = null;
-	private ReentrantLock devLock = new ReentrantLock();
+	public String connicalPath;
+	public String rabbitMQNode = null;
+	public String rabbitMQTopic = "sdfs";
+	public String rabbitMQUser = null;
+	public String rabbitMQPassword = null;
+	public int rabbitMQPort = 5672;
+	public String pubsubTopic =null;
+	public String pubsubSubscription = null;
+	public String gcpProject = null;
+	public String gcpCredsPath = null;
 
 	public boolean isClustered() {
 		return this.clustered;
 	}
 
-	public VolumeSocket getSoc() {
-		return this.soc;
-	}
+	
 
 	public static void setStorageConnected(boolean connected) {
 		if (connected && !storageConnected) {
@@ -127,15 +127,17 @@ public class Volume implements java.io.Serializable {
 			SDFSEvent.wrErrEvent();
 		}
 	}
-	
+
 	public void addFile() {
+
 		this.files.incrementAndGet();
 	}
-	
+
 	public long getFiles() {
+
 		return this.files.get();
 	}
-	
+
 	public void removeFile() {
 		this.files.decrementAndGet();
 	}
@@ -151,42 +153,6 @@ public class Volume implements java.io.Serializable {
 		return allowExternalSymlinks;
 	}
 
-	public void closeAllDevices() {
-		SDFSLogger.getLog().warn("Closing all devices");
-		devLock.lock();
-		try {
-			for (BlockDev dev : devices) {
-				try {
-					SDFSLogger.getLog().warn("Closing " + dev.devName);
-					dev.stopDev();
-					SDFSLogger.getLog().warn("Closed " + dev.devName);
-				} catch (Exception e) {
-
-				}
-			}
-		} finally {
-			devLock.unlock();
-		}
-	}
-
-	private void startAllOnStartupDevices() {
-		devLock.lock();
-		try {
-			for (BlockDev dev : devices) {
-				try {
-					if (dev.startOnInit)
-						this.startDev(dev.devName);
-				} catch (Exception e) {
-					SDFSLogger.getLog().error(
-							"unable to start block device [" + dev.devName
-									+ "]", e);
-				}
-			}
-		} finally {
-			devLock.unlock();
-		}
-	}
-
 	public boolean isOffLine() {
 		return this.volumeOffLine;
 	}
@@ -199,8 +165,7 @@ public class Volume implements java.io.Serializable {
 		this.volumeOffLine = offline;
 	}
 
-	public void setAllowExternalSymlinks(boolean allowExternalSymlinks,
-			boolean propigateEvent) {
+	public void setAllowExternalSymlinks(boolean allowExternalSymlinks, boolean propigateEvent) {
 		this.allowExternalSymlinks = allowExternalSymlinks;
 	}
 
@@ -220,52 +185,49 @@ public class Volume implements java.io.Serializable {
 		if (!pathF.exists())
 			pathF.mkdirs();
 		this.path = pathF.getPath();
+		this.connicalPath = pathF.getCanonicalPath();
 		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
 		if (vol.hasAttribute("name"))
 			this.name = vol.getAttribute("name");
 		else
 			this.name = pathF.getParentFile().getName();
 		if (vol.hasAttribute("read-timeout-seconds"))
-			Main.readTimeoutSeconds = Integer.parseInt(vol
-					.getAttribute("read-timeout-seconds"));
+			Main.readTimeoutSeconds = Integer.parseInt(vol.getAttribute("read-timeout-seconds"));
 		if (vol.hasAttribute("write-timeout-seconds"))
-			Main.writeTimeoutSeconds = Integer.parseInt(vol
-					.getAttribute("write-timeout-seconds"));
+			Main.writeTimeoutSeconds = Integer.parseInt(vol.getAttribute("write-timeout-seconds"));
 		if (vol.hasAttribute("sync-files")) {
-			boolean syncDL = Boolean.parseBoolean(vol
-					.getAttribute("sync-files"));
+			boolean syncDL = Boolean.parseBoolean(vol.getAttribute("sync-files"));
 			if (syncDL)
 				Main.syncDL = true;
 		}
-		if (vol.hasAttribute("use-dse-size"))
-			this.useDSESize = Boolean.parseBoolean(vol
-					.getAttribute("use-dse-size"));
-		if (vol.hasAttribute("cluster-id"))
+		if (vol.hasAttribute("cluster-id") && vol.getAttribute("cluster-id").trim().length() > 0)
 			this.uuid = vol.getAttribute("cluster-id");
 		else
 			this.uuid = RandomGUID.getGuid();
+		if (vol.hasAttribute("use-dse-size"))
+			this.useDSESize = Boolean.parseBoolean(vol.getAttribute("use-dse-size"));
 		if (vol.hasAttribute("use-dse-capacity"))
-			this.useDSECapacity = Boolean.parseBoolean(vol
-					.getAttribute("use-dse-capacity"));
+			this.useDSECapacity = Boolean.parseBoolean(vol.getAttribute("use-dse-capacity"));
 		if (vol.hasAttribute("use-perf-mon"))
-			this.usePerfMon = Boolean.parseBoolean(vol
-					.getAttribute("use-perf-mon"));
+			this.usePerfMon = Boolean.parseBoolean(vol.getAttribute("use-perf-mon"));
 		if (vol.hasAttribute("perf-mon-file"))
 			this.perfMonFile = vol.getAttribute("perf-mon-file");
 		else
-			this.perfMonFile = "/var/log/sdfs/volume-" + this.name
-					+ "-perf.json";
+			this.perfMonFile = "/var/log/sdfs/volume-" + this.name + "-perf.json";
 		this.currentSize.set(Long.parseLong(vol.getAttribute("current-size")));
-		if (vol.hasAttribute("duplicate-bytes"))
-			this.duplicateBytes.set(Long.parseLong(vol
-					.getAttribute("duplicate-bytes")));
-		if (vol.hasAttribute("read-bytes"))
-			this.readBytes.set(Double.parseDouble(vol
-					.getAttribute("read-bytes")));
-		if (vol.hasAttribute("write-bytes"))
-			this.actualWriteBytes.set(Long.parseLong(vol
-					.getAttribute("write-bytes")));
-		if(vol.hasAttribute("files")) {
+		if (vol.hasAttribute("duplicate-bytes")) {
+			this.duplicateBytes.set(Long.parseLong(vol.getAttribute("duplicate-bytes")));
+		}
+		if (vol.hasAttribute("read-bytes")) {
+
+			this.readBytes.set(Double.parseDouble(vol.getAttribute("read-bytes")));
+		}
+		if (vol.hasAttribute("write-bytes")) {
+
+			this.actualWriteBytes.set(Long.parseLong(vol.getAttribute("write-bytes")));
+		}
+		if (vol.hasAttribute("files")) {
+
 			this.files.set(Long.parseLong(vol.getAttribute("files")));
 		} else {
 			File vf = new File(Main.dedupDBStore);
@@ -275,189 +237,97 @@ public class Volume implements java.io.Serializable {
 		}
 
 		if (vol.hasAttribute("serial-number")) {
-			this.serialNumber = Long.parseLong(vol
-					.getAttribute("serial-number"));
+			this.serialNumber = Long.parseLong(vol.getAttribute("serial-number"));
 		} else {
 			int sn = new Random().nextInt();
 			if (sn < 0)
 				sn = sn * -1;
 			this.serialNumber = sn;
 		}
-		Main.DSEID=this.serialNumber;
-		if(vol.hasAttribute("compress-metadata"))
+		Main.DSEID = this.serialNumber;
+		if (vol.hasAttribute("compress-metadata"))
 			Main.COMPRESS_METADATA = Boolean.parseBoolean(vol.getAttribute("compress-metadata"));
 		if (vol.hasAttribute("maximum-percentage-full")) {
-			this.fullPercentage = Double.parseDouble(vol
-					.getAttribute("maximum-percentage-full"));
+			this.fullPercentage = Double.parseDouble(vol.getAttribute("maximum-percentage-full"));
 			if (this.fullPercentage > 1)
 				this.fullPercentage = this.fullPercentage / 100;
-			SDFSLogger.getLog().info(
-					"Volume write threshold is " + this.fullPercentage);
+			SDFSLogger.getLog().info("Volume write threshold is " + this.fullPercentage);
 			this.absoluteLength = (long) (this.capacity * this.fullPercentage);
 		}
 		if (vol.hasAttribute("closed-gracefully")) {
-			Main.closedGracefully = Boolean.parseBoolean(vol
-					.getAttribute("closed-gracefully"));
-			if (!Main.closedGracefully)
-				Main.runConsistancyCheck = true;
+			Main.closedGracefully = Boolean.parseBoolean(vol.getAttribute("closed-gracefully"));
 		}
-		if (vol.hasAttribute("allow-external-links"))
-			Main.allowExternalSymlinks = Boolean.parseBoolean(vol
-					.getAttribute("allow-external-links"));
-		if (vol.hasAttribute("cluster-block-copies")) {
-			this.clusterCopies = Byte.valueOf(vol
-					.getAttribute("cluster-block-copies"));
-			if (this.clusterCopies > 7) {
-				this.clusterCopies = 7;
-			}
+		if (vol.hasAttribute("rebuild-hashtable")) {
+			Main.runConsistancyCheck = true;
 		}
-		if (vol.hasAttribute("volume-clustered")) {
 
-			this.clustered = Boolean.parseBoolean(vol
-					.getAttribute("volume-clustered"));
-		}
-		if (vol.hasAttribute("cluster-rack-aware")) {
-			this.clusterRackAware = Boolean.parseBoolean(vol
-					.getAttribute("cluster-rack-aware"));
-		}
-		if (vol.hasAttribute("cluster-response-timeout"))
-			Main.ClusterRSPTimeout = Integer.parseInt(vol
-					.getAttribute("cluster-response-timeout"));
+		if (vol.hasAttribute("allow-external-links"))
+			Main.allowExternalSymlinks = Boolean.parseBoolean(vol.getAttribute("allow-external-links"));
+
 		SDFSLogger.getLog().info("Setting volume size to " + this.capacity);
 		if (this.fullPercentage > 0)
-			SDFSLogger.getLog().info(
-					"Setting maximum capacity to " + this.absoluteLength);
+			SDFSLogger.getLog().info("Setting maximum capacity to " + this.absoluteLength);
 		else
 			SDFSLogger.getLog().info("Setting maximum capacity to infinite");
 		this.startThreads();
-		if (vol.getElementsByTagName("blockdev").getLength() > 0) {
-			NodeList lst = vol.getElementsByTagName("blockdev");
-			for (int i = 0; i < lst.getLength(); i++) {
-				Element el = (Element) lst.item(i);
-				BlockDev dev = new BlockDev(el);
-				this.devices.add(dev);
+		
+		if (vol.getElementsByTagName("rabbitmq-node").getLength() > 0) {
+			Element el = (Element) vol.getElementsByTagName("rabbitmq-node").item(0);
+			this.rabbitMQNode = el.getAttribute("hostname");
+			if (el.hasAttribute("username"))
+				this.rabbitMQUser = el.getAttribute("username");
+			if (el.hasAttribute("password")) {
+				this.rabbitMQPassword = el.getAttribute("password");
+			}
+			if (el.hasAttribute("port")) {
+				this.rabbitMQPort = Integer.parseInt(el.getAttribute("port"));
+			}
+			if (el.hasAttribute("topic")) {
+				this.rabbitMQTopic = el.getAttribute("topic");
+			}
+			
+		}
+		if (vol.getElementsByTagName("gcp-pubsub").getLength() > 0) {
+			SDFSLogger.getLog().info("Reading Pubsub Settings");
+			Element el = (Element) vol.getElementsByTagName("gcp-pubsub").item(0);
+			if(el.hasAttribute("topic")) {
+				this.pubsubTopic = el.getAttribute("topic");
+			}else {
+				this.pubsubTopic = "sdfsvolume";
+			}
+			if(el.hasAttribute("subscription")) {
+				this.pubsubSubscription = el.getAttribute("subscription");
+			}else {
+				this.pubsubSubscription = Long.toString(serialNumber);
+			}
+			this.gcpProject = el.getAttribute("project-id");
+			if(el.hasAttribute("auth-file")) {
+				this.gcpCredsPath = el.getAttribute("auth-file");
+			} else {
+				this.gcpCredsPath = null;
 			}
 		}
 	}
 
 	public Volume() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public void init() throws Exception {
-		if (this.clustered) {
-			this.soc = new VolumeSocket(this, Main.DSEClusterConfig);
-		}
-		if (Main.blockDev)
-			this.startAllOnStartupDevices();
 		
+
 		DedupFileStore.init();
 	}
 
-	public synchronized void addBlockDev(BlockDev dev) throws Exception {
-		devLock.lock();
-		try {
-			long sz = 0;
-			for (BlockDev _dev : this.devices) {
-				if (dev.devName.equalsIgnoreCase(_dev.devName))
-					throw new IOException("Device Name [" + dev.devName
-							+ "] already exists");
-				if (dev.internalPath.equalsIgnoreCase(_dev.internalPath))
-					throw new IOException("Device Internal Path ["
-							+ dev.internalPath + "] already exists");
-				sz = sz + _dev.size;
-			}
-			sz = sz + dev.size;
-			if (sz > this.getCapacity())
-				throw new IOException(
-						"Requested Block Device is too large for volume. "
-								+ "Volume capacity is ["
-								+ StorageUnit.of(this.getCapacity()).format(
-										this.getCapacity())
-								+ "] and requested size was ["
-								+ StorageUnit.of(dev.size).format(dev.size)
-								+ "]");
-			this.devices.add(dev);
-			/*
-			 * if (dev.startOnInit && Main.blockDev) { try {
-			 * this.startDev(dev.devName); } catch (Exception e) {
-			 * SDFSLogger.getLog().warn("unable to start device", e); } }
-			 */
-			this.writer.writeConfig();
-		} finally {
-			devLock.unlock();
-		}
-	}
-
-	public synchronized BlockDev removeBlockDev(String devName)
-			throws Exception {
-		devLock.lock();
-		try {
-			for (BlockDev _dev : this.devices) {
-				if (_dev.devName.equalsIgnoreCase(devName)) {
-					try {
-						_dev.stopDev();
-					} catch (IOException e) {
-						if (SDFSLogger.isDebug())
-							SDFSLogger
-									.getLog()
-									.debug("issue while stopping device during removal ",
-											e);
-					}
-					this.devices.remove(_dev);
-					this.writer.writeConfig();
-					return _dev;
-				}
-			}
-		} finally {
-			devLock.unlock();
-		}
-		throw new IOException("Device not found [" + devName + "]");
-	}
-
-	public synchronized BlockDev getBlockDev(String devName) throws IOException {
-		devLock.lock();
-		try {
-			for (BlockDev _dev : this.devices) {
-				if (_dev.devName.equalsIgnoreCase(devName)) {
-					return _dev;
-				}
-			}
-		} finally {
-			devLock.unlock();
-		}
-		throw new IOException("Device not found [" + devName + "]");
-	}
+	
 
 	public void writeUpdate() throws Exception {
 		this.writer.writeConfig();
 	}
 
-	private synchronized String getFreeDevice() throws IOException {
-		for (int i = 0; i < 128; i++) {
-			String blkDevP = "/dev/nbd" + i;
-			boolean found = false;
-			for (BlockDev _dev : this.devices) {
-				if (_dev.devPath != null
-						&& _dev.devPath.equalsIgnoreCase(blkDevP)) {
-					found = true;
-					break;
-				}
-			}
-			if (!found)
-				return blkDevP;
-		}
-		throw new IOException("no free block devices found");
-	}
+	
 
-	public synchronized BlockDev startDev(String devname) throws IOException {
-
-		BlockDev dev = this.getBlockDev(devname);
-		if (Main.blockDev) {
-			dev.startDev(this.getFreeDevice());
-		}
-		return dev;
-	}
+	
 
 	private void startThreads() {
 		this.writer = new VolumeConfigWriterThread(this.configPath);
@@ -469,23 +339,20 @@ public class Volume implements java.io.Serializable {
 	public long getCapacity() {
 		if (this.useDSECapacity) {
 			if (HashFunctionPool.max_hash_cluster == 1)
-				return HCServiceProxy.getMaxSize()
-						* HCServiceProxy.getPageSize();
+				return HCServiceProxy.getMaxSize() * HCServiceProxy.getPageSize();
 			else
-				return HCServiceProxy.getMaxSize()
-						* HashFunctionPool.avg_page_size;
+				return HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size;
 		} else
 			return capacity;
 	}
 
-	public void setCapacity(long capacity, boolean propigateEvent)
-			throws Exception {
+	public void setCapacity(long capacity, boolean propigateEvent) throws Exception {
 		if (capacity <= this.currentSize.get())
-			throw new IOException(
-					"Cannot resize volume to something less than current size. Current Size ["
-							+ this.currentSize + "] requested capacity ["
-							+ capacity + "]");
+			throw new IOException("Cannot resize volume to something less than current size. Current Size ["
+					+ this.currentSize + "] requested capacity [" + capacity + "]");
 		this.capacity = capacity;
+		Main.chunkStoreAllocationSize = capacity;
+		HCServiceProxy.setDseSize((capacity / HashFunctionPool.avg_page_size) + 8000);
 		SDFSLogger.getLog().info("Set Volume Capacity to " + capacity);
 		writer.writeConfig();
 
@@ -510,11 +377,11 @@ public class Volume implements java.io.Serializable {
 		return this.volumeFull;
 		/*
 		 * long avail = pathF.getUsableSpace(); if(avail < minFree) {
-		 * SDFSLogger.getLog().warn("Drive is almost full space left is [" +
-		 * avail + "]"); return true;
+		 * SDFSLogger.getLog().warn("Drive is almost full space left is [" + avail +
+		 * "]"); return true;
 		 * 
-		 * } if (this.fullPercentage < 0 || this.currentSize == 0) return false;
-		 * else { return (this.currentSize > this.absoluteLength); }
+		 * } if (this.fullPercentage < 0 || this.currentSize == 0) return false; else {
+		 * return (this.currentSize > this.absoluteLength); }
 		 */
 	}
 
@@ -596,62 +463,70 @@ public class Volume implements java.io.Serializable {
 		return Paths.get(path).getNameCount();
 	}
 
-	public Element toXMLElement(Document doc)
-			throws ParserConfigurationException {
+	public Element toXMLElement(Document doc) throws ParserConfigurationException {
 		Element root = doc.createElement("volume");
 		root.setAttribute("path", path);
 		root.setAttribute("name", this.name);
 		root.setAttribute("current-size", Long.toString(this.currentSize.get()));
-		root.setAttribute("capacity",
-				StorageUnit.of(this.capacity).format(this.capacity));
-		root.setAttribute("maximum-percentage-full",
-				Double.toString(this.fullPercentage));
-		root.setAttribute("duplicate-bytes",
-				Long.toString(this.duplicateBytes.get()));
+		root.setAttribute("capacity", StorageUnit.of(this.capacity).format(this.capacity));
+		root.setAttribute("maximum-percentage-full", Double.toString(this.fullPercentage));
+
+		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes.get()));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes.get()));
-		root.setAttribute("write-bytes",
-				Long.toString(this.actualWriteBytes.get()));
-		root.setAttribute("closed-gracefully",
-				Boolean.toString(this.closedGracefully));
+
+		root.setAttribute("write-bytes", Long.toString(this.getActualWriteBytes()));
+		root.setAttribute("closed-gracefully", Boolean.toString(this.closedGracefully));
 		root.setAttribute("serial-number", Long.toString(this.serialNumber));
 		root.setAttribute("cluster-id", this.uuid);
-		root.setAttribute("files", Long.toString(this.files.get()));
-		root.setAttribute("cluster-response-timeout",
-				Integer.toString(Main.ClusterRSPTimeout));
-		root.setAttribute("allow-external-links",
-				Boolean.toString(Main.allowExternalSymlinks));
-		root.setAttribute("use-dse-capacity",
-				Boolean.toString(this.useDSECapacity));
+		root.setAttribute("files", Long.toString(this.getFiles()));
+		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
+		root.setAttribute("use-dse-capacity", Boolean.toString(this.useDSECapacity));
 		root.setAttribute("use-dse-size", Boolean.toString(this.useDSESize));
 		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		root.setAttribute("perf-mon-file", this.perfMonFile);
-		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
-		root.setAttribute("cluster-rack-aware",
-				Boolean.toString(this.clusterRackAware));
 		root.setAttribute("offline", Boolean.toString(this.volumeOffLine));
 		root.setAttribute("volume-clustered", Boolean.toString(clustered));
-		root.setAttribute("read-timeout-seconds",
-				Integer.toString(Main.readTimeoutSeconds));
-		root.setAttribute("write-timeout-seconds",
-				Integer.toString(Main.writeTimeoutSeconds));
+		root.setAttribute("read-timeout-seconds", Integer.toString(Main.readTimeoutSeconds));
+		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
+		
 		try {
-			root.setAttribute("dse-comp-size",
-					Long.toString(HCServiceProxy.getDSECompressedSize()));
-			root.setAttribute("dse-size",
-					Long.toString(HCServiceProxy.getDSESize()));
+			root.setAttribute("dse-comp-size", Long.toString(HCServiceProxy.getDSECompressedSize()));
+			root.setAttribute("dse-size", Long.toString(HCServiceProxy.getDSESize()));
 		} catch (Exception e) {
 			root.setAttribute("dse-comp-size", Long.toString(0));
 			root.setAttribute("dse-size", Long.toString(0));
 		}
-		for (BlockDev blk : this.devices) {
-			Element el = blk.getElement();
-			doc.adoptNode(el);
-			root.appendChild(el);
+		if (this.rabbitMQNode != null) {
+			Element rmq = doc.createElement("rabbitmq-node");
+			rmq.setAttribute("hostname", this.rabbitMQNode);
+			rmq.setAttribute("port", Integer.toString(this.rabbitMQPort));
+			rmq.setAttribute("topic", this.rabbitMQTopic);
+			if(this.rabbitMQUser != null) {
+				rmq.setAttribute("username", this.rabbitMQUser);
+			}
+			if(this.rabbitMQPassword != null) {
+				rmq.setAttribute("password", this.rabbitMQPassword);
+			}
+			doc.adoptNode(rmq);
+			root.appendChild(rmq);
+		}
+		if (this.gcpProject != null) {
+			Element pbm = doc.createElement("gcp-pubsub");
+			pbm.setAttribute("project-id", this.gcpProject);
+			pbm.setAttribute("topic", this.pubsubTopic);
+			pbm.setAttribute("subscription", this.pubsubSubscription);
+			if(this.gcpCredsPath != null) {
+				pbm.setAttribute("auth-file", this.gcpCredsPath);
+			}
+			doc.adoptNode(pbm);
+			root.appendChild(pbm);
 		}
 		return root;
 	}
+
+	
 
 	public Document toXMLDocument() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("volume");
@@ -660,64 +535,89 @@ public class Volume implements java.io.Serializable {
 		root.setAttribute("name", this.name);
 		root.setAttribute("current-size", Long.toString(this.currentSize.get()));
 		root.setAttribute("capacity", Long.toString(this.capacity));
-		root.setAttribute("maximum-percentage-full",
-				Double.toString(this.fullPercentage));
-		root.setAttribute("duplicate-bytes",
-				Long.toString(this.duplicateBytes.get()));
+		root.setAttribute("maximum-percentage-full", Double.toString(this.fullPercentage));
+		root.setAttribute("duplicate-bytes", Long.toString(this.getDuplicateBytes()));
 		root.setAttribute("read-bytes", Double.toString(this.readBytes.get()));
-		root.setAttribute("write-bytes",
-				Long.toString(this.actualWriteBytes.get()));
-		root.setAttribute("cluster-response-timeout",
-				Integer.toString(Main.ClusterRSPTimeout));
+		root.setAttribute("write-bytes", Long.toString(this.getActualWriteBytes()));
 		root.setAttribute("serial-number", Long.toString(this.serialNumber));
 		root.setAttribute("name", this.name);
 		if (HashFunctionPool.max_hash_cluster == 1)
-			root.setAttribute(
-					"max-size",
-					Long.toString(HCServiceProxy.getMaxSize()
-							* HCServiceProxy.getPageSize()));
+			root.setAttribute("max-size", Long.toString(HCServiceProxy.getMaxSize() * HCServiceProxy.getPageSize()));
 		else
-			root.setAttribute(
-					"max-size",
-					Long.toString(HCServiceProxy.getMaxSize()
-							* HashFunctionPool.avg_page_size));
-		root.setAttribute("dse-size",
-				Long.toString(HCServiceProxy.getDSESize()));
-		root.setAttribute("dse-comp-size",
-				Long.toString(HCServiceProxy.getDSECompressedSize()));
+			root.setAttribute("max-size", Long.toString(HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size));
+		root.setAttribute("dse-size", Long.toString(HCServiceProxy.getDSESize()));
+		root.setAttribute("dse-comp-size", Long.toString(HCServiceProxy.getDSECompressedSize()));
 		root.setAttribute("readops", Double.toString(this.readOperations.get()));
-		root.setAttribute("writeops",
-				Double.toString(this.writeOperations.get()));
+		root.setAttribute("writeops", Double.toString(this.writeOperations.get()));
 		root.setAttribute("readerrors", Long.toString(this.readErrors.get()));
 		root.setAttribute("writeerrors", Long.toString(this.writeErrors.get()));
-		root.setAttribute("files", Long.toString(this.files.get()));
-		root.setAttribute("closed-gracefully",
-				Boolean.toString(this.closedGracefully));
-		root.setAttribute("allow-external-links",
-				Boolean.toString(Main.allowExternalSymlinks));
+		root.setAttribute("files", Long.toString(this.getFiles()));
+		root.setAttribute("closed-gracefully", Boolean.toString(this.closedGracefully));
+		root.setAttribute("allow-external-links", Boolean.toString(Main.allowExternalSymlinks));
 		root.setAttribute("use-perf-mon", Boolean.toString(this.usePerfMon));
 		root.setAttribute("cluster-id", this.uuid);
 		root.setAttribute("perf-mon-file", this.perfMonFile);
-		root.setAttribute("cluster-block-copies", Byte.toString(clusterCopies));
-		root.setAttribute("cluster-rack-aware",
-				Boolean.toString(this.clusterRackAware));
 		root.setAttribute("volume-clustered", Boolean.toString(clustered));
-		root.setAttribute("read-timeout-seconds",
-				Integer.toString(Main.readTimeoutSeconds));
-		root.setAttribute("write-timeout-seconds",
-				Integer.toString(Main.writeTimeoutSeconds));
+		root.setAttribute("read-timeout-seconds", Integer.toString(Main.readTimeoutSeconds));
+		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
-		for (BlockDev blk : this.devices) {
-			Element el = blk.getElement();
-			doc.adoptNode(el);
-			root.appendChild(el);
+		
+		if (this.rabbitMQNode != null) {
+			Element rmq = doc.createElement("rabbitmq-node");
+			rmq.setAttribute("hostname", this.rabbitMQNode);
+			rmq.setAttribute("port", Integer.toString(this.rabbitMQPort));
+			rmq.setAttribute("topic", this.rabbitMQTopic);
+			if(this.rabbitMQUser != null) {
+				rmq.setAttribute("username", this.rabbitMQUser);
+			}
+			if(this.rabbitMQPassword != null) {
+				rmq.setAttribute("password", this.rabbitMQPassword);
+			}
+			doc.adoptNode(rmq);
+			root.appendChild(rmq);
+		}
+		if (this.gcpProject != null) {
+			Element pbm = doc.createElement("gcp-pubsub");
+			pbm.setAttribute("project-id", this.gcpProject);
+			pbm.setAttribute("topic", this.pubsubTopic);
+			pbm.setAttribute("subscription", this.pubsubSubscription);
+			if(this.gcpCredsPath != null) {
+				pbm.setAttribute("auth-file", this.gcpCredsPath);
+			}
+			doc.adoptNode(pbm);
+			root.appendChild(pbm);
 		}
 		return doc;
 	}
 
-	public void addVirtualBytesWritten(long virtualBytesWritten,
-			boolean propigateEvent) {
+	public VolumeInfoResponse toProtoc() {
+		org.opendedup.grpc.VolumeInfoResponse.Builder b = VolumeInfoResponse.newBuilder().setPath(path)
+		.setName(this.name).setCurrentSize(this.currentSize.get()).setCapactity(this.capacity)
+		.setMaxPercentageFull(this.fullPercentage).setDuplicateBytes(this.getDuplicateBytes())
+		.setReadBytes(this.getReadBytes()).setWriteBytes(this.getActualWriteBytes()).setSerialNumber(this.serialNumber)
+		.setMaxPageSize(HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size).setDseSize(HCServiceProxy.getDSESize())
+		.setDseCompSize(HCServiceProxy.getDSECompressedSize()).setReadOps(this.readOperations.get())
+		.setWriteOps(this.writeOperations.get()).setReadErrors(this.readErrors.get()).setWriteErrors(this.writeErrors.get())
+		.setFiles(this.getFiles()).setClosedGracefully(this.closedGracefully).setAllowExternalLinks(this.allowExternalSymlinks)
+		.setUsePerfMon(this.usePerfMon).setVolumeClustered(clustered).setClusterId(this.uuid).setPerfMonFile(this.perfMonFile)
+		.setReadTimeoutSeconds(Main.readTimeoutSeconds).setWriteTimeoutSeconds(Main.writeTimeoutSeconds)
+		.setCompressedMetaData(Main.COMPRESS_METADATA).setSyncFiles(Main.syncDL).setOffline(this.isOffLine());
+		if (this.rabbitMQNode != null) {
+			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setHostName(this.rabbitMQNode).setMqType(MQType.RabbitMQ)
+			.setPort(this.rabbitMQPort).setTopic(this.rabbitMQTopic);
+			b.addMessageQueue(mb);
+		}
+		if(this.gcpProject != null) {
+			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setMqType(MQType.PubSub)
+			.setTopic(this.pubsubTopic).setSubScription(this.pubsubSubscription).setAuthInfo(this.gcpCredsPath)
+			.setProject(this.gcpProject);
+			b.addMessageQueue(mb);
+		}
+		return b.build();
+	}
+
+	public void addVirtualBytesWritten(long virtualBytesWritten, boolean propigateEvent) {
 		this.addWIO(true);
 		double val = this.virtualBytesWritten.addAndGet(virtualBytesWritten);
 		if (val < 0)
@@ -729,12 +629,14 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void addDuplicateBytes(long duplicateBytes, boolean propigateEvent) {
+
 		double val = this.duplicateBytes.addAndGet(duplicateBytes);
 		if (val < 0)
 			this.duplicateBytes.set(0);
 	}
 
-	public double getDuplicateBytes() {
+	public long getDuplicateBytes() {
+
 		return duplicateBytes.get();
 	}
 
@@ -750,12 +652,14 @@ public class Volume implements java.io.Serializable {
 	}
 
 	public void addActualWriteBytes(long writeBytes, boolean propigateEvent) {
+
 		double val = this.actualWriteBytes.addAndGet(writeBytes);
 		if (val < 0)
 			this.actualWriteBytes.set(0);
 	}
 
 	public long getActualWriteBytes() {
+
 		return actualWriteBytes.get();
 	}
 
@@ -765,22 +669,6 @@ public class Volume implements java.io.Serializable {
 
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
-	}
-
-	public byte getClusterCopies() {
-		return clusterCopies;
-	}
-
-	public void setClusterCopies(byte clusterCopies) {
-		this.clusterCopies = clusterCopies;
-	}
-
-	public boolean isClusterRackAware() {
-		return clusterRackAware;
-	}
-
-	public void setClusterRackAware(boolean clusterRackAware) {
-		this.clusterRackAware = clusterRackAware;
 	}
 
 	public Long getSerialNumber() {

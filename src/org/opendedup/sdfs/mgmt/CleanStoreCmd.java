@@ -7,8 +7,9 @@ import org.opendedup.sdfs.filestore.gc.ManualGC;
 import org.w3c.dom.Element;
 
 public class CleanStoreCmd implements Runnable {
-
-	public Element getResult() throws IOException {
+	private boolean compact;
+	public Element getResult(boolean compact) throws IOException {
+		this.compact = compact;
 		Thread th = new Thread(this);
 		th.start();
 		try {
@@ -23,9 +24,9 @@ public class CleanStoreCmd implements Runnable {
 	public void run() {
 		try {
 
-			long chunks = ManualGC.clearChunks();
+			long chunks = ManualGC.clearChunks(compact);
 
-			SDFSLogger.getLog().info("Expunged [" + chunks + "] unclaimed ");
+			SDFSLogger.getLog().info("Expunged [" + chunks + "] unclaimed compact [" + this.compact + "]");
 		} catch (Exception e) {
 			SDFSLogger
 					.getLog()

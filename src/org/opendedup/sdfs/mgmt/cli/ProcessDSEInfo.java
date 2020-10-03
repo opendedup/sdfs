@@ -39,8 +39,6 @@ public class ProcessDSEInfo {
 				long freeBlocks = Long.parseLong(dse
 						.getAttribute("free-blocks"));
 				int pageSize = Integer.parseInt(dse.getAttribute("page-size"));
-				int port = Integer.parseInt(dse.getAttribute("listen-port"));
-				String host = dse.getAttribute("listen-hostname");
 				double pFull = 0.00;
 				if (currentSz > 0) {
 					pFull = (((double) currentSz / (double) maxSz) * 100);
@@ -66,10 +64,6 @@ public class ProcessDSEInfo {
 					System.out.printf("Average DSE Block Size : %s\n",
 							avgbs);
 				}
-				System.out.printf("DSE Listen Port : %s\n", port);
-				System.out.printf("DSE Listen Host : %s\n", host);
-				System.out.printf("DSE Listen SSL : %s\n",
-						dse.getAttribute("listen-encrypted"));
 				System.out.printf("DSE Current Cache Size : %s\n", StorageUnit
 						.of(cacheSz).format(cacheSz));
 				System.out.printf("DSE Max Cache Size : %s\n",

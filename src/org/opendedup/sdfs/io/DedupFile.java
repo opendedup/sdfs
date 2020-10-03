@@ -63,10 +63,6 @@ public interface DedupFile {
 	public void updateMap(DedupChunkInterface writeBuffer, int doop)
 			throws FileClosedException, IOException;
 
-	public void putBufferIntoFlush(DedupChunkInterface writeBuffer);
-
-	public void removeBufferFromFlush(DedupChunkInterface writeBuffer);
-
 	public void updateMap(DedupChunkInterface writeBuffer, int doop,
 			boolean propigateEvent) throws FileClosedException, IOException;
 
@@ -123,7 +119,7 @@ public interface DedupFile {
 	 * 
 	 * @return true if deleted
 	 */
-	public abstract boolean delete();
+	public abstract boolean delete(boolean localOnly);
 
 	
 	/**
@@ -343,4 +339,7 @@ public interface DedupFile {
 	public abstract void truncate(long length, boolean propigateEvent)
 			throws IOException;
 
+	void removeBufferFromFlush(WritableCacheBuffer writeBuffer);
+
+	void putBufferIntoFlush(WritableCacheBuffer writeBuffer);
 }

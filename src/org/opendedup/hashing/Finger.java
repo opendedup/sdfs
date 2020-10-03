@@ -19,20 +19,18 @@
 package org.opendedup.hashing;
 
 import java.io.IOException;
+
 import java.util.Arrays;
 import java.util.List;
 
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.AsyncChunkWriteActionListener;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
-
-
 public class Finger implements Runnable {
-	private static final byte [] k = new byte[16];
+	private static final byte[] k = new byte[HashFunctionPool.hashLength];
 	public byte[] chunk;
 	public byte[] hash;
 	public InsertRecord hl;
@@ -41,17 +39,19 @@ public class Finger implements Runnable {
 	public int ap;
 	public boolean noPersist;
 	public AsyncChunkWriteActionListener l;
+	public int claims = -1;
+	public String uuid = null;
+
+	public Finger(String uuid) {
+		this.uuid = uuid;
+	}
 
 	public void run() {
 		try {
-			if(Arrays.equals(this.hash, k))
-				this.hl = new InsertRecord(false,1);
-			else if (Main.chunkStoreLocal)
-				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk);
-			else
-				this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk,
-						this.hl.getHashLocs());
-			
+			if (Arrays.equals(this.hash, k))
+				this.hl = new InsertRecord(false, 1);
+			this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk, claims, this.uuid);
+
 			l.commandResponse(this);
 
 		} catch (Throwable e) {
@@ -62,17 +62,13 @@ public class Finger implements Runnable {
 	public static class FingerPersister implements Runnable {
 		public AsyncChunkWriteActionListener l;
 		public List<Finger> fingers;
-		public boolean dedup;
 
 		@Override
 		public void run() {
 			for (Finger f : fingers) {
 				try {
-					if (Main.chunkStoreLocal)
-						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
-					else
-						f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk,
-								f.hl.getHashLocs());
+					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk, f.claims, f.uuid);
+
 					l.commandResponse(f);
 
 				} catch (Throwable e) {
@@ -84,12 +80,9 @@ public class Finger implements Runnable {
 
 		public void persist() throws IOException, HashtableFullException {
 			for (Finger f : fingers) {
-				if(Arrays.equals(f.hash, WritableCacheBuffer.bk))
-					f.hl = new InsertRecord(false,1);
-				else if (Main.chunkStoreLocal)
-					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
-				else
-					f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk);
+				if (Arrays.equals(f.hash, WritableCacheBuffer.bk))
+					f.hl = new InsertRecord(false, 1);
+				f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk, f.claims, f.uuid);
 
 			}
 		}

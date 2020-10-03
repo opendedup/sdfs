@@ -35,8 +35,8 @@ public class GetDSE {
 			root.setAttribute("page-size",
 					Long.toString(HCServiceProxy.getPageSize()));
 			root.setAttribute("storage-type", Main.chunkStoreClass);
-			root.setAttribute("listen-port", Integer.toString(Main.serverPort));
-			root.setAttribute("listen-hostname", Main.serverHostName);
+			root.setAttribute("listen-port", Integer.toString(Main.sdfsCliPort));
+			root.setAttribute("listen-hostname", Main.sdfsCliListenAddr);
 			root.setAttribute("read-speed",
 					Integer.toString(HCServiceProxy.getReadSpeed()));
 			root.setAttribute("write-speed",
@@ -46,7 +46,7 @@ public class GetDSE {
 			root.setAttribute("max-cache-size",
 					Long.toString(HCServiceProxy.getMaxCacheSize()));
 			root.setAttribute("listen-encrypted",
-					Boolean.toString(Main.serverUseSSL));
+					Boolean.toString(Main.sdfsCliSSL));
 			root.setAttribute("ecryption-key", Main.chunkStoreEncryptionKey);
 			root.setAttribute("ecryption-iv", Main.chunkStoreEncryptionIV);
 			if(Main.cloudAccessKey != null)

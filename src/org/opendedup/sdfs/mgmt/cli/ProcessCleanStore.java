@@ -9,15 +9,15 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ProcessCleanStore {
-	public static void runCmd() {
+	public static void runCmd(boolean compact) {
 		try {
 			String file = URLEncoder.encode("null", "UTF-8");
 			StringBuilder sb = new StringBuilder();
 			Formatter formatter = new Formatter(sb);
 			System.out.printf("Cleaning store\n");
 			System.out.flush();
-			formatter.format("file=%s&cmd=%s&options=%s", file, "cleanstore",
-					"1");
+			formatter.format("file=%s&cmd=%s&options=%s&compact=%s", file, "cleanstore",
+					"1",Boolean.toString(compact));
 			Document doc = MgmtServerConnection.getResponse(sb.toString());
 			Element root = doc.getDocumentElement();
 			formatter.close();

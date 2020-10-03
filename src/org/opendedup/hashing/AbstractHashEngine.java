@@ -18,6 +18,9 @@
  *******************************************************************************/
 package org.opendedup.hashing;
 
+import java.io.IOException;
+import java.util.List;
+
 public interface AbstractHashEngine {
 
 	public boolean isVariableLength();
@@ -31,4 +34,6 @@ public interface AbstractHashEngine {
 	public int getMaxLen();
 
 	public int getMinLen();
+	
+	public List<Finger> getChunks(byte[] byteBuffer,String uuid) throws IOException;
 }

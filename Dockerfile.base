@@ -1,0 +1,26 @@
+FROM ubuntu:18.04
+
+LABEL email=samsilverberg@google.com
+LABEL author="Sam Silverberg"
+RUN apt update && apt upgrade -y && apt install -y \
+		openjdk-11-jdk \
+        maven \
+        libfuse2 \
+        ssh \
+        openssh-server \
+        jsvc \
+        libxml2 \
+        ruby-dev \
+        build-essential \
+        libxml2-utils \
+        fuse \
+        alien
+
+RUN gem install fpm
+COPY pom.xml /sdfs-build/
+WORKDIR "/sdfs-build"
+ENV VERSION=3.11.0
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+WORKDIR "/sdfs-build/"
+RUN mvn dependency:copy-dependencies
+ENTRYPOINT ls -lah

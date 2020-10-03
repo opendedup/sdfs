@@ -48,6 +48,8 @@ public interface AbstractChunkStore {
 
 	public abstract void setCacheSize(long sz) throws IOException;
 
+	public abstract void setDseSize(long sz);
+
 	/**
 	 * Closes the chunk store, if this is required
 	 */
@@ -129,7 +131,7 @@ public interface AbstractChunkStore {
 	 *            stored at
 	 * @throws IOException
 	 */
-	public abstract long writeChunk(byte[] hash, byte[] chunk, int len)
+	public abstract long writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
 			throws IOException ;
 
 	/**
@@ -164,6 +166,8 @@ public interface AbstractChunkStore {
 			throws IOException;
 
 	public abstract ChunkData getNextChunck() throws IOException;
+	
+	public abstract long getAllObjSummary(String pp, long id) throws IOException;
 
 	public abstract void iterationInit(boolean getchunks) throws IOException;
 

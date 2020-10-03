@@ -38,7 +38,7 @@ public class WriteTest implements Runnable {
 	String path;
 	int size;
 	int uniqueP;
-	int bs = 16 * 1024;
+	int bs = 1024 * 1024;
 	public long duration = 0;
 	public static AtomicInteger fn = new AtomicInteger(0);
 	boolean finished = false;

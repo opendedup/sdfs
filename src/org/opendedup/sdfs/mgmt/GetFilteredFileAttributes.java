@@ -99,5 +99,4 @@ public class GetFilteredFileAttributes {
 		this.currentLevel++;
 		return parentEl;
 	}
-
 }

@@ -77,9 +77,9 @@ public class SyncFS {
 		long entries = FileCounts.getCount(f, false);
 		try {
 			long sz = FileCounts.getSize(f, false);
-			fEvt.maxCt = sz;
-			if (fEvt.maxCt == 0)
-				fEvt.maxCt = 1;
+			fEvt.setMaxCount(sz);
+			if (fEvt.getMaxCount() == 0)
+				fEvt.setMaxCount(1);
 
 			SDFSLogger.getLog().info("entries = " + entries);
 			SDFSLogger.getLog().info(
@@ -146,7 +146,7 @@ public class SyncFS {
 			}
 
 			l.lock();
-			fEvt.curCt++;
+			fEvt.addCount(1);
 			l.unlock();
 			this.files.incrementAndGet();
 		} catch (Exception e) {

@@ -4,11 +4,13 @@ import java.io.IOException;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.SyncFS;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.w3c.dom.Element;
 
 public class SyncFSCmd implements Runnable {
 	int minutes = 0;
 	SyncFS fd = null;
+	public SDFSEvent evt = null;
 
 	public Element getResult() throws IOException {
 		// minutes = Integer.parseInt(cmd);
@@ -16,6 +18,7 @@ public class SyncFSCmd implements Runnable {
 		Thread th = new Thread(this);
 		th.start();
 		try {
+			evt = fd.getEvt();
 			return fd.getEvt().toXML();
 		} catch (Exception e) {
 			throw new IOException(e);

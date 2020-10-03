@@ -11,7 +11,6 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.hashing.HashFunctionPool;
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -103,9 +102,13 @@ public class HashStore {
 	public long getMaxEntries() {
 		return this.bdb.getMaxSize();
 	}
+
+	public void setMaxSize(long sz) throws IOException  {
+		this.bdb.setMaxSize(sz);
+	}
 	
-	public boolean mightContainKey(byte [] key) {
-		return this.bdb.mightContainKey(key);
+	public boolean mightContainKey(byte [] key,long id) {
+		return this.bdb.mightContainKey(key,id);
 	}
 
 	/**
@@ -122,7 +125,7 @@ public class HashStore {
 	 */
 
 	/**
-	 * returns the name of the TCHashStore
+	 * returns the name of the TCHashStoreentrie
 	 * 
 	 * @return the name of the hash store
 	 */
@@ -142,8 +145,8 @@ public class HashStore {
 		return this.bdb.get(hash);
 	}
 
-	public String restoreBlock(byte[] hash) throws IOException {
-		long id = this.bdb.get(hash);
+	public String restoreBlock(byte[] hash,long id) throws IOException {
+		//long id = this.bdb.get(hash);
 		return HCServiceProxy.getChunkStore().restoreBlock(id, hash);
 	}
 
@@ -152,7 +155,7 @@ public class HashStore {
 	}
 
 	/**
-	 * The method used to open and connect to the TC database.
+	 * The method used to open and connect to the database.
 	 * 
 	 * @throws IOException
 	 * @throws HashtableFullException
@@ -171,6 +174,13 @@ public class HashStore {
 			SDFSLogger.getLog().info(
 					"Loading hashdb class " + Main.hashesDBClass);
 			SDFSLogger.getLog().info("Maximum Number of Entries is " + entries);
+			if(Main.hashesDBClass.equals("org.opendedup.collections.ShardedProgressiveFileBasedCSMap2")) {
+				SDFSLogger.getLog().info("updating hashesdb class to org.opendedup.collections.RocksDBMap");
+				Main.hashesDBClass = "org.opendedup.collections.RocksDBMap";
+			} else if(Main.hashesDBClass.equals("backport")) {
+				Main.hashesDBClass = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
+			}
+				
 			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
 					.newInstance();
 			bdb.init(entries, dbf.getPath(),Main.fpp);
@@ -220,17 +230,17 @@ public class HashStore {
 		 */
 		byte [] data = bdb.getData(hash,pos);
 		if (data == null && Arrays.equals(hash, blankHash)) {
-			hs = new HashChunk(hash, new byte[blankData.length], false);
+			hs = new HashChunk(hash, new byte[blankData.length], false,1,null);
 		} else if(data == null) {
 			SDFSLogger.getLog().warn("data null for [" + StringUtils.getHexString(hash) + "] [" + pos + "]");
 		}
-		hs = new HashChunk(hash, data, false);
+		hs = new HashChunk(hash, data, false,1,null);
 		// this.cacheBuffers.put(hStr, hs);
 
 		return hs;
 	}
 	
-	public boolean claimKey(byte [] key,long val,long ct) throws IOException {
+	public long claimKey(byte [] key,long val,long ct) throws IOException {
 		return bdb.claimKey(key,val,ct);
 	}
 
@@ -239,17 +249,12 @@ public class HashStore {
 		bdb.cache(pos);
 	}
 
-	public long processHashClaims(SDFSEvent evt) throws IOException {
-		return this.bdb.claimRecords(evt);
+	public long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
+		return this.bdb.claimRecords(evt,compact);
 	}
 	
 	public void clearRefMap() throws IOException {
 		this.bdb.clearRefMap();
-	}
-
-	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
-			throws IOException {
-		return this.bdb.claimRecords(evt, bf);
 	}
 
 	/**
@@ -269,7 +274,8 @@ public class HashStore {
 			// if (!bdb.containsKey(chunk.getName())) {
 			// long start = chunkStore.reserveWritePosition(chunk.getLen());
 			ChunkData cm = new ChunkData(chunk.getName(),
-					Main.chunkStorePageSize, chunk.getData());
+					Main.chunkStorePageSize, chunk.getData(),chunk.getUUID());
+			cm.references = chunk.getCT();
 			written = bdb.put(cm);
 			// SDFSLogger.getLog().debug("wrote hash " +
 			// StringUtils.getHexString(chunk.getName()) + " = " +written);

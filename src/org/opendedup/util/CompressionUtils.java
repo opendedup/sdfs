@@ -19,6 +19,7 @@
 package org.opendedup.util;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -134,6 +135,7 @@ public class CompressionUtils {
 		os.flush();
 		os.close();
 		fis.close();
+		
 	}
 
 	public static void decompressFile(File src, File dst) throws IOException {

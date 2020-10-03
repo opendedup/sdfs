@@ -31,6 +31,7 @@ public class SDFSLogger {
 
 	private static Logger log = Logger.getLogger("sdfs");
 	private static Logger awslog = Logger.getLogger("com.amazonaws");
+	private static Logger quartzLog = Logger.getLogger("org.quartz");
 	private static Logger fslog = Logger.getLogger("fs");
 	private static Logger basicLog = Logger.getLogger("bsdfs");
 	private static boolean debug = false;
@@ -45,14 +46,16 @@ public class SDFSLogger {
 		try {
 
 			app = new RollingFileAppender(new PatternLayout(
-					"%d [%c] [%C] [%L] [%t] %x - %m%n"), Main.logPath, true);
-			app.setMaxBackupIndex(2);
+					"%d [%p] [%c] [%C] [%L] [%t] %x - %m%n"), Main.logPath, true);
+			app.setMaxBackupIndex(100);
 			app.setMaxFileSize(Main.logSize);
 		} catch (IOException e) {
 			log.debug("unable to change appender", e);
 		}
 		awslog.setLevel(Level.WARN);
+		quartzLog.setLevel(Level.INFO);
 		awslog.removeAllAppenders();
+		quartzLog.removeAllAppenders();
 		log.setLevel(Level.INFO);
 		fsdebug = true;
 		fslog.setLevel(Level.INFO);
@@ -121,7 +124,7 @@ public class SDFSLogger {
 		try {
 			app = new RollingFileAppender(new PatternLayout(
 					"%d [%c] [%t] %x - %m%n"), file, true);
-			app.setMaxBackupIndex(2);
+			app.setMaxBackupIndex(100);
 			app.setMaxFileSize("10MB");
 		} catch (IOException e) {
 			System.out.println("Unable to initialize logger");

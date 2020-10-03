@@ -95,16 +95,16 @@ public class SDFSEventLogger {
 		MDC.put("startTime", new Date(evt.startTime).toString());
 		MDC.put("endTime", new Date(evt.endTime).toString());
 		MDC.put("extendedInfo", evt.extendedInfo);
-		MDC.put("maxCt", Long.toString(evt.maxCt));
-		MDC.put("curCt", Long.toString(evt.curCt));
+		MDC.put("maxCt", Long.toString(evt.getMaxCount()));
+		MDC.put("curCt", Long.toString(evt.getCount()));
 		MDC.clear();
 	}
 
 	public static void main(String[] args) {
 		Main.logPath = "/tmp/volume-log-xml.log";
 		SDFSEvent evt = SDFSEvent.testEvent("Archiving out");
-		evt.maxCt = 10;
-		evt.curCt = 1;
+		evt.setMaxCount(10);
+		evt.setCurrentCount(1);
 		evt.endEvent("woweessss");
 	}
 

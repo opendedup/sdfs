@@ -39,8 +39,8 @@ public class ImportArchiveCmd implements Runnable {
 
 		evt = SDFSEvent.importEvent("Importing " + archive + " from " + server
 				+ ":" + port + " to " + dest);
-		evt.curCt = 0;
-		evt.maxCt = 2;
+		evt.setCurrentCount(0);
+		evt.setMaxCount(2);
 		Thread th = new Thread(this);
 		th.start();
 		try {

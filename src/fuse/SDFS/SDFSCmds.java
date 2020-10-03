@@ -107,9 +107,7 @@ public class SDFSCmds {
 		}
 		File f = new File(internalPath);
 		if (!f.isDirectory()) {
-			if (command.equalsIgnoreCase("user.sdfs.dedupAll")) {
-				return Boolean.toString(mf.isDedup());
-			}
+			
 			if (command.equalsIgnoreCase("user.sdfs.file.isopen")) {
 				return Boolean.toString(DedupFileStore.fileOpen(mf));
 			}
@@ -195,10 +193,6 @@ public class SDFSCmds {
 		} else {
 			String[] args = value.split(":");
 			String status = "no status";
-			if (command.equalsIgnoreCase("user.cmd.dedupAll")) {
-				boolean dedup = Boolean.parseBoolean(args[1]);
-				status = dedup(path, dedup);
-			}
 			if (command.equalsIgnoreCase("user.cmd.cleanstore")) {
 				int minutes = Integer.parseInt(args[1]);
 				status = "command completed successfully";
@@ -206,7 +200,7 @@ public class SDFSCmds {
 					SDFSLogger.getLog().debug(
 							"Clearing store of data older that [" + minutes
 									+ "]");
-					ManualGC.clearChunks();
+					ManualGC.clearChunks(false);
 				} catch (Exception e) {
 					status = "command failed : " + e.getMessage();
 				}
@@ -282,21 +276,7 @@ public class SDFSCmds {
 		}
 	}
 
-	private String dedup(String srcPath, boolean dedup) {
-		File f = new File(this.mountedVolume + File.separator + srcPath);
-		try {
-			MetaFileStore.getMF(f.getPath()).setDedup(dedup, true);
-			return "SUCCESS Dedup Success: set dedup to [" + srcPath + "]  ["
-					+ dedup + "]";
-		} catch (Exception e) {
-			log.error(
-					"ERROR Dedup Failed: unable to set dedup Source ["
-							+ srcPath + "] " + "length [" + dedup
-							+ "] because :" + e.toString(), e);
-			return "ERROR Dedup Failed: unable to set dedup Source [" + srcPath
-					+ "] " + "length [" + dedup + "]  because :" + e.toString();
-		}
-	}
+	
 
 	private String takeSnapshot(String srcPath, String dstPath) {
 		File f = new File(this.mountedVolume + File.separator + srcPath);

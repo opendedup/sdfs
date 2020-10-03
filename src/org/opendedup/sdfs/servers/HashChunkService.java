@@ -20,25 +20,18 @@ package org.opendedup.sdfs.servers;
 
 import java.io.IOException;
 
-
-import java.util.ArrayList;
-
 import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.hashing.LargeBloomFilter;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.ConsistancyCheck;
-import org.opendedup.sdfs.filestore.DSECompaction;
-import org.opendedup.sdfs.filestore.FileChunkStore;
 import org.opendedup.sdfs.filestore.HashChunk;
 import org.opendedup.sdfs.filestore.HashStore;
 import org.opendedup.sdfs.filestore.cloud.AbstractCloudFileSync;
 import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
-import org.opendedup.sdfs.network.HashClient;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class HashChunkService implements HashChunkServiceInterface {
@@ -97,14 +90,14 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	public InsertRecord writeChunk(byte[] hash, byte[] aContents,
-			boolean compressed) throws IOException, HashtableFullException {
+			boolean compressed,long ct,String uuid) throws IOException, HashtableFullException {
 		if (aContents.length > Main.chunkStorePageSize)
 			throw new IOException("content size out of bounds ["
 					+ aContents.length + "] > [" + Main.chunkStorePageSize
 					+ "]");
 		chunksRead++;
 		InsertRecord written = hs.addHashChunk(new HashChunk(hash, aContents,
-				compressed));
+				compressed,ct,uuid));
 		if (written.getInserted()) {
 			unComittedChunks++;
 			chunksWritten++;
@@ -134,22 +127,11 @@ public class HashChunkService implements HashChunkServiceInterface {
 		fileStore.setCacheSize(sz);
 	}
 
-	public void remoteFetchChunks(ArrayList<String> al, String server,
-			String password, int port, boolean useSSL) throws IOException,
-			HashtableFullException {
-		HCServer hserver = new HCServer(server, port, false, false, useSSL);
-		HashClient hc = new HashClient(hserver, "replication", password,
-				(byte) 0);
-		try {
-			ArrayList<HashChunk> hck = hc.fetchChunks(al);
-			for (int i = 0; i < hck.size(); i++) {
-				HashChunk _hc = hck.get(i);
-				writeChunk(_hc.getName(), _hc.getData(), false);
-			}
-		} finally {
-			hc.close();
-		}
+	public void setDseSize(long sz) throws IOException {
+		hs.bdb.setMaxSize(sz);
 	}
+
+	
 
 	public long hashExists(byte[] hash) throws IOException,
 			HashtableFullException {
@@ -181,13 +163,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hashRoute;
 	}
 
-	public long processHashClaims(SDFSEvent evt) throws IOException {
-		return hs.processHashClaims(evt);
-	}
-
-	public long processHashClaims(SDFSEvent evt, LargeBloomFilter bf)
-			throws IOException {
-		return hs.processHashClaims(evt, bf);
+	public long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
+		return hs.processHashClaims(evt,compact);
 	}
 
 	public void commitChunks() {
@@ -235,12 +212,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	public void init() throws IOException {
-		if (Main.runCompact) {
-			DSECompaction.runCheck(hs.bdb,
-					(FileChunkStore) this.getChuckStore());
-			SDFSLogger.getLog().info("Finished compaction");
-
-		}
+		
 	}
 
 	@Override
@@ -278,8 +250,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	@Override
-	public String restoreBlock(byte[] hash) throws IOException {
-		return hs.restoreBlock(hash);
+	public String restoreBlock(byte[] hash,long id) throws IOException {
+		return hs.restoreBlock(hash,id);
 	}
 
 	@Override
@@ -297,12 +269,12 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	@Override
-	public boolean mightContainKey(byte[] key) {
-		return hs.mightContainKey(key);
+	public boolean mightContainKey(byte[] key,long id) {
+		return hs.mightContainKey(key,id);
 	}
 
 	@Override
-	public boolean claimKey(byte[] key,long val,long ct) throws IOException {
+	public long claimKey(byte[] key,long val,long ct) throws IOException {
 		return hs.claimKey(key,val,ct);
 	}
 

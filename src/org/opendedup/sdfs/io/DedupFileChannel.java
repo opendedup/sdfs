@@ -20,11 +20,10 @@ package org.opendedup.sdfs.io;
 
 import java.io.IOException;
 
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.opendedup.buse.sdfsdev.BlockDeviceSmallWriteEvent;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.RestoreArchive;
@@ -32,7 +31,6 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.RandomGUID;
 
-import com.google.common.eventbus.EventBus;
 
 /**
  * 
@@ -53,11 +51,10 @@ public class DedupFileChannel {
 	// private String GUID = UUID.randomUUID().toString();
 	private ReentrantLock closeLock = new ReentrantLock();
 	private boolean closed = false;
-	private boolean readAheadInitiated = false;
+	private ReadAhead rh = null;
 	private int flags = -1;
-	EventBus eventBus = new EventBus();
 	private String id = RandomGUID.getGuid();
-	private static int READHEAD_TRIGGER_SIZE=30*1024*1024;
+	MetaDataDedupFile mf = null;
 
 	/**
 	 * Instantiates the DedupFileChannel
@@ -71,19 +68,19 @@ public class DedupFileChannel {
 			throws IOException {
 		df = file;
 		this.flags = flags;
-		SparseDedupFile sdf = (SparseDedupFile) df;
-		eventBus.register(sdf.bdb);
+		this.mf = this.df.mf;
 		if (Main.checkArchiveOnOpen) {
-			this.recoverArchives();
+			this.recoverArchives(-1);
 		}
 		
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
-					"Initializing Cache " + df.getMetaFile().getPath());
+					"Initializing Cache " + mf.getPath());
 	}
 
-	private void recoverArchives() throws IOException {
-		RestoreArchive ar = new RestoreArchive(df.getMetaFile());
+	private void recoverArchives(long id) throws IOException {
+		try {
+		RestoreArchive ar = new RestoreArchive(mf,id);
 		Thread th = new Thread(ar);
 		th.start();
 		while (!ar.fEvt.isDone()) {
@@ -95,7 +92,11 @@ public class DedupFileChannel {
 		}
 		if (ar.fEvt.level != SDFSEvent.INFO) {
 			throw new IOException("unable to restore all archived data for "
-					+ df.getMetaFile().getPath());
+					+ mf.getPath());
+		}
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("unable to initiate archive restore for " + id,e);
+			throw new IOException(e);
 		}
 	}
 
@@ -133,7 +134,7 @@ public class DedupFileChannel {
 		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("Truncating File");
-			if (siz < df.getMetaFile().length()) {
+			if (siz < mf.length()) {
 				df.truncate(siz);
 				/*
 				 * WritableCacheBuffer writeBuffer = df.getWriteBuffer(siz); int
@@ -149,8 +150,8 @@ public class DedupFileChannel {
 				 */
 
 			}
-			df.getMetaFile().setLastModified(System.currentTimeMillis());
-			df.getMetaFile().setLength(siz, true);
+			mf.setLastModified(System.currentTimeMillis());
+			mf.setLength(siz, true);
 		} finally {
 			l.unlock();
 		}
@@ -186,7 +187,7 @@ public class DedupFileChannel {
 	 * @return the current size of the file
 	 */
 	public long size() {
-		return df.getMetaFile().length();
+		return mf.length();
 	}
 	
 	public boolean isWrittenTo(){
@@ -198,7 +199,7 @@ public class DedupFileChannel {
 	 * @return the path of the file
 	 */
 	public String getPath() {
-		return df.getMetaFile().getPath();
+		return mf.getPath();
 	}
 
 	/**
@@ -206,7 +207,7 @@ public class DedupFileChannel {
 	 * @return the path of the file
 	 */
 	public String getName() {
-		return df.getMetaFile().getPath();
+		return mf.getPath();
 	}
 
 	/**
@@ -214,7 +215,7 @@ public class DedupFileChannel {
 	 * @return the MetaDataDedupFile associated with this DedupFileChannel
 	 */
 	public MetaDataDedupFile getFile() {
-		return df.getMetaFile();
+		return mf;
 	}
 
 	/**
@@ -237,7 +238,7 @@ public class DedupFileChannel {
 		} catch (FileClosedException e) {
 			if (Main.safeClose)
 				SDFSLogger.getLog().warn(
-						df.getMetaFile().getPath()
+						mf.getPath()
 								+ " is closed but still writing");
 			this.closeLock.lock();
 			try {
@@ -251,10 +252,8 @@ public class DedupFileChannel {
 		} finally {
 			l.unlock();
 		}
-		if (df.getMetaFile().getDev() != null)
-			df.getMetaFile().sync();
+		
 	}
-
 	/**
 	 * writes data to the DedupFile
 	 * 
@@ -277,17 +276,17 @@ public class DedupFileChannel {
 			throw new ReadOnlyException();
 		if (SDFSLogger.isDebug()) {
 			SDFSLogger.getLog().debug(
-					"fc writing " + df.getMetaFile().getPath() + " spos="
+					"fc writing " + mf.getPath() + " spos="
 							+ offset + " buffcap=" + buf.capacity() + " len="
 							+ len + " bcpos=" + pos);
-			if (df.getMetaFile().getPath().endsWith(".vmx")
-					|| df.getMetaFile().getPath().endsWith(".vmx~")) {
+			if (mf.getPath().endsWith(".vmx")
+					|| mf.getPath().endsWith(".vmx~")) {
 				byte[] _zb = new byte[len];
 				buf.get(_zb);
 
 				SDFSLogger.getLog().debug(
 						"###### In fc Text of VMX="
-								+ df.getMetaFile().getPath() + "="
+								+ mf.getPath() + "="
 								+ new String(_zb, "UTF-8"));
 			}
 		}
@@ -336,18 +335,15 @@ public class DedupFileChannel {
 						writeBuffer = df.getWriteBuffer(filePos);
 						writeBuffer.write(b, startPos);
 
-						if (_len != Main.CHUNK_LENGTH && propigate
-								&& df.getMetaFile().getDev() != null) {
-							eventBus.post(new BlockDeviceSmallWriteEvent(df
-									.getMetaFile().getDev(),
-									ByteBuffer.wrap(b), filePos + startPos,
-									_len));
-						}
+						
+						/*
 						if (Main.volume.isClustered())
 							writeBuffer.flush();
+						*/
 					} catch (BufferClosedException e) {
 						if (SDFSLogger.isDebug())
 							SDFSLogger.getLog().debug("trying to write again");
+						df.closeBuffer((WritableCacheBuffer)writeBuffer);
 						writeBuffer = null;
 					}
 				}
@@ -355,8 +351,8 @@ public class DedupFileChannel {
 				bytesLeft = bytesLeft - _len;
 				write = write + _len;
 				this.currentPosition = _cp;
-				if (_cp > df.getMetaFile().length()) {
-					df.getMetaFile().setLength(_cp, false);
+				if (_cp > mf.length()) {
+					mf.setLength(_cp, false);
 				}
 
 			}
@@ -364,19 +360,19 @@ public class DedupFileChannel {
 			if (Main.checkArchiveOnRead) {
 				SDFSLogger
 						.getLog()
-						.warn("Archived data found in "
-								+ df.getMetaFile().getPath()
+						.warn("Archived data found during write at ["+offset+ "]in "
+								+ mf.getPath()
 								+ " at "
 								+ pos
 								+ ". Recovering data from archive. This may take up to 4 hours for " +e.getPos(),e);
-				this.recoverArchives();
+				this.recoverArchives(e.getPos());
 				this.writeFile(buf, len, pos, offset, propigate);
 			} else
 				throw e;
 		} catch (FileClosedException e) {
 			if (Main.safeClose)
 				SDFSLogger.getLog().warn(
-						df.getMetaFile().getPath()
+						mf.getPath()
 								+ " is closed but still writing");
 			this.closeLock.lock();
 			try {
@@ -388,14 +384,14 @@ public class DedupFileChannel {
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal(
-					"error while writing to " + this.df.getMetaFile().getPath()
+					"error while writing to " + this.mf.getPath()
 							+ " " + e.toString(), e);
 			Main.volume.addWriteError();
 			throw new IOException("error while writing to "
-					+ this.df.getMetaFile().getPath() + " " + e.toString());
+					+ this.mf.getPath() + " " + e.toString());
 		} finally {
 			try {
-				df.getMetaFile().setLastModified(System.currentTimeMillis());
+				mf.setLastModified(System.currentTimeMillis());
 			} catch (Exception e) {
 			}
 			l.unlock();
@@ -416,7 +412,7 @@ public class DedupFileChannel {
 			if (Main.safeClose) {
 				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug(
-							"close " + df.getMetaFile().getPath() + " flag="
+							"close " + mf.getPath() + " flag="
 									+ flags);
 				if (!this.isClosed()) {
 
@@ -427,8 +423,8 @@ public class DedupFileChannel {
 							df.sync(false);
 
 						}
-						if (df.getMetaFile().canWrite())
-							df.getMetaFile().sync();
+						if (mf.canWrite())
+							mf.sync();
 					} catch (Exception e) {
 
 					} finally {
@@ -448,10 +444,10 @@ public class DedupFileChannel {
 	 * 
 	 * @throws IOException
 	 */
-	protected void forceClose() throws IOException {
+	public void forceClose() throws IOException {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
-					"close " + df.getMetaFile().getPath() + " flag=" + flags);
+					"close " + mf.getPath() + " flag=" + flags);
 		Lock l = null;
 		this.closeLock.lock();
 		try {
@@ -461,13 +457,13 @@ public class DedupFileChannel {
 
 				try {
 					if (this.writtenTo && Main.safeSync
-							&& df.getMetaFile().canWrite()) {
+							&& mf.canWrite()) {
 						df.writeCache();
 						df.sync(false);
 
 					}
-					if (df.getMetaFile().canWrite())
-						df.getMetaFile().sync();
+					if (mf.canWrite())
+						mf.sync();
 				} catch (Exception e) {
 
 				} finally {
@@ -504,32 +500,33 @@ public class DedupFileChannel {
 
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
-					"fc reading " + df.getMetaFile().getPath() + " spos="
+					"fc reading " + mf.getPath() + " spos="
 							+ filePos + " buffcap=" + buf.capacity() + " len="
 							+ siz + " bcpos=" + bufPos);
 		Lock l = df.getReadLock();
 		l.lock();
 		try {
-			if (filePos > READHEAD_TRIGGER_SIZE && !readAheadInitiated && Main.readAhead) {
-				this.readAheadInitiated = true;
-				ReadAhead.getReadAhead(df);
+			if (Main.readAhead) {
+				if(rh == null)
+					rh =ReadAhead.getReadAhead(this.df);
+				rh.cacheFromRange(filePos);
 			}
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
 					"unable to load readahead for " + df.mf.getPath(), e);
 		}
 		try {
-			if (filePos >= df.getMetaFile().length() && !Main.blockDev) {
+			if (filePos >= mf.length() && !Main.blockDev) {
 				return -1;
 			}
 			long currentLocation = filePos;
 			buf.position(bufPos);
 			int bytesLeft = siz;
 			long futureFilePostion = bytesLeft + currentLocation;
-			if (Main.blockDev && futureFilePostion > df.getMetaFile().length())
-				df.getMetaFile().setLength(futureFilePostion, false);
-			if (futureFilePostion > df.getMetaFile().length()) {
-				bytesLeft = (int) (df.getMetaFile().length() - currentLocation);
+			if (Main.blockDev && futureFilePostion > mf.length())
+				mf.setLength(futureFilePostion, false);
+			if (futureFilePostion > mf.length()) {
+				bytesLeft = (int) (mf.length() - currentLocation);
 			}
 			int read = 0;
 			while (bytesLeft > 0) {
@@ -552,17 +549,20 @@ public class DedupFileChannel {
 							else
 								buf.put(_rb);
 							//SDFSLogger.getLog().info(new String(_rb));
-							df.getMetaFile().getIOMonitor()
+							mf.getIOMonitor()
 									.addBytesRead(_len, true);
 							currentLocation = currentLocation + _len;
 							bytesLeft = bytesLeft - _len;
 							read = read + _len;
+							/*
 							if (Main.volume.isClustered())
 								readBuffer.flush();
+								*/
 						} catch (BufferClosedException e) {
 							if (SDFSLogger.isDebug())
 								SDFSLogger.getLog().debug(
 										"trying to write again");
+							df.closeBuffer((WritableCacheBuffer)readBuffer);
 							readBuffer = null;
 						}
 					}
@@ -570,19 +570,19 @@ public class DedupFileChannel {
 					if (Main.checkArchiveOnRead) {
 						SDFSLogger
 								.getLog()
-								.warn("Archived data found in "
-										+ df.getMetaFile().getPath()
+								.warn("Archived data found in read at ["+filePos+ "]in "
+										+ mf.getPath()
 										+ " at "
 										+ startPos
 										+ ". Recovering data from archive. This may take up to 4 hours " + e.getPos(),e);
-						this.recoverArchives();
+						this.recoverArchives(e.getPos());
 						this.read(buf, bufPos, siz, filePos);
 					} else
 						throw e;
 				} catch (FileClosedException e) {
 					if (Main.safeClose)
 						SDFSLogger.getLog().warn(
-								df.getMetaFile().getPath()
+								mf.getPath()
 										+ " is closed but still writing");
 					this.closeLock.lock();
 					try {
@@ -597,7 +597,7 @@ public class DedupFileChannel {
 
 					throw new IOException("Error reading buffer");
 				}
-				if (currentLocation == df.getMetaFile().length()) {
+				if (currentLocation == mf.length()) {
 					return read;
 				}
 
@@ -609,12 +609,12 @@ public class DedupFileChannel {
 			throw e;
 		} catch (Exception e) {
 			SDFSLogger.getLog().error(
-					"unable to read " + df.getMetaFile().getPath(), e);
+					"unable to read " + mf.getPath(), e);
 			Main.volume.addReadError();
 			throw new IOException(e);
 		} finally {
 			try {
-				df.getMetaFile().setLastAccessed(System.currentTimeMillis());
+				mf.setLastAccessed(System.currentTimeMillis());
 			} catch (Exception e) {
 			}
 			l.unlock();
@@ -643,7 +643,7 @@ public class DedupFileChannel {
 		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug(
-						"seek " + df.getMetaFile().getPath() + " at " + pos
+						"seek " + mf.getPath() + " at " + pos
 								+ " type=" + typ);
 			// Check if the current file position is the required file position
 
@@ -667,7 +667,7 @@ public class DedupFileChannel {
 			}
 				break;
 			}
-			df.getMetaFile().setLastAccessed(System.currentTimeMillis());
+			mf.setLastAccessed(System.currentTimeMillis());
 			// Return the new file position
 			return this.position();
 		} finally {
@@ -682,7 +682,7 @@ public class DedupFileChannel {
 	 */
 	public MetaDataDedupFile openFile() throws IOException {
 
-		return this.df.getMetaFile();
+		return this.mf;
 	}
 
 	/**
@@ -701,7 +701,7 @@ public class DedupFileChannel {
 			throws IOException {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
-					"trylock " + df.getMetaFile().getPath() + " at " + position
+					"trylock " + mf.getPath() + " at " + position
 							+ " size=" + size + " shared="
 							+ Boolean.toString(shared));
 		return df.addLock(this, position, size, shared);
@@ -715,9 +715,9 @@ public class DedupFileChannel {
 	 */
 	public DedupFileLock tryLock() throws IOException {
 		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug("trylock " + df.getMetaFile().getPath());
+			SDFSLogger.getLog().debug("trylock " + mf.getPath());
 
-		return df.addLock(this, 0, df.getMetaFile().length(), false);
+		return df.addLock(this, 0, mf.length(), false);
 	}
 
 	/**
@@ -729,7 +729,7 @@ public class DedupFileChannel {
 	public void removeLock(DedupFileLock lock) {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug(
-					"removelock " + df.getMetaFile().getPath());
+					"removelock " + mf.getPath());
 		lock.release();
 		df.removeLock(lock);
 	}
@@ -748,7 +748,7 @@ public class DedupFileChannel {
 		try {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug(
-						"trim " + df.getMetaFile().getPath() + " start="
+						"trim " + mf.getPath() + " start="
 								+ start + " len=" + len);
 			df.trim(start, len);
 		} finally {

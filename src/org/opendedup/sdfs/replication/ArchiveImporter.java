@@ -19,6 +19,8 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
+
+
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
@@ -28,11 +30,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.commons.io.FileUtils;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.ClusterRedundancyCheck;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.gc.GCMain;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.mgmt.cli.MgmtServerConnection;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.FileCounts;
 import org.opendedup.util.OSValidator;
@@ -87,9 +89,9 @@ public class ArchiveImporter {
 				if (OSValidator.isWindows()) {
 
 					TFile srcRoot = new TFile(new File(srcArchive + "/"));
-					ievt.maxCt = FileCounts.getSize(srcRoot);
+					ievt.setMaxCount( FileCounts.getSize(srcRoot));
 
-					SDFSLogger.getLog().info("Tar file size is " + ievt.maxCt);
+					SDFSLogger.getLog().info("Tar file size is " + ievt.getMaxCount());
 					TFile srcFilesRoot = new TFile(new File(srcArchive
 							+ "/files/"));
 					TFile srcFiles = null;
@@ -116,7 +118,7 @@ public class ArchiveImporter {
 					TVFS.umount(mDstFiles);
 					TVFS.umount(srcRoot.getInnerArchive());
 				} else {
-					ievt.maxCt = 3;
+					ievt.setMaxCount(3);
 					File stg = null;
 					try {
 						stg = new File(new File(srcArchive).getParentFile()
@@ -133,7 +135,7 @@ public class ArchiveImporter {
 						if (xt != 0)
 							throw new IOException("expand failed in " + expFile
 									+ " exit value was " + xt);
-						ievt.curCt++;
+									ievt.addCount(1);
 						SDFSLogger.getLog().info(
 								"executed " + expFile + " exit code was " + xt);
 						File srcFilesRoot = new File(stg.getPath()
@@ -159,7 +161,7 @@ public class ArchiveImporter {
 									+ " exit value was " + xt);
 						SDFSLogger.getLog().info(
 								"executed " + cpCmd + " exit code was " + xt);
-						ievt.curCt++;
+						ievt.addCount(1);
 						srcFiles = new File(stg.getPath() + File.separator
 								+ "ddb");
 						File ddb = new File(Main.dedupDBStore + File.separator);
@@ -187,8 +189,9 @@ public class ArchiveImporter {
 					}
 
 				}
+				MgmtServerConnection.baseHmac = MgmtServerConnection.initAuth(password,server,port,useSSL);
 				imp = new MetaFileImport(Main.volume.getPath() + File.separator
-						+ sdest, server, password, port, maxSz, evt, useSSL);
+						+ sdest, server, MgmtServerConnection.baseHmac, port, maxSz, evt, useSSL);
 				imp.runImport();
 				if (imp.isCorrupt()) {
 
@@ -208,10 +211,7 @@ public class ArchiveImporter {
 					throw new IOException(
 							"uable to import files: There are files that are missing blocks");
 				} else {
-					if (!Main.chunkStoreLocal)
-						new ClusterRedundancyCheck(ievt,
-								new File(Main.volume.getPath() + File.separator
-										+ sdest), true);
+					
 					commitImport(Main.volume.getPath() + File.separator + dest,
 							Main.volume.getPath() + File.separator + sdest);
 					DocumentBuilderFactory factory = DocumentBuilderFactory
@@ -284,11 +284,11 @@ public class ArchiveImporter {
 					if (_mf.isDirectory())
 						rollBackImport(_mf.getPath());
 					else {
-						MetaFileStore.removeMetaFile(_mf.getPath(), true,true);
+						MetaFileStore.removeMetaFile(_mf.getPath(), true,true,true);
 					}
 				}
 			}
-			MetaFileStore.removeMetaFile(mf.getPath(), true,true);
+			MetaFileStore.removeMetaFile(mf.getPath(), true,true,true);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn(
 					"unable to remove " + path + " during rollback ", e);

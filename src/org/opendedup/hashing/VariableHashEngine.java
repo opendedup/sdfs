@@ -28,26 +28,24 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.rabinfingerprint.handprint.BoundaryDetectors;
 import org.rabinfingerprint.handprint.FingerFactory.ChunkBoundaryDetector;
-import org.rabinfingerprint.handprint.EnhancedFingerFactory;
 import org.rabinfingerprint.handprint.EnhancedFingerFactory.EnhancedChunkVisitor;
+import org.rabinfingerprint.handprint.EnhancedFingerFactory;
 import org.rabinfingerprint.polynomial.Polynomial;
 
 public class VariableHashEngine implements AbstractHashEngine {
 
-	public int seed;
-	public static int minLen = Main.MIN_CHUNK_LENGTH;
-	public static int maxLen = Main.CHUNK_LENGTH;
+	private int seed;
 	static Polynomial p = Polynomial.createFromLong(10923124345206883L);
 	ChunkBoundaryDetector boundaryDetector = BoundaryDetectors.DEFAULT_BOUNDARY_DETECTOR;
-	public static long bytesPerWindow = 48;
+	
 	private EnhancedFingerFactory ff = null;
 
 	public VariableHashEngine() throws NoSuchAlgorithmException {
 		this.seed = Main.hashSeed;
 		while (ff == null) {
-			SDFSLogger.getLog().info("Variable minLen=" +minLen + " maxlen=" + maxLen + " windowSize=" + bytesPerWindow);
-			ff = new EnhancedFingerFactory(p, bytesPerWindow, boundaryDetector,
-					minLen, maxLen);
+			SDFSLogger.getLog().info("Variable minLen=" +HashFunctionPool.minLen + " maxlen=" + HashFunctionPool.maxLen + " windowSize=" + HashFunctionPool.bytesPerWindow);
+			ff = new EnhancedFingerFactory(p, HashFunctionPool.bytesPerWindow, boundaryDetector,
+					HashFunctionPool.minLen, HashFunctionPool.maxLen);
 		}
 
 	}
@@ -60,13 +58,13 @@ public class VariableHashEngine implements AbstractHashEngine {
 	
 	
 
-	public List<Finger> getChunks(byte[] data) throws IOException {
+	public List<Finger> getChunks(byte [] b,String uuid) throws IOException {
 		final ArrayList<Finger> al = new ArrayList<Finger>();
-		ff.getChunkFingerprints(data, new EnhancedChunkVisitor() {
+		ff.getChunkFingerprints(b, new EnhancedChunkVisitor() {
 			public void visit(long fingerprint, long chunkStart, long chunkEnd,
 					byte[] chunk) {
 				byte[] hash = getHash(chunk);
-				Finger f = new Finger();
+				Finger f = new Finger(uuid);
 				f.chunk = chunk;
 				f.hash = hash;
 				f.len = (int) (chunkEnd - chunkStart);
@@ -75,15 +73,6 @@ public class VariableHashEngine implements AbstractHashEngine {
 			}
 		});
 		return al;
-	}
-
-	public static int getHashLenth() {
-		// TODO Auto-generated method stub
-		return 16;
-	}
-
-	public static int getMaxCluster() {
-		return Main.CHUNK_LENGTH / minLen;
 	}
 
 	@Override
@@ -106,7 +95,7 @@ public class VariableHashEngine implements AbstractHashEngine {
 	@Override
 	public int getMinLen() {
 		// TODO Auto-generated method stub
-		return minLen;
+		return HashFunctionPool.minLen;
 	}
 
 	@Override

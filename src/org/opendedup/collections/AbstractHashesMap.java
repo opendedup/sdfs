@@ -20,7 +20,7 @@ package org.opendedup.collections;
 
 import java.io.IOException;
 
-import org.opendedup.hashing.LargeBloomFilter;
+
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.notification.SDFSEvent;
 
@@ -34,12 +34,13 @@ public interface AbstractHashesMap {
 
 	public abstract long getMaxSize();
 	
-	public abstract boolean mightContainKey(byte [] key);
+	public abstract void setMaxSize(long sz) throws IOException;
 
-	public abstract long claimRecords(SDFSEvent evt) throws IOException;
+	public abstract boolean mightContainKey(byte [] key,long id);
 
-	public abstract long claimRecords(SDFSEvent evt, LargeBloomFilter bf)
-			throws IOException;
+	public abstract long claimRecords(SDFSEvent evt,boolean compact) throws IOException;
+
+	
 
 	/**
 	 * Searches the set for <tt>obj</tt>
@@ -89,6 +90,6 @@ public interface AbstractHashesMap {
 
 	void clearRefMap() throws IOException;
 
-	boolean claimKey(byte[] hash, long val, long ct) throws IOException;
-
+	long claimKey(byte[] hash, long val, long ct) throws IOException;
+	
 }
