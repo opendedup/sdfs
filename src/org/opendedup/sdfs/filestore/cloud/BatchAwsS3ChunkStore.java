@@ -20,6 +20,7 @@ package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.BufferedInputStream;
 
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -647,7 +648,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						clientConfig.setProtocol(Protocol.HTTPS);
 
 				}
-
 				if (el.hasAttribute("s3-target")) {
 					s3Target = el.getAttribute("s3-target");
 				}

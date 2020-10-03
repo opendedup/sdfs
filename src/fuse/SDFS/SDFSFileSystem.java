@@ -429,7 +429,6 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				// SDFSLogger.getLog().info("41=");
 				throw new FuseException("Volume Full").initErrno(Errno.ENOSPC);
 			}
-
 			if (f.exists()) {
 				// SDFSLogger.getLog().info("42=");
 				f = null;

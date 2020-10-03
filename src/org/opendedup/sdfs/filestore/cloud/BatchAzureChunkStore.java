@@ -2158,4 +2158,31 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		return null;
 	}
 
+	public static void main(String[] args) {
+		String storageConnectionString = "DefaultEndpointsProtocol=http;" + "AccountName=pauld;"
+				+ "AccountKey=KGKHMbp6EwHiTAGiU09x0PaWDeo0/2060u9rgzzISy9tvqJ2Ov0rCmgayaAjSoR16xHPjZlkBPHvTnFc5m6qag==";
+		try {
+			// Retrieve storage account from connection-string.
+			CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
+
+			// Create the blob client.
+			CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
+
+			// Get a reference to a container.
+			// The container name must be lower case
+			CloudBlobContainer container = blobClient.getContainerReference("clab-pd-fp2-348-azure0");
+			CloudBlockBlob kblob = container
+					.getBlockBlobReference("claims\\keys\\LTc0MjM1NTYzNDcxNzMwNjg2ODI=\\Nzg2OTU2NzA4MzQ3MDA3NzA3NQ==");
+			kblob.downloadAttributes();
+			for (String key : kblob.getMetadata().keySet()) {
+				System.out.println(key);
+			}
+
+		} catch (Exception e) {
+			// Output the stack trace.
+			e.printStackTrace();
+		}
+
+	}
+
 }

@@ -711,6 +711,7 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("salt", this.sdfsCliSalt);
 		sdfscli.setAttribute("port", Integer.toString(this.sdfsCliPort));
 		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
+		
 
 		root.appendChild(sdfscli);
 		if (this.backblazeEnabled) {

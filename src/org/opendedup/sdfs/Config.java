@@ -64,7 +64,6 @@ public class Config {
 	 * @param fileName
 	 * @throws Exception
 	 */
-
 	public synchronized static void parseSDFSConfigFile(String fileName, String password) throws Exception {
 		File file = new File(fileName);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -132,7 +131,6 @@ public class Config {
 			Main.hashType = cache.getAttribute("hash-type");
 			SDFSLogger.getLog().info("Setting hash engine to " + Main.hashType);
 		}
-
 		if (cache.hasAttribute("hash-seed")) {
 			Main.hashSeed = Integer.parseInt(cache.getAttribute("hash-seed"));
 		}
@@ -310,6 +308,20 @@ public class Config {
 					SDFSLogger.getLog().warn("unable to decrypt encrytion key " + oc, e);
 				}
 
+			}
+		}
+		if (password != null) {
+			if (Main.cloudSecretKey != null) {
+				Main.eCloudSecretKey = Main.cloudSecretKey;
+				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.cloudSecretKey), password,
+						Main.chunkStoreEncryptionIV);
+				Main.cloudSecretKey = new String(dc);
+			}
+			if (Main.chunkStoreEncryptionKey != null) {
+				Main.eChunkStoreEncryptionKey = Main.chunkStoreEncryptionKey;
+				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey),
+						password, Main.chunkStoreEncryptionIV);
+				Main.chunkStoreEncryptionKey = new String(dc);
 			}
 		}
 		if (Main.chunkStoreEncryptionEnabled)

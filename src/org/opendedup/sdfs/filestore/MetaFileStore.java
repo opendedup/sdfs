@@ -476,6 +476,21 @@ public class MetaFileStore {
 		}
 		SDFSLogger.getLog().info("metafilestore closed");
 	}
+	
+	private static class DeleteMap implements Runnable {
+		MetaDataDedupFile mf = null;
+
+		@Override
+		public void run() {
+			try {
+				mf.getDedupFile(false).delete();
+			} catch (IOException e) {
+				SDFSLogger.getLog().debug(e);
+			}
+			
+		}
+		
+	}
 
 	private static class DeleteMap implements Runnable {
 		MetaDataDedupFile mf = null;
