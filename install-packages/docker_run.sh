@@ -31,9 +31,6 @@ if [ -n "${TYPE}" ]; then
     if [ -n "${PUBSUB_CREDS_FILE}" ]; then
         RUNCMD+=" --pubsub-authfile ${PUBSUB_CREDS_FILE}"
     fi
-    
-
-    
 fi
 
 ADDLCMD = ""
