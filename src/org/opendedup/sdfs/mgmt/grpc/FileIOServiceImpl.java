@@ -1018,9 +1018,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     sb.setUid(uid);
                     sb.setGid(gid);
                     sb.setMode(mode);
-                    sb.setAtime(attrs.lastAccessTime().toMillis() / 1000L);
-                    sb.setMtim(attrs.lastModifiedTime().toMillis() / 1000L);
-                    sb.setCtim(attrs.creationTime().toMillis() / 1000L);
+                    sb.setAtime(attrs.lastAccessTime().toMillis());
+                    sb.setMtim(attrs.lastModifiedTime().toMillis());
+                    sb.setCtim(attrs.creationTime().toMillis());
                     sb.setBlksize(BLOCK_SIZE);
                     sb.setDev(p.hashCode());
                     sb.setBlocks((fileLength * NAME_LENGTH + BLOCK_SIZE - 1) / BLOCK_SIZE);
@@ -1057,8 +1057,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         sb.setUid(uid);
                         sb.setGid(gid);
                         sb.setMode(mode);
-                        sb.setAtime(mf.getLastAccessed() / 1000L);
-                        sb.setMtim(mf.lastModified() / 1000L);
+                        sb.setAtime(mf.getLastAccessed() );
+                        sb.setMtim(mf.lastModified());
                         sb.setCtim(0);
                         sb.setBlksize(BLOCK_SIZE);
                         sb.setDev(mf.getHashCode());
@@ -1085,8 +1085,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         sb.setUid(uid);
                         sb.setGid(gid);
                         sb.setMode(mode);
-                        sb.setAtime(mf.getLastAccessed() / 1000L);
-                        sb.setMtim(mf.lastModified() / 1000L);
+                        sb.setAtime(mf.getLastAccessed());
+                        sb.setMtim(mf.lastModified());
                         sb.setCtim(0);
                         sb.setBlksize(BLOCK_SIZE);
                         sb.setDev(mf.getHashCode());
@@ -1261,11 +1261,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             File f = this.resolvePath(path);
             if (f.isFile()) {
                 MetaDataDedupFile mf = MetaFileStore.getMF(f);
-                mf.setLastAccessed(atime * 1000L);
-                mf.setLastModified(mtime * 1000L);
+                mf.setLastAccessed(atime);
+                mf.setLastModified(mtime);
             } else {
                 Path p = f.toPath();
-                Files.setLastModifiedTime(p, FileTime.fromMillis(mtime * 1000L));
+                Files.setLastModifiedTime(p, FileTime.fromMillis(mtime));
                 MetaDataDedupFile mf = MetaFileStore.getMF(f);
                 if (mf.isFile())
                     mf.setDirty(true);
