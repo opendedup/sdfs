@@ -494,11 +494,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     return;
                 }
             } else {
-
                 File f = this.resolvePath(path);
                 try {
                     MetaFileStore.getMF(f).clearRetentionLock();
-                    if (MetaFileStore.removeMetaFile(f.getPath(), true, true, true)) {
+                    if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
                         // SDFSLogger.getLog().info("deleted file " +
                         // f.getPath());
                         responseObserver.onNext(b.build());
@@ -595,7 +594,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
             return;
         }
-
     }
 
     @Override
@@ -629,7 +627,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
     @Override
     public void mknod(MkNodRequest request, StreamObserver<MkNodResponse> responseObserver) {
-        SDFSLogger.getLog().info("making object " + request.getPath());
         MkNodResponse.Builder b = MkNodResponse.newBuilder();
         try {
             String path = request.getPath();
@@ -719,9 +716,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     @Override
     public void read(DataReadRequest request, StreamObserver<DataReadResponse> responseObserver) {
         DataReadResponse.Builder b = DataReadResponse.newBuilder();
-        SDFSLogger.getLog().info("Reading");
         if (Main.volume.isOffLine()) {
-            SDFSLogger.getLog().info("Reading 1");
             b.setError("Volume Offline");
             b.setErrorCode(errorCodes.ENODEV);
             responseObserver.onNext(b.build());
@@ -729,11 +724,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
         try {
-            SDFSLogger.getLog().info("Reading 2");
             ByteBuffer buf = ByteBuffer.allocate(request.getLen());
             DedupFileChannel ch = this.getFileChannel((Long) request.getFileHandle());
             int read = ch.read(buf, 0, buf.capacity(), request.getStart());
-            SDFSLogger.getLog().info("Read " + read);
             if (read == -1)
                 read = 0;
             buf.position(0);
@@ -743,7 +736,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
             return;
         } catch (FileIOError e) {
-            SDFSLogger.getLog().info("Reading 3");
             b.setError(e.message);
             b.setErrorCode(e.code);
             responseObserver.onNext(b.build());
