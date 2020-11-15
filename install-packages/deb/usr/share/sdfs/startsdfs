@@ -9,7 +9,7 @@ EXEC="/usr/share/sdfs/jsvc"
 BASEPATH="/usr/share/sdfs"
 PF="sdfs-ncfg.pid"
 OPTIND=1
-while getopts "v:z:f:p:e:anmzcdshcrlw" opt; do
+while getopts "v:z:f:p:e:anmqzcdshcrlw" opt; do
   case $opt in
     v)
         echo "$OPTARG"
