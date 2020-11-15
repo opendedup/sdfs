@@ -31,7 +31,6 @@ public class Main {
 	public static double fpp = .01;
 	public static String logSize="10MB";
 	public static boolean ignoreDSEHTSize = true;
-	public static boolean CUCKOO =false;
 	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
@@ -303,6 +302,7 @@ public class Main {
 	public static boolean useAim;
 
 	/** Azure login info **/
+	
 	public static boolean AZUREChunkStore = false;
 	public static String AZURE_ACCOUNT_NAME = "MyAccountName";
 	public static String AZURE_ACCOUNT_KEY = "MyAccountKey";
