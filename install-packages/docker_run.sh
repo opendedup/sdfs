@@ -43,7 +43,7 @@ if [ ! -f /etc/sdfs/pool0-volume-cfg.xml ]; then
     ADDLCMD+=" -w"
 fi
 
-if [ -n "${DISABLE_TLS}"]; then
+if [ -n "${DISABLE_TLS}" ]; then
         ADDLCMD+=" -s"
 fi
 echo ${ADDLCMD}
