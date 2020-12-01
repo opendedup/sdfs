@@ -82,13 +82,13 @@ public class IOServer {
       public void run() {
         // Use stderr here since the logger may have been reset by its JVM shutdown
         // hook.
-        System.err.println("*** shutting down gRPC server since JVM is shutting down");
+        //System.err.println("*** shutting down gRPC server since JVM is shutting down");
         try {
           IOServer.this.stop();
         } catch (InterruptedException e) {
           e.printStackTrace(System.err);
         }
-        System.err.println("*** server shut down");
+        //System.err.println("*** server shut down");
       }
     });
   }
@@ -107,15 +107,6 @@ public class IOServer {
     if (server != null) {
       server.awaitTermination();
     }
-  }
-
-  /**
-   * Main launches the server from the command line.
-   */
-  public static void main(String[] args) throws IOException, InterruptedException {
-    final IOServer server = new IOServer();
-    server.start(false,"localhost",6442);
-    server.blockUntilShutdown();
   }
 
   public static class AuthorizationInterceptor implements ServerInterceptor {
