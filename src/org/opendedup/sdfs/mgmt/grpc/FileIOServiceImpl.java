@@ -19,6 +19,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.RestoreArchive;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -47,6 +48,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 import com.google.protobuf.ByteString;
 
 import org.opendedup.sdfs.io.FileClosedException;
@@ -291,14 +293,13 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
-        }catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             SDFSLogger.getLog().error("unable to fulfill request", e);
-            b.setError("file not found " +request.getFile());
+            b.setError("file not found " + request.getFile());
             b.setErrorCode(errorCodes.ENOENT);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
-        } 
-        catch (Exception e) {
+        } catch (Exception e) {
             SDFSLogger.getLog().error("unable to fulfill request", e);
             b.setError("unable to fulfill request");
             b.setErrorCode(errorCodes.EIO);
@@ -659,10 +660,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 MetaDataDedupFile mf = MetaFileStore.getMF(f);
                 mf.unmarshal();
                 try {
-					mf.setMode(request.getMode());
-				} finally {
-					f = null;
-				}
+                    mf.setMode(request.getMode());
+                } finally {
+                    f = null;
+                }
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
@@ -1049,7 +1050,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         sb.setUid(uid);
                         sb.setGid(gid);
                         sb.setMode(mode);
-                        sb.setAtime(mf.getLastAccessed() );
+                        sb.setAtime(mf.getLastAccessed());
                         sb.setMtim(mf.lastModified());
                         sb.setCtim(0);
                         sb.setBlksize(BLOCK_SIZE);
@@ -1442,7 +1443,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
     }
-    
 
     @Override
     public void getFileInfo(FileInfoRequest req, StreamObserver<FileMessageResponse> responseObserver) {
@@ -1493,7 +1493,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         maxFiles = req.getNumberOfFiles();
                     }
                     b.setMaxNumberOfFiles(maxFiles);
-                    while (stream.hasNext()){
+                    while (stream.hasNext()) {
                         Path p = stream.next();
                         File _mf = p.toFile();
                         MetaDataDedupFile mf = MetaFileStore.getNCMF(_mf);
@@ -1839,32 +1839,105 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
 
     }
+
     @Override
     public void statFS(StatFSRequest request, StreamObserver<StatFSResponse> responseObserver) {
         StatFSResponse.Builder b = StatFSResponse.newBuilder();
         StatFS.Builder bs = StatFS.newBuilder();
-        
-		try {
-			long blocks = Main.volume.getTotalBlocks();
-			long used = Main.volume.getUsedBlocks();
-			if (used > blocks)
-				used = blocks;
-            bs.setBsize(Main.volume.getBlockSize()).setBlocks(blocks).setBfree(blocks-used).setNamelen(NAME_LENGTH)
-            .setType(0).setFsid(Main.volume.getSerialNumber());
+
+        try {
+            long blocks = Main.volume.getTotalBlocks();
+            long used = Main.volume.getUsedBlocks();
+            if (used > blocks)
+                used = blocks;
+            bs.setBsize(Main.volume.getBlockSize()).setBlocks(blocks).setBfree(blocks - used).setNamelen(NAME_LENGTH)
+                    .setType(0).setFsid(Main.volume.getSerialNumber());
             b.setStat(bs);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
-		} catch (Exception e) {
+        } catch (Exception e) {
             SDFSLogger.getLog().error("unable to stat", e);
             b.setError("unable to stat");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
-		} finally {
+        } finally {
 
-		}
+        }
     }
 
+    @Override
+    public void syncNotification(SyncNotificationSubscription request,
+            StreamObserver<FileMessageResponse> responseObserver) {
+        SDFSLogger.getLog().info("Received Request " + request.getUid());
+        DownloadFileListener dListener = new DownloadFileListener(responseObserver);
+        while (!dListener.closed) {
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+            }
+
+        }
+    }
+
+    public class DownloadFileListener implements Runnable {
+
+        StreamObserver<FileMessageResponse> responseObserver;
+        boolean closed = false;
+
+        public DownloadFileListener(StreamObserver<FileMessageResponse> responseObserver) {
+            this.responseObserver = responseObserver;
+            FileReplicationService.registerEvents(this);
+        }
+
+        @Subscribe
+        public void synEvent(org.opendedup.sdfs.io.events.MFileDownloaded _evt) {
+            synchronized (responseObserver) {
+                FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                try {
+                    b.addResponse(_evt.mf.toGRPC(true));
+
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("error creating file message", e);
+                    b.setError("Unable to create file message");
+                    b.setErrorCode(errorCodes.EIO);
+                }
+                try {
+                    responseObserver.onNext(b.build());
+
+                    SDFSLogger.getLog().info("Sent message");
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("Unable to send message", e);
+                    this.close();
+                }
+            }
+        }
+
+        public void close() {
+            synchronized (responseObserver) {
+                if (!this.closed) {
+                    responseObserver.onCompleted();
+                    this.closed = true;
+                }
+            }
+        }
+
+        @Override
+        public void run() {
+            while (!this.closed) {
+                try {
+                    Thread.sleep(3000);
+                    synchronized (responseObserver) {
+                        FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                        responseObserver.onNext(b.build());
+                    }
+                } catch (Exception e) {
+                    this.close();
+                }
+            }
+
+        }
+    }
 }

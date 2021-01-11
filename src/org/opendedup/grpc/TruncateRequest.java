@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.TruncateRequest}
  */
-public  final class TruncateRequest extends
+public final class TruncateRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.TruncateRequest)
     TruncateRequestOrBuilder {
@@ -98,6 +98,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The path.
    */
+  @java.lang.Override
   public java.lang.String getPath() {
     java.lang.Object ref = path_;
     if (ref instanceof java.lang.String) {
@@ -114,6 +115,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The bytes for path.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getPathBytes() {
     java.lang.Object ref = path_;
@@ -134,6 +136,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 length = 2;</code>
    * @return The length.
    */
+  @java.lang.Override
   public long getLength() {
     return length_;
   }
@@ -539,6 +542,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 length = 2;</code>
      * @return The length.
      */
+    @java.lang.Override
     public long getLength() {
       return length_;
     }

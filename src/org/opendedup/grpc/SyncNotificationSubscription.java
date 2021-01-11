@@ -4,27 +4,26 @@
 package org.opendedup.grpc;
 
 /**
- * Protobuf type {@code org.opendedup.grpc.RemoveXAttrResponse}
+ * Protobuf type {@code org.opendedup.grpc.SyncNotificationSubscription}
  */
-public final class RemoveXAttrResponse extends
+public final class SyncNotificationSubscription extends
     com.google.protobuf.GeneratedMessageV3 implements
-    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RemoveXAttrResponse)
-    RemoveXAttrResponseOrBuilder {
+    // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SyncNotificationSubscription)
+    SyncNotificationSubscriptionOrBuilder {
 private static final long serialVersionUID = 0L;
-  // Use RemoveXAttrResponse.newBuilder() to construct.
-  private RemoveXAttrResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+  // Use SyncNotificationSubscription.newBuilder() to construct.
+  private SyncNotificationSubscription(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
     super(builder);
   }
-  private RemoveXAttrResponse() {
-    error_ = "";
-    errorCode_ = 0;
+  private SyncNotificationSubscription() {
+    uid_ = "";
   }
 
   @java.lang.Override
   @SuppressWarnings({"unused"})
   protected java.lang.Object newInstance(
       UnusedPrivateParameter unused) {
-    return new RemoveXAttrResponse();
+    return new SyncNotificationSubscription();
   }
 
   @java.lang.Override
@@ -32,7 +31,7 @@ private static final long serialVersionUID = 0L;
   getUnknownFields() {
     return this.unknownFields;
   }
-  private RemoveXAttrResponse(
+  private SyncNotificationSubscription(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
@@ -53,13 +52,7 @@ private static final long serialVersionUID = 0L;
           case 10: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            error_ = s;
-            break;
-          }
-          case 16: {
-            int rawValue = input.readEnum();
-
-            errorCode_ = rawValue;
+            uid_ = s;
             break;
           }
           default: {
@@ -83,72 +76,53 @@ private static final long serialVersionUID = 0L;
   }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
-    return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_RemoveXAttrResponse_descriptor;
+    return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SyncNotificationSubscription_descriptor;
   }
 
   @java.lang.Override
   protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internalGetFieldAccessorTable() {
-    return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_RemoveXAttrResponse_fieldAccessorTable
+    return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SyncNotificationSubscription_fieldAccessorTable
         .ensureFieldAccessorsInitialized(
-            org.opendedup.grpc.RemoveXAttrResponse.class, org.opendedup.grpc.RemoveXAttrResponse.Builder.class);
+            org.opendedup.grpc.SyncNotificationSubscription.class, org.opendedup.grpc.SyncNotificationSubscription.Builder.class);
   }
 
-  public static final int ERROR_FIELD_NUMBER = 1;
-  private volatile java.lang.Object error_;
+  public static final int UID_FIELD_NUMBER = 1;
+  private volatile java.lang.Object uid_;
   /**
-   * <code>string error = 1;</code>
-   * @return The error.
+   * <code>string uid = 1;</code>
+   * @return The uid.
    */
   @java.lang.Override
-  public java.lang.String getError() {
-    java.lang.Object ref = error_;
+  public java.lang.String getUid() {
+    java.lang.Object ref = uid_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      error_ = s;
+      uid_ = s;
       return s;
     }
   }
   /**
-   * <code>string error = 1;</code>
-   * @return The bytes for error.
+   * <code>string uid = 1;</code>
+   * @return The bytes for uid.
    */
   @java.lang.Override
   public com.google.protobuf.ByteString
-      getErrorBytes() {
-    java.lang.Object ref = error_;
+      getUidBytes() {
+    java.lang.Object ref = uid_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      error_ = b;
+      uid_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
-  }
-
-  public static final int ERRORCODE_FIELD_NUMBER = 2;
-  private int errorCode_;
-  /**
-   * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-   * @return The enum numeric value on the wire for errorCode.
-   */
-  @java.lang.Override public int getErrorCodeValue() {
-    return errorCode_;
-  }
-  /**
-   * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-   * @return The errorCode.
-   */
-  @java.lang.Override public org.opendedup.grpc.errorCodes getErrorCode() {
-    @SuppressWarnings("deprecation")
-    org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);
-    return result == null ? org.opendedup.grpc.errorCodes.UNRECOGNIZED : result;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -165,11 +139,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!getErrorBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
-    }
-    if (errorCode_ != org.opendedup.grpc.errorCodes.NOERR.getNumber()) {
-      output.writeEnum(2, errorCode_);
+    if (!getUidBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 1, uid_);
     }
     unknownFields.writeTo(output);
   }
@@ -180,12 +151,8 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (!getErrorBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
-    }
-    if (errorCode_ != org.opendedup.grpc.errorCodes.NOERR.getNumber()) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeEnumSize(2, errorCode_);
+    if (!getUidBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, uid_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -197,14 +164,13 @@ private static final long serialVersionUID = 0L;
     if (obj == this) {
      return true;
     }
-    if (!(obj instanceof org.opendedup.grpc.RemoveXAttrResponse)) {
+    if (!(obj instanceof org.opendedup.grpc.SyncNotificationSubscription)) {
       return super.equals(obj);
     }
-    org.opendedup.grpc.RemoveXAttrResponse other = (org.opendedup.grpc.RemoveXAttrResponse) obj;
+    org.opendedup.grpc.SyncNotificationSubscription other = (org.opendedup.grpc.SyncNotificationSubscription) obj;
 
-    if (!getError()
-        .equals(other.getError())) return false;
-    if (errorCode_ != other.errorCode_) return false;
+    if (!getUid()
+        .equals(other.getUid())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -216,78 +182,76 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + ERROR_FIELD_NUMBER;
-    hash = (53 * hash) + getError().hashCode();
-    hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
-    hash = (53 * hash) + errorCode_;
+    hash = (37 * hash) + UID_FIELD_NUMBER;
+    hash = (53 * hash) + getUid().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
   }
 
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(
       java.nio.ByteBuffer data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(
       java.nio.ByteBuffer data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(
       com.google.protobuf.ByteString data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(
       com.google.protobuf.ByteString data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(byte[] data)
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(byte[] data)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(
       byte[] data,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     return PARSER.parseFrom(data, extensionRegistry);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseDelimitedFrom(java.io.InputStream input)
+  public static org.opendedup.grpc.SyncNotificationSubscription parseDelimitedFrom(java.io.InputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseDelimitedFrom(
+  public static org.opendedup.grpc.SyncNotificationSubscription parseDelimitedFrom(
       java.io.InputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(
       com.google.protobuf.CodedInputStream input)
       throws java.io.IOException {
     return com.google.protobuf.GeneratedMessageV3
         .parseWithIOException(PARSER, input);
   }
-  public static org.opendedup.grpc.RemoveXAttrResponse parseFrom(
+  public static org.opendedup.grpc.SyncNotificationSubscription parseFrom(
       com.google.protobuf.CodedInputStream input,
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws java.io.IOException {
@@ -300,7 +264,7 @@ private static final long serialVersionUID = 0L;
   public static Builder newBuilder() {
     return DEFAULT_INSTANCE.toBuilder();
   }
-  public static Builder newBuilder(org.opendedup.grpc.RemoveXAttrResponse prototype) {
+  public static Builder newBuilder(org.opendedup.grpc.SyncNotificationSubscription prototype) {
     return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
   }
   @java.lang.Override
@@ -316,26 +280,26 @@ private static final long serialVersionUID = 0L;
     return builder;
   }
   /**
-   * Protobuf type {@code org.opendedup.grpc.RemoveXAttrResponse}
+   * Protobuf type {@code org.opendedup.grpc.SyncNotificationSubscription}
    */
   public static final class Builder extends
       com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.RemoveXAttrResponse)
-      org.opendedup.grpc.RemoveXAttrResponseOrBuilder {
+      // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.SyncNotificationSubscription)
+      org.opendedup.grpc.SyncNotificationSubscriptionOrBuilder {
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_RemoveXAttrResponse_descriptor;
+      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SyncNotificationSubscription_descriptor;
     }
 
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_RemoveXAttrResponse_fieldAccessorTable
+      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SyncNotificationSubscription_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              org.opendedup.grpc.RemoveXAttrResponse.class, org.opendedup.grpc.RemoveXAttrResponse.Builder.class);
+              org.opendedup.grpc.SyncNotificationSubscription.class, org.opendedup.grpc.SyncNotificationSubscription.Builder.class);
     }
 
-    // Construct using org.opendedup.grpc.RemoveXAttrResponse.newBuilder()
+    // Construct using org.opendedup.grpc.SyncNotificationSubscription.newBuilder()
     private Builder() {
       maybeForceBuilderInitialization();
     }
@@ -353,9 +317,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      error_ = "";
-
-      errorCode_ = 0;
+      uid_ = "";
 
       return this;
     }
@@ -363,17 +325,17 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public com.google.protobuf.Descriptors.Descriptor
         getDescriptorForType() {
-      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_RemoveXAttrResponse_descriptor;
+      return org.opendedup.grpc.IOService.internal_static_org_opendedup_grpc_SyncNotificationSubscription_descriptor;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.RemoveXAttrResponse getDefaultInstanceForType() {
-      return org.opendedup.grpc.RemoveXAttrResponse.getDefaultInstance();
+    public org.opendedup.grpc.SyncNotificationSubscription getDefaultInstanceForType() {
+      return org.opendedup.grpc.SyncNotificationSubscription.getDefaultInstance();
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.RemoveXAttrResponse build() {
-      org.opendedup.grpc.RemoveXAttrResponse result = buildPartial();
+    public org.opendedup.grpc.SyncNotificationSubscription build() {
+      org.opendedup.grpc.SyncNotificationSubscription result = buildPartial();
       if (!result.isInitialized()) {
         throw newUninitializedMessageException(result);
       }
@@ -381,10 +343,9 @@ private static final long serialVersionUID = 0L;
     }
 
     @java.lang.Override
-    public org.opendedup.grpc.RemoveXAttrResponse buildPartial() {
-      org.opendedup.grpc.RemoveXAttrResponse result = new org.opendedup.grpc.RemoveXAttrResponse(this);
-      result.error_ = error_;
-      result.errorCode_ = errorCode_;
+    public org.opendedup.grpc.SyncNotificationSubscription buildPartial() {
+      org.opendedup.grpc.SyncNotificationSubscription result = new org.opendedup.grpc.SyncNotificationSubscription(this);
+      result.uid_ = uid_;
       onBuilt();
       return result;
     }
@@ -423,22 +384,19 @@ private static final long serialVersionUID = 0L;
     }
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
-      if (other instanceof org.opendedup.grpc.RemoveXAttrResponse) {
-        return mergeFrom((org.opendedup.grpc.RemoveXAttrResponse)other);
+      if (other instanceof org.opendedup.grpc.SyncNotificationSubscription) {
+        return mergeFrom((org.opendedup.grpc.SyncNotificationSubscription)other);
       } else {
         super.mergeFrom(other);
         return this;
       }
     }
 
-    public Builder mergeFrom(org.opendedup.grpc.RemoveXAttrResponse other) {
-      if (other == org.opendedup.grpc.RemoveXAttrResponse.getDefaultInstance()) return this;
-      if (!other.getError().isEmpty()) {
-        error_ = other.error_;
+    public Builder mergeFrom(org.opendedup.grpc.SyncNotificationSubscription other) {
+      if (other == org.opendedup.grpc.SyncNotificationSubscription.getDefaultInstance()) return this;
+      if (!other.getUid().isEmpty()) {
+        uid_ = other.uid_;
         onChanged();
-      }
-      if (other.errorCode_ != 0) {
-        setErrorCodeValue(other.getErrorCodeValue());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -455,11 +413,11 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      org.opendedup.grpc.RemoveXAttrResponse parsedMessage = null;
+      org.opendedup.grpc.SyncNotificationSubscription parsedMessage = null;
       try {
         parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (org.opendedup.grpc.RemoveXAttrResponse) e.getUnfinishedMessage();
+        parsedMessage = (org.opendedup.grpc.SyncNotificationSubscription) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
         if (parsedMessage != null) {
@@ -469,132 +427,78 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object error_ = "";
+    private java.lang.Object uid_ = "";
     /**
-     * <code>string error = 1;</code>
-     * @return The error.
+     * <code>string uid = 1;</code>
+     * @return The uid.
      */
-    public java.lang.String getError() {
-      java.lang.Object ref = error_;
+    public java.lang.String getUid() {
+      java.lang.Object ref = uid_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        error_ = s;
+        uid_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string error = 1;</code>
-     * @return The bytes for error.
+     * <code>string uid = 1;</code>
+     * @return The bytes for uid.
      */
     public com.google.protobuf.ByteString
-        getErrorBytes() {
-      java.lang.Object ref = error_;
+        getUidBytes() {
+      java.lang.Object ref = uid_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        error_ = b;
+        uid_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string error = 1;</code>
-     * @param value The error to set.
+     * <code>string uid = 1;</code>
+     * @param value The uid to set.
      * @return This builder for chaining.
      */
-    public Builder setError(
+    public Builder setUid(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      error_ = value;
+      uid_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string error = 1;</code>
+     * <code>string uid = 1;</code>
      * @return This builder for chaining.
      */
-    public Builder clearError() {
+    public Builder clearUid() {
       
-      error_ = getDefaultInstance().getError();
+      uid_ = getDefaultInstance().getUid();
       onChanged();
       return this;
     }
     /**
-     * <code>string error = 1;</code>
-     * @param value The bytes for error to set.
+     * <code>string uid = 1;</code>
+     * @param value The bytes for uid to set.
      * @return This builder for chaining.
      */
-    public Builder setErrorBytes(
+    public Builder setUidBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      error_ = value;
-      onChanged();
-      return this;
-    }
-
-    private int errorCode_ = 0;
-    /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The enum numeric value on the wire for errorCode.
-     */
-    @java.lang.Override public int getErrorCodeValue() {
-      return errorCode_;
-    }
-    /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @param value The enum numeric value on the wire for errorCode to set.
-     * @return This builder for chaining.
-     */
-    public Builder setErrorCodeValue(int value) {
-      
-      errorCode_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The errorCode.
-     */
-    @java.lang.Override
-    public org.opendedup.grpc.errorCodes getErrorCode() {
-      @SuppressWarnings("deprecation")
-      org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);
-      return result == null ? org.opendedup.grpc.errorCodes.UNRECOGNIZED : result;
-    }
-    /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @param value The errorCode to set.
-     * @return This builder for chaining.
-     */
-    public Builder setErrorCode(org.opendedup.grpc.errorCodes value) {
-      if (value == null) {
-        throw new NullPointerException();
-      }
-      
-      errorCode_ = value.getNumber();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearErrorCode() {
-      
-      errorCode_ = 0;
+      uid_ = value;
       onChanged();
       return this;
     }
@@ -611,41 +515,41 @@ private static final long serialVersionUID = 0L;
     }
 
 
-    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.RemoveXAttrResponse)
+    // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.SyncNotificationSubscription)
   }
 
-  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.RemoveXAttrResponse)
-  private static final org.opendedup.grpc.RemoveXAttrResponse DEFAULT_INSTANCE;
+  // @@protoc_insertion_point(class_scope:org.opendedup.grpc.SyncNotificationSubscription)
+  private static final org.opendedup.grpc.SyncNotificationSubscription DEFAULT_INSTANCE;
   static {
-    DEFAULT_INSTANCE = new org.opendedup.grpc.RemoveXAttrResponse();
+    DEFAULT_INSTANCE = new org.opendedup.grpc.SyncNotificationSubscription();
   }
 
-  public static org.opendedup.grpc.RemoveXAttrResponse getDefaultInstance() {
+  public static org.opendedup.grpc.SyncNotificationSubscription getDefaultInstance() {
     return DEFAULT_INSTANCE;
   }
 
-  private static final com.google.protobuf.Parser<RemoveXAttrResponse>
-      PARSER = new com.google.protobuf.AbstractParser<RemoveXAttrResponse>() {
+  private static final com.google.protobuf.Parser<SyncNotificationSubscription>
+      PARSER = new com.google.protobuf.AbstractParser<SyncNotificationSubscription>() {
     @java.lang.Override
-    public RemoveXAttrResponse parsePartialFrom(
+    public SyncNotificationSubscription parsePartialFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new RemoveXAttrResponse(input, extensionRegistry);
+      return new SyncNotificationSubscription(input, extensionRegistry);
     }
   };
 
-  public static com.google.protobuf.Parser<RemoveXAttrResponse> parser() {
+  public static com.google.protobuf.Parser<SyncNotificationSubscription> parser() {
     return PARSER;
   }
 
   @java.lang.Override
-  public com.google.protobuf.Parser<RemoveXAttrResponse> getParserForType() {
+  public com.google.protobuf.Parser<SyncNotificationSubscription> getParserForType() {
     return PARSER;
   }
 
   @java.lang.Override
-  public org.opendedup.grpc.RemoveXAttrResponse getDefaultInstanceForType() {
+  public org.opendedup.grpc.SyncNotificationSubscription getDefaultInstanceForType() {
     return DEFAULT_INSTANCE;
   }
 

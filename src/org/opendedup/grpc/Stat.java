@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.Stat}
  */
-public  final class Stat extends
+public final class Stat extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.Stat)
     StatOrBuilder {
@@ -155,6 +155,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 dev = 1;</code>
    * @return The dev.
    */
+  @java.lang.Override
   public long getDev() {
     return dev_;
   }
@@ -169,6 +170,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 ino = 2;</code>
    * @return The ino.
    */
+  @java.lang.Override
   public long getIno() {
     return ino_;
   }
@@ -183,6 +185,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 mode = 3;</code>
    * @return The mode.
    */
+  @java.lang.Override
   public int getMode() {
     return mode_;
   }
@@ -197,6 +200,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 nlink = 4;</code>
    * @return The nlink.
    */
+  @java.lang.Override
   public int getNlink() {
     return nlink_;
   }
@@ -211,6 +215,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 uid = 5;</code>
    * @return The uid.
    */
+  @java.lang.Override
   public int getUid() {
     return uid_;
   }
@@ -225,6 +230,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 gid = 6;</code>
    * @return The gid.
    */
+  @java.lang.Override
   public int getGid() {
     return gid_;
   }
@@ -239,6 +245,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 rdev = 7;</code>
    * @return The rdev.
    */
+  @java.lang.Override
   public int getRdev() {
     return rdev_;
   }
@@ -253,6 +260,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 size = 8;</code>
    * @return The size.
    */
+  @java.lang.Override
   public long getSize() {
     return size_;
   }
@@ -267,6 +275,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 blksize = 9;</code>
    * @return The blksize.
    */
+  @java.lang.Override
   public int getBlksize() {
     return blksize_;
   }
@@ -281,6 +290,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 blocks = 10;</code>
    * @return The blocks.
    */
+  @java.lang.Override
   public long getBlocks() {
     return blocks_;
   }
@@ -295,6 +305,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 atime = 11;</code>
    * @return The atime.
    */
+  @java.lang.Override
   public long getAtime() {
     return atime_;
   }
@@ -309,6 +320,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 mtim = 12;</code>
    * @return The mtim.
    */
+  @java.lang.Override
   public long getMtim() {
     return mtim_;
   }
@@ -323,6 +335,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 ctim = 13;</code>
    * @return The ctim.
    */
+  @java.lang.Override
   public long getCtim() {
     return ctim_;
   }
@@ -849,6 +862,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 dev = 1;</code>
      * @return The dev.
      */
+    @java.lang.Override
     public long getDev() {
       return dev_;
     }
@@ -891,6 +905,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 ino = 2;</code>
      * @return The ino.
      */
+    @java.lang.Override
     public long getIno() {
       return ino_;
     }
@@ -933,6 +948,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 mode = 3;</code>
      * @return The mode.
      */
+    @java.lang.Override
     public int getMode() {
       return mode_;
     }
@@ -975,6 +991,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 nlink = 4;</code>
      * @return The nlink.
      */
+    @java.lang.Override
     public int getNlink() {
       return nlink_;
     }
@@ -1017,6 +1034,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 uid = 5;</code>
      * @return The uid.
      */
+    @java.lang.Override
     public int getUid() {
       return uid_;
     }
@@ -1059,6 +1077,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 gid = 6;</code>
      * @return The gid.
      */
+    @java.lang.Override
     public int getGid() {
       return gid_;
     }
@@ -1101,6 +1120,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 rdev = 7;</code>
      * @return The rdev.
      */
+    @java.lang.Override
     public int getRdev() {
       return rdev_;
     }
@@ -1143,6 +1163,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 size = 8;</code>
      * @return The size.
      */
+    @java.lang.Override
     public long getSize() {
       return size_;
     }
@@ -1185,6 +1206,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 blksize = 9;</code>
      * @return The blksize.
      */
+    @java.lang.Override
     public int getBlksize() {
       return blksize_;
     }
@@ -1227,6 +1249,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 blocks = 10;</code>
      * @return The blocks.
      */
+    @java.lang.Override
     public long getBlocks() {
       return blocks_;
     }
@@ -1269,6 +1292,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 atime = 11;</code>
      * @return The atime.
      */
+    @java.lang.Override
     public long getAtime() {
       return atime_;
     }
@@ -1311,6 +1335,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 mtim = 12;</code>
      * @return The mtim.
      */
+    @java.lang.Override
     public long getMtim() {
       return mtim_;
     }
@@ -1353,6 +1378,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 ctim = 13;</code>
      * @return The ctim.
      */
+    @java.lang.Override
     public long getCtim() {
       return ctim_;
     }

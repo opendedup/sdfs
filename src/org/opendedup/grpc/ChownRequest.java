@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.ChownRequest}
  */
-public  final class ChownRequest extends
+public final class ChownRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ChownRequest)
     ChownRequestOrBuilder {
@@ -103,6 +103,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The path.
    */
+  @java.lang.Override
   public java.lang.String getPath() {
     java.lang.Object ref = path_;
     if (ref instanceof java.lang.String) {
@@ -119,6 +120,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The bytes for path.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getPathBytes() {
     java.lang.Object ref = path_;
@@ -139,6 +141,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 uid = 2;</code>
    * @return The uid.
    */
+  @java.lang.Override
   public int getUid() {
     return uid_;
   }
@@ -149,6 +152,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 gid = 3;</code>
    * @return The gid.
    */
+  @java.lang.Override
   public int getGid() {
     return gid_;
   }
@@ -570,6 +574,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 uid = 2;</code>
      * @return The uid.
      */
+    @java.lang.Override
     public int getUid() {
       return uid_;
     }
@@ -600,6 +605,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 gid = 3;</code>
      * @return The gid.
      */
+    @java.lang.Override
     public int getGid() {
       return gid_;
     }

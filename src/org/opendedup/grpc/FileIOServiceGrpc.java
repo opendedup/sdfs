@@ -1019,6 +1019,37 @@ public final class FileIOServiceGrpc {
     return getStatFSMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SyncNotificationSubscription,
+      org.opendedup.grpc.FileMessageResponse> getSyncNotificationMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SyncNotification",
+      requestType = org.opendedup.grpc.SyncNotificationSubscription.class,
+      responseType = org.opendedup.grpc.FileMessageResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SyncNotificationSubscription,
+      org.opendedup.grpc.FileMessageResponse> getSyncNotificationMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SyncNotificationSubscription, org.opendedup.grpc.FileMessageResponse> getSyncNotificationMethod;
+    if ((getSyncNotificationMethod = FileIOServiceGrpc.getSyncNotificationMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getSyncNotificationMethod = FileIOServiceGrpc.getSyncNotificationMethod) == null) {
+          FileIOServiceGrpc.getSyncNotificationMethod = getSyncNotificationMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SyncNotificationSubscription, org.opendedup.grpc.FileMessageResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SyncNotification"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SyncNotificationSubscription.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.FileMessageResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("SyncNotification"))
+              .build();
+        }
+      }
+    }
+    return getSyncNotificationMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -1294,6 +1325,13 @@ public final class FileIOServiceGrpc {
       asyncUnimplementedUnaryCall(getStatFSMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void syncNotification(org.opendedup.grpc.SyncNotificationSubscription request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FileMessageResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSyncNotificationMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -1520,6 +1558,13 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.StatFSRequest,
                 org.opendedup.grpc.StatFSResponse>(
                   this, METHODID_STAT_FS)))
+          .addMethod(
+            getSyncNotificationMethod(),
+            asyncServerStreamingCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SyncNotificationSubscription,
+                org.opendedup.grpc.FileMessageResponse>(
+                  this, METHODID_SYNC_NOTIFICATION)))
           .build();
     }
   }
@@ -1796,6 +1841,14 @@ public final class FileIOServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getStatFSMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void syncNotification(org.opendedup.grpc.SyncNotificationSubscription request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FileMessageResponse> responseObserver) {
+      asyncServerStreamingCall(
+          getChannel().newCall(getSyncNotificationMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -2037,6 +2090,14 @@ public final class FileIOServiceGrpc {
     public org.opendedup.grpc.StatFSResponse statFS(org.opendedup.grpc.StatFSRequest request) {
       return blockingUnaryCall(
           getChannel(), getStatFSMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public java.util.Iterator<org.opendedup.grpc.FileMessageResponse> syncNotification(
+        org.opendedup.grpc.SyncNotificationSubscription request) {
+      return blockingServerStreamingCall(
+          getChannel(), getSyncNotificationMethod(), getCallOptions(), request);
     }
   }
 
@@ -2346,6 +2407,7 @@ public final class FileIOServiceGrpc {
   private static final int METHODID_GET_CLOUD_FILE = 29;
   private static final int METHODID_GET_CLOUD_META_FILE = 30;
   private static final int METHODID_STAT_FS = 31;
+  private static final int METHODID_SYNC_NOTIFICATION = 32;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -2492,6 +2554,10 @@ public final class FileIOServiceGrpc {
           serviceImpl.statFS((org.opendedup.grpc.StatFSRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.StatFSResponse>) responseObserver);
           break;
+        case METHODID_SYNC_NOTIFICATION:
+          serviceImpl.syncNotification((org.opendedup.grpc.SyncNotificationSubscription) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.FileMessageResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -2585,6 +2651,7 @@ public final class FileIOServiceGrpc {
               .addMethod(getGetCloudFileMethod())
               .addMethod(getGetCloudMetaFileMethod())
               .addMethod(getStatFSMethod())
+              .addMethod(getSyncNotificationMethod())
               .build();
         }
       }

@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.ChmodRequest}
  */
-public  final class ChmodRequest extends
+public final class ChmodRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ChmodRequest)
     ChmodRequestOrBuilder {
@@ -98,6 +98,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The path.
    */
+  @java.lang.Override
   public java.lang.String getPath() {
     java.lang.Object ref = path_;
     if (ref instanceof java.lang.String) {
@@ -114,6 +115,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The bytes for path.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getPathBytes() {
     java.lang.Object ref = path_;
@@ -134,6 +136,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 mode = 2;</code>
    * @return The mode.
    */
+  @java.lang.Override
   public int getMode() {
     return mode_;
   }
@@ -538,6 +541,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 mode = 2;</code>
      * @return The mode.
      */
+    @java.lang.Override
     public int getMode() {
       return mode_;
     }

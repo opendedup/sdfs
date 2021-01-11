@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.GetXAttrRequest}
  */
-public  final class GetXAttrRequest extends
+public final class GetXAttrRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.GetXAttrRequest)
     GetXAttrRequestOrBuilder {
@@ -100,6 +100,7 @@ private static final long serialVersionUID = 0L;
    * <code>string attr = 1;</code>
    * @return The attr.
    */
+  @java.lang.Override
   public java.lang.String getAttr() {
     java.lang.Object ref = attr_;
     if (ref instanceof java.lang.String) {
@@ -116,6 +117,7 @@ private static final long serialVersionUID = 0L;
    * <code>string attr = 1;</code>
    * @return The bytes for attr.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getAttrBytes() {
     java.lang.Object ref = attr_;
@@ -136,6 +138,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 2;</code>
    * @return The path.
    */
+  @java.lang.Override
   public java.lang.String getPath() {
     java.lang.Object ref = path_;
     if (ref instanceof java.lang.String) {
@@ -152,6 +155,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 2;</code>
    * @return The bytes for path.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getPathBytes() {
     java.lang.Object ref = path_;

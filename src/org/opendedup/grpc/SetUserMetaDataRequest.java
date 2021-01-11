@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SetUserMetaDataRequest}
  */
-public  final class SetUserMetaDataRequest extends
+public final class SetUserMetaDataRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetUserMetaDataRequest)
     SetUserMetaDataRequestOrBuilder {
@@ -106,12 +106,14 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
    */
+  @java.lang.Override
   public java.util.List<org.opendedup.grpc.FileAttributes> getFileAttributesList() {
     return fileAttributes_;
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
    */
+  @java.lang.Override
   public java.util.List<? extends org.opendedup.grpc.FileAttributesOrBuilder> 
       getFileAttributesOrBuilderList() {
     return fileAttributes_;
@@ -119,18 +121,21 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
    */
+  @java.lang.Override
   public int getFileAttributesCount() {
     return fileAttributes_.size();
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.FileAttributes getFileAttributes(int index) {
     return fileAttributes_.get(index);
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.FileAttributesOrBuilder getFileAttributesOrBuilder(
       int index) {
     return fileAttributes_.get(index);
@@ -142,6 +147,7 @@ private static final long serialVersionUID = 0L;
    * <code>string Path = 2;</code>
    * @return The path.
    */
+  @java.lang.Override
   public java.lang.String getPath() {
     java.lang.Object ref = path_;
     if (ref instanceof java.lang.String) {
@@ -158,6 +164,7 @@ private static final long serialVersionUID = 0L;
    * <code>string Path = 2;</code>
    * @return The bytes for path.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getPathBytes() {
     java.lang.Object ref = path_;

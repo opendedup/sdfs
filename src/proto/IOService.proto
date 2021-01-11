@@ -338,6 +338,11 @@ message FsyncResponse {
     errorCodes errorCode = 2;
 }
 
+message SyncNotificationSubscription {
+    string uid = 1;
+}
+
+
 service FileIOService {
     // Define a RPC operation
     rpc GetXAttrSize(GetXAttrSizeRequest) returns (GetXAttrSizeResponse);
@@ -372,5 +377,6 @@ service FileIOService {
     rpc GetCloudFile(GetCloudFileRequest) returns (GetCloudFileResponse);
     rpc GetCloudMetaFile(GetCloudFileRequest) returns (GetCloudFileResponse);
     rpc StatFS(StatFSRequest) returns (StatFSResponse);
+    rpc SyncNotification (SyncNotificationSubscription) returns (stream FileMessageResponse) {};
   }
 

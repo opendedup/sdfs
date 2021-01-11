@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SymLinkRequest}
  */
-public  final class SymLinkRequest extends
+public final class SymLinkRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SymLinkRequest)
     SymLinkRequestOrBuilder {
@@ -100,6 +100,7 @@ private static final long serialVersionUID = 0L;
    * <code>string from = 1;</code>
    * @return The from.
    */
+  @java.lang.Override
   public java.lang.String getFrom() {
     java.lang.Object ref = from_;
     if (ref instanceof java.lang.String) {
@@ -116,6 +117,7 @@ private static final long serialVersionUID = 0L;
    * <code>string from = 1;</code>
    * @return The bytes for from.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getFromBytes() {
     java.lang.Object ref = from_;
@@ -136,6 +138,7 @@ private static final long serialVersionUID = 0L;
    * <code>string to = 2;</code>
    * @return The to.
    */
+  @java.lang.Override
   public java.lang.String getTo() {
     java.lang.Object ref = to_;
     if (ref instanceof java.lang.String) {
@@ -152,6 +155,7 @@ private static final long serialVersionUID = 0L;
    * <code>string to = 2;</code>
    * @return The bytes for to.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getToBytes() {
     java.lang.Object ref = to_;

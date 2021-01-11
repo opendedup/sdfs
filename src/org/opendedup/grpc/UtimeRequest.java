@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.UtimeRequest}
  */
-public  final class UtimeRequest extends
+public final class UtimeRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.UtimeRequest)
     UtimeRequestOrBuilder {
@@ -103,6 +103,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The path.
    */
+  @java.lang.Override
   public java.lang.String getPath() {
     java.lang.Object ref = path_;
     if (ref instanceof java.lang.String) {
@@ -119,6 +120,7 @@ private static final long serialVersionUID = 0L;
    * <code>string path = 1;</code>
    * @return The bytes for path.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getPathBytes() {
     java.lang.Object ref = path_;
@@ -139,6 +141,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 atime = 2;</code>
    * @return The atime.
    */
+  @java.lang.Override
   public long getAtime() {
     return atime_;
   }
@@ -149,6 +152,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 mtime = 3;</code>
    * @return The mtime.
    */
+  @java.lang.Override
   public long getMtime() {
     return mtime_;
   }
@@ -572,6 +576,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 atime = 2;</code>
      * @return The atime.
      */
+    @java.lang.Override
     public long getAtime() {
       return atime_;
     }
@@ -602,6 +607,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 mtime = 3;</code>
      * @return The mtime.
      */
+    @java.lang.Override
     public long getMtime() {
       return mtime_;
     }

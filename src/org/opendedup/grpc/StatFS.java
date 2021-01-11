@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.StatFS}
  */
-public  final class StatFS extends
+public final class StatFS extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.StatFS)
     StatFSOrBuilder {
@@ -145,6 +145,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 bsize = 1;</code>
    * @return The bsize.
    */
+  @java.lang.Override
   public int getBsize() {
     return bsize_;
   }
@@ -159,6 +160,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 blocks = 2;</code>
    * @return The blocks.
    */
+  @java.lang.Override
   public long getBlocks() {
     return blocks_;
   }
@@ -173,6 +175,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 bfree = 3;</code>
    * @return The bfree.
    */
+  @java.lang.Override
   public long getBfree() {
     return bfree_;
   }
@@ -187,6 +190,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 bavail = 4;</code>
    * @return The bavail.
    */
+  @java.lang.Override
   public long getBavail() {
     return bavail_;
   }
@@ -201,6 +205,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 files = 5;</code>
    * @return The files.
    */
+  @java.lang.Override
   public long getFiles() {
     return files_;
   }
@@ -215,6 +220,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 ffree = 6;</code>
    * @return The ffree.
    */
+  @java.lang.Override
   public long getFfree() {
     return ffree_;
   }
@@ -229,6 +235,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 fsid = 7;</code>
    * @return The fsid.
    */
+  @java.lang.Override
   public long getFsid() {
     return fsid_;
   }
@@ -243,6 +250,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 namelen = 8;</code>
    * @return The namelen.
    */
+  @java.lang.Override
   public int getNamelen() {
     return namelen_;
   }
@@ -257,6 +265,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 frsize = 9;</code>
    * @return The frsize.
    */
+  @java.lang.Override
   public int getFrsize() {
     return frsize_;
   }
@@ -271,6 +280,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 flags = 10;</code>
    * @return The flags.
    */
+  @java.lang.Override
   public int getFlags() {
     return flags_;
   }
@@ -285,6 +295,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 type = 11;</code>
    * @return The type.
    */
+  @java.lang.Override
   public int getType() {
     return type_;
   }
@@ -776,6 +787,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 bsize = 1;</code>
      * @return The bsize.
      */
+    @java.lang.Override
     public int getBsize() {
       return bsize_;
     }
@@ -818,6 +830,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 blocks = 2;</code>
      * @return The blocks.
      */
+    @java.lang.Override
     public long getBlocks() {
       return blocks_;
     }
@@ -860,6 +873,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 bfree = 3;</code>
      * @return The bfree.
      */
+    @java.lang.Override
     public long getBfree() {
       return bfree_;
     }
@@ -902,6 +916,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 bavail = 4;</code>
      * @return The bavail.
      */
+    @java.lang.Override
     public long getBavail() {
       return bavail_;
     }
@@ -944,6 +959,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 files = 5;</code>
      * @return The files.
      */
+    @java.lang.Override
     public long getFiles() {
       return files_;
     }
@@ -986,6 +1002,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 ffree = 6;</code>
      * @return The ffree.
      */
+    @java.lang.Override
     public long getFfree() {
       return ffree_;
     }
@@ -1028,6 +1045,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 fsid = 7;</code>
      * @return The fsid.
      */
+    @java.lang.Override
     public long getFsid() {
       return fsid_;
     }
@@ -1070,6 +1088,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 namelen = 8;</code>
      * @return The namelen.
      */
+    @java.lang.Override
     public int getNamelen() {
       return namelen_;
     }
@@ -1112,6 +1131,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 frsize = 9;</code>
      * @return The frsize.
      */
+    @java.lang.Override
     public int getFrsize() {
       return frsize_;
     }
@@ -1154,6 +1174,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 flags = 10;</code>
      * @return The flags.
      */
+    @java.lang.Override
     public int getFlags() {
       return flags_;
     }
@@ -1196,6 +1217,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 type = 11;</code>
      * @return The type.
      */
+    @java.lang.Override
     public int getType() {
       return type_;
     }

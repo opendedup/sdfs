@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 
@@ -26,7 +25,6 @@ import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
-import org.opendedup.grpc.SDFSEvent;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.SyncFS;
 import org.opendedup.sdfs.Main;
@@ -40,13 +38,13 @@ import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.VolumeConfigWriterThread;
 import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.io.events.MFileDeleted;
+import org.opendedup.sdfs.io.events.MFileDownloaded;
 import org.opendedup.sdfs.io.events.MFileSync;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.SFileDeleted;
 import org.opendedup.sdfs.io.events.SFileSync;
 import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.sdfs.io.events.VolumeWritten;
-import org.opendedup.sdfs.notification.SDFSEvent.Level;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.OSValidator;
 
@@ -697,6 +695,7 @@ public class FileReplicationService {
 					Main.volume.addFile();
 					SDFSLogger.getLog().debug("downloaded " + to.getPath() + " sz=" + to.length());
 					done = true;
+					eventUploadBus.post(new MFileDownloaded(mf));
 					evt.addCount(1);
 					fdl.incrementAndGet();
 				} catch (Exception e) {

@@ -304,6 +304,11 @@ public final class IOService {
   static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_FsyncResponse_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_SyncNotificationSubscription_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_SyncNotificationSubscription_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -429,78 +434,82 @@ public final class IOService {
       "syncRequest\022\014\n\004path\030\001 \001(\t\022\n\n\002fh\030\002 \001(\003\022\020\n" +
       "\010datasync\030\003 \001(\010\"Q\n\rFsyncResponse\022\r\n\005erro" +
       "r\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opended" +
-      "up.grpc.errorCodes2\334\025\n\rFileIOService\022a\n\014" +
-      "GetXAttrSize\022\'.org.opendedup.grpc.GetXAt" +
-      "trSizeRequest\032(.org.opendedup.grpc.GetXA" +
-      "ttrSizeResponse\022L\n\005Fsync\022 .org.opendedup" +
-      ".grpc.FsyncRequest\032!.org.opendedup.grpc." +
-      "FsyncResponse\022U\n\010SetXAttr\022#.org.opendedu" +
-      "p.grpc.SetXAttrRequest\032$.org.opendedup.g" +
-      "rpc.SetXAttrResponse\022^\n\013RemoveXAttr\022&.or" +
-      "g.opendedup.grpc.RemoveXAttrRequest\032\'.or" +
-      "g.opendedup.grpc.RemoveXAttrResponse\022U\n\010" +
-      "GetXAttr\022#.org.opendedup.grpc.GetXAttrRe" +
-      "quest\032$.org.opendedup.grpc.GetXAttrRespo" +
-      "nse\022L\n\005Utime\022 .org.opendedup.grpc.UtimeR" +
-      "equest\032!.org.opendedup.grpc.UtimeRespons" +
-      "e\022U\n\010Truncate\022#.org.opendedup.grpc.Trunc" +
-      "ateRequest\032$.org.opendedup.grpc.Truncate" +
-      "Response\022R\n\007SymLink\022\".org.opendedup.grpc" +
-      ".SymLinkRequest\032#.org.opendedup.grpc.Sym" +
-      "LinkResponse\022M\n\010ReadLink\022\037.org.opendedup" +
-      ".grpc.LinkRequest\032 .org.opendedup.grpc.L" +
-      "inkResponse\022L\n\007GetAttr\022\037.org.opendedup.g" +
-      "rpc.StatRequest\032 .org.opendedup.grpc.Sta" +
-      "tResponse\022L\n\005Flush\022 .org.opendedup.grpc." +
-      "FlushRequest\032!.org.opendedup.grpc.FlushR" +
-      "esponse\022L\n\005Chown\022 .org.opendedup.grpc.Ch" +
-      "ownRequest\032!.org.opendedup.grpc.ChownRes" +
-      "ponse\022L\n\005Chmod\022 .org.opendedup.grpc.Chmo" +
-      "dRequest\032!.org.opendedup.grpc.ChmodRespo" +
-      "nse\022L\n\005MkDir\022 .org.opendedup.grpc.MkDirR" +
-      "equest\032!.org.opendedup.grpc.MkDirRespons" +
-      "e\022L\n\005RmDir\022 .org.opendedup.grpc.RmDirReq" +
-      "uest\032!.org.opendedup.grpc.RmDirResponse\022" +
-      "O\n\006Unlink\022!.org.opendedup.grpc.UnlinkReq" +
-      "uest\032\".org.opendedup.grpc.UnlinkResponse" +
-      "\022T\n\005Write\022$.org.opendedup.grpc.DataWrite" +
-      "Request\032%.org.opendedup.grpc.DataWriteRe" +
-      "sponse\022Q\n\004Read\022#.org.opendedup.grpc.Data" +
-      "ReadRequest\032$.org.opendedup.grpc.DataRea" +
-      "dResponse\022V\n\007Release\022$.org.opendedup.grp" +
-      "c.FileCloseRequest\032%.org.opendedup.grpc." +
-      "FileCloseResponse\022L\n\005Mknod\022 .org.opended" +
-      "up.grpc.MkNodRequest\032!.org.opendedup.grp" +
-      "c.MkNodResponse\022Q\n\004Open\022#.org.opendedup." +
-      "grpc.FileOpenRequest\032$.org.opendedup.grp" +
-      "c.FileOpenResponse\022[\n\013GetFileInfo\022#.org." +
-      "opendedup.grpc.FileInfoRequest\032\'.org.ope" +
-      "ndedup.grpc.FileMessageResponse\022_\n\nCreat" +
-      "eCopy\022\'.org.opendedup.grpc.FileSnapshotR" +
-      "equest\032(.org.opendedup.grpc.FileSnapshot" +
-      "Response\022[\n\nFileExists\022%.org.opendedup.g" +
-      "rpc.FileExistsRequest\032&.org.opendedup.gr" +
-      "pc.FileExistsResponse\022O\n\010MkDirAll\022 .org." +
-      "opendedup.grpc.MkDirRequest\032!.org.opende" +
-      "dup.grpc.MkDirResponse\022T\n\004Stat\022#.org.ope" +
-      "ndedup.grpc.FileInfoRequest\032\'.org.opende" +
-      "dup.grpc.FileMessageResponse\022W\n\006Rename\022%" +
-      ".org.opendedup.grpc.FileRenameRequest\032&." +
-      "org.opendedup.grpc.FileRenameResponse\022[\n" +
-      "\nCopyExtent\022%.org.opendedup.grpc.CopyExt" +
-      "entRequest\032&.org.opendedup.grpc.CopyExte" +
-      "ntResponse\022j\n\017SetUserMetaData\022*.org.open" +
-      "dedup.grpc.SetUserMetaDataRequest\032+.org." +
-      "opendedup.grpc.SetUserMetaDataResponse\022a" +
-      "\n\014GetCloudFile\022\'.org.opendedup.grpc.GetC" +
-      "loudFileRequest\032(.org.opendedup.grpc.Get" +
-      "CloudFileResponse\022e\n\020GetCloudMetaFile\022\'." +
-      "org.opendedup.grpc.GetCloudFileRequest\032(" +
-      ".org.opendedup.grpc.GetCloudFileResponse" +
-      "\022O\n\006StatFS\022!.org.opendedup.grpc.StatFSRe" +
-      "quest\032\".org.opendedup.grpc.StatFSRespons" +
-      "eB2P\001Z.github.com/opendedup/sdfs-client-" +
-      "go/sdfs/;sdfsb\006proto3"
+      "up.grpc.errorCodes\"+\n\034SyncNotificationSu" +
+      "bscription\022\013\n\003uid\030\001 \001(\t2\315\026\n\rFileIOServic" +
+      "e\022a\n\014GetXAttrSize\022\'.org.opendedup.grpc.G" +
+      "etXAttrSizeRequest\032(.org.opendedup.grpc." +
+      "GetXAttrSizeResponse\022L\n\005Fsync\022 .org.open" +
+      "dedup.grpc.FsyncRequest\032!.org.opendedup." +
+      "grpc.FsyncResponse\022U\n\010SetXAttr\022#.org.ope" +
+      "ndedup.grpc.SetXAttrRequest\032$.org.opende" +
+      "dup.grpc.SetXAttrResponse\022^\n\013RemoveXAttr" +
+      "\022&.org.opendedup.grpc.RemoveXAttrRequest" +
+      "\032\'.org.opendedup.grpc.RemoveXAttrRespons" +
+      "e\022U\n\010GetXAttr\022#.org.opendedup.grpc.GetXA" +
+      "ttrRequest\032$.org.opendedup.grpc.GetXAttr" +
+      "Response\022L\n\005Utime\022 .org.opendedup.grpc.U" +
+      "timeRequest\032!.org.opendedup.grpc.UtimeRe" +
+      "sponse\022U\n\010Truncate\022#.org.opendedup.grpc." +
+      "TruncateRequest\032$.org.opendedup.grpc.Tru" +
+      "ncateResponse\022R\n\007SymLink\022\".org.opendedup" +
+      ".grpc.SymLinkRequest\032#.org.opendedup.grp" +
+      "c.SymLinkResponse\022M\n\010ReadLink\022\037.org.open" +
+      "dedup.grpc.LinkRequest\032 .org.opendedup.g" +
+      "rpc.LinkResponse\022L\n\007GetAttr\022\037.org.opende" +
+      "dup.grpc.StatRequest\032 .org.opendedup.grp" +
+      "c.StatResponse\022L\n\005Flush\022 .org.opendedup." +
+      "grpc.FlushRequest\032!.org.opendedup.grpc.F" +
+      "lushResponse\022L\n\005Chown\022 .org.opendedup.gr" +
+      "pc.ChownRequest\032!.org.opendedup.grpc.Cho" +
+      "wnResponse\022L\n\005Chmod\022 .org.opendedup.grpc" +
+      ".ChmodRequest\032!.org.opendedup.grpc.Chmod" +
+      "Response\022L\n\005MkDir\022 .org.opendedup.grpc.M" +
+      "kDirRequest\032!.org.opendedup.grpc.MkDirRe" +
+      "sponse\022L\n\005RmDir\022 .org.opendedup.grpc.RmD" +
+      "irRequest\032!.org.opendedup.grpc.RmDirResp" +
+      "onse\022O\n\006Unlink\022!.org.opendedup.grpc.Unli" +
+      "nkRequest\032\".org.opendedup.grpc.UnlinkRes" +
+      "ponse\022T\n\005Write\022$.org.opendedup.grpc.Data" +
+      "WriteRequest\032%.org.opendedup.grpc.DataWr" +
+      "iteResponse\022Q\n\004Read\022#.org.opendedup.grpc" +
+      ".DataReadRequest\032$.org.opendedup.grpc.Da" +
+      "taReadResponse\022V\n\007Release\022$.org.opendedu" +
+      "p.grpc.FileCloseRequest\032%.org.opendedup." +
+      "grpc.FileCloseResponse\022L\n\005Mknod\022 .org.op" +
+      "endedup.grpc.MkNodRequest\032!.org.opendedu" +
+      "p.grpc.MkNodResponse\022Q\n\004Open\022#.org.opend" +
+      "edup.grpc.FileOpenRequest\032$.org.opendedu" +
+      "p.grpc.FileOpenResponse\022[\n\013GetFileInfo\022#" +
+      ".org.opendedup.grpc.FileInfoRequest\032\'.or" +
+      "g.opendedup.grpc.FileMessageResponse\022_\n\n" +
+      "CreateCopy\022\'.org.opendedup.grpc.FileSnap" +
+      "shotRequest\032(.org.opendedup.grpc.FileSna" +
+      "pshotResponse\022[\n\nFileExists\022%.org.opende" +
+      "dup.grpc.FileExistsRequest\032&.org.opended" +
+      "up.grpc.FileExistsResponse\022O\n\010MkDirAll\022 " +
+      ".org.opendedup.grpc.MkDirRequest\032!.org.o" +
+      "pendedup.grpc.MkDirResponse\022T\n\004Stat\022#.or" +
+      "g.opendedup.grpc.FileInfoRequest\032\'.org.o" +
+      "pendedup.grpc.FileMessageResponse\022W\n\006Ren" +
+      "ame\022%.org.opendedup.grpc.FileRenameReque" +
+      "st\032&.org.opendedup.grpc.FileRenameRespon" +
+      "se\022[\n\nCopyExtent\022%.org.opendedup.grpc.Co" +
+      "pyExtentRequest\032&.org.opendedup.grpc.Cop" +
+      "yExtentResponse\022j\n\017SetUserMetaData\022*.org" +
+      ".opendedup.grpc.SetUserMetaDataRequest\032+" +
+      ".org.opendedup.grpc.SetUserMetaDataRespo" +
+      "nse\022a\n\014GetCloudFile\022\'.org.opendedup.grpc" +
+      ".GetCloudFileRequest\032(.org.opendedup.grp" +
+      "c.GetCloudFileResponse\022e\n\020GetCloudMetaFi" +
+      "le\022\'.org.opendedup.grpc.GetCloudFileRequ" +
+      "est\032(.org.opendedup.grpc.GetCloudFileRes" +
+      "ponse\022O\n\006StatFS\022!.org.opendedup.grpc.Sta" +
+      "tFSRequest\032\".org.opendedup.grpc.StatFSRe" +
+      "sponse\022o\n\020SyncNofification\0220.org.opended" +
+      "up.grpc.SyncNotificationSubscription\032\'.o" +
+      "rg.opendedup.grpc.FileMessageResponse0\001B" +
+      "2P\001Z.github.com/opendedup/sdfs-client-go" +
+      "/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -855,6 +864,12 @@ public final class IOService {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_FsyncResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_SyncNotificationSubscription_descriptor =
+      getDescriptor().getMessageTypes().get(58);
+    internal_static_org_opendedup_grpc_SyncNotificationSubscription_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_SyncNotificationSubscription_descriptor,
+        new java.lang.String[] { "Uid", });
     org.opendedup.grpc.FileInfo.getDescriptor();
   }
 

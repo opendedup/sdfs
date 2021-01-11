@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.FileCloseRequest}
  */
-public  final class FileCloseRequest extends
+public final class FileCloseRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileCloseRequest)
     FileCloseRequestOrBuilder {
@@ -91,6 +91,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 fileHandle = 1;</code>
    * @return The fileHandle.
    */
+  @java.lang.Override
   public long getFileHandle() {
     return fileHandle_;
   }
@@ -403,6 +404,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 fileHandle = 1;</code>
      * @return The fileHandle.
      */
+    @java.lang.Override
     public long getFileHandle() {
       return fileHandle_;
     }
