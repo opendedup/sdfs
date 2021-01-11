@@ -175,7 +175,6 @@ public class IOMonitor implements java.io.Serializable {
 		Main.volume.addDuplicateBytes(len, true);
 	}
 
-	/*
 	public byte[] toByteArray() {
 		byte[] ip = this.iopProfile.getBytes();
 		ByteBuffer buf = ByteBuffer.wrap(new byte[8 + 8 + 8 + 8 + 4 + ip.length
@@ -216,7 +215,6 @@ public class IOMonitor implements java.io.Serializable {
 			this.qos = buf.getInt();
 		}
 	}
-	*/
 
 	public void fromGrpc(IOMonitorResponse r) {
 		this.virtualBytesWritten.set(r.getVirtualBytesWritten());

@@ -21,13 +21,16 @@ package org.opendedup.fsync;
 import java.util.Properties;
 
 import org.opendedup.logging.SDFSLogger;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
-
-import org.opendedup.fsync.GCJob;
 
 public class SyncFSScheduler {
 
@@ -38,22 +41,22 @@ public class SyncFSScheduler {
 		try {
 			Properties props = new Properties();
 			props.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
-			props.setProperty("org.quartz.threadPool.class",
-					"org.quartz.simpl.SimpleThreadPool");
+			props.setProperty("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
 			props.setProperty("org.quartz.threadPool.threadCount", "1");
-			props.setProperty("org.quartz.threadPool.threadPriority",
-					Integer.toString(8));
+			props.setProperty("org.quartz.threadPool.threadPriority", Integer.toString(8));
 			SDFSLogger.getLog().info("Scheduling SyncFS Job for SDFS");
 			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();
 			sched.start();
-			JobDetail ccjobDetail = new JobDetail("syncgc", null, GCJob.class);
-			CronTrigger cctrigger = new CronTrigger("gcTrigger2", "group2",
-					schedule);
+			JobBuilder jobBuilder = JobBuilder.newJob(GCJob.class);
+
+			JobDetail ccjobDetail = jobBuilder.withIdentity("syncgc").build();
+
+			CronTrigger cctrigger = TriggerBuilder.newTrigger().withIdentity("gcTrigger2")
+					.withSchedule(CronScheduleBuilder.cronSchedule(schedule)).build();
 			sched.scheduleJob(ccjobDetail, cctrigger);
 			SDFSLogger.getLog().info(
-					"Stand Alone Cloud SyncFS Scheduled will run first at "
-							+ cctrigger.getNextFireTime().toString());
+					"Stand Alone Cloud SyncFS Scheduled will run first at " + cctrigger.getNextFireTime().toString());
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("Unable to schedule Cloud SyncFS", e);
 		}
@@ -69,8 +72,8 @@ public class SyncFSScheduler {
 
 	public void stopSchedules() {
 		try {
-			sched.unscheduleJob("syncgc", null);
-			sched.deleteJob("syncgc", null);
+			sched.unscheduleJob(new TriggerKey("syncgc"));
+			sched.deleteJob(new JobKey("syncgc"));
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to stop schedule", e);
 		}

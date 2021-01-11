@@ -21,11 +21,15 @@ package org.opendedup.sdfs.replication;
 import java.util.Properties;
 
 import org.opendedup.logging.SDFSLogger;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 
 public class ReplicationScheduler {
@@ -46,11 +50,15 @@ public class ReplicationScheduler {
 			sched.start();
 			JobDataMap dataMap = new JobDataMap();
 			dataMap.put("service", service);
-			JobDetail ccjobDetail = new JobDetail("replication", null,
-					ReplicationJob.class);
-			ccjobDetail.setJobDataMap(dataMap);
-			CronTrigger cctrigger = new CronTrigger("replicationTrigger",
-					"group1", schedule);
+			JobBuilder jobBuilder = JobBuilder.newJob(ReplicationJob.class);
+
+			JobDetail ccjobDetail = jobBuilder.withIdentity("replication").usingJobData(dataMap).build();
+
+			
+
+			
+			CronTrigger cctrigger = TriggerBuilder.newTrigger().withIdentity("replicationTrigger","group1")
+					.withSchedule(CronScheduleBuilder.cronSchedule(schedule)).build();
 			sched.scheduleJob(ccjobDetail, cctrigger);
 			SDFSLogger.getLog().info("Replication Job Scheduled");
 		} catch (Exception e) {
@@ -60,7 +68,7 @@ public class ReplicationScheduler {
 
 	public void stopSchedules() {
 		try {
-			sched.unscheduleJob("replication", "replicationTrigger");
+			sched.unscheduleJob(new TriggerKey("replicationTrigger","group1"));
 		} catch (Exception e) {
 
 		}

@@ -22,10 +22,15 @@ import java.util.Properties;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 
 public class SDFSGCScheduler {
@@ -46,9 +51,15 @@ public class SDFSGCScheduler {
 			SchedulerFactory schedFact = new StdSchedulerFactory(props);
 			sched = schedFact.getScheduler();
 			sched.start();
-			JobDetail ccjobDetail = new JobDetail("gc", null, GCJob.class);
-			CronTrigger cctrigger = new CronTrigger("gcTrigger", "group1",
-					Main.fDkiskSchedule);
+			JobBuilder jobBuilder = JobBuilder.newJob( GCJob.class);
+
+			JobDetail ccjobDetail = jobBuilder.withIdentity("gc").build();
+
+			
+
+			
+			CronTrigger cctrigger = TriggerBuilder.newTrigger().withIdentity("gcTrigger","group1")
+					.withSchedule(CronScheduleBuilder.cronSchedule(Main.fDkiskSchedule)).build();
 			sched.scheduleJob(ccjobDetail, cctrigger);
 			SDFSLogger.getLog().info(
 					"Stand Alone Garbage Collection Jobs Scheduled will run first at "
@@ -69,8 +80,8 @@ public class SDFSGCScheduler {
 
 	public void stopSchedules() {
 		try {
-			sched.unscheduleJob("gc", null);
-			sched.deleteJob("gc", null);
+			sched.unscheduleJob(new TriggerKey("gcTrigger", "group1"));
+			sched.deleteJob(new JobKey("gc"));
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to stop schedule", e);
 		}
