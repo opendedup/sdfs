@@ -1015,10 +1015,10 @@ public class LongByteArrayMap implements DataMapInterface {
 							SDFSLogger.getLog().error("both " + df.getPath() + " exists and " + cf.getPath());
 							throw new IOException("both " + df.getPath() + " exists and " + cf.getPath());
 						} else {
-							SDFSLogger.getLog().info("compressing " + df.getPath() + " to " + cf.getPath());
+							SDFSLogger.getLog().debug("compressing " + df.getPath() + " to " + cf.getPath());
 							CompressionUtils.compressFile(df, cf);
 							df.delete();
-							SDFSLogger.getLog().info("compressed "+ cf.getPath());
+							SDFSLogger.getLog().debug("compressed "+ cf.getPath());
 						}
 					}
 					mp.remove(this.filePath);

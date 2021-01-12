@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
+import io.grpc.stub.ServerCallStreamObserver;
 import io.grpc.stub.StreamObserver;
 
 import org.opendedup.collections.DataArchivedException;
@@ -759,7 +760,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
         String internalPath = Main.volume.getPath() + File.separator + req.getFileName();
         File f = new File(internalPath);
-        SDFSLogger.getLog().info("looking for " + f.getPath());
+        SDFSLogger.getLog().debug("looking for " + f.getPath());
         if (!f.exists()) {
             SDFSLogger.getLog().info("File not found " + req.getFileName());
             b.setError("File not found " + req.getFileName());
@@ -769,7 +770,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
         try {
-            SDFSLogger.getLog().info("found " + f.getPath());
+            SDFSLogger.getLog().debug("found " + f.getPath());
             MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
             b.addResponse(mf.toGRPC(req.getCompact()));
             responseObserver.onNext(b.build());
@@ -1858,19 +1859,22 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     public void fileNotification(SyncNotificationSubscription request,
             StreamObserver<FileMessageResponse> responseObserver) {
         SDFSLogger.getLog().info("Received Request " + request.getUid());
-        SyncFileListener dListener = new SyncFileListener(responseObserver);
-        while (!dListener.closed) {
+        final ServerCallStreamObserver<FileMessageResponse> callStreamObserver = (ServerCallStreamObserver<FileMessageResponse>) responseObserver;
+        SyncFileListener dListener = new SyncFileListener(callStreamObserver);
+        while (!dListener.closed && !callStreamObserver.isCancelled()){
             try {
                 Thread.sleep(100);
             } catch (Exception e) {
             }
 
         }
+        dListener.close();
+
     }
 
     
 
-    public class SyncFileListener implements Runnable {
+    public class SyncFileListener {
 
         StreamObserver<FileMessageResponse> responseObserver;
         boolean closed = false;
@@ -1954,6 +1958,30 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             }
         }
 
+        @Subscribe
+        public void syncEvent(org.opendedup.sdfs.io.events.MFileUploaded _evt) {
+            synchronized (responseObserver) {
+                FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                try {
+                    b.setAction(FileMessageResponse.syncaction.UPLOAD);
+                    b.addResponse(_evt.mf.toGRPC(true));
+
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("error creating file message", e);
+                    b.setError("Unable to create file message");
+                    b.setErrorCode(errorCodes.EIO);
+                }
+                try {
+                    responseObserver.onNext(b.build());
+
+                    SDFSLogger.getLog().info("Sent message");
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("Unable to send message", e);
+                    this.close();
+                }
+            }
+        }
+
         public void close() {
             synchronized (responseObserver) {
                 if (!this.closed) {
@@ -1962,24 +1990,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     MetaFileStore.unregisterListener(this);
                     responseObserver.onCompleted();
                     this.closed = true;
+                    SDFSLogger.getLog().info("Closed Listener");
                 }
             }
         }
 
-        @Override
-        public void run() {
-            while (!this.closed) {
-                try {
-                    Thread.sleep(3000);
-                    synchronized (responseObserver) {
-                        FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
-                        responseObserver.onNext(b.build());
-                    }
-                } catch (Exception e) {
-                    this.close();
-                }
-            }
-
-        }
+       
     }
 }

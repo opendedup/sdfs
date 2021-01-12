@@ -40,6 +40,7 @@ import org.opendedup.sdfs.io.events.CloudSyncDLRequest;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileDownloaded;
 import org.opendedup.sdfs.io.events.MFileSync;
+import org.opendedup.sdfs.io.events.MFileUploaded;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.SFileDeleted;
 import org.opendedup.sdfs.io.events.SFileSync;
@@ -329,10 +330,12 @@ public class FileReplicationService {
 									SDFSLogger.getLog().debug("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
 									this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl),
 											"files", new HashMap<String, String>(), false);
+									eventUploadBus.post(new MFileUploaded(evt.mf));
 								} finally {
 									evt.mf.writeLock.unlock();
 								}
 								eventUploadBus.post(evt);
+								
 							}
 						} else {
 							if (SDFSLogger.isDebug())

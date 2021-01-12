@@ -156,6 +156,22 @@ private static final long serialVersionUID = 0L;
      * <code>DELETE = 2;</code>
      */
     DELETE(2),
+    /**
+     * <pre>
+     *Upload Data To Cloud
+     * </pre>
+     *
+     * <code>UPLOAD = 3;</code>
+     */
+    UPLOAD(3),
+    /**
+     * <pre>
+     *A Keepalive message
+     * </pre>
+     *
+     * <code>KEEPALIVE = 4;</code>
+     */
+    KEEPALIVE(4),
     UNRECOGNIZED(-1),
     ;
 
@@ -183,6 +199,22 @@ private static final long serialVersionUID = 0L;
      * <code>DELETE = 2;</code>
      */
     public static final int DELETE_VALUE = 2;
+    /**
+     * <pre>
+     *Upload Data To Cloud
+     * </pre>
+     *
+     * <code>UPLOAD = 3;</code>
+     */
+    public static final int UPLOAD_VALUE = 3;
+    /**
+     * <pre>
+     *A Keepalive message
+     * </pre>
+     *
+     * <code>KEEPALIVE = 4;</code>
+     */
+    public static final int KEEPALIVE_VALUE = 4;
 
 
     public final int getNumber() {
@@ -212,6 +244,8 @@ private static final long serialVersionUID = 0L;
         case 0: return DOWNLOAD;
         case 1: return WRITE;
         case 2: return DELETE;
+        case 3: return UPLOAD;
+        case 4: return KEEPALIVE;
         default: return null;
       }
     }

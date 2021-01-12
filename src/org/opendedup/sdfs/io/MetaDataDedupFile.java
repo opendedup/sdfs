@@ -84,6 +84,7 @@ import com.google.gson.JsonObject;
  */
 public class MetaDataDedupFile implements java.io.Externalizable {
 
+	private static final long serialVersionUID = -4598940197202968523L;
 	private static EventBus eventBus = new EventBus();
 	transient public static final String pathSeparator = File.pathSeparator;
 	transient public static final String separator = File.separator;
