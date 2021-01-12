@@ -17,6 +17,14 @@ message FileMessageResponse {
     repeated FileInfoResponse response =3;
     errorCodes errorCode =4;
     int32 maxNumberOfFiles =5;
+    enum syncaction {
+        DOWNLOAD=0; //Sync from Cloud
+        WRITE=1; //Write Locally
+        DELETE=2; //Delete
+        UPLOAD=3; //Upload Data To Cloud
+        KEEPALIVE=4; //A Keepalive message
+    }
+    syncaction action =6;
 }
 
 enum errorCodes {

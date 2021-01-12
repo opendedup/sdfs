@@ -30,22 +30,22 @@ if [ -n "${TYPE}" ]; then
     fi
     if [ -n "${PUBSUB_CREDS_FILE}" ]; then
         RUNCMD+=" --pubsub-authfile ${PUBSUB_CREDS_FILE}"
+    elif [ -n "${GCS_CREDS_FILE}" ]; then
+        RUNCMD+=" --pubsub-authfile ${GCS_CREDS_FILE}"
     fi
-    
-
-    
 fi
 
-ADDLCMD = ""
+ADDLCMD=""
 
 if [ ! -f /etc/sdfs/pool0-volume-cfg.xml ]; then
     echo ${RUNCMD}
     ${RUNCMD}
-    ADDLCMD=" -w"
-    if [ -n "${DISABLE_TLS}"]; then
-        ADDLCMD+=" -s"
-    fi
+    ADDLCMD+=" -w"
 fi
 
+if [ -n "${DISABLE_TLS}" ]; then
+        ADDLCMD+=" -s"
+fi
+echo ${ADDLCMD}
 rm -rf /var/run/pool0.pid
-startsdfs -n  -v pool0 ${ADDLCMD}
+startsdfs -q -n -v pool0 ${ADDLCMD}

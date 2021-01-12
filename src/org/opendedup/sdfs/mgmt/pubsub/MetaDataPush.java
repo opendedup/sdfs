@@ -58,7 +58,6 @@ import org.opendedup.sdfs.mgmt.DeleteFileCmd;
 import org.opendedup.sdfs.mgmt.GetCloudFile;
 import org.opendedup.sdfs.mgmt.mqtt.VolumeEvent;
 
-
 public class MetaDataPush {
 	private static ReentrantLock iLock = new ReentrantLock(true);
 	private ConcurrentHashMap<String, ReentrantLock> activeTasks = new ConcurrentHashMap<String, ReentrantLock>();
@@ -74,10 +73,10 @@ public class MetaDataPush {
 		}
 		TopicAdminClient topicAdminClient = TopicAdminClient.create(stubSettings.build().createStub());
 		try {
-		Topic t = topicAdminClient.createTopic(tn.toString());
-		SDFSLogger.getLog().info("Created topic: " + t.getAllFields());
-		}catch(com.google.api.gax.rpc.AlreadyExistsException e) {
-			SDFSLogger.getLog().info("Topic Alread Created");
+			Topic t = topicAdminClient.createTopic(tn.toString());
+			SDFSLogger.getLog().debug("Created topic: " + t.getAllFields());
+		} catch (com.google.api.gax.rpc.AlreadyExistsException e) {
+			SDFSLogger.getLog().debug("Topic Alread Created");
 		}
 		Publisher.Builder b = Publisher.newBuilder(tn);
 		if (credsPath != null) {
@@ -240,7 +239,8 @@ public class MetaDataPush {
 				Credentials creds = ServiceAccountCredentials.fromStream(new FileInputStream(credsFile));
 				stubSettings.setCredentialsProvider(FixedCredentialsProvider.create(creds));
 			}
-			SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient.create(stubSettings.build().createStub());
+			SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient
+					.create(stubSettings.build().createStub());
 			if (!subName.startsWith("sdfs")) {
 				subName = "sdfs" + subName;
 			}
@@ -250,17 +250,17 @@ public class MetaDataPush {
 			Subscription.Builder b = Subscription.newBuilder().setName(subscriptionName.toString())
 					.setTopic(tn.toString()).setEnableMessageOrdering(true).setAckDeadlineSeconds(600);
 			try {
-			subscription = subscriptionAdminClient.createSubscription(b.build());
-			
-			SDFSLogger.getLog().info("Created a subscription with ordering: " + subscription.getAllFields());
-			}catch (io.grpc.StatusRuntimeException e) {
+				subscription = subscriptionAdminClient.createSubscription(b.build());
+
+				SDFSLogger.getLog().debug("Created a subscription with ordering: " + subscription.getAllFields());
+			} catch (com.google.api.gax.rpc.AlreadyExistsException e) {
 
 			}
 
 			new UpdateProcessor(this);
 			MessageReceiver receiver = (PubsubMessage message, AckReplyConsumer consumer) -> {
 				String mString = message.getData().toStringUtf8();
-				SDFSLogger.getLog().info(" [x] Received '" + message.getMessageId());
+				SDFSLogger.getLog().debug(" [x] Received '" + message.getMessageId());
 				VolumeEvent evt = new VolumeEvent(mString);
 				ReentrantLock l = this.getLock(evt.getTarget());
 				l.lock();
@@ -279,7 +279,7 @@ public class MetaDataPush {
 								n.message = message;
 								this.updateMap.put(evt.getTarget(), n);
 							} else {
-								SDFSLogger.getLog().info("ignorining event " + evt.getJsonString()
+								SDFSLogger.getLog().debug("ignorining event " + evt.getJsonString()
 										+ "because timestamp " + evt.getVolumeTS() + " < " + _evt.getVolumeTS());
 								consumer.ack();
 							}
@@ -373,22 +373,22 @@ public class MetaDataPush {
 									if (evt.getVolumeID() != Main.volume.getSerialNumber()) {
 										if (evt.isMFDelete()) {
 											try {
-												SDFSLogger.getLog().info("Deleting File [" + file + "] ");
+												SDFSLogger.getLog().debug("Deleting File [" + file + "] ");
 
 												String msg = new DeleteFileCmd().getResult("deletefile", file,
 														evt.getChangeID(), true, true);
-												SDFSLogger.getLog().info(msg);
+												SDFSLogger.getLog().debug(msg);
 												s.updateMap.remove(file).consumer.ack();
 											} catch (Exception e) {
-												SDFSLogger.getLog().info("unable to delete mf " + file, e);
+												SDFSLogger.getLog().debug("unable to delete mf " + file, e);
 											}
 										} else if (evt.isDBUpdate()) {
 											try {
-												SDFSLogger.getLog().info("Updating File [" + file + "] ");
+												SDFSLogger.getLog().debug("Updating File [" + file + "] ");
 												new GetCloudFile().getResult(file, null, true, evt.getChangeID());
 												s.updateMap.remove(file).consumer.ack();
 											} catch (Exception e) {
-												SDFSLogger.getLog().info("unable to update ddb " + file + " on ", e);
+												SDFSLogger.getLog().debug("unable to update ddb " + file + " on ", e);
 											}
 										} else {
 

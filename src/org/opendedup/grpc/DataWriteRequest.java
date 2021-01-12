@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.DataWriteRequest}
  */
-public  final class DataWriteRequest extends
+public final class DataWriteRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DataWriteRequest)
     DataWriteRequestOrBuilder {
@@ -107,6 +107,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 fileHandle = 1;</code>
    * @return The fileHandle.
    */
+  @java.lang.Override
   public long getFileHandle() {
     return fileHandle_;
   }
@@ -117,6 +118,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 start = 2;</code>
    * @return The start.
    */
+  @java.lang.Override
   public long getStart() {
     return start_;
   }
@@ -127,6 +129,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 len = 3;</code>
    * @return The len.
    */
+  @java.lang.Override
   public int getLen() {
     return len_;
   }
@@ -137,6 +140,7 @@ private static final long serialVersionUID = 0L;
    * <code>bytes data = 4;</code>
    * @return The data.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString getData() {
     return data_;
   }
@@ -501,6 +505,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 fileHandle = 1;</code>
      * @return The fileHandle.
      */
+    @java.lang.Override
     public long getFileHandle() {
       return fileHandle_;
     }
@@ -531,6 +536,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 start = 2;</code>
      * @return The start.
      */
+    @java.lang.Override
     public long getStart() {
       return start_;
     }
@@ -561,6 +567,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 len = 3;</code>
      * @return The len.
      */
+    @java.lang.Override
     public int getLen() {
       return len_;
     }
@@ -591,6 +598,7 @@ private static final long serialVersionUID = 0L;
      * <code>bytes data = 4;</code>
      * @return The data.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString getData() {
       return data_;
     }

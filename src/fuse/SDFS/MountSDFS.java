@@ -50,6 +50,7 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("h", false, "displays available options");
 		options.addOption("s", false, "If set ssl will not be used sdfscli traffic.");
 		options.addOption("w", false, "Sync With All Files in Cloud.");
+		options.addOption("q", false, "Use Console Logging.");
 		return options;
 	}
 
@@ -76,9 +77,9 @@ public class MountSDFS implements Daemon, Runnable {
 		String sVersion = sProp.getProperty("java.version");
 		sVersion = sVersion.substring(0, 3);
 		Float f = Float.valueOf(sVersion);
-		if (f.floatValue() < (float) 1.7) {
-			System.out.println("Java version must be 1.7 or newer");
-			System.out.println("To get Java 7 go to https://jdk7.dev.java.net/");
+		if (f.floatValue() < (float) 1.8) {
+			System.out.println("Java version must be 1.8 or newer");
+			System.out.println("To get Java 8 go to https://jdk7.dev.java.net/");
 			System.exit(-1);
 		}
 	}
@@ -104,6 +105,10 @@ public class MountSDFS implements Daemon, Runnable {
 		if (cmd.hasOption("c")) {
 			Main.runConsistancyCheck = true;
 		}
+		if (cmd.hasOption("q")) {
+			SDFSLogger.useConsoleLogger();
+		}
+
 		if (cmd.hasOption("d")) {
 			fal.add("-d");
 		}

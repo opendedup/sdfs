@@ -1,18 +1,28 @@
 steps:
 - name: gcr.io/kaniko-project/executor:latest
   args:
-    - --destination=gcr.io/$PROJECT_ID/hybrics-base:$BRANCH_NAME
+    - --destination=gcr.io/$PROJECT_ID/hybrics-build:$BRANCH_NAME
     - --cache=true
     - --cache-ttl=10h
-    - --dockerfile=Docker.base
-    - --cleanup
+    - --target=builder
+    - --dockerfile=Dockerfile
 - name: gcr.io/kaniko-project/executor:latest
   args:
-    - --destination=gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME
-    - --cache=false
-    - --cache-ttl=10h
-    - --cleanup
-    - --dockerfile=Dockerfile
+      - --destination=gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME
+      - --cache=true
+      - --cache-ttl=10h
+      - --dockerfile=Dockerfile
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args: [ '-c', "mkdir pkgs/" ]
+- name: gcr.io/cloud-builders/docker
+  entrypoint: 'bash'
+  args: [ '-c', 'docker run --rm gcr.io/hybrics/hybrics-build:$BRANCH_NAME | tar --extract --verbose -C pkgs/']
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args: [ '-c', "gsutil cp pkgs/*.* gs://${_DIST_BUCKET}/pkgs/" ]
+substitutions:
+  _DIST_BUCKET: abucket # default value
 timeout: 10800s
 options:
   machineType: 'N1_HIGHCPU_32'

@@ -52,6 +52,10 @@ public class MetaFileStore {
 		eventBus.register(obj);
 	}
 
+	public static void unregisterListener(Object obj) {
+		eventBus.unregister(obj);
+	}
+
 	private static LoadingCache<String, MetaDataDedupFile> pathMap = CacheBuilder.newBuilder()
 			.concurrencyLevel(Main.writeThreads).maximumSize(Main.maxOpenFiles).expireAfterAccess(1, TimeUnit.MINUTES)
 			.removalListener(new RemovalListener<String, MetaDataDedupFile>() {
@@ -412,7 +416,6 @@ public class MetaFileStore {
 									mf.getDedupFile(false).forceClose();
 									DeleteMap m = new DeleteMap();
 									m.mf = mf;
-									m.localOnly = localOnly;
 
 									service.execute(m);
 
@@ -475,21 +478,6 @@ public class MetaFileStore {
 
 		}
 		SDFSLogger.getLog().info("metafilestore closed");
-	}
-	
-	private static class DeleteMap implements Runnable {
-		MetaDataDedupFile mf = null;
-
-		@Override
-		public void run() {
-			try {
-				mf.getDedupFile(false).delete();
-			} catch (IOException e) {
-				SDFSLogger.getLog().debug(e);
-			}
-			
-		}
-		
 	}
 
 	private static class DeleteMap implements Runnable {

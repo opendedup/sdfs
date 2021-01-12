@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.StatFSRequest}
  */
-public  final class StatFSRequest extends
+public final class StatFSRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.StatFSRequest)
     StatFSRequestOrBuilder {

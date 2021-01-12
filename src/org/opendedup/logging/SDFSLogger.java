@@ -25,6 +25,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
+import org.apache.log4j.spi.RootLogger;
 import org.opendedup.sdfs.Main;
 
 public class SDFSLogger {
@@ -37,6 +38,7 @@ public class SDFSLogger {
 	private static boolean debug = false;
 	private static boolean fsdebug = false;
 	static RollingFileAppender app = null;
+	private static String msgPattern = "%d [%p] [%c] [%C] [%L] [%t] %x - %m%n";
 	static {
 
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
@@ -44,9 +46,8 @@ public class SDFSLogger {
 
 		basicLog.setLevel(Level.WARN);
 		try {
-
 			app = new RollingFileAppender(new PatternLayout(
-					"%d [%p] [%c] [%C] [%L] [%t] %x - %m%n"), Main.logPath, true);
+					msgPattern), Main.logPath, true);
 			app.setMaxBackupIndex(100);
 			app.setMaxFileSize(Main.logSize);
 		} catch (IOException e) {
@@ -62,6 +63,13 @@ public class SDFSLogger {
 		Logger rootLogger = Logger.getRootLogger();
 		rootLogger.setLevel(Level.INFO);
 		rootLogger.addAppender(app);
+	}
+
+	public static void useConsoleLogger() {
+		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout(msgPattern));
+		log.removeAllAppenders();
+		log.addAppender(bapp);
+
 	}
 
 	public static Logger getLog() {
