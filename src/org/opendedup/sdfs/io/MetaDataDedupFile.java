@@ -126,6 +126,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		eventBus.register(obj);
 	}
 
+	public static void unregisterListener(Object obj) {
+		eventBus.unregister(obj);
+	}
+
 	public int getMode() throws IOException {
 		if (mode == -1) {
 			Path p = Paths.get(this.path);

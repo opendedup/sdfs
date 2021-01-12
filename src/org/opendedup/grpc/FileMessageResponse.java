@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.FileMessageResponse}
  */
-public  final class FileMessageResponse extends
+public final class FileMessageResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileMessageResponse)
     FileMessageResponseOrBuilder {
@@ -20,6 +20,7 @@ private static final long serialVersionUID = 0L;
     listGuid_ = "";
     response_ = java.util.Collections.emptyList();
     errorCode_ = 0;
+    action_ = 0;
   }
 
   @java.lang.Override
@@ -85,6 +86,12 @@ private static final long serialVersionUID = 0L;
             maxNumberOfFiles_ = input.readInt32();
             break;
           }
+          case 48: {
+            int rawValue = input.readEnum();
+
+            action_ = rawValue;
+            break;
+          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -120,12 +127,154 @@ private static final long serialVersionUID = 0L;
             org.opendedup.grpc.FileMessageResponse.class, org.opendedup.grpc.FileMessageResponse.Builder.class);
   }
 
+  /**
+   * Protobuf enum {@code org.opendedup.grpc.FileMessageResponse.syncaction}
+   */
+  public enum syncaction
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     *Sync from Cloud
+     * </pre>
+     *
+     * <code>DOWNLOAD = 0;</code>
+     */
+    DOWNLOAD(0),
+    /**
+     * <pre>
+     *Write Locally
+     * </pre>
+     *
+     * <code>WRITE = 1;</code>
+     */
+    WRITE(1),
+    /**
+     * <pre>
+     *Delete
+     * </pre>
+     *
+     * <code>DELETE = 2;</code>
+     */
+    DELETE(2),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     *Sync from Cloud
+     * </pre>
+     *
+     * <code>DOWNLOAD = 0;</code>
+     */
+    public static final int DOWNLOAD_VALUE = 0;
+    /**
+     * <pre>
+     *Write Locally
+     * </pre>
+     *
+     * <code>WRITE = 1;</code>
+     */
+    public static final int WRITE_VALUE = 1;
+    /**
+     * <pre>
+     *Delete
+     * </pre>
+     *
+     * <code>DELETE = 2;</code>
+     */
+    public static final int DELETE_VALUE = 2;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static syncaction valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static syncaction forNumber(int value) {
+      switch (value) {
+        case 0: return DOWNLOAD;
+        case 1: return WRITE;
+        case 2: return DELETE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<syncaction>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        syncaction> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<syncaction>() {
+            public syncaction findValueByNumber(int number) {
+              return syncaction.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileMessageResponse.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final syncaction[] VALUES = values();
+
+    public static syncaction valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private syncaction(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:org.opendedup.grpc.FileMessageResponse.syncaction)
+  }
+
   public static final int ERROR_FIELD_NUMBER = 1;
   private volatile java.lang.Object error_;
   /**
    * <code>string error = 1;</code>
    * @return The error.
    */
+  @java.lang.Override
   public java.lang.String getError() {
     java.lang.Object ref = error_;
     if (ref instanceof java.lang.String) {
@@ -142,6 +291,7 @@ private static final long serialVersionUID = 0L;
    * <code>string error = 1;</code>
    * @return The bytes for error.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getErrorBytes() {
     java.lang.Object ref = error_;
@@ -162,6 +312,7 @@ private static final long serialVersionUID = 0L;
    * <code>string listGuid = 2;</code>
    * @return The listGuid.
    */
+  @java.lang.Override
   public java.lang.String getListGuid() {
     java.lang.Object ref = listGuid_;
     if (ref instanceof java.lang.String) {
@@ -178,6 +329,7 @@ private static final long serialVersionUID = 0L;
    * <code>string listGuid = 2;</code>
    * @return The bytes for listGuid.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getListGuidBytes() {
     java.lang.Object ref = listGuid_;
@@ -197,12 +349,14 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
    */
+  @java.lang.Override
   public java.util.List<org.opendedup.grpc.FileInfoResponse> getResponseList() {
     return response_;
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
    */
+  @java.lang.Override
   public java.util.List<? extends org.opendedup.grpc.FileInfoResponseOrBuilder> 
       getResponseOrBuilderList() {
     return response_;
@@ -210,18 +364,21 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
    */
+  @java.lang.Override
   public int getResponseCount() {
     return response_.size();
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.FileInfoResponse getResponse(int index) {
     return response_.get(index);
   }
   /**
    * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
    */
+  @java.lang.Override
   public org.opendedup.grpc.FileInfoResponseOrBuilder getResponseOrBuilder(
       int index) {
     return response_.get(index);
@@ -233,14 +390,14 @@ private static final long serialVersionUID = 0L;
    * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
    * @return The enum numeric value on the wire for errorCode.
    */
-  public int getErrorCodeValue() {
+  @java.lang.Override public int getErrorCodeValue() {
     return errorCode_;
   }
   /**
    * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
    * @return The errorCode.
    */
-  public org.opendedup.grpc.errorCodes getErrorCode() {
+  @java.lang.Override public org.opendedup.grpc.errorCodes getErrorCode() {
     @SuppressWarnings("deprecation")
     org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);
     return result == null ? org.opendedup.grpc.errorCodes.UNRECOGNIZED : result;
@@ -252,8 +409,28 @@ private static final long serialVersionUID = 0L;
    * <code>int32 maxNumberOfFiles = 5;</code>
    * @return The maxNumberOfFiles.
    */
+  @java.lang.Override
   public int getMaxNumberOfFiles() {
     return maxNumberOfFiles_;
+  }
+
+  public static final int ACTION_FIELD_NUMBER = 6;
+  private int action_;
+  /**
+   * <code>.org.opendedup.grpc.FileMessageResponse.syncaction action = 6;</code>
+   * @return The enum numeric value on the wire for action.
+   */
+  @java.lang.Override public int getActionValue() {
+    return action_;
+  }
+  /**
+   * <code>.org.opendedup.grpc.FileMessageResponse.syncaction action = 6;</code>
+   * @return The action.
+   */
+  @java.lang.Override public org.opendedup.grpc.FileMessageResponse.syncaction getAction() {
+    @SuppressWarnings("deprecation")
+    org.opendedup.grpc.FileMessageResponse.syncaction result = org.opendedup.grpc.FileMessageResponse.syncaction.valueOf(action_);
+    return result == null ? org.opendedup.grpc.FileMessageResponse.syncaction.UNRECOGNIZED : result;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -285,6 +462,9 @@ private static final long serialVersionUID = 0L;
     if (maxNumberOfFiles_ != 0) {
       output.writeInt32(5, maxNumberOfFiles_);
     }
+    if (action_ != org.opendedup.grpc.FileMessageResponse.syncaction.DOWNLOAD.getNumber()) {
+      output.writeEnum(6, action_);
+    }
     unknownFields.writeTo(output);
   }
 
@@ -312,6 +492,10 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeInt32Size(5, maxNumberOfFiles_);
     }
+    if (action_ != org.opendedup.grpc.FileMessageResponse.syncaction.DOWNLOAD.getNumber()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeEnumSize(6, action_);
+    }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
     return size;
@@ -336,6 +520,7 @@ private static final long serialVersionUID = 0L;
     if (errorCode_ != other.errorCode_) return false;
     if (getMaxNumberOfFiles()
         != other.getMaxNumberOfFiles()) return false;
+    if (action_ != other.action_) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -359,6 +544,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + errorCode_;
     hash = (37 * hash) + MAXNUMBEROFFILES_FIELD_NUMBER;
     hash = (53 * hash) + getMaxNumberOfFiles();
+    hash = (37 * hash) + ACTION_FIELD_NUMBER;
+    hash = (53 * hash) + action_;
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -507,6 +694,8 @@ private static final long serialVersionUID = 0L;
 
       maxNumberOfFiles_ = 0;
 
+      action_ = 0;
+
       return this;
     }
 
@@ -547,6 +736,7 @@ private static final long serialVersionUID = 0L;
       }
       result.errorCode_ = errorCode_;
       result.maxNumberOfFiles_ = maxNumberOfFiles_;
+      result.action_ = action_;
       onBuilt();
       return result;
     }
@@ -634,6 +824,9 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getMaxNumberOfFiles() != 0) {
         setMaxNumberOfFiles(other.getMaxNumberOfFiles());
+      }
+      if (other.action_ != 0) {
+        setActionValue(other.getActionValue());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -1062,7 +1255,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
      * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
@@ -1071,6 +1264,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setErrorCodeValue(int value) {
+      
       errorCode_ = value;
       onChanged();
       return this;
@@ -1079,6 +1273,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
      * @return The errorCode.
      */
+    @java.lang.Override
     public org.opendedup.grpc.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);
@@ -1114,6 +1309,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 maxNumberOfFiles = 5;</code>
      * @return The maxNumberOfFiles.
      */
+    @java.lang.Override
     public int getMaxNumberOfFiles() {
       return maxNumberOfFiles_;
     }
@@ -1135,6 +1331,60 @@ private static final long serialVersionUID = 0L;
     public Builder clearMaxNumberOfFiles() {
       
       maxNumberOfFiles_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int action_ = 0;
+    /**
+     * <code>.org.opendedup.grpc.FileMessageResponse.syncaction action = 6;</code>
+     * @return The enum numeric value on the wire for action.
+     */
+    @java.lang.Override public int getActionValue() {
+      return action_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.FileMessageResponse.syncaction action = 6;</code>
+     * @param value The enum numeric value on the wire for action to set.
+     * @return This builder for chaining.
+     */
+    public Builder setActionValue(int value) {
+      
+      action_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.org.opendedup.grpc.FileMessageResponse.syncaction action = 6;</code>
+     * @return The action.
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileMessageResponse.syncaction getAction() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileMessageResponse.syncaction result = org.opendedup.grpc.FileMessageResponse.syncaction.valueOf(action_);
+      return result == null ? org.opendedup.grpc.FileMessageResponse.syncaction.UNRECOGNIZED : result;
+    }
+    /**
+     * <code>.org.opendedup.grpc.FileMessageResponse.syncaction action = 6;</code>
+     * @param value The action to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAction(org.opendedup.grpc.FileMessageResponse.syncaction value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      
+      action_ = value.getNumber();
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>.org.opendedup.grpc.FileMessageResponse.syncaction action = 6;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearAction() {
+      
+      action_ = 0;
       onChanged();
       return this;
     }

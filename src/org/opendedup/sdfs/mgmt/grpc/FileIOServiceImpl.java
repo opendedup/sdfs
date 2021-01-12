@@ -63,15 +63,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     private static final int BLOCK_SIZE = 32768;
     private static final int NAME_LENGTH = 2048;
 
-    private LoadingCache<String, Iterator<Path>> fileListers = CacheBuilder.newBuilder().maximumSize(100)
-            .expireAfterAccess(5, TimeUnit.MINUTES).build(new CacheLoader<String, Iterator<Path>>() {
+    private LoadingCache<String, Iterator<Path>> fileListers=CacheBuilder.newBuilder().maximumSize(100).expireAfterAccess(5,TimeUnit.MINUTES).build(new CacheLoader<String,Iterator<Path>>(){
 
-                @Override
-                public Iterator<Path> load(String key) throws Exception {
-                    throw new IOException("Key Not Found [" + key + "]");
-                }
+    @Override public Iterator<Path>load(String key)throws Exception{throw new IOException("Key Not Found ["+key+"]");}
 
-            });
+    });
     ConcurrentHashMap<Long, DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long, DedupFileChannel>();
     public String mountedVolume;
     public String connicalMountedVolume;
@@ -1589,21 +1585,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
-    private static LoadingCache<String, DedupFileChannel> writeChannels = CacheBuilder.newBuilder()
-            .maximumSize(Main.maxOpenFiles * 2).concurrencyLevel(64).expireAfterAccess(120, TimeUnit.SECONDS)
-            .removalListener(new RemovalListener<String, DedupFileChannel>() {
-                public void onRemoval(RemovalNotification<String, DedupFileChannel> removal) {
-                    DedupFileChannel ck = removal.getValue();
-                    ck.getDedupFile().unRegisterChannel(ck, -1);
-                    // flushingBuffers.put(pos, ck);
-                }
-            }).build(new CacheLoader<String, DedupFileChannel>() {
-                public DedupFileChannel load(String f) throws IOException, FileClosedException {
-                    SparseDedupFile sdf = (SparseDedupFile) MetaFileStore.getMF(f).getDedupFile(true);
-                    return sdf.getChannel(-1);
-                }
+    private static LoadingCache<String, DedupFileChannel> writeChannels=CacheBuilder.newBuilder().maximumSize(Main.maxOpenFiles*2).concurrencyLevel(64).expireAfterAccess(120,TimeUnit.SECONDS).removalListener(new RemovalListener<String,DedupFileChannel>(){public void onRemoval(RemovalNotification<String,DedupFileChannel>removal){DedupFileChannel ck=removal.getValue();ck.getDedupFile().unRegisterChannel(ck,-1);
+    // flushingBuffers.put(pos, ck);
+    }}).build(new CacheLoader<String,DedupFileChannel>(){public DedupFileChannel load(String f)throws IOException,FileClosedException{SparseDedupFile sdf=(SparseDedupFile)MetaFileStore.getMF(f).getDedupFile(true);return sdf.getChannel(-1);}
 
-            });
+    });
 
     @Override
     public void copyExtent(CopyExtentRequest req, StreamObserver<CopyExtentResponse> responseObserver) {
@@ -1869,10 +1855,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     @Override
-    public void syncNotification(SyncNotificationSubscription request,
+    public void fileNotification(SyncNotificationSubscription request,
             StreamObserver<FileMessageResponse> responseObserver) {
         SDFSLogger.getLog().info("Received Request " + request.getUid());
-        DownloadFileListener dListener = new DownloadFileListener(responseObserver);
+        SyncFileListener dListener = new SyncFileListener(responseObserver);
         while (!dListener.closed) {
             try {
                 Thread.sleep(100);
@@ -1882,21 +1868,74 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
-    public class DownloadFileListener implements Runnable {
+    
+
+    public class SyncFileListener implements Runnable {
 
         StreamObserver<FileMessageResponse> responseObserver;
         boolean closed = false;
 
-        public DownloadFileListener(StreamObserver<FileMessageResponse> responseObserver) {
+        public SyncFileListener(StreamObserver<FileMessageResponse> responseObserver) {
             this.responseObserver = responseObserver;
             FileReplicationService.registerEvents(this);
+            MetaDataDedupFile.registerListener(this);
+            MetaFileStore.registerListener(this);
         }
 
         @Subscribe
-        public void synEvent(org.opendedup.sdfs.io.events.MFileDownloaded _evt) {
+        public void syncEvent(org.opendedup.sdfs.io.events.MFileDownloaded _evt) {
             synchronized (responseObserver) {
                 FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
                 try {
+                    b.setAction(FileMessageResponse.syncaction.DOWNLOAD);
+                    b.addResponse(_evt.mf.toGRPC(true));
+
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("error creating file message", e);
+                    b.setError("Unable to create file message");
+                    b.setErrorCode(errorCodes.EIO);
+                }
+                try {
+                    responseObserver.onNext(b.build());
+
+                    SDFSLogger.getLog().info("Sent message");
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("Unable to send message", e);
+                    this.close();
+                }
+            }
+        }
+
+        @Subscribe
+        public void syncEvent(org.opendedup.sdfs.io.events.MFileWritten _evt) {
+            synchronized (responseObserver) {
+                FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                try {
+                    b.setAction(FileMessageResponse.syncaction.WRITE);
+                    b.addResponse(_evt.mf.toGRPC(true));
+
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("error creating file message", e);
+                    b.setError("Unable to create file message");
+                    b.setErrorCode(errorCodes.EIO);
+                }
+                try {
+                    responseObserver.onNext(b.build());
+
+                    SDFSLogger.getLog().info("Sent message");
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("Unable to send message", e);
+                    this.close();
+                }
+            }
+        }
+
+        @Subscribe
+        public void syncEvent(org.opendedup.sdfs.io.events.MFileDeleted _evt) {
+            synchronized (responseObserver) {
+                FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                try {
+                    b.setAction(FileMessageResponse.syncaction.DELETE);
                     b.addResponse(_evt.mf.toGRPC(true));
 
                 } catch (Exception e) {
@@ -1918,6 +1957,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         public void close() {
             synchronized (responseObserver) {
                 if (!this.closed) {
+                    FileReplicationService.unregisterEvents(this);
+                    MetaDataDedupFile.unregisterListener(this);
+                    MetaFileStore.unregisterListener(this);
                     responseObserver.onCompleted();
                     this.closed = true;
                 }

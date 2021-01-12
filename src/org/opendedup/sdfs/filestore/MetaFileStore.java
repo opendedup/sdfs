@@ -52,6 +52,10 @@ public class MetaFileStore {
 		eventBus.register(obj);
 	}
 
+	public static void unregisterListener(Object obj) {
+		eventBus.unregister(obj);
+	}
+
 	private static LoadingCache<String, MetaDataDedupFile> pathMap = CacheBuilder.newBuilder()
 			.concurrencyLevel(Main.writeThreads).maximumSize(Main.maxOpenFiles).expireAfterAccess(1, TimeUnit.MINUTES)
 			.removalListener(new RemovalListener<String, MetaDataDedupFile>() {

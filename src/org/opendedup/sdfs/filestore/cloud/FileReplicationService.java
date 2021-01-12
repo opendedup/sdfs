@@ -73,6 +73,10 @@ public class FileReplicationService {
 		eventUploadBus.register(obj);
 	}
 
+	public static void unregisterEvents(Object obj) {
+		eventUploadBus.unregister(obj);
+	}
+
 	public FileReplicationService(AbstractCloudFileSync sync) {
 		this.sync = sync;
 		SparseDedupFile.registerListener(this);

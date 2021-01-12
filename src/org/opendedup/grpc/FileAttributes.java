@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.FileAttributes}
  */
-public  final class FileAttributes extends
+public final class FileAttributes extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileAttributes)
     FileAttributesOrBuilder {
@@ -100,6 +100,7 @@ private static final long serialVersionUID = 0L;
    * <code>string key = 1;</code>
    * @return The key.
    */
+  @java.lang.Override
   public java.lang.String getKey() {
     java.lang.Object ref = key_;
     if (ref instanceof java.lang.String) {
@@ -116,6 +117,7 @@ private static final long serialVersionUID = 0L;
    * <code>string key = 1;</code>
    * @return The bytes for key.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getKeyBytes() {
     java.lang.Object ref = key_;
@@ -136,6 +138,7 @@ private static final long serialVersionUID = 0L;
    * <code>string value = 2;</code>
    * @return The value.
    */
+  @java.lang.Override
   public java.lang.String getValue() {
     java.lang.Object ref = value_;
     if (ref instanceof java.lang.String) {
@@ -152,6 +155,7 @@ private static final long serialVersionUID = 0L;
    * <code>string value = 2;</code>
    * @return The bytes for value.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getValueBytes() {
     java.lang.Object ref = value_;

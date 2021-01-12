@@ -10,7 +10,7 @@ package org.opendedup.grpc;
  *
  * Protobuf type {@code org.opendedup.grpc.FileInfoRequest}
  */
-public  final class FileInfoRequest extends
+public final class FileInfoRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileInfoRequest)
     FileInfoRequestOrBuilder {
@@ -114,6 +114,7 @@ private static final long serialVersionUID = 0L;
    * <code>string fileName = 1;</code>
    * @return The fileName.
    */
+  @java.lang.Override
   public java.lang.String getFileName() {
     java.lang.Object ref = fileName_;
     if (ref instanceof java.lang.String) {
@@ -130,6 +131,7 @@ private static final long serialVersionUID = 0L;
    * <code>string fileName = 1;</code>
    * @return The bytes for fileName.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getFileNameBytes() {
     java.lang.Object ref = fileName_;
@@ -150,6 +152,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool compact = 2;</code>
    * @return The compact.
    */
+  @java.lang.Override
   public boolean getCompact() {
     return compact_;
   }
@@ -160,6 +163,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 numberOfFiles = 3;</code>
    * @return The numberOfFiles.
    */
+  @java.lang.Override
   public int getNumberOfFiles() {
     return numberOfFiles_;
   }
@@ -170,6 +174,7 @@ private static final long serialVersionUID = 0L;
    * <code>string listGuid = 4;</code>
    * @return The listGuid.
    */
+  @java.lang.Override
   public java.lang.String getListGuid() {
     java.lang.Object ref = listGuid_;
     if (ref instanceof java.lang.String) {
@@ -186,6 +191,7 @@ private static final long serialVersionUID = 0L;
    * <code>string listGuid = 4;</code>
    * @return The bytes for listGuid.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getListGuidBytes() {
     java.lang.Object ref = listGuid_;
@@ -639,6 +645,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool compact = 2;</code>
      * @return The compact.
      */
+    @java.lang.Override
     public boolean getCompact() {
       return compact_;
     }
@@ -669,6 +676,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 numberOfFiles = 3;</code>
      * @return The numberOfFiles.
      */
+    @java.lang.Override
     public int getNumberOfFiles() {
       return numberOfFiles_;
     }
