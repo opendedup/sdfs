@@ -211,7 +211,7 @@ public enum errorCodes
   }
   public static final com.google.protobuf.Descriptors.EnumDescriptor
       getDescriptor() {
-    return org.opendedup.grpc.FileInfo.getDescriptor().getEnumTypes().get(0);
+    return org.opendedup.grpc.FileInfo.getDescriptor().getEnumTypes().get(1);
   }
 
   private static final errorCodes[] VALUES = values();

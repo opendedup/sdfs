@@ -73,13 +73,13 @@ public interface FileMessageResponseOrBuilder extends
   int getMaxNumberOfFiles();
 
   /**
-   * <code>.org.opendedup.grpc.FileMessageResponse.syncaction action = 6;</code>
+   * <code>.org.opendedup.grpc.syncaction action = 6;</code>
    * @return The enum numeric value on the wire for action.
    */
   int getActionValue();
   /**
-   * <code>.org.opendedup.grpc.FileMessageResponse.syncaction action = 6;</code>
+   * <code>.org.opendedup.grpc.syncaction action = 6;</code>
    * @return The action.
    */
-  org.opendedup.grpc.FileMessageResponse.syncaction getAction();
+  org.opendedup.grpc.syncaction getAction();
 }

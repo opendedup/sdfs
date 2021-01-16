@@ -71,62 +71,62 @@ public final class FileInfo {
       "\n\016FileInfo.proto\022\022org.opendedup.grpc\"]\n\017" +
       "FileInfoRequest\022\020\n\010fileName\030\001 \001(\t\022\017\n\007com" +
       "pact\030\002 \001(\010\022\025\n\rnumberOfFiles\030\003 \001(\005\022\020\n\010lis" +
-      "tGuid\030\004 \001(\t\"\315\002\n\023FileMessageResponse\022\r\n\005e" +
+      "tGuid\030\004 \001(\t\"\353\001\n\023FileMessageResponse\022\r\n\005e" +
       "rror\030\001 \001(\t\022\020\n\010listGuid\030\002 \001(\t\0226\n\010response" +
       "\030\003 \003(\0132$.org.opendedup.grpc.FileInfoResp" +
       "onse\0221\n\terrorCode\030\004 \001(\0162\036.org.opendedup." +
       "grpc.errorCodes\022\030\n\020maxNumberOfFiles\030\005 \001(" +
-      "\005\022B\n\006action\030\006 \001(\01622.org.opendedup.grpc.F" +
-      "ileMessageResponse.syncaction\"L\n\nsyncact" +
-      "ion\022\014\n\010DOWNLOAD\020\000\022\t\n\005WRITE\020\001\022\n\n\006DELETE\020\002" +
-      "\022\n\n\006UPLOAD\020\003\022\r\n\tKEEPALIVE\020\004\"\246\006\n\020FileInfo" +
-      "Response\022\020\n\010fileName\030\001 \001(\t\022\020\n\010filePath\030\002" +
-      " \001(\t\022;\n\004type\030\003 \001(\0162-.org.opendedup.grpc." +
-      "FileInfoResponse.fileType\022\020\n\010sdfsPath\030\004 " +
-      "\001(\t\022\r\n\005atime\030\005 \001(\003\022\r\n\005mtime\030\006 \001(\003\022\r\n\005cti" +
-      "me\030\007 \001(\003\022\016\n\006hidden\030\010 \001(\010\022\014\n\004size\030\t \001(\003\022\014" +
-      "\n\004open\030\n \001(\010\022\021\n\tfileGuild\030\013 \001(\t\022\017\n\007mapGu" +
-      "id\030\014 \001(\t\022\022\n\nlocalOwner\030\r \001(\010\022\017\n\007execute\030" +
-      "\016 \001(\010\022\014\n\004read\030\017 \001(\010\022\r\n\005write\030\020 \001(\010\022\021\n\tim" +
-      "porting\030\021 \001(\010\022\017\n\007symlink\030\022 \001(\010\022:\n\016fileAt" +
-      "tributes\030\023 \003(\0132\".org.opendedup.grpc.File" +
-      "Attributes\022\n\n\002id\030\024 \001(\t\0223\n\005files\030\025 \003(\0132$." +
-      "org.opendedup.grpc.FileInfoResponse\022\022\n\np" +
-      "arentPath\030\026 \001(\t\022\020\n\010volumeid\030\027 \001(\t\0228\n\tioM" +
-      "onitor\030\030 \001(\0132%.org.opendedup.grpc.IOMoni" +
-      "torResponse\022\023\n\013symlinkPath\030\031 \001(\t\022\020\n\010grou" +
-      "p_id\030\032 \001(\003\022\017\n\007user_id\030\033 \001(\003\022\023\n\013permissio" +
-      "ns\030\034 \001(\005\022\020\n\010hashcode\030\035 \001(\003\022\025\n\rretentionL" +
-      "ock\030\036 \001(\003\022\022\n\nattributes\030\037 \001(\003\022\017\n\007version" +
-      "\030  \001(\t\022\014\n\004mode\030! \001(\005\022\027\n\017delete_on_close\030" +
-      "\" \001(\010\"\035\n\010fileType\022\010\n\004FILE\020\000\022\007\n\003DIR\020\001\"\347\002\n" +
-      "\021IOMonitorResponse\022\033\n\023virtualBytesWritte" +
-      "n\030\001 \001(\003\022\032\n\022actualBytesWritten\030\002 \001(\003\022\021\n\tb" +
-      "ytesRead\030\003 \001(\003\022\027\n\017duplicateBlocks\030\004 \001(\003\022" +
-      "\021\n\twriteOpts\030\005 \001(\003\022\020\n\010readOpts\030\006 \001(\003\022\022\n\n" +
-      "maxReadOps\030\007 \001(\003\022\023\n\013maxWriteOps\030\010 \001(\003\022\017\n" +
-      "\007maxIops\030\t \001(\003\022\023\n\013maxReadMbps\030\n \001(\003\022\024\n\014m" +
-      "axWriteMbps\030\013 \001(\003\022\017\n\007maxMbps\030\014 \001(\003\022\r\n\005io" +
-      "Qos\030\r \001(\005\022\021\n\tioProfile\030\016 \001(\t\022\017\n\007maxRbps\030" +
-      "\017 \001(\003\022\017\n\007maxWbps\030\020 \001(\003\022\016\n\006maxBps\030\021 \001(\003\"f" +
-      "\n\026WFileAttributesRequest\022:\n\016fileAttribut" +
-      "es\030\001 \003(\0132\".org.opendedup.grpc.FileAttrib" +
-      "utes\022\020\n\010filePath\030\002 \001(\t\"[\n\027WFileAttribute" +
-      "sResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 " +
-      "\001(\0162\036.org.opendedup.grpc.errorCodes\"*\n\026R" +
-      "FileAttributesRequest\022\020\n\010filePath\030\001 \001(\t\"" +
-      "\227\001\n\027RFileAttributesResponse\022:\n\016fileAttri" +
-      "butes\030\001 \003(\0132\".org.opendedup.grpc.FileAtt" +
-      "ributes\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(" +
-      "\0162\036.org.opendedup.grpc.errorCodes\",\n\016Fil" +
-      "eAttributes\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*" +
-      "\315\001\n\nerrorCodes\022\t\n\005NOERR\020\000\022\n\n\006ENOENT\020\002\022\007\n" +
-      "\003EIO\020\005\022\n\n\006EAGAIN\020\013\022\n\n\006EEXIST\020\021\022\013\n\007ENOTDI" +
-      "R\020\024\022\013\n\007ENODATA\020=\022\013\n\007ENAVAIL\020w\022\t\n\005EPERM\020\001" +
-      "\022\n\n\006ENOSPC\020\034\022\n\n\006EACCES\020\r\022\r\n\tENOTEMPTY\020\'\022" +
-      "\n\n\006ENOSYS\020&\022\n\n\006ENODEV\020\023\022\n\n\006EBADFD\020M\022\n\n\006E" +
-      "ISDIR\020\025B2P\001Z.github.com/opendedup/sdfs-c" +
-      "lient-go/sdfs/;sdfsb\006proto3"
+      "\005\022.\n\006action\030\006 \001(\0162\036.org.opendedup.grpc.s" +
+      "yncaction\"\246\006\n\020FileInfoResponse\022\020\n\010fileNa" +
+      "me\030\001 \001(\t\022\020\n\010filePath\030\002 \001(\t\022;\n\004type\030\003 \001(\016" +
+      "2-.org.opendedup.grpc.FileInfoResponse.f" +
+      "ileType\022\020\n\010sdfsPath\030\004 \001(\t\022\r\n\005atime\030\005 \001(\003" +
+      "\022\r\n\005mtime\030\006 \001(\003\022\r\n\005ctime\030\007 \001(\003\022\016\n\006hidden" +
+      "\030\010 \001(\010\022\014\n\004size\030\t \001(\003\022\014\n\004open\030\n \001(\010\022\021\n\tfi" +
+      "leGuild\030\013 \001(\t\022\017\n\007mapGuid\030\014 \001(\t\022\022\n\nlocalO" +
+      "wner\030\r \001(\010\022\017\n\007execute\030\016 \001(\010\022\014\n\004read\030\017 \001(" +
+      "\010\022\r\n\005write\030\020 \001(\010\022\021\n\timporting\030\021 \001(\010\022\017\n\007s" +
+      "ymlink\030\022 \001(\010\022:\n\016fileAttributes\030\023 \003(\0132\".o" +
+      "rg.opendedup.grpc.FileAttributes\022\n\n\002id\030\024" +
+      " \001(\t\0223\n\005files\030\025 \003(\0132$.org.opendedup.grpc" +
+      ".FileInfoResponse\022\022\n\nparentPath\030\026 \001(\t\022\020\n" +
+      "\010volumeid\030\027 \001(\t\0228\n\tioMonitor\030\030 \001(\0132%.org" +
+      ".opendedup.grpc.IOMonitorResponse\022\023\n\013sym" +
+      "linkPath\030\031 \001(\t\022\020\n\010group_id\030\032 \001(\003\022\017\n\007user" +
+      "_id\030\033 \001(\003\022\023\n\013permissions\030\034 \001(\005\022\020\n\010hashco" +
+      "de\030\035 \001(\003\022\025\n\rretentionLock\030\036 \001(\003\022\022\n\nattri" +
+      "butes\030\037 \001(\003\022\017\n\007version\030  \001(\t\022\014\n\004mode\030! \001" +
+      "(\005\022\027\n\017delete_on_close\030\" \001(\010\"\035\n\010fileType\022" +
+      "\010\n\004FILE\020\000\022\007\n\003DIR\020\001\"\347\002\n\021IOMonitorResponse" +
+      "\022\033\n\023virtualBytesWritten\030\001 \001(\003\022\032\n\022actualB" +
+      "ytesWritten\030\002 \001(\003\022\021\n\tbytesRead\030\003 \001(\003\022\027\n\017" +
+      "duplicateBlocks\030\004 \001(\003\022\021\n\twriteOpts\030\005 \001(\003" +
+      "\022\020\n\010readOpts\030\006 \001(\003\022\022\n\nmaxReadOps\030\007 \001(\003\022\023" +
+      "\n\013maxWriteOps\030\010 \001(\003\022\017\n\007maxIops\030\t \001(\003\022\023\n\013" +
+      "maxReadMbps\030\n \001(\003\022\024\n\014maxWriteMbps\030\013 \001(\003\022" +
+      "\017\n\007maxMbps\030\014 \001(\003\022\r\n\005ioQos\030\r \001(\005\022\021\n\tioPro" +
+      "file\030\016 \001(\t\022\017\n\007maxRbps\030\017 \001(\003\022\017\n\007maxWbps\030\020" +
+      " \001(\003\022\016\n\006maxBps\030\021 \001(\003\"f\n\026WFileAttributesR" +
+      "equest\022:\n\016fileAttributes\030\001 \003(\0132\".org.ope" +
+      "ndedup.grpc.FileAttributes\022\020\n\010filePath\030\002" +
+      " \001(\t\"[\n\027WFileAttributesResponse\022\r\n\005error" +
+      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
+      "p.grpc.errorCodes\"*\n\026RFileAttributesRequ" +
+      "est\022\020\n\010filePath\030\001 \001(\t\"\227\001\n\027RFileAttribute" +
+      "sResponse\022:\n\016fileAttributes\030\001 \003(\0132\".org." +
+      "opendedup.grpc.FileAttributes\022\r\n\005error\030\002" +
+      " \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup." +
+      "grpc.errorCodes\",\n\016FileAttributes\022\013\n\003key" +
+      "\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*L\n\nsyncaction\022\014\n\010D" +
+      "OWNLOAD\020\000\022\t\n\005WRITE\020\001\022\n\n\006DELETE\020\002\022\n\n\006UPLO" +
+      "AD\020\003\022\r\n\tKEEPALIVE\020\004*\315\001\n\nerrorCodes\022\t\n\005NO" +
+      "ERR\020\000\022\n\n\006ENOENT\020\002\022\007\n\003EIO\020\005\022\n\n\006EAGAIN\020\013\022\n" +
+      "\n\006EEXIST\020\021\022\013\n\007ENOTDIR\020\024\022\013\n\007ENODATA\020=\022\013\n\007" +
+      "ENAVAIL\020w\022\t\n\005EPERM\020\001\022\n\n\006ENOSPC\020\034\022\n\n\006EACC" +
+      "ES\020\r\022\r\n\tENOTEMPTY\020\'\022\n\n\006ENOSYS\020&\022\n\n\006ENODE" +
+      "V\020\023\022\n\n\006EBADFD\020M\022\n\n\006EISDIR\020\025B2P\001Z.github." +
+      "com/opendedup/sdfs-client-go/sdfs/;sdfsb" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
