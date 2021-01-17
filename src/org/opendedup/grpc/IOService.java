@@ -435,7 +435,7 @@ public final class IOService {
       "\010datasync\030\003 \001(\010\"Q\n\rFsyncResponse\022\r\n\005erro" +
       "r\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opended" +
       "up.grpc.errorCodes\"+\n\034SyncNotificationSu" +
-      "bscription\022\013\n\003uid\030\001 \001(\t2\320\027\n\rFileIOServic" +
+      "bscription\022\013\n\003uid\030\001 \001(\t2\317\026\n\rFileIOServic" +
       "e\022a\n\014GetXAttrSize\022\'.org.opendedup.grpc.G" +
       "etXAttrSizeRequest\032(.org.opendedup.grpc." +
       "GetXAttrSizeResponse\022L\n\005Fsync\022 .org.open" +
@@ -505,14 +505,11 @@ public final class IOService {
       "est\032(.org.opendedup.grpc.GetCloudFileRes" +
       "ponse\022O\n\006StatFS\022!.org.opendedup.grpc.Sta" +
       "tFSRequest\032\".org.opendedup.grpc.StatFSRe" +
-      "sponse\022y\n\030DownloadFileNotification\0220.org" +
-      ".opendedup.grpc.SyncNotificationSubscrip" +
-      "tion\032\'.org.opendedup.grpc.FileMessageRes" +
-      "ponse\"\0000\001\022w\n\026UploadFileNotification\0220.or" +
-      "g.opendedup.grpc.SyncNotificationSubscri" +
-      "ption\032\'.org.opendedup.grpc.FileMessageRe" +
-      "sponse\"\0000\001B2P\001Z.github.com/opendedup/sdf" +
-      "s-client-go/sdfs/;sdfsb\006proto3"
+      "sponse\022q\n\020fileNotification\0220.org.opended" +
+      "up.grpc.SyncNotificationSubscription\032\'.o" +
+      "rg.opendedup.grpc.FileMessageResponse\"\0000" +
+      "\001B2P\001Z.github.com/opendedup/sdfs-client-" +
+      "go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

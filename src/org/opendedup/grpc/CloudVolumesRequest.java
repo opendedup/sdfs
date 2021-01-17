@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.CloudVolumesRequest}
  */
-public  final class CloudVolumesRequest extends
+public final class CloudVolumesRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CloudVolumesRequest)
     CloudVolumesRequestOrBuilder {

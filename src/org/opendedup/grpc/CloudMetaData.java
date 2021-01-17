@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.CloudMetaData}
  */
-public  final class CloudMetaData extends
+public final class CloudMetaData extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CloudMetaData)
     CloudMetaDataOrBuilder {
@@ -117,6 +117,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 date = 1;</code>
    * @return The date.
    */
+  @java.lang.Override
   public long getDate() {
     return date_;
   }
@@ -151,6 +152,7 @@ private static final long serialVersionUID = 0L;
    * <code>map&lt;string, string&gt; attributes = 2;</code>
    */
 
+  @java.lang.Override
   public boolean containsAttributes(
       java.lang.String key) {
     if (key == null) { throw new java.lang.NullPointerException(); }
@@ -159,6 +161,7 @@ private static final long serialVersionUID = 0L;
   /**
    * Use {@link #getAttributesMap()} instead.
    */
+  @java.lang.Override
   @java.lang.Deprecated
   public java.util.Map<java.lang.String, java.lang.String> getAttributes() {
     return getAttributesMap();
@@ -166,6 +169,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>map&lt;string, string&gt; attributes = 2;</code>
    */
+  @java.lang.Override
 
   public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
     return internalGetAttributes().getMap();
@@ -173,6 +177,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>map&lt;string, string&gt; attributes = 2;</code>
    */
+  @java.lang.Override
 
   public java.lang.String getAttributesOrDefault(
       java.lang.String key,
@@ -185,6 +190,7 @@ private static final long serialVersionUID = 0L;
   /**
    * <code>map&lt;string, string&gt; attributes = 2;</code>
    */
+  @java.lang.Override
 
   public java.lang.String getAttributesOrThrow(
       java.lang.String key) {
@@ -556,6 +562,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 date = 1;</code>
      * @return The date.
      */
+    @java.lang.Override
     public long getDate() {
       return date_;
     }
@@ -611,6 +618,7 @@ private static final long serialVersionUID = 0L;
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
 
+    @java.lang.Override
     public boolean containsAttributes(
         java.lang.String key) {
       if (key == null) { throw new java.lang.NullPointerException(); }
@@ -619,6 +627,7 @@ private static final long serialVersionUID = 0L;
     /**
      * Use {@link #getAttributesMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getAttributes() {
       return getAttributesMap();
@@ -626,6 +635,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
       return internalGetAttributes().getMap();
@@ -633,6 +643,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getAttributesOrDefault(
         java.lang.String key,
@@ -645,6 +656,7 @@ private static final long serialVersionUID = 0L;
     /**
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getAttributesOrThrow(
         java.lang.String key) {

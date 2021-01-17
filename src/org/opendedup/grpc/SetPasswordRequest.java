@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SetPasswordRequest}
  */
-public  final class SetPasswordRequest extends
+public final class SetPasswordRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetPasswordRequest)
     SetPasswordRequestOrBuilder {
@@ -93,6 +93,7 @@ private static final long serialVersionUID = 0L;
    * <code>string password = 1;</code>
    * @return The password.
    */
+  @java.lang.Override
   public java.lang.String getPassword() {
     java.lang.Object ref = password_;
     if (ref instanceof java.lang.String) {
@@ -109,6 +110,7 @@ private static final long serialVersionUID = 0L;
    * <code>string password = 1;</code>
    * @return The bytes for password.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getPasswordBytes() {
     java.lang.Object ref = password_;

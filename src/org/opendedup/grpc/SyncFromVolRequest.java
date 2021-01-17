@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SyncFromVolRequest}
  */
-public  final class SyncFromVolRequest extends
+public final class SyncFromVolRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SyncFromVolRequest)
     SyncFromVolRequestOrBuilder {
@@ -91,6 +91,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 volumeid = 1;</code>
    * @return The volumeid.
    */
+  @java.lang.Override
   public long getVolumeid() {
     return volumeid_;
   }
@@ -403,6 +404,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 volumeid = 1;</code>
      * @return The volumeid.
      */
+    @java.lang.Override
     public long getVolumeid() {
       return volumeid_;
     }

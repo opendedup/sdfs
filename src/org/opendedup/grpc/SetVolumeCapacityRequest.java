@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SetVolumeCapacityRequest}
  */
-public  final class SetVolumeCapacityRequest extends
+public final class SetVolumeCapacityRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetVolumeCapacityRequest)
     SetVolumeCapacityRequestOrBuilder {
@@ -91,6 +91,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 size = 1;</code>
    * @return The size.
    */
+  @java.lang.Override
   public long getSize() {
     return size_;
   }
@@ -403,6 +404,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 size = 1;</code>
      * @return The size.
      */
+    @java.lang.Override
     public long getSize() {
       return size_;
     }

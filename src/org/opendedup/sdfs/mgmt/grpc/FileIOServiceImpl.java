@@ -1891,7 +1891,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             synchronized (responseObserver) {
                 FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
                 try {
-                    b.setAction(FileMessageResponse.syncaction.DOWNLOAD);
+                    b.setAction(syncaction.DOWNLOAD);
                     b.addResponse(_evt.mf.toGRPC(true));
 
                 } catch (Exception e) {
@@ -1915,7 +1915,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             synchronized (responseObserver) {
                 FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
                 try {
-                    b.setAction(FileMessageResponse.syncaction.WRITE);
+                    b.setAction(syncaction.WRITE);
                     b.addResponse(_evt.mf.toGRPC(true));
 
                 } catch (Exception e) {
@@ -1939,7 +1939,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             synchronized (responseObserver) {
                 FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
                 try {
-                    b.setAction(FileMessageResponse.syncaction.DELETE);
+                    b.setAction(syncaction.DELETE);
                     b.addResponse(_evt.mf.toGRPC(true));
 
                 } catch (Exception e) {
@@ -1963,7 +1963,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             synchronized (responseObserver) {
                 FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
                 try {
-                    b.setAction(FileMessageResponse.syncaction.UPLOAD);
+                    b.setAction(syncaction.UPLOAD);
                     b.addResponse(_evt.mf.toGRPC(true));
 
                 } catch (Exception e) {

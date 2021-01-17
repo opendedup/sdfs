@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.GCScheduleResponse}
  */
-public  final class GCScheduleResponse extends
+public final class GCScheduleResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.GCScheduleResponse)
     GCScheduleResponseOrBuilder {
@@ -107,6 +107,7 @@ private static final long serialVersionUID = 0L;
    * <code>string schedule = 1;</code>
    * @return The schedule.
    */
+  @java.lang.Override
   public java.lang.String getSchedule() {
     java.lang.Object ref = schedule_;
     if (ref instanceof java.lang.String) {
@@ -123,6 +124,7 @@ private static final long serialVersionUID = 0L;
    * <code>string schedule = 1;</code>
    * @return The bytes for schedule.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getScheduleBytes() {
     java.lang.Object ref = schedule_;
@@ -143,6 +145,7 @@ private static final long serialVersionUID = 0L;
    * <code>string error = 2;</code>
    * @return The error.
    */
+  @java.lang.Override
   public java.lang.String getError() {
     java.lang.Object ref = error_;
     if (ref instanceof java.lang.String) {
@@ -159,6 +162,7 @@ private static final long serialVersionUID = 0L;
    * <code>string error = 2;</code>
    * @return The bytes for error.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getErrorBytes() {
     java.lang.Object ref = error_;
@@ -179,14 +183,14 @@ private static final long serialVersionUID = 0L;
    * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
    * @return The enum numeric value on the wire for errorCode.
    */
-  public int getErrorCodeValue() {
+  @java.lang.Override public int getErrorCodeValue() {
     return errorCode_;
   }
   /**
    * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
    * @return The errorCode.
    */
-  public org.opendedup.grpc.errorCodes getErrorCode() {
+  @java.lang.Override public org.opendedup.grpc.errorCodes getErrorCode() {
     @SuppressWarnings("deprecation")
     org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);
     return result == null ? org.opendedup.grpc.errorCodes.UNRECOGNIZED : result;
@@ -684,7 +688,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
      * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
@@ -693,6 +697,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setErrorCodeValue(int value) {
+      
       errorCode_ = value;
       onChanged();
       return this;
@@ -701,6 +706,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
      * @return The errorCode.
      */
+    @java.lang.Override
     public org.opendedup.grpc.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.errorCodes result = org.opendedup.grpc.errorCodes.valueOf(errorCode_);

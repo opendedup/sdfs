@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SpeedRequest}
  */
-public  final class SpeedRequest extends
+public final class SpeedRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SpeedRequest)
     SpeedRequestOrBuilder {
@@ -91,6 +91,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 requestedSpeed = 1;</code>
    * @return The requestedSpeed.
    */
+  @java.lang.Override
   public int getRequestedSpeed() {
     return requestedSpeed_;
   }
@@ -402,6 +403,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 requestedSpeed = 1;</code>
      * @return The requestedSpeed.
      */
+    @java.lang.Override
     public int getRequestedSpeed() {
       return requestedSpeed_;
     }

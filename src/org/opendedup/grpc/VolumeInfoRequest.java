@@ -10,7 +10,7 @@ package org.opendedup.grpc;
  *
  * Protobuf type {@code org.opendedup.grpc.VolumeInfoRequest}
  */
-public  final class VolumeInfoRequest extends
+public final class VolumeInfoRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.VolumeInfoRequest)
     VolumeInfoRequestOrBuilder {

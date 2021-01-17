@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.ConnectedVolumeInfo}
  */
-public  final class ConnectedVolumeInfo extends
+public final class ConnectedVolumeInfo extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ConnectedVolumeInfo)
     ConnectedVolumeInfoOrBuilder {
@@ -135,6 +135,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 id = 1;</code>
    * @return The id.
    */
+  @java.lang.Override
   public long getId() {
     return id_;
   }
@@ -145,6 +146,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool local = 2;</code>
    * @return The local.
    */
+  @java.lang.Override
   public boolean getLocal() {
     return local_;
   }
@@ -155,6 +157,7 @@ private static final long serialVersionUID = 0L;
    * <code>string hostname = 3;</code>
    * @return The hostname.
    */
+  @java.lang.Override
   public java.lang.String getHostname() {
     java.lang.Object ref = hostname_;
     if (ref instanceof java.lang.String) {
@@ -171,6 +174,7 @@ private static final long serialVersionUID = 0L;
    * <code>string hostname = 3;</code>
    * @return The bytes for hostname.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getHostnameBytes() {
     java.lang.Object ref = hostname_;
@@ -191,6 +195,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 port = 4;</code>
    * @return The port.
    */
+  @java.lang.Override
   public int getPort() {
     return port_;
   }
@@ -201,6 +206,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 size = 5;</code>
    * @return The size.
    */
+  @java.lang.Override
   public long getSize() {
     return size_;
   }
@@ -211,6 +217,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 compressedSize = 6;</code>
    * @return The compressedSize.
    */
+  @java.lang.Override
   public long getCompressedSize() {
     return compressedSize_;
   }
@@ -221,6 +228,7 @@ private static final long serialVersionUID = 0L;
    * <code>string sdfsVersion = 7;</code>
    * @return The sdfsVersion.
    */
+  @java.lang.Override
   public java.lang.String getSdfsVersion() {
     java.lang.Object ref = sdfsVersion_;
     if (ref instanceof java.lang.String) {
@@ -237,6 +245,7 @@ private static final long serialVersionUID = 0L;
    * <code>string sdfsVersion = 7;</code>
    * @return The bytes for sdfsVersion.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSdfsVersionBytes() {
     java.lang.Object ref = sdfsVersion_;
@@ -257,6 +266,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 lastUpdate = 8;</code>
    * @return The lastUpdate.
    */
+  @java.lang.Override
   public long getLastUpdate() {
     return lastUpdate_;
   }
@@ -267,6 +277,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 version = 9;</code>
    * @return The version.
    */
+  @java.lang.Override
   public int getVersion() {
     return version_;
   }
@@ -719,6 +730,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 id = 1;</code>
      * @return The id.
      */
+    @java.lang.Override
     public long getId() {
       return id_;
     }
@@ -749,6 +761,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool local = 2;</code>
      * @return The local.
      */
+    @java.lang.Override
     public boolean getLocal() {
       return local_;
     }
@@ -855,6 +868,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 port = 4;</code>
      * @return The port.
      */
+    @java.lang.Override
     public int getPort() {
       return port_;
     }
@@ -885,6 +899,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 size = 5;</code>
      * @return The size.
      */
+    @java.lang.Override
     public long getSize() {
       return size_;
     }
@@ -915,6 +930,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 compressedSize = 6;</code>
      * @return The compressedSize.
      */
+    @java.lang.Override
     public long getCompressedSize() {
       return compressedSize_;
     }
@@ -1021,6 +1037,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 lastUpdate = 8;</code>
      * @return The lastUpdate.
      */
+    @java.lang.Override
     public long getLastUpdate() {
       return lastUpdate_;
     }
@@ -1051,6 +1068,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 version = 9;</code>
      * @return The version.
      */
+    @java.lang.Override
     public int getVersion() {
       return version_;
     }

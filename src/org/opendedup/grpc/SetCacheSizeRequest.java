@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SetCacheSizeRequest}
  */
-public  final class SetCacheSizeRequest extends
+public final class SetCacheSizeRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetCacheSizeRequest)
     SetCacheSizeRequestOrBuilder {
@@ -91,6 +91,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 cacheSize = 1;</code>
    * @return The cacheSize.
    */
+  @java.lang.Override
   public long getCacheSize() {
     return cacheSize_;
   }
@@ -403,6 +404,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 cacheSize = 1;</code>
      * @return The cacheSize.
      */
+    @java.lang.Override
     public long getCacheSize() {
       return cacheSize_;
     }

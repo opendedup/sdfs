@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.DSERequest}
  */
-public  final class DSERequest extends
+public final class DSERequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DSERequest)
     DSERequestOrBuilder {

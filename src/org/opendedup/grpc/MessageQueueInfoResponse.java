@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.MessageQueueInfoResponse}
  */
-public  final class MessageQueueInfoResponse extends
+public final class MessageQueueInfoResponse extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.MessageQueueInfoResponse)
     MessageQueueInfoResponseOrBuilder {
@@ -197,6 +197,10 @@ private static final long serialVersionUID = 0L;
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -237,6 +241,7 @@ private static final long serialVersionUID = 0L;
    * <code>string hostName = 1;</code>
    * @return The hostName.
    */
+  @java.lang.Override
   public java.lang.String getHostName() {
     java.lang.Object ref = hostName_;
     if (ref instanceof java.lang.String) {
@@ -253,6 +258,7 @@ private static final long serialVersionUID = 0L;
    * <code>string hostName = 1;</code>
    * @return The bytes for hostName.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getHostNameBytes() {
     java.lang.Object ref = hostName_;
@@ -273,14 +279,14 @@ private static final long serialVersionUID = 0L;
    * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
    * @return The enum numeric value on the wire for mqType.
    */
-  public int getMqTypeValue() {
+  @java.lang.Override public int getMqTypeValue() {
     return mqType_;
   }
   /**
    * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
    * @return The mqType.
    */
-  public org.opendedup.grpc.MessageQueueInfoResponse.MQType getMqType() {
+  @java.lang.Override public org.opendedup.grpc.MessageQueueInfoResponse.MQType getMqType() {
     @SuppressWarnings("deprecation")
     org.opendedup.grpc.MessageQueueInfoResponse.MQType result = org.opendedup.grpc.MessageQueueInfoResponse.MQType.valueOf(mqType_);
     return result == null ? org.opendedup.grpc.MessageQueueInfoResponse.MQType.UNRECOGNIZED : result;
@@ -292,6 +298,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 port = 3;</code>
    * @return The port.
    */
+  @java.lang.Override
   public int getPort() {
     return port_;
   }
@@ -302,6 +309,7 @@ private static final long serialVersionUID = 0L;
    * <code>string topic = 4;</code>
    * @return The topic.
    */
+  @java.lang.Override
   public java.lang.String getTopic() {
     java.lang.Object ref = topic_;
     if (ref instanceof java.lang.String) {
@@ -318,6 +326,7 @@ private static final long serialVersionUID = 0L;
    * <code>string topic = 4;</code>
    * @return The bytes for topic.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getTopicBytes() {
     java.lang.Object ref = topic_;
@@ -338,6 +347,7 @@ private static final long serialVersionUID = 0L;
    * <code>string authInfo = 5;</code>
    * @return The authInfo.
    */
+  @java.lang.Override
   public java.lang.String getAuthInfo() {
     java.lang.Object ref = authInfo_;
     if (ref instanceof java.lang.String) {
@@ -354,6 +364,7 @@ private static final long serialVersionUID = 0L;
    * <code>string authInfo = 5;</code>
    * @return The bytes for authInfo.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getAuthInfoBytes() {
     java.lang.Object ref = authInfo_;
@@ -374,6 +385,7 @@ private static final long serialVersionUID = 0L;
    * <code>string subScription = 6;</code>
    * @return The subScription.
    */
+  @java.lang.Override
   public java.lang.String getSubScription() {
     java.lang.Object ref = subScription_;
     if (ref instanceof java.lang.String) {
@@ -390,6 +402,7 @@ private static final long serialVersionUID = 0L;
    * <code>string subScription = 6;</code>
    * @return The bytes for subScription.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSubScriptionBytes() {
     java.lang.Object ref = subScription_;
@@ -410,6 +423,7 @@ private static final long serialVersionUID = 0L;
    * <code>string project = 7;</code>
    * @return The project.
    */
+  @java.lang.Override
   public java.lang.String getProject() {
     java.lang.Object ref = project_;
     if (ref instanceof java.lang.String) {
@@ -426,6 +440,7 @@ private static final long serialVersionUID = 0L;
    * <code>string project = 7;</code>
    * @return The bytes for project.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getProjectBytes() {
     java.lang.Object ref = project_;
@@ -924,7 +939,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
      * @return The enum numeric value on the wire for mqType.
      */
-    public int getMqTypeValue() {
+    @java.lang.Override public int getMqTypeValue() {
       return mqType_;
     }
     /**
@@ -933,6 +948,7 @@ private static final long serialVersionUID = 0L;
      * @return This builder for chaining.
      */
     public Builder setMqTypeValue(int value) {
+      
       mqType_ = value;
       onChanged();
       return this;
@@ -941,6 +957,7 @@ private static final long serialVersionUID = 0L;
      * <code>.org.opendedup.grpc.MessageQueueInfoResponse.MQType mqType = 2;</code>
      * @return The mqType.
      */
+    @java.lang.Override
     public org.opendedup.grpc.MessageQueueInfoResponse.MQType getMqType() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.MessageQueueInfoResponse.MQType result = org.opendedup.grpc.MessageQueueInfoResponse.MQType.valueOf(mqType_);
@@ -976,6 +993,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 port = 3;</code>
      * @return The port.
      */
+    @java.lang.Override
     public int getPort() {
       return port_;
     }

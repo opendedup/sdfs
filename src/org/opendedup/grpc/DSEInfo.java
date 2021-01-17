@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.DSEInfo}
  */
-public  final class DSEInfo extends
+public final class DSEInfo extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DSEInfo)
     DSEInfoOrBuilder {
@@ -195,6 +195,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxSize = 1;</code>
    * @return The maxSize.
    */
+  @java.lang.Override
   public long getMaxSize() {
     return maxSize_;
   }
@@ -205,6 +206,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 currentSize = 2;</code>
    * @return The currentSize.
    */
+  @java.lang.Override
   public long getCurrentSize() {
     return currentSize_;
   }
@@ -215,6 +217,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 entries = 3;</code>
    * @return The entries.
    */
+  @java.lang.Override
   public long getEntries() {
     return entries_;
   }
@@ -225,6 +228,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 compressedSize = 4;</code>
    * @return The compressedSize.
    */
+  @java.lang.Override
   public long getCompressedSize() {
     return compressedSize_;
   }
@@ -235,6 +239,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 freeBlocks = 5;</code>
    * @return The freeBlocks.
    */
+  @java.lang.Override
   public long getFreeBlocks() {
     return freeBlocks_;
   }
@@ -245,6 +250,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 pageSize = 6;</code>
    * @return The pageSize.
    */
+  @java.lang.Override
   public long getPageSize() {
     return pageSize_;
   }
@@ -255,6 +261,7 @@ private static final long serialVersionUID = 0L;
    * <code>string storageType = 7;</code>
    * @return The storageType.
    */
+  @java.lang.Override
   public java.lang.String getStorageType() {
     java.lang.Object ref = storageType_;
     if (ref instanceof java.lang.String) {
@@ -271,6 +278,7 @@ private static final long serialVersionUID = 0L;
    * <code>string storageType = 7;</code>
    * @return The bytes for storageType.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getStorageTypeBytes() {
     java.lang.Object ref = storageType_;
@@ -291,6 +299,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 listenPort = 8;</code>
    * @return The listenPort.
    */
+  @java.lang.Override
   public int getListenPort() {
     return listenPort_;
   }
@@ -301,6 +310,7 @@ private static final long serialVersionUID = 0L;
    * <code>string listenHost = 9;</code>
    * @return The listenHost.
    */
+  @java.lang.Override
   public java.lang.String getListenHost() {
     java.lang.Object ref = listenHost_;
     if (ref instanceof java.lang.String) {
@@ -317,6 +327,7 @@ private static final long serialVersionUID = 0L;
    * <code>string listenHost = 9;</code>
    * @return The bytes for listenHost.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getListenHostBytes() {
     java.lang.Object ref = listenHost_;
@@ -337,6 +348,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 readSpeed = 10;</code>
    * @return The readSpeed.
    */
+  @java.lang.Override
   public int getReadSpeed() {
     return readSpeed_;
   }
@@ -347,6 +359,7 @@ private static final long serialVersionUID = 0L;
    * <code>int32 writeSpeed = 11;</code>
    * @return The writeSpeed.
    */
+  @java.lang.Override
   public int getWriteSpeed() {
     return writeSpeed_;
   }
@@ -357,6 +370,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 cacheSize = 12;</code>
    * @return The cacheSize.
    */
+  @java.lang.Override
   public long getCacheSize() {
     return cacheSize_;
   }
@@ -367,6 +381,7 @@ private static final long serialVersionUID = 0L;
    * <code>int64 maxCacheSize = 13;</code>
    * @return The maxCacheSize.
    */
+  @java.lang.Override
   public long getMaxCacheSize() {
     return maxCacheSize_;
   }
@@ -377,6 +392,7 @@ private static final long serialVersionUID = 0L;
    * <code>bool listenEncrypted = 14;</code>
    * @return The listenEncrypted.
    */
+  @java.lang.Override
   public boolean getListenEncrypted() {
     return listenEncrypted_;
   }
@@ -387,6 +403,7 @@ private static final long serialVersionUID = 0L;
    * <code>string encryptionKey = 15;</code>
    * @return The encryptionKey.
    */
+  @java.lang.Override
   public java.lang.String getEncryptionKey() {
     java.lang.Object ref = encryptionKey_;
     if (ref instanceof java.lang.String) {
@@ -403,6 +420,7 @@ private static final long serialVersionUID = 0L;
    * <code>string encryptionKey = 15;</code>
    * @return The bytes for encryptionKey.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getEncryptionKeyBytes() {
     java.lang.Object ref = encryptionKey_;
@@ -423,6 +441,7 @@ private static final long serialVersionUID = 0L;
    * <code>string encryptionIV = 16;</code>
    * @return The encryptionIV.
    */
+  @java.lang.Override
   public java.lang.String getEncryptionIV() {
     java.lang.Object ref = encryptionIV_;
     if (ref instanceof java.lang.String) {
@@ -439,6 +458,7 @@ private static final long serialVersionUID = 0L;
    * <code>string encryptionIV = 16;</code>
    * @return The bytes for encryptionIV.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getEncryptionIVBytes() {
     java.lang.Object ref = encryptionIV_;
@@ -459,6 +479,7 @@ private static final long serialVersionUID = 0L;
    * <code>string cloudAccessKey = 17;</code>
    * @return The cloudAccessKey.
    */
+  @java.lang.Override
   public java.lang.String getCloudAccessKey() {
     java.lang.Object ref = cloudAccessKey_;
     if (ref instanceof java.lang.String) {
@@ -475,6 +496,7 @@ private static final long serialVersionUID = 0L;
    * <code>string cloudAccessKey = 17;</code>
    * @return The bytes for cloudAccessKey.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getCloudAccessKeyBytes() {
     java.lang.Object ref = cloudAccessKey_;
@@ -495,6 +517,7 @@ private static final long serialVersionUID = 0L;
    * <code>string cloudSecretKey = 18;</code>
    * @return The cloudSecretKey.
    */
+  @java.lang.Override
   public java.lang.String getCloudSecretKey() {
     java.lang.Object ref = cloudSecretKey_;
     if (ref instanceof java.lang.String) {
@@ -511,6 +534,7 @@ private static final long serialVersionUID = 0L;
    * <code>string cloudSecretKey = 18;</code>
    * @return The bytes for cloudSecretKey.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getCloudSecretKeyBytes() {
     java.lang.Object ref = cloudSecretKey_;
@@ -531,6 +555,7 @@ private static final long serialVersionUID = 0L;
    * <code>string bucketName = 19;</code>
    * @return The bucketName.
    */
+  @java.lang.Override
   public java.lang.String getBucketName() {
     java.lang.Object ref = bucketName_;
     if (ref instanceof java.lang.String) {
@@ -547,6 +572,7 @@ private static final long serialVersionUID = 0L;
    * <code>string bucketName = 19;</code>
    * @return The bytes for bucketName.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getBucketNameBytes() {
     java.lang.Object ref = bucketName_;
@@ -1183,6 +1209,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxSize = 1;</code>
      * @return The maxSize.
      */
+    @java.lang.Override
     public long getMaxSize() {
       return maxSize_;
     }
@@ -1213,6 +1240,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 currentSize = 2;</code>
      * @return The currentSize.
      */
+    @java.lang.Override
     public long getCurrentSize() {
       return currentSize_;
     }
@@ -1243,6 +1271,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 entries = 3;</code>
      * @return The entries.
      */
+    @java.lang.Override
     public long getEntries() {
       return entries_;
     }
@@ -1273,6 +1302,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 compressedSize = 4;</code>
      * @return The compressedSize.
      */
+    @java.lang.Override
     public long getCompressedSize() {
       return compressedSize_;
     }
@@ -1303,6 +1333,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 freeBlocks = 5;</code>
      * @return The freeBlocks.
      */
+    @java.lang.Override
     public long getFreeBlocks() {
       return freeBlocks_;
     }
@@ -1333,6 +1364,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 pageSize = 6;</code>
      * @return The pageSize.
      */
+    @java.lang.Override
     public long getPageSize() {
       return pageSize_;
     }
@@ -1439,6 +1471,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 listenPort = 8;</code>
      * @return The listenPort.
      */
+    @java.lang.Override
     public int getListenPort() {
       return listenPort_;
     }
@@ -1545,6 +1578,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 readSpeed = 10;</code>
      * @return The readSpeed.
      */
+    @java.lang.Override
     public int getReadSpeed() {
       return readSpeed_;
     }
@@ -1575,6 +1609,7 @@ private static final long serialVersionUID = 0L;
      * <code>int32 writeSpeed = 11;</code>
      * @return The writeSpeed.
      */
+    @java.lang.Override
     public int getWriteSpeed() {
       return writeSpeed_;
     }
@@ -1605,6 +1640,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 cacheSize = 12;</code>
      * @return The cacheSize.
      */
+    @java.lang.Override
     public long getCacheSize() {
       return cacheSize_;
     }
@@ -1635,6 +1671,7 @@ private static final long serialVersionUID = 0L;
      * <code>int64 maxCacheSize = 13;</code>
      * @return The maxCacheSize.
      */
+    @java.lang.Override
     public long getMaxCacheSize() {
       return maxCacheSize_;
     }
@@ -1665,6 +1702,7 @@ private static final long serialVersionUID = 0L;
      * <code>bool listenEncrypted = 14;</code>
      * @return The listenEncrypted.
      */
+    @java.lang.Override
     public boolean getListenEncrypted() {
       return listenEncrypted_;
     }

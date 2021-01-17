@@ -6,7 +6,7 @@ package org.opendedup.grpc;
 /**
  * Protobuf type {@code org.opendedup.grpc.SyncVolRequest}
  */
-public  final class SyncVolRequest extends
+public final class SyncVolRequest extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SyncVolRequest)
     SyncVolRequestOrBuilder {
