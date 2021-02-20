@@ -2115,7 +2115,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		try {
 			if (this.simpleS3) {
 				S3Object obj = null;
-				SDFSLogger.getLog().info("downloading " + pp + "/" + haName);
+				SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
 				obj = s3Service.getObject(this.name, pp + "/" + haName);
 				BufferedInputStream in = new BufferedInputStream(obj.getObjectContent());
 				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(p));
@@ -2131,7 +2131,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (Exception e1) {
 				}
 			} else {
-				SDFSLogger.getLog().info("downloading " + pp + "/" + haName);
+				SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
 				this.multiPartDownload(pp + "/" + haName, p);
 				mp = this.getUserMetaData(pp + "/" + haName);
 				if (md5sum && mp.containsKey("md5sum")) {
@@ -2338,7 +2338,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (t_size >= 0) {
 				HashBlobArchive.setLength(t_size);
 			}
-			SDFSLogger.getLog().info("length = " + t_compressedsize + " " + t_size);
+			SDFSLogger.getLog().debug("length = " + t_compressedsize + " " + t_size);
 			return 0;
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -2966,7 +2966,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	private void refreshObject(long id) throws IOException {
 		String km = "blocks/" + EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-		SDFSLogger.getLog().info("Refreshing " + km);
+		SDFSLogger.getLog().debug("Refreshing " + km);
 		CopyObjectRequest creq = new CopyObjectRequest(name, km + mdExt, name, km + mdExt);
 		s3Service.copyObject(creq);
 		creq = new CopyObjectRequest(name, km + this.dExt, name, km + this.dExt);
