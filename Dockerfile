@@ -1,6 +1,6 @@
 FROM gcr.io/hybrics/hybrics-base:3.11 AS builder
-
-LABEL email=samsilverberg@google.com
+ARG DEBIAN_FRONTEND=noninteractive
+LABEL email=sam.silverberg@gmail.com
 LABEL author="Sam Silverberg"
 
 COPY pom.xml /sdfs-build/
@@ -37,7 +37,7 @@ FROM ubuntu:20.04
 ENV VERSION=3.11.0
 LABEL email=samsilverberg@google.com
 LABEL author="Sam Silverberg"
-RUN apt update && apt upgrade -y && apt install -y \
+RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
 		openjdk-11-jdk \
         maven \
         libfuse2 \
