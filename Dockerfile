@@ -33,7 +33,7 @@ WORKDIR "/sdfs-build/install-packages/"
 RUN echo "tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm" > export_data.sh && \
     chmod 700 export_data.sh
 ENTRYPOINT tar cvf - sdfs-${VERSION}.jar sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 ENV VERSION=3.11.0
 LABEL email=samsilverberg@google.com
 LABEL author="Sam Silverberg"
@@ -53,8 +53,11 @@ WORKDIR "/tmp"
 COPY --from=0 /sdfs-build/install-packages/sdfs_${VERSION}_amd64.deb .
 RUN dpkg -i sdfs_${VERSION}_amd64.deb && \
     rm sdfs_${VERSION}_amd64.deb
+RUN echo "* hard nofile 65535" >> /etc/security/limits.conf
+RUN	echo "* soft nofile 65535" >> /etc/security/limits.conf
 COPY --from=0 /sdfs-build/install-packages/docker_run.sh /usr/share/sdfs/docker_run.sh
 RUN chmod 700 /usr/share/sdfs/docker_run.sh
 ENV DOCKER_DETATCH="-nodetach"
 ENV CAPACITY=1TB
+
 CMD ["/usr/share/sdfs/docker_run.sh"]
