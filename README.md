@@ -3,26 +3,26 @@ What is this?
 
   A deduplicated file system that can store data in object storage or block storage.
 
-License
+## License
 
 GPLv2
 
-Requirements
+## Requirements
 
-System Requirements
+### System Requirements
 
 	1. x64 Linux Distribution. The application was tested and developed on ubuntu 18.04
 	2. At least 8 GB of RAM
 	3. Minimum of 2 cores
 	4. Minimum of 16GB or Storage
 	
-Optional Packages
+### Optional Packages
 
 	* Docker
 
-Installation
+## Installation
 
-Ubuntu/Debian (Ubuntu 14.04+)
+### Ubuntu/Debian (Ubuntu 14.04+)
 
 	Step 1: Download the latest sdfs version
 		wget http://opendedup.org/downloads/sdfs-latest.deb
@@ -37,7 +37,7 @@ Ubuntu/Debian (Ubuntu 14.04+)
 		exit
 	Step 5: Log Out and Proceed to Initialization Instructions
 
-CentOS/RedHat (Centos 7.0+)
+### CentOS/RedHat (Centos 7.0+)
 
 	Step 1: Download the latest sdfs version
 		wget http://opendedup.org/downloads/sdfs-latest.rpm
@@ -59,6 +59,34 @@ CentOS/RedHat (Centos 7.0+)
 		chkconfig iptables off
 
 	Step 7: Log Out and Proceed to Initialization Instructions
+
+### Docker
+	Step 1:
+
+		docker pull gcr.io/hybrics/hybrics
+	
+	Step 2:
+
+		docker run --name=sdfs1 -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.11 /usr/share/sdfs/docker_run.sh
+	
+	Step 3:
+
+		wget https://storage.cloud.google.com/hybricsbinaries/hybrics-fs/mount.sdfs-master
+		sudo mv mount.sdfs-master /usr/sbin/mount.sdfs
+		sudo chmod 777 /usr/sbin/mount.sdfs
+		sudo mkdir /media/sdfs
+	
+	Step 4:
+		sudo ./mount.sdfs -d sdfs://localhost:6442 /mnt
+
+
+### Docker Parameters:
+
+	| Envronmental Variable | Description | Default |
+	|-----------------------|-------------|---------|
+	|CAPACITY				| The Maximum Phyiscal Capacity of the volume. This is Specified in GB or TB| 1TB|
+
+
 
 Initialization Instructions for Standalone Volumes
 
