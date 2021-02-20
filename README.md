@@ -1,7 +1,7 @@
 # sdfs
 What is this?
 
-  A clustered deduplicated file system.
+  A deduplicated file system that can store data in object storage or block storage.
 
 License
 
@@ -11,15 +11,14 @@ Requirements
 
 System Requirements
 
-	1. x64 Linux Distribution. The application was tested and developed on ubuntu 14.0.4 and CentOS 7
-	2. At least 4 GB of RAM
-	3. Java 8 - available at https://jdk8.dev.java.net/
-	4. JSVC (http://commons.apache.org/proper/commons-daemon/jsvc.html)
+	1. x64 Linux Distribution. The application was tested and developed on ubuntu 18.04
+	2. At least 8 GB of RAM
+	3. Minimum of 2 cores
+	4. Minimum of 16GB or Storage
 	
 Optional Packages
 
-	* NFS Kernel Server
-	* LIO - for ISCSI support
+	* Docker
 
 Installation
 
