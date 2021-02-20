@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
-import io.grpc.Attributes;
 import io.grpc.Metadata;
 import io.grpc.Server;
 import io.grpc.ServerInterceptor;
@@ -12,8 +11,6 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.ServerCall;
 import io.grpc.ServerCall.Listener;
-import io.grpc.internal.ServerStream;
-import io.grpc.internal.ServerTransportListener;
 import io.grpc.ServerCallHandler;
 import io.grpc.Metadata.Key;
 
