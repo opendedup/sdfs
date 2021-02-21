@@ -50,7 +50,9 @@ if [ -n "${TYPE}" ]; then
     if [ -n "${PASSWORD}" ]; then
         RUNCMD+=" --sdfscli-password ${PASSWORD}"
     fi
-
+    if [ -n "${EXTENDED_CMD}" ]; then
+        RUNCMD+=" ${EXTENDED_CMD}"
+    fi
 fi
 
 ADDLCMD=""
