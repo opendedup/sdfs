@@ -141,7 +141,7 @@ public class VolumeConfigWriter {
 	private String topic;
 	private String subscription;
 	private String gcpProject;
-	private String credsFile;
+	private long rmthreashold = 15 * 60 *1000;
 
 	public VolumeConfigWriter() {
 		sn = new Random().nextLong();
@@ -408,6 +408,9 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("user-agent-prefix")) {
 			this.userAgentPrefix = cmd.getOptionValue("user-agent-prefix");
+		}
+		if (cmd.hasOption("hashtable-rm-threshold")) {
+			this.rmthreashold = Long.parseLong(cmd.getOptionValue("hashtable-rm-threshold"));
 		}
 		if (this.awsEnabled || minIOEnabled) {
 			if (awsAim || (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key"))
@@ -680,6 +683,7 @@ public class VolumeConfigWriter {
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("average-chunk-size", Integer.toString(this.avgPgSz));
 		cs.setAttribute("allocation-size", Long.toString(this.chunk_store_allocation_size));
+		cs.setAttribute("hashtable-rm-threshold",Long.toString(this.rmthreashold));
 		cs.setAttribute("gc-class", this.gc_class);
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("fpp", ".001");
@@ -953,6 +957,11 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"IP Listenting address for the sdfscli management interface. This defaults to \"localhost\"")
 				.hasArg(true).withArgName("ip address or host name").create());
+		options.addOption(OptionBuilder.withLongOpt("hashtable-rm-threshold")
+				.withDescription(
+						"The threashold in milliseconds to wait for unclaimed chucks to be available for garbage collection" +
+						"The default is 15 minutes or 900000 ms,")
+				.hasArg(true).withArgName("time in milliseconds").create());
 		options.addOption(
 				OptionBuilder.withLongOpt("base-path")
 						.withDescription("the folder path for all volume data and meta data.\n Defaults to: \n "

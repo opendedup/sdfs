@@ -60,7 +60,9 @@ GPLv2
 
 	Step 7: Log Out and Proceed to Initialization Instructions
 
-### Docker
+## Docker Usage
+
+### Setup
 	Step 1:
 
 		docker pull gcr.io/hybrics/hybrics
@@ -82,13 +84,44 @@ GPLv2
 
 ### Docker Parameters:
 
-	| Envronmental Variable | Description | Default |
-	|-----------------------|-------------|---------|
-	|CAPACITY				| The Maximum Phyiscal Capacity of the volume. This is Specified in GB or TB| 1TB|
+| Envronmental Variable | Description | Default |
+|-----------------------|-------------|---------|
+|CAPACITY				| The Maximum Phyiscal Capacity of the volume. This is Specified in GB or TB| 100GB|
+|TYPE					| The type of backend storage. This can be specified as AZURE, GOOGLE, AWS, BACKBLAZE. If none is specified local storage is used.| local storage|
+|URL					| The url of for the oject storage used|None|
+|BACKUP_VOLUME			| If set to true, the sdfs volume will be setup for deduping archive data better and faster. If not set it will default to better read/write access for random IO| false|
+|GCS_CREDS_FILE			| The location of a GCS creds file for authicating to Google cloud storage and GCP Pubsub. Will be required for Google Cloud Storage and GCP Pubsub access.|None|
+|ACCESS_KEY				| S3 or Azure Access Key|None|
+|SECRET_KEY				| The S3 or Azure Secret Key used to Access object storage|None|
+|AWS_AIM				| If set to true AWS AIM will be used for access| false|
+|PUBSUB_PROJECT			| The project where the pubsub notification should be setup for file changes and replication|None|
+|PUBSUB_CREDS_FILE		| The credentials file used for pubsub creation and access with GCP. If not set GCS_CREDS_FILE will be used.|None|
+|DISABLE_TLS			| Disable TLS for api access is set to true| false|
+|REQUIRE_AUTH			| Whether to require authication for access to the sdfs APIs|false|
+|PASSWORD				| The password to use when creating the volume|admin|
+|EXTENDED_CMD			| Any addition command parameters to run during creation|None|
+
+### Docker run examples
+
+Optimize usage running using local storage:
+
+```bash
+sudo mkdir /opt/sdfs1
+sudo docker run --name=sdfs1 --env CAPACITY=1TB --volume /home/A_USER/sdfs1:/opt/sdfs -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.11
+```
+
+Optimize usage running using Google Cloud Storage:
+
+```bash
+sudo mkdir /opt/sdfs1
+sudo docker run --name=sdfs1 --env BUCKET_NAME=ABUCKETNAME --env TYPE=GOOGLE --env=GCS_CREDS_FILE=/keys/service_account_key.json --env=PUBSUB_PROJECT=A_GCP_PROJECT --env CAPACITY=1TB --volume=/home/A_USER/keys:/keys --volume /home/A_USER/sdfs1:/opt/sdfs -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.11
+```
 
 
 
-Initialization Instructions for Standalone Volumes
+
+
+## Initialization Instructions for Standalone Volumes
 
 
 	Step 1: Log into the linux system as root or use sudo
@@ -120,110 +153,7 @@ Initialization Instructions for Standalone Volumes
 		
 
 
-Initialization Instructions for A Multi-Node Configuration
-
-	In a mult-node cluster there are two components :
-
-		* The Dedup Storage Engine (DSE) - This is the server/service that store all unique blocks. For redundancy, you should have at least two of these. They can live on the same 			  physical server as other components but this is not recommended for redundancy
-		* The File System Service (FSS) - This is the server/service that mounts the sdfs volume. Multiple FSS services each serving its own volume can live in the same cluster.
-	Prerequisits :
-
-		* Static IP address and unique name for all nodes: All nodes should have a static IP address to reduce network issues.
-		* Disable host firewalls : IPTables should be disabled for testing and then enabled again if needed with open ports for multicast and udp.
-		* Network Communication : Multicast communication is the default configuration. All nodes in the cluster will need to be able to talk to eachother using multicast unless 			  the Jgroups configuration is modified.Multicast communication is usually not a problem on the same subnet but can be an issue between subnets or over wans
-		* Fast Low Latency Network : SDFS will work within most networks but speed will suffer is network speeds low or network latency is high. 1Gb/s or above dedicated network is 			  recommeded. 
-		* Update your /etc/sysctl.conf to improve network IO performance. Below are some recommeded options :
-			vm.swappiness=1
-			net.core.rmem_max=254800000
-			net.core.wmem_max=254800000
-			net.core.rmem_default=254800000
-			net.core.wmem_default=254800000
-			net.core.optmem_max=25480000
-			net.ipv4.tcp_timestamps=0
-			net.ipv4.tcp_sack=0
-			net.core.netdev_max_backlog=250000
-			net.ipv4.tcp_mem=25480000 25480000 25480000
-			net.ipv4.tcp_rmem=4096 87380 25480000
-			net.ipv4.tcp_wmem=4096 65536 25480000
-			net.ipv4.tcp_low_latency=1
-			Creating and Starting a DSE
-
-The following steps will create 2 DSEs on server1 and server2
-
-	Step 1: Create a DSE on Server1 using a 4K block size and 200GB of capacity and cluster node id of "1"
-
-		mkdse --dse-name=sdfs --dse-capacity=200GB --cluster-node-id=1
-
-	Step 2: Edit the /etc/sdfs/jgroups.cfg.xml and add the bind_addr attribute with Server1's IP address to the <UDP> tag.
-
-		<UDP         
-		mcast_port="${jgroups.udp.mcast_port:45588}"         
-		tos="8"         
-		ucast_recv_buf_size="5M"       
-		 ucast_send_buf_size="640K"         
-		mcast_recv_buf_size="5M"       
-		 mcast_send_buf_size="640K"         
-		loopback="true"         
-		max_bundle_size="64K"         
-		bind_addr="SERVER1 IP Address"
-	
-	Step 3: Start the DSE service on Server1
-
-		startDSEService.sh -c /etc/sdfs/sdfs-dse-cfg.xml &
-
-	Step 4: Create a DSE on Server1 using a 4K block size and 200GB of capacity and cluster node id of "1"
-
-		mkdse --dse-name=sdfs --dse-capacity=200GB --cluster-node-id=1
-
-	Step 5: Edit the /etc/sdfs/jgroups.cfg.xml and add the bind_addr attribute with Server1's IP address to the <UDP> tag.
-
-		<UDP
-		mcast_port="${jgroups.udp.mcast_port:45588}"
-		tos="8"
-		ucast_recv_buf_size="5M"
-		ucast_send_buf_size="640K"
-		mcast_recv_buf_size="5M"
-		mcast_send_buf_size="640K"
-		loopback="true"
-		max_bundle_size="64K"
-		bind_addr="SERVER1 IP Address"
-
-	Step 6: Start the DSE service on Server1
-
-		startDSEService.sh -c /etc/sdfs/sdfs-dse-cfg.xml &
-
-Creating and Starting a SDFS FSS - Mounting a Volume
-
-	The following steps will create 1 SDFS Volume on Server0. These are run as root.
-
-	Step 1: Create the volume configuration. The following will create a volume using 4K blocks. This must match the block size used by the DSEs
-
-		mkfs.sdfs --volume-name=pool0 --volume-capacity=400GB --chunk-store-local false
-
-	Step 2: Create a mount point on the filesystem for the volume
-
-		mkdir /media/pool0
-
-	Step 3: Mount the SDFS FSS (Volume)
-
-		mount.sdfs pool0 /media/pool0
-
-Verify its all Working
-
-	Step 1: Make sure you can see all your DSE Servers from the FSS Node. 
-
-		On the node that you mounted the volume run sdfscli --cluster-dse-info. You should see all the nodes in the cluster. If you don't then there is probably a networking issue 			somewhere that is preventing them from talking.
-
-	Step 2: Make sure you can see all of your other volumes in the cluster.
-
-		On any node that has a mounted volume run sdfscli --cluster-volumes. You should see all of the volumes in the cluster.
-
-	Step 3: Copy some data to the volume and make sure it all is there
-
-		md5sum /etc/sdfs/pool0-volume-cfg.xml
-		cp /etc/sdfs/pool0-volume-cfg.xml /media/pool0
-		md5sum /media/pool0/pool0-volume-cfg.xml
-Troubleshooting and other Notes
+## Troubleshooting and other Notes
 
 	Running on a Multi-Node clusting on KVM guest.
 
