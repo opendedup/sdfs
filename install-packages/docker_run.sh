@@ -50,9 +50,22 @@ if [ -n "${TYPE}" ]; then
     if [ -n "${PASSWORD}" ]; then
         RUNCMD+=" --sdfscli-password ${PASSWORD}"
     fi
-    if [ -n "${EXTENDED_CMD}" ]; then
+fi
+if [ -n "${EXTENDED_CMD}" ]; then
         RUNCMD+=" ${EXTENDED_CMD}"
+fi
+if [ -n "${DISABLE_TLS}" ]; then
+    if [ ${DISABLE_TLS} = true ]; then
+            RUNCMD+=" --sdfscli-disable-ssl"
     fi
+fi
+if [ -n "${REQUIRE_AUTH}" ]; then
+    if [ ${REQUIRE_AUTH} = true ]; then
+            RUNCMD+=" --sdfscli-require-auth"
+    fi
+fi
+if [ -n "${PASSWORD}" ]; then
+    RUNCMD+=" --sdfscli-password ${PASSWORD}"
 fi
 
 ADDLCMD=""
