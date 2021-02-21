@@ -15,11 +15,6 @@ if [ -n "${TYPE}" ]; then
     if [ -n "${URL}" ]; then
         RUNCMD+=" --cloud-url ${URL}"
     fi
-    if [ -n "${BACKUP_VOLUME}" ]; then
-        if [ ${BACKUP_VOLUME} = true ]; then
-            RUNCMD+=" --backup-volume"
-        fi
-    fi
     if [ -n "${GCS_CREDS_FILE}" ]; then
         RUNCMD+=" --gcs-creds-file ${GCS_CREDS_FILE}"
     elif [ -n "${ACCESS_KEY}" ]; then
@@ -37,18 +32,10 @@ if [ -n "${TYPE}" ]; then
     elif [ -n "${GCS_CREDS_FILE}" ]; then
         RUNCMD+=" --pubsub-authfile ${GCS_CREDS_FILE}"
     fi
-    if [ -n "${DISABLE_TLS}" ]; then
-        if [ ${DISABLE_TLS} = true ]; then
-            RUNCMD+=" --sdfscli-disable-ssl"
-        fi
-    fi
-    if [ -n "${REQUIRE_AUTH}" ]; then
-        if [ ${REQUIRE_AUTH} = true ]; then
-            RUNCMD+=" --sdfscli-require-auth"
-        fi
-    fi
-    if [ -n "${PASSWORD}" ]; then
-        RUNCMD+=" --sdfscli-password ${PASSWORD}"
+fi
+if [ -n "${BACKUP_VOLUME}" ]; then
+    if [ ${BACKUP_VOLUME} = true ]; then
+        RUNCMD+=" --backup-volume"
     fi
 fi
 if [ -n "${EXTENDED_CMD}" ]; then
