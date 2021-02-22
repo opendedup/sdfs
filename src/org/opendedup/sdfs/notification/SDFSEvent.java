@@ -615,9 +615,10 @@ public class SDFSEvent implements java.io.Serializable {
 		Iterator<SDFSEvent> iter = tasks.values().iterator();
 		while (iter.hasNext()) {
 			try {
-			al.add(iter.next().toProtoBuf());
+				al.add(iter.next().toProtoBuf());
 			}catch(Exception e) {
-				throw new NullPointerException(" could not be found");
+				SDFSLogger.getLog().warn("unable to list events",e);
+				throw new NullPointerException("unable to list events");
 			}
 		}
 		return al;
@@ -640,7 +641,7 @@ public class SDFSEvent implements java.io.Serializable {
 			if (tasks.containsKey(uuid))
 				return tasks.get(uuid).toXML();
 			else
-				throw new NullPointerException(uuid + " could not be found");
+				throw new NullPointerException("["+uuid + "] could not be found");
 		}
 	}
 
@@ -650,11 +651,12 @@ public class SDFSEvent implements java.io.Serializable {
 				try{
 				return tasks.get(uuid).toProtoBuf();
 				}catch(Exception e) {
-					throw new NullPointerException(uuid + " could not be found");
+					SDFSLogger.getLog().warn("["+uuid + "] could not be found",e);
+					throw new NullPointerException("["+uuid + "] could not be found");
 				}
 			}
 			else
-				throw new NullPointerException(uuid + " could not be found");
+				throw new NullPointerException("["+uuid + "] could not be found");
 		}
 	}
 
@@ -663,7 +665,7 @@ public class SDFSEvent implements java.io.Serializable {
 			if (tasks.containsKey(uuid))
 				return tasks.get(uuid);
 			else
-				throw new NullPointerException(uuid + " could not be found");
+				throw new NullPointerException("["+uuid + "] could not be found");
 		}
 	}
 
