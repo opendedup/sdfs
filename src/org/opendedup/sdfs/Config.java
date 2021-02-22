@@ -182,6 +182,7 @@ public class Config {
 		}
 		if(localChunkStore.hasAttribute("hashtable-rm-threshold")) {
 			Main.HT_RM_THRESH = Long.parseLong(localChunkStore.getAttribute("hashtable-rm-threshold"));
+			SDFSLogger.getLog().info("HT_RM_THRESH = " + Main.HT_RM_THRESH);
 		}
 		
 		if (localChunkStore.hasAttribute("max-chunk-age")) {
