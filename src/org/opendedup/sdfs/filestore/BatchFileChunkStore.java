@@ -134,7 +134,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	@Override
 	public long size() {
 		// TODO Auto-generated method stub
-		return HashBlobArchive.getLength();
+		return HashBlobArchive.getCompressedLength();
 	}
 
 	public void cacheData(long len) throws IOException, DataArchivedException {
