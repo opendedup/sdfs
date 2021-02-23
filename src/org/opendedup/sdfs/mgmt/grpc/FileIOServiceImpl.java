@@ -1789,7 +1789,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
     }
-    
 
     public void fileExists(FileExistsRequest req, StreamObserver<FileExistsResponse> responseObserver) {
         FileExistsResponse.Builder b = FileExistsResponse.newBuilder();
