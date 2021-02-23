@@ -1777,6 +1777,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             }
             SDFSEvent evt = SDFSEvent.snapEvent("Snapshot Intiated for " + req.getSrc() + " to " + req.getDest(), f);
             MetaFileStore.snapshot(f.getPath(), nf.getPath(), false, evt);
+            b.setEventID(evt.uid);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
@@ -1788,6 +1789,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             return;
         }
     }
+    
 
     public void fileExists(FileExistsRequest req, StreamObserver<FileExistsResponse> responseObserver) {
         FileExistsResponse.Builder b = FileExistsResponse.newBuilder();
