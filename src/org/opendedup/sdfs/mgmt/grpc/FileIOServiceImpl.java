@@ -112,7 +112,20 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     private File resolvePath(String path) throws FileIOError {
         String pt = mountedVolume + path.trim();
         File _f = new File(pt);
-
+        if (Files.isSymbolicLink(_f.toPath())) {
+			try {
+				_f = Files.readSymbolicLink(_f.toPath()).toFile();
+			} catch (IOException e) {
+				SDFSLogger.getLog().debug("error resolving " + mountedVolume + path, e);
+                throw new FileIOError("error resolving [" + path + "]", errorCodes.ENOENT);
+			}
+		}
+        try {
+			this.checkInFS(_f);
+		} catch (FileIOError e) {
+			SDFSLogger.getLog().warn("unable", e);
+			throw e;
+		}
         if (!_f.exists()) {
             if (SDFSLogger.isDebug())
                 SDFSLogger.getLog().debug("No such node");
