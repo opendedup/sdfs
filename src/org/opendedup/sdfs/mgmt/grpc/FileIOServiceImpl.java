@@ -1425,6 +1425,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             mf.removeXAttribute(name);
             if (mf.isFile())
                 mf.setDirty(true);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
         } catch (FileIOError e) {
             b.setError(e.message);
             b.setErrorCode(e.code);
