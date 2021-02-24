@@ -1412,6 +1412,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (this.symlink) {
 				b.setSymlinkPath(this.getSymlinkPath());
 			}
+		} else if(!compact && this.isSymlink()) {
+				Path p = Paths.get(this.getPath());
+				b.setSymlinkPath(this.getSymlinkPath());
+				b.setSymlink(this.symlink);
+				File f = new File(this.getPath());
+				BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+				b.setAtime(attrs.lastAccessTime().toMillis()).setMtime(attrs.lastModifiedTime().toMillis())
+					.setCtime(attrs.creationTime().toMillis()).setHidden(f.isHidden()).setSize(f.length())
+					.setSymlink(this.symlink).setMode(this.getMode());
 		}
 		return b.build();
 	}
