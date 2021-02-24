@@ -282,22 +282,30 @@ public class MetaFileStore {
 				Path dstP = Paths.get(dst.getPath());
 				try {
 					Files.createSymbolicLink(dstP, srcP);
+					evt.endEvent();
 				} catch (IOException e) {
 					SDFSLogger.getLog().error("error symlinking " + origionalPath + " to " + snapPath, e);
 				}
+				
 				return getMF(new File(snapPath));
 			} else {
 
 				MetaDataDedupFile mf = getMF(new File(origionalPath));
-				if (mf == null)
+				if (mf == null) {
 					throw new IOException(
 							origionalPath + " does not exist. Cannot take a snapshot of a non-existent file.");
+				}
 				synchronized (mf) {
 					MetaDataDedupFile _mf = mf.snapshot(snapPath, overwrite, evt);
+					evt.endEvent("Snapshot Successful for " + origionalPath + " to " + snapPath);
 					return _mf;
 				}
 			}
-		} finally {
+		} catch(Exception e) {
+			SDFSLogger.getLog().error("error creating snapshot for" + origionalPath + " to " + snapPath,e);
+			evt.endEvent("Error Creating snapshot for" + origionalPath + " to " + snapPath + " error: " +e.getMessage(), SDFSEvent.ERROR);
+			throw new IOException(e);
+		}finally {
 
 		}
 	}
