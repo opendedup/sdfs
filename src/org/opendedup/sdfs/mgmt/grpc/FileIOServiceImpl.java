@@ -115,6 +115,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         if (Files.isSymbolicLink(_f.toPath())) {
 			try {
 				_f = Files.readSymbolicLink(_f.toPath()).toFile();
+                pt = mountedVolume + _f.getPath();
+                _f = new File(pt);
 			} catch (IOException e) {
 				SDFSLogger.getLog().debug("error resolving " + mountedVolume + path, e);
                 throw new FileIOError("error resolving [" + path + "]", errorCodes.ENOENT);
@@ -1499,7 +1501,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         guid = req.getListGuid();
                         stream = this.fileListers.get(guid);
                     }
-
                     int maxFiles = 1000;
                     int cf = 0;
                     if (req.getNumberOfFiles() > 0) {
