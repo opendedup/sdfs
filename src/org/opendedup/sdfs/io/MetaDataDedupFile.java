@@ -132,7 +132,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public int getMode() throws IOException {
 		if (mode == -1) {
 			Path p = Paths.get(this.path);
-			this.mode = (Integer) Files.getAttribute(p, "unix:mode");
+			this.mode = (Integer) Files.getAttribute(p, "unix:mode",LinkOption.NOFOLLOW_LINKS);
 		}
 		return this.mode;
 	}
@@ -278,7 +278,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public int getOwner_id() throws IOException {
 		if (owner_id == -1) {
 			Path p = Paths.get(this.path);
-			this.owner_id = (Integer) Files.getAttribute(p, "unix:uid");
+			this.owner_id = (Integer) Files.getAttribute(p, "unix:uid",LinkOption.NOFOLLOW_LINKS);
 		}
 		return owner_id;
 	}
@@ -312,7 +312,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public int getGroup_id() throws IOException {
 		if (group_id == -1) {
 			Path p = Paths.get(this.path);
-			this.group_id = (Integer) Files.getAttribute(p, "unix:gid");
+			this.group_id = (Integer) Files.getAttribute(p, "unix:gid", LinkOption.NOFOLLOW_LINKS);
 		}
 		return group_id;
 	}
