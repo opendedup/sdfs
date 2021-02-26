@@ -50,9 +50,6 @@ public class GetCloudMetaFile {
 		}
 		synchronized (obj) {
 			fevt = SDFSEvent.cfEvent(file);
-			if (dstfile != null && file.contentEquals(dstfile))
-				throw new IOException("local filename in the same as source name");
-
 			File df = null;
 			if (dstfile != null)
 				df = new File(Main.volume.getPath() + File.separator + dstfile);
