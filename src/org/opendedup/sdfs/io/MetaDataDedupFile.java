@@ -1748,8 +1748,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				out.writeInt(-1);
 			}
 			out.writeBoolean(vmdk);
-			out.writeInt(owner_id);
-			out.writeInt(group_id);
+			out.writeInt(this.getOwner_id());
+			out.writeInt(this.getGroup_id());
 			byte[] hmb = ByteUtils.serializeHashMap(extendedAttrs);
 			out.writeInt(hmb.length);
 			out.write(hmb);
@@ -1758,7 +1758,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeInt(vb.length);
 			out.write(vb);
 			out.writeLong(attributes);
-			out.writeInt(this.mode);
+			out.writeInt(this.getMode());
 			out.writeBoolean(this.deleteOnClose);
 			out.writeBoolean(true);
 			out.writeLong(this.retentionLock);

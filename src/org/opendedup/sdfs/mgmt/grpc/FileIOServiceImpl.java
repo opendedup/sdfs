@@ -676,6 +676,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 } finally {
                     f = null;
                 }
+                mf.unmarshal();
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
@@ -839,6 +840,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     try {
                         MetaDataDedupFile mf = MetaFileStore.getMF(f);
                         mf.setMode(mode);
+                        mf.unmarshal();
                         responseObserver.onNext(b.build());
                         responseObserver.onCompleted();
                     } catch (Exception e) {
