@@ -1694,6 +1694,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.importing = in.readBoolean();
 				}
+				if (in.available() > 0) {
+					this.permissions =  in.readInt();
+				}
 
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb = new byte[vlen];
@@ -1763,6 +1766,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeBoolean(true);
 			out.writeLong(this.retentionLock);
 			out.writeBoolean(this.importing);
+			out.writeInt(this.permissions);
 			/*
 			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
 			 * this.backingFile.getBytes(); out.writeInt(bb.length); out.write(bb); }
