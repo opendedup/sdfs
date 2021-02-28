@@ -879,11 +879,16 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         int uid = req.getUid();
         int gid = req.getGid();
         try {
-            File f = resolvePath(path);
+            String pt = mountedVolume + path.trim();
+            File f = new File(pt);
+            if (!Files.isSymbolicLink(f.toPath())) {
+                f = resolvePath(path);
+            } 
             int ftype = this.getFtype(path);
             if (ftype == FuseFtypeConstants.TYPE_SYMLINK || ftype == FuseFtypeConstants.TYPE_DIR) {
                 Path p = Paths.get(f.getCanonicalPath());
                 try {
+                    SDFSLogger.getLog().info("setting uid " + uid + "and gid " + gid);
                     Files.setAttribute(p, "unix:uid", Integer.valueOf(uid), LinkOption.NOFOLLOW_LINKS);
                     Files.setAttribute(p, "unix:gid", Integer.valueOf(gid), LinkOption.NOFOLLOW_LINKS);
                     responseObserver.onNext(b.build());
@@ -916,6 +921,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 }
             }
         } catch (FileIOError e) {
+            SDFSLogger.getLog().error(path, e);
             b.setError(e.message);
             b.setErrorCode(e.code);
             responseObserver.onNext(b.build());
@@ -1191,6 +1197,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 return;
             }
             if (dst.exists()) {
+                b.setError("file exists " +dst.getPath());
                 b.setErrorCode(errorCodes.EEXIST);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
