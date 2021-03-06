@@ -12,9 +12,9 @@ public class DeleteCloudVolumeEvent extends SDFSEvent {
 	}
     
     @Override
-    public org.opendedup.grpc.SDFSEvent toProtoBuf() throws IOException{
-        org.opendedup.grpc.SDFSEvent evt = super.toProtoBuf();
-        org.opendedup.grpc.SDFSEvent.Builder b= org.opendedup.grpc.SDFSEvent.newBuilder(evt);
+    public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent toProtoBuf() throws IOException{
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt = super.toProtoBuf();
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder b= org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.newBuilder(evt);
         b.putAttributes("volumeid", Long.toString(this.volumeid));
         return b.build();
     }

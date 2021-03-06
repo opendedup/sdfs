@@ -1,15 +1,12 @@
 package org.opendedup.sdfs.mgmt.cli;
 
-import java.io.IOException;
-import java.util.Formatter;
 import java.util.concurrent.TimeUnit;
 
-import org.opendedup.grpc.ShutdownRequest;
-import org.opendedup.grpc.ShutdownResponse;
+import org.opendedup.grpc.Shutdown.ShutdownRequest;
+import org.opendedup.grpc.Shutdown.ShutdownResponse;
 import org.opendedup.grpc.VolumeServiceGrpc;
-import org.opendedup.grpc.errorCodes;
+import org.opendedup.grpc.FileInfo.errorCodes;
 import org.opendedup.grpc.VolumeServiceGrpc.VolumeServiceBlockingStub;
-
 
 import io.grpc.Status.Code;
 

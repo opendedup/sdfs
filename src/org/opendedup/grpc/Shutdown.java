@@ -14,14 +14,1115 @@ public final class Shutdown {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  static final com.google.protobuf.Descriptors.Descriptor
+  public interface ShutdownRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.ShutdownRequest)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Request payload
+   * </pre>
+   *
+   * Protobuf type {@code org.opendedup.grpc.ShutdownRequest}
+   */
+  public static final class ShutdownRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ShutdownRequest)
+      ShutdownRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ShutdownRequest.newBuilder() to construct.
+    private ShutdownRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ShutdownRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ShutdownRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ShutdownRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.Shutdown.ShutdownRequest.class, org.opendedup.grpc.Shutdown.ShutdownRequest.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.Shutdown.ShutdownRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.Shutdown.ShutdownRequest other = (org.opendedup.grpc.Shutdown.ShutdownRequest) obj;
+
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.Shutdown.ShutdownRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request payload
+     * </pre>
+     *
+     * Protobuf type {@code org.opendedup.grpc.ShutdownRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.ShutdownRequest)
+        org.opendedup.grpc.Shutdown.ShutdownRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.Shutdown.ShutdownRequest.class, org.opendedup.grpc.Shutdown.ShutdownRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.Shutdown.ShutdownRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Shutdown.ShutdownRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.Shutdown.ShutdownRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Shutdown.ShutdownRequest build() {
+        org.opendedup.grpc.Shutdown.ShutdownRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Shutdown.ShutdownRequest buildPartial() {
+        org.opendedup.grpc.Shutdown.ShutdownRequest result = new org.opendedup.grpc.Shutdown.ShutdownRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.Shutdown.ShutdownRequest) {
+          return mergeFrom((org.opendedup.grpc.Shutdown.ShutdownRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.Shutdown.ShutdownRequest other) {
+        if (other == org.opendedup.grpc.Shutdown.ShutdownRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.Shutdown.ShutdownRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.Shutdown.ShutdownRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.ShutdownRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.ShutdownRequest)
+    private static final org.opendedup.grpc.Shutdown.ShutdownRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.Shutdown.ShutdownRequest();
+    }
+
+    public static org.opendedup.grpc.Shutdown.ShutdownRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ShutdownRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ShutdownRequest>() {
+      @java.lang.Override
+      public ShutdownRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ShutdownRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ShutdownRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ShutdownRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.Shutdown.ShutdownRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ShutdownResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.ShutdownResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The errorCode.
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.ShutdownResponse}
+   */
+  public static final class ShutdownResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ShutdownResponse)
+      ShutdownResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ShutdownResponse.newBuilder() to construct.
+    private ShutdownResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ShutdownResponse() {
+      error_ = "";
+      errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ShutdownResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ShutdownResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            case 32: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.Shutdown.ShutdownResponse.class, org.opendedup.grpc.Shutdown.ShutdownResponse.Builder.class);
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 1;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    @java.lang.Override
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 4;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    @java.lang.Override public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The errorCode.
+     */
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(4, errorCode_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, errorCode_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.Shutdown.ShutdownResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.Shutdown.ShutdownResponse other = (org.opendedup.grpc.Shutdown.ShutdownResponse) obj;
+
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.Shutdown.ShutdownResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.ShutdownResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.ShutdownResponse)
+        org.opendedup.grpc.Shutdown.ShutdownResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.Shutdown.ShutdownResponse.class, org.opendedup.grpc.Shutdown.ShutdownResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.Shutdown.ShutdownResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        error_ = "";
+
+        errorCode_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.Shutdown.internal_static_org_opendedup_grpc_ShutdownResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Shutdown.ShutdownResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.Shutdown.ShutdownResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Shutdown.ShutdownResponse build() {
+        org.opendedup.grpc.Shutdown.ShutdownResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Shutdown.ShutdownResponse buildPartial() {
+        org.opendedup.grpc.Shutdown.ShutdownResponse result = new org.opendedup.grpc.Shutdown.ShutdownResponse(this);
+        result.error_ = error_;
+        result.errorCode_ = errorCode_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.Shutdown.ShutdownResponse) {
+          return mergeFrom((org.opendedup.grpc.Shutdown.ShutdownResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.Shutdown.ShutdownResponse other) {
+        if (other == org.opendedup.grpc.Shutdown.ShutdownResponse.getDefaultInstance()) return this;
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.Shutdown.ShutdownResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.Shutdown.ShutdownResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 1;</code>
+       * @return The error.
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return The bytes for error.
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return The enum numeric value on the wire for errorCode.
+       */
+      @java.lang.Override public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCodeValue(int value) {
+        
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return The errorCode.
+       */
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.ShutdownResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.ShutdownResponse)
+    private static final org.opendedup.grpc.Shutdown.ShutdownResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.Shutdown.ShutdownResponse();
+    }
+
+    public static org.opendedup.grpc.Shutdown.ShutdownResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ShutdownResponse>
+        PARSER = new com.google.protobuf.AbstractParser<ShutdownResponse>() {
+      @java.lang.Override
+      public ShutdownResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ShutdownResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ShutdownResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ShutdownResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.Shutdown.ShutdownResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_ShutdownRequest_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_ShutdownRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_ShutdownResponse_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_ShutdownResponse_fieldAccessorTable;
 
@@ -36,9 +1137,9 @@ public final class Shutdown {
       "\n\016Shutdown.proto\022\022org.opendedup.grpc\032\016Fi" +
       "leInfo.proto\"\021\n\017ShutdownRequest\"T\n\020Shutd" +
       "ownResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
-      "\004 \001(\0162\036.org.opendedup.grpc.errorCodesB2P" +
-      "\001Z.github.com/opendedup/sdfs-client-go/s" +
-      "dfs/;sdfsb\006proto3"
+      "\004 \001(\0162\036.org.opendedup.grpc.errorCodesB0Z" +
+      ".github.com/opendedup/sdfs-client-go/sdf" +
+      "s/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

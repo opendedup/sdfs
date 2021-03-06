@@ -584,9 +584,9 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 	}
 
-	public org.opendedup.grpc.SDFSEvent toProtoBuf() throws IOException {
+	public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent toProtoBuf() throws IOException {
 		try {
-		org.opendedup.grpc.SDFSEvent.Builder b = org.opendedup.grpc.SDFSEvent.newBuilder();
+		org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder b = org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.newBuilder();
 
 		if(this.puid != null) {
 			b.setParentUuid(this.puid);
@@ -610,8 +610,8 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 	}
 
-	public static List<org.opendedup.grpc.SDFSEvent> getProtoBufEvents() {
-		ArrayList<org.opendedup.grpc.SDFSEvent> al = new ArrayList<org.opendedup.grpc.SDFSEvent>();
+	public static List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> getProtoBufEvents() {
+		ArrayList<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> al = new ArrayList<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent>();
 		Iterator<SDFSEvent> iter = tasks.values().iterator();
 		while (iter.hasNext()) {
 			try {
@@ -645,7 +645,7 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 	}
 
-	public static org.opendedup.grpc.SDFSEvent getPotoBufEvent(String uuid) {
+	public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getPotoBufEvent(String uuid) {
 		synchronized (tasks) {
 			if (tasks.containsKey(uuid)) {
 				try{

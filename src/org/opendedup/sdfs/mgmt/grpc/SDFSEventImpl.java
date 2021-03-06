@@ -1,15 +1,12 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
-import java.io.IOException;
-
 import com.google.common.eventbus.Subscribe;
-
-import org.opendedup.grpc.SDFSEventListRequest;
-import org.opendedup.grpc.SDFSEventListResponse;
-import org.opendedup.grpc.SDFSEventRequest;
-import org.opendedup.grpc.SDFSEventResponse;
+import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest;
+import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse;
+import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest;
+import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventResponse;
 import org.opendedup.grpc.SDFSEventServiceGrpc;
-import org.opendedup.grpc.errorCodes;
+import org.opendedup.grpc.FileInfo.errorCodes;
 import org.opendedup.logging.SDFSLogger;
 
 import io.grpc.stub.StreamObserver;

@@ -1,11 +1,10 @@
 package org.opendedup.sdfs.filestore.cloud;
 
 import java.io.File;
-
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.opendedup.grpc.FileInfoResponse;
+import org.opendedup.grpc.FileInfo.FileInfoResponse;
 
 public interface AbstractCloudFileSync {
 	public abstract void uploadFile(File f, String to, String parentPath,HashMap<String,String> md,boolean disableComp)

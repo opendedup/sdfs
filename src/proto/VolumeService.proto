@@ -1,7 +1,7 @@
 syntax = "proto3";
 option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
 package org.opendedup.grpc;
-option java_multiple_files = true;
+//option java_multiple_files = true;
 import "Shutdown.proto";
 import "FileInfo.proto";
 
@@ -40,6 +40,25 @@ message VolumeInfoResponse {
   repeated MessageQueueInfoResponse messageQueue = 27;
   string perfMonFile = 28;
   bool offline = 29;
+}
+
+message HashingInfoRequest {
+
+}
+
+message HashingInfoResponse {
+  int64 chunkSize = 1;
+  int64 minSegmentSize = 2;
+  int64 maxSegmentSize = 3;
+  int64 polyNumber = 4;
+  int64 hashSeed = 5;
+  hashtype hashtype = 6;
+  int32 mapVersion = 7;
+}
+
+enum hashtype {
+  SHA256=0; //Sha256
+  MD5=1; //md5
 }
 
 message SystemInfo {
@@ -251,4 +270,5 @@ service VolumeService {
   rpc SetWriteSpeed(SpeedRequest) returns (SpeedResponse);
   rpc SyncFromCloudVolume(SyncFromVolRequest) returns (SyncFromVolResponse);
   rpc SyncCloudVolume(SyncVolRequest) returns (SyncVolResponse);
+  rpc HashingInfo(HashingInfoRequest) returns (HashingInfoResponse);
 }

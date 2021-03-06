@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,12 +28,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.crypto.spec.IvParameterSpec;
 
+import com.google.common.io.BaseEncoding;
+
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.ec.ECIO;
-import org.opendedup.grpc.FileInfo;
-import org.opendedup.grpc.FileInfoResponse;
-import org.opendedup.grpc.Stat;
+import org.opendedup.grpc.FileInfo.FileInfoResponse;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractBatchStore;
@@ -48,9 +49,6 @@ import org.opendedup.util.PassPhrase;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import java.util.AbstractMap.SimpleImmutableEntry;
-
-import com.google.common.io.BaseEncoding;
 
 public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
 

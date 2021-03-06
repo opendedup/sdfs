@@ -1,7 +1,8 @@
 package org.opendedup.sdfs.filestore.cloud;
 
-import java.io.BufferedInputStream;
+import static java.lang.Math.toIntExact;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -31,31 +32,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.sdfs.filestore.HashBlobArchive;
-import org.opendedup.sdfs.filestore.StringResult;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.opendedup.collections.DataArchivedException;
-import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.AbstractBatchStore;
-import org.opendedup.sdfs.filestore.AbstractChunkStore;
-import org.opendedup.sdfs.filestore.ChunkData;
-import org.opendedup.sdfs.filestore.cloud.azure.BlobDataIO;
-import org.opendedup.sdfs.filestore.cloud.azure.BlobDataTracker;
-import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
-import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
-import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.util.CompressionUtils;
-import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.OSValidator;
-import org.opendedup.util.RandomGUID;
-import org.opendedup.util.StringUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-
-import static java.lang.Math.toIntExact;
-
 import com.google.common.hash.Funnels;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -75,10 +51,30 @@ import com.microsoft.azure.storage.blob.RehydrationStatus;
 import com.microsoft.azure.storage.blob.StandardBlobTier;
 import com.microsoft.azure.storage.core.Base64;
 
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
-import org.opendedup.grpc.FileInfo;
-import org.opendedup.grpc.FileInfoResponse;
-import org.opendedup.grpc.Stat;
+import org.opendedup.grpc.FileInfo.FileInfoResponse;
+import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.AbstractBatchStore;
+import org.opendedup.sdfs.filestore.AbstractChunkStore;
+import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
+import org.opendedup.sdfs.filestore.StringResult;
+import org.opendedup.sdfs.filestore.cloud.azure.BlobDataIO;
+import org.opendedup.sdfs.filestore.cloud.azure.BlobDataTracker;
+import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
+import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
+import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.CompressionUtils;
+import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.OSValidator;
+import org.opendedup.util.RandomGUID;
+import org.opendedup.util.StringUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 
 /**
  * 

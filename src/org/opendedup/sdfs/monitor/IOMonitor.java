@@ -19,19 +19,18 @@
 package org.opendedup.sdfs.monitor;
 
 import java.nio.ByteBuffer;
-
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.opendedup.grpc.IOMonitorResponse;
+import com.google.gson.JsonObject;
+
+import org.opendedup.grpc.FileInfo.IOMonitorResponse;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.gson.JsonObject;
 
 public class IOMonitor implements java.io.Serializable {
 

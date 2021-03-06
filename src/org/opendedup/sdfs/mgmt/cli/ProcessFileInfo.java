@@ -5,14 +5,14 @@ import java.text.NumberFormat;
 import java.util.Iterator;
 import java.util.Locale;
 
-import org.opendedup.util.StorageUnit;
-import org.opendedup.grpc.FileInfoRequest;
-import org.opendedup.grpc.FileInfoResponse;
-import org.opendedup.grpc.FileMessageResponseOrBuilder;
-import org.opendedup.grpc.IOMonitorResponse;
 import org.opendedup.grpc.FileIOServiceGrpc;
-import org.opendedup.grpc.errorCodes;
 import org.opendedup.grpc.FileIOServiceGrpc.FileIOServiceBlockingStub;
+import org.opendedup.grpc.FileInfo.FileInfoRequest;
+import org.opendedup.grpc.FileInfo.FileInfoResponse;
+import org.opendedup.grpc.FileInfo.FileMessageResponseOrBuilder;
+import org.opendedup.grpc.FileInfo.IOMonitorResponse;
+import org.opendedup.grpc.FileInfo.errorCodes;
+import org.opendedup.util.StorageUnit;
 
 public class ProcessFileInfo {
 	public static void runCmd(String file) {
