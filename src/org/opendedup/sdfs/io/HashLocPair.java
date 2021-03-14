@@ -29,6 +29,9 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.rabin.utils.StringUtils;
 
 import com.google.common.collect.Range;
+import com.google.protobuf.ByteString;
+
+import org.opendedup.grpc.Storage.HashLocPairP;
 
 public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 	public static final int BAL = HashFunctionPool.hashLength + 8 + 4 + 4 + 4
@@ -69,16 +72,6 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 	}
 
 	private int currentPos = 1;
-
-	public synchronized void addHashLoc(byte loc) {
-		// SDFSLogger.getLog().info("set " + this.currentPos + " to " + loc);
-		if (currentPos < this.hashloc.length) {
-			if (this.hashloc[0] == -1)
-				this.hashloc[0] = 0;
-			this.hashloc[currentPos] = loc;
-			this.currentPos++;
-		}
-	}
 
 	public void resetHashLoc() {
 		this.hashloc = new byte[8];
@@ -184,5 +177,30 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 	@Override
 	public int hashCode() {
 		return ByteBuffer.wrap(this.hash).getInt();
+	}
+
+	public HashLocPairP toProtoBuf() {
+		HashLocPairP.Builder b = HashLocPairP.newBuilder();
+		long hl = ByteBuffer.wrap(this.hashloc).getLong();
+		b.setDup(this.dup).setHash(ByteString.copyFrom(this.hash)).setHashloc(hl).setInserted(this.inserted)
+		.setLen(this.len).setNlen(this.nlen).setOffset(this.offset).setPos(this.pos);
+		return b.build();
+	}
+
+	public static HashLocPair fromProtoBuf(HashLocPairP p) throws IOException {
+		HashLocPair hlp = new HashLocPair();
+		hlp.hash = p.getHash().toByteArray();
+		if(hlp.hash.length != HashFunctionPool.hashLength) {
+			throw new IOException("Hash length mismatch expected " + HashFunctionPool.hashLength + " got " + hlp.hash.length);
+		}
+		ByteBuffer bf = ByteBuffer.wrap(new byte[8]);
+		bf.putLong(p.getHashloc());
+		hlp.hashloc = bf.array();
+		hlp.len = p.getLen();
+		hlp.pos = p.getPos();
+		hlp.offset = p.getOffset();
+		hlp.nlen = p.getNlen();
+		hlp.checkCorrupt();
+		return hlp;
 	}
 }

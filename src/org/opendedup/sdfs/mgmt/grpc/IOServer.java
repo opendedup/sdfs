@@ -4,6 +4,8 @@ import org.apache.log4j.Logger;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
+import io.grpc.Context;
+import io.grpc.Contexts;
 import io.grpc.Metadata;
 import io.grpc.Server;
 import io.grpc.ServerInterceptor;
@@ -110,6 +112,8 @@ public class IOServer {
   }
 
   public static class AuthorizationInterceptor implements ServerInterceptor {
+    public static final Context.Key<JWebToken> USER_IDENTITY
+      = Context.key("identity");
 
     @Override
     public <ReqT, RespT> Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers,
@@ -133,7 +137,9 @@ public class IOServer {
                   SDFSLogger.getLog().warn("token not valid for user " + token.getAudience());
                   throw new StatusRuntimeException(Status.UNAUTHENTICATED);
                 } else {
+                  Context context = Context.current().withValue(USER_IDENTITY, token);
                   SDFSLogger.getLog().debug("authenticated " + token.getAudience());
+                  return Contexts.interceptCall(context, call, headers, next);
                 }
               } catch (Exception e) {
                 SDFSLogger.getLog().error("unable to authenticate user", e);
@@ -155,6 +161,8 @@ public class IOServer {
       return next.startCall(call, headers);
     }
   }
+
+  
 
 
 }

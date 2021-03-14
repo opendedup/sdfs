@@ -16,6 +16,13 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
     @Override
     public void getEvent(SDFSEventRequest request, StreamObserver<SDFSEventResponse> responseObserver) {
         SDFSEventResponse.Builder b = SDFSEventResponse.newBuilder();
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.EVENT_READ)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
         try {
             b.setEvent(org.opendedup.sdfs.notification.SDFSEvent.getPotoBufEvent(request.getUuid()));
         } catch (NullPointerException e) {
@@ -34,10 +41,17 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
     @Override
     public void subscribeEvent(SDFSEventRequest request, StreamObserver<SDFSEventResponse> responseObserver) {
         SDFSEventResponse.Builder b = SDFSEventResponse.newBuilder();
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.EVENT_READ)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
         org.opendedup.sdfs.notification.SDFSEvent evt = null;
         SDFSEventListener l = null;
         try {
-            
+
             try {
                 evt = org.opendedup.sdfs.notification.SDFSEvent.getEvent(request.getUuid());
             } catch (NullPointerException e) {
@@ -47,7 +61,7 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
                 responseObserver.onCompleted();
                 return;
             }
-            l= new SDFSEventListener(evt, responseObserver, b);
+            l = new SDFSEventListener(evt, responseObserver, b);
             evt.registerListener(l);
             while (!evt.isDone()) {
                 try {
@@ -56,17 +70,17 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
                     return;
                 }
             }
-           
+
             int i = 0;
             while (!l.evtsent) {
                 Thread.sleep(100);
                 i++;
-                if(i>10) {
+                if (i > 10) {
                     break;
                 }
             }
             if (!l.evtsent) {
-                
+
                 b.setEvent(evt.toProtoBuf());
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
@@ -78,7 +92,7 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
         } finally {
-            if(evt != null && l != null) {
+            if (evt != null && l != null) {
                 evt.unregisterListener(l);
             }
         }
@@ -123,6 +137,13 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
     @Override
     public void listEvents(SDFSEventListRequest request, StreamObserver<SDFSEventListResponse> responseObserver) {
         SDFSEventListResponse.Builder b = SDFSEventListResponse.newBuilder();
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.EVENT_READ)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
         try {
             b.addAllEvents(org.opendedup.sdfs.notification.SDFSEvent.getProtoBufEvents());
         } catch (Exception e) {

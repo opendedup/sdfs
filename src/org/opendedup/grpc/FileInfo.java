@@ -199,65 +199,973 @@ public final class FileInfo {
      */
     NOERR(0),
     /**
-     * <code>ENOENT = 2;</code>
-     */
-    ENOENT(2),
-    /**
-     * <code>EIO = 5;</code>
-     */
-    EIO(5),
-    /**
-     * <code>EAGAIN = 11;</code>
-     */
-    EAGAIN(11),
-    /**
-     * <code>EEXIST = 17;</code>
-     */
-    EEXIST(17),
-    /**
-     * <code>ENOTDIR = 20;</code>
-     */
-    ENOTDIR(20),
-    /**
-     * <code>ENODATA = 61;</code>
-     */
-    ENODATA(61),
-    /**
-     * <code>ENAVAIL = 119;</code>
-     */
-    ENAVAIL(119),
-    /**
+     * <pre>
+     * Operation not permitted 
+     * </pre>
+     *
      * <code>EPERM = 1;</code>
      */
     EPERM(1),
     /**
-     * <code>ENOSPC = 28;</code>
+     * <pre>
+     * No such file or directory 
+     * </pre>
+     *
+     * <code>ENOENT = 2;</code>
      */
-    ENOSPC(28),
+    ENOENT(2),
     /**
+     * <pre>
+     * No such process 
+     * </pre>
+     *
+     * <code>ESRCH = 3;</code>
+     */
+    ESRCH(3),
+    /**
+     * <pre>
+     * Interrupted system call 
+     * </pre>
+     *
+     * <code>EINTR = 4;</code>
+     */
+    EINTR(4),
+    /**
+     * <pre>
+     * I/O error 
+     * </pre>
+     *
+     * <code>EIO = 5;</code>
+     */
+    EIO(5),
+    /**
+     * <pre>
+     * No such device or address 
+     * </pre>
+     *
+     * <code>ENXIO = 6;</code>
+     */
+    ENXIO(6),
+    /**
+     * <pre>
+     * Arg list too long 
+     * </pre>
+     *
+     * <code>E2BIG = 7;</code>
+     */
+    E2BIG(7),
+    /**
+     * <pre>
+     * Exec format error 
+     * </pre>
+     *
+     * <code>ENOEXEC = 8;</code>
+     */
+    ENOEXEC(8),
+    /**
+     * <pre>
+     * Bad file number 
+     * </pre>
+     *
+     * <code>EBADF = 9;</code>
+     */
+    EBADF(9),
+    /**
+     * <pre>
+     * No child processes 
+     * </pre>
+     *
+     * <code>ECHILD = 10;</code>
+     */
+    ECHILD(10),
+    /**
+     * <pre>
+     * Try again 
+     * </pre>
+     *
+     * <code>EAGAIN = 11;</code>
+     */
+    EAGAIN(11),
+    /**
+     * <pre>
+     * Out of memory 
+     * </pre>
+     *
+     * <code>ENOMEM = 12;</code>
+     */
+    ENOMEM(12),
+    /**
+     * <pre>
+     * Permission denied 
+     * </pre>
+     *
      * <code>EACCES = 13;</code>
      */
     EACCES(13),
     /**
-     * <code>ENOTEMPTY = 39;</code>
+     * <pre>
+     * Bad address 
+     * </pre>
+     *
+     * <code>EFAULT = 14;</code>
      */
-    ENOTEMPTY(39),
+    EFAULT(14),
     /**
-     * <code>ENOSYS = 38;</code>
+     * <pre>
+     * Block device required 
+     * </pre>
+     *
+     * <code>ENOTBLK = 15;</code>
      */
-    ENOSYS(38),
+    ENOTBLK(15),
     /**
+     * <pre>
+     * Device or resource busy 
+     * </pre>
+     *
+     * <code>EBUSY = 16;</code>
+     */
+    EBUSY(16),
+    /**
+     * <pre>
+     * File exists 
+     * </pre>
+     *
+     * <code>EEXIST = 17;</code>
+     */
+    EEXIST(17),
+    /**
+     * <pre>
+     * Cross-device link 
+     * </pre>
+     *
+     * <code>EXDEV = 18;</code>
+     */
+    EXDEV(18),
+    /**
+     * <pre>
+     * No such device 
+     * </pre>
+     *
      * <code>ENODEV = 19;</code>
      */
     ENODEV(19),
     /**
+     * <pre>
+     * Not a directory 
+     * </pre>
+     *
+     * <code>ENOTDIR = 20;</code>
+     */
+    ENOTDIR(20),
+    /**
+     * <pre>
+     * Is a directory 
+     * </pre>
+     *
+     * <code>EISDIR = 21;</code>
+     */
+    EISDIR(21),
+    /**
+     * <pre>
+     * Invalid argument 
+     * </pre>
+     *
+     * <code>EINVAL = 22;</code>
+     */
+    EINVAL(22),
+    /**
+     * <pre>
+     * File table overflow 
+     * </pre>
+     *
+     * <code>ENFILE = 23;</code>
+     */
+    ENFILE(23),
+    /**
+     * <pre>
+     * Too many open files 
+     * </pre>
+     *
+     * <code>EMFILE = 24;</code>
+     */
+    EMFILE(24),
+    /**
+     * <pre>
+     * Not a typewriter 
+     * </pre>
+     *
+     * <code>ENOTTY = 25;</code>
+     */
+    ENOTTY(25),
+    /**
+     * <pre>
+     * Text file busy 
+     * </pre>
+     *
+     * <code>ETXTBSY = 26;</code>
+     */
+    ETXTBSY(26),
+    /**
+     * <pre>
+     * File too large 
+     * </pre>
+     *
+     * <code>EFBIG = 27;</code>
+     */
+    EFBIG(27),
+    /**
+     * <pre>
+     * No space left on device 
+     * </pre>
+     *
+     * <code>ENOSPC = 28;</code>
+     */
+    ENOSPC(28),
+    /**
+     * <pre>
+     * Illegal seek 
+     * </pre>
+     *
+     * <code>ESPIPE = 29;</code>
+     */
+    ESPIPE(29),
+    /**
+     * <pre>
+     * Read-only file system 
+     * </pre>
+     *
+     * <code>EROFS = 30;</code>
+     */
+    EROFS(30),
+    /**
+     * <pre>
+     * Too many links 
+     * </pre>
+     *
+     * <code>EMLINK = 31;</code>
+     */
+    EMLINK(31),
+    /**
+     * <pre>
+     * Broken pipe 
+     * </pre>
+     *
+     * <code>EPIPE = 32;</code>
+     */
+    EPIPE(32),
+    /**
+     * <pre>
+     * Math argument out of domain of func 
+     * </pre>
+     *
+     * <code>EDOM = 33;</code>
+     */
+    EDOM(33),
+    /**
+     * <pre>
+     * Math result not representable 
+     * </pre>
+     *
+     * <code>ERANGE = 34;</code>
+     */
+    ERANGE(34),
+    /**
+     * <pre>
+     * Resource deadlock would occur 
+     * </pre>
+     *
+     * <code>EDEADLK = 35;</code>
+     */
+    EDEADLK(35),
+    /**
+     * <pre>
+     * File name too long 
+     * </pre>
+     *
+     * <code>ENAMETOOLONG = 36;</code>
+     */
+    ENAMETOOLONG(36),
+    /**
+     * <pre>
+     * No record locks available 
+     * </pre>
+     *
+     * <code>ENOLCK = 37;</code>
+     */
+    ENOLCK(37),
+    /**
+     * <pre>
+     * Function not implemented 
+     * </pre>
+     *
+     * <code>ENOSYS = 38;</code>
+     */
+    ENOSYS(38),
+    /**
+     * <pre>
+     * Directory not empty 
+     * </pre>
+     *
+     * <code>ENOTEMPTY = 39;</code>
+     */
+    ENOTEMPTY(39),
+    /**
+     * <pre>
+     * Too many symbolic links encountered 
+     * </pre>
+     *
+     * <code>ELOOP = 40;</code>
+     */
+    ELOOP(40),
+    /**
+     * <pre>
+     * Operation would block 
+     * </pre>
+     *
+     * <code>EWOULDBLOCK = 41;</code>
+     */
+    EWOULDBLOCK(41),
+    /**
+     * <pre>
+     * No message of desired type 
+     * </pre>
+     *
+     * <code>ENOMSG = 42;</code>
+     */
+    ENOMSG(42),
+    /**
+     * <pre>
+     * Identifier removed 
+     * </pre>
+     *
+     * <code>EIDRM = 43;</code>
+     */
+    EIDRM(43),
+    /**
+     * <pre>
+     * Channel number out of range 
+     * </pre>
+     *
+     * <code>ECHRNG = 44;</code>
+     */
+    ECHRNG(44),
+    /**
+     * <pre>
+     * Level 2 not synchronized 
+     * </pre>
+     *
+     * <code>EL2NSYNC = 45;</code>
+     */
+    EL2NSYNC(45),
+    /**
+     * <pre>
+     * Level 3 halted 
+     * </pre>
+     *
+     * <code>EL3HLT = 46;</code>
+     */
+    EL3HLT(46),
+    /**
+     * <pre>
+     * Level 3 reset 
+     * </pre>
+     *
+     * <code>EL3RST = 47;</code>
+     */
+    EL3RST(47),
+    /**
+     * <pre>
+     * Link number out of range 
+     * </pre>
+     *
+     * <code>ELNRNG = 48;</code>
+     */
+    ELNRNG(48),
+    /**
+     * <pre>
+     * Protocol driver not attached 
+     * </pre>
+     *
+     * <code>EUNATCH = 49;</code>
+     */
+    EUNATCH(49),
+    /**
+     * <pre>
+     * No CSI structure available 
+     * </pre>
+     *
+     * <code>ENOCSI = 50;</code>
+     */
+    ENOCSI(50),
+    /**
+     * <pre>
+     * Level 2 halted 
+     * </pre>
+     *
+     * <code>EL2HLT = 51;</code>
+     */
+    EL2HLT(51),
+    /**
+     * <pre>
+     * Invalid exchange 
+     * </pre>
+     *
+     * <code>EBADE = 52;</code>
+     */
+    EBADE(52),
+    /**
+     * <pre>
+     * Invalid request descriptor 
+     * </pre>
+     *
+     * <code>EBADR = 53;</code>
+     */
+    EBADR(53),
+    /**
+     * <pre>
+     * Exchange full 
+     * </pre>
+     *
+     * <code>EXFULL = 54;</code>
+     */
+    EXFULL(54),
+    /**
+     * <pre>
+     * No anode 
+     * </pre>
+     *
+     * <code>ENOANO = 55;</code>
+     */
+    ENOANO(55),
+    /**
+     * <pre>
+     * Invalid request code 
+     * </pre>
+     *
+     * <code>EBADRQC = 56;</code>
+     */
+    EBADRQC(56),
+    /**
+     * <pre>
+     * Invalid slot 
+     * </pre>
+     *
+     * <code>EBADSLT = 57;</code>
+     */
+    EBADSLT(57),
+    /**
+     * <pre>
+     * File locking deadlock error 
+     * </pre>
+     *
+     * <code>EDEADLOCK = 58;</code>
+     */
+    EDEADLOCK(58),
+    /**
+     * <pre>
+     * Bad font file format 
+     * </pre>
+     *
+     * <code>EBFONT = 59;</code>
+     */
+    EBFONT(59),
+    /**
+     * <pre>
+     * Device not a stream 
+     * </pre>
+     *
+     * <code>ENOSTR = 60;</code>
+     */
+    ENOSTR(60),
+    /**
+     * <pre>
+     * No data available 
+     * </pre>
+     *
+     * <code>ENODATA = 61;</code>
+     */
+    ENODATA(61),
+    /**
+     * <pre>
+     * Timer expired 
+     * </pre>
+     *
+     * <code>ETIME = 62;</code>
+     */
+    ETIME(62),
+    /**
+     * <pre>
+     * Out of streams resources 
+     * </pre>
+     *
+     * <code>ENOSR = 63;</code>
+     */
+    ENOSR(63),
+    /**
+     * <pre>
+     * Machine is not on the network 
+     * </pre>
+     *
+     * <code>ENONET = 64;</code>
+     */
+    ENONET(64),
+    /**
+     * <pre>
+     * Package not installed 
+     * </pre>
+     *
+     * <code>ENOPKG = 65;</code>
+     */
+    ENOPKG(65),
+    /**
+     * <pre>
+     * Object is remote 
+     * </pre>
+     *
+     * <code>EREMOTE = 66;</code>
+     */
+    EREMOTE(66),
+    /**
+     * <pre>
+     * Link has been severed 
+     * </pre>
+     *
+     * <code>ENOLINK = 67;</code>
+     */
+    ENOLINK(67),
+    /**
+     * <pre>
+     * Advertise error 
+     * </pre>
+     *
+     * <code>EADV = 68;</code>
+     */
+    EADV(68),
+    /**
+     * <pre>
+     * Srmount error 
+     * </pre>
+     *
+     * <code>ESRMNT = 69;</code>
+     */
+    ESRMNT(69),
+    /**
+     * <pre>
+     * Communication error on send 
+     * </pre>
+     *
+     * <code>ECOMM = 70;</code>
+     */
+    ECOMM(70),
+    /**
+     * <pre>
+     * Protocol error 
+     * </pre>
+     *
+     * <code>EPROTO = 71;</code>
+     */
+    EPROTO(71),
+    /**
+     * <pre>
+     * Multihop attempted 
+     * </pre>
+     *
+     * <code>EMULTIHOP = 72;</code>
+     */
+    EMULTIHOP(72),
+    /**
+     * <pre>
+     * RFS specific error 
+     * </pre>
+     *
+     * <code>EDOTDOT = 73;</code>
+     */
+    EDOTDOT(73),
+    /**
+     * <pre>
+     * Not a data message 
+     * </pre>
+     *
+     * <code>EBADMSG = 74;</code>
+     */
+    EBADMSG(74),
+    /**
+     * <pre>
+     * Value too large for defined data type 
+     * </pre>
+     *
+     * <code>EOVERFLOW = 75;</code>
+     */
+    EOVERFLOW(75),
+    /**
+     * <pre>
+     * Name not unique on network 
+     * </pre>
+     *
+     * <code>ENOTUNIQ = 76;</code>
+     */
+    ENOTUNIQ(76),
+    /**
+     * <pre>
+     * File descriptor in bad state 
+     * </pre>
+     *
      * <code>EBADFD = 77;</code>
      */
     EBADFD(77),
     /**
-     * <code>EISDIR = 21;</code>
+     * <pre>
+     * Remote address changed 
+     * </pre>
+     *
+     * <code>EREMCHG = 78;</code>
      */
-    EISDIR(21),
+    EREMCHG(78),
+    /**
+     * <pre>
+     * Can not access a needed shared library 
+     * </pre>
+     *
+     * <code>ELIBACC = 79;</code>
+     */
+    ELIBACC(79),
+    /**
+     * <pre>
+     * Accessing a corrupted shared library 
+     * </pre>
+     *
+     * <code>ELIBBAD = 80;</code>
+     */
+    ELIBBAD(80),
+    /**
+     * <pre>
+     * .lib section in a.out corrupted 
+     * </pre>
+     *
+     * <code>ELIBSCN = 81;</code>
+     */
+    ELIBSCN(81),
+    /**
+     * <pre>
+     * Attempting to link in too many shared libraries 
+     * </pre>
+     *
+     * <code>ELIBMAX = 82;</code>
+     */
+    ELIBMAX(82),
+    /**
+     * <pre>
+     * Cannot exec a shared library directly 
+     * </pre>
+     *
+     * <code>ELIBEXEC = 83;</code>
+     */
+    ELIBEXEC(83),
+    /**
+     * <pre>
+     * Illegal byte sequence 
+     * </pre>
+     *
+     * <code>EILSEQ = 84;</code>
+     */
+    EILSEQ(84),
+    /**
+     * <pre>
+     * Interrupted system call should be restarted 
+     * </pre>
+     *
+     * <code>ERESTART = 85;</code>
+     */
+    ERESTART(85),
+    /**
+     * <pre>
+     * Streams pipe error 
+     * </pre>
+     *
+     * <code>ESTRPIPE = 86;</code>
+     */
+    ESTRPIPE(86),
+    /**
+     * <pre>
+     * Too many users 
+     * </pre>
+     *
+     * <code>EUSERS = 87;</code>
+     */
+    EUSERS(87),
+    /**
+     * <pre>
+     * Socket operation on non-socket 
+     * </pre>
+     *
+     * <code>ENOTSOCK = 88;</code>
+     */
+    ENOTSOCK(88),
+    /**
+     * <pre>
+     * Destination address required 
+     * </pre>
+     *
+     * <code>EDESTADDRREQ = 89;</code>
+     */
+    EDESTADDRREQ(89),
+    /**
+     * <pre>
+     * Message too long 
+     * </pre>
+     *
+     * <code>EMSGSIZE = 90;</code>
+     */
+    EMSGSIZE(90),
+    /**
+     * <pre>
+     * Protocol wrong type for socket 
+     * </pre>
+     *
+     * <code>EPROTOTYPE = 91;</code>
+     */
+    EPROTOTYPE(91),
+    /**
+     * <pre>
+     * Protocol not available 
+     * </pre>
+     *
+     * <code>ENOPROTOOPT = 92;</code>
+     */
+    ENOPROTOOPT(92),
+    /**
+     * <pre>
+     * Protocol not supported 
+     * </pre>
+     *
+     * <code>EPROTONOSUPPORT = 93;</code>
+     */
+    EPROTONOSUPPORT(93),
+    /**
+     * <pre>
+     * Socket type not supported 
+     * </pre>
+     *
+     * <code>ESOCKTNOSUPPORT = 94;</code>
+     */
+    ESOCKTNOSUPPORT(94),
+    /**
+     * <pre>
+     * Operation not supported on transport endpoint 
+     * </pre>
+     *
+     * <code>EOPNOTSUPP = 95;</code>
+     */
+    EOPNOTSUPP(95),
+    /**
+     * <pre>
+     * Protocol family not supported 
+     * </pre>
+     *
+     * <code>EPFNOSUPPORT = 96;</code>
+     */
+    EPFNOSUPPORT(96),
+    /**
+     * <pre>
+     * Address family not supported by protocol 
+     * </pre>
+     *
+     * <code>EAFNOSUPPORT = 97;</code>
+     */
+    EAFNOSUPPORT(97),
+    /**
+     * <pre>
+     * Address already in use 
+     * </pre>
+     *
+     * <code>EADDRINUSE = 98;</code>
+     */
+    EADDRINUSE(98),
+    /**
+     * <pre>
+     * Cannot assign requested address 
+     * </pre>
+     *
+     * <code>EADDRNOTAVAIL = 99;</code>
+     */
+    EADDRNOTAVAIL(99),
+    /**
+     * <pre>
+     * Network is down 
+     * </pre>
+     *
+     * <code>ENETDOWN = 100;</code>
+     */
+    ENETDOWN(100),
+    /**
+     * <pre>
+     * Network is unreachable 
+     * </pre>
+     *
+     * <code>ENETUNREACH = 101;</code>
+     */
+    ENETUNREACH(101),
+    /**
+     * <pre>
+     * Network dropped connection because of reset 
+     * </pre>
+     *
+     * <code>ENETRESET = 102;</code>
+     */
+    ENETRESET(102),
+    /**
+     * <pre>
+     * Software caused connection abort 
+     * </pre>
+     *
+     * <code>ECONNABORTED = 103;</code>
+     */
+    ECONNABORTED(103),
+    /**
+     * <pre>
+     * Connection reset by peer 
+     * </pre>
+     *
+     * <code>ECONNRESET = 104;</code>
+     */
+    ECONNRESET(104),
+    /**
+     * <pre>
+     * No buffer space available 
+     * </pre>
+     *
+     * <code>ENOBUFS = 105;</code>
+     */
+    ENOBUFS(105),
+    /**
+     * <pre>
+     * Transport endpoint is already connected 
+     * </pre>
+     *
+     * <code>EISCONN = 106;</code>
+     */
+    EISCONN(106),
+    /**
+     * <pre>
+     * Transport endpoint is not connected 
+     * </pre>
+     *
+     * <code>ENOTCONN = 107;</code>
+     */
+    ENOTCONN(107),
+    /**
+     * <pre>
+     * Cannot send after transport endpoint shutdown 
+     * </pre>
+     *
+     * <code>ESHUTDOWN = 108;</code>
+     */
+    ESHUTDOWN(108),
+    /**
+     * <pre>
+     * Too many references: cannot splice 
+     * </pre>
+     *
+     * <code>ETOOMANYREFS = 109;</code>
+     */
+    ETOOMANYREFS(109),
+    /**
+     * <pre>
+     * Connection timed out 
+     * </pre>
+     *
+     * <code>ETIMEDOUT = 110;</code>
+     */
+    ETIMEDOUT(110),
+    /**
+     * <pre>
+     * Connection refused 
+     * </pre>
+     *
+     * <code>ECONNREFUSED = 111;</code>
+     */
+    ECONNREFUSED(111),
+    /**
+     * <pre>
+     * Host is down 
+     * </pre>
+     *
+     * <code>EHOSTDOWN = 112;</code>
+     */
+    EHOSTDOWN(112),
+    /**
+     * <pre>
+     * No route to host 
+     * </pre>
+     *
+     * <code>EHOSTUNREACH = 113;</code>
+     */
+    EHOSTUNREACH(113),
+    /**
+     * <pre>
+     * Operation already in progress 
+     * </pre>
+     *
+     * <code>EALREADY = 114;</code>
+     */
+    EALREADY(114),
+    /**
+     * <pre>
+     * Operation now in progress 
+     * </pre>
+     *
+     * <code>EINPROGRESS = 115;</code>
+     */
+    EINPROGRESS(115),
+    /**
+     * <pre>
+     * Stale NFS file handle 
+     * </pre>
+     *
+     * <code>ESTALE = 116;</code>
+     */
+    ESTALE(116),
+    /**
+     * <pre>
+     * Structure needs cleaning 
+     * </pre>
+     *
+     * <code>EUCLEAN = 117;</code>
+     */
+    EUCLEAN(117),
+    /**
+     * <pre>
+     * Not a XENIX named type file 
+     * </pre>
+     *
+     * <code>ENOTNAM = 118;</code>
+     */
+    ENOTNAM(118),
+    /**
+     * <pre>
+     * No XENIX semaphores available 
+     * </pre>
+     *
+     * <code>ENAVAIL = 119;</code>
+     */
+    ENAVAIL(119),
+    /**
+     * <pre>
+     * Is a named type file 
+     * </pre>
+     *
+     * <code>EISNAM = 120;</code>
+     */
+    EISNAM(120),
+    /**
+     * <pre>
+     * Remote I/O error 
+     * </pre>
+     *
+     * <code>EREMOTEIO = 121;</code>
+     */
+    EREMOTEIO(121),
     UNRECOGNIZED(-1),
     ;
 
@@ -266,65 +1174,973 @@ public final class FileInfo {
      */
     public static final int NOERR_VALUE = 0;
     /**
-     * <code>ENOENT = 2;</code>
-     */
-    public static final int ENOENT_VALUE = 2;
-    /**
-     * <code>EIO = 5;</code>
-     */
-    public static final int EIO_VALUE = 5;
-    /**
-     * <code>EAGAIN = 11;</code>
-     */
-    public static final int EAGAIN_VALUE = 11;
-    /**
-     * <code>EEXIST = 17;</code>
-     */
-    public static final int EEXIST_VALUE = 17;
-    /**
-     * <code>ENOTDIR = 20;</code>
-     */
-    public static final int ENOTDIR_VALUE = 20;
-    /**
-     * <code>ENODATA = 61;</code>
-     */
-    public static final int ENODATA_VALUE = 61;
-    /**
-     * <code>ENAVAIL = 119;</code>
-     */
-    public static final int ENAVAIL_VALUE = 119;
-    /**
+     * <pre>
+     * Operation not permitted 
+     * </pre>
+     *
      * <code>EPERM = 1;</code>
      */
     public static final int EPERM_VALUE = 1;
     /**
-     * <code>ENOSPC = 28;</code>
+     * <pre>
+     * No such file or directory 
+     * </pre>
+     *
+     * <code>ENOENT = 2;</code>
      */
-    public static final int ENOSPC_VALUE = 28;
+    public static final int ENOENT_VALUE = 2;
     /**
+     * <pre>
+     * No such process 
+     * </pre>
+     *
+     * <code>ESRCH = 3;</code>
+     */
+    public static final int ESRCH_VALUE = 3;
+    /**
+     * <pre>
+     * Interrupted system call 
+     * </pre>
+     *
+     * <code>EINTR = 4;</code>
+     */
+    public static final int EINTR_VALUE = 4;
+    /**
+     * <pre>
+     * I/O error 
+     * </pre>
+     *
+     * <code>EIO = 5;</code>
+     */
+    public static final int EIO_VALUE = 5;
+    /**
+     * <pre>
+     * No such device or address 
+     * </pre>
+     *
+     * <code>ENXIO = 6;</code>
+     */
+    public static final int ENXIO_VALUE = 6;
+    /**
+     * <pre>
+     * Arg list too long 
+     * </pre>
+     *
+     * <code>E2BIG = 7;</code>
+     */
+    public static final int E2BIG_VALUE = 7;
+    /**
+     * <pre>
+     * Exec format error 
+     * </pre>
+     *
+     * <code>ENOEXEC = 8;</code>
+     */
+    public static final int ENOEXEC_VALUE = 8;
+    /**
+     * <pre>
+     * Bad file number 
+     * </pre>
+     *
+     * <code>EBADF = 9;</code>
+     */
+    public static final int EBADF_VALUE = 9;
+    /**
+     * <pre>
+     * No child processes 
+     * </pre>
+     *
+     * <code>ECHILD = 10;</code>
+     */
+    public static final int ECHILD_VALUE = 10;
+    /**
+     * <pre>
+     * Try again 
+     * </pre>
+     *
+     * <code>EAGAIN = 11;</code>
+     */
+    public static final int EAGAIN_VALUE = 11;
+    /**
+     * <pre>
+     * Out of memory 
+     * </pre>
+     *
+     * <code>ENOMEM = 12;</code>
+     */
+    public static final int ENOMEM_VALUE = 12;
+    /**
+     * <pre>
+     * Permission denied 
+     * </pre>
+     *
      * <code>EACCES = 13;</code>
      */
     public static final int EACCES_VALUE = 13;
     /**
-     * <code>ENOTEMPTY = 39;</code>
+     * <pre>
+     * Bad address 
+     * </pre>
+     *
+     * <code>EFAULT = 14;</code>
      */
-    public static final int ENOTEMPTY_VALUE = 39;
+    public static final int EFAULT_VALUE = 14;
     /**
-     * <code>ENOSYS = 38;</code>
+     * <pre>
+     * Block device required 
+     * </pre>
+     *
+     * <code>ENOTBLK = 15;</code>
      */
-    public static final int ENOSYS_VALUE = 38;
+    public static final int ENOTBLK_VALUE = 15;
     /**
+     * <pre>
+     * Device or resource busy 
+     * </pre>
+     *
+     * <code>EBUSY = 16;</code>
+     */
+    public static final int EBUSY_VALUE = 16;
+    /**
+     * <pre>
+     * File exists 
+     * </pre>
+     *
+     * <code>EEXIST = 17;</code>
+     */
+    public static final int EEXIST_VALUE = 17;
+    /**
+     * <pre>
+     * Cross-device link 
+     * </pre>
+     *
+     * <code>EXDEV = 18;</code>
+     */
+    public static final int EXDEV_VALUE = 18;
+    /**
+     * <pre>
+     * No such device 
+     * </pre>
+     *
      * <code>ENODEV = 19;</code>
      */
     public static final int ENODEV_VALUE = 19;
     /**
+     * <pre>
+     * Not a directory 
+     * </pre>
+     *
+     * <code>ENOTDIR = 20;</code>
+     */
+    public static final int ENOTDIR_VALUE = 20;
+    /**
+     * <pre>
+     * Is a directory 
+     * </pre>
+     *
+     * <code>EISDIR = 21;</code>
+     */
+    public static final int EISDIR_VALUE = 21;
+    /**
+     * <pre>
+     * Invalid argument 
+     * </pre>
+     *
+     * <code>EINVAL = 22;</code>
+     */
+    public static final int EINVAL_VALUE = 22;
+    /**
+     * <pre>
+     * File table overflow 
+     * </pre>
+     *
+     * <code>ENFILE = 23;</code>
+     */
+    public static final int ENFILE_VALUE = 23;
+    /**
+     * <pre>
+     * Too many open files 
+     * </pre>
+     *
+     * <code>EMFILE = 24;</code>
+     */
+    public static final int EMFILE_VALUE = 24;
+    /**
+     * <pre>
+     * Not a typewriter 
+     * </pre>
+     *
+     * <code>ENOTTY = 25;</code>
+     */
+    public static final int ENOTTY_VALUE = 25;
+    /**
+     * <pre>
+     * Text file busy 
+     * </pre>
+     *
+     * <code>ETXTBSY = 26;</code>
+     */
+    public static final int ETXTBSY_VALUE = 26;
+    /**
+     * <pre>
+     * File too large 
+     * </pre>
+     *
+     * <code>EFBIG = 27;</code>
+     */
+    public static final int EFBIG_VALUE = 27;
+    /**
+     * <pre>
+     * No space left on device 
+     * </pre>
+     *
+     * <code>ENOSPC = 28;</code>
+     */
+    public static final int ENOSPC_VALUE = 28;
+    /**
+     * <pre>
+     * Illegal seek 
+     * </pre>
+     *
+     * <code>ESPIPE = 29;</code>
+     */
+    public static final int ESPIPE_VALUE = 29;
+    /**
+     * <pre>
+     * Read-only file system 
+     * </pre>
+     *
+     * <code>EROFS = 30;</code>
+     */
+    public static final int EROFS_VALUE = 30;
+    /**
+     * <pre>
+     * Too many links 
+     * </pre>
+     *
+     * <code>EMLINK = 31;</code>
+     */
+    public static final int EMLINK_VALUE = 31;
+    /**
+     * <pre>
+     * Broken pipe 
+     * </pre>
+     *
+     * <code>EPIPE = 32;</code>
+     */
+    public static final int EPIPE_VALUE = 32;
+    /**
+     * <pre>
+     * Math argument out of domain of func 
+     * </pre>
+     *
+     * <code>EDOM = 33;</code>
+     */
+    public static final int EDOM_VALUE = 33;
+    /**
+     * <pre>
+     * Math result not representable 
+     * </pre>
+     *
+     * <code>ERANGE = 34;</code>
+     */
+    public static final int ERANGE_VALUE = 34;
+    /**
+     * <pre>
+     * Resource deadlock would occur 
+     * </pre>
+     *
+     * <code>EDEADLK = 35;</code>
+     */
+    public static final int EDEADLK_VALUE = 35;
+    /**
+     * <pre>
+     * File name too long 
+     * </pre>
+     *
+     * <code>ENAMETOOLONG = 36;</code>
+     */
+    public static final int ENAMETOOLONG_VALUE = 36;
+    /**
+     * <pre>
+     * No record locks available 
+     * </pre>
+     *
+     * <code>ENOLCK = 37;</code>
+     */
+    public static final int ENOLCK_VALUE = 37;
+    /**
+     * <pre>
+     * Function not implemented 
+     * </pre>
+     *
+     * <code>ENOSYS = 38;</code>
+     */
+    public static final int ENOSYS_VALUE = 38;
+    /**
+     * <pre>
+     * Directory not empty 
+     * </pre>
+     *
+     * <code>ENOTEMPTY = 39;</code>
+     */
+    public static final int ENOTEMPTY_VALUE = 39;
+    /**
+     * <pre>
+     * Too many symbolic links encountered 
+     * </pre>
+     *
+     * <code>ELOOP = 40;</code>
+     */
+    public static final int ELOOP_VALUE = 40;
+    /**
+     * <pre>
+     * Operation would block 
+     * </pre>
+     *
+     * <code>EWOULDBLOCK = 41;</code>
+     */
+    public static final int EWOULDBLOCK_VALUE = 41;
+    /**
+     * <pre>
+     * No message of desired type 
+     * </pre>
+     *
+     * <code>ENOMSG = 42;</code>
+     */
+    public static final int ENOMSG_VALUE = 42;
+    /**
+     * <pre>
+     * Identifier removed 
+     * </pre>
+     *
+     * <code>EIDRM = 43;</code>
+     */
+    public static final int EIDRM_VALUE = 43;
+    /**
+     * <pre>
+     * Channel number out of range 
+     * </pre>
+     *
+     * <code>ECHRNG = 44;</code>
+     */
+    public static final int ECHRNG_VALUE = 44;
+    /**
+     * <pre>
+     * Level 2 not synchronized 
+     * </pre>
+     *
+     * <code>EL2NSYNC = 45;</code>
+     */
+    public static final int EL2NSYNC_VALUE = 45;
+    /**
+     * <pre>
+     * Level 3 halted 
+     * </pre>
+     *
+     * <code>EL3HLT = 46;</code>
+     */
+    public static final int EL3HLT_VALUE = 46;
+    /**
+     * <pre>
+     * Level 3 reset 
+     * </pre>
+     *
+     * <code>EL3RST = 47;</code>
+     */
+    public static final int EL3RST_VALUE = 47;
+    /**
+     * <pre>
+     * Link number out of range 
+     * </pre>
+     *
+     * <code>ELNRNG = 48;</code>
+     */
+    public static final int ELNRNG_VALUE = 48;
+    /**
+     * <pre>
+     * Protocol driver not attached 
+     * </pre>
+     *
+     * <code>EUNATCH = 49;</code>
+     */
+    public static final int EUNATCH_VALUE = 49;
+    /**
+     * <pre>
+     * No CSI structure available 
+     * </pre>
+     *
+     * <code>ENOCSI = 50;</code>
+     */
+    public static final int ENOCSI_VALUE = 50;
+    /**
+     * <pre>
+     * Level 2 halted 
+     * </pre>
+     *
+     * <code>EL2HLT = 51;</code>
+     */
+    public static final int EL2HLT_VALUE = 51;
+    /**
+     * <pre>
+     * Invalid exchange 
+     * </pre>
+     *
+     * <code>EBADE = 52;</code>
+     */
+    public static final int EBADE_VALUE = 52;
+    /**
+     * <pre>
+     * Invalid request descriptor 
+     * </pre>
+     *
+     * <code>EBADR = 53;</code>
+     */
+    public static final int EBADR_VALUE = 53;
+    /**
+     * <pre>
+     * Exchange full 
+     * </pre>
+     *
+     * <code>EXFULL = 54;</code>
+     */
+    public static final int EXFULL_VALUE = 54;
+    /**
+     * <pre>
+     * No anode 
+     * </pre>
+     *
+     * <code>ENOANO = 55;</code>
+     */
+    public static final int ENOANO_VALUE = 55;
+    /**
+     * <pre>
+     * Invalid request code 
+     * </pre>
+     *
+     * <code>EBADRQC = 56;</code>
+     */
+    public static final int EBADRQC_VALUE = 56;
+    /**
+     * <pre>
+     * Invalid slot 
+     * </pre>
+     *
+     * <code>EBADSLT = 57;</code>
+     */
+    public static final int EBADSLT_VALUE = 57;
+    /**
+     * <pre>
+     * File locking deadlock error 
+     * </pre>
+     *
+     * <code>EDEADLOCK = 58;</code>
+     */
+    public static final int EDEADLOCK_VALUE = 58;
+    /**
+     * <pre>
+     * Bad font file format 
+     * </pre>
+     *
+     * <code>EBFONT = 59;</code>
+     */
+    public static final int EBFONT_VALUE = 59;
+    /**
+     * <pre>
+     * Device not a stream 
+     * </pre>
+     *
+     * <code>ENOSTR = 60;</code>
+     */
+    public static final int ENOSTR_VALUE = 60;
+    /**
+     * <pre>
+     * No data available 
+     * </pre>
+     *
+     * <code>ENODATA = 61;</code>
+     */
+    public static final int ENODATA_VALUE = 61;
+    /**
+     * <pre>
+     * Timer expired 
+     * </pre>
+     *
+     * <code>ETIME = 62;</code>
+     */
+    public static final int ETIME_VALUE = 62;
+    /**
+     * <pre>
+     * Out of streams resources 
+     * </pre>
+     *
+     * <code>ENOSR = 63;</code>
+     */
+    public static final int ENOSR_VALUE = 63;
+    /**
+     * <pre>
+     * Machine is not on the network 
+     * </pre>
+     *
+     * <code>ENONET = 64;</code>
+     */
+    public static final int ENONET_VALUE = 64;
+    /**
+     * <pre>
+     * Package not installed 
+     * </pre>
+     *
+     * <code>ENOPKG = 65;</code>
+     */
+    public static final int ENOPKG_VALUE = 65;
+    /**
+     * <pre>
+     * Object is remote 
+     * </pre>
+     *
+     * <code>EREMOTE = 66;</code>
+     */
+    public static final int EREMOTE_VALUE = 66;
+    /**
+     * <pre>
+     * Link has been severed 
+     * </pre>
+     *
+     * <code>ENOLINK = 67;</code>
+     */
+    public static final int ENOLINK_VALUE = 67;
+    /**
+     * <pre>
+     * Advertise error 
+     * </pre>
+     *
+     * <code>EADV = 68;</code>
+     */
+    public static final int EADV_VALUE = 68;
+    /**
+     * <pre>
+     * Srmount error 
+     * </pre>
+     *
+     * <code>ESRMNT = 69;</code>
+     */
+    public static final int ESRMNT_VALUE = 69;
+    /**
+     * <pre>
+     * Communication error on send 
+     * </pre>
+     *
+     * <code>ECOMM = 70;</code>
+     */
+    public static final int ECOMM_VALUE = 70;
+    /**
+     * <pre>
+     * Protocol error 
+     * </pre>
+     *
+     * <code>EPROTO = 71;</code>
+     */
+    public static final int EPROTO_VALUE = 71;
+    /**
+     * <pre>
+     * Multihop attempted 
+     * </pre>
+     *
+     * <code>EMULTIHOP = 72;</code>
+     */
+    public static final int EMULTIHOP_VALUE = 72;
+    /**
+     * <pre>
+     * RFS specific error 
+     * </pre>
+     *
+     * <code>EDOTDOT = 73;</code>
+     */
+    public static final int EDOTDOT_VALUE = 73;
+    /**
+     * <pre>
+     * Not a data message 
+     * </pre>
+     *
+     * <code>EBADMSG = 74;</code>
+     */
+    public static final int EBADMSG_VALUE = 74;
+    /**
+     * <pre>
+     * Value too large for defined data type 
+     * </pre>
+     *
+     * <code>EOVERFLOW = 75;</code>
+     */
+    public static final int EOVERFLOW_VALUE = 75;
+    /**
+     * <pre>
+     * Name not unique on network 
+     * </pre>
+     *
+     * <code>ENOTUNIQ = 76;</code>
+     */
+    public static final int ENOTUNIQ_VALUE = 76;
+    /**
+     * <pre>
+     * File descriptor in bad state 
+     * </pre>
+     *
      * <code>EBADFD = 77;</code>
      */
     public static final int EBADFD_VALUE = 77;
     /**
-     * <code>EISDIR = 21;</code>
+     * <pre>
+     * Remote address changed 
+     * </pre>
+     *
+     * <code>EREMCHG = 78;</code>
      */
-    public static final int EISDIR_VALUE = 21;
+    public static final int EREMCHG_VALUE = 78;
+    /**
+     * <pre>
+     * Can not access a needed shared library 
+     * </pre>
+     *
+     * <code>ELIBACC = 79;</code>
+     */
+    public static final int ELIBACC_VALUE = 79;
+    /**
+     * <pre>
+     * Accessing a corrupted shared library 
+     * </pre>
+     *
+     * <code>ELIBBAD = 80;</code>
+     */
+    public static final int ELIBBAD_VALUE = 80;
+    /**
+     * <pre>
+     * .lib section in a.out corrupted 
+     * </pre>
+     *
+     * <code>ELIBSCN = 81;</code>
+     */
+    public static final int ELIBSCN_VALUE = 81;
+    /**
+     * <pre>
+     * Attempting to link in too many shared libraries 
+     * </pre>
+     *
+     * <code>ELIBMAX = 82;</code>
+     */
+    public static final int ELIBMAX_VALUE = 82;
+    /**
+     * <pre>
+     * Cannot exec a shared library directly 
+     * </pre>
+     *
+     * <code>ELIBEXEC = 83;</code>
+     */
+    public static final int ELIBEXEC_VALUE = 83;
+    /**
+     * <pre>
+     * Illegal byte sequence 
+     * </pre>
+     *
+     * <code>EILSEQ = 84;</code>
+     */
+    public static final int EILSEQ_VALUE = 84;
+    /**
+     * <pre>
+     * Interrupted system call should be restarted 
+     * </pre>
+     *
+     * <code>ERESTART = 85;</code>
+     */
+    public static final int ERESTART_VALUE = 85;
+    /**
+     * <pre>
+     * Streams pipe error 
+     * </pre>
+     *
+     * <code>ESTRPIPE = 86;</code>
+     */
+    public static final int ESTRPIPE_VALUE = 86;
+    /**
+     * <pre>
+     * Too many users 
+     * </pre>
+     *
+     * <code>EUSERS = 87;</code>
+     */
+    public static final int EUSERS_VALUE = 87;
+    /**
+     * <pre>
+     * Socket operation on non-socket 
+     * </pre>
+     *
+     * <code>ENOTSOCK = 88;</code>
+     */
+    public static final int ENOTSOCK_VALUE = 88;
+    /**
+     * <pre>
+     * Destination address required 
+     * </pre>
+     *
+     * <code>EDESTADDRREQ = 89;</code>
+     */
+    public static final int EDESTADDRREQ_VALUE = 89;
+    /**
+     * <pre>
+     * Message too long 
+     * </pre>
+     *
+     * <code>EMSGSIZE = 90;</code>
+     */
+    public static final int EMSGSIZE_VALUE = 90;
+    /**
+     * <pre>
+     * Protocol wrong type for socket 
+     * </pre>
+     *
+     * <code>EPROTOTYPE = 91;</code>
+     */
+    public static final int EPROTOTYPE_VALUE = 91;
+    /**
+     * <pre>
+     * Protocol not available 
+     * </pre>
+     *
+     * <code>ENOPROTOOPT = 92;</code>
+     */
+    public static final int ENOPROTOOPT_VALUE = 92;
+    /**
+     * <pre>
+     * Protocol not supported 
+     * </pre>
+     *
+     * <code>EPROTONOSUPPORT = 93;</code>
+     */
+    public static final int EPROTONOSUPPORT_VALUE = 93;
+    /**
+     * <pre>
+     * Socket type not supported 
+     * </pre>
+     *
+     * <code>ESOCKTNOSUPPORT = 94;</code>
+     */
+    public static final int ESOCKTNOSUPPORT_VALUE = 94;
+    /**
+     * <pre>
+     * Operation not supported on transport endpoint 
+     * </pre>
+     *
+     * <code>EOPNOTSUPP = 95;</code>
+     */
+    public static final int EOPNOTSUPP_VALUE = 95;
+    /**
+     * <pre>
+     * Protocol family not supported 
+     * </pre>
+     *
+     * <code>EPFNOSUPPORT = 96;</code>
+     */
+    public static final int EPFNOSUPPORT_VALUE = 96;
+    /**
+     * <pre>
+     * Address family not supported by protocol 
+     * </pre>
+     *
+     * <code>EAFNOSUPPORT = 97;</code>
+     */
+    public static final int EAFNOSUPPORT_VALUE = 97;
+    /**
+     * <pre>
+     * Address already in use 
+     * </pre>
+     *
+     * <code>EADDRINUSE = 98;</code>
+     */
+    public static final int EADDRINUSE_VALUE = 98;
+    /**
+     * <pre>
+     * Cannot assign requested address 
+     * </pre>
+     *
+     * <code>EADDRNOTAVAIL = 99;</code>
+     */
+    public static final int EADDRNOTAVAIL_VALUE = 99;
+    /**
+     * <pre>
+     * Network is down 
+     * </pre>
+     *
+     * <code>ENETDOWN = 100;</code>
+     */
+    public static final int ENETDOWN_VALUE = 100;
+    /**
+     * <pre>
+     * Network is unreachable 
+     * </pre>
+     *
+     * <code>ENETUNREACH = 101;</code>
+     */
+    public static final int ENETUNREACH_VALUE = 101;
+    /**
+     * <pre>
+     * Network dropped connection because of reset 
+     * </pre>
+     *
+     * <code>ENETRESET = 102;</code>
+     */
+    public static final int ENETRESET_VALUE = 102;
+    /**
+     * <pre>
+     * Software caused connection abort 
+     * </pre>
+     *
+     * <code>ECONNABORTED = 103;</code>
+     */
+    public static final int ECONNABORTED_VALUE = 103;
+    /**
+     * <pre>
+     * Connection reset by peer 
+     * </pre>
+     *
+     * <code>ECONNRESET = 104;</code>
+     */
+    public static final int ECONNRESET_VALUE = 104;
+    /**
+     * <pre>
+     * No buffer space available 
+     * </pre>
+     *
+     * <code>ENOBUFS = 105;</code>
+     */
+    public static final int ENOBUFS_VALUE = 105;
+    /**
+     * <pre>
+     * Transport endpoint is already connected 
+     * </pre>
+     *
+     * <code>EISCONN = 106;</code>
+     */
+    public static final int EISCONN_VALUE = 106;
+    /**
+     * <pre>
+     * Transport endpoint is not connected 
+     * </pre>
+     *
+     * <code>ENOTCONN = 107;</code>
+     */
+    public static final int ENOTCONN_VALUE = 107;
+    /**
+     * <pre>
+     * Cannot send after transport endpoint shutdown 
+     * </pre>
+     *
+     * <code>ESHUTDOWN = 108;</code>
+     */
+    public static final int ESHUTDOWN_VALUE = 108;
+    /**
+     * <pre>
+     * Too many references: cannot splice 
+     * </pre>
+     *
+     * <code>ETOOMANYREFS = 109;</code>
+     */
+    public static final int ETOOMANYREFS_VALUE = 109;
+    /**
+     * <pre>
+     * Connection timed out 
+     * </pre>
+     *
+     * <code>ETIMEDOUT = 110;</code>
+     */
+    public static final int ETIMEDOUT_VALUE = 110;
+    /**
+     * <pre>
+     * Connection refused 
+     * </pre>
+     *
+     * <code>ECONNREFUSED = 111;</code>
+     */
+    public static final int ECONNREFUSED_VALUE = 111;
+    /**
+     * <pre>
+     * Host is down 
+     * </pre>
+     *
+     * <code>EHOSTDOWN = 112;</code>
+     */
+    public static final int EHOSTDOWN_VALUE = 112;
+    /**
+     * <pre>
+     * No route to host 
+     * </pre>
+     *
+     * <code>EHOSTUNREACH = 113;</code>
+     */
+    public static final int EHOSTUNREACH_VALUE = 113;
+    /**
+     * <pre>
+     * Operation already in progress 
+     * </pre>
+     *
+     * <code>EALREADY = 114;</code>
+     */
+    public static final int EALREADY_VALUE = 114;
+    /**
+     * <pre>
+     * Operation now in progress 
+     * </pre>
+     *
+     * <code>EINPROGRESS = 115;</code>
+     */
+    public static final int EINPROGRESS_VALUE = 115;
+    /**
+     * <pre>
+     * Stale NFS file handle 
+     * </pre>
+     *
+     * <code>ESTALE = 116;</code>
+     */
+    public static final int ESTALE_VALUE = 116;
+    /**
+     * <pre>
+     * Structure needs cleaning 
+     * </pre>
+     *
+     * <code>EUCLEAN = 117;</code>
+     */
+    public static final int EUCLEAN_VALUE = 117;
+    /**
+     * <pre>
+     * Not a XENIX named type file 
+     * </pre>
+     *
+     * <code>ENOTNAM = 118;</code>
+     */
+    public static final int ENOTNAM_VALUE = 118;
+    /**
+     * <pre>
+     * No XENIX semaphores available 
+     * </pre>
+     *
+     * <code>ENAVAIL = 119;</code>
+     */
+    public static final int ENAVAIL_VALUE = 119;
+    /**
+     * <pre>
+     * Is a named type file 
+     * </pre>
+     *
+     * <code>EISNAM = 120;</code>
+     */
+    public static final int EISNAM_VALUE = 120;
+    /**
+     * <pre>
+     * Remote I/O error 
+     * </pre>
+     *
+     * <code>EREMOTEIO = 121;</code>
+     */
+    public static final int EREMOTEIO_VALUE = 121;
 
 
     public final int getNumber() {
@@ -352,21 +2168,127 @@ public final class FileInfo {
     public static errorCodes forNumber(int value) {
       switch (value) {
         case 0: return NOERR;
-        case 2: return ENOENT;
-        case 5: return EIO;
-        case 11: return EAGAIN;
-        case 17: return EEXIST;
-        case 20: return ENOTDIR;
-        case 61: return ENODATA;
-        case 119: return ENAVAIL;
         case 1: return EPERM;
-        case 28: return ENOSPC;
+        case 2: return ENOENT;
+        case 3: return ESRCH;
+        case 4: return EINTR;
+        case 5: return EIO;
+        case 6: return ENXIO;
+        case 7: return E2BIG;
+        case 8: return ENOEXEC;
+        case 9: return EBADF;
+        case 10: return ECHILD;
+        case 11: return EAGAIN;
+        case 12: return ENOMEM;
         case 13: return EACCES;
-        case 39: return ENOTEMPTY;
-        case 38: return ENOSYS;
+        case 14: return EFAULT;
+        case 15: return ENOTBLK;
+        case 16: return EBUSY;
+        case 17: return EEXIST;
+        case 18: return EXDEV;
         case 19: return ENODEV;
-        case 77: return EBADFD;
+        case 20: return ENOTDIR;
         case 21: return EISDIR;
+        case 22: return EINVAL;
+        case 23: return ENFILE;
+        case 24: return EMFILE;
+        case 25: return ENOTTY;
+        case 26: return ETXTBSY;
+        case 27: return EFBIG;
+        case 28: return ENOSPC;
+        case 29: return ESPIPE;
+        case 30: return EROFS;
+        case 31: return EMLINK;
+        case 32: return EPIPE;
+        case 33: return EDOM;
+        case 34: return ERANGE;
+        case 35: return EDEADLK;
+        case 36: return ENAMETOOLONG;
+        case 37: return ENOLCK;
+        case 38: return ENOSYS;
+        case 39: return ENOTEMPTY;
+        case 40: return ELOOP;
+        case 41: return EWOULDBLOCK;
+        case 42: return ENOMSG;
+        case 43: return EIDRM;
+        case 44: return ECHRNG;
+        case 45: return EL2NSYNC;
+        case 46: return EL3HLT;
+        case 47: return EL3RST;
+        case 48: return ELNRNG;
+        case 49: return EUNATCH;
+        case 50: return ENOCSI;
+        case 51: return EL2HLT;
+        case 52: return EBADE;
+        case 53: return EBADR;
+        case 54: return EXFULL;
+        case 55: return ENOANO;
+        case 56: return EBADRQC;
+        case 57: return EBADSLT;
+        case 58: return EDEADLOCK;
+        case 59: return EBFONT;
+        case 60: return ENOSTR;
+        case 61: return ENODATA;
+        case 62: return ETIME;
+        case 63: return ENOSR;
+        case 64: return ENONET;
+        case 65: return ENOPKG;
+        case 66: return EREMOTE;
+        case 67: return ENOLINK;
+        case 68: return EADV;
+        case 69: return ESRMNT;
+        case 70: return ECOMM;
+        case 71: return EPROTO;
+        case 72: return EMULTIHOP;
+        case 73: return EDOTDOT;
+        case 74: return EBADMSG;
+        case 75: return EOVERFLOW;
+        case 76: return ENOTUNIQ;
+        case 77: return EBADFD;
+        case 78: return EREMCHG;
+        case 79: return ELIBACC;
+        case 80: return ELIBBAD;
+        case 81: return ELIBSCN;
+        case 82: return ELIBMAX;
+        case 83: return ELIBEXEC;
+        case 84: return EILSEQ;
+        case 85: return ERESTART;
+        case 86: return ESTRPIPE;
+        case 87: return EUSERS;
+        case 88: return ENOTSOCK;
+        case 89: return EDESTADDRREQ;
+        case 90: return EMSGSIZE;
+        case 91: return EPROTOTYPE;
+        case 92: return ENOPROTOOPT;
+        case 93: return EPROTONOSUPPORT;
+        case 94: return ESOCKTNOSUPPORT;
+        case 95: return EOPNOTSUPP;
+        case 96: return EPFNOSUPPORT;
+        case 97: return EAFNOSUPPORT;
+        case 98: return EADDRINUSE;
+        case 99: return EADDRNOTAVAIL;
+        case 100: return ENETDOWN;
+        case 101: return ENETUNREACH;
+        case 102: return ENETRESET;
+        case 103: return ECONNABORTED;
+        case 104: return ECONNRESET;
+        case 105: return ENOBUFS;
+        case 106: return EISCONN;
+        case 107: return ENOTCONN;
+        case 108: return ESHUTDOWN;
+        case 109: return ETOOMANYREFS;
+        case 110: return ETIMEDOUT;
+        case 111: return ECONNREFUSED;
+        case 112: return EHOSTDOWN;
+        case 113: return EHOSTUNREACH;
+        case 114: return EALREADY;
+        case 115: return EINPROGRESS;
+        case 116: return ESTALE;
+        case 117: return EUCLEAN;
+        case 118: return ENOTNAM;
+        case 119: return ENAVAIL;
+        case 120: return EISNAM;
+        case 121: return EREMOTEIO;
         default: return null;
       }
     }
@@ -12930,14 +14852,49 @@ public final class FileInfo {
       "grpc.errorCodes\",\n\016FileAttributes\022\013\n\003key" +
       "\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*L\n\nsyncaction\022\014\n\010D" +
       "OWNLOAD\020\000\022\t\n\005WRITE\020\001\022\n\n\006DELETE\020\002\022\n\n\006UPLO" +
-      "AD\020\003\022\r\n\tKEEPALIVE\020\004*\315\001\n\nerrorCodes\022\t\n\005NO" +
-      "ERR\020\000\022\n\n\006ENOENT\020\002\022\007\n\003EIO\020\005\022\n\n\006EAGAIN\020\013\022\n" +
-      "\n\006EEXIST\020\021\022\013\n\007ENOTDIR\020\024\022\013\n\007ENODATA\020=\022\013\n\007" +
-      "ENAVAIL\020w\022\t\n\005EPERM\020\001\022\n\n\006ENOSPC\020\034\022\n\n\006EACC" +
-      "ES\020\r\022\r\n\tENOTEMPTY\020\'\022\n\n\006ENOSYS\020&\022\n\n\006ENODE" +
-      "V\020\023\022\n\n\006EBADFD\020M\022\n\n\006EISDIR\020\025B0Z.github.co" +
-      "m/opendedup/sdfs-client-go/sdfs/;sdfsb\006p" +
-      "roto3"
+      "AD\020\003\022\r\n\tKEEPALIVE\020\004*\335\014\n\nerrorCodes\022\t\n\005NO" +
+      "ERR\020\000\022\t\n\005EPERM\020\001\022\n\n\006ENOENT\020\002\022\t\n\005ESRCH\020\003\022" +
+      "\t\n\005EINTR\020\004\022\007\n\003EIO\020\005\022\t\n\005ENXIO\020\006\022\t\n\005E2BIG\020" +
+      "\007\022\013\n\007ENOEXEC\020\010\022\t\n\005EBADF\020\t\022\n\n\006ECHILD\020\n\022\n\n" +
+      "\006EAGAIN\020\013\022\n\n\006ENOMEM\020\014\022\n\n\006EACCES\020\r\022\n\n\006EFA" +
+      "ULT\020\016\022\013\n\007ENOTBLK\020\017\022\t\n\005EBUSY\020\020\022\n\n\006EEXIST\020" +
+      "\021\022\t\n\005EXDEV\020\022\022\n\n\006ENODEV\020\023\022\013\n\007ENOTDIR\020\024\022\n\n" +
+      "\006EISDIR\020\025\022\n\n\006EINVAL\020\026\022\n\n\006ENFILE\020\027\022\n\n\006EMF" +
+      "ILE\020\030\022\n\n\006ENOTTY\020\031\022\013\n\007ETXTBSY\020\032\022\t\n\005EFBIG\020" +
+      "\033\022\n\n\006ENOSPC\020\034\022\n\n\006ESPIPE\020\035\022\t\n\005EROFS\020\036\022\n\n\006" +
+      "EMLINK\020\037\022\t\n\005EPIPE\020 \022\010\n\004EDOM\020!\022\n\n\006ERANGE\020" +
+      "\"\022\013\n\007EDEADLK\020#\022\020\n\014ENAMETOOLONG\020$\022\n\n\006ENOL" +
+      "CK\020%\022\n\n\006ENOSYS\020&\022\r\n\tENOTEMPTY\020\'\022\t\n\005ELOOP" +
+      "\020(\022\017\n\013EWOULDBLOCK\020)\022\n\n\006ENOMSG\020*\022\t\n\005EIDRM" +
+      "\020+\022\n\n\006ECHRNG\020,\022\014\n\010EL2NSYNC\020-\022\n\n\006EL3HLT\020." +
+      "\022\n\n\006EL3RST\020/\022\n\n\006ELNRNG\0200\022\013\n\007EUNATCH\0201\022\n\n" +
+      "\006ENOCSI\0202\022\n\n\006EL2HLT\0203\022\t\n\005EBADE\0204\022\t\n\005EBAD" +
+      "R\0205\022\n\n\006EXFULL\0206\022\n\n\006ENOANO\0207\022\013\n\007EBADRQC\0208" +
+      "\022\013\n\007EBADSLT\0209\022\r\n\tEDEADLOCK\020:\022\n\n\006EBFONT\020;" +
+      "\022\n\n\006ENOSTR\020<\022\013\n\007ENODATA\020=\022\t\n\005ETIME\020>\022\t\n\005" +
+      "ENOSR\020?\022\n\n\006ENONET\020@\022\n\n\006ENOPKG\020A\022\013\n\007EREMO" +
+      "TE\020B\022\013\n\007ENOLINK\020C\022\010\n\004EADV\020D\022\n\n\006ESRMNT\020E\022" +
+      "\t\n\005ECOMM\020F\022\n\n\006EPROTO\020G\022\r\n\tEMULTIHOP\020H\022\013\n" +
+      "\007EDOTDOT\020I\022\013\n\007EBADMSG\020J\022\r\n\tEOVERFLOW\020K\022\014" +
+      "\n\010ENOTUNIQ\020L\022\n\n\006EBADFD\020M\022\013\n\007EREMCHG\020N\022\013\n" +
+      "\007ELIBACC\020O\022\013\n\007ELIBBAD\020P\022\013\n\007ELIBSCN\020Q\022\013\n\007" +
+      "ELIBMAX\020R\022\014\n\010ELIBEXEC\020S\022\n\n\006EILSEQ\020T\022\014\n\010E" +
+      "RESTART\020U\022\014\n\010ESTRPIPE\020V\022\n\n\006EUSERS\020W\022\014\n\010E" +
+      "NOTSOCK\020X\022\020\n\014EDESTADDRREQ\020Y\022\014\n\010EMSGSIZE\020" +
+      "Z\022\016\n\nEPROTOTYPE\020[\022\017\n\013ENOPROTOOPT\020\\\022\023\n\017EP" +
+      "ROTONOSUPPORT\020]\022\023\n\017ESOCKTNOSUPPORT\020^\022\016\n\n" +
+      "EOPNOTSUPP\020_\022\020\n\014EPFNOSUPPORT\020`\022\020\n\014EAFNOS" +
+      "UPPORT\020a\022\016\n\nEADDRINUSE\020b\022\021\n\rEADDRNOTAVAI" +
+      "L\020c\022\014\n\010ENETDOWN\020d\022\017\n\013ENETUNREACH\020e\022\r\n\tEN" +
+      "ETRESET\020f\022\020\n\014ECONNABORTED\020g\022\016\n\nECONNRESE" +
+      "T\020h\022\013\n\007ENOBUFS\020i\022\013\n\007EISCONN\020j\022\014\n\010ENOTCON" +
+      "N\020k\022\r\n\tESHUTDOWN\020l\022\020\n\014ETOOMANYREFS\020m\022\r\n\t" +
+      "ETIMEDOUT\020n\022\020\n\014ECONNREFUSED\020o\022\r\n\tEHOSTDO" +
+      "WN\020p\022\020\n\014EHOSTUNREACH\020q\022\014\n\010EALREADY\020r\022\017\n\013" +
+      "EINPROGRESS\020s\022\n\n\006ESTALE\020t\022\013\n\007EUCLEAN\020u\022\013" +
+      "\n\007ENOTNAM\020v\022\013\n\007ENAVAIL\020w\022\n\n\006EISNAM\020x\022\r\n\t" +
+      "EREMOTEIO\020yB0Z.github.com/opendedup/sdfs" +
+      "-client-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

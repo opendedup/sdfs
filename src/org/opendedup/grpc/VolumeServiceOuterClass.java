@@ -14,130 +14,6 @@ public final class VolumeServiceOuterClass {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  /**
-   * Protobuf enum {@code org.opendedup.grpc.hashtype}
-   */
-  public enum hashtype
-      implements com.google.protobuf.ProtocolMessageEnum {
-    /**
-     * <pre>
-     *Sha256
-     * </pre>
-     *
-     * <code>SHA256 = 0;</code>
-     */
-    SHA256(0),
-    /**
-     * <pre>
-     *md5
-     * </pre>
-     *
-     * <code>MD5 = 1;</code>
-     */
-    MD5(1),
-    UNRECOGNIZED(-1),
-    ;
-
-    /**
-     * <pre>
-     *Sha256
-     * </pre>
-     *
-     * <code>SHA256 = 0;</code>
-     */
-    public static final int SHA256_VALUE = 0;
-    /**
-     * <pre>
-     *md5
-     * </pre>
-     *
-     * <code>MD5 = 1;</code>
-     */
-    public static final int MD5_VALUE = 1;
-
-
-    public final int getNumber() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalArgumentException(
-            "Can't get the number of an unknown enum value.");
-      }
-      return value;
-    }
-
-    /**
-     * @param value The numeric wire value of the corresponding enum entry.
-     * @return The enum associated with the given numeric wire value.
-     * @deprecated Use {@link #forNumber(int)} instead.
-     */
-    @java.lang.Deprecated
-    public static hashtype valueOf(int value) {
-      return forNumber(value);
-    }
-
-    /**
-     * @param value The numeric wire value of the corresponding enum entry.
-     * @return The enum associated with the given numeric wire value.
-     */
-    public static hashtype forNumber(int value) {
-      switch (value) {
-        case 0: return SHA256;
-        case 1: return MD5;
-        default: return null;
-      }
-    }
-
-    public static com.google.protobuf.Internal.EnumLiteMap<hashtype>
-        internalGetValueMap() {
-      return internalValueMap;
-    }
-    private static final com.google.protobuf.Internal.EnumLiteMap<
-        hashtype> internalValueMap =
-          new com.google.protobuf.Internal.EnumLiteMap<hashtype>() {
-            public hashtype findValueByNumber(int number) {
-              return hashtype.forNumber(number);
-            }
-          };
-
-    public final com.google.protobuf.Descriptors.EnumValueDescriptor
-        getValueDescriptor() {
-      if (this == UNRECOGNIZED) {
-        throw new java.lang.IllegalStateException(
-            "Can't get the descriptor of an unrecognized enum value.");
-      }
-      return getDescriptor().getValues().get(ordinal());
-    }
-    public final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptorForType() {
-      return getDescriptor();
-    }
-    public static final com.google.protobuf.Descriptors.EnumDescriptor
-        getDescriptor() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.getDescriptor().getEnumTypes().get(0);
-    }
-
-    private static final hashtype[] VALUES = values();
-
-    public static hashtype valueOf(
-        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
-      if (desc.getType() != getDescriptor()) {
-        throw new java.lang.IllegalArgumentException(
-          "EnumValueDescriptor is not for this type.");
-      }
-      if (desc.getIndex() == -1) {
-        return UNRECOGNIZED;
-      }
-      return VALUES[desc.getIndex()];
-    }
-
-    private final int value;
-
-    private hashtype(int value) {
-      this.value = value;
-    }
-
-    // @@protoc_insertion_point(enum_scope:org.opendedup.grpc.hashtype)
-  }
-
   public interface VolumeInfoRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.VolumeInfoRequest)
       com.google.protobuf.MessageOrBuilder {
@@ -783,6 +659,29 @@ public final class VolumeServiceOuterClass {
      * @return The offline.
      */
     boolean getOffline();
+
+    /**
+     * <code>string error = 30;</code>
+     * @return The error.
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 30;</code>
+     * @return The bytes for error.
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 31;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 31;</code>
+     * @return The errorCode.
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.VolumeInfoResponse}
@@ -802,6 +701,8 @@ public final class VolumeServiceOuterClass {
       clusterId_ = "";
       messageQueue_ = java.util.Collections.emptyList();
       perfMonFile_ = "";
+      error_ = "";
+      errorCode_ = 0;
     }
 
     @java.lang.Override
@@ -986,6 +887,18 @@ public final class VolumeServiceOuterClass {
             case 232: {
 
               offline_ = input.readBool();
+              break;
+            }
+            case 242: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            case 248: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
               break;
             }
             default: {
@@ -1479,6 +1392,63 @@ public final class VolumeServiceOuterClass {
       return offline_;
     }
 
+    public static final int ERROR_FIELD_NUMBER = 30;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 30;</code>
+     * @return The error.
+     */
+    @java.lang.Override
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 30;</code>
+     * @return The bytes for error.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 31;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 31;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    @java.lang.Override public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 31;</code>
+     * @return The errorCode.
+     */
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1579,6 +1549,12 @@ public final class VolumeServiceOuterClass {
       }
       if (offline_ != false) {
         output.writeBool(29, offline_);
+      }
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 30, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(31, errorCode_);
       }
       unknownFields.writeTo(output);
     }
@@ -1701,6 +1677,13 @@ public final class VolumeServiceOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(29, offline_);
       }
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(30, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(31, errorCode_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -1778,6 +1761,9 @@ public final class VolumeServiceOuterClass {
           .equals(other.getPerfMonFile())) return false;
       if (getOffline()
           != other.getOffline()) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1871,6 +1857,10 @@ public final class VolumeServiceOuterClass {
       hash = (37 * hash) + OFFLINE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getOffline());
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2067,6 +2057,10 @@ public final class VolumeServiceOuterClass {
 
         offline_ = false;
 
+        error_ = "";
+
+        errorCode_ = 0;
+
         return this;
       }
 
@@ -2131,6 +2125,8 @@ public final class VolumeServiceOuterClass {
         }
         result.perfMonFile_ = perfMonFile_;
         result.offline_ = offline_;
+        result.error_ = error_;
+        result.errorCode_ = errorCode_;
         onBuilt();
         return result;
       }
@@ -2292,6 +2288,13 @@ public final class VolumeServiceOuterClass {
         }
         if (other.getOffline() != false) {
           setOffline(other.getOffline());
+        }
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -3610,6 +3613,136 @@ public final class VolumeServiceOuterClass {
         onChanged();
         return this;
       }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 30;</code>
+       * @return The error.
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 30;</code>
+       * @return The bytes for error.
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 30;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 30;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 30;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 31;</code>
+       * @return The enum numeric value on the wire for errorCode.
+       */
+      @java.lang.Override public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 31;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCodeValue(int value) {
+        
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 31;</code>
+       * @return The errorCode.
+       */
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 31;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 31;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -3658,1374 +3791,6 @@ public final class VolumeServiceOuterClass {
 
     @java.lang.Override
     public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface HashingInfoRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.HashingInfoRequest)
-      com.google.protobuf.MessageOrBuilder {
-  }
-  /**
-   * Protobuf type {@code org.opendedup.grpc.HashingInfoRequest}
-   */
-  public static final class HashingInfoRequest extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.HashingInfoRequest)
-      HashingInfoRequestOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use HashingInfoRequest.newBuilder() to construct.
-    private HashingInfoRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private HashingInfoRequest() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new HashingInfoRequest();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private HashingInfoRequest(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoRequest_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoRequest_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest.Builder.class);
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest)) {
-        return super.equals(obj);
-      }
-      org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest) obj;
-
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code org.opendedup.grpc.HashingInfoRequest}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.HashingInfoRequest)
-        org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequestOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoRequest_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoRequest_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest.Builder.class);
-      }
-
-      // Construct using org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoRequest_descriptor;
-      }
-
-      @java.lang.Override
-      public org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest getDefaultInstanceForType() {
-        return org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest build() {
-        org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest buildPartial() {
-        org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest(this);
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest) {
-          return mergeFrom((org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest other) {
-        if (other == org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest.getDefaultInstance()) return this;
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.HashingInfoRequest)
-    }
-
-    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.HashingInfoRequest)
-    private static final org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest();
-    }
-
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<HashingInfoRequest>
-        PARSER = new com.google.protobuf.AbstractParser<HashingInfoRequest>() {
-      @java.lang.Override
-      public HashingInfoRequest parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new HashingInfoRequest(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<HashingInfoRequest> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<HashingInfoRequest> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest getDefaultInstanceForType() {
-      return DEFAULT_INSTANCE;
-    }
-
-  }
-
-  public interface HashingInfoResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.HashingInfoResponse)
-      com.google.protobuf.MessageOrBuilder {
-
-    /**
-     * <code>int64 chunkSize = 1;</code>
-     * @return The chunkSize.
-     */
-    long getChunkSize();
-
-    /**
-     * <code>int64 minSegmentSize = 2;</code>
-     * @return The minSegmentSize.
-     */
-    long getMinSegmentSize();
-
-    /**
-     * <code>int64 maxSegmentSize = 3;</code>
-     * @return The maxSegmentSize.
-     */
-    long getMaxSegmentSize();
-
-    /**
-     * <code>int64 polyNumber = 4;</code>
-     * @return The polyNumber.
-     */
-    long getPolyNumber();
-
-    /**
-     * <code>int64 hashSeed = 5;</code>
-     * @return The hashSeed.
-     */
-    long getHashSeed();
-
-    /**
-     * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
-     * @return The enum numeric value on the wire for hashtype.
-     */
-    int getHashtypeValue();
-    /**
-     * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
-     * @return The hashtype.
-     */
-    org.opendedup.grpc.VolumeServiceOuterClass.hashtype getHashtype();
-
-    /**
-     * <code>int32 mapVersion = 7;</code>
-     * @return The mapVersion.
-     */
-    int getMapVersion();
-  }
-  /**
-   * Protobuf type {@code org.opendedup.grpc.HashingInfoResponse}
-   */
-  public static final class HashingInfoResponse extends
-      com.google.protobuf.GeneratedMessageV3 implements
-      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.HashingInfoResponse)
-      HashingInfoResponseOrBuilder {
-  private static final long serialVersionUID = 0L;
-    // Use HashingInfoResponse.newBuilder() to construct.
-    private HashingInfoResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
-      super(builder);
-    }
-    private HashingInfoResponse() {
-      hashtype_ = 0;
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new HashingInfoResponse();
-    }
-
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-    getUnknownFields() {
-      return this.unknownFields;
-    }
-    private HashingInfoResponse(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      this();
-      if (extensionRegistry == null) {
-        throw new java.lang.NullPointerException();
-      }
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            case 8: {
-
-              chunkSize_ = input.readInt64();
-              break;
-            }
-            case 16: {
-
-              minSegmentSize_ = input.readInt64();
-              break;
-            }
-            case 24: {
-
-              maxSegmentSize_ = input.readInt64();
-              break;
-            }
-            case 32: {
-
-              polyNumber_ = input.readInt64();
-              break;
-            }
-            case 40: {
-
-              hashSeed_ = input.readInt64();
-              break;
-            }
-            case 48: {
-              int rawValue = input.readEnum();
-
-              hashtype_ = rawValue;
-              break;
-            }
-            case 56: {
-
-              mapVersion_ = input.readInt32();
-              break;
-            }
-            default: {
-              if (!parseUnknownField(
-                  input, unknownFields, extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoResponse_descriptor;
-    }
-
-    @java.lang.Override
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoResponse_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse.class, org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse.Builder.class);
-    }
-
-    public static final int CHUNKSIZE_FIELD_NUMBER = 1;
-    private long chunkSize_;
-    /**
-     * <code>int64 chunkSize = 1;</code>
-     * @return The chunkSize.
-     */
-    @java.lang.Override
-    public long getChunkSize() {
-      return chunkSize_;
-    }
-
-    public static final int MINSEGMENTSIZE_FIELD_NUMBER = 2;
-    private long minSegmentSize_;
-    /**
-     * <code>int64 minSegmentSize = 2;</code>
-     * @return The minSegmentSize.
-     */
-    @java.lang.Override
-    public long getMinSegmentSize() {
-      return minSegmentSize_;
-    }
-
-    public static final int MAXSEGMENTSIZE_FIELD_NUMBER = 3;
-    private long maxSegmentSize_;
-    /**
-     * <code>int64 maxSegmentSize = 3;</code>
-     * @return The maxSegmentSize.
-     */
-    @java.lang.Override
-    public long getMaxSegmentSize() {
-      return maxSegmentSize_;
-    }
-
-    public static final int POLYNUMBER_FIELD_NUMBER = 4;
-    private long polyNumber_;
-    /**
-     * <code>int64 polyNumber = 4;</code>
-     * @return The polyNumber.
-     */
-    @java.lang.Override
-    public long getPolyNumber() {
-      return polyNumber_;
-    }
-
-    public static final int HASHSEED_FIELD_NUMBER = 5;
-    private long hashSeed_;
-    /**
-     * <code>int64 hashSeed = 5;</code>
-     * @return The hashSeed.
-     */
-    @java.lang.Override
-    public long getHashSeed() {
-      return hashSeed_;
-    }
-
-    public static final int HASHTYPE_FIELD_NUMBER = 6;
-    private int hashtype_;
-    /**
-     * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
-     * @return The enum numeric value on the wire for hashtype.
-     */
-    @java.lang.Override public int getHashtypeValue() {
-      return hashtype_;
-    }
-    /**
-     * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
-     * @return The hashtype.
-     */
-    @java.lang.Override public org.opendedup.grpc.VolumeServiceOuterClass.hashtype getHashtype() {
-      @SuppressWarnings("deprecation")
-      org.opendedup.grpc.VolumeServiceOuterClass.hashtype result = org.opendedup.grpc.VolumeServiceOuterClass.hashtype.valueOf(hashtype_);
-      return result == null ? org.opendedup.grpc.VolumeServiceOuterClass.hashtype.UNRECOGNIZED : result;
-    }
-
-    public static final int MAPVERSION_FIELD_NUMBER = 7;
-    private int mapVersion_;
-    /**
-     * <code>int32 mapVersion = 7;</code>
-     * @return The mapVersion.
-     */
-    @java.lang.Override
-    public int getMapVersion() {
-      return mapVersion_;
-    }
-
-    private byte memoizedIsInitialized = -1;
-    @java.lang.Override
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    @java.lang.Override
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      if (chunkSize_ != 0L) {
-        output.writeInt64(1, chunkSize_);
-      }
-      if (minSegmentSize_ != 0L) {
-        output.writeInt64(2, minSegmentSize_);
-      }
-      if (maxSegmentSize_ != 0L) {
-        output.writeInt64(3, maxSegmentSize_);
-      }
-      if (polyNumber_ != 0L) {
-        output.writeInt64(4, polyNumber_);
-      }
-      if (hashSeed_ != 0L) {
-        output.writeInt64(5, hashSeed_);
-      }
-      if (hashtype_ != org.opendedup.grpc.VolumeServiceOuterClass.hashtype.SHA256.getNumber()) {
-        output.writeEnum(6, hashtype_);
-      }
-      if (mapVersion_ != 0) {
-        output.writeInt32(7, mapVersion_);
-      }
-      unknownFields.writeTo(output);
-    }
-
-    @java.lang.Override
-    public int getSerializedSize() {
-      int size = memoizedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (chunkSize_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, chunkSize_);
-      }
-      if (minSegmentSize_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(2, minSegmentSize_);
-      }
-      if (maxSegmentSize_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, maxSegmentSize_);
-      }
-      if (polyNumber_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(4, polyNumber_);
-      }
-      if (hashSeed_ != 0L) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(5, hashSeed_);
-      }
-      if (hashtype_ != org.opendedup.grpc.VolumeServiceOuterClass.hashtype.SHA256.getNumber()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(6, hashtype_);
-      }
-      if (mapVersion_ != 0) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(7, mapVersion_);
-      }
-      size += unknownFields.getSerializedSize();
-      memoizedSize = size;
-      return size;
-    }
-
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
-      if (obj == this) {
-       return true;
-      }
-      if (!(obj instanceof org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse)) {
-        return super.equals(obj);
-      }
-      org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse other = (org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse) obj;
-
-      if (getChunkSize()
-          != other.getChunkSize()) return false;
-      if (getMinSegmentSize()
-          != other.getMinSegmentSize()) return false;
-      if (getMaxSegmentSize()
-          != other.getMaxSegmentSize()) return false;
-      if (getPolyNumber()
-          != other.getPolyNumber()) return false;
-      if (getHashSeed()
-          != other.getHashSeed()) return false;
-      if (hashtype_ != other.hashtype_) return false;
-      if (getMapVersion()
-          != other.getMapVersion()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
-    }
-
-    @java.lang.Override
-    public int hashCode() {
-      if (memoizedHashCode != 0) {
-        return memoizedHashCode;
-      }
-      int hash = 41;
-      hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + CHUNKSIZE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getChunkSize());
-      hash = (37 * hash) + MINSEGMENTSIZE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getMinSegmentSize());
-      hash = (37 * hash) + MAXSEGMENTSIZE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getMaxSegmentSize());
-      hash = (37 * hash) + POLYNUMBER_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getPolyNumber());
-      hash = (37 * hash) + HASHSEED_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getHashSeed());
-      hash = (37 * hash) + HASHTYPE_FIELD_NUMBER;
-      hash = (53 * hash) + hashtype_;
-      hash = (37 * hash) + MAPVERSION_FIELD_NUMBER;
-      hash = (53 * hash) + getMapVersion();
-      hash = (29 * hash) + unknownFields.hashCode();
-      memoizedHashCode = hash;
-      return hash;
-    }
-
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(
-        java.nio.ByteBuffer data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(
-        java.nio.ByteBuffer data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input);
-    }
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return com.google.protobuf.GeneratedMessageV3
-          .parseWithIOException(PARSER, input, extensionRegistry);
-    }
-
-    @java.lang.Override
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder() {
-      return DEFAULT_INSTANCE.toBuilder();
-    }
-    public static Builder newBuilder(org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse prototype) {
-      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
-    }
-    @java.lang.Override
-    public Builder toBuilder() {
-      return this == DEFAULT_INSTANCE
-          ? new Builder() : new Builder().mergeFrom(this);
-    }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code org.opendedup.grpc.HashingInfoResponse}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.HashingInfoResponse)
-        org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponseOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoResponse_descriptor;
-      }
-
-      @java.lang.Override
-      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoResponse_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse.class, org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse.Builder.class);
-      }
-
-      // Construct using org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessageV3
-                .alwaysUseFieldBuilders) {
-        }
-      }
-      @java.lang.Override
-      public Builder clear() {
-        super.clear();
-        chunkSize_ = 0L;
-
-        minSegmentSize_ = 0L;
-
-        maxSegmentSize_ = 0L;
-
-        polyNumber_ = 0L;
-
-        hashSeed_ = 0L;
-
-        hashtype_ = 0;
-
-        mapVersion_ = 0;
-
-        return this;
-      }
-
-      @java.lang.Override
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_HashingInfoResponse_descriptor;
-      }
-
-      @java.lang.Override
-      public org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse getDefaultInstanceForType() {
-        return org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse.getDefaultInstance();
-      }
-
-      @java.lang.Override
-      public org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse build() {
-        org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      @java.lang.Override
-      public org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse buildPartial() {
-        org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse result = new org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse(this);
-        result.chunkSize_ = chunkSize_;
-        result.minSegmentSize_ = minSegmentSize_;
-        result.maxSegmentSize_ = maxSegmentSize_;
-        result.polyNumber_ = polyNumber_;
-        result.hashSeed_ = hashSeed_;
-        result.hashtype_ = hashtype_;
-        result.mapVersion_ = mapVersion_;
-        onBuilt();
-        return result;
-      }
-
-      @java.lang.Override
-      public Builder clone() {
-        return super.clone();
-      }
-      @java.lang.Override
-      public Builder setField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.setField(field, value);
-      }
-      @java.lang.Override
-      public Builder clearField(
-          com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
-      }
-      @java.lang.Override
-      public Builder clearOneof(
-          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
-      }
-      @java.lang.Override
-      public Builder setRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
-      }
-      @java.lang.Override
-      public Builder addRepeatedField(
-          com.google.protobuf.Descriptors.FieldDescriptor field,
-          java.lang.Object value) {
-        return super.addRepeatedField(field, value);
-      }
-      @java.lang.Override
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse) {
-          return mergeFrom((org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse other) {
-        if (other == org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse.getDefaultInstance()) return this;
-        if (other.getChunkSize() != 0L) {
-          setChunkSize(other.getChunkSize());
-        }
-        if (other.getMinSegmentSize() != 0L) {
-          setMinSegmentSize(other.getMinSegmentSize());
-        }
-        if (other.getMaxSegmentSize() != 0L) {
-          setMaxSegmentSize(other.getMaxSegmentSize());
-        }
-        if (other.getPolyNumber() != 0L) {
-          setPolyNumber(other.getPolyNumber());
-        }
-        if (other.getHashSeed() != 0L) {
-          setHashSeed(other.getHashSeed());
-        }
-        if (other.hashtype_ != 0) {
-          setHashtypeValue(other.getHashtypeValue());
-        }
-        if (other.getMapVersion() != 0) {
-          setMapVersion(other.getMapVersion());
-        }
-        this.mergeUnknownFields(other.unknownFields);
-        onChanged();
-        return this;
-      }
-
-      @java.lang.Override
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      @java.lang.Override
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse) e.getUnfinishedMessage();
-          throw e.unwrapIOException();
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-
-      private long chunkSize_ ;
-      /**
-       * <code>int64 chunkSize = 1;</code>
-       * @return The chunkSize.
-       */
-      @java.lang.Override
-      public long getChunkSize() {
-        return chunkSize_;
-      }
-      /**
-       * <code>int64 chunkSize = 1;</code>
-       * @param value The chunkSize to set.
-       * @return This builder for chaining.
-       */
-      public Builder setChunkSize(long value) {
-        
-        chunkSize_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 chunkSize = 1;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearChunkSize() {
-        
-        chunkSize_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long minSegmentSize_ ;
-      /**
-       * <code>int64 minSegmentSize = 2;</code>
-       * @return The minSegmentSize.
-       */
-      @java.lang.Override
-      public long getMinSegmentSize() {
-        return minSegmentSize_;
-      }
-      /**
-       * <code>int64 minSegmentSize = 2;</code>
-       * @param value The minSegmentSize to set.
-       * @return This builder for chaining.
-       */
-      public Builder setMinSegmentSize(long value) {
-        
-        minSegmentSize_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 minSegmentSize = 2;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearMinSegmentSize() {
-        
-        minSegmentSize_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long maxSegmentSize_ ;
-      /**
-       * <code>int64 maxSegmentSize = 3;</code>
-       * @return The maxSegmentSize.
-       */
-      @java.lang.Override
-      public long getMaxSegmentSize() {
-        return maxSegmentSize_;
-      }
-      /**
-       * <code>int64 maxSegmentSize = 3;</code>
-       * @param value The maxSegmentSize to set.
-       * @return This builder for chaining.
-       */
-      public Builder setMaxSegmentSize(long value) {
-        
-        maxSegmentSize_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 maxSegmentSize = 3;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearMaxSegmentSize() {
-        
-        maxSegmentSize_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long polyNumber_ ;
-      /**
-       * <code>int64 polyNumber = 4;</code>
-       * @return The polyNumber.
-       */
-      @java.lang.Override
-      public long getPolyNumber() {
-        return polyNumber_;
-      }
-      /**
-       * <code>int64 polyNumber = 4;</code>
-       * @param value The polyNumber to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPolyNumber(long value) {
-        
-        polyNumber_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 polyNumber = 4;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearPolyNumber() {
-        
-        polyNumber_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private long hashSeed_ ;
-      /**
-       * <code>int64 hashSeed = 5;</code>
-       * @return The hashSeed.
-       */
-      @java.lang.Override
-      public long getHashSeed() {
-        return hashSeed_;
-      }
-      /**
-       * <code>int64 hashSeed = 5;</code>
-       * @param value The hashSeed to set.
-       * @return This builder for chaining.
-       */
-      public Builder setHashSeed(long value) {
-        
-        hashSeed_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int64 hashSeed = 5;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearHashSeed() {
-        
-        hashSeed_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      private int hashtype_ = 0;
-      /**
-       * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
-       * @return The enum numeric value on the wire for hashtype.
-       */
-      @java.lang.Override public int getHashtypeValue() {
-        return hashtype_;
-      }
-      /**
-       * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
-       * @param value The enum numeric value on the wire for hashtype to set.
-       * @return This builder for chaining.
-       */
-      public Builder setHashtypeValue(int value) {
-        
-        hashtype_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
-       * @return The hashtype.
-       */
-      @java.lang.Override
-      public org.opendedup.grpc.VolumeServiceOuterClass.hashtype getHashtype() {
-        @SuppressWarnings("deprecation")
-        org.opendedup.grpc.VolumeServiceOuterClass.hashtype result = org.opendedup.grpc.VolumeServiceOuterClass.hashtype.valueOf(hashtype_);
-        return result == null ? org.opendedup.grpc.VolumeServiceOuterClass.hashtype.UNRECOGNIZED : result;
-      }
-      /**
-       * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
-       * @param value The hashtype to set.
-       * @return This builder for chaining.
-       */
-      public Builder setHashtype(org.opendedup.grpc.VolumeServiceOuterClass.hashtype value) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        
-        hashtype_ = value.getNumber();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearHashtype() {
-        
-        hashtype_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int mapVersion_ ;
-      /**
-       * <code>int32 mapVersion = 7;</code>
-       * @return The mapVersion.
-       */
-      @java.lang.Override
-      public int getMapVersion() {
-        return mapVersion_;
-      }
-      /**
-       * <code>int32 mapVersion = 7;</code>
-       * @param value The mapVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setMapVersion(int value) {
-        
-        mapVersion_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>int32 mapVersion = 7;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearMapVersion() {
-        
-        mapVersion_ = 0;
-        onChanged();
-        return this;
-      }
-      @java.lang.Override
-      public final Builder setUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
-      }
-
-      @java.lang.Override
-      public final Builder mergeUnknownFields(
-          final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.mergeUnknownFields(unknownFields);
-      }
-
-
-      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.HashingInfoResponse)
-    }
-
-    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.HashingInfoResponse)
-    private static final org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse DEFAULT_INSTANCE;
-    static {
-      DEFAULT_INSTANCE = new org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse();
-    }
-
-    public static org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse getDefaultInstance() {
-      return DEFAULT_INSTANCE;
-    }
-
-    private static final com.google.protobuf.Parser<HashingInfoResponse>
-        PARSER = new com.google.protobuf.AbstractParser<HashingInfoResponse>() {
-      @java.lang.Override
-      public HashingInfoResponse parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new HashingInfoResponse(input, extensionRegistry);
-      }
-    };
-
-    public static com.google.protobuf.Parser<HashingInfoResponse> parser() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<HashingInfoResponse> getParserForType() {
-      return PARSER;
-    }
-
-    @java.lang.Override
-    public org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -11540,6 +10305,12 @@ public final class VolumeServiceOuterClass {
      */
     com.google.protobuf.ByteString
         getBucketNameBytes();
+
+    /**
+     * <code>int64 maxAge = 20;</code>
+     * @return The maxAge.
+     */
+    long getMaxAge();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DSEInfo}
@@ -11693,6 +10464,11 @@ public final class VolumeServiceOuterClass {
               java.lang.String s = input.readStringRequireUtf8();
 
               bucketName_ = s;
+              break;
+            }
+            case 160: {
+
+              maxAge_ = input.readInt64();
               break;
             }
             default: {
@@ -12125,6 +10901,17 @@ public final class VolumeServiceOuterClass {
       }
     }
 
+    public static final int MAXAGE_FIELD_NUMBER = 20;
+    private long maxAge_;
+    /**
+     * <code>int64 maxAge = 20;</code>
+     * @return The maxAge.
+     */
+    @java.lang.Override
+    public long getMaxAge() {
+      return maxAge_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -12195,6 +10982,9 @@ public final class VolumeServiceOuterClass {
       }
       if (!getBucketNameBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 19, bucketName_);
+      }
+      if (maxAge_ != 0L) {
+        output.writeInt64(20, maxAge_);
       }
       unknownFields.writeTo(output);
     }
@@ -12274,6 +11064,10 @@ public final class VolumeServiceOuterClass {
       if (!getBucketNameBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(19, bucketName_);
       }
+      if (maxAge_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(20, maxAge_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -12327,6 +11121,8 @@ public final class VolumeServiceOuterClass {
           .equals(other.getCloudSecretKey())) return false;
       if (!getBucketName()
           .equals(other.getBucketName())) return false;
+      if (getMaxAge()
+          != other.getMaxAge()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -12385,6 +11181,9 @@ public final class VolumeServiceOuterClass {
       hash = (53 * hash) + getCloudSecretKey().hashCode();
       hash = (37 * hash) + BUCKETNAME_FIELD_NUMBER;
       hash = (53 * hash) + getBucketName().hashCode();
+      hash = (37 * hash) + MAXAGE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxAge());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -12556,6 +11355,8 @@ public final class VolumeServiceOuterClass {
 
         bucketName_ = "";
 
+        maxAge_ = 0L;
+
         return this;
       }
 
@@ -12601,6 +11402,7 @@ public final class VolumeServiceOuterClass {
         result.cloudAccessKey_ = cloudAccessKey_;
         result.cloudSecretKey_ = cloudSecretKey_;
         result.bucketName_ = bucketName_;
+        result.maxAge_ = maxAge_;
         onBuilt();
         return result;
       }
@@ -12712,6 +11514,9 @@ public final class VolumeServiceOuterClass {
         if (!other.getBucketName().isEmpty()) {
           bucketName_ = other.bucketName_;
           onChanged();
+        }
+        if (other.getMaxAge() != 0L) {
+          setMaxAge(other.getMaxAge());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -13642,6 +12447,37 @@ public final class VolumeServiceOuterClass {
   checkByteStringIsUtf8(value);
         
         bucketName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long maxAge_ ;
+      /**
+       * <code>int64 maxAge = 20;</code>
+       * @return The maxAge.
+       */
+      @java.lang.Override
+      public long getMaxAge() {
+        return maxAge_;
+      }
+      /**
+       * <code>int64 maxAge = 20;</code>
+       * @param value The maxAge to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxAge(long value) {
+        
+        maxAge_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxAge = 20;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxAge() {
+        
+        maxAge_ = 0L;
         onChanged();
         return this;
       }
@@ -28209,6 +27045,1170 @@ public final class VolumeServiceOuterClass {
 
   }
 
+  public interface SetMaxAgeRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.SetMaxAgeRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 maxAge = 1;</code>
+     * @return The maxAge.
+     */
+    long getMaxAge();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.SetMaxAgeRequest}
+   */
+  public static final class SetMaxAgeRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetMaxAgeRequest)
+      SetMaxAgeRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SetMaxAgeRequest.newBuilder() to construct.
+    private SetMaxAgeRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SetMaxAgeRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SetMaxAgeRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SetMaxAgeRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              maxAge_ = input.readInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.Builder.class);
+    }
+
+    public static final int MAXAGE_FIELD_NUMBER = 1;
+    private long maxAge_;
+    /**
+     * <code>int64 maxAge = 1;</code>
+     * @return The maxAge.
+     */
+    @java.lang.Override
+    public long getMaxAge() {
+      return maxAge_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (maxAge_ != 0L) {
+        output.writeInt64(1, maxAge_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (maxAge_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, maxAge_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest) obj;
+
+      if (getMaxAge()
+          != other.getMaxAge()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + MAXAGE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxAge());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.SetMaxAgeRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.SetMaxAgeRequest)
+        org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        maxAge_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest build() {
+        org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest buildPartial() {
+        org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest(this);
+        result.maxAge_ = maxAge_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest) {
+          return mergeFrom((org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest other) {
+        if (other == org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.getDefaultInstance()) return this;
+        if (other.getMaxAge() != 0L) {
+          setMaxAge(other.getMaxAge());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long maxAge_ ;
+      /**
+       * <code>int64 maxAge = 1;</code>
+       * @return The maxAge.
+       */
+      @java.lang.Override
+      public long getMaxAge() {
+        return maxAge_;
+      }
+      /**
+       * <code>int64 maxAge = 1;</code>
+       * @param value The maxAge to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxAge(long value) {
+        
+        maxAge_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxAge = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxAge() {
+        
+        maxAge_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.SetMaxAgeRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.SetMaxAgeRequest)
+    private static final org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest();
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SetMaxAgeRequest>
+        PARSER = new com.google.protobuf.AbstractParser<SetMaxAgeRequest>() {
+      @java.lang.Override
+      public SetMaxAgeRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SetMaxAgeRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SetMaxAgeRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SetMaxAgeRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface SetMaxAgeResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.SetMaxAgeResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.SetMaxAgeResponse}
+   */
+  public static final class SetMaxAgeResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetMaxAgeResponse)
+      SetMaxAgeResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SetMaxAgeResponse.newBuilder() to construct.
+    private SetMaxAgeResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SetMaxAgeResponse() {
+      error_ = "";
+      errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SetMaxAgeResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SetMaxAgeResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse.class, org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse.Builder.class);
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 1;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    @java.lang.Override
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 2;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    @java.lang.Override public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
+     */
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(2, errorCode_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, errorCode_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse other = (org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse) obj;
+
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.SetMaxAgeResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.SetMaxAgeResponse)
+        org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse.class, org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        error_ = "";
+
+        errorCode_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse build() {
+        org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse buildPartial() {
+        org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse result = new org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse(this);
+        result.error_ = error_;
+        result.errorCode_ = errorCode_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse) {
+          return mergeFrom((org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse other) {
+        if (other == org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse.getDefaultInstance()) return this;
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 1;</code>
+       * @return The error.
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return The bytes for error.
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
+       */
+      @java.lang.Override public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCodeValue(int value) {
+        
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
+       */
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.SetMaxAgeResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.SetMaxAgeResponse)
+    private static final org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse();
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SetMaxAgeResponse>
+        PARSER = new com.google.protobuf.AbstractParser<SetMaxAgeResponse>() {
+      @java.lang.Override
+      public SetMaxAgeResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SetMaxAgeResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SetMaxAgeResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SetMaxAgeResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_VolumeInfoRequest_descriptor;
   private static final 
@@ -28219,16 +28219,6 @@ public final class VolumeServiceOuterClass {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_VolumeInfoResponse_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_opendedup_grpc_HashingInfoRequest_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_opendedup_grpc_HashingInfoRequest_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_org_opendedup_grpc_HashingInfoResponse_descriptor;
-  private static final 
-    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_org_opendedup_grpc_HashingInfoResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_SystemInfo_descriptor;
   private static final 
@@ -28379,6 +28369,16 @@ public final class VolumeServiceOuterClass {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_SyncVolResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_SetMaxAgeRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_SetMaxAgeRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_SetMaxAgeResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -28390,7 +28390,7 @@ public final class VolumeServiceOuterClass {
     java.lang.String[] descriptorData = {
       "\n\023VolumeService.proto\022\022org.opendedup.grp" +
       "c\032\016Shutdown.proto\032\016FileInfo.proto\"\023\n\021Vol" +
-      "umeInfoRequest\"\246\005\n\022VolumeInfoResponse\022\014\n" +
+      "umeInfoRequest\"\350\005\n\022VolumeInfoResponse\022\014\n" +
       "\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\023\n\013currentSize" +
       "\030\003 \001(\003\022\021\n\tcapactity\030\004 \001(\003\022\031\n\021maxPercenta" +
       "geFull\030\005 \001(\001\022\026\n\016duplicateBytes\030\006 \001(\003\022\021\n\t" +
@@ -28407,130 +28407,128 @@ public final class VolumeServiceOuterClass {
       "es\030\031 \001(\010\022\023\n\013maxPageSize\030\032 \001(\003\022B\n\014message" +
       "Queue\030\033 \003(\0132,.org.opendedup.grpc.Message" +
       "QueueInfoResponse\022\023\n\013perfMonFile\030\034 \001(\t\022\017" +
-      "\n\007offline\030\035 \001(\010\"\024\n\022HashingInfoRequest\"\302\001" +
-      "\n\023HashingInfoResponse\022\021\n\tchunkSize\030\001 \001(\003" +
-      "\022\026\n\016minSegmentSize\030\002 \001(\003\022\026\n\016maxSegmentSi" +
-      "ze\030\003 \001(\003\022\022\n\npolyNumber\030\004 \001(\003\022\020\n\010hashSeed" +
-      "\030\005 \001(\003\022.\n\010hashtype\030\006 \001(\0162\034.org.opendedup" +
-      ".grpc.hashtype\022\022\n\nmapVersion\030\007 \001(\005\"\337\001\n\nS" +
-      "ystemInfo\022\025\n\ractiveThreads\030\001 \001(\005\022\024\n\014bloc" +
-      "ksStored\030\002 \001(\005\022\027\n\017maxBlocksStored\030\003 \001(\005\022" +
-      "\022\n\ntotalSpace\030\004 \001(\003\022\021\n\tfreeSpace\030\005 \001(\003\022\024" +
-      "\n\014totalCpuLoad\030\006 \001(\001\022\020\n\010cpuCores\030\007 \001(\001\022\023" +
-      "\n\013sdfsCpuLoad\030\010 \001(\001\022\023\n\013totalMemory\030\n \001(\001" +
-      "\022\022\n\nfreeMemory\030\013 \001(\001\"\023\n\021SystemInfoReques" +
-      "t\"\260\001\n\023ConnectedVolumeInfo\022\n\n\002id\030\001 \001(\003\022\r\n" +
-      "\005local\030\002 \001(\010\022\020\n\010hostname\030\003 \001(\t\022\014\n\004port\030\004" +
-      " \001(\005\022\014\n\004size\030\005 \001(\003\022\026\n\016compressedSize\030\006 \001" +
-      "(\003\022\023\n\013sdfsVersion\030\007 \001(\t\022\022\n\nlastUpdate\030\010 " +
-      "\001(\003\022\017\n\007version\030\t \001(\005\"\023\n\021GCScheduleReques" +
-      "t\"h\n\022GCScheduleResponse\022\020\n\010schedule\030\001 \001(" +
-      "\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.or" +
-      "g.opendedup.grpc.errorCodes\"\025\n\023CloudVolu" +
-      "mesRequest\"\225\001\n\024CloudVolumesResponse\022;\n\nv" +
-      "olumeInfo\030\001 \003(\0132\'.org.opendedup.grpc.Con" +
-      "nectedVolumeInfo\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
+      "\n\007offline\030\035 \001(\010\022\r\n\005error\030\036 \001(\t\0221\n\terrorC" +
+      "ode\030\037 \001(\0162\036.org.opendedup.grpc.errorCode" +
+      "s\"\337\001\n\nSystemInfo\022\025\n\ractiveThreads\030\001 \001(\005\022" +
+      "\024\n\014blocksStored\030\002 \001(\005\022\027\n\017maxBlocksStored" +
+      "\030\003 \001(\005\022\022\n\ntotalSpace\030\004 \001(\003\022\021\n\tfreeSpace\030" +
+      "\005 \001(\003\022\024\n\014totalCpuLoad\030\006 \001(\001\022\020\n\010cpuCores\030" +
+      "\007 \001(\001\022\023\n\013sdfsCpuLoad\030\010 \001(\001\022\023\n\013totalMemor" +
+      "y\030\n \001(\001\022\022\n\nfreeMemory\030\013 \001(\001\"\023\n\021SystemInf" +
+      "oRequest\"\260\001\n\023ConnectedVolumeInfo\022\n\n\002id\030\001" +
+      " \001(\003\022\r\n\005local\030\002 \001(\010\022\020\n\010hostname\030\003 \001(\t\022\014\n" +
+      "\004port\030\004 \001(\005\022\014\n\004size\030\005 \001(\003\022\026\n\016compressedS" +
+      "ize\030\006 \001(\003\022\023\n\013sdfsVersion\030\007 \001(\t\022\022\n\nlastUp" +
+      "date\030\010 \001(\003\022\017\n\007version\030\t \001(\005\"\023\n\021GCSchedul" +
+      "eRequest\"h\n\022GCScheduleResponse\022\020\n\010schedu" +
+      "le\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001" +
+      "(\0162\036.org.opendedup.grpc.errorCodes\"\025\n\023Cl" +
+      "oudVolumesRequest\"\225\001\n\024CloudVolumesRespon" +
+      "se\022;\n\nvolumeInfo\030\001 \003(\0132\'.org.opendedup.g" +
+      "rpc.ConnectedVolumeInfo\022\r\n\005error\030\002 \001(\t\0221" +
+      "\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc.e" +
+      "rrorCodes\"\204\001\n\022SystemInfoResponse\022,\n\004info" +
+      "\030\001 \001(\0132\036.org.opendedup.grpc.SystemInfo\022\r" +
+      "\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.o" +
+      "pendedup.grpc.errorCodes\"\245\003\n\007DSEInfo\022\017\n\007" +
+      "maxSize\030\001 \001(\003\022\023\n\013currentSize\030\002 \001(\003\022\017\n\007en" +
+      "tries\030\003 \001(\003\022\026\n\016compressedSize\030\004 \001(\003\022\022\n\nf" +
+      "reeBlocks\030\005 \001(\003\022\020\n\010pageSize\030\006 \001(\003\022\023\n\013sto" +
+      "rageType\030\007 \001(\t\022\022\n\nlistenPort\030\010 \001(\005\022\022\n\nli" +
+      "stenHost\030\t \001(\t\022\021\n\treadSpeed\030\n \001(\005\022\022\n\nwri" +
+      "teSpeed\030\013 \001(\005\022\021\n\tcacheSize\030\014 \001(\003\022\024\n\014maxC" +
+      "acheSize\030\r \001(\003\022\027\n\017listenEncrypted\030\016 \001(\010\022" +
+      "\025\n\rencryptionKey\030\017 \001(\t\022\024\n\014encryptionIV\030\020" +
+      " \001(\t\022\026\n\016cloudAccessKey\030\021 \001(\t\022\026\n\016cloudSec" +
+      "retKey\030\022 \001(\t\022\022\n\nbucketName\030\023 \001(\t\022\016\n\006maxA" +
+      "ge\030\024 \001(\003\"\014\n\nDSERequest\"z\n\013DSEResponse\022)\n" +
+      "\004info\030\001 \001(\0132\033.org.opendedup.grpc.DSEInfo" +
+      "\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org" +
+      ".opendedup.grpc.errorCodes\";\n\025Authentica" +
+      "tionRequest\022\020\n\010username\030\001 \001(\t\022\020\n\010passwor" +
+      "d\030\002 \001(\t\"i\n\026AuthenticationResponse\022\r\n\005tok" +
+      "en\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001" +
+      "(\0162\036.org.opendedup.grpc.errorCodes\"\353\001\n\030M" +
+      "essageQueueInfoResponse\022\020\n\010hostName\030\001 \001(" +
+      "\t\022C\n\006mqType\030\002 \001(\01623.org.opendedup.grpc.M" +
+      "essageQueueInfoResponse.MQType\022\014\n\004port\030\003" +
+      " \001(\005\022\r\n\005topic\030\004 \001(\t\022\020\n\010authInfo\030\005 \001(\t\022\024\n" +
+      "\014subScription\030\006 \001(\t\022\017\n\007project\030\007 \001(\t\"\"\n\006" +
+      "MQType\022\014\n\010RabbitMQ\020\000\022\n\n\006PubSub\020\001\"$\n\021Clea" +
+      "nStoreRequest\022\017\n\007compact\030\001 \001(\010\"g\n\022CleanS" +
+      "toreResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002" +
+      " \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup." +
+      "grpc.errorCodes\"(\n\023SetCacheSizeRequest\022\021" +
+      "\n\tcacheSize\030\001 \001(\003\"i\n\024SetCacheSizeRespons" +
+      "e\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terr" +
+      "orCode\030\003 \001(\0162\036.org.opendedup.grpc.errorC" +
+      "odes\",\n\030DeleteCloudVolumeRequest\022\020\n\010volu" +
+      "meid\030\001 \001(\003\"n\n\031DeleteCloudVolumeResponse\022" +
+      "\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
       "Code\030\003 \001(\0162\036.org.opendedup.grpc.errorCod" +
-      "es\"\204\001\n\022SystemInfoResponse\022,\n\004info\030\001 \001(\0132" +
-      "\036.org.opendedup.grpc.SystemInfo\022\r\n\005error" +
-      "\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedu" +
-      "p.grpc.errorCodes\"\225\003\n\007DSEInfo\022\017\n\007maxSize" +
-      "\030\001 \001(\003\022\023\n\013currentSize\030\002 \001(\003\022\017\n\007entries\030\003" +
-      " \001(\003\022\026\n\016compressedSize\030\004 \001(\003\022\022\n\nfreeBloc" +
-      "ks\030\005 \001(\003\022\020\n\010pageSize\030\006 \001(\003\022\023\n\013storageTyp" +
-      "e\030\007 \001(\t\022\022\n\nlistenPort\030\010 \001(\005\022\022\n\nlistenHos" +
-      "t\030\t \001(\t\022\021\n\treadSpeed\030\n \001(\005\022\022\n\nwriteSpeed" +
-      "\030\013 \001(\005\022\021\n\tcacheSize\030\014 \001(\003\022\024\n\014maxCacheSiz" +
-      "e\030\r \001(\003\022\027\n\017listenEncrypted\030\016 \001(\010\022\025\n\rencr" +
-      "yptionKey\030\017 \001(\t\022\024\n\014encryptionIV\030\020 \001(\t\022\026\n" +
-      "\016cloudAccessKey\030\021 \001(\t\022\026\n\016cloudSecretKey\030" +
-      "\022 \001(\t\022\022\n\nbucketName\030\023 \001(\t\"\014\n\nDSERequest\"" +
-      "z\n\013DSEResponse\022)\n\004info\030\001 \001(\0132\033.org.opend" +
-      "edup.grpc.DSEInfo\022\r\n\005error\030\002 \001(\t\0221\n\terro" +
-      "rCode\030\003 \001(\0162\036.org.opendedup.grpc.errorCo" +
-      "des\";\n\025AuthenticationRequest\022\020\n\010username" +
-      "\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\"i\n\026Authenticati" +
-      "onResponse\022\r\n\005token\030\001 \001(\t\022\r\n\005error\030\002 \001(\t" +
-      "\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc" +
-      ".errorCodes\"\353\001\n\030MessageQueueInfoResponse" +
-      "\022\020\n\010hostName\030\001 \001(\t\022C\n\006mqType\030\002 \001(\01623.org" +
-      ".opendedup.grpc.MessageQueueInfoResponse" +
-      ".MQType\022\014\n\004port\030\003 \001(\005\022\r\n\005topic\030\004 \001(\t\022\020\n\010" +
-      "authInfo\030\005 \001(\t\022\024\n\014subScription\030\006 \001(\t\022\017\n\007" +
-      "project\030\007 \001(\t\"\"\n\006MQType\022\014\n\010RabbitMQ\020\000\022\n\n" +
-      "\006PubSub\020\001\"$\n\021CleanStoreRequest\022\017\n\007compac" +
-      "t\030\001 \001(\010\"g\n\022CleanStoreResponse\022\017\n\007eventID" +
-      "\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\016" +
-      "2\036.org.opendedup.grpc.errorCodes\"(\n\023SetC" +
-      "acheSizeRequest\022\021\n\tcacheSize\030\001 \001(\003\"i\n\024Se" +
-      "tCacheSizeResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005e" +
-      "rror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.open" +
-      "dedup.grpc.errorCodes\",\n\030DeleteCloudVolu" +
-      "meRequest\022\020\n\010volumeid\030\001 \001(\003\"n\n\031DeleteClo" +
-      "udVolumeResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005err" +
-      "or\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opende" +
-      "dup.grpc.errorCodes\"(\n\030SetVolumeCapacity" +
-      "Request\022\014\n\004size\030\001 \001(\003\"]\n\031SetVolumeCapaci" +
-      "tyResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002" +
-      " \001(\0162\036.org.opendedup.grpc.errorCodes\"&\n\022" +
-      "SetPasswordRequest\022\020\n\010password\030\001 \001(\t\"W\n\023" +
-      "SetPasswordResponse\022\r\n\005error\030\001 \001(\t\0221\n\ter" +
-      "rorCode\030\002 \001(\0162\036.org.opendedup.grpc.error" +
-      "Codes\"&\n\014SpeedRequest\022\026\n\016requestedSpeed\030" +
-      "\001 \001(\005\"b\n\rSpeedResponse\022\017\n\007eventID\030\001 \001(\t\022" +
-      "\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org." +
-      "opendedup.grpc.errorCodes\"&\n\022SyncFromVol" +
-      "Request\022\020\n\010volumeid\030\001 \001(\003\"h\n\023SyncFromVol" +
-      "Response\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t" +
-      "\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc" +
-      ".errorCodes\"\020\n\016SyncVolRequest\"d\n\017SyncVol" +
-      "Response\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t" +
-      "\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc" +
-      ".errorCodes*\037\n\010hashtype\022\n\n\006SHA256\020\000\022\007\n\003M" +
-      "D5\020\0012\375\014\n\rVolumeService\022i\n\020AuthenticateUs" +
-      "er\022).org.opendedup.grpc.AuthenticationRe" +
-      "quest\032*.org.opendedup.grpc.Authenticatio" +
-      "nResponse\022^\n\rGetVolumeInfo\022%.org.opended" +
-      "up.grpc.VolumeInfoRequest\032&.org.opendedu" +
-      "p.grpc.VolumeInfoResponse\022[\n\016ShutdownVol" +
-      "ume\022#.org.opendedup.grpc.ShutdownRequest" +
-      "\032$.org.opendedup.grpc.ShutdownResponse\022[" +
-      "\n\nCleanStore\022%.org.opendedup.grpc.CleanS" +
-      "toreRequest\032&.org.opendedup.grpc.CleanSt" +
-      "oreResponse\022p\n\021DeleteCloudVolume\022,.org.o" +
-      "pendedup.grpc.DeleteCloudVolumeRequest\032-" +
-      ".org.opendedup.grpc.DeleteCloudVolumeRes" +
-      "ponse\022J\n\007DSEInfo\022\036.org.opendedup.grpc.DS" +
-      "ERequest\032\037.org.opendedup.grpc.DSERespons" +
-      "e\022[\n\nSystemInfo\022%.org.opendedup.grpc.Sys" +
-      "temInfoRequest\032&.org.opendedup.grpc.Syst" +
-      "emInfoResponse\022p\n\021SetVolumeCapacity\022,.or" +
-      "g.opendedup.grpc.SetVolumeCapacityReques" +
-      "t\032-.org.opendedup.grpc.SetVolumeCapacity" +
-      "Response\022h\n\023GetConnectedVolumes\022\'.org.op" +
-      "endedup.grpc.CloudVolumesRequest\032(.org.o" +
-      "pendedup.grpc.CloudVolumesResponse\022^\n\rGe" +
-      "tGCSchedule\022%.org.opendedup.grpc.GCSched" +
-      "uleRequest\032&.org.opendedup.grpc.GCSchedu" +
-      "leResponse\022a\n\014SetCacheSize\022\'.org.opended" +
-      "up.grpc.SetCacheSizeRequest\032(.org.opende" +
-      "dup.grpc.SetCacheSizeResponse\022^\n\013SetPass" +
-      "word\022&.org.opendedup.grpc.SetPasswordReq" +
-      "uest\032\'.org.opendedup.grpc.SetPasswordRes" +
-      "ponse\022S\n\014SetReadSpeed\022 .org.opendedup.gr" +
-      "pc.SpeedRequest\032!.org.opendedup.grpc.Spe" +
-      "edResponse\022T\n\rSetWriteSpeed\022 .org.opende" +
-      "dup.grpc.SpeedRequest\032!.org.opendedup.gr" +
-      "pc.SpeedResponse\022f\n\023SyncFromCloudVolume\022" +
-      "&.org.opendedup.grpc.SyncFromVolRequest\032" +
-      "\'.org.opendedup.grpc.SyncFromVolResponse" +
-      "\022Z\n\017SyncCloudVolume\022\".org.opendedup.grpc" +
-      ".SyncVolRequest\032#.org.opendedup.grpc.Syn" +
-      "cVolResponse\022^\n\013HashingInfo\022&.org.opende" +
-      "dup.grpc.HashingInfoRequest\032\'.org.opende" +
-      "dup.grpc.HashingInfoResponseB0Z.github.c" +
-      "om/opendedup/sdfs-client-go/sdfs/;sdfsb\006" +
-      "proto3"
+      "es\"(\n\030SetVolumeCapacityRequest\022\014\n\004size\030\001" +
+      " \001(\003\"]\n\031SetVolumeCapacityResponse\022\r\n\005err" +
+      "or\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opende" +
+      "dup.grpc.errorCodes\"&\n\022SetPasswordReques" +
+      "t\022\020\n\010password\030\001 \001(\t\"W\n\023SetPasswordRespon" +
+      "se\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.o" +
+      "rg.opendedup.grpc.errorCodes\"&\n\014SpeedReq" +
+      "uest\022\026\n\016requestedSpeed\030\001 \001(\005\"b\n\rSpeedRes" +
+      "ponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n" +
+      "\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc.er" +
+      "rorCodes\"&\n\022SyncFromVolRequest\022\020\n\010volume" +
+      "id\030\001 \001(\003\"h\n\023SyncFromVolResponse\022\017\n\007event" +
+      "ID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001" +
+      "(\0162\036.org.opendedup.grpc.errorCodes\"\020\n\016Sy" +
+      "ncVolRequest\"d\n\017SyncVolResponse\022\017\n\007event" +
+      "ID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001" +
+      "(\0162\036.org.opendedup.grpc.errorCodes\"\"\n\020Se" +
+      "tMaxAgeRequest\022\016\n\006maxAge\030\001 \001(\003\"U\n\021SetMax" +
+      "AgeResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
+      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes2\367\014" +
+      "\n\rVolumeService\022i\n\020AuthenticateUser\022).or" +
+      "g.opendedup.grpc.AuthenticationRequest\032*" +
+      ".org.opendedup.grpc.AuthenticationRespon" +
+      "se\022^\n\rGetVolumeInfo\022%.org.opendedup.grpc" +
+      ".VolumeInfoRequest\032&.org.opendedup.grpc." +
+      "VolumeInfoResponse\022[\n\016ShutdownVolume\022#.o" +
+      "rg.opendedup.grpc.ShutdownRequest\032$.org." +
+      "opendedup.grpc.ShutdownResponse\022[\n\nClean" +
+      "Store\022%.org.opendedup.grpc.CleanStoreReq" +
+      "uest\032&.org.opendedup.grpc.CleanStoreResp" +
+      "onse\022p\n\021DeleteCloudVolume\022,.org.opendedu" +
+      "p.grpc.DeleteCloudVolumeRequest\032-.org.op" +
+      "endedup.grpc.DeleteCloudVolumeResponse\022J" +
+      "\n\007DSEInfo\022\036.org.opendedup.grpc.DSEReques" +
+      "t\032\037.org.opendedup.grpc.DSEResponse\022[\n\nSy" +
+      "stemInfo\022%.org.opendedup.grpc.SystemInfo" +
+      "Request\032&.org.opendedup.grpc.SystemInfoR" +
+      "esponse\022p\n\021SetVolumeCapacity\022,.org.opend" +
+      "edup.grpc.SetVolumeCapacityRequest\032-.org" +
+      ".opendedup.grpc.SetVolumeCapacityRespons" +
+      "e\022h\n\023GetConnectedVolumes\022\'.org.opendedup" +
+      ".grpc.CloudVolumesRequest\032(.org.opendedu" +
+      "p.grpc.CloudVolumesResponse\022^\n\rGetGCSche" +
+      "dule\022%.org.opendedup.grpc.GCScheduleRequ" +
+      "est\032&.org.opendedup.grpc.GCScheduleRespo" +
+      "nse\022a\n\014SetCacheSize\022\'.org.opendedup.grpc" +
+      ".SetCacheSizeRequest\032(.org.opendedup.grp" +
+      "c.SetCacheSizeResponse\022^\n\013SetPassword\022&." +
+      "org.opendedup.grpc.SetPasswordRequest\032\'." +
+      "org.opendedup.grpc.SetPasswordResponse\022S" +
+      "\n\014SetReadSpeed\022 .org.opendedup.grpc.Spee" +
+      "dRequest\032!.org.opendedup.grpc.SpeedRespo" +
+      "nse\022T\n\rSetWriteSpeed\022 .org.opendedup.grp" +
+      "c.SpeedRequest\032!.org.opendedup.grpc.Spee" +
+      "dResponse\022f\n\023SyncFromCloudVolume\022&.org.o" +
+      "pendedup.grpc.SyncFromVolRequest\032\'.org.o" +
+      "pendedup.grpc.SyncFromVolResponse\022Z\n\017Syn" +
+      "cCloudVolume\022\".org.opendedup.grpc.SyncVo" +
+      "lRequest\032#.org.opendedup.grpc.SyncVolRes" +
+      "ponse\022X\n\tSetMaxAge\022$.org.opendedup.grpc." +
+      "SetMaxAgeRequest\032%.org.opendedup.grpc.Se" +
+      "tMaxAgeResponseB0Z.github.com/opendedup/" +
+      "sdfs-client-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -28549,199 +28547,199 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_VolumeInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_VolumeInfoResponse_descriptor,
-        new java.lang.String[] { "Path", "Name", "CurrentSize", "Capactity", "MaxPercentageFull", "DuplicateBytes", "ReadBytes", "WriteBytes", "SerialNumber", "DseSize", "DseCompSize", "ReadOps", "WriteOps", "ReadErrors", "WriteErrors", "Files", "ClosedGracefully", "AllowExternalLinks", "UsePerfMon", "ClusterId", "VolumeClustered", "ReadTimeoutSeconds", "WriteTimeoutSeconds", "CompressedMetaData", "SyncFiles", "MaxPageSize", "MessageQueue", "PerfMonFile", "Offline", });
-    internal_static_org_opendedup_grpc_HashingInfoRequest_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_org_opendedup_grpc_HashingInfoRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_opendedup_grpc_HashingInfoRequest_descriptor,
-        new java.lang.String[] { });
-    internal_static_org_opendedup_grpc_HashingInfoResponse_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_org_opendedup_grpc_HashingInfoResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_org_opendedup_grpc_HashingInfoResponse_descriptor,
-        new java.lang.String[] { "ChunkSize", "MinSegmentSize", "MaxSegmentSize", "PolyNumber", "HashSeed", "Hashtype", "MapVersion", });
+        new java.lang.String[] { "Path", "Name", "CurrentSize", "Capactity", "MaxPercentageFull", "DuplicateBytes", "ReadBytes", "WriteBytes", "SerialNumber", "DseSize", "DseCompSize", "ReadOps", "WriteOps", "ReadErrors", "WriteErrors", "Files", "ClosedGracefully", "AllowExternalLinks", "UsePerfMon", "ClusterId", "VolumeClustered", "ReadTimeoutSeconds", "WriteTimeoutSeconds", "CompressedMetaData", "SyncFiles", "MaxPageSize", "MessageQueue", "PerfMonFile", "Offline", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SystemInfo_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(2);
     internal_static_org_opendedup_grpc_SystemInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SystemInfo_descriptor,
         new java.lang.String[] { "ActiveThreads", "BlocksStored", "MaxBlocksStored", "TotalSpace", "FreeSpace", "TotalCpuLoad", "CpuCores", "SdfsCpuLoad", "TotalMemory", "FreeMemory", });
     internal_static_org_opendedup_grpc_SystemInfoRequest_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(3);
     internal_static_org_opendedup_grpc_SystemInfoRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SystemInfoRequest_descriptor,
         new java.lang.String[] { });
     internal_static_org_opendedup_grpc_ConnectedVolumeInfo_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_org_opendedup_grpc_ConnectedVolumeInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ConnectedVolumeInfo_descriptor,
         new java.lang.String[] { "Id", "Local", "Hostname", "Port", "Size", "CompressedSize", "SdfsVersion", "LastUpdate", "Version", });
     internal_static_org_opendedup_grpc_GCScheduleRequest_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_org_opendedup_grpc_GCScheduleRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_GCScheduleRequest_descriptor,
         new java.lang.String[] { });
     internal_static_org_opendedup_grpc_GCScheduleResponse_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_org_opendedup_grpc_GCScheduleResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_GCScheduleResponse_descriptor,
         new java.lang.String[] { "Schedule", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_CloudVolumesRequest_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_org_opendedup_grpc_CloudVolumesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CloudVolumesRequest_descriptor,
         new java.lang.String[] { });
     internal_static_org_opendedup_grpc_CloudVolumesResponse_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_org_opendedup_grpc_CloudVolumesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CloudVolumesResponse_descriptor,
         new java.lang.String[] { "VolumeInfo", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SystemInfoResponse_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_org_opendedup_grpc_SystemInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SystemInfoResponse_descriptor,
         new java.lang.String[] { "Info", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_DSEInfo_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_org_opendedup_grpc_DSEInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSEInfo_descriptor,
-        new java.lang.String[] { "MaxSize", "CurrentSize", "Entries", "CompressedSize", "FreeBlocks", "PageSize", "StorageType", "ListenPort", "ListenHost", "ReadSpeed", "WriteSpeed", "CacheSize", "MaxCacheSize", "ListenEncrypted", "EncryptionKey", "EncryptionIV", "CloudAccessKey", "CloudSecretKey", "BucketName", });
+        new java.lang.String[] { "MaxSize", "CurrentSize", "Entries", "CompressedSize", "FreeBlocks", "PageSize", "StorageType", "ListenPort", "ListenHost", "ReadSpeed", "WriteSpeed", "CacheSize", "MaxCacheSize", "ListenEncrypted", "EncryptionKey", "EncryptionIV", "CloudAccessKey", "CloudSecretKey", "BucketName", "MaxAge", });
     internal_static_org_opendedup_grpc_DSERequest_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_org_opendedup_grpc_DSERequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSERequest_descriptor,
         new java.lang.String[] { });
     internal_static_org_opendedup_grpc_DSEResponse_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_org_opendedup_grpc_DSEResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSEResponse_descriptor,
         new java.lang.String[] { "Info", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_AuthenticationRequest_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_org_opendedup_grpc_AuthenticationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_AuthenticationRequest_descriptor,
         new java.lang.String[] { "Username", "Password", });
     internal_static_org_opendedup_grpc_AuthenticationResponse_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_org_opendedup_grpc_AuthenticationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_AuthenticationResponse_descriptor,
         new java.lang.String[] { "Token", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_MessageQueueInfoResponse_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_org_opendedup_grpc_MessageQueueInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_MessageQueueInfoResponse_descriptor,
         new java.lang.String[] { "HostName", "MqType", "Port", "Topic", "AuthInfo", "SubScription", "Project", });
     internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor,
         new java.lang.String[] { "Compact", });
     internal_static_org_opendedup_grpc_CleanStoreResponse_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_org_opendedup_grpc_CleanStoreResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CleanStoreResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SetCacheSizeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_org_opendedup_grpc_SetCacheSizeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetCacheSizeRequest_descriptor,
         new java.lang.String[] { "CacheSize", });
     internal_static_org_opendedup_grpc_SetCacheSizeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_org_opendedup_grpc_SetCacheSizeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetCacheSizeResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_descriptor,
         new java.lang.String[] { "Volumeid", });
     internal_static_org_opendedup_grpc_DeleteCloudVolumeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_org_opendedup_grpc_DeleteCloudVolumeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DeleteCloudVolumeResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_descriptor,
         new java.lang.String[] { "Size", });
     internal_static_org_opendedup_grpc_SetVolumeCapacityResponse_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_org_opendedup_grpc_SetVolumeCapacityResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetVolumeCapacityResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SetPasswordRequest_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_org_opendedup_grpc_SetPasswordRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetPasswordRequest_descriptor,
         new java.lang.String[] { "Password", });
     internal_static_org_opendedup_grpc_SetPasswordResponse_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_org_opendedup_grpc_SetPasswordResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetPasswordResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SpeedRequest_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_org_opendedup_grpc_SpeedRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SpeedRequest_descriptor,
         new java.lang.String[] { "RequestedSpeed", });
     internal_static_org_opendedup_grpc_SpeedResponse_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_org_opendedup_grpc_SpeedResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SpeedResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SyncFromVolRequest_descriptor =
-      getDescriptor().getMessageTypes().get(30);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_org_opendedup_grpc_SyncFromVolRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncFromVolRequest_descriptor,
         new java.lang.String[] { "Volumeid", });
     internal_static_org_opendedup_grpc_SyncFromVolResponse_descriptor =
-      getDescriptor().getMessageTypes().get(31);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_org_opendedup_grpc_SyncFromVolResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncFromVolResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SyncVolRequest_descriptor =
-      getDescriptor().getMessageTypes().get(32);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_org_opendedup_grpc_SyncVolRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncVolRequest_descriptor,
         new java.lang.String[] { });
     internal_static_org_opendedup_grpc_SyncVolResponse_descriptor =
-      getDescriptor().getMessageTypes().get(33);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_org_opendedup_grpc_SyncVolResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncVolResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_SetMaxAgeRequest_descriptor =
+      getDescriptor().getMessageTypes().get(32);
+    internal_static_org_opendedup_grpc_SetMaxAgeRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_SetMaxAgeRequest_descriptor,
+        new java.lang.String[] { "MaxAge", });
+    internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor =
+      getDescriptor().getMessageTypes().get(33);
+    internal_static_org_opendedup_grpc_SetMaxAgeResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
     org.opendedup.grpc.Shutdown.getDescriptor();
     org.opendedup.grpc.FileInfo.getDescriptor();
   }

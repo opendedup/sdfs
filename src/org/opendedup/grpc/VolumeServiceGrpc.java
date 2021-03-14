@@ -526,35 +526,35 @@ public final class VolumeServiceGrpc {
     return getSyncCloudVolumeMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest,
-      org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse> getHashingInfoMethod;
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest,
+      org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse> getSetMaxAgeMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "HashingInfo",
-      requestType = org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest.class,
-      responseType = org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse.class,
+      fullMethodName = SERVICE_NAME + '/' + "SetMaxAge",
+      requestType = org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.class,
+      responseType = org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest,
-      org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse> getHashingInfoMethod() {
-    io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest, org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse> getHashingInfoMethod;
-    if ((getHashingInfoMethod = VolumeServiceGrpc.getHashingInfoMethod) == null) {
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest,
+      org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse> getSetMaxAgeMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest, org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse> getSetMaxAgeMethod;
+    if ((getSetMaxAgeMethod = VolumeServiceGrpc.getSetMaxAgeMethod) == null) {
       synchronized (VolumeServiceGrpc.class) {
-        if ((getHashingInfoMethod = VolumeServiceGrpc.getHashingInfoMethod) == null) {
-          VolumeServiceGrpc.getHashingInfoMethod = getHashingInfoMethod =
-              io.grpc.MethodDescriptor.<org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest, org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse>newBuilder()
+        if ((getSetMaxAgeMethod = VolumeServiceGrpc.getSetMaxAgeMethod) == null) {
+          VolumeServiceGrpc.getSetMaxAgeMethod = getSetMaxAgeMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest, org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "HashingInfo"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetMaxAge"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest.getDefaultInstance()))
+                  org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("HashingInfo"))
+                  org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("SetMaxAge"))
               .build();
         }
       }
     }
-    return getHashingInfoMethod;
+    return getSetMaxAgeMethod;
   }
 
   /**
@@ -722,9 +722,9 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public void hashingInfo(org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getHashingInfoMethod(), responseObserver);
+    public void setMaxAge(org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetMaxAgeMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -842,12 +842,12 @@ public final class VolumeServiceGrpc {
                 org.opendedup.grpc.VolumeServiceOuterClass.SyncVolResponse>(
                   this, METHODID_SYNC_CLOUD_VOLUME)))
           .addMethod(
-            getHashingInfoMethod(),
+            getSetMaxAgeMethod(),
             asyncUnaryCall(
               new MethodHandlers<
-                org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest,
-                org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse>(
-                  this, METHODID_HASHING_INFO)))
+                org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest,
+                org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse>(
+                  this, METHODID_SET_MAX_AGE)))
           .build();
     }
   }
@@ -999,10 +999,10 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public void hashingInfo(org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse> responseObserver) {
+    public void setMaxAge(org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse> responseObserver) {
       asyncUnaryCall(
-          getChannel().newCall(getHashingInfoMethod(), getCallOptions()), request, responseObserver);
+          getChannel().newCall(getSetMaxAgeMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -1137,9 +1137,9 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse hashingInfo(org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest request) {
+    public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse setMaxAge(org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest request) {
       return blockingUnaryCall(
-          getChannel(), getHashingInfoMethod(), getCallOptions(), request);
+          getChannel(), getSetMaxAgeMethod(), getCallOptions(), request);
     }
   }
 
@@ -1290,10 +1290,10 @@ public final class VolumeServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse> hashingInfo(
-        org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest request) {
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse> setMaxAge(
+        org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest request) {
       return futureUnaryCall(
-          getChannel().newCall(getHashingInfoMethod(), getCallOptions()), request);
+          getChannel().newCall(getSetMaxAgeMethod(), getCallOptions()), request);
     }
   }
 
@@ -1313,7 +1313,7 @@ public final class VolumeServiceGrpc {
   private static final int METHODID_SET_WRITE_SPEED = 13;
   private static final int METHODID_SYNC_FROM_CLOUD_VOLUME = 14;
   private static final int METHODID_SYNC_CLOUD_VOLUME = 15;
-  private static final int METHODID_HASHING_INFO = 16;
+  private static final int METHODID_SET_MAX_AGE = 16;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1396,9 +1396,9 @@ public final class VolumeServiceGrpc {
           serviceImpl.syncCloudVolume((org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.SyncVolResponse>) responseObserver);
           break;
-        case METHODID_HASHING_INFO:
-          serviceImpl.hashingInfo((org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoRequest) request,
-              (io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.HashingInfoResponse>) responseObserver);
+        case METHODID_SET_MAX_AGE:
+          serviceImpl.setMaxAge((org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -1477,7 +1477,7 @@ public final class VolumeServiceGrpc {
               .addMethod(getSetWriteSpeedMethod())
               .addMethod(getSyncFromCloudVolumeMethod())
               .addMethod(getSyncCloudVolumeMethod())
-              .addMethod(getHashingInfoMethod())
+              .addMethod(getSetMaxAgeMethod())
               .build();
         }
       }

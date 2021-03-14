@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -29,6 +31,7 @@ public class JWebToken {
     private JSONObject payload = new JSONObject();
     private String signature;
     private String encodedHeader;
+    private Set<String> groups;
 
     private JWebToken() {
         encodedHeader = encode(new JSONObject(JWT_HEADER));
@@ -74,7 +77,21 @@ public class JWebToken {
         if (!payload.has("exp")) {
             throw new JSONException("Payload doesn't contain expiry " + payload);
         }
+        if(payload.has("sub")) {
+            groups = new HashSet<String>();
+            for(Object grp : (payload.getJSONArray("sub").toList())) {
+                groups.add((String)grp);
+            }
+        }
         signature = parts[2];
+    }
+
+    public boolean hasGroup(String group) {
+        if(this.groups != null) {
+            return this.groups.contains(group);
+        }
+        return false;
+        
     }
 
     @Override

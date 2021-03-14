@@ -40,25 +40,9 @@ message VolumeInfoResponse {
   repeated MessageQueueInfoResponse messageQueue = 27;
   string perfMonFile = 28;
   bool offline = 29;
-}
+  string error = 30;
+  errorCodes errorCode = 31;
 
-message HashingInfoRequest {
-
-}
-
-message HashingInfoResponse {
-  int64 chunkSize = 1;
-  int64 minSegmentSize = 2;
-  int64 maxSegmentSize = 3;
-  int64 polyNumber = 4;
-  int64 hashSeed = 5;
-  hashtype hashtype = 6;
-  int32 mapVersion = 7;
-}
-
-enum hashtype {
-  SHA256=0; //Sha256
-  MD5=1; //md5
 }
 
 message SystemInfo {
@@ -136,6 +120,7 @@ message DSEInfo {
   string cloudAccessKey = 17;
   string cloudSecretKey = 18;
   string bucketName = 19;
+  int64 maxAge = 20;
 }
 
 message DSERequest {}
@@ -250,6 +235,14 @@ message SyncVolResponse {
   errorCodes errorCode = 3;
 }
 
+message SetMaxAgeRequest {
+  int64 maxAge = 1;
+}
+
+message SetMaxAgeResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
 
 
 // Defining a Service, a Service can have multiple RPC operations
@@ -270,5 +263,5 @@ service VolumeService {
   rpc SetWriteSpeed(SpeedRequest) returns (SpeedResponse);
   rpc SyncFromCloudVolume(SyncFromVolRequest) returns (SyncFromVolResponse);
   rpc SyncCloudVolume(SyncVolRequest) returns (SyncVolResponse);
-  rpc HashingInfo(HashingInfoRequest) returns (HashingInfoResponse);
+  rpc SetMaxAge(SetMaxAgeRequest) returns (SetMaxAgeResponse);
 }

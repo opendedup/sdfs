@@ -25,6 +25,8 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.opendedup.grpc.Storage.SparseDataChunkP;
+import org.opendedup.grpc.Storage.SparseDataFlags;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -63,6 +65,19 @@ public class SparseDataChunk {
 	
 	public byte getVersion() {
 		return this.version;
+	}
+
+	public SparseDataChunkP toProtoBuf() {
+		SparseDataChunkP.Builder b = SparseDataChunkP.newBuilder();
+		b.setDoop(this.doop).setFpos(this.fpos).setLen(this.len).setPrevdoop(this.prevdoop)
+		.setVersion(this.version);
+		if(this.isRecontructed()) {
+			b.setFlags(0, SparseDataFlags.RECONSTRUCTED);
+		}
+		for (Entry<Integer, HashLocPair> hl : this.ar.entrySet()) {
+			b.putAr(hl.getKey(), hl.getValue().toProtoBuf());
+		}
+		return b.build();
 	}
 
 	private void marshall(byte[] raw) throws IOException {

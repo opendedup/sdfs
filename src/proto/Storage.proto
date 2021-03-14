@@ -1,0 +1,138 @@
+syntax = "proto3";
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
+package org.opendedup.grpc;
+
+import "FileInfo.proto";
+
+
+message CheckHashesRequest {
+  repeated bytes hashes =1;
+}
+
+message CheckHashesEntry {
+  bytes hash = 1;
+  bool exists = 2;
+}
+
+message CheckHashesResponse {
+  repeated CheckHashesEntry contains = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message MetaDataDedupeFileRequest {
+  string filePath =1;
+}
+
+message SparseDedupeFileRequest {
+  string guid =1;
+}
+
+message ChunkResponse {
+  bytes file =1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message ChunkEntry {
+  bytes hash = 1;
+  bytes data = 2;
+}
+
+message WriteChunksRequest {
+  repeated ChunkEntry chunks= 1;
+}
+
+message WriteChunksResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
+
+message ReadChunksRequest {
+  repeated ChunkEntry chunks= 1;
+}
+
+message ReadChunksResponse {
+  repeated ChunkEntry chunks= 1;
+}
+
+
+message HashingInfoRequest {
+  repeated ChunkEntry chunks = 1;
+  string error = 2;
+  errorCodes errorCode = 3;
+}
+
+message HashLocPairP {
+  bytes hash =1;
+  int64 hashloc =2;
+  int32 len = 3;
+  int32 pos = 4;
+  int32 offset = 5;
+  int32 nlen =6;
+  bool dup =7;
+  bool inserted = 8;
+}
+
+enum SparseDataFlags {
+  RECONSTRUCTED = 0;
+}
+
+message SparseDataChunkP {
+  int64 fpos = 1;
+  int32 len =2;
+  repeated SparseDataFlags flags = 3;
+  int32 version=4;
+  map<int32,HashLocPairP> ar =5;
+  int32 doop = 6;
+  int32 prevdoop = 7;
+}
+
+message SparseDedupeChunkWriteRequest {
+  SparseDataChunkP chunk = 1;
+  int64 fileHandle = 2;
+}
+
+message SparseDedupeChunkWriteResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
+message SparseDedupeChunkReadRequest {
+  int64 offset = 1;
+  int64 fileHandle = 2;
+}
+
+message SparseDedupeChunkReadResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+  SparseDataChunkP chunk = 3;
+}
+
+message HashingInfoResponse {
+  int64 chunkSize = 1;
+  int64 minSegmentSize = 2;
+  int64 maxSegmentSize = 3;
+  int64 polyNumber = 4;
+  int64 hashSeed = 5;
+  hashtype hashtype = 6;
+  int32 mapVersion = 7;
+}
+
+enum hashtype {
+  SHA256=0; //Sha256
+  MD5=1; //md5
+}
+
+// Defining a Service, a Service can have multiple RPC operations
+service StorageService {
+  rpc HashingInfo(HashingInfoRequest) returns (HashingInfoResponse);
+  rpc CheckHashes(CheckHashesRequest) returns (CheckHashesResponse);
+  rpc WriteChunks(WriteChunksRequest) returns (WriteChunksResponse);
+  rpc ReadChunks(ReadChunksRequest) returns (ReadChunksResponse);
+  rpc WriteSparseDataChunk(SparseDedupeChunkWriteRequest) returns (SparseDedupeChunkWriteResponse);
+  rpc ReadSparseDataChunk(SparseDedupeChunkReadRequest) returns (SparseDedupeChunkReadResponse);
+  rpc GetMetaDataDedupeFile(MetaDataDedupeFileRequest) returns(stream ChunkResponse);
+  rpc GetSparseDedupeFile(SparseDedupeFileRequest) returns(stream ChunkResponse);
+}
