@@ -495,7 +495,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		while (entries.hasRemaining()) {
 			long _ar = entries.getLong();
 			if (_ar == archive) {
-				entries.position(0);
 				return entries.getLong();
 			} else {
 				entries.position(entries.position() + 16);
@@ -510,7 +509,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		while (entries.hasRemaining()) {
 			long _ar = entries.getLong();
 			if (_ar == archive) {
-				entries.position(0);
 				entries.putLong(ct);
 			} else {
 				entries.position(entries.position() + 16);
@@ -827,7 +825,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				ByteBuffer bk = ByteBuffer.wrap(v);
 				long pos = bk.getLong();
 				long ct = bk.getLong();
-				if (v.length >= 24 && Main.maxAge > 0) {
+				if (v.length >= 24 && Main.maxAge > -1) {
 					long age = bk.getLong(16);
 					if (age + Main.maxAge < System.currentTimeMillis()) {
 						byte[] arVal = armdb.get(this.armdbHsAr, cm.getHash());
