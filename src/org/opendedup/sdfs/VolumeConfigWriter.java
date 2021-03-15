@@ -137,7 +137,7 @@ public class VolumeConfigWriter {
 	private String userAgentPrefix = null;
 	private boolean encryptConfig = false;
 	private String glacierClass = "standard";
-	private long maxAge = 0;
+	private long maxAge = -1;
 	private String topic;
 	private String subscription;
 	private String gcpProject;
