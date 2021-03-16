@@ -456,7 +456,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							long oct = ct;
 							ct += refs;
 							if (ct <= 0 && oct < 0) {
-								rmdb.put(this.rmdbHsAr, key, v);
+								rmdb.put(this.rmdbHsAr, key, nb);
 								ByteBuffer _bf = this.removeArRef(bk, val);
 								byte[] _val = _bf.array();
 								if (_val.length == 0) {
