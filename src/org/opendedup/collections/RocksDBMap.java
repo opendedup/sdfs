@@ -448,8 +448,11 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					
 					if (v != null) {
 						ByteBuffer bk = ByteBuffer.wrap(v);
-						long refs = this.getArRefs(bk, val);
-						if (refs >= 0) {
+						byte [] nb = this.getArVal(bk, val);
+						if (nb.length > 0) {
+							ByteBuffer _nbf = ByteBuffer.wrap(nb);
+							_nbf.position(8);
+							long refs = _nbf.getLong();
 							long oct = ct;
 							ct += refs;
 							if (ct <= 0 && oct < 0) {
@@ -495,13 +498,31 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		while (entries.hasRemaining()) {
 			long _ar = entries.getLong();
 			if (_ar == archive) {
+				entries.position(0);
 				return entries.getLong();
 			} else {
 				entries.position(entries.position() + 16);
 			}
 		}
 		entries.position(0);
-		return -1;
+		return-1;
+	}
+
+	private byte [] getArVal(ByteBuffer entries, long archive) {
+		entries.position(0);
+		while (entries.hasRemaining()) {
+			long _ar = entries.getLong();
+			if (_ar == archive) {
+				byte [] b = new byte[24];
+				entries.position(entries.position()-8);
+				entries.get(b);
+				return b;
+			} else {
+				entries.position(entries.position() + 16);
+			}
+		}
+		entries.position(0);
+		return new byte[0];
 	}
 
 	private void setArRefs(ByteBuffer entries, long archive, long ct) {
@@ -618,6 +639,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						if (System.currentTimeMillis() > tm) {
 							boolean recovered = false;
 							byte[] arVal = this.armdb.get(this.armdbHsAr, hash);
+							
 							if (arVal != null && this.getArRefs(ByteBuffer.wrap(arVal), pos) > 0) {
 								ndct++;
 								recovered = true;
