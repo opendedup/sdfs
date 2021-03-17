@@ -77,9 +77,9 @@ public class JWebToken {
         if (!payload.has("exp")) {
             throw new JSONException("Payload doesn't contain expiry " + payload);
         }
-        if(payload.has("sub")) {
+        if(payload.has("aud")) {
             groups = new HashSet<String>();
-            for(Object grp : (payload.getJSONArray("sub").toList())) {
+            for(Object grp : (payload.getJSONArray("aud").toList())) {
                 groups.add((String)grp);
             }
         }
