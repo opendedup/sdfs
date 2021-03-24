@@ -84,7 +84,7 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-storage</artifactId>
-            <version>1.111.2</version>
+            <version>1.113.14</version>
         </dependency>
         <dependency>
             <groupId>io.perfmark</groupId>
@@ -233,7 +233,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.11.634</version>
+            <version>1.11.981</version>
         </dependency>
         <dependency>
             <groupId>org.simpleframework</groupId>
@@ -258,27 +258,27 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.34.1</version>
+            <version>1.36.0</version>
           </dependency>
           <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>1.34.1</version>
+            <version>1.36.0</version>
           </dependency>
           <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>1.34.1</version>
+            <version>1.36.0</version>
           </dependency>
           <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty</artifactId>
-            <version>1.34.1</version>
+            <version>1.36.0</version>
         </dependency>
           <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-core</artifactId>
-            <version>1.34.1</version>
+            <version>1.36.0</version>
         </dependency>
           <dependency> <!-- necessary for Java 9+ -->
             <groupId>org.apache.tomcat</groupId>
