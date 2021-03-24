@@ -14,7 +14,8 @@ RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteracti
         build-essential \
         libxml2-utils \
         fuse \
-        alien
+        alien \
+        git
 
 RUN gem install fpm
 COPY pom.xml /sdfs-build/
