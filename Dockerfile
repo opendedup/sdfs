@@ -21,6 +21,7 @@ WORKDIR "/sdfs-build/install-packages/"
 RUN rm -rf deb/usr/share/sdfs/lib/*
 WORKDIR "/sdfs-build/"
 RUN mvn package
+
 RUN cp target/lib/*.jar install-packages/deb/usr/share/sdfs/lib/ && \
     cp target/sdfs-${VERSION}.jar install-packages/deb/usr/share/sdfs/lib/sdfs.jar && \
     cp target/sdfs-${VERSION}.jar install-packages

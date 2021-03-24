@@ -191,16 +191,7 @@ public class MountSDFS implements Daemon, Runnable {
 		shutdownHook = new ShutdownHook(sdfsService, cmd.getOptionValue("m"));
 		mountOptions = cmd.getOptionValue("m");
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
-		if (nm) {
-			System.out.println("volume mounted");
-			while (!SDFSService.isStopped()) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-
-				}
-			}
-		} else {
+		if (!nm) {
 			if (cmd.hasOption("o")) {
 				fal.add("-o");
 				fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
@@ -235,6 +226,9 @@ public class MountSDFS implements Daemon, Runnable {
 			MountSDFS sd = new MountSDFS();
 			Thread th = new Thread(sd);
 			th.start();
+		}
+		else {
+			System.out.println("SDFS Volume Service Started");
 		}
 	}
 
