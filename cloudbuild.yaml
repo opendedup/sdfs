@@ -1,5 +1,5 @@
 steps:
-- name: getsdfscli
+- name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
   args: [ '-c', "gsutil cp gs://${_DIST_BUCKET}/sdfscli/sdfscli-master /tmp/ 
     && rm -rf install-packages/deb/sbin/sdfscli
@@ -7,7 +7,7 @@ steps:
     && cp /tmp/sdfscli-master install-packages/deb/sbin/sdfscli 
     && cp /tmp/sdfscli-master install-packages/deb/usr/share/sdfs/sdfscli
     && rm /tmp/sdfscli-master"]
-- name: getmountsdfs
+- name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
   args: [ '-c', "gsutil cp gs://${_DIST_BUCKET}/hybrics-fs/mount.sdfs-master /tmp/ 
     && rm -rf install-packages/deb/sbin/mount.sdfs
