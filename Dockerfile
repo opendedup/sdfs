@@ -12,7 +12,8 @@ RUN wget https://cdn.azul.com/zulu/bin/zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.g
     tar -xzvf zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz && \
     mkdir -p install-packages/deb/usr/share/sdfs/bin/ && \
     cp -rf zulu11.35.13-ca-jdk11.0.5-linux_x64 install-packages/deb/usr/share/sdfs/bin/jre
-
+RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
+        git
 ENV VERSION=3.11.0
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
 ENV DEBFILE="sdfs_${VERSION}_amd64.deb"
