@@ -102,11 +102,6 @@
             <version>1.20</version>
         </dependency>
         <dependency>
-            <groupId>jonelo</groupId>
-            <artifactId>jacksum</artifactId>
-            <version>1.7.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.opendedupe</groupId>
             <artifactId>rabinwindow</artifactId>
             <version>1.0.2</version>

@@ -1,25 +1,19 @@
 steps:
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
-  args: [ '-c', "gsutil cp gs://${_DIST_BUCKET}/sdfscli/sdfscli-master /tmp/ 
+  args: [ '-c', "gsutil cp gs://${_DIST_BUCKET}/sdfscli/sdfscli-$BRANCH_NAME /tmp/ 
     && rm -rf install-packages/deb/sbin/sdfscli
     && rm -rf install-packages/deb/usr/share/sdfs/sdfscli
-    && cp /tmp/sdfscli-master install-packages/deb/sbin/sdfscli 
-    && cp /tmp/sdfscli-master install-packages/deb/usr/share/sdfs/sdfscli
-    && rm /tmp/sdfscli-master"]
+    && cp /tmp/sdfscli-$BRANCH_NAME install-packages/deb/sbin/sdfscli 
+    && cp /tmp/sdfscli-$BRANCH_NAME install-packages/deb/usr/share/sdfs/sdfscli
+    && rm /tmp/sdfscli-$BRANCH_NAME"]
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
-  args: [ '-c', "gsutil cp gs://${_DIST_BUCKET}/hybrics-fs/mount.sdfs-master /tmp/ 
+  args: [ '-c', "gsutil cp gs://${_DIST_BUCKET}/hybrics-fs/mount.sdfs-$BRANCH_NAME /tmp/ 
     && rm -rf install-packages/deb/sbin/mount.sdfs
     && rm -rf install-packages/deb/usr/share/sdfs/mount.sdfs
-    && cp /tmp/mount.sdfs-master install-packages/deb/sbin/mount.sdfs 
-    && cp /tmp/mount.sdfs-master install-packages/deb/usr/share/sdfs/mount.sdfs"]
-- name: gcr.io/kaniko-project/executor:latest
-  args:
-    - --destination=gcr.io/$PROJECT_ID/hybrics-build:$BRANCH_NAME
-    - --cache=true
-    - --cache-ttl=10h
-    - --dockerfile=Dockerfile.base
+    && cp /tmp/mount.sdfs-$BRANCH_NAME install-packages/deb/sbin/mount.sdfs 
+    && cp /tmp/mount.sdfs-$BRANCH_NAME install-packages/deb/usr/share/sdfs/mount.sdfs"]
 - name: gcr.io/kaniko-project/executor:latest
   args:
       - --destination=gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME

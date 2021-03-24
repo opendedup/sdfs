@@ -19,6 +19,8 @@
 package org.opendedup.sdfs.replication;
 
 import java.io.File;
+
+import org.bouncycastle.util.Arrays;
 import org.opendedup.collections.ByteArrayWrapper;
 
 
@@ -52,7 +54,6 @@ import org.opendedup.util.FileCounts;
 
 import com.google.common.primitives.Longs;
 
-import jonelo.jacksum.adapt.org.bouncycastle.util.Arrays;
 
 public class MetaFileImport implements Serializable {
 	private static final long serialVersionUID = 2281680761909041919L;

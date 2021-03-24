@@ -51,9 +51,7 @@ public class HashFunctionPool {
 	public static long bytesPerWindow = 48;
 
 	static {
-		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
-			hashLength = Tiger16HashEngine.getHashLenth();
-		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
+		if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hashLength = Murmur3HashEngine.getHashLenth();
 		} else if (Main.hashType.toUpperCase().startsWith("VARIABLE_")) {
 			if(Main.hashType.endsWith("256")) {
@@ -107,9 +105,7 @@ public class HashFunctionPool {
 			 {
 		try {
 		AbstractHashEngine hc = null;
-		if (Main.hashType.equalsIgnoreCase(TIGER_16)) {
-			hc = new Tiger16HashEngine();
-		} else if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
+		if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
 			hc = new Murmur3HashEngine();
 		} else if (Main.hashType.equalsIgnoreCase("VARIABLE_MURMUR3")) {
 			hc = new VariableHashEngine();
