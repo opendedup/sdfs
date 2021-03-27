@@ -5,6 +5,7 @@ LABEL author="Sam Silverberg"
 
 COPY pom.xml /sdfs-build/
 COPY src /sdfs-build/src/
+COPY .git /sdfs-build/
 COPY install-packages /sdfs-build/install-packages/
 WORKDIR "/sdfs-build"
 RUN wget https://cdn.azul.com/zulu/bin/zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz && \

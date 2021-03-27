@@ -18,6 +18,7 @@ RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteracti
         git
 
 RUN gem install fpm
+COPY .git /sdfs-build/
 COPY pom.xml /sdfs-build/
 WORKDIR "/sdfs-build"
 ENV VERSION=3.11.0
