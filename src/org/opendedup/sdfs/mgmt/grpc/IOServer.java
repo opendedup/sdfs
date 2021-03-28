@@ -119,7 +119,7 @@ public class IOServer {
     public <ReqT, RespT> Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers,
         ServerCallHandler<ReqT, RespT> next) {
       if (Main.sdfsCliRequireAuth) {
-        SDFSLogger.getLog().debug(call.getMethodDescriptor().getFullMethodName());
+        SDFSLogger.getLog().debug("authenticated call to " +call.getMethodDescriptor().getFullMethodName());
         if (call.getMethodDescriptor().getFullMethodName()
             .equals("org.opendedup.grpc.VolumeService/AuthenticateUser")) {
           SDFSLogger.getLog().debug("Authenticating User");
@@ -155,7 +155,7 @@ public class IOServer {
 
         }
       } else {
-
+        SDFSLogger.getLog().debug("Unauthenticated Call to "+call.getMethodDescriptor().getFullMethodName());
       }
 
       return next.startCall(call, headers);

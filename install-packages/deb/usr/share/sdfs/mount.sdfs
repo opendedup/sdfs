@@ -14,7 +14,7 @@ while getopts "v:z:" opt; do
     v)
         CFG="/etc/sdfs/$OPTARG-volume-cfg.xml"
         PF="$OPTARG.pid"
-        echo "Yahoo $CFG";;
+        ;;
     z)
       MEM=$OPTARG;;
 esac
