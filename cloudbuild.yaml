@@ -12,11 +12,14 @@ steps:
     rm /tmp/sdfscli-$BRANCH_NAME
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
-  args: ["gsutil cp gs://${_DIST_BUCKET}/hybrics-fs/mount.sdfs-$BRANCH_NAME /tmp/ 
-    && rm -rf /workspace/install-packages/deb/sbin/mount.sdfs
-    && rm -rf /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs
-    && cp /tmp/mount.sdfs-$BRANCH_NAME  /workspace/install-packages/deb/sbin/mount.sdfs 
-    && cp /tmp/mount.sdfs-$BRANCH_NAME  /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs"]
+  args:
+  - "-c"
+  - |-
+    gsutil cp gs://${_DIST_BUCKET}/hybrics-fs/mount.sdfs-$BRANCH_NAME /tmp/ 
+    rm -rf /workspace/install-packages/deb/sbin/mount.sdfs
+    rm -rf /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs
+    cp /tmp/mount.sdfs-$BRANCH_NAME  /workspace/install-packages/deb/sbin/mount.sdfs 
+    cp /tmp/mount.sdfs-$BRANCH_NAME  /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs
 - name: gcr.io/kaniko-project/executor:latest
   args:
       - --destination=gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME
