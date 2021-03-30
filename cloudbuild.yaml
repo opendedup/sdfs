@@ -1,7 +1,7 @@
 steps:
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
-  args: [ '-c', "gsutil cp gs://${_DIST_BUCKET}/sdfscli/sdfscli-$BRANCH_NAME /tmp/ 
+  args: ["gsutil cp gs://${_DIST_BUCKET}/sdfscli/sdfscli-$BRANCH_NAME /tmp/ 
     && rm -rf install-packages/deb/sbin/sdfscli
     && rm -rf install-packages/deb/usr/share/sdfs/sdfscli
     && cp /tmp/sdfscli-$BRANCH_NAME install-packages/deb/sbin/sdfscli 
@@ -9,7 +9,7 @@ steps:
     && rm /tmp/sdfscli-$BRANCH_NAME"]
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
-  args: [ '-c', "gsutil cp gs://${_DIST_BUCKET}/hybrics-fs/mount.sdfs-$BRANCH_NAME /tmp/ 
+  args: ["gsutil cp gs://${_DIST_BUCKET}/hybrics-fs/mount.sdfs-$BRANCH_NAME /tmp/ 
     && rm -rf install-packages/deb/sbin/mount.sdfs
     && rm -rf install-packages/deb/usr/share/sdfs/mount.sdfs
     && cp /tmp/mount.sdfs-$BRANCH_NAME install-packages/deb/sbin/mount.sdfs 
