@@ -65,11 +65,11 @@ GPLv2
 ### Setup
 	Step 1:
 
-		docker pull gcr.io/hybrics/hybrics
+		docker pull gcr.io/hybrics/hybrics:3.12
 	
 	Step 2:
 
-		docker run --name=sdfs1 -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.12 /usr/share/sdfs/docker_run.sh
+		docker run --name=sdfs1 -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.12
 	
 	Step 3:
 
