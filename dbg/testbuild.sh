@@ -1,4 +1,4 @@
-export VERSION=3.11.0
+export VERSION=3.12.0
 sudo umount /media/pool0
 sudo killall -9 jsvc
 #sudo rm -rf /opt/sdfs/volumes/gcs0/

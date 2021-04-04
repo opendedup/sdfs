@@ -69,7 +69,7 @@ GPLv2
 	
 	Step 2:
 
-		docker run --name=sdfs1 -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.11 /usr/share/sdfs/docker_run.sh
+		docker run --name=sdfs1 -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.12 /usr/share/sdfs/docker_run.sh
 	
 	Step 3:
 
@@ -107,14 +107,14 @@ Optimize usage running using local storage:
 
 ```bash
 sudo mkdir /opt/sdfs1
-sudo docker run --name=sdfs1 --env CAPACITY=1TB --volume /home/A_USER/sdfs1:/opt/sdfs -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.11
+sudo docker run --name=sdfs1 --env CAPACITY=1TB --volume /home/A_USER/sdfs1:/opt/sdfs -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.12
 ```
 
 Optimize usage running using Google Cloud Storage:
 
 ```bash
 sudo mkdir /opt/sdfs1
-sudo docker run --name=sdfs1 --env BUCKET_NAME=ABUCKETNAME --env TYPE=GOOGLE --env=GCS_CREDS_FILE=/keys/service_account_key.json --env=PUBSUB_PROJECT=A_GCP_PROJECT --env CAPACITY=1TB --volume=/home/A_USER/keys:/keys --volume /home/A_USER/sdfs1:/opt/sdfs -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.11
+sudo docker run --name=sdfs1 --env BUCKET_NAME=ABUCKETNAME --env TYPE=GOOGLE --env=GCS_CREDS_FILE=/keys/service_account_key.json --env=PUBSUB_PROJECT=A_GCP_PROJECT --env CAPACITY=1TB --volume=/home/A_USER/keys:/keys --volume /home/A_USER/sdfs1:/opt/sdfs -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.12
 ```
 
 
