@@ -149,7 +149,7 @@
         <dependency>
             <groupId>commons-daemon</groupId>
             <artifactId>commons-daemon</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -228,7 +228,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
-            <version>1.11.981</version>
+            <version>1.11.993</version>
         </dependency>
         <dependency>
             <groupId>org.simpleframework</groupId>
@@ -253,27 +253,27 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.36.0</version>
+            <version>1.36.1</version>
           </dependency>
           <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>1.36.0</version>
+            <version>1.36.1</version>
           </dependency>
           <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>1.36.0</version>
+            <version>1.36.1</version>
           </dependency>
           <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty</artifactId>
-            <version>1.36.0</version>
+            <version>1.36.1</version>
         </dependency>
           <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-core</artifactId>
-            <version>1.36.0</version>
+            <version>1.36.1</version>
         </dependency>
           <dependency> <!-- necessary for Java 9+ -->
             <groupId>org.apache.tomcat</groupId>
