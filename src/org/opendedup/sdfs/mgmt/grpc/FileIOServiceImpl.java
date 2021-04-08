@@ -12,6 +12,7 @@ import org.opendedup.sdfs.mgmt.CloseFile;
 import org.opendedup.sdfs.mgmt.GetCloudFile;
 import org.opendedup.sdfs.mgmt.GetCloudMetaFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.util.OSValidator;
 
 import fuse.FuseFtypeConstants;
 
@@ -185,7 +186,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     private File resolvePath(String path) throws FileIOError {
         String pt = mountedVolume + path.trim();
         File _f = new File(pt);
-        if (Files.isSymbolicLink(_f.toPath())) {
+        
+        if (!OSValidator.isWindows() && Files.isSymbolicLink(_f.toPath())) {
             try {
                 _f = Files.readSymbolicLink(_f.toPath()).toFile();
                 pt = mountedVolume + _f.getPath();
@@ -743,7 +745,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     @Override
     public void release(FileCloseRequest request, StreamObserver<FileCloseResponse> responseObserver) {
         FileCloseResponse.Builder b = FileCloseResponse.newBuilder();
-        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ) || !AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)
+                || !AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
             b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
@@ -840,7 +843,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     @Override
     public void open(FileOpenRequest request, StreamObserver<FileOpenResponse> responseObserver) {
         FileOpenResponse.Builder b = FileOpenResponse.newBuilder();
-        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE) || !AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)
+                || !AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
             b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
@@ -995,7 +999,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         Path p = Paths.get(f.getCanonicalPath());
 
                         try {
-                            Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
+                            if (!OSValidator.isWindows())
+                                Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
                             responseObserver.onNext(b.build());
                             responseObserver.onCompleted();
                         } catch (IOException e) {
@@ -1068,8 +1073,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     Path p = Paths.get(f.getCanonicalPath());
                     try {
                         SDFSLogger.getLog().info("setting uid " + uid + "and gid " + gid);
-                        Files.setAttribute(p, "unix:uid", Integer.valueOf(uid), LinkOption.NOFOLLOW_LINKS);
-                        Files.setAttribute(p, "unix:gid", Integer.valueOf(gid), LinkOption.NOFOLLOW_LINKS);
+                        if (!OSValidator.isWindows()) {
+                            Files.setAttribute(p, "unix:uid", Integer.valueOf(uid), LinkOption.NOFOLLOW_LINKS);
+                            Files.setAttribute(p, "unix:gid", Integer.valueOf(gid), LinkOption.NOFOLLOW_LINKS);
+                        }
                         responseObserver.onNext(b.build());
                         responseObserver.onCompleted();
                     } catch (IOException e) {
@@ -1215,9 +1222,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         int gid = 0;
                         int mode = 0000;
                         try {
-                            uid = (Integer) Files.getAttribute(p, "unix:uid", LinkOption.NOFOLLOW_LINKS);
-                            gid = (Integer) Files.getAttribute(p, "unix:gid", LinkOption.NOFOLLOW_LINKS);
-                            mode = (Integer) Files.getAttribute(p, "unix:mode", LinkOption.NOFOLLOW_LINKS);
+                            if (!OSValidator.isWindows()) {
+                                uid = (Integer) Files.getAttribute(p, "unix:uid", LinkOption.NOFOLLOW_LINKS);
+                                gid = (Integer) Files.getAttribute(p, "unix:gid", LinkOption.NOFOLLOW_LINKS);
+                                mode = (Integer) Files.getAttribute(p, "unix:mode", LinkOption.NOFOLLOW_LINKS);
+                            }
                         } catch (Exception e) {
                             SDFSLogger.getLog().error("unable to parse sylink " + path, e);
                         }
@@ -1261,15 +1270,22 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
                         p = Paths.get(f.getCanonicalPath());
                         if (ftype == FuseFtypeConstants.TYPE_DIR) {
-                            int uid = (Integer) Files.getAttribute(p, "unix:uid");
-                            int gid = (Integer) Files.getAttribute(p, "unix:gid");
-                            int mode = (Integer) Files.getAttribute(p, "unix:mode");
+                            int uid = 0;
+                            int gid = 0;
+                            int mode = 0;
+                            if (!OSValidator.isWindows()) {
+                                uid = (Integer) Files.getAttribute(p, "unix:uid");
+                                gid = (Integer) Files.getAttribute(p, "unix:gid");
+                                mode = (Integer) Files.getAttribute(p, "unix:mode");
+                            }
                             MetaDataDedupFile mf = MetaFileStore.getFolder(f);
 
                             long fileLength = f.length();
-                            sb.setUid(uid);
-                            sb.setGid(gid);
-                            sb.setMode(mode);
+                            if (!OSValidator.isWindows()) {
+                                sb.setUid(uid);
+                                sb.setGid(gid);
+                                sb.setMode(mode);
+                            }
                             sb.setAtime(mf.getLastAccessed());
                             sb.setMtim(mf.lastModified());
                             sb.setCtim(0);
