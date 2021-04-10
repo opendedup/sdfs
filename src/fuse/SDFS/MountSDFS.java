@@ -40,7 +40,7 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("r", false, "Restores files from cloud storage if the backend cloud store supports it");
 		options.addOption("d", false, "debug output");
 		options.addOption("p", true, "port to use for sdfs cli");
-		options.addOption("l", true, "Compact Volume on Disk");
+		options.addOption("l", false, "Compact Volume on Disk");
 		options.addOption("c", false, "Runs Consistency Check");
 		options.addOption("e", true, "password to decrypt config");
 		options.addOption("n", false, "disable drive mount");
@@ -68,8 +68,7 @@ public class MountSDFS implements Daemon, Runnable {
 
 	private static void printHelp(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("mount.sdfs",
-				options);
+		formatter.printHelp("mount.sdfs", options);
 	}
 
 	private static void checkJavaVersion() {
@@ -191,20 +190,22 @@ public class MountSDFS implements Daemon, Runnable {
 		shutdownHook = new ShutdownHook(sdfsService, cmd.getOptionValue("m"));
 		mountOptions = cmd.getOptionValue("m");
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
-		if (!nm) {
-			if (cmd.hasOption("o")) {
-				fal.add("-o");
-				fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
-						+ volumeConfigFile + ":" + Main.sdfsCliPort + "," + cmd.getOptionValue("o"));
-			} else {
-				fal.add("-o");
-				fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
-						+ volumeConfigFile + ":" + Main.sdfsCliPort);
-			}
-			sFal = new String[fal.size()];
-			fal.toArray(sFal);
-			for (int i = 0; i < sFal.length; i++) {
-				SDFSLogger.getLog().info("Mount Option : " + sFal[i]);
+		if (!OSValidator.isWindows()) {
+			if (!nm) {
+				if (cmd.hasOption("o")) {
+					fal.add("-o");
+					fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
+							+ volumeConfigFile + ":" + Main.sdfsCliPort + "," + cmd.getOptionValue("o"));
+				} else {
+					fal.add("-o");
+					fal.add("modules=iconv,from_code=UTF-8,to_code=UTF-8,direct_io,allow_other,nonempty,big_writes,allow_other,fsname=sdfs:"
+							+ volumeConfigFile + ":" + Main.sdfsCliPort);
+				}
+				sFal = new String[fal.size()];
+				fal.toArray(sFal);
+				for (int i = 0; i < sFal.length; i++) {
+					SDFSLogger.getLog().info("Mount Option : " + sFal[i]);
+				}
 			}
 		}
 	}
@@ -226,8 +227,7 @@ public class MountSDFS implements Daemon, Runnable {
 			MountSDFS sd = new MountSDFS();
 			Thread th = new Thread(sd);
 			th.start();
-		}
-		else {
+		} else {
 			System.out.println("SDFS Volume Service Started");
 		}
 	}
