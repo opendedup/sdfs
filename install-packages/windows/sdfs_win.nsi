@@ -119,6 +119,12 @@ Section "SDFS Setup" SecMain
     "$INSTDIR" "(BU)" "GenericRead + GenericWrite"
 SectionEnd
 
+Section "Visual Studio Runtime"
+  SetOutPath "$INSTDIR"
+  ExecWait '"$INSTDIR\VC_redist.x64.exe" /quiet'
+  Delete "$INSTDIR\VC_redist.x64.exe"
+SectionEnd
+
 
 Function .onInstSuccess
   IfSilent noreboot

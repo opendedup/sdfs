@@ -67,6 +67,7 @@ import org.opendedup.sdfs.io.events.MMetaUpdated;
 import org.opendedup.sdfs.monitor.IOMonitor;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.ByteUtils;
+import org.opendedup.util.OSValidator;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -133,7 +134,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public int getMode() throws IOException {
 		if (mode == -1) {
 			Path p = Paths.get(this.path);
+			if(!OSValidator.isWindows()) {
 			this.mode = (Integer) Files.getAttribute(p, "unix:mode",LinkOption.NOFOLLOW_LINKS);
+			} else {
+				this.mode = 0;
+			}
 		}
 		return this.mode;
 	}
@@ -145,8 +150,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setMode(int mode, boolean propigateEvent) throws IOException {
 		this.mode = mode;
 		this.dirty = true;
+		if(!OSValidator.isWindows()) {
 		Path p = Paths.get(this.path);
 		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
+		}
 	}
 
 	/**
@@ -278,8 +285,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public int getOwner_id() throws IOException {
 		if (owner_id == -1) {
+			if(!OSValidator.isWindows()) {
 			Path p = Paths.get(this.path);
 			this.owner_id = (Integer) Files.getAttribute(p, "unix:uid",LinkOption.NOFOLLOW_LINKS);
+			} else {
+				this.owner_id = 0;
+			}
 		}
 		return owner_id;
 	}
@@ -301,8 +312,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void setOwner_id(int owner_id, boolean propigateEvent) throws IOException {
 		this.owner_id = owner_id;
+		if(!OSValidator.isWindows()) {
 		Path p = Paths.get(this.path);
 		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id), LinkOption.NOFOLLOW_LINKS);
+		}
 	}
 
 	/**
@@ -312,8 +325,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public int getGroup_id() throws IOException {
 		if (group_id == -1) {
+			if(!OSValidator.isWindows()) {
 			Path p = Paths.get(this.path);
 			this.group_id = (Integer) Files.getAttribute(p, "unix:gid", LinkOption.NOFOLLOW_LINKS);
+			}else { 
+				this.group_id = 0;
+			}
 		}
 		return group_id;
 	}
@@ -335,8 +352,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void setGroup_id(int group_id, boolean propigateEvent) throws IOException {
 		this.group_id = group_id;
+		if(!OSValidator.isWindows()) {
 		Path p = Paths.get(this.path);
 		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id), LinkOption.NOFOLLOW_LINKS);
+		}
 	}
 
 	/**
