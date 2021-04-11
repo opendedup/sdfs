@@ -58,9 +58,20 @@ public class MountSDFS implements Daemon, Runnable {
 		BasicConfigurator.configure();
 		setup(args);
 		try {
+			if (!OSValidator.isWindows()) {
+				FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(), Main.volumeMountPoint), log);
+				System.exit(0);
+			} else {
+				System.out.println("volumemounted");
+				System.out.println("");
+				while (!SDFSService.isStopped()) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
 
-			FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(), Main.volumeMountPoint), log);
-			System.exit(0);
+					}
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -140,6 +151,9 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 		if (cmd.hasOption("v")) {
 			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim() + "-volume-cfg.xml");
+			if (OSValidator.isWindows()) {
+				f = new File(OSValidator.getConfigPath() + cmd.getOptionValue("v").trim() + "-volume-cfg.xml");
+			}
 			volname = f.getName();
 			if (!f.exists()) {
 				System.out.println("Volume configuration file " + f.getPath() + " does not exist");
