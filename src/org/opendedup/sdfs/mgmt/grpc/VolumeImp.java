@@ -69,7 +69,13 @@ import net.sf.jpam.Pam;
 
 class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
   private static final int EXPIRY_DAYS = 90;
-  private static Pam pam = new Pam("login");
+  
+  private static Pam pam = null;
+  static {
+    if(!OSValidator.isWindows()) {
+      pam =  new Pam("login");
+    }
+  }
 
   @Override
   public void getVolumeInfo(VolumeInfoRequest req, StreamObserver<VolumeInfoResponse> responseObserver) {
@@ -108,7 +114,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
         String token = new JWebToken(jwtPayload).toString();
         b.setToken(token);
-      } else {
+      } else if (!OSValidator.isWindows()){
         if (!pam.authenticateSuccessful(req.getUsername(), req.getPassword())) {
           b.setError("Unable to Authenticate User");
           b.setErrorCode(errorCodes.EACCES);
@@ -139,6 +145,9 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
           }
 
         }
+      } else {
+        b.setError("Unable to Authenticate User");
+        b.setErrorCode(errorCodes.EACCES);
       }
     } catch (Exception e) {
       SDFSLogger.getLog().error("unable to authenticat user", e);

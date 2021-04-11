@@ -188,8 +188,13 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 		if (OSValidator.isUnix())
 			Main.logPath = "/var/log/sdfs/" + volname + ".log";
-		if (OSValidator.isWindows())
-			Main.logPath = Main.volume.getPath() + "\\log\\" + Main.volume.getName() + ".log";
+		if (OSValidator.isWindows()) {
+			File cf = new File(volumeConfigFile);
+			String fn = cf.getName().substring(0, cf.getName().lastIndexOf(".")) + ".log";
+			Main.logPath = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + fn;
+			File lf = new File(Main.logPath);
+			lf.getParentFile().mkdirs();
+		}
 		sdfsService = new SDFSService(volumeConfigFile, volumes);
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);

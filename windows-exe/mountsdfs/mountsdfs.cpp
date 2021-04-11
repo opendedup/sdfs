@@ -27,9 +27,9 @@ HANDLE hParentStdOut = NULL;
 HANDLE g_hChildStd_OUT_Wr = NULL;
 PROCESS_INFORMATION piProcInfo;
 STARTUPINFO siStartInfo;
-void CreateChildProcess(TCHAR *p);
+void CreateChildProcess(TCHAR* p);
 void WriteToPipe(void);
-void ReadFromPipe(void *param);
+void ReadFromPipe(void* param);
 void ErrorExit(PTSTR);
 bool threadFinished = false;
 bool processCompleted = false;
@@ -38,7 +38,7 @@ using namespace std;
 using namespace tinyxml2;
 bool mounted = false;
 bool cpt = false;
-int FileExists(TCHAR * file)
+int FileExists(TCHAR* file)
 {
 	WIN32_FIND_DATA FindFileData;
 	HANDLE handle = FindFirstFile(file, &FindFileData);
@@ -51,7 +51,7 @@ int FileExists(TCHAR * file)
 	return found;
 }
 
-TCHAR * ReadRegValue(HKEY root, LPCSTR key, LPCSTR name)
+TCHAR* ReadRegValue(HKEY root, LPCSTR key, LPCSTR name)
 {
 	HKEY hKey;
 	if (RegOpenKeyEx(root, key, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
@@ -80,7 +80,7 @@ void signalHandler(int signum)
 
 }
 
-int _tmain(int argc, TCHAR *argv[])
+int _tmain(int argc, TCHAR* argv[])
 {
 	signal(SIGINT, signalHandler);
 
@@ -114,13 +114,13 @@ int _tmain(int argc, TCHAR *argv[])
 	if (!SetHandleInformation(g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0))
 		ErrorExit(TEXT("Stdin SetHandleInformation"));
 	TCHAR cmd[2048];
-	TCHAR *val = ReadRegValue(HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\SDFS", "path");
-	
+	TCHAR* val = ReadRegValue(HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\SDFS", "path");
+
 	TCHAR path[512];
 	_tcscpy_s(path, val);
 	//_tprintf("path=%s\n", path);
 	bool mt = false;
-	
+
 	TCHAR configFile[512];
 	__int64 mem = 256;
 	__int64 basemem = 3000;
@@ -203,10 +203,10 @@ int _tmain(int argc, TCHAR *argv[])
 					//long tt = (bz* tz*3)/1024;
 
 					mem += basemem;
-					if(cz < 512) {
+					if (cz < 512) {
 						cz = 512;
 					}
-					mem += cz*3;
+					mem += cz * 3;
 					//long gb = sz / (1073741824);
 					//mem += .3 * gb;
 					//cout << sz << " asz= " << gb << " mem=" << mem << "\n";
@@ -251,7 +251,7 @@ int _tmain(int argc, TCHAR *argv[])
 	DWORD exit_code = 0;
 	_beginthread(ReadFromPipe, 0, NULL);
 	if (cpt)
-	_tprintf("cp=%s", cmd);
+		_tprintf("cp=%s", cmd);
 	if (NULL != piProcInfo.hProcess)
 	{
 		while (!processCompleted) {
@@ -276,7 +276,7 @@ int _tmain(int argc, TCHAR *argv[])
 			}
 		}
 		CloseHandle(piProcInfo.hProcess);
-		
+
 	}
 
 	// The remaining open handles are cleaned up when this process terminates. 
@@ -285,10 +285,10 @@ int _tmain(int argc, TCHAR *argv[])
 	return exit_code;
 }
 
-void CreateChildProcess(TCHAR *p)
+void CreateChildProcess(TCHAR* p)
 // Create a child process that uses the previously created pipes for STDIN and STDOUT.
 {
-	
+
 	BOOL bSuccess = FALSE;
 
 	// Set up members of the PROCESS_INFORMATION structure. 
@@ -335,7 +335,7 @@ void CreateChildProcess(TCHAR *p)
 	}
 }
 
-void ReadFromPipe(void *param)
+void ReadFromPipe(void* param)
 
 // Read output from the child process's pipe for STDOUT
 // and write to the parent process's pipe for STDOUT. 
@@ -384,5 +384,5 @@ void ErrorExit(PTSTR lpszFunction)
 // Format a readable error message, display a message box, 
 // and exit from the application.
 {
-	
+
 }

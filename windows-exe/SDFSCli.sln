@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdfscli", "SDFSCli\SDFSCli.vcxproj", "{68CB2F4C-6FB1-44CD-A0A3-61410BEE9DE9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mksdfs", "mksdfs\mksdfs.vcxproj", "{2BE03095-727A-448B-9543-D2FD83D883EC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mountsdfs", "mountsdfs\mountsdfs.vcxproj", "{4EC35CF3-EF15-4099-B94B-1CA8806A9891}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "startsdfs", "ConsoleApplication1\ConsoleApplication1.vcxproj", "{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,8 +57,23 @@ Global
 		{4EC35CF3-EF15-4099-B94B-1CA8806A9891}.Release|Win32.Build.0 = Release|Win32
 		{4EC35CF3-EF15-4099-B94B-1CA8806A9891}.Release|x64.ActiveCfg = Release|x64
 		{4EC35CF3-EF15-4099-B94B-1CA8806A9891}.Release|x64.Build.0 = Release|x64
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Debug|Win32.Build.0 = Debug|Win32
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Debug|x64.ActiveCfg = Debug|x64
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Debug|x64.Build.0 = Debug|x64
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Release|Win32.ActiveCfg = Release|Win32
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Release|Win32.Build.0 = Release|Win32
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Release|x64.ActiveCfg = Release|x64
+		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {081045ED-92B2-4615-9414-A17180CBAEB6}
 	EndGlobalSection
 EndGlobal
