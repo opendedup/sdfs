@@ -4,8 +4,8 @@
         "path": "/usr/local/bin/protoc",
         "compile_on_save": true,
         "options": [
-            "--proto_path=src/proto",
-            "--java_out=src/",
+            "--proto_path=${workspaceRoot}/src/proto/",
+            "--java_out=${workspaceRoot}/src/",
             "--plugin=protoc-gen-grpc-java=/home/sam/Downloads/protoc-gen-grpc-java-1.30.2-linux-x86_64.exe"
         ]
     }

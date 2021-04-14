@@ -50,14 +50,14 @@ public class SDFSService {
 		String ts = "";
 		Properties props = new Properties();
 		try {
-			props.load(this.getClass().getResourceAsStream("/version.properties"));
-			Main.version = props.getProperty("version");
-			ts = props.getProperty("timestamp");
+			props.load(this.getClass().getResourceAsStream("/git.properties"));
+			Main.version = props.getProperty("git.branch") + " tag: " + props.getProperty("git.closest.tag.name");
+			ts = props.getProperty("git.build.time");
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Running Program SDFS Version " + Main.version + " build date " + ts);
+		System.out.println("Running Program SDFS Version [" + Main.version + "] build date " + ts);
 
 		System.out.println("reading config file = " + this.configFile);
 	}

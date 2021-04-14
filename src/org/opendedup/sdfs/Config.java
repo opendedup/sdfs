@@ -86,6 +86,7 @@ public class Config {
 			Main.sdfsCliSSL = Boolean.parseBoolean(cli.getAttribute("use-ssl"));
 		}
 		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli.getAttribute("enable-auth"));
+		Main.sdfsCliRequireMutualTLSAuth = Boolean.parseBoolean(cli.getAttribute("enable-mutual-tls-auth"));
 		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
 		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
 
@@ -182,6 +183,7 @@ public class Config {
 		}
 		if(localChunkStore.hasAttribute("hashtable-rm-threshold")) {
 			Main.HT_RM_THRESH = Long.parseLong(localChunkStore.getAttribute("hashtable-rm-threshold"));
+			SDFSLogger.getLog().info("HT_RM_THRESH = " + Main.HT_RM_THRESH);
 		}
 		
 		if (localChunkStore.hasAttribute("max-chunk-age")) {

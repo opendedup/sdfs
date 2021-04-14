@@ -14,49 +14,14782 @@ public final class FileInfo {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
-  static final com.google.protobuf.Descriptors.Descriptor
+  /**
+   * Protobuf enum {@code org.opendedup.grpc.syncaction}
+   */
+  public enum syncaction
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <pre>
+     *Sync from Cloud
+     * </pre>
+     *
+     * <code>DOWNLOAD = 0;</code>
+     */
+    DOWNLOAD(0),
+    /**
+     * <pre>
+     *Write Locally
+     * </pre>
+     *
+     * <code>WRITE = 1;</code>
+     */
+    WRITE(1),
+    /**
+     * <pre>
+     *Delete
+     * </pre>
+     *
+     * <code>DELETE = 2;</code>
+     */
+    DELETE(2),
+    /**
+     * <pre>
+     *Upload Data To Cloud
+     * </pre>
+     *
+     * <code>UPLOAD = 3;</code>
+     */
+    UPLOAD(3),
+    /**
+     * <pre>
+     *A Keepalive message
+     * </pre>
+     *
+     * <code>KEEPALIVE = 4;</code>
+     */
+    KEEPALIVE(4),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <pre>
+     *Sync from Cloud
+     * </pre>
+     *
+     * <code>DOWNLOAD = 0;</code>
+     */
+    public static final int DOWNLOAD_VALUE = 0;
+    /**
+     * <pre>
+     *Write Locally
+     * </pre>
+     *
+     * <code>WRITE = 1;</code>
+     */
+    public static final int WRITE_VALUE = 1;
+    /**
+     * <pre>
+     *Delete
+     * </pre>
+     *
+     * <code>DELETE = 2;</code>
+     */
+    public static final int DELETE_VALUE = 2;
+    /**
+     * <pre>
+     *Upload Data To Cloud
+     * </pre>
+     *
+     * <code>UPLOAD = 3;</code>
+     */
+    public static final int UPLOAD_VALUE = 3;
+    /**
+     * <pre>
+     *A Keepalive message
+     * </pre>
+     *
+     * <code>KEEPALIVE = 4;</code>
+     */
+    public static final int KEEPALIVE_VALUE = 4;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static syncaction valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static syncaction forNumber(int value) {
+      switch (value) {
+        case 0: return DOWNLOAD;
+        case 1: return WRITE;
+        case 2: return DELETE;
+        case 3: return UPLOAD;
+        case 4: return KEEPALIVE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<syncaction>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        syncaction> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<syncaction>() {
+            public syncaction findValueByNumber(int number) {
+              return syncaction.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final syncaction[] VALUES = values();
+
+    public static syncaction valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private syncaction(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:org.opendedup.grpc.syncaction)
+  }
+
+  /**
+   * Protobuf enum {@code org.opendedup.grpc.errorCodes}
+   */
+  public enum errorCodes
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>NOERR = 0;</code>
+     */
+    NOERR(0),
+    /**
+     * <pre>
+     * Operation not permitted 
+     * </pre>
+     *
+     * <code>EPERM = 1;</code>
+     */
+    EPERM(1),
+    /**
+     * <pre>
+     * No such file or directory 
+     * </pre>
+     *
+     * <code>ENOENT = 2;</code>
+     */
+    ENOENT(2),
+    /**
+     * <pre>
+     * No such process 
+     * </pre>
+     *
+     * <code>ESRCH = 3;</code>
+     */
+    ESRCH(3),
+    /**
+     * <pre>
+     * Interrupted system call 
+     * </pre>
+     *
+     * <code>EINTR = 4;</code>
+     */
+    EINTR(4),
+    /**
+     * <pre>
+     * I/O error 
+     * </pre>
+     *
+     * <code>EIO = 5;</code>
+     */
+    EIO(5),
+    /**
+     * <pre>
+     * No such device or address 
+     * </pre>
+     *
+     * <code>ENXIO = 6;</code>
+     */
+    ENXIO(6),
+    /**
+     * <pre>
+     * Arg list too long 
+     * </pre>
+     *
+     * <code>E2BIG = 7;</code>
+     */
+    E2BIG(7),
+    /**
+     * <pre>
+     * Exec format error 
+     * </pre>
+     *
+     * <code>ENOEXEC = 8;</code>
+     */
+    ENOEXEC(8),
+    /**
+     * <pre>
+     * Bad file number 
+     * </pre>
+     *
+     * <code>EBADF = 9;</code>
+     */
+    EBADF(9),
+    /**
+     * <pre>
+     * No child processes 
+     * </pre>
+     *
+     * <code>ECHILD = 10;</code>
+     */
+    ECHILD(10),
+    /**
+     * <pre>
+     * Try again 
+     * </pre>
+     *
+     * <code>EAGAIN = 11;</code>
+     */
+    EAGAIN(11),
+    /**
+     * <pre>
+     * Out of memory 
+     * </pre>
+     *
+     * <code>ENOMEM = 12;</code>
+     */
+    ENOMEM(12),
+    /**
+     * <pre>
+     * Permission denied 
+     * </pre>
+     *
+     * <code>EACCES = 13;</code>
+     */
+    EACCES(13),
+    /**
+     * <pre>
+     * Bad address 
+     * </pre>
+     *
+     * <code>EFAULT = 14;</code>
+     */
+    EFAULT(14),
+    /**
+     * <pre>
+     * Block device required 
+     * </pre>
+     *
+     * <code>ENOTBLK = 15;</code>
+     */
+    ENOTBLK(15),
+    /**
+     * <pre>
+     * Device or resource busy 
+     * </pre>
+     *
+     * <code>EBUSY = 16;</code>
+     */
+    EBUSY(16),
+    /**
+     * <pre>
+     * File exists 
+     * </pre>
+     *
+     * <code>EEXIST = 17;</code>
+     */
+    EEXIST(17),
+    /**
+     * <pre>
+     * Cross-device link 
+     * </pre>
+     *
+     * <code>EXDEV = 18;</code>
+     */
+    EXDEV(18),
+    /**
+     * <pre>
+     * No such device 
+     * </pre>
+     *
+     * <code>ENODEV = 19;</code>
+     */
+    ENODEV(19),
+    /**
+     * <pre>
+     * Not a directory 
+     * </pre>
+     *
+     * <code>ENOTDIR = 20;</code>
+     */
+    ENOTDIR(20),
+    /**
+     * <pre>
+     * Is a directory 
+     * </pre>
+     *
+     * <code>EISDIR = 21;</code>
+     */
+    EISDIR(21),
+    /**
+     * <pre>
+     * Invalid argument 
+     * </pre>
+     *
+     * <code>EINVAL = 22;</code>
+     */
+    EINVAL(22),
+    /**
+     * <pre>
+     * File table overflow 
+     * </pre>
+     *
+     * <code>ENFILE = 23;</code>
+     */
+    ENFILE(23),
+    /**
+     * <pre>
+     * Too many open files 
+     * </pre>
+     *
+     * <code>EMFILE = 24;</code>
+     */
+    EMFILE(24),
+    /**
+     * <pre>
+     * Not a typewriter 
+     * </pre>
+     *
+     * <code>ENOTTY = 25;</code>
+     */
+    ENOTTY(25),
+    /**
+     * <pre>
+     * Text file busy 
+     * </pre>
+     *
+     * <code>ETXTBSY = 26;</code>
+     */
+    ETXTBSY(26),
+    /**
+     * <pre>
+     * File too large 
+     * </pre>
+     *
+     * <code>EFBIG = 27;</code>
+     */
+    EFBIG(27),
+    /**
+     * <pre>
+     * No space left on device 
+     * </pre>
+     *
+     * <code>ENOSPC = 28;</code>
+     */
+    ENOSPC(28),
+    /**
+     * <pre>
+     * Illegal seek 
+     * </pre>
+     *
+     * <code>ESPIPE = 29;</code>
+     */
+    ESPIPE(29),
+    /**
+     * <pre>
+     * Read-only file system 
+     * </pre>
+     *
+     * <code>EROFS = 30;</code>
+     */
+    EROFS(30),
+    /**
+     * <pre>
+     * Too many links 
+     * </pre>
+     *
+     * <code>EMLINK = 31;</code>
+     */
+    EMLINK(31),
+    /**
+     * <pre>
+     * Broken pipe 
+     * </pre>
+     *
+     * <code>EPIPE = 32;</code>
+     */
+    EPIPE(32),
+    /**
+     * <pre>
+     * Math argument out of domain of func 
+     * </pre>
+     *
+     * <code>EDOM = 33;</code>
+     */
+    EDOM(33),
+    /**
+     * <pre>
+     * Math result not representable 
+     * </pre>
+     *
+     * <code>ERANGE = 34;</code>
+     */
+    ERANGE(34),
+    /**
+     * <pre>
+     * Resource deadlock would occur 
+     * </pre>
+     *
+     * <code>EDEADLK = 35;</code>
+     */
+    EDEADLK(35),
+    /**
+     * <pre>
+     * File name too long 
+     * </pre>
+     *
+     * <code>ENAMETOOLONG = 36;</code>
+     */
+    ENAMETOOLONG(36),
+    /**
+     * <pre>
+     * No record locks available 
+     * </pre>
+     *
+     * <code>ENOLCK = 37;</code>
+     */
+    ENOLCK(37),
+    /**
+     * <pre>
+     * Function not implemented 
+     * </pre>
+     *
+     * <code>ENOSYS = 38;</code>
+     */
+    ENOSYS(38),
+    /**
+     * <pre>
+     * Directory not empty 
+     * </pre>
+     *
+     * <code>ENOTEMPTY = 39;</code>
+     */
+    ENOTEMPTY(39),
+    /**
+     * <pre>
+     * Too many symbolic links encountered 
+     * </pre>
+     *
+     * <code>ELOOP = 40;</code>
+     */
+    ELOOP(40),
+    /**
+     * <pre>
+     * Operation would block 
+     * </pre>
+     *
+     * <code>EWOULDBLOCK = 41;</code>
+     */
+    EWOULDBLOCK(41),
+    /**
+     * <pre>
+     * No message of desired type 
+     * </pre>
+     *
+     * <code>ENOMSG = 42;</code>
+     */
+    ENOMSG(42),
+    /**
+     * <pre>
+     * Identifier removed 
+     * </pre>
+     *
+     * <code>EIDRM = 43;</code>
+     */
+    EIDRM(43),
+    /**
+     * <pre>
+     * Channel number out of range 
+     * </pre>
+     *
+     * <code>ECHRNG = 44;</code>
+     */
+    ECHRNG(44),
+    /**
+     * <pre>
+     * Level 2 not synchronized 
+     * </pre>
+     *
+     * <code>EL2NSYNC = 45;</code>
+     */
+    EL2NSYNC(45),
+    /**
+     * <pre>
+     * Level 3 halted 
+     * </pre>
+     *
+     * <code>EL3HLT = 46;</code>
+     */
+    EL3HLT(46),
+    /**
+     * <pre>
+     * Level 3 reset 
+     * </pre>
+     *
+     * <code>EL3RST = 47;</code>
+     */
+    EL3RST(47),
+    /**
+     * <pre>
+     * Link number out of range 
+     * </pre>
+     *
+     * <code>ELNRNG = 48;</code>
+     */
+    ELNRNG(48),
+    /**
+     * <pre>
+     * Protocol driver not attached 
+     * </pre>
+     *
+     * <code>EUNATCH = 49;</code>
+     */
+    EUNATCH(49),
+    /**
+     * <pre>
+     * No CSI structure available 
+     * </pre>
+     *
+     * <code>ENOCSI = 50;</code>
+     */
+    ENOCSI(50),
+    /**
+     * <pre>
+     * Level 2 halted 
+     * </pre>
+     *
+     * <code>EL2HLT = 51;</code>
+     */
+    EL2HLT(51),
+    /**
+     * <pre>
+     * Invalid exchange 
+     * </pre>
+     *
+     * <code>EBADE = 52;</code>
+     */
+    EBADE(52),
+    /**
+     * <pre>
+     * Invalid request descriptor 
+     * </pre>
+     *
+     * <code>EBADR = 53;</code>
+     */
+    EBADR(53),
+    /**
+     * <pre>
+     * Exchange full 
+     * </pre>
+     *
+     * <code>EXFULL = 54;</code>
+     */
+    EXFULL(54),
+    /**
+     * <pre>
+     * No anode 
+     * </pre>
+     *
+     * <code>ENOANO = 55;</code>
+     */
+    ENOANO(55),
+    /**
+     * <pre>
+     * Invalid request code 
+     * </pre>
+     *
+     * <code>EBADRQC = 56;</code>
+     */
+    EBADRQC(56),
+    /**
+     * <pre>
+     * Invalid slot 
+     * </pre>
+     *
+     * <code>EBADSLT = 57;</code>
+     */
+    EBADSLT(57),
+    /**
+     * <pre>
+     * File locking deadlock error 
+     * </pre>
+     *
+     * <code>EDEADLOCK = 58;</code>
+     */
+    EDEADLOCK(58),
+    /**
+     * <pre>
+     * Bad font file format 
+     * </pre>
+     *
+     * <code>EBFONT = 59;</code>
+     */
+    EBFONT(59),
+    /**
+     * <pre>
+     * Device not a stream 
+     * </pre>
+     *
+     * <code>ENOSTR = 60;</code>
+     */
+    ENOSTR(60),
+    /**
+     * <pre>
+     * No data available 
+     * </pre>
+     *
+     * <code>ENODATA = 61;</code>
+     */
+    ENODATA(61),
+    /**
+     * <pre>
+     * Timer expired 
+     * </pre>
+     *
+     * <code>ETIME = 62;</code>
+     */
+    ETIME(62),
+    /**
+     * <pre>
+     * Out of streams resources 
+     * </pre>
+     *
+     * <code>ENOSR = 63;</code>
+     */
+    ENOSR(63),
+    /**
+     * <pre>
+     * Machine is not on the network 
+     * </pre>
+     *
+     * <code>ENONET = 64;</code>
+     */
+    ENONET(64),
+    /**
+     * <pre>
+     * Package not installed 
+     * </pre>
+     *
+     * <code>ENOPKG = 65;</code>
+     */
+    ENOPKG(65),
+    /**
+     * <pre>
+     * Object is remote 
+     * </pre>
+     *
+     * <code>EREMOTE = 66;</code>
+     */
+    EREMOTE(66),
+    /**
+     * <pre>
+     * Link has been severed 
+     * </pre>
+     *
+     * <code>ENOLINK = 67;</code>
+     */
+    ENOLINK(67),
+    /**
+     * <pre>
+     * Advertise error 
+     * </pre>
+     *
+     * <code>EADV = 68;</code>
+     */
+    EADV(68),
+    /**
+     * <pre>
+     * Srmount error 
+     * </pre>
+     *
+     * <code>ESRMNT = 69;</code>
+     */
+    ESRMNT(69),
+    /**
+     * <pre>
+     * Communication error on send 
+     * </pre>
+     *
+     * <code>ECOMM = 70;</code>
+     */
+    ECOMM(70),
+    /**
+     * <pre>
+     * Protocol error 
+     * </pre>
+     *
+     * <code>EPROTO = 71;</code>
+     */
+    EPROTO(71),
+    /**
+     * <pre>
+     * Multihop attempted 
+     * </pre>
+     *
+     * <code>EMULTIHOP = 72;</code>
+     */
+    EMULTIHOP(72),
+    /**
+     * <pre>
+     * RFS specific error 
+     * </pre>
+     *
+     * <code>EDOTDOT = 73;</code>
+     */
+    EDOTDOT(73),
+    /**
+     * <pre>
+     * Not a data message 
+     * </pre>
+     *
+     * <code>EBADMSG = 74;</code>
+     */
+    EBADMSG(74),
+    /**
+     * <pre>
+     * Value too large for defined data type 
+     * </pre>
+     *
+     * <code>EOVERFLOW = 75;</code>
+     */
+    EOVERFLOW(75),
+    /**
+     * <pre>
+     * Name not unique on network 
+     * </pre>
+     *
+     * <code>ENOTUNIQ = 76;</code>
+     */
+    ENOTUNIQ(76),
+    /**
+     * <pre>
+     * File descriptor in bad state 
+     * </pre>
+     *
+     * <code>EBADFD = 77;</code>
+     */
+    EBADFD(77),
+    /**
+     * <pre>
+     * Remote address changed 
+     * </pre>
+     *
+     * <code>EREMCHG = 78;</code>
+     */
+    EREMCHG(78),
+    /**
+     * <pre>
+     * Can not access a needed shared library 
+     * </pre>
+     *
+     * <code>ELIBACC = 79;</code>
+     */
+    ELIBACC(79),
+    /**
+     * <pre>
+     * Accessing a corrupted shared library 
+     * </pre>
+     *
+     * <code>ELIBBAD = 80;</code>
+     */
+    ELIBBAD(80),
+    /**
+     * <pre>
+     * .lib section in a.out corrupted 
+     * </pre>
+     *
+     * <code>ELIBSCN = 81;</code>
+     */
+    ELIBSCN(81),
+    /**
+     * <pre>
+     * Attempting to link in too many shared libraries 
+     * </pre>
+     *
+     * <code>ELIBMAX = 82;</code>
+     */
+    ELIBMAX(82),
+    /**
+     * <pre>
+     * Cannot exec a shared library directly 
+     * </pre>
+     *
+     * <code>ELIBEXEC = 83;</code>
+     */
+    ELIBEXEC(83),
+    /**
+     * <pre>
+     * Illegal byte sequence 
+     * </pre>
+     *
+     * <code>EILSEQ = 84;</code>
+     */
+    EILSEQ(84),
+    /**
+     * <pre>
+     * Interrupted system call should be restarted 
+     * </pre>
+     *
+     * <code>ERESTART = 85;</code>
+     */
+    ERESTART(85),
+    /**
+     * <pre>
+     * Streams pipe error 
+     * </pre>
+     *
+     * <code>ESTRPIPE = 86;</code>
+     */
+    ESTRPIPE(86),
+    /**
+     * <pre>
+     * Too many users 
+     * </pre>
+     *
+     * <code>EUSERS = 87;</code>
+     */
+    EUSERS(87),
+    /**
+     * <pre>
+     * Socket operation on non-socket 
+     * </pre>
+     *
+     * <code>ENOTSOCK = 88;</code>
+     */
+    ENOTSOCK(88),
+    /**
+     * <pre>
+     * Destination address required 
+     * </pre>
+     *
+     * <code>EDESTADDRREQ = 89;</code>
+     */
+    EDESTADDRREQ(89),
+    /**
+     * <pre>
+     * Message too long 
+     * </pre>
+     *
+     * <code>EMSGSIZE = 90;</code>
+     */
+    EMSGSIZE(90),
+    /**
+     * <pre>
+     * Protocol wrong type for socket 
+     * </pre>
+     *
+     * <code>EPROTOTYPE = 91;</code>
+     */
+    EPROTOTYPE(91),
+    /**
+     * <pre>
+     * Protocol not available 
+     * </pre>
+     *
+     * <code>ENOPROTOOPT = 92;</code>
+     */
+    ENOPROTOOPT(92),
+    /**
+     * <pre>
+     * Protocol not supported 
+     * </pre>
+     *
+     * <code>EPROTONOSUPPORT = 93;</code>
+     */
+    EPROTONOSUPPORT(93),
+    /**
+     * <pre>
+     * Socket type not supported 
+     * </pre>
+     *
+     * <code>ESOCKTNOSUPPORT = 94;</code>
+     */
+    ESOCKTNOSUPPORT(94),
+    /**
+     * <pre>
+     * Operation not supported on transport endpoint 
+     * </pre>
+     *
+     * <code>EOPNOTSUPP = 95;</code>
+     */
+    EOPNOTSUPP(95),
+    /**
+     * <pre>
+     * Protocol family not supported 
+     * </pre>
+     *
+     * <code>EPFNOSUPPORT = 96;</code>
+     */
+    EPFNOSUPPORT(96),
+    /**
+     * <pre>
+     * Address family not supported by protocol 
+     * </pre>
+     *
+     * <code>EAFNOSUPPORT = 97;</code>
+     */
+    EAFNOSUPPORT(97),
+    /**
+     * <pre>
+     * Address already in use 
+     * </pre>
+     *
+     * <code>EADDRINUSE = 98;</code>
+     */
+    EADDRINUSE(98),
+    /**
+     * <pre>
+     * Cannot assign requested address 
+     * </pre>
+     *
+     * <code>EADDRNOTAVAIL = 99;</code>
+     */
+    EADDRNOTAVAIL(99),
+    /**
+     * <pre>
+     * Network is down 
+     * </pre>
+     *
+     * <code>ENETDOWN = 100;</code>
+     */
+    ENETDOWN(100),
+    /**
+     * <pre>
+     * Network is unreachable 
+     * </pre>
+     *
+     * <code>ENETUNREACH = 101;</code>
+     */
+    ENETUNREACH(101),
+    /**
+     * <pre>
+     * Network dropped connection because of reset 
+     * </pre>
+     *
+     * <code>ENETRESET = 102;</code>
+     */
+    ENETRESET(102),
+    /**
+     * <pre>
+     * Software caused connection abort 
+     * </pre>
+     *
+     * <code>ECONNABORTED = 103;</code>
+     */
+    ECONNABORTED(103),
+    /**
+     * <pre>
+     * Connection reset by peer 
+     * </pre>
+     *
+     * <code>ECONNRESET = 104;</code>
+     */
+    ECONNRESET(104),
+    /**
+     * <pre>
+     * No buffer space available 
+     * </pre>
+     *
+     * <code>ENOBUFS = 105;</code>
+     */
+    ENOBUFS(105),
+    /**
+     * <pre>
+     * Transport endpoint is already connected 
+     * </pre>
+     *
+     * <code>EISCONN = 106;</code>
+     */
+    EISCONN(106),
+    /**
+     * <pre>
+     * Transport endpoint is not connected 
+     * </pre>
+     *
+     * <code>ENOTCONN = 107;</code>
+     */
+    ENOTCONN(107),
+    /**
+     * <pre>
+     * Cannot send after transport endpoint shutdown 
+     * </pre>
+     *
+     * <code>ESHUTDOWN = 108;</code>
+     */
+    ESHUTDOWN(108),
+    /**
+     * <pre>
+     * Too many references: cannot splice 
+     * </pre>
+     *
+     * <code>ETOOMANYREFS = 109;</code>
+     */
+    ETOOMANYREFS(109),
+    /**
+     * <pre>
+     * Connection timed out 
+     * </pre>
+     *
+     * <code>ETIMEDOUT = 110;</code>
+     */
+    ETIMEDOUT(110),
+    /**
+     * <pre>
+     * Connection refused 
+     * </pre>
+     *
+     * <code>ECONNREFUSED = 111;</code>
+     */
+    ECONNREFUSED(111),
+    /**
+     * <pre>
+     * Host is down 
+     * </pre>
+     *
+     * <code>EHOSTDOWN = 112;</code>
+     */
+    EHOSTDOWN(112),
+    /**
+     * <pre>
+     * No route to host 
+     * </pre>
+     *
+     * <code>EHOSTUNREACH = 113;</code>
+     */
+    EHOSTUNREACH(113),
+    /**
+     * <pre>
+     * Operation already in progress 
+     * </pre>
+     *
+     * <code>EALREADY = 114;</code>
+     */
+    EALREADY(114),
+    /**
+     * <pre>
+     * Operation now in progress 
+     * </pre>
+     *
+     * <code>EINPROGRESS = 115;</code>
+     */
+    EINPROGRESS(115),
+    /**
+     * <pre>
+     * Stale NFS file handle 
+     * </pre>
+     *
+     * <code>ESTALE = 116;</code>
+     */
+    ESTALE(116),
+    /**
+     * <pre>
+     * Structure needs cleaning 
+     * </pre>
+     *
+     * <code>EUCLEAN = 117;</code>
+     */
+    EUCLEAN(117),
+    /**
+     * <pre>
+     * Not a XENIX named type file 
+     * </pre>
+     *
+     * <code>ENOTNAM = 118;</code>
+     */
+    ENOTNAM(118),
+    /**
+     * <pre>
+     * No XENIX semaphores available 
+     * </pre>
+     *
+     * <code>ENAVAIL = 119;</code>
+     */
+    ENAVAIL(119),
+    /**
+     * <pre>
+     * Is a named type file 
+     * </pre>
+     *
+     * <code>EISNAM = 120;</code>
+     */
+    EISNAM(120),
+    /**
+     * <pre>
+     * Remote I/O error 
+     * </pre>
+     *
+     * <code>EREMOTEIO = 121;</code>
+     */
+    EREMOTEIO(121),
+    UNRECOGNIZED(-1),
+    ;
+
+    /**
+     * <code>NOERR = 0;</code>
+     */
+    public static final int NOERR_VALUE = 0;
+    /**
+     * <pre>
+     * Operation not permitted 
+     * </pre>
+     *
+     * <code>EPERM = 1;</code>
+     */
+    public static final int EPERM_VALUE = 1;
+    /**
+     * <pre>
+     * No such file or directory 
+     * </pre>
+     *
+     * <code>ENOENT = 2;</code>
+     */
+    public static final int ENOENT_VALUE = 2;
+    /**
+     * <pre>
+     * No such process 
+     * </pre>
+     *
+     * <code>ESRCH = 3;</code>
+     */
+    public static final int ESRCH_VALUE = 3;
+    /**
+     * <pre>
+     * Interrupted system call 
+     * </pre>
+     *
+     * <code>EINTR = 4;</code>
+     */
+    public static final int EINTR_VALUE = 4;
+    /**
+     * <pre>
+     * I/O error 
+     * </pre>
+     *
+     * <code>EIO = 5;</code>
+     */
+    public static final int EIO_VALUE = 5;
+    /**
+     * <pre>
+     * No such device or address 
+     * </pre>
+     *
+     * <code>ENXIO = 6;</code>
+     */
+    public static final int ENXIO_VALUE = 6;
+    /**
+     * <pre>
+     * Arg list too long 
+     * </pre>
+     *
+     * <code>E2BIG = 7;</code>
+     */
+    public static final int E2BIG_VALUE = 7;
+    /**
+     * <pre>
+     * Exec format error 
+     * </pre>
+     *
+     * <code>ENOEXEC = 8;</code>
+     */
+    public static final int ENOEXEC_VALUE = 8;
+    /**
+     * <pre>
+     * Bad file number 
+     * </pre>
+     *
+     * <code>EBADF = 9;</code>
+     */
+    public static final int EBADF_VALUE = 9;
+    /**
+     * <pre>
+     * No child processes 
+     * </pre>
+     *
+     * <code>ECHILD = 10;</code>
+     */
+    public static final int ECHILD_VALUE = 10;
+    /**
+     * <pre>
+     * Try again 
+     * </pre>
+     *
+     * <code>EAGAIN = 11;</code>
+     */
+    public static final int EAGAIN_VALUE = 11;
+    /**
+     * <pre>
+     * Out of memory 
+     * </pre>
+     *
+     * <code>ENOMEM = 12;</code>
+     */
+    public static final int ENOMEM_VALUE = 12;
+    /**
+     * <pre>
+     * Permission denied 
+     * </pre>
+     *
+     * <code>EACCES = 13;</code>
+     */
+    public static final int EACCES_VALUE = 13;
+    /**
+     * <pre>
+     * Bad address 
+     * </pre>
+     *
+     * <code>EFAULT = 14;</code>
+     */
+    public static final int EFAULT_VALUE = 14;
+    /**
+     * <pre>
+     * Block device required 
+     * </pre>
+     *
+     * <code>ENOTBLK = 15;</code>
+     */
+    public static final int ENOTBLK_VALUE = 15;
+    /**
+     * <pre>
+     * Device or resource busy 
+     * </pre>
+     *
+     * <code>EBUSY = 16;</code>
+     */
+    public static final int EBUSY_VALUE = 16;
+    /**
+     * <pre>
+     * File exists 
+     * </pre>
+     *
+     * <code>EEXIST = 17;</code>
+     */
+    public static final int EEXIST_VALUE = 17;
+    /**
+     * <pre>
+     * Cross-device link 
+     * </pre>
+     *
+     * <code>EXDEV = 18;</code>
+     */
+    public static final int EXDEV_VALUE = 18;
+    /**
+     * <pre>
+     * No such device 
+     * </pre>
+     *
+     * <code>ENODEV = 19;</code>
+     */
+    public static final int ENODEV_VALUE = 19;
+    /**
+     * <pre>
+     * Not a directory 
+     * </pre>
+     *
+     * <code>ENOTDIR = 20;</code>
+     */
+    public static final int ENOTDIR_VALUE = 20;
+    /**
+     * <pre>
+     * Is a directory 
+     * </pre>
+     *
+     * <code>EISDIR = 21;</code>
+     */
+    public static final int EISDIR_VALUE = 21;
+    /**
+     * <pre>
+     * Invalid argument 
+     * </pre>
+     *
+     * <code>EINVAL = 22;</code>
+     */
+    public static final int EINVAL_VALUE = 22;
+    /**
+     * <pre>
+     * File table overflow 
+     * </pre>
+     *
+     * <code>ENFILE = 23;</code>
+     */
+    public static final int ENFILE_VALUE = 23;
+    /**
+     * <pre>
+     * Too many open files 
+     * </pre>
+     *
+     * <code>EMFILE = 24;</code>
+     */
+    public static final int EMFILE_VALUE = 24;
+    /**
+     * <pre>
+     * Not a typewriter 
+     * </pre>
+     *
+     * <code>ENOTTY = 25;</code>
+     */
+    public static final int ENOTTY_VALUE = 25;
+    /**
+     * <pre>
+     * Text file busy 
+     * </pre>
+     *
+     * <code>ETXTBSY = 26;</code>
+     */
+    public static final int ETXTBSY_VALUE = 26;
+    /**
+     * <pre>
+     * File too large 
+     * </pre>
+     *
+     * <code>EFBIG = 27;</code>
+     */
+    public static final int EFBIG_VALUE = 27;
+    /**
+     * <pre>
+     * No space left on device 
+     * </pre>
+     *
+     * <code>ENOSPC = 28;</code>
+     */
+    public static final int ENOSPC_VALUE = 28;
+    /**
+     * <pre>
+     * Illegal seek 
+     * </pre>
+     *
+     * <code>ESPIPE = 29;</code>
+     */
+    public static final int ESPIPE_VALUE = 29;
+    /**
+     * <pre>
+     * Read-only file system 
+     * </pre>
+     *
+     * <code>EROFS = 30;</code>
+     */
+    public static final int EROFS_VALUE = 30;
+    /**
+     * <pre>
+     * Too many links 
+     * </pre>
+     *
+     * <code>EMLINK = 31;</code>
+     */
+    public static final int EMLINK_VALUE = 31;
+    /**
+     * <pre>
+     * Broken pipe 
+     * </pre>
+     *
+     * <code>EPIPE = 32;</code>
+     */
+    public static final int EPIPE_VALUE = 32;
+    /**
+     * <pre>
+     * Math argument out of domain of func 
+     * </pre>
+     *
+     * <code>EDOM = 33;</code>
+     */
+    public static final int EDOM_VALUE = 33;
+    /**
+     * <pre>
+     * Math result not representable 
+     * </pre>
+     *
+     * <code>ERANGE = 34;</code>
+     */
+    public static final int ERANGE_VALUE = 34;
+    /**
+     * <pre>
+     * Resource deadlock would occur 
+     * </pre>
+     *
+     * <code>EDEADLK = 35;</code>
+     */
+    public static final int EDEADLK_VALUE = 35;
+    /**
+     * <pre>
+     * File name too long 
+     * </pre>
+     *
+     * <code>ENAMETOOLONG = 36;</code>
+     */
+    public static final int ENAMETOOLONG_VALUE = 36;
+    /**
+     * <pre>
+     * No record locks available 
+     * </pre>
+     *
+     * <code>ENOLCK = 37;</code>
+     */
+    public static final int ENOLCK_VALUE = 37;
+    /**
+     * <pre>
+     * Function not implemented 
+     * </pre>
+     *
+     * <code>ENOSYS = 38;</code>
+     */
+    public static final int ENOSYS_VALUE = 38;
+    /**
+     * <pre>
+     * Directory not empty 
+     * </pre>
+     *
+     * <code>ENOTEMPTY = 39;</code>
+     */
+    public static final int ENOTEMPTY_VALUE = 39;
+    /**
+     * <pre>
+     * Too many symbolic links encountered 
+     * </pre>
+     *
+     * <code>ELOOP = 40;</code>
+     */
+    public static final int ELOOP_VALUE = 40;
+    /**
+     * <pre>
+     * Operation would block 
+     * </pre>
+     *
+     * <code>EWOULDBLOCK = 41;</code>
+     */
+    public static final int EWOULDBLOCK_VALUE = 41;
+    /**
+     * <pre>
+     * No message of desired type 
+     * </pre>
+     *
+     * <code>ENOMSG = 42;</code>
+     */
+    public static final int ENOMSG_VALUE = 42;
+    /**
+     * <pre>
+     * Identifier removed 
+     * </pre>
+     *
+     * <code>EIDRM = 43;</code>
+     */
+    public static final int EIDRM_VALUE = 43;
+    /**
+     * <pre>
+     * Channel number out of range 
+     * </pre>
+     *
+     * <code>ECHRNG = 44;</code>
+     */
+    public static final int ECHRNG_VALUE = 44;
+    /**
+     * <pre>
+     * Level 2 not synchronized 
+     * </pre>
+     *
+     * <code>EL2NSYNC = 45;</code>
+     */
+    public static final int EL2NSYNC_VALUE = 45;
+    /**
+     * <pre>
+     * Level 3 halted 
+     * </pre>
+     *
+     * <code>EL3HLT = 46;</code>
+     */
+    public static final int EL3HLT_VALUE = 46;
+    /**
+     * <pre>
+     * Level 3 reset 
+     * </pre>
+     *
+     * <code>EL3RST = 47;</code>
+     */
+    public static final int EL3RST_VALUE = 47;
+    /**
+     * <pre>
+     * Link number out of range 
+     * </pre>
+     *
+     * <code>ELNRNG = 48;</code>
+     */
+    public static final int ELNRNG_VALUE = 48;
+    /**
+     * <pre>
+     * Protocol driver not attached 
+     * </pre>
+     *
+     * <code>EUNATCH = 49;</code>
+     */
+    public static final int EUNATCH_VALUE = 49;
+    /**
+     * <pre>
+     * No CSI structure available 
+     * </pre>
+     *
+     * <code>ENOCSI = 50;</code>
+     */
+    public static final int ENOCSI_VALUE = 50;
+    /**
+     * <pre>
+     * Level 2 halted 
+     * </pre>
+     *
+     * <code>EL2HLT = 51;</code>
+     */
+    public static final int EL2HLT_VALUE = 51;
+    /**
+     * <pre>
+     * Invalid exchange 
+     * </pre>
+     *
+     * <code>EBADE = 52;</code>
+     */
+    public static final int EBADE_VALUE = 52;
+    /**
+     * <pre>
+     * Invalid request descriptor 
+     * </pre>
+     *
+     * <code>EBADR = 53;</code>
+     */
+    public static final int EBADR_VALUE = 53;
+    /**
+     * <pre>
+     * Exchange full 
+     * </pre>
+     *
+     * <code>EXFULL = 54;</code>
+     */
+    public static final int EXFULL_VALUE = 54;
+    /**
+     * <pre>
+     * No anode 
+     * </pre>
+     *
+     * <code>ENOANO = 55;</code>
+     */
+    public static final int ENOANO_VALUE = 55;
+    /**
+     * <pre>
+     * Invalid request code 
+     * </pre>
+     *
+     * <code>EBADRQC = 56;</code>
+     */
+    public static final int EBADRQC_VALUE = 56;
+    /**
+     * <pre>
+     * Invalid slot 
+     * </pre>
+     *
+     * <code>EBADSLT = 57;</code>
+     */
+    public static final int EBADSLT_VALUE = 57;
+    /**
+     * <pre>
+     * File locking deadlock error 
+     * </pre>
+     *
+     * <code>EDEADLOCK = 58;</code>
+     */
+    public static final int EDEADLOCK_VALUE = 58;
+    /**
+     * <pre>
+     * Bad font file format 
+     * </pre>
+     *
+     * <code>EBFONT = 59;</code>
+     */
+    public static final int EBFONT_VALUE = 59;
+    /**
+     * <pre>
+     * Device not a stream 
+     * </pre>
+     *
+     * <code>ENOSTR = 60;</code>
+     */
+    public static final int ENOSTR_VALUE = 60;
+    /**
+     * <pre>
+     * No data available 
+     * </pre>
+     *
+     * <code>ENODATA = 61;</code>
+     */
+    public static final int ENODATA_VALUE = 61;
+    /**
+     * <pre>
+     * Timer expired 
+     * </pre>
+     *
+     * <code>ETIME = 62;</code>
+     */
+    public static final int ETIME_VALUE = 62;
+    /**
+     * <pre>
+     * Out of streams resources 
+     * </pre>
+     *
+     * <code>ENOSR = 63;</code>
+     */
+    public static final int ENOSR_VALUE = 63;
+    /**
+     * <pre>
+     * Machine is not on the network 
+     * </pre>
+     *
+     * <code>ENONET = 64;</code>
+     */
+    public static final int ENONET_VALUE = 64;
+    /**
+     * <pre>
+     * Package not installed 
+     * </pre>
+     *
+     * <code>ENOPKG = 65;</code>
+     */
+    public static final int ENOPKG_VALUE = 65;
+    /**
+     * <pre>
+     * Object is remote 
+     * </pre>
+     *
+     * <code>EREMOTE = 66;</code>
+     */
+    public static final int EREMOTE_VALUE = 66;
+    /**
+     * <pre>
+     * Link has been severed 
+     * </pre>
+     *
+     * <code>ENOLINK = 67;</code>
+     */
+    public static final int ENOLINK_VALUE = 67;
+    /**
+     * <pre>
+     * Advertise error 
+     * </pre>
+     *
+     * <code>EADV = 68;</code>
+     */
+    public static final int EADV_VALUE = 68;
+    /**
+     * <pre>
+     * Srmount error 
+     * </pre>
+     *
+     * <code>ESRMNT = 69;</code>
+     */
+    public static final int ESRMNT_VALUE = 69;
+    /**
+     * <pre>
+     * Communication error on send 
+     * </pre>
+     *
+     * <code>ECOMM = 70;</code>
+     */
+    public static final int ECOMM_VALUE = 70;
+    /**
+     * <pre>
+     * Protocol error 
+     * </pre>
+     *
+     * <code>EPROTO = 71;</code>
+     */
+    public static final int EPROTO_VALUE = 71;
+    /**
+     * <pre>
+     * Multihop attempted 
+     * </pre>
+     *
+     * <code>EMULTIHOP = 72;</code>
+     */
+    public static final int EMULTIHOP_VALUE = 72;
+    /**
+     * <pre>
+     * RFS specific error 
+     * </pre>
+     *
+     * <code>EDOTDOT = 73;</code>
+     */
+    public static final int EDOTDOT_VALUE = 73;
+    /**
+     * <pre>
+     * Not a data message 
+     * </pre>
+     *
+     * <code>EBADMSG = 74;</code>
+     */
+    public static final int EBADMSG_VALUE = 74;
+    /**
+     * <pre>
+     * Value too large for defined data type 
+     * </pre>
+     *
+     * <code>EOVERFLOW = 75;</code>
+     */
+    public static final int EOVERFLOW_VALUE = 75;
+    /**
+     * <pre>
+     * Name not unique on network 
+     * </pre>
+     *
+     * <code>ENOTUNIQ = 76;</code>
+     */
+    public static final int ENOTUNIQ_VALUE = 76;
+    /**
+     * <pre>
+     * File descriptor in bad state 
+     * </pre>
+     *
+     * <code>EBADFD = 77;</code>
+     */
+    public static final int EBADFD_VALUE = 77;
+    /**
+     * <pre>
+     * Remote address changed 
+     * </pre>
+     *
+     * <code>EREMCHG = 78;</code>
+     */
+    public static final int EREMCHG_VALUE = 78;
+    /**
+     * <pre>
+     * Can not access a needed shared library 
+     * </pre>
+     *
+     * <code>ELIBACC = 79;</code>
+     */
+    public static final int ELIBACC_VALUE = 79;
+    /**
+     * <pre>
+     * Accessing a corrupted shared library 
+     * </pre>
+     *
+     * <code>ELIBBAD = 80;</code>
+     */
+    public static final int ELIBBAD_VALUE = 80;
+    /**
+     * <pre>
+     * .lib section in a.out corrupted 
+     * </pre>
+     *
+     * <code>ELIBSCN = 81;</code>
+     */
+    public static final int ELIBSCN_VALUE = 81;
+    /**
+     * <pre>
+     * Attempting to link in too many shared libraries 
+     * </pre>
+     *
+     * <code>ELIBMAX = 82;</code>
+     */
+    public static final int ELIBMAX_VALUE = 82;
+    /**
+     * <pre>
+     * Cannot exec a shared library directly 
+     * </pre>
+     *
+     * <code>ELIBEXEC = 83;</code>
+     */
+    public static final int ELIBEXEC_VALUE = 83;
+    /**
+     * <pre>
+     * Illegal byte sequence 
+     * </pre>
+     *
+     * <code>EILSEQ = 84;</code>
+     */
+    public static final int EILSEQ_VALUE = 84;
+    /**
+     * <pre>
+     * Interrupted system call should be restarted 
+     * </pre>
+     *
+     * <code>ERESTART = 85;</code>
+     */
+    public static final int ERESTART_VALUE = 85;
+    /**
+     * <pre>
+     * Streams pipe error 
+     * </pre>
+     *
+     * <code>ESTRPIPE = 86;</code>
+     */
+    public static final int ESTRPIPE_VALUE = 86;
+    /**
+     * <pre>
+     * Too many users 
+     * </pre>
+     *
+     * <code>EUSERS = 87;</code>
+     */
+    public static final int EUSERS_VALUE = 87;
+    /**
+     * <pre>
+     * Socket operation on non-socket 
+     * </pre>
+     *
+     * <code>ENOTSOCK = 88;</code>
+     */
+    public static final int ENOTSOCK_VALUE = 88;
+    /**
+     * <pre>
+     * Destination address required 
+     * </pre>
+     *
+     * <code>EDESTADDRREQ = 89;</code>
+     */
+    public static final int EDESTADDRREQ_VALUE = 89;
+    /**
+     * <pre>
+     * Message too long 
+     * </pre>
+     *
+     * <code>EMSGSIZE = 90;</code>
+     */
+    public static final int EMSGSIZE_VALUE = 90;
+    /**
+     * <pre>
+     * Protocol wrong type for socket 
+     * </pre>
+     *
+     * <code>EPROTOTYPE = 91;</code>
+     */
+    public static final int EPROTOTYPE_VALUE = 91;
+    /**
+     * <pre>
+     * Protocol not available 
+     * </pre>
+     *
+     * <code>ENOPROTOOPT = 92;</code>
+     */
+    public static final int ENOPROTOOPT_VALUE = 92;
+    /**
+     * <pre>
+     * Protocol not supported 
+     * </pre>
+     *
+     * <code>EPROTONOSUPPORT = 93;</code>
+     */
+    public static final int EPROTONOSUPPORT_VALUE = 93;
+    /**
+     * <pre>
+     * Socket type not supported 
+     * </pre>
+     *
+     * <code>ESOCKTNOSUPPORT = 94;</code>
+     */
+    public static final int ESOCKTNOSUPPORT_VALUE = 94;
+    /**
+     * <pre>
+     * Operation not supported on transport endpoint 
+     * </pre>
+     *
+     * <code>EOPNOTSUPP = 95;</code>
+     */
+    public static final int EOPNOTSUPP_VALUE = 95;
+    /**
+     * <pre>
+     * Protocol family not supported 
+     * </pre>
+     *
+     * <code>EPFNOSUPPORT = 96;</code>
+     */
+    public static final int EPFNOSUPPORT_VALUE = 96;
+    /**
+     * <pre>
+     * Address family not supported by protocol 
+     * </pre>
+     *
+     * <code>EAFNOSUPPORT = 97;</code>
+     */
+    public static final int EAFNOSUPPORT_VALUE = 97;
+    /**
+     * <pre>
+     * Address already in use 
+     * </pre>
+     *
+     * <code>EADDRINUSE = 98;</code>
+     */
+    public static final int EADDRINUSE_VALUE = 98;
+    /**
+     * <pre>
+     * Cannot assign requested address 
+     * </pre>
+     *
+     * <code>EADDRNOTAVAIL = 99;</code>
+     */
+    public static final int EADDRNOTAVAIL_VALUE = 99;
+    /**
+     * <pre>
+     * Network is down 
+     * </pre>
+     *
+     * <code>ENETDOWN = 100;</code>
+     */
+    public static final int ENETDOWN_VALUE = 100;
+    /**
+     * <pre>
+     * Network is unreachable 
+     * </pre>
+     *
+     * <code>ENETUNREACH = 101;</code>
+     */
+    public static final int ENETUNREACH_VALUE = 101;
+    /**
+     * <pre>
+     * Network dropped connection because of reset 
+     * </pre>
+     *
+     * <code>ENETRESET = 102;</code>
+     */
+    public static final int ENETRESET_VALUE = 102;
+    /**
+     * <pre>
+     * Software caused connection abort 
+     * </pre>
+     *
+     * <code>ECONNABORTED = 103;</code>
+     */
+    public static final int ECONNABORTED_VALUE = 103;
+    /**
+     * <pre>
+     * Connection reset by peer 
+     * </pre>
+     *
+     * <code>ECONNRESET = 104;</code>
+     */
+    public static final int ECONNRESET_VALUE = 104;
+    /**
+     * <pre>
+     * No buffer space available 
+     * </pre>
+     *
+     * <code>ENOBUFS = 105;</code>
+     */
+    public static final int ENOBUFS_VALUE = 105;
+    /**
+     * <pre>
+     * Transport endpoint is already connected 
+     * </pre>
+     *
+     * <code>EISCONN = 106;</code>
+     */
+    public static final int EISCONN_VALUE = 106;
+    /**
+     * <pre>
+     * Transport endpoint is not connected 
+     * </pre>
+     *
+     * <code>ENOTCONN = 107;</code>
+     */
+    public static final int ENOTCONN_VALUE = 107;
+    /**
+     * <pre>
+     * Cannot send after transport endpoint shutdown 
+     * </pre>
+     *
+     * <code>ESHUTDOWN = 108;</code>
+     */
+    public static final int ESHUTDOWN_VALUE = 108;
+    /**
+     * <pre>
+     * Too many references: cannot splice 
+     * </pre>
+     *
+     * <code>ETOOMANYREFS = 109;</code>
+     */
+    public static final int ETOOMANYREFS_VALUE = 109;
+    /**
+     * <pre>
+     * Connection timed out 
+     * </pre>
+     *
+     * <code>ETIMEDOUT = 110;</code>
+     */
+    public static final int ETIMEDOUT_VALUE = 110;
+    /**
+     * <pre>
+     * Connection refused 
+     * </pre>
+     *
+     * <code>ECONNREFUSED = 111;</code>
+     */
+    public static final int ECONNREFUSED_VALUE = 111;
+    /**
+     * <pre>
+     * Host is down 
+     * </pre>
+     *
+     * <code>EHOSTDOWN = 112;</code>
+     */
+    public static final int EHOSTDOWN_VALUE = 112;
+    /**
+     * <pre>
+     * No route to host 
+     * </pre>
+     *
+     * <code>EHOSTUNREACH = 113;</code>
+     */
+    public static final int EHOSTUNREACH_VALUE = 113;
+    /**
+     * <pre>
+     * Operation already in progress 
+     * </pre>
+     *
+     * <code>EALREADY = 114;</code>
+     */
+    public static final int EALREADY_VALUE = 114;
+    /**
+     * <pre>
+     * Operation now in progress 
+     * </pre>
+     *
+     * <code>EINPROGRESS = 115;</code>
+     */
+    public static final int EINPROGRESS_VALUE = 115;
+    /**
+     * <pre>
+     * Stale NFS file handle 
+     * </pre>
+     *
+     * <code>ESTALE = 116;</code>
+     */
+    public static final int ESTALE_VALUE = 116;
+    /**
+     * <pre>
+     * Structure needs cleaning 
+     * </pre>
+     *
+     * <code>EUCLEAN = 117;</code>
+     */
+    public static final int EUCLEAN_VALUE = 117;
+    /**
+     * <pre>
+     * Not a XENIX named type file 
+     * </pre>
+     *
+     * <code>ENOTNAM = 118;</code>
+     */
+    public static final int ENOTNAM_VALUE = 118;
+    /**
+     * <pre>
+     * No XENIX semaphores available 
+     * </pre>
+     *
+     * <code>ENAVAIL = 119;</code>
+     */
+    public static final int ENAVAIL_VALUE = 119;
+    /**
+     * <pre>
+     * Is a named type file 
+     * </pre>
+     *
+     * <code>EISNAM = 120;</code>
+     */
+    public static final int EISNAM_VALUE = 120;
+    /**
+     * <pre>
+     * Remote I/O error 
+     * </pre>
+     *
+     * <code>EREMOTEIO = 121;</code>
+     */
+    public static final int EREMOTEIO_VALUE = 121;
+
+
+    public final int getNumber() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalArgumentException(
+            "Can't get the number of an unknown enum value.");
+      }
+      return value;
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     * @deprecated Use {@link #forNumber(int)} instead.
+     */
+    @java.lang.Deprecated
+    public static errorCodes valueOf(int value) {
+      return forNumber(value);
+    }
+
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
+    public static errorCodes forNumber(int value) {
+      switch (value) {
+        case 0: return NOERR;
+        case 1: return EPERM;
+        case 2: return ENOENT;
+        case 3: return ESRCH;
+        case 4: return EINTR;
+        case 5: return EIO;
+        case 6: return ENXIO;
+        case 7: return E2BIG;
+        case 8: return ENOEXEC;
+        case 9: return EBADF;
+        case 10: return ECHILD;
+        case 11: return EAGAIN;
+        case 12: return ENOMEM;
+        case 13: return EACCES;
+        case 14: return EFAULT;
+        case 15: return ENOTBLK;
+        case 16: return EBUSY;
+        case 17: return EEXIST;
+        case 18: return EXDEV;
+        case 19: return ENODEV;
+        case 20: return ENOTDIR;
+        case 21: return EISDIR;
+        case 22: return EINVAL;
+        case 23: return ENFILE;
+        case 24: return EMFILE;
+        case 25: return ENOTTY;
+        case 26: return ETXTBSY;
+        case 27: return EFBIG;
+        case 28: return ENOSPC;
+        case 29: return ESPIPE;
+        case 30: return EROFS;
+        case 31: return EMLINK;
+        case 32: return EPIPE;
+        case 33: return EDOM;
+        case 34: return ERANGE;
+        case 35: return EDEADLK;
+        case 36: return ENAMETOOLONG;
+        case 37: return ENOLCK;
+        case 38: return ENOSYS;
+        case 39: return ENOTEMPTY;
+        case 40: return ELOOP;
+        case 41: return EWOULDBLOCK;
+        case 42: return ENOMSG;
+        case 43: return EIDRM;
+        case 44: return ECHRNG;
+        case 45: return EL2NSYNC;
+        case 46: return EL3HLT;
+        case 47: return EL3RST;
+        case 48: return ELNRNG;
+        case 49: return EUNATCH;
+        case 50: return ENOCSI;
+        case 51: return EL2HLT;
+        case 52: return EBADE;
+        case 53: return EBADR;
+        case 54: return EXFULL;
+        case 55: return ENOANO;
+        case 56: return EBADRQC;
+        case 57: return EBADSLT;
+        case 58: return EDEADLOCK;
+        case 59: return EBFONT;
+        case 60: return ENOSTR;
+        case 61: return ENODATA;
+        case 62: return ETIME;
+        case 63: return ENOSR;
+        case 64: return ENONET;
+        case 65: return ENOPKG;
+        case 66: return EREMOTE;
+        case 67: return ENOLINK;
+        case 68: return EADV;
+        case 69: return ESRMNT;
+        case 70: return ECOMM;
+        case 71: return EPROTO;
+        case 72: return EMULTIHOP;
+        case 73: return EDOTDOT;
+        case 74: return EBADMSG;
+        case 75: return EOVERFLOW;
+        case 76: return ENOTUNIQ;
+        case 77: return EBADFD;
+        case 78: return EREMCHG;
+        case 79: return ELIBACC;
+        case 80: return ELIBBAD;
+        case 81: return ELIBSCN;
+        case 82: return ELIBMAX;
+        case 83: return ELIBEXEC;
+        case 84: return EILSEQ;
+        case 85: return ERESTART;
+        case 86: return ESTRPIPE;
+        case 87: return EUSERS;
+        case 88: return ENOTSOCK;
+        case 89: return EDESTADDRREQ;
+        case 90: return EMSGSIZE;
+        case 91: return EPROTOTYPE;
+        case 92: return ENOPROTOOPT;
+        case 93: return EPROTONOSUPPORT;
+        case 94: return ESOCKTNOSUPPORT;
+        case 95: return EOPNOTSUPP;
+        case 96: return EPFNOSUPPORT;
+        case 97: return EAFNOSUPPORT;
+        case 98: return EADDRINUSE;
+        case 99: return EADDRNOTAVAIL;
+        case 100: return ENETDOWN;
+        case 101: return ENETUNREACH;
+        case 102: return ENETRESET;
+        case 103: return ECONNABORTED;
+        case 104: return ECONNRESET;
+        case 105: return ENOBUFS;
+        case 106: return EISCONN;
+        case 107: return ENOTCONN;
+        case 108: return ESHUTDOWN;
+        case 109: return ETOOMANYREFS;
+        case 110: return ETIMEDOUT;
+        case 111: return ECONNREFUSED;
+        case 112: return EHOSTDOWN;
+        case 113: return EHOSTUNREACH;
+        case 114: return EALREADY;
+        case 115: return EINPROGRESS;
+        case 116: return ESTALE;
+        case 117: return EUCLEAN;
+        case 118: return ENOTNAM;
+        case 119: return ENAVAIL;
+        case 120: return EISNAM;
+        case 121: return EREMOTEIO;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<errorCodes>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static final com.google.protobuf.Internal.EnumLiteMap<
+        errorCodes> internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<errorCodes>() {
+            public errorCodes findValueByNumber(int number) {
+              return errorCodes.forNumber(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
+      return getDescriptor().getValues().get(ordinal());
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.getDescriptor().getEnumTypes().get(1);
+    }
+
+    private static final errorCodes[] VALUES = values();
+
+    public static errorCodes valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      if (desc.getIndex() == -1) {
+        return UNRECOGNIZED;
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int value;
+
+    private errorCodes(int value) {
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:org.opendedup.grpc.errorCodes)
+  }
+
+  public interface FileInfoRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.FileInfoRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string fileName = 1;</code>
+     * @return The fileName.
+     */
+    java.lang.String getFileName();
+    /**
+     * <code>string fileName = 1;</code>
+     * @return The bytes for fileName.
+     */
+    com.google.protobuf.ByteString
+        getFileNameBytes();
+
+    /**
+     * <code>bool compact = 2;</code>
+     * @return The compact.
+     */
+    boolean getCompact();
+
+    /**
+     * <code>int32 numberOfFiles = 3;</code>
+     * @return The numberOfFiles.
+     */
+    int getNumberOfFiles();
+
+    /**
+     * <code>string listGuid = 4;</code>
+     * @return The listGuid.
+     */
+    java.lang.String getListGuid();
+    /**
+     * <code>string listGuid = 4;</code>
+     * @return The bytes for listGuid.
+     */
+    com.google.protobuf.ByteString
+        getListGuidBytes();
+  }
+  /**
+   * <pre>
+   * Request payload
+   * </pre>
+   *
+   * Protobuf type {@code org.opendedup.grpc.FileInfoRequest}
+   */
+  public static final class FileInfoRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileInfoRequest)
+      FileInfoRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use FileInfoRequest.newBuilder() to construct.
+    private FileInfoRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FileInfoRequest() {
+      fileName_ = "";
+      listGuid_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileInfoRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FileInfoRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              fileName_ = s;
+              break;
+            }
+            case 16: {
+
+              compact_ = input.readBool();
+              break;
+            }
+            case 24: {
+
+              numberOfFiles_ = input.readInt32();
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              listGuid_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.FileInfo.FileInfoRequest.class, org.opendedup.grpc.FileInfo.FileInfoRequest.Builder.class);
+    }
+
+    public static final int FILENAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object fileName_;
+    /**
+     * <code>string fileName = 1;</code>
+     * @return The fileName.
+     */
+    @java.lang.Override
+    public java.lang.String getFileName() {
+      java.lang.Object ref = fileName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fileName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string fileName = 1;</code>
+     * @return The bytes for fileName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFileNameBytes() {
+      java.lang.Object ref = fileName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fileName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int COMPACT_FIELD_NUMBER = 2;
+    private boolean compact_;
+    /**
+     * <code>bool compact = 2;</code>
+     * @return The compact.
+     */
+    @java.lang.Override
+    public boolean getCompact() {
+      return compact_;
+    }
+
+    public static final int NUMBEROFFILES_FIELD_NUMBER = 3;
+    private int numberOfFiles_;
+    /**
+     * <code>int32 numberOfFiles = 3;</code>
+     * @return The numberOfFiles.
+     */
+    @java.lang.Override
+    public int getNumberOfFiles() {
+      return numberOfFiles_;
+    }
+
+    public static final int LISTGUID_FIELD_NUMBER = 4;
+    private volatile java.lang.Object listGuid_;
+    /**
+     * <code>string listGuid = 4;</code>
+     * @return The listGuid.
+     */
+    @java.lang.Override
+    public java.lang.String getListGuid() {
+      java.lang.Object ref = listGuid_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        listGuid_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string listGuid = 4;</code>
+     * @return The bytes for listGuid.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getListGuidBytes() {
+      java.lang.Object ref = listGuid_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        listGuid_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getFileNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, fileName_);
+      }
+      if (compact_ != false) {
+        output.writeBool(2, compact_);
+      }
+      if (numberOfFiles_ != 0) {
+        output.writeInt32(3, numberOfFiles_);
+      }
+      if (!getListGuidBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, listGuid_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getFileNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, fileName_);
+      }
+      if (compact_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, compact_);
+      }
+      if (numberOfFiles_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, numberOfFiles_);
+      }
+      if (!getListGuidBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, listGuid_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.FileInfo.FileInfoRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.FileInfo.FileInfoRequest other = (org.opendedup.grpc.FileInfo.FileInfoRequest) obj;
+
+      if (!getFileName()
+          .equals(other.getFileName())) return false;
+      if (getCompact()
+          != other.getCompact()) return false;
+      if (getNumberOfFiles()
+          != other.getNumberOfFiles()) return false;
+      if (!getListGuid()
+          .equals(other.getListGuid())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFileName().hashCode();
+      hash = (37 * hash) + COMPACT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCompact());
+      hash = (37 * hash) + NUMBEROFFILES_FIELD_NUMBER;
+      hash = (53 * hash) + getNumberOfFiles();
+      hash = (37 * hash) + LISTGUID_FIELD_NUMBER;
+      hash = (53 * hash) + getListGuid().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.FileInfo.FileInfoRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request payload
+     * </pre>
+     *
+     * Protobuf type {@code org.opendedup.grpc.FileInfoRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.FileInfoRequest)
+        org.opendedup.grpc.FileInfo.FileInfoRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.FileInfo.FileInfoRequest.class, org.opendedup.grpc.FileInfo.FileInfoRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.FileInfo.FileInfoRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        fileName_ = "";
+
+        compact_ = false;
+
+        numberOfFiles_ = 0;
+
+        listGuid_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileInfoRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.FileInfo.FileInfoRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileInfoRequest build() {
+        org.opendedup.grpc.FileInfo.FileInfoRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileInfoRequest buildPartial() {
+        org.opendedup.grpc.FileInfo.FileInfoRequest result = new org.opendedup.grpc.FileInfo.FileInfoRequest(this);
+        result.fileName_ = fileName_;
+        result.compact_ = compact_;
+        result.numberOfFiles_ = numberOfFiles_;
+        result.listGuid_ = listGuid_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.FileInfo.FileInfoRequest) {
+          return mergeFrom((org.opendedup.grpc.FileInfo.FileInfoRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.FileInfo.FileInfoRequest other) {
+        if (other == org.opendedup.grpc.FileInfo.FileInfoRequest.getDefaultInstance()) return this;
+        if (!other.getFileName().isEmpty()) {
+          fileName_ = other.fileName_;
+          onChanged();
+        }
+        if (other.getCompact() != false) {
+          setCompact(other.getCompact());
+        }
+        if (other.getNumberOfFiles() != 0) {
+          setNumberOfFiles(other.getNumberOfFiles());
+        }
+        if (!other.getListGuid().isEmpty()) {
+          listGuid_ = other.listGuid_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.FileInfo.FileInfoRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.FileInfo.FileInfoRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object fileName_ = "";
+      /**
+       * <code>string fileName = 1;</code>
+       * @return The fileName.
+       */
+      public java.lang.String getFileName() {
+        java.lang.Object ref = fileName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fileName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string fileName = 1;</code>
+       * @return The bytes for fileName.
+       */
+      public com.google.protobuf.ByteString
+          getFileNameBytes() {
+        java.lang.Object ref = fileName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fileName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string fileName = 1;</code>
+       * @param value The fileName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        fileName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string fileName = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileName() {
+        
+        fileName_ = getDefaultInstance().getFileName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string fileName = 1;</code>
+       * @param value The bytes for fileName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        fileName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean compact_ ;
+      /**
+       * <code>bool compact = 2;</code>
+       * @return The compact.
+       */
+      @java.lang.Override
+      public boolean getCompact() {
+        return compact_;
+      }
+      /**
+       * <code>bool compact = 2;</code>
+       * @param value The compact to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompact(boolean value) {
+        
+        compact_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool compact = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompact() {
+        
+        compact_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int numberOfFiles_ ;
+      /**
+       * <code>int32 numberOfFiles = 3;</code>
+       * @return The numberOfFiles.
+       */
+      @java.lang.Override
+      public int getNumberOfFiles() {
+        return numberOfFiles_;
+      }
+      /**
+       * <code>int32 numberOfFiles = 3;</code>
+       * @param value The numberOfFiles to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNumberOfFiles(int value) {
+        
+        numberOfFiles_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 numberOfFiles = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearNumberOfFiles() {
+        
+        numberOfFiles_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object listGuid_ = "";
+      /**
+       * <code>string listGuid = 4;</code>
+       * @return The listGuid.
+       */
+      public java.lang.String getListGuid() {
+        java.lang.Object ref = listGuid_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          listGuid_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string listGuid = 4;</code>
+       * @return The bytes for listGuid.
+       */
+      public com.google.protobuf.ByteString
+          getListGuidBytes() {
+        java.lang.Object ref = listGuid_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          listGuid_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string listGuid = 4;</code>
+       * @param value The listGuid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setListGuid(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        listGuid_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string listGuid = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearListGuid() {
+        
+        listGuid_ = getDefaultInstance().getListGuid();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string listGuid = 4;</code>
+       * @param value The bytes for listGuid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setListGuidBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        listGuid_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.FileInfoRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.FileInfoRequest)
+    private static final org.opendedup.grpc.FileInfo.FileInfoRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.FileInfo.FileInfoRequest();
+    }
+
+    public static org.opendedup.grpc.FileInfo.FileInfoRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<FileInfoRequest>
+        PARSER = new com.google.protobuf.AbstractParser<FileInfoRequest>() {
+      @java.lang.Override
+      public FileInfoRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FileInfoRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<FileInfoRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FileInfoRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileInfoRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface FileMessageResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.FileMessageResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+
+    /**
+     * <code>string listGuid = 2;</code>
+     * @return The listGuid.
+     */
+    java.lang.String getListGuid();
+    /**
+     * <code>string listGuid = 2;</code>
+     * @return The bytes for listGuid.
+     */
+    com.google.protobuf.ByteString
+        getListGuidBytes();
+
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> 
+        getResponseList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileInfoResponse getResponse(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    int getResponseCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
+        getResponseOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getResponseOrBuilder(
+        int index);
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The errorCode.
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+
+    /**
+     * <code>int32 maxNumberOfFiles = 5;</code>
+     * @return The maxNumberOfFiles.
+     */
+    int getMaxNumberOfFiles();
+
+    /**
+     * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+     * @return The enum numeric value on the wire for action.
+     */
+    int getActionValue();
+    /**
+     * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+     * @return The action.
+     */
+    org.opendedup.grpc.FileInfo.syncaction getAction();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.FileMessageResponse}
+   */
+  public static final class FileMessageResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileMessageResponse)
+      FileMessageResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use FileMessageResponse.newBuilder() to construct.
+    private FileMessageResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FileMessageResponse() {
+      error_ = "";
+      listGuid_ = "";
+      response_ = java.util.Collections.emptyList();
+      errorCode_ = 0;
+      action_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileMessageResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FileMessageResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              listGuid_ = s;
+              break;
+            }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                response_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileInfoResponse>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              response_.add(
+                  input.readMessage(org.opendedup.grpc.FileInfo.FileInfoResponse.parser(), extensionRegistry));
+              break;
+            }
+            case 32: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
+              break;
+            }
+            case 40: {
+
+              maxNumberOfFiles_ = input.readInt32();
+              break;
+            }
+            case 48: {
+              int rawValue = input.readEnum();
+
+              action_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          response_ = java.util.Collections.unmodifiableList(response_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileMessageResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileMessageResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.FileInfo.FileMessageResponse.class, org.opendedup.grpc.FileInfo.FileMessageResponse.Builder.class);
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 1;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    @java.lang.Override
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int LISTGUID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object listGuid_;
+    /**
+     * <code>string listGuid = 2;</code>
+     * @return The listGuid.
+     */
+    @java.lang.Override
+    public java.lang.String getListGuid() {
+      java.lang.Object ref = listGuid_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        listGuid_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string listGuid = 2;</code>
+     * @return The bytes for listGuid.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getListGuidBytes() {
+      java.lang.Object ref = listGuid_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        listGuid_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RESPONSE_FIELD_NUMBER = 3;
+    private java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> response_;
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> getResponseList() {
+      return response_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
+        getResponseOrBuilderList() {
+      return response_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    @java.lang.Override
+    public int getResponseCount() {
+      return response_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileInfoResponse getResponse(int index) {
+      return response_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getResponseOrBuilder(
+        int index) {
+      return response_.get(index);
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 4;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    @java.lang.Override public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The errorCode.
+     */
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
+    public static final int MAXNUMBEROFFILES_FIELD_NUMBER = 5;
+    private int maxNumberOfFiles_;
+    /**
+     * <code>int32 maxNumberOfFiles = 5;</code>
+     * @return The maxNumberOfFiles.
+     */
+    @java.lang.Override
+    public int getMaxNumberOfFiles() {
+      return maxNumberOfFiles_;
+    }
+
+    public static final int ACTION_FIELD_NUMBER = 6;
+    private int action_;
+    /**
+     * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+     * @return The enum numeric value on the wire for action.
+     */
+    @java.lang.Override public int getActionValue() {
+      return action_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+     * @return The action.
+     */
+    @java.lang.Override public org.opendedup.grpc.FileInfo.syncaction getAction() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.syncaction result = org.opendedup.grpc.FileInfo.syncaction.valueOf(action_);
+      return result == null ? org.opendedup.grpc.FileInfo.syncaction.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
+      }
+      if (!getListGuidBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, listGuid_);
+      }
+      for (int i = 0; i < response_.size(); i++) {
+        output.writeMessage(3, response_.get(i));
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(4, errorCode_);
+      }
+      if (maxNumberOfFiles_ != 0) {
+        output.writeInt32(5, maxNumberOfFiles_);
+      }
+      if (action_ != org.opendedup.grpc.FileInfo.syncaction.DOWNLOAD.getNumber()) {
+        output.writeEnum(6, action_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
+      }
+      if (!getListGuidBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, listGuid_);
+      }
+      for (int i = 0; i < response_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, response_.get(i));
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, errorCode_);
+      }
+      if (maxNumberOfFiles_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, maxNumberOfFiles_);
+      }
+      if (action_ != org.opendedup.grpc.FileInfo.syncaction.DOWNLOAD.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(6, action_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.FileInfo.FileMessageResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.FileInfo.FileMessageResponse other = (org.opendedup.grpc.FileInfo.FileMessageResponse) obj;
+
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (!getListGuid()
+          .equals(other.getListGuid())) return false;
+      if (!getResponseList()
+          .equals(other.getResponseList())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (getMaxNumberOfFiles()
+          != other.getMaxNumberOfFiles()) return false;
+      if (action_ != other.action_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (37 * hash) + LISTGUID_FIELD_NUMBER;
+      hash = (53 * hash) + getListGuid().hashCode();
+      if (getResponseCount() > 0) {
+        hash = (37 * hash) + RESPONSE_FIELD_NUMBER;
+        hash = (53 * hash) + getResponseList().hashCode();
+      }
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
+      hash = (37 * hash) + MAXNUMBEROFFILES_FIELD_NUMBER;
+      hash = (53 * hash) + getMaxNumberOfFiles();
+      hash = (37 * hash) + ACTION_FIELD_NUMBER;
+      hash = (53 * hash) + action_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.FileInfo.FileMessageResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.FileMessageResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.FileMessageResponse)
+        org.opendedup.grpc.FileInfo.FileMessageResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileMessageResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileMessageResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.FileInfo.FileMessageResponse.class, org.opendedup.grpc.FileInfo.FileMessageResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.FileInfo.FileMessageResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getResponseFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        error_ = "";
+
+        listGuid_ = "";
+
+        if (responseBuilder_ == null) {
+          response_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          responseBuilder_.clear();
+        }
+        errorCode_ = 0;
+
+        maxNumberOfFiles_ = 0;
+
+        action_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileMessageResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileMessageResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.FileInfo.FileMessageResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileMessageResponse build() {
+        org.opendedup.grpc.FileInfo.FileMessageResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileMessageResponse buildPartial() {
+        org.opendedup.grpc.FileInfo.FileMessageResponse result = new org.opendedup.grpc.FileInfo.FileMessageResponse(this);
+        int from_bitField0_ = bitField0_;
+        result.error_ = error_;
+        result.listGuid_ = listGuid_;
+        if (responseBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            response_ = java.util.Collections.unmodifiableList(response_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.response_ = response_;
+        } else {
+          result.response_ = responseBuilder_.build();
+        }
+        result.errorCode_ = errorCode_;
+        result.maxNumberOfFiles_ = maxNumberOfFiles_;
+        result.action_ = action_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.FileInfo.FileMessageResponse) {
+          return mergeFrom((org.opendedup.grpc.FileInfo.FileMessageResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.FileInfo.FileMessageResponse other) {
+        if (other == org.opendedup.grpc.FileInfo.FileMessageResponse.getDefaultInstance()) return this;
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        if (!other.getListGuid().isEmpty()) {
+          listGuid_ = other.listGuid_;
+          onChanged();
+        }
+        if (responseBuilder_ == null) {
+          if (!other.response_.isEmpty()) {
+            if (response_.isEmpty()) {
+              response_ = other.response_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureResponseIsMutable();
+              response_.addAll(other.response_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.response_.isEmpty()) {
+            if (responseBuilder_.isEmpty()) {
+              responseBuilder_.dispose();
+              responseBuilder_ = null;
+              response_ = other.response_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              responseBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getResponseFieldBuilder() : null;
+            } else {
+              responseBuilder_.addAllMessages(other.response_);
+            }
+          }
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
+        }
+        if (other.getMaxNumberOfFiles() != 0) {
+          setMaxNumberOfFiles(other.getMaxNumberOfFiles());
+        }
+        if (other.action_ != 0) {
+          setActionValue(other.getActionValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.FileInfo.FileMessageResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.FileInfo.FileMessageResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 1;</code>
+       * @return The error.
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return The bytes for error.
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object listGuid_ = "";
+      /**
+       * <code>string listGuid = 2;</code>
+       * @return The listGuid.
+       */
+      public java.lang.String getListGuid() {
+        java.lang.Object ref = listGuid_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          listGuid_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string listGuid = 2;</code>
+       * @return The bytes for listGuid.
+       */
+      public com.google.protobuf.ByteString
+          getListGuidBytes() {
+        java.lang.Object ref = listGuid_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          listGuid_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string listGuid = 2;</code>
+       * @param value The listGuid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setListGuid(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        listGuid_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string listGuid = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearListGuid() {
+        
+        listGuid_ = getDefaultInstance().getListGuid();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string listGuid = 2;</code>
+       * @param value The bytes for listGuid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setListGuidBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        listGuid_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> response_ =
+        java.util.Collections.emptyList();
+      private void ensureResponseIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          response_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileInfoResponse>(response_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> responseBuilder_;
+
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> getResponseList() {
+        if (responseBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(response_);
+        } else {
+          return responseBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public int getResponseCount() {
+        if (responseBuilder_ == null) {
+          return response_.size();
+        } else {
+          return responseBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponse getResponse(int index) {
+        if (responseBuilder_ == null) {
+          return response_.get(index);
+        } else {
+          return responseBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public Builder setResponse(
+          int index, org.opendedup.grpc.FileInfo.FileInfoResponse value) {
+        if (responseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResponseIsMutable();
+          response_.set(index, value);
+          onChanged();
+        } else {
+          responseBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public Builder setResponse(
+          int index, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder builderForValue) {
+        if (responseBuilder_ == null) {
+          ensureResponseIsMutable();
+          response_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          responseBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public Builder addResponse(org.opendedup.grpc.FileInfo.FileInfoResponse value) {
+        if (responseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResponseIsMutable();
+          response_.add(value);
+          onChanged();
+        } else {
+          responseBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public Builder addResponse(
+          int index, org.opendedup.grpc.FileInfo.FileInfoResponse value) {
+        if (responseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureResponseIsMutable();
+          response_.add(index, value);
+          onChanged();
+        } else {
+          responseBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public Builder addResponse(
+          org.opendedup.grpc.FileInfo.FileInfoResponse.Builder builderForValue) {
+        if (responseBuilder_ == null) {
+          ensureResponseIsMutable();
+          response_.add(builderForValue.build());
+          onChanged();
+        } else {
+          responseBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public Builder addResponse(
+          int index, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder builderForValue) {
+        if (responseBuilder_ == null) {
+          ensureResponseIsMutable();
+          response_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          responseBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public Builder addAllResponse(
+          java.lang.Iterable<? extends org.opendedup.grpc.FileInfo.FileInfoResponse> values) {
+        if (responseBuilder_ == null) {
+          ensureResponseIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, response_);
+          onChanged();
+        } else {
+          responseBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public Builder clearResponse() {
+        if (responseBuilder_ == null) {
+          response_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          responseBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public Builder removeResponse(int index) {
+        if (responseBuilder_ == null) {
+          ensureResponseIsMutable();
+          response_.remove(index);
+          onChanged();
+        } else {
+          responseBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponse.Builder getResponseBuilder(
+          int index) {
+        return getResponseFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getResponseOrBuilder(
+          int index) {
+        if (responseBuilder_ == null) {
+          return response_.get(index);  } else {
+          return responseBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
+           getResponseOrBuilderList() {
+        if (responseBuilder_ != null) {
+          return responseBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(response_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponse.Builder addResponseBuilder() {
+        return getResponseFieldBuilder().addBuilder(
+            org.opendedup.grpc.FileInfo.FileInfoResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponse.Builder addResponseBuilder(
+          int index) {
+        return getResponseFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.FileInfo.FileInfoResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse.Builder> 
+           getResponseBuilderList() {
+        return getResponseFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
+          getResponseFieldBuilder() {
+        if (responseBuilder_ == null) {
+          responseBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder>(
+                  response_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          response_ = null;
+        }
+        return responseBuilder_;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return The enum numeric value on the wire for errorCode.
+       */
+      @java.lang.Override public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCodeValue(int value) {
+        
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return The errorCode.
+       */
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int maxNumberOfFiles_ ;
+      /**
+       * <code>int32 maxNumberOfFiles = 5;</code>
+       * @return The maxNumberOfFiles.
+       */
+      @java.lang.Override
+      public int getMaxNumberOfFiles() {
+        return maxNumberOfFiles_;
+      }
+      /**
+       * <code>int32 maxNumberOfFiles = 5;</code>
+       * @param value The maxNumberOfFiles to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxNumberOfFiles(int value) {
+        
+        maxNumberOfFiles_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 maxNumberOfFiles = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxNumberOfFiles() {
+        
+        maxNumberOfFiles_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int action_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @return The enum numeric value on the wire for action.
+       */
+      @java.lang.Override public int getActionValue() {
+        return action_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @param value The enum numeric value on the wire for action to set.
+       * @return This builder for chaining.
+       */
+      public Builder setActionValue(int value) {
+        
+        action_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @return The action.
+       */
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.syncaction getAction() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.syncaction result = org.opendedup.grpc.FileInfo.syncaction.valueOf(action_);
+        return result == null ? org.opendedup.grpc.FileInfo.syncaction.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @param value The action to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAction(org.opendedup.grpc.FileInfo.syncaction value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        action_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAction() {
+        
+        action_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.FileMessageResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.FileMessageResponse)
+    private static final org.opendedup.grpc.FileInfo.FileMessageResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.FileInfo.FileMessageResponse();
+    }
+
+    public static org.opendedup.grpc.FileInfo.FileMessageResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<FileMessageResponse>
+        PARSER = new com.google.protobuf.AbstractParser<FileMessageResponse>() {
+      @java.lang.Override
+      public FileMessageResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FileMessageResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<FileMessageResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FileMessageResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileMessageResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface FileInfoResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.FileInfoResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string fileName = 1;</code>
+     * @return The fileName.
+     */
+    java.lang.String getFileName();
+    /**
+     * <code>string fileName = 1;</code>
+     * @return The bytes for fileName.
+     */
+    com.google.protobuf.ByteString
+        getFileNameBytes();
+
+    /**
+     * <code>string filePath = 2;</code>
+     * @return The filePath.
+     */
+    java.lang.String getFilePath();
+    /**
+     * <code>string filePath = 2;</code>
+     * @return The bytes for filePath.
+     */
+    com.google.protobuf.ByteString
+        getFilePathBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+     * @return The enum numeric value on the wire for type.
+     */
+    int getTypeValue();
+    /**
+     * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+     * @return The type.
+     */
+    org.opendedup.grpc.FileInfo.FileInfoResponse.fileType getType();
+
+    /**
+     * <code>string sdfsPath = 4;</code>
+     * @return The sdfsPath.
+     */
+    java.lang.String getSdfsPath();
+    /**
+     * <code>string sdfsPath = 4;</code>
+     * @return The bytes for sdfsPath.
+     */
+    com.google.protobuf.ByteString
+        getSdfsPathBytes();
+
+    /**
+     * <code>int64 atime = 5;</code>
+     * @return The atime.
+     */
+    long getAtime();
+
+    /**
+     * <code>int64 mtime = 6;</code>
+     * @return The mtime.
+     */
+    long getMtime();
+
+    /**
+     * <code>int64 ctime = 7;</code>
+     * @return The ctime.
+     */
+    long getCtime();
+
+    /**
+     * <code>bool hidden = 8;</code>
+     * @return The hidden.
+     */
+    boolean getHidden();
+
+    /**
+     * <code>int64 size = 9;</code>
+     * @return The size.
+     */
+    long getSize();
+
+    /**
+     * <code>bool open = 10;</code>
+     * @return The open.
+     */
+    boolean getOpen();
+
+    /**
+     * <code>string fileGuild = 11;</code>
+     * @return The fileGuild.
+     */
+    java.lang.String getFileGuild();
+    /**
+     * <code>string fileGuild = 11;</code>
+     * @return The bytes for fileGuild.
+     */
+    com.google.protobuf.ByteString
+        getFileGuildBytes();
+
+    /**
+     * <code>string mapGuid = 12;</code>
+     * @return The mapGuid.
+     */
+    java.lang.String getMapGuid();
+    /**
+     * <code>string mapGuid = 12;</code>
+     * @return The bytes for mapGuid.
+     */
+    com.google.protobuf.ByteString
+        getMapGuidBytes();
+
+    /**
+     * <code>bool localOwner = 13;</code>
+     * @return The localOwner.
+     */
+    boolean getLocalOwner();
+
+    /**
+     * <code>bool execute = 14;</code>
+     * @return The execute.
+     */
+    boolean getExecute();
+
+    /**
+     * <code>bool read = 15;</code>
+     * @return The read.
+     */
+    boolean getRead();
+
+    /**
+     * <code>bool write = 16;</code>
+     * @return The write.
+     */
+    boolean getWrite();
+
+    /**
+     * <code>bool importing = 17;</code>
+     * @return The importing.
+     */
+    boolean getImporting();
+
+    /**
+     * <code>bool symlink = 18;</code>
+     * @return The symlink.
+     */
+    boolean getSymlink();
+
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> 
+        getFileAttributesList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    int getFileAttributesCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+        getFileAttributesOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
+        int index);
+
+    /**
+     * <code>string id = 20;</code>
+     * @return The id.
+     */
+    java.lang.String getId();
+    /**
+     * <code>string id = 20;</code>
+     * @return The bytes for id.
+     */
+    com.google.protobuf.ByteString
+        getIdBytes();
+
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> 
+        getFilesList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileInfoResponse getFiles(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    int getFilesCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
+        getFilesOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getFilesOrBuilder(
+        int index);
+
+    /**
+     * <code>string parentPath = 22;</code>
+     * @return The parentPath.
+     */
+    java.lang.String getParentPath();
+    /**
+     * <code>string parentPath = 22;</code>
+     * @return The bytes for parentPath.
+     */
+    com.google.protobuf.ByteString
+        getParentPathBytes();
+
+    /**
+     * <code>string volumeid = 23;</code>
+     * @return The volumeid.
+     */
+    java.lang.String getVolumeid();
+    /**
+     * <code>string volumeid = 23;</code>
+     * @return The bytes for volumeid.
+     */
+    com.google.protobuf.ByteString
+        getVolumeidBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return Whether the ioMonitor field is set.
+     */
+    boolean hasIoMonitor();
+    /**
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return The ioMonitor.
+     */
+    org.opendedup.grpc.FileInfo.IOMonitorResponse getIoMonitor();
+    /**
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     */
+    org.opendedup.grpc.FileInfo.IOMonitorResponseOrBuilder getIoMonitorOrBuilder();
+
+    /**
+     * <code>string symlinkPath = 25;</code>
+     * @return The symlinkPath.
+     */
+    java.lang.String getSymlinkPath();
+    /**
+     * <code>string symlinkPath = 25;</code>
+     * @return The bytes for symlinkPath.
+     */
+    com.google.protobuf.ByteString
+        getSymlinkPathBytes();
+
+    /**
+     * <code>int64 group_id = 26;</code>
+     * @return The groupId.
+     */
+    long getGroupId();
+
+    /**
+     * <code>int64 user_id = 27;</code>
+     * @return The userId.
+     */
+    long getUserId();
+
+    /**
+     * <code>int32 permissions = 28;</code>
+     * @return The permissions.
+     */
+    int getPermissions();
+
+    /**
+     * <code>int64 hashcode = 29;</code>
+     * @return The hashcode.
+     */
+    long getHashcode();
+
+    /**
+     * <code>int64 retentionLock = 30;</code>
+     * @return The retentionLock.
+     */
+    long getRetentionLock();
+
+    /**
+     * <code>int64 attributes = 31;</code>
+     * @return The attributes.
+     */
+    long getAttributes();
+
+    /**
+     * <code>string version = 32;</code>
+     * @return The version.
+     */
+    java.lang.String getVersion();
+    /**
+     * <code>string version = 32;</code>
+     * @return The bytes for version.
+     */
+    com.google.protobuf.ByteString
+        getVersionBytes();
+
+    /**
+     * <code>int32 mode = 33;</code>
+     * @return The mode.
+     */
+    int getMode();
+
+    /**
+     * <code>bool delete_on_close = 34;</code>
+     * @return The deleteOnClose.
+     */
+    boolean getDeleteOnClose();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.FileInfoResponse}
+   */
+  public static final class FileInfoResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileInfoResponse)
+      FileInfoResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use FileInfoResponse.newBuilder() to construct.
+    private FileInfoResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FileInfoResponse() {
+      fileName_ = "";
+      filePath_ = "";
+      type_ = 0;
+      sdfsPath_ = "";
+      fileGuild_ = "";
+      mapGuid_ = "";
+      fileAttributes_ = java.util.Collections.emptyList();
+      id_ = "";
+      files_ = java.util.Collections.emptyList();
+      parentPath_ = "";
+      volumeid_ = "";
+      symlinkPath_ = "";
+      version_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileInfoResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FileInfoResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              fileName_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              filePath_ = s;
+              break;
+            }
+            case 24: {
+              int rawValue = input.readEnum();
+
+              type_ = rawValue;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              sdfsPath_ = s;
+              break;
+            }
+            case 40: {
+
+              atime_ = input.readInt64();
+              break;
+            }
+            case 48: {
+
+              mtime_ = input.readInt64();
+              break;
+            }
+            case 56: {
+
+              ctime_ = input.readInt64();
+              break;
+            }
+            case 64: {
+
+              hidden_ = input.readBool();
+              break;
+            }
+            case 72: {
+
+              size_ = input.readInt64();
+              break;
+            }
+            case 80: {
+
+              open_ = input.readBool();
+              break;
+            }
+            case 90: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              fileGuild_ = s;
+              break;
+            }
+            case 98: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              mapGuid_ = s;
+              break;
+            }
+            case 104: {
+
+              localOwner_ = input.readBool();
+              break;
+            }
+            case 112: {
+
+              execute_ = input.readBool();
+              break;
+            }
+            case 120: {
+
+              read_ = input.readBool();
+              break;
+            }
+            case 128: {
+
+              write_ = input.readBool();
+              break;
+            }
+            case 136: {
+
+              importing_ = input.readBool();
+              break;
+            }
+            case 144: {
+
+              symlink_ = input.readBool();
+              break;
+            }
+            case 154: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              fileAttributes_.add(
+                  input.readMessage(org.opendedup.grpc.FileInfo.FileAttributes.parser(), extensionRegistry));
+              break;
+            }
+            case 162: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              id_ = s;
+              break;
+            }
+            case 170: {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+                files_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileInfoResponse>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              files_.add(
+                  input.readMessage(org.opendedup.grpc.FileInfo.FileInfoResponse.parser(), extensionRegistry));
+              break;
+            }
+            case 178: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              parentPath_ = s;
+              break;
+            }
+            case 186: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              volumeid_ = s;
+              break;
+            }
+            case 194: {
+              org.opendedup.grpc.FileInfo.IOMonitorResponse.Builder subBuilder = null;
+              if (ioMonitor_ != null) {
+                subBuilder = ioMonitor_.toBuilder();
+              }
+              ioMonitor_ = input.readMessage(org.opendedup.grpc.FileInfo.IOMonitorResponse.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(ioMonitor_);
+                ioMonitor_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 202: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              symlinkPath_ = s;
+              break;
+            }
+            case 208: {
+
+              groupId_ = input.readInt64();
+              break;
+            }
+            case 216: {
+
+              userId_ = input.readInt64();
+              break;
+            }
+            case 224: {
+
+              permissions_ = input.readInt32();
+              break;
+            }
+            case 232: {
+
+              hashcode_ = input.readInt64();
+              break;
+            }
+            case 240: {
+
+              retentionLock_ = input.readInt64();
+              break;
+            }
+            case 248: {
+
+              attributes_ = input.readInt64();
+              break;
+            }
+            case 258: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              version_ = s;
+              break;
+            }
+            case 264: {
+
+              mode_ = input.readInt32();
+              break;
+            }
+            case 272: {
+
+              deleteOnClose_ = input.readBool();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
+        }
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
+          files_ = java.util.Collections.unmodifiableList(files_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.FileInfo.FileInfoResponse.class, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code org.opendedup.grpc.FileInfoResponse.fileType}
+     */
+    public enum fileType
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>FILE = 0;</code>
+       */
+      FILE(0),
+      /**
+       * <code>DIR = 1;</code>
+       */
+      DIR(1),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>FILE = 0;</code>
+       */
+      public static final int FILE_VALUE = 0;
+      /**
+       * <code>DIR = 1;</code>
+       */
+      public static final int DIR_VALUE = 1;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static fileType valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static fileType forNumber(int value) {
+        switch (value) {
+          case 0: return FILE;
+          case 1: return DIR;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<fileType>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          fileType> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<fileType>() {
+              public fileType findValueByNumber(int number) {
+                return fileType.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.FileInfoResponse.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final fileType[] VALUES = values();
+
+      public static fileType valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private fileType(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:org.opendedup.grpc.FileInfoResponse.fileType)
+    }
+
+    public static final int FILENAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object fileName_;
+    /**
+     * <code>string fileName = 1;</code>
+     * @return The fileName.
+     */
+    @java.lang.Override
+    public java.lang.String getFileName() {
+      java.lang.Object ref = fileName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fileName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string fileName = 1;</code>
+     * @return The bytes for fileName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFileNameBytes() {
+      java.lang.Object ref = fileName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fileName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FILEPATH_FIELD_NUMBER = 2;
+    private volatile java.lang.Object filePath_;
+    /**
+     * <code>string filePath = 2;</code>
+     * @return The filePath.
+     */
+    @java.lang.Override
+    public java.lang.String getFilePath() {
+      java.lang.Object ref = filePath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        filePath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string filePath = 2;</code>
+     * @return The bytes for filePath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFilePathBytes() {
+      java.lang.Object ref = filePath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        filePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 3;
+    private int type_;
+    /**
+     * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+     * @return The enum numeric value on the wire for type.
+     */
+    @java.lang.Override public int getTypeValue() {
+      return type_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+     * @return The type.
+     */
+    @java.lang.Override public org.opendedup.grpc.FileInfo.FileInfoResponse.fileType getType() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.FileInfoResponse.fileType result = org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.valueOf(type_);
+      return result == null ? org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.UNRECOGNIZED : result;
+    }
+
+    public static final int SDFSPATH_FIELD_NUMBER = 4;
+    private volatile java.lang.Object sdfsPath_;
+    /**
+     * <code>string sdfsPath = 4;</code>
+     * @return The sdfsPath.
+     */
+    @java.lang.Override
+    public java.lang.String getSdfsPath() {
+      java.lang.Object ref = sdfsPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        sdfsPath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string sdfsPath = 4;</code>
+     * @return The bytes for sdfsPath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getSdfsPathBytes() {
+      java.lang.Object ref = sdfsPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        sdfsPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ATIME_FIELD_NUMBER = 5;
+    private long atime_;
+    /**
+     * <code>int64 atime = 5;</code>
+     * @return The atime.
+     */
+    @java.lang.Override
+    public long getAtime() {
+      return atime_;
+    }
+
+    public static final int MTIME_FIELD_NUMBER = 6;
+    private long mtime_;
+    /**
+     * <code>int64 mtime = 6;</code>
+     * @return The mtime.
+     */
+    @java.lang.Override
+    public long getMtime() {
+      return mtime_;
+    }
+
+    public static final int CTIME_FIELD_NUMBER = 7;
+    private long ctime_;
+    /**
+     * <code>int64 ctime = 7;</code>
+     * @return The ctime.
+     */
+    @java.lang.Override
+    public long getCtime() {
+      return ctime_;
+    }
+
+    public static final int HIDDEN_FIELD_NUMBER = 8;
+    private boolean hidden_;
+    /**
+     * <code>bool hidden = 8;</code>
+     * @return The hidden.
+     */
+    @java.lang.Override
+    public boolean getHidden() {
+      return hidden_;
+    }
+
+    public static final int SIZE_FIELD_NUMBER = 9;
+    private long size_;
+    /**
+     * <code>int64 size = 9;</code>
+     * @return The size.
+     */
+    @java.lang.Override
+    public long getSize() {
+      return size_;
+    }
+
+    public static final int OPEN_FIELD_NUMBER = 10;
+    private boolean open_;
+    /**
+     * <code>bool open = 10;</code>
+     * @return The open.
+     */
+    @java.lang.Override
+    public boolean getOpen() {
+      return open_;
+    }
+
+    public static final int FILEGUILD_FIELD_NUMBER = 11;
+    private volatile java.lang.Object fileGuild_;
+    /**
+     * <code>string fileGuild = 11;</code>
+     * @return The fileGuild.
+     */
+    @java.lang.Override
+    public java.lang.String getFileGuild() {
+      java.lang.Object ref = fileGuild_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        fileGuild_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string fileGuild = 11;</code>
+     * @return The bytes for fileGuild.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFileGuildBytes() {
+      java.lang.Object ref = fileGuild_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        fileGuild_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MAPGUID_FIELD_NUMBER = 12;
+    private volatile java.lang.Object mapGuid_;
+    /**
+     * <code>string mapGuid = 12;</code>
+     * @return The mapGuid.
+     */
+    @java.lang.Override
+    public java.lang.String getMapGuid() {
+      java.lang.Object ref = mapGuid_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        mapGuid_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string mapGuid = 12;</code>
+     * @return The bytes for mapGuid.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getMapGuidBytes() {
+      java.lang.Object ref = mapGuid_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        mapGuid_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int LOCALOWNER_FIELD_NUMBER = 13;
+    private boolean localOwner_;
+    /**
+     * <code>bool localOwner = 13;</code>
+     * @return The localOwner.
+     */
+    @java.lang.Override
+    public boolean getLocalOwner() {
+      return localOwner_;
+    }
+
+    public static final int EXECUTE_FIELD_NUMBER = 14;
+    private boolean execute_;
+    /**
+     * <code>bool execute = 14;</code>
+     * @return The execute.
+     */
+    @java.lang.Override
+    public boolean getExecute() {
+      return execute_;
+    }
+
+    public static final int READ_FIELD_NUMBER = 15;
+    private boolean read_;
+    /**
+     * <code>bool read = 15;</code>
+     * @return The read.
+     */
+    @java.lang.Override
+    public boolean getRead() {
+      return read_;
+    }
+
+    public static final int WRITE_FIELD_NUMBER = 16;
+    private boolean write_;
+    /**
+     * <code>bool write = 16;</code>
+     * @return The write.
+     */
+    @java.lang.Override
+    public boolean getWrite() {
+      return write_;
+    }
+
+    public static final int IMPORTING_FIELD_NUMBER = 17;
+    private boolean importing_;
+    /**
+     * <code>bool importing = 17;</code>
+     * @return The importing.
+     */
+    @java.lang.Override
+    public boolean getImporting() {
+      return importing_;
+    }
+
+    public static final int SYMLINK_FIELD_NUMBER = 18;
+    private boolean symlink_;
+    /**
+     * <code>bool symlink = 18;</code>
+     * @return The symlink.
+     */
+    @java.lang.Override
+    public boolean getSymlink() {
+      return symlink_;
+    }
+
+    public static final int FILEATTRIBUTES_FIELD_NUMBER = 19;
+    private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_;
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    @java.lang.Override
+    public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> getFileAttributesList() {
+      return fileAttributes_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+        getFileAttributesOrBuilderList() {
+      return fileAttributes_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    @java.lang.Override
+    public int getFileAttributesCount() {
+      return fileAttributes_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index) {
+      return fileAttributes_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
+        int index) {
+      return fileAttributes_.get(index);
+    }
+
+    public static final int ID_FIELD_NUMBER = 20;
+    private volatile java.lang.Object id_;
+    /**
+     * <code>string id = 20;</code>
+     * @return The id.
+     */
+    @java.lang.Override
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string id = 20;</code>
+     * @return The bytes for id.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FILES_FIELD_NUMBER = 21;
+    private java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> files_;
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    @java.lang.Override
+    public java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> getFilesList() {
+      return files_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
+        getFilesOrBuilderList() {
+      return files_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    @java.lang.Override
+    public int getFilesCount() {
+      return files_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileInfoResponse getFiles(int index) {
+      return files_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getFilesOrBuilder(
+        int index) {
+      return files_.get(index);
+    }
+
+    public static final int PARENTPATH_FIELD_NUMBER = 22;
+    private volatile java.lang.Object parentPath_;
+    /**
+     * <code>string parentPath = 22;</code>
+     * @return The parentPath.
+     */
+    @java.lang.Override
+    public java.lang.String getParentPath() {
+      java.lang.Object ref = parentPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        parentPath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string parentPath = 22;</code>
+     * @return The bytes for parentPath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getParentPathBytes() {
+      java.lang.Object ref = parentPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        parentPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VOLUMEID_FIELD_NUMBER = 23;
+    private volatile java.lang.Object volumeid_;
+    /**
+     * <code>string volumeid = 23;</code>
+     * @return The volumeid.
+     */
+    @java.lang.Override
+    public java.lang.String getVolumeid() {
+      java.lang.Object ref = volumeid_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        volumeid_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string volumeid = 23;</code>
+     * @return The bytes for volumeid.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getVolumeidBytes() {
+      java.lang.Object ref = volumeid_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        volumeid_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int IOMONITOR_FIELD_NUMBER = 24;
+    private org.opendedup.grpc.FileInfo.IOMonitorResponse ioMonitor_;
+    /**
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return Whether the ioMonitor field is set.
+     */
+    @java.lang.Override
+    public boolean hasIoMonitor() {
+      return ioMonitor_ != null;
+    }
+    /**
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return The ioMonitor.
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.IOMonitorResponse getIoMonitor() {
+      return ioMonitor_ == null ? org.opendedup.grpc.FileInfo.IOMonitorResponse.getDefaultInstance() : ioMonitor_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.IOMonitorResponseOrBuilder getIoMonitorOrBuilder() {
+      return getIoMonitor();
+    }
+
+    public static final int SYMLINKPATH_FIELD_NUMBER = 25;
+    private volatile java.lang.Object symlinkPath_;
+    /**
+     * <code>string symlinkPath = 25;</code>
+     * @return The symlinkPath.
+     */
+    @java.lang.Override
+    public java.lang.String getSymlinkPath() {
+      java.lang.Object ref = symlinkPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        symlinkPath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string symlinkPath = 25;</code>
+     * @return The bytes for symlinkPath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getSymlinkPathBytes() {
+      java.lang.Object ref = symlinkPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        symlinkPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int GROUP_ID_FIELD_NUMBER = 26;
+    private long groupId_;
+    /**
+     * <code>int64 group_id = 26;</code>
+     * @return The groupId.
+     */
+    @java.lang.Override
+    public long getGroupId() {
+      return groupId_;
+    }
+
+    public static final int USER_ID_FIELD_NUMBER = 27;
+    private long userId_;
+    /**
+     * <code>int64 user_id = 27;</code>
+     * @return The userId.
+     */
+    @java.lang.Override
+    public long getUserId() {
+      return userId_;
+    }
+
+    public static final int PERMISSIONS_FIELD_NUMBER = 28;
+    private int permissions_;
+    /**
+     * <code>int32 permissions = 28;</code>
+     * @return The permissions.
+     */
+    @java.lang.Override
+    public int getPermissions() {
+      return permissions_;
+    }
+
+    public static final int HASHCODE_FIELD_NUMBER = 29;
+    private long hashcode_;
+    /**
+     * <code>int64 hashcode = 29;</code>
+     * @return The hashcode.
+     */
+    @java.lang.Override
+    public long getHashcode() {
+      return hashcode_;
+    }
+
+    public static final int RETENTIONLOCK_FIELD_NUMBER = 30;
+    private long retentionLock_;
+    /**
+     * <code>int64 retentionLock = 30;</code>
+     * @return The retentionLock.
+     */
+    @java.lang.Override
+    public long getRetentionLock() {
+      return retentionLock_;
+    }
+
+    public static final int ATTRIBUTES_FIELD_NUMBER = 31;
+    private long attributes_;
+    /**
+     * <code>int64 attributes = 31;</code>
+     * @return The attributes.
+     */
+    @java.lang.Override
+    public long getAttributes() {
+      return attributes_;
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 32;
+    private volatile java.lang.Object version_;
+    /**
+     * <code>string version = 32;</code>
+     * @return The version.
+     */
+    @java.lang.Override
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        version_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string version = 32;</code>
+     * @return The bytes for version.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getVersionBytes() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        version_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MODE_FIELD_NUMBER = 33;
+    private int mode_;
+    /**
+     * <code>int32 mode = 33;</code>
+     * @return The mode.
+     */
+    @java.lang.Override
+    public int getMode() {
+      return mode_;
+    }
+
+    public static final int DELETE_ON_CLOSE_FIELD_NUMBER = 34;
+    private boolean deleteOnClose_;
+    /**
+     * <code>bool delete_on_close = 34;</code>
+     * @return The deleteOnClose.
+     */
+    @java.lang.Override
+    public boolean getDeleteOnClose() {
+      return deleteOnClose_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getFileNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, fileName_);
+      }
+      if (!getFilePathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, filePath_);
+      }
+      if (type_ != org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.FILE.getNumber()) {
+        output.writeEnum(3, type_);
+      }
+      if (!getSdfsPathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, sdfsPath_);
+      }
+      if (atime_ != 0L) {
+        output.writeInt64(5, atime_);
+      }
+      if (mtime_ != 0L) {
+        output.writeInt64(6, mtime_);
+      }
+      if (ctime_ != 0L) {
+        output.writeInt64(7, ctime_);
+      }
+      if (hidden_ != false) {
+        output.writeBool(8, hidden_);
+      }
+      if (size_ != 0L) {
+        output.writeInt64(9, size_);
+      }
+      if (open_ != false) {
+        output.writeBool(10, open_);
+      }
+      if (!getFileGuildBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, fileGuild_);
+      }
+      if (!getMapGuidBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, mapGuid_);
+      }
+      if (localOwner_ != false) {
+        output.writeBool(13, localOwner_);
+      }
+      if (execute_ != false) {
+        output.writeBool(14, execute_);
+      }
+      if (read_ != false) {
+        output.writeBool(15, read_);
+      }
+      if (write_ != false) {
+        output.writeBool(16, write_);
+      }
+      if (importing_ != false) {
+        output.writeBool(17, importing_);
+      }
+      if (symlink_ != false) {
+        output.writeBool(18, symlink_);
+      }
+      for (int i = 0; i < fileAttributes_.size(); i++) {
+        output.writeMessage(19, fileAttributes_.get(i));
+      }
+      if (!getIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 20, id_);
+      }
+      for (int i = 0; i < files_.size(); i++) {
+        output.writeMessage(21, files_.get(i));
+      }
+      if (!getParentPathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 22, parentPath_);
+      }
+      if (!getVolumeidBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 23, volumeid_);
+      }
+      if (ioMonitor_ != null) {
+        output.writeMessage(24, getIoMonitor());
+      }
+      if (!getSymlinkPathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 25, symlinkPath_);
+      }
+      if (groupId_ != 0L) {
+        output.writeInt64(26, groupId_);
+      }
+      if (userId_ != 0L) {
+        output.writeInt64(27, userId_);
+      }
+      if (permissions_ != 0) {
+        output.writeInt32(28, permissions_);
+      }
+      if (hashcode_ != 0L) {
+        output.writeInt64(29, hashcode_);
+      }
+      if (retentionLock_ != 0L) {
+        output.writeInt64(30, retentionLock_);
+      }
+      if (attributes_ != 0L) {
+        output.writeInt64(31, attributes_);
+      }
+      if (!getVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 32, version_);
+      }
+      if (mode_ != 0) {
+        output.writeInt32(33, mode_);
+      }
+      if (deleteOnClose_ != false) {
+        output.writeBool(34, deleteOnClose_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getFileNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, fileName_);
+      }
+      if (!getFilePathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, filePath_);
+      }
+      if (type_ != org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.FILE.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, type_);
+      }
+      if (!getSdfsPathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, sdfsPath_);
+      }
+      if (atime_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, atime_);
+      }
+      if (mtime_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(6, mtime_);
+      }
+      if (ctime_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(7, ctime_);
+      }
+      if (hidden_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(8, hidden_);
+      }
+      if (size_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(9, size_);
+      }
+      if (open_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(10, open_);
+      }
+      if (!getFileGuildBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, fileGuild_);
+      }
+      if (!getMapGuidBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, mapGuid_);
+      }
+      if (localOwner_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(13, localOwner_);
+      }
+      if (execute_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(14, execute_);
+      }
+      if (read_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(15, read_);
+      }
+      if (write_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(16, write_);
+      }
+      if (importing_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(17, importing_);
+      }
+      if (symlink_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(18, symlink_);
+      }
+      for (int i = 0; i < fileAttributes_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(19, fileAttributes_.get(i));
+      }
+      if (!getIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(20, id_);
+      }
+      for (int i = 0; i < files_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(21, files_.get(i));
+      }
+      if (!getParentPathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(22, parentPath_);
+      }
+      if (!getVolumeidBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, volumeid_);
+      }
+      if (ioMonitor_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(24, getIoMonitor());
+      }
+      if (!getSymlinkPathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(25, symlinkPath_);
+      }
+      if (groupId_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(26, groupId_);
+      }
+      if (userId_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(27, userId_);
+      }
+      if (permissions_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(28, permissions_);
+      }
+      if (hashcode_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(29, hashcode_);
+      }
+      if (retentionLock_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(30, retentionLock_);
+      }
+      if (attributes_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(31, attributes_);
+      }
+      if (!getVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, version_);
+      }
+      if (mode_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(33, mode_);
+      }
+      if (deleteOnClose_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(34, deleteOnClose_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.FileInfo.FileInfoResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.FileInfo.FileInfoResponse other = (org.opendedup.grpc.FileInfo.FileInfoResponse) obj;
+
+      if (!getFileName()
+          .equals(other.getFileName())) return false;
+      if (!getFilePath()
+          .equals(other.getFilePath())) return false;
+      if (type_ != other.type_) return false;
+      if (!getSdfsPath()
+          .equals(other.getSdfsPath())) return false;
+      if (getAtime()
+          != other.getAtime()) return false;
+      if (getMtime()
+          != other.getMtime()) return false;
+      if (getCtime()
+          != other.getCtime()) return false;
+      if (getHidden()
+          != other.getHidden()) return false;
+      if (getSize()
+          != other.getSize()) return false;
+      if (getOpen()
+          != other.getOpen()) return false;
+      if (!getFileGuild()
+          .equals(other.getFileGuild())) return false;
+      if (!getMapGuid()
+          .equals(other.getMapGuid())) return false;
+      if (getLocalOwner()
+          != other.getLocalOwner()) return false;
+      if (getExecute()
+          != other.getExecute()) return false;
+      if (getRead()
+          != other.getRead()) return false;
+      if (getWrite()
+          != other.getWrite()) return false;
+      if (getImporting()
+          != other.getImporting()) return false;
+      if (getSymlink()
+          != other.getSymlink()) return false;
+      if (!getFileAttributesList()
+          .equals(other.getFileAttributesList())) return false;
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (!getFilesList()
+          .equals(other.getFilesList())) return false;
+      if (!getParentPath()
+          .equals(other.getParentPath())) return false;
+      if (!getVolumeid()
+          .equals(other.getVolumeid())) return false;
+      if (hasIoMonitor() != other.hasIoMonitor()) return false;
+      if (hasIoMonitor()) {
+        if (!getIoMonitor()
+            .equals(other.getIoMonitor())) return false;
+      }
+      if (!getSymlinkPath()
+          .equals(other.getSymlinkPath())) return false;
+      if (getGroupId()
+          != other.getGroupId()) return false;
+      if (getUserId()
+          != other.getUserId()) return false;
+      if (getPermissions()
+          != other.getPermissions()) return false;
+      if (getHashcode()
+          != other.getHashcode()) return false;
+      if (getRetentionLock()
+          != other.getRetentionLock()) return false;
+      if (getAttributes()
+          != other.getAttributes()) return false;
+      if (!getVersion()
+          .equals(other.getVersion())) return false;
+      if (getMode()
+          != other.getMode()) return false;
+      if (getDeleteOnClose()
+          != other.getDeleteOnClose()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + FILENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getFileName().hashCode();
+      hash = (37 * hash) + FILEPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getFilePath().hashCode();
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + type_;
+      hash = (37 * hash) + SDFSPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getSdfsPath().hashCode();
+      hash = (37 * hash) + ATIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getAtime());
+      hash = (37 * hash) + MTIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMtime());
+      hash = (37 * hash) + CTIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getCtime());
+      hash = (37 * hash) + HIDDEN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getHidden());
+      hash = (37 * hash) + SIZE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getSize());
+      hash = (37 * hash) + OPEN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getOpen());
+      hash = (37 * hash) + FILEGUILD_FIELD_NUMBER;
+      hash = (53 * hash) + getFileGuild().hashCode();
+      hash = (37 * hash) + MAPGUID_FIELD_NUMBER;
+      hash = (53 * hash) + getMapGuid().hashCode();
+      hash = (37 * hash) + LOCALOWNER_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getLocalOwner());
+      hash = (37 * hash) + EXECUTE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getExecute());
+      hash = (37 * hash) + READ_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRead());
+      hash = (37 * hash) + WRITE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getWrite());
+      hash = (37 * hash) + IMPORTING_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getImporting());
+      hash = (37 * hash) + SYMLINK_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSymlink());
+      if (getFileAttributesCount() > 0) {
+        hash = (37 * hash) + FILEATTRIBUTES_FIELD_NUMBER;
+        hash = (53 * hash) + getFileAttributesList().hashCode();
+      }
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId().hashCode();
+      if (getFilesCount() > 0) {
+        hash = (37 * hash) + FILES_FIELD_NUMBER;
+        hash = (53 * hash) + getFilesList().hashCode();
+      }
+      hash = (37 * hash) + PARENTPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getParentPath().hashCode();
+      hash = (37 * hash) + VOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + getVolumeid().hashCode();
+      if (hasIoMonitor()) {
+        hash = (37 * hash) + IOMONITOR_FIELD_NUMBER;
+        hash = (53 * hash) + getIoMonitor().hashCode();
+      }
+      hash = (37 * hash) + SYMLINKPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getSymlinkPath().hashCode();
+      hash = (37 * hash) + GROUP_ID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getGroupId());
+      hash = (37 * hash) + USER_ID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getUserId());
+      hash = (37 * hash) + PERMISSIONS_FIELD_NUMBER;
+      hash = (53 * hash) + getPermissions();
+      hash = (37 * hash) + HASHCODE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getHashcode());
+      hash = (37 * hash) + RETENTIONLOCK_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getRetentionLock());
+      hash = (37 * hash) + ATTRIBUTES_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getAttributes());
+      hash = (37 * hash) + VERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getVersion().hashCode();
+      hash = (37 * hash) + MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getMode();
+      hash = (37 * hash) + DELETE_ON_CLOSE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getDeleteOnClose());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.FileInfo.FileInfoResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.FileInfoResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.FileInfoResponse)
+        org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.FileInfo.FileInfoResponse.class, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.FileInfo.FileInfoResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getFileAttributesFieldBuilder();
+          getFilesFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        fileName_ = "";
+
+        filePath_ = "";
+
+        type_ = 0;
+
+        sdfsPath_ = "";
+
+        atime_ = 0L;
+
+        mtime_ = 0L;
+
+        ctime_ = 0L;
+
+        hidden_ = false;
+
+        size_ = 0L;
+
+        open_ = false;
+
+        fileGuild_ = "";
+
+        mapGuid_ = "";
+
+        localOwner_ = false;
+
+        execute_ = false;
+
+        read_ = false;
+
+        write_ = false;
+
+        importing_ = false;
+
+        symlink_ = false;
+
+        if (fileAttributesBuilder_ == null) {
+          fileAttributes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          fileAttributesBuilder_.clear();
+        }
+        id_ = "";
+
+        if (filesBuilder_ == null) {
+          files_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+        } else {
+          filesBuilder_.clear();
+        }
+        parentPath_ = "";
+
+        volumeid_ = "";
+
+        if (ioMonitorBuilder_ == null) {
+          ioMonitor_ = null;
+        } else {
+          ioMonitor_ = null;
+          ioMonitorBuilder_ = null;
+        }
+        symlinkPath_ = "";
+
+        groupId_ = 0L;
+
+        userId_ = 0L;
+
+        permissions_ = 0;
+
+        hashcode_ = 0L;
+
+        retentionLock_ = 0L;
+
+        attributes_ = 0L;
+
+        version_ = "";
+
+        mode_ = 0;
+
+        deleteOnClose_ = false;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileInfoResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileInfoResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.FileInfo.FileInfoResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileInfoResponse build() {
+        org.opendedup.grpc.FileInfo.FileInfoResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileInfoResponse buildPartial() {
+        org.opendedup.grpc.FileInfo.FileInfoResponse result = new org.opendedup.grpc.FileInfo.FileInfoResponse(this);
+        int from_bitField0_ = bitField0_;
+        result.fileName_ = fileName_;
+        result.filePath_ = filePath_;
+        result.type_ = type_;
+        result.sdfsPath_ = sdfsPath_;
+        result.atime_ = atime_;
+        result.mtime_ = mtime_;
+        result.ctime_ = ctime_;
+        result.hidden_ = hidden_;
+        result.size_ = size_;
+        result.open_ = open_;
+        result.fileGuild_ = fileGuild_;
+        result.mapGuid_ = mapGuid_;
+        result.localOwner_ = localOwner_;
+        result.execute_ = execute_;
+        result.read_ = read_;
+        result.write_ = write_;
+        result.importing_ = importing_;
+        result.symlink_ = symlink_;
+        if (fileAttributesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.fileAttributes_ = fileAttributes_;
+        } else {
+          result.fileAttributes_ = fileAttributesBuilder_.build();
+        }
+        result.id_ = id_;
+        if (filesBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            files_ = java.util.Collections.unmodifiableList(files_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.files_ = files_;
+        } else {
+          result.files_ = filesBuilder_.build();
+        }
+        result.parentPath_ = parentPath_;
+        result.volumeid_ = volumeid_;
+        if (ioMonitorBuilder_ == null) {
+          result.ioMonitor_ = ioMonitor_;
+        } else {
+          result.ioMonitor_ = ioMonitorBuilder_.build();
+        }
+        result.symlinkPath_ = symlinkPath_;
+        result.groupId_ = groupId_;
+        result.userId_ = userId_;
+        result.permissions_ = permissions_;
+        result.hashcode_ = hashcode_;
+        result.retentionLock_ = retentionLock_;
+        result.attributes_ = attributes_;
+        result.version_ = version_;
+        result.mode_ = mode_;
+        result.deleteOnClose_ = deleteOnClose_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.FileInfo.FileInfoResponse) {
+          return mergeFrom((org.opendedup.grpc.FileInfo.FileInfoResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.FileInfo.FileInfoResponse other) {
+        if (other == org.opendedup.grpc.FileInfo.FileInfoResponse.getDefaultInstance()) return this;
+        if (!other.getFileName().isEmpty()) {
+          fileName_ = other.fileName_;
+          onChanged();
+        }
+        if (!other.getFilePath().isEmpty()) {
+          filePath_ = other.filePath_;
+          onChanged();
+        }
+        if (other.type_ != 0) {
+          setTypeValue(other.getTypeValue());
+        }
+        if (!other.getSdfsPath().isEmpty()) {
+          sdfsPath_ = other.sdfsPath_;
+          onChanged();
+        }
+        if (other.getAtime() != 0L) {
+          setAtime(other.getAtime());
+        }
+        if (other.getMtime() != 0L) {
+          setMtime(other.getMtime());
+        }
+        if (other.getCtime() != 0L) {
+          setCtime(other.getCtime());
+        }
+        if (other.getHidden() != false) {
+          setHidden(other.getHidden());
+        }
+        if (other.getSize() != 0L) {
+          setSize(other.getSize());
+        }
+        if (other.getOpen() != false) {
+          setOpen(other.getOpen());
+        }
+        if (!other.getFileGuild().isEmpty()) {
+          fileGuild_ = other.fileGuild_;
+          onChanged();
+        }
+        if (!other.getMapGuid().isEmpty()) {
+          mapGuid_ = other.mapGuid_;
+          onChanged();
+        }
+        if (other.getLocalOwner() != false) {
+          setLocalOwner(other.getLocalOwner());
+        }
+        if (other.getExecute() != false) {
+          setExecute(other.getExecute());
+        }
+        if (other.getRead() != false) {
+          setRead(other.getRead());
+        }
+        if (other.getWrite() != false) {
+          setWrite(other.getWrite());
+        }
+        if (other.getImporting() != false) {
+          setImporting(other.getImporting());
+        }
+        if (other.getSymlink() != false) {
+          setSymlink(other.getSymlink());
+        }
+        if (fileAttributesBuilder_ == null) {
+          if (!other.fileAttributes_.isEmpty()) {
+            if (fileAttributes_.isEmpty()) {
+              fileAttributes_ = other.fileAttributes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureFileAttributesIsMutable();
+              fileAttributes_.addAll(other.fileAttributes_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.fileAttributes_.isEmpty()) {
+            if (fileAttributesBuilder_.isEmpty()) {
+              fileAttributesBuilder_.dispose();
+              fileAttributesBuilder_ = null;
+              fileAttributes_ = other.fileAttributes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              fileAttributesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getFileAttributesFieldBuilder() : null;
+            } else {
+              fileAttributesBuilder_.addAllMessages(other.fileAttributes_);
+            }
+          }
+        }
+        if (!other.getId().isEmpty()) {
+          id_ = other.id_;
+          onChanged();
+        }
+        if (filesBuilder_ == null) {
+          if (!other.files_.isEmpty()) {
+            if (files_.isEmpty()) {
+              files_ = other.files_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureFilesIsMutable();
+              files_.addAll(other.files_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.files_.isEmpty()) {
+            if (filesBuilder_.isEmpty()) {
+              filesBuilder_.dispose();
+              filesBuilder_ = null;
+              files_ = other.files_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              filesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getFilesFieldBuilder() : null;
+            } else {
+              filesBuilder_.addAllMessages(other.files_);
+            }
+          }
+        }
+        if (!other.getParentPath().isEmpty()) {
+          parentPath_ = other.parentPath_;
+          onChanged();
+        }
+        if (!other.getVolumeid().isEmpty()) {
+          volumeid_ = other.volumeid_;
+          onChanged();
+        }
+        if (other.hasIoMonitor()) {
+          mergeIoMonitor(other.getIoMonitor());
+        }
+        if (!other.getSymlinkPath().isEmpty()) {
+          symlinkPath_ = other.symlinkPath_;
+          onChanged();
+        }
+        if (other.getGroupId() != 0L) {
+          setGroupId(other.getGroupId());
+        }
+        if (other.getUserId() != 0L) {
+          setUserId(other.getUserId());
+        }
+        if (other.getPermissions() != 0) {
+          setPermissions(other.getPermissions());
+        }
+        if (other.getHashcode() != 0L) {
+          setHashcode(other.getHashcode());
+        }
+        if (other.getRetentionLock() != 0L) {
+          setRetentionLock(other.getRetentionLock());
+        }
+        if (other.getAttributes() != 0L) {
+          setAttributes(other.getAttributes());
+        }
+        if (!other.getVersion().isEmpty()) {
+          version_ = other.version_;
+          onChanged();
+        }
+        if (other.getMode() != 0) {
+          setMode(other.getMode());
+        }
+        if (other.getDeleteOnClose() != false) {
+          setDeleteOnClose(other.getDeleteOnClose());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.FileInfo.FileInfoResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.FileInfo.FileInfoResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object fileName_ = "";
+      /**
+       * <code>string fileName = 1;</code>
+       * @return The fileName.
+       */
+      public java.lang.String getFileName() {
+        java.lang.Object ref = fileName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fileName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string fileName = 1;</code>
+       * @return The bytes for fileName.
+       */
+      public com.google.protobuf.ByteString
+          getFileNameBytes() {
+        java.lang.Object ref = fileName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fileName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string fileName = 1;</code>
+       * @param value The fileName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        fileName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string fileName = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileName() {
+        
+        fileName_ = getDefaultInstance().getFileName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string fileName = 1;</code>
+       * @param value The bytes for fileName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        fileName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object filePath_ = "";
+      /**
+       * <code>string filePath = 2;</code>
+       * @return The filePath.
+       */
+      public java.lang.String getFilePath() {
+        java.lang.Object ref = filePath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          filePath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string filePath = 2;</code>
+       * @return The bytes for filePath.
+       */
+      public com.google.protobuf.ByteString
+          getFilePathBytes() {
+        java.lang.Object ref = filePath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          filePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string filePath = 2;</code>
+       * @param value The filePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFilePath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        filePath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filePath = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFilePath() {
+        
+        filePath_ = getDefaultInstance().getFilePath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filePath = 2;</code>
+       * @param value The bytes for filePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFilePathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        filePath_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int type_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @return The enum numeric value on the wire for type.
+       */
+      @java.lang.Override public int getTypeValue() {
+        return type_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @param value The enum numeric value on the wire for type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTypeValue(int value) {
+        
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @return The type.
+       */
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileInfoResponse.fileType getType() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.FileInfoResponse.fileType result = org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.valueOf(type_);
+        return result == null ? org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setType(org.opendedup.grpc.FileInfo.FileInfoResponse.fileType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        type_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearType() {
+        
+        type_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object sdfsPath_ = "";
+      /**
+       * <code>string sdfsPath = 4;</code>
+       * @return The sdfsPath.
+       */
+      public java.lang.String getSdfsPath() {
+        java.lang.Object ref = sdfsPath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          sdfsPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string sdfsPath = 4;</code>
+       * @return The bytes for sdfsPath.
+       */
+      public com.google.protobuf.ByteString
+          getSdfsPathBytes() {
+        java.lang.Object ref = sdfsPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          sdfsPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string sdfsPath = 4;</code>
+       * @param value The sdfsPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSdfsPath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        sdfsPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string sdfsPath = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSdfsPath() {
+        
+        sdfsPath_ = getDefaultInstance().getSdfsPath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string sdfsPath = 4;</code>
+       * @param value The bytes for sdfsPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSdfsPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        sdfsPath_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long atime_ ;
+      /**
+       * <code>int64 atime = 5;</code>
+       * @return The atime.
+       */
+      @java.lang.Override
+      public long getAtime() {
+        return atime_;
+      }
+      /**
+       * <code>int64 atime = 5;</code>
+       * @param value The atime to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAtime(long value) {
+        
+        atime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 atime = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAtime() {
+        
+        atime_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long mtime_ ;
+      /**
+       * <code>int64 mtime = 6;</code>
+       * @return The mtime.
+       */
+      @java.lang.Override
+      public long getMtime() {
+        return mtime_;
+      }
+      /**
+       * <code>int64 mtime = 6;</code>
+       * @param value The mtime to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMtime(long value) {
+        
+        mtime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 mtime = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMtime() {
+        
+        mtime_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long ctime_ ;
+      /**
+       * <code>int64 ctime = 7;</code>
+       * @return The ctime.
+       */
+      @java.lang.Override
+      public long getCtime() {
+        return ctime_;
+      }
+      /**
+       * <code>int64 ctime = 7;</code>
+       * @param value The ctime to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCtime(long value) {
+        
+        ctime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 ctime = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCtime() {
+        
+        ctime_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private boolean hidden_ ;
+      /**
+       * <code>bool hidden = 8;</code>
+       * @return The hidden.
+       */
+      @java.lang.Override
+      public boolean getHidden() {
+        return hidden_;
+      }
+      /**
+       * <code>bool hidden = 8;</code>
+       * @param value The hidden to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHidden(boolean value) {
+        
+        hidden_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool hidden = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHidden() {
+        
+        hidden_ = false;
+        onChanged();
+        return this;
+      }
+
+      private long size_ ;
+      /**
+       * <code>int64 size = 9;</code>
+       * @return The size.
+       */
+      @java.lang.Override
+      public long getSize() {
+        return size_;
+      }
+      /**
+       * <code>int64 size = 9;</code>
+       * @param value The size to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSize(long value) {
+        
+        size_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 size = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSize() {
+        
+        size_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private boolean open_ ;
+      /**
+       * <code>bool open = 10;</code>
+       * @return The open.
+       */
+      @java.lang.Override
+      public boolean getOpen() {
+        return open_;
+      }
+      /**
+       * <code>bool open = 10;</code>
+       * @param value The open to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOpen(boolean value) {
+        
+        open_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool open = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOpen() {
+        
+        open_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object fileGuild_ = "";
+      /**
+       * <code>string fileGuild = 11;</code>
+       * @return The fileGuild.
+       */
+      public java.lang.String getFileGuild() {
+        java.lang.Object ref = fileGuild_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          fileGuild_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string fileGuild = 11;</code>
+       * @return The bytes for fileGuild.
+       */
+      public com.google.protobuf.ByteString
+          getFileGuildBytes() {
+        java.lang.Object ref = fileGuild_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          fileGuild_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string fileGuild = 11;</code>
+       * @param value The fileGuild to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileGuild(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        fileGuild_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string fileGuild = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFileGuild() {
+        
+        fileGuild_ = getDefaultInstance().getFileGuild();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string fileGuild = 11;</code>
+       * @param value The bytes for fileGuild to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFileGuildBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        fileGuild_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object mapGuid_ = "";
+      /**
+       * <code>string mapGuid = 12;</code>
+       * @return The mapGuid.
+       */
+      public java.lang.String getMapGuid() {
+        java.lang.Object ref = mapGuid_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          mapGuid_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string mapGuid = 12;</code>
+       * @return The bytes for mapGuid.
+       */
+      public com.google.protobuf.ByteString
+          getMapGuidBytes() {
+        java.lang.Object ref = mapGuid_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          mapGuid_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string mapGuid = 12;</code>
+       * @param value The mapGuid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMapGuid(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        mapGuid_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string mapGuid = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMapGuid() {
+        
+        mapGuid_ = getDefaultInstance().getMapGuid();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string mapGuid = 12;</code>
+       * @param value The bytes for mapGuid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMapGuidBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        mapGuid_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean localOwner_ ;
+      /**
+       * <code>bool localOwner = 13;</code>
+       * @return The localOwner.
+       */
+      @java.lang.Override
+      public boolean getLocalOwner() {
+        return localOwner_;
+      }
+      /**
+       * <code>bool localOwner = 13;</code>
+       * @param value The localOwner to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLocalOwner(boolean value) {
+        
+        localOwner_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool localOwner = 13;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLocalOwner() {
+        
+        localOwner_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean execute_ ;
+      /**
+       * <code>bool execute = 14;</code>
+       * @return The execute.
+       */
+      @java.lang.Override
+      public boolean getExecute() {
+        return execute_;
+      }
+      /**
+       * <code>bool execute = 14;</code>
+       * @param value The execute to set.
+       * @return This builder for chaining.
+       */
+      public Builder setExecute(boolean value) {
+        
+        execute_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool execute = 14;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearExecute() {
+        
+        execute_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean read_ ;
+      /**
+       * <code>bool read = 15;</code>
+       * @return The read.
+       */
+      @java.lang.Override
+      public boolean getRead() {
+        return read_;
+      }
+      /**
+       * <code>bool read = 15;</code>
+       * @param value The read to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRead(boolean value) {
+        
+        read_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool read = 15;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRead() {
+        
+        read_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean write_ ;
+      /**
+       * <code>bool write = 16;</code>
+       * @return The write.
+       */
+      @java.lang.Override
+      public boolean getWrite() {
+        return write_;
+      }
+      /**
+       * <code>bool write = 16;</code>
+       * @param value The write to set.
+       * @return This builder for chaining.
+       */
+      public Builder setWrite(boolean value) {
+        
+        write_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool write = 16;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearWrite() {
+        
+        write_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean importing_ ;
+      /**
+       * <code>bool importing = 17;</code>
+       * @return The importing.
+       */
+      @java.lang.Override
+      public boolean getImporting() {
+        return importing_;
+      }
+      /**
+       * <code>bool importing = 17;</code>
+       * @param value The importing to set.
+       * @return This builder for chaining.
+       */
+      public Builder setImporting(boolean value) {
+        
+        importing_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool importing = 17;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearImporting() {
+        
+        importing_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean symlink_ ;
+      /**
+       * <code>bool symlink = 18;</code>
+       * @return The symlink.
+       */
+      @java.lang.Override
+      public boolean getSymlink() {
+        return symlink_;
+      }
+      /**
+       * <code>bool symlink = 18;</code>
+       * @param value The symlink to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSymlink(boolean value) {
+        
+        symlink_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool symlink = 18;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSymlink() {
+        
+        symlink_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_ =
+        java.util.Collections.emptyList();
+      private void ensureFileAttributesIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>(fileAttributes_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> fileAttributesBuilder_;
+
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> getFileAttributesList() {
+        if (fileAttributesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(fileAttributes_);
+        } else {
+          return fileAttributesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public int getFileAttributesCount() {
+        if (fileAttributesBuilder_ == null) {
+          return fileAttributes_.size();
+        } else {
+          return fileAttributesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index) {
+        if (fileAttributesBuilder_ == null) {
+          return fileAttributes_.get(index);
+        } else {
+          return fileAttributesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public Builder setFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes value) {
+        if (fileAttributesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileAttributesIsMutable();
+          fileAttributes_.set(index, value);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public Builder setFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes.Builder builderForValue) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          fileAttributesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public Builder addFileAttributes(org.opendedup.grpc.FileInfo.FileAttributes value) {
+        if (fileAttributesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(value);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public Builder addFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes value) {
+        if (fileAttributesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(index, value);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public Builder addFileAttributes(
+          org.opendedup.grpc.FileInfo.FileAttributes.Builder builderForValue) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(builderForValue.build());
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public Builder addFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes.Builder builderForValue) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public Builder addAllFileAttributes(
+          java.lang.Iterable<? extends org.opendedup.grpc.FileInfo.FileAttributes> values) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, fileAttributes_);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public Builder clearFileAttributes() {
+        if (fileAttributesBuilder_ == null) {
+          fileAttributes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public Builder removeFileAttributes(int index) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.remove(index);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes.Builder getFileAttributesBuilder(
+          int index) {
+        return getFileAttributesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
+          int index) {
+        if (fileAttributesBuilder_ == null) {
+          return fileAttributes_.get(index);  } else {
+          return fileAttributesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+           getFileAttributesOrBuilderList() {
+        if (fileAttributesBuilder_ != null) {
+          return fileAttributesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(fileAttributes_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes.Builder addFileAttributesBuilder() {
+        return getFileAttributesFieldBuilder().addBuilder(
+            org.opendedup.grpc.FileInfo.FileAttributes.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes.Builder addFileAttributesBuilder(
+          int index) {
+        return getFileAttributesFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.FileInfo.FileAttributes.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes.Builder> 
+           getFileAttributesBuilderList() {
+        return getFileAttributesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+          getFileAttributesFieldBuilder() {
+        if (fileAttributesBuilder_ == null) {
+          fileAttributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder>(
+                  fileAttributes_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          fileAttributes_ = null;
+        }
+        return fileAttributesBuilder_;
+      }
+
+      private java.lang.Object id_ = "";
+      /**
+       * <code>string id = 20;</code>
+       * @return The id.
+       */
+      public java.lang.String getId() {
+        java.lang.Object ref = id_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          id_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string id = 20;</code>
+       * @return The bytes for id.
+       */
+      public com.google.protobuf.ByteString
+          getIdBytes() {
+        java.lang.Object ref = id_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          id_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string id = 20;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string id = 20;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        
+        id_ = getDefaultInstance().getId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string id = 20;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        id_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> files_ =
+        java.util.Collections.emptyList();
+      private void ensureFilesIsMutable() {
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          files_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileInfoResponse>(files_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> filesBuilder_;
+
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> getFilesList() {
+        if (filesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(files_);
+        } else {
+          return filesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public int getFilesCount() {
+        if (filesBuilder_ == null) {
+          return files_.size();
+        } else {
+          return filesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponse getFiles(int index) {
+        if (filesBuilder_ == null) {
+          return files_.get(index);
+        } else {
+          return filesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public Builder setFiles(
+          int index, org.opendedup.grpc.FileInfo.FileInfoResponse value) {
+        if (filesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFilesIsMutable();
+          files_.set(index, value);
+          onChanged();
+        } else {
+          filesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public Builder setFiles(
+          int index, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder builderForValue) {
+        if (filesBuilder_ == null) {
+          ensureFilesIsMutable();
+          files_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          filesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public Builder addFiles(org.opendedup.grpc.FileInfo.FileInfoResponse value) {
+        if (filesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFilesIsMutable();
+          files_.add(value);
+          onChanged();
+        } else {
+          filesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public Builder addFiles(
+          int index, org.opendedup.grpc.FileInfo.FileInfoResponse value) {
+        if (filesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFilesIsMutable();
+          files_.add(index, value);
+          onChanged();
+        } else {
+          filesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public Builder addFiles(
+          org.opendedup.grpc.FileInfo.FileInfoResponse.Builder builderForValue) {
+        if (filesBuilder_ == null) {
+          ensureFilesIsMutable();
+          files_.add(builderForValue.build());
+          onChanged();
+        } else {
+          filesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public Builder addFiles(
+          int index, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder builderForValue) {
+        if (filesBuilder_ == null) {
+          ensureFilesIsMutable();
+          files_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          filesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public Builder addAllFiles(
+          java.lang.Iterable<? extends org.opendedup.grpc.FileInfo.FileInfoResponse> values) {
+        if (filesBuilder_ == null) {
+          ensureFilesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, files_);
+          onChanged();
+        } else {
+          filesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public Builder clearFiles() {
+        if (filesBuilder_ == null) {
+          files_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          filesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public Builder removeFiles(int index) {
+        if (filesBuilder_ == null) {
+          ensureFilesIsMutable();
+          files_.remove(index);
+          onChanged();
+        } else {
+          filesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponse.Builder getFilesBuilder(
+          int index) {
+        return getFilesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getFilesOrBuilder(
+          int index) {
+        if (filesBuilder_ == null) {
+          return files_.get(index);  } else {
+          return filesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
+           getFilesOrBuilderList() {
+        if (filesBuilder_ != null) {
+          return filesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(files_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponse.Builder addFilesBuilder() {
+        return getFilesFieldBuilder().addBuilder(
+            org.opendedup.grpc.FileInfo.FileInfoResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileInfoResponse.Builder addFilesBuilder(
+          int index) {
+        return getFilesFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.FileInfo.FileInfoResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse.Builder> 
+           getFilesBuilderList() {
+        return getFilesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
+          getFilesFieldBuilder() {
+        if (filesBuilder_ == null) {
+          filesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder>(
+                  files_,
+                  ((bitField0_ & 0x00000002) != 0),
+                  getParentForChildren(),
+                  isClean());
+          files_ = null;
+        }
+        return filesBuilder_;
+      }
+
+      private java.lang.Object parentPath_ = "";
+      /**
+       * <code>string parentPath = 22;</code>
+       * @return The parentPath.
+       */
+      public java.lang.String getParentPath() {
+        java.lang.Object ref = parentPath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          parentPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string parentPath = 22;</code>
+       * @return The bytes for parentPath.
+       */
+      public com.google.protobuf.ByteString
+          getParentPathBytes() {
+        java.lang.Object ref = parentPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          parentPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string parentPath = 22;</code>
+       * @param value The parentPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentPath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        parentPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string parentPath = 22;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearParentPath() {
+        
+        parentPath_ = getDefaultInstance().getParentPath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string parentPath = 22;</code>
+       * @param value The bytes for parentPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setParentPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        parentPath_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object volumeid_ = "";
+      /**
+       * <code>string volumeid = 23;</code>
+       * @return The volumeid.
+       */
+      public java.lang.String getVolumeid() {
+        java.lang.Object ref = volumeid_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          volumeid_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string volumeid = 23;</code>
+       * @return The bytes for volumeid.
+       */
+      public com.google.protobuf.ByteString
+          getVolumeidBytes() {
+        java.lang.Object ref = volumeid_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          volumeid_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string volumeid = 23;</code>
+       * @param value The volumeid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVolumeid(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        volumeid_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string volumeid = 23;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVolumeid() {
+        
+        volumeid_ = getDefaultInstance().getVolumeid();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string volumeid = 23;</code>
+       * @param value The bytes for volumeid to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVolumeidBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        volumeid_ = value;
+        onChanged();
+        return this;
+      }
+
+      private org.opendedup.grpc.FileInfo.IOMonitorResponse ioMonitor_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.IOMonitorResponse, org.opendedup.grpc.FileInfo.IOMonitorResponse.Builder, org.opendedup.grpc.FileInfo.IOMonitorResponseOrBuilder> ioMonitorBuilder_;
+      /**
+       * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       * @return Whether the ioMonitor field is set.
+       */
+      public boolean hasIoMonitor() {
+        return ioMonitorBuilder_ != null || ioMonitor_ != null;
+      }
+      /**
+       * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       * @return The ioMonitor.
+       */
+      public org.opendedup.grpc.FileInfo.IOMonitorResponse getIoMonitor() {
+        if (ioMonitorBuilder_ == null) {
+          return ioMonitor_ == null ? org.opendedup.grpc.FileInfo.IOMonitorResponse.getDefaultInstance() : ioMonitor_;
+        } else {
+          return ioMonitorBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       */
+      public Builder setIoMonitor(org.opendedup.grpc.FileInfo.IOMonitorResponse value) {
+        if (ioMonitorBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ioMonitor_ = value;
+          onChanged();
+        } else {
+          ioMonitorBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       */
+      public Builder setIoMonitor(
+          org.opendedup.grpc.FileInfo.IOMonitorResponse.Builder builderForValue) {
+        if (ioMonitorBuilder_ == null) {
+          ioMonitor_ = builderForValue.build();
+          onChanged();
+        } else {
+          ioMonitorBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       */
+      public Builder mergeIoMonitor(org.opendedup.grpc.FileInfo.IOMonitorResponse value) {
+        if (ioMonitorBuilder_ == null) {
+          if (ioMonitor_ != null) {
+            ioMonitor_ =
+              org.opendedup.grpc.FileInfo.IOMonitorResponse.newBuilder(ioMonitor_).mergeFrom(value).buildPartial();
+          } else {
+            ioMonitor_ = value;
+          }
+          onChanged();
+        } else {
+          ioMonitorBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       */
+      public Builder clearIoMonitor() {
+        if (ioMonitorBuilder_ == null) {
+          ioMonitor_ = null;
+          onChanged();
+        } else {
+          ioMonitor_ = null;
+          ioMonitorBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       */
+      public org.opendedup.grpc.FileInfo.IOMonitorResponse.Builder getIoMonitorBuilder() {
+        
+        onChanged();
+        return getIoMonitorFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       */
+      public org.opendedup.grpc.FileInfo.IOMonitorResponseOrBuilder getIoMonitorOrBuilder() {
+        if (ioMonitorBuilder_ != null) {
+          return ioMonitorBuilder_.getMessageOrBuilder();
+        } else {
+          return ioMonitor_ == null ?
+              org.opendedup.grpc.FileInfo.IOMonitorResponse.getDefaultInstance() : ioMonitor_;
+        }
+      }
+      /**
+       * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.IOMonitorResponse, org.opendedup.grpc.FileInfo.IOMonitorResponse.Builder, org.opendedup.grpc.FileInfo.IOMonitorResponseOrBuilder> 
+          getIoMonitorFieldBuilder() {
+        if (ioMonitorBuilder_ == null) {
+          ioMonitorBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              org.opendedup.grpc.FileInfo.IOMonitorResponse, org.opendedup.grpc.FileInfo.IOMonitorResponse.Builder, org.opendedup.grpc.FileInfo.IOMonitorResponseOrBuilder>(
+                  getIoMonitor(),
+                  getParentForChildren(),
+                  isClean());
+          ioMonitor_ = null;
+        }
+        return ioMonitorBuilder_;
+      }
+
+      private java.lang.Object symlinkPath_ = "";
+      /**
+       * <code>string symlinkPath = 25;</code>
+       * @return The symlinkPath.
+       */
+      public java.lang.String getSymlinkPath() {
+        java.lang.Object ref = symlinkPath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          symlinkPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string symlinkPath = 25;</code>
+       * @return The bytes for symlinkPath.
+       */
+      public com.google.protobuf.ByteString
+          getSymlinkPathBytes() {
+        java.lang.Object ref = symlinkPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          symlinkPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string symlinkPath = 25;</code>
+       * @param value The symlinkPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSymlinkPath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        symlinkPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string symlinkPath = 25;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSymlinkPath() {
+        
+        symlinkPath_ = getDefaultInstance().getSymlinkPath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string symlinkPath = 25;</code>
+       * @param value The bytes for symlinkPath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSymlinkPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        symlinkPath_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long groupId_ ;
+      /**
+       * <code>int64 group_id = 26;</code>
+       * @return The groupId.
+       */
+      @java.lang.Override
+      public long getGroupId() {
+        return groupId_;
+      }
+      /**
+       * <code>int64 group_id = 26;</code>
+       * @param value The groupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setGroupId(long value) {
+        
+        groupId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 group_id = 26;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearGroupId() {
+        
+        groupId_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long userId_ ;
+      /**
+       * <code>int64 user_id = 27;</code>
+       * @return The userId.
+       */
+      @java.lang.Override
+      public long getUserId() {
+        return userId_;
+      }
+      /**
+       * <code>int64 user_id = 27;</code>
+       * @param value The userId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUserId(long value) {
+        
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 user_id = 27;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUserId() {
+        
+        userId_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private int permissions_ ;
+      /**
+       * <code>int32 permissions = 28;</code>
+       * @return The permissions.
+       */
+      @java.lang.Override
+      public int getPermissions() {
+        return permissions_;
+      }
+      /**
+       * <code>int32 permissions = 28;</code>
+       * @param value The permissions to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPermissions(int value) {
+        
+        permissions_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 permissions = 28;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPermissions() {
+        
+        permissions_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long hashcode_ ;
+      /**
+       * <code>int64 hashcode = 29;</code>
+       * @return The hashcode.
+       */
+      @java.lang.Override
+      public long getHashcode() {
+        return hashcode_;
+      }
+      /**
+       * <code>int64 hashcode = 29;</code>
+       * @param value The hashcode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHashcode(long value) {
+        
+        hashcode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 hashcode = 29;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHashcode() {
+        
+        hashcode_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long retentionLock_ ;
+      /**
+       * <code>int64 retentionLock = 30;</code>
+       * @return The retentionLock.
+       */
+      @java.lang.Override
+      public long getRetentionLock() {
+        return retentionLock_;
+      }
+      /**
+       * <code>int64 retentionLock = 30;</code>
+       * @param value The retentionLock to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRetentionLock(long value) {
+        
+        retentionLock_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 retentionLock = 30;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRetentionLock() {
+        
+        retentionLock_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long attributes_ ;
+      /**
+       * <code>int64 attributes = 31;</code>
+       * @return The attributes.
+       */
+      @java.lang.Override
+      public long getAttributes() {
+        return attributes_;
+      }
+      /**
+       * <code>int64 attributes = 31;</code>
+       * @param value The attributes to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAttributes(long value) {
+        
+        attributes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 attributes = 31;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAttributes() {
+        
+        attributes_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object version_ = "";
+      /**
+       * <code>string version = 32;</code>
+       * @return The version.
+       */
+      public java.lang.String getVersion() {
+        java.lang.Object ref = version_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          version_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string version = 32;</code>
+       * @return The bytes for version.
+       */
+      public com.google.protobuf.ByteString
+          getVersionBytes() {
+        java.lang.Object ref = version_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          version_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string version = 32;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        version_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string version = 32;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVersion() {
+        
+        version_ = getDefaultInstance().getVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string version = 32;</code>
+       * @param value The bytes for version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        version_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int mode_ ;
+      /**
+       * <code>int32 mode = 33;</code>
+       * @return The mode.
+       */
+      @java.lang.Override
+      public int getMode() {
+        return mode_;
+      }
+      /**
+       * <code>int32 mode = 33;</code>
+       * @param value The mode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMode(int value) {
+        
+        mode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 mode = 33;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMode() {
+        
+        mode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean deleteOnClose_ ;
+      /**
+       * <code>bool delete_on_close = 34;</code>
+       * @return The deleteOnClose.
+       */
+      @java.lang.Override
+      public boolean getDeleteOnClose() {
+        return deleteOnClose_;
+      }
+      /**
+       * <code>bool delete_on_close = 34;</code>
+       * @param value The deleteOnClose to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeleteOnClose(boolean value) {
+        
+        deleteOnClose_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool delete_on_close = 34;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDeleteOnClose() {
+        
+        deleteOnClose_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.FileInfoResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.FileInfoResponse)
+    private static final org.opendedup.grpc.FileInfo.FileInfoResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.FileInfo.FileInfoResponse();
+    }
+
+    public static org.opendedup.grpc.FileInfo.FileInfoResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<FileInfoResponse>
+        PARSER = new com.google.protobuf.AbstractParser<FileInfoResponse>() {
+      @java.lang.Override
+      public FileInfoResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FileInfoResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<FileInfoResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FileInfoResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileInfoResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface IOMonitorResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.IOMonitorResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 virtualBytesWritten = 1;</code>
+     * @return The virtualBytesWritten.
+     */
+    long getVirtualBytesWritten();
+
+    /**
+     * <code>int64 actualBytesWritten = 2;</code>
+     * @return The actualBytesWritten.
+     */
+    long getActualBytesWritten();
+
+    /**
+     * <code>int64 bytesRead = 3;</code>
+     * @return The bytesRead.
+     */
+    long getBytesRead();
+
+    /**
+     * <code>int64 duplicateBlocks = 4;</code>
+     * @return The duplicateBlocks.
+     */
+    long getDuplicateBlocks();
+
+    /**
+     * <code>int64 writeOpts = 5;</code>
+     * @return The writeOpts.
+     */
+    long getWriteOpts();
+
+    /**
+     * <code>int64 readOpts = 6;</code>
+     * @return The readOpts.
+     */
+    long getReadOpts();
+
+    /**
+     * <code>int64 maxReadOps = 7;</code>
+     * @return The maxReadOps.
+     */
+    long getMaxReadOps();
+
+    /**
+     * <code>int64 maxWriteOps = 8;</code>
+     * @return The maxWriteOps.
+     */
+    long getMaxWriteOps();
+
+    /**
+     * <code>int64 maxIops = 9;</code>
+     * @return The maxIops.
+     */
+    long getMaxIops();
+
+    /**
+     * <code>int64 maxReadMbps = 10;</code>
+     * @return The maxReadMbps.
+     */
+    long getMaxReadMbps();
+
+    /**
+     * <code>int64 maxWriteMbps = 11;</code>
+     * @return The maxWriteMbps.
+     */
+    long getMaxWriteMbps();
+
+    /**
+     * <code>int64 maxMbps = 12;</code>
+     * @return The maxMbps.
+     */
+    long getMaxMbps();
+
+    /**
+     * <code>int32 ioQos = 13;</code>
+     * @return The ioQos.
+     */
+    int getIoQos();
+
+    /**
+     * <code>string ioProfile = 14;</code>
+     * @return The ioProfile.
+     */
+    java.lang.String getIoProfile();
+    /**
+     * <code>string ioProfile = 14;</code>
+     * @return The bytes for ioProfile.
+     */
+    com.google.protobuf.ByteString
+        getIoProfileBytes();
+
+    /**
+     * <code>int64 maxRbps = 15;</code>
+     * @return The maxRbps.
+     */
+    long getMaxRbps();
+
+    /**
+     * <code>int64 maxWbps = 16;</code>
+     * @return The maxWbps.
+     */
+    long getMaxWbps();
+
+    /**
+     * <code>int64 maxBps = 17;</code>
+     * @return The maxBps.
+     */
+    long getMaxBps();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.IOMonitorResponse}
+   */
+  public static final class IOMonitorResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.IOMonitorResponse)
+      IOMonitorResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use IOMonitorResponse.newBuilder() to construct.
+    private IOMonitorResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private IOMonitorResponse() {
+      ioProfile_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new IOMonitorResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private IOMonitorResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              virtualBytesWritten_ = input.readInt64();
+              break;
+            }
+            case 16: {
+
+              actualBytesWritten_ = input.readInt64();
+              break;
+            }
+            case 24: {
+
+              bytesRead_ = input.readInt64();
+              break;
+            }
+            case 32: {
+
+              duplicateBlocks_ = input.readInt64();
+              break;
+            }
+            case 40: {
+
+              writeOpts_ = input.readInt64();
+              break;
+            }
+            case 48: {
+
+              readOpts_ = input.readInt64();
+              break;
+            }
+            case 56: {
+
+              maxReadOps_ = input.readInt64();
+              break;
+            }
+            case 64: {
+
+              maxWriteOps_ = input.readInt64();
+              break;
+            }
+            case 72: {
+
+              maxIops_ = input.readInt64();
+              break;
+            }
+            case 80: {
+
+              maxReadMbps_ = input.readInt64();
+              break;
+            }
+            case 88: {
+
+              maxWriteMbps_ = input.readInt64();
+              break;
+            }
+            case 96: {
+
+              maxMbps_ = input.readInt64();
+              break;
+            }
+            case 104: {
+
+              ioQos_ = input.readInt32();
+              break;
+            }
+            case 114: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              ioProfile_ = s;
+              break;
+            }
+            case 120: {
+
+              maxRbps_ = input.readInt64();
+              break;
+            }
+            case 128: {
+
+              maxWbps_ = input.readInt64();
+              break;
+            }
+            case 136: {
+
+              maxBps_ = input.readInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_IOMonitorResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_IOMonitorResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.FileInfo.IOMonitorResponse.class, org.opendedup.grpc.FileInfo.IOMonitorResponse.Builder.class);
+    }
+
+    public static final int VIRTUALBYTESWRITTEN_FIELD_NUMBER = 1;
+    private long virtualBytesWritten_;
+    /**
+     * <code>int64 virtualBytesWritten = 1;</code>
+     * @return The virtualBytesWritten.
+     */
+    @java.lang.Override
+    public long getVirtualBytesWritten() {
+      return virtualBytesWritten_;
+    }
+
+    public static final int ACTUALBYTESWRITTEN_FIELD_NUMBER = 2;
+    private long actualBytesWritten_;
+    /**
+     * <code>int64 actualBytesWritten = 2;</code>
+     * @return The actualBytesWritten.
+     */
+    @java.lang.Override
+    public long getActualBytesWritten() {
+      return actualBytesWritten_;
+    }
+
+    public static final int BYTESREAD_FIELD_NUMBER = 3;
+    private long bytesRead_;
+    /**
+     * <code>int64 bytesRead = 3;</code>
+     * @return The bytesRead.
+     */
+    @java.lang.Override
+    public long getBytesRead() {
+      return bytesRead_;
+    }
+
+    public static final int DUPLICATEBLOCKS_FIELD_NUMBER = 4;
+    private long duplicateBlocks_;
+    /**
+     * <code>int64 duplicateBlocks = 4;</code>
+     * @return The duplicateBlocks.
+     */
+    @java.lang.Override
+    public long getDuplicateBlocks() {
+      return duplicateBlocks_;
+    }
+
+    public static final int WRITEOPTS_FIELD_NUMBER = 5;
+    private long writeOpts_;
+    /**
+     * <code>int64 writeOpts = 5;</code>
+     * @return The writeOpts.
+     */
+    @java.lang.Override
+    public long getWriteOpts() {
+      return writeOpts_;
+    }
+
+    public static final int READOPTS_FIELD_NUMBER = 6;
+    private long readOpts_;
+    /**
+     * <code>int64 readOpts = 6;</code>
+     * @return The readOpts.
+     */
+    @java.lang.Override
+    public long getReadOpts() {
+      return readOpts_;
+    }
+
+    public static final int MAXREADOPS_FIELD_NUMBER = 7;
+    private long maxReadOps_;
+    /**
+     * <code>int64 maxReadOps = 7;</code>
+     * @return The maxReadOps.
+     */
+    @java.lang.Override
+    public long getMaxReadOps() {
+      return maxReadOps_;
+    }
+
+    public static final int MAXWRITEOPS_FIELD_NUMBER = 8;
+    private long maxWriteOps_;
+    /**
+     * <code>int64 maxWriteOps = 8;</code>
+     * @return The maxWriteOps.
+     */
+    @java.lang.Override
+    public long getMaxWriteOps() {
+      return maxWriteOps_;
+    }
+
+    public static final int MAXIOPS_FIELD_NUMBER = 9;
+    private long maxIops_;
+    /**
+     * <code>int64 maxIops = 9;</code>
+     * @return The maxIops.
+     */
+    @java.lang.Override
+    public long getMaxIops() {
+      return maxIops_;
+    }
+
+    public static final int MAXREADMBPS_FIELD_NUMBER = 10;
+    private long maxReadMbps_;
+    /**
+     * <code>int64 maxReadMbps = 10;</code>
+     * @return The maxReadMbps.
+     */
+    @java.lang.Override
+    public long getMaxReadMbps() {
+      return maxReadMbps_;
+    }
+
+    public static final int MAXWRITEMBPS_FIELD_NUMBER = 11;
+    private long maxWriteMbps_;
+    /**
+     * <code>int64 maxWriteMbps = 11;</code>
+     * @return The maxWriteMbps.
+     */
+    @java.lang.Override
+    public long getMaxWriteMbps() {
+      return maxWriteMbps_;
+    }
+
+    public static final int MAXMBPS_FIELD_NUMBER = 12;
+    private long maxMbps_;
+    /**
+     * <code>int64 maxMbps = 12;</code>
+     * @return The maxMbps.
+     */
+    @java.lang.Override
+    public long getMaxMbps() {
+      return maxMbps_;
+    }
+
+    public static final int IOQOS_FIELD_NUMBER = 13;
+    private int ioQos_;
+    /**
+     * <code>int32 ioQos = 13;</code>
+     * @return The ioQos.
+     */
+    @java.lang.Override
+    public int getIoQos() {
+      return ioQos_;
+    }
+
+    public static final int IOPROFILE_FIELD_NUMBER = 14;
+    private volatile java.lang.Object ioProfile_;
+    /**
+     * <code>string ioProfile = 14;</code>
+     * @return The ioProfile.
+     */
+    @java.lang.Override
+    public java.lang.String getIoProfile() {
+      java.lang.Object ref = ioProfile_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        ioProfile_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string ioProfile = 14;</code>
+     * @return The bytes for ioProfile.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getIoProfileBytes() {
+      java.lang.Object ref = ioProfile_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        ioProfile_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MAXRBPS_FIELD_NUMBER = 15;
+    private long maxRbps_;
+    /**
+     * <code>int64 maxRbps = 15;</code>
+     * @return The maxRbps.
+     */
+    @java.lang.Override
+    public long getMaxRbps() {
+      return maxRbps_;
+    }
+
+    public static final int MAXWBPS_FIELD_NUMBER = 16;
+    private long maxWbps_;
+    /**
+     * <code>int64 maxWbps = 16;</code>
+     * @return The maxWbps.
+     */
+    @java.lang.Override
+    public long getMaxWbps() {
+      return maxWbps_;
+    }
+
+    public static final int MAXBPS_FIELD_NUMBER = 17;
+    private long maxBps_;
+    /**
+     * <code>int64 maxBps = 17;</code>
+     * @return The maxBps.
+     */
+    @java.lang.Override
+    public long getMaxBps() {
+      return maxBps_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (virtualBytesWritten_ != 0L) {
+        output.writeInt64(1, virtualBytesWritten_);
+      }
+      if (actualBytesWritten_ != 0L) {
+        output.writeInt64(2, actualBytesWritten_);
+      }
+      if (bytesRead_ != 0L) {
+        output.writeInt64(3, bytesRead_);
+      }
+      if (duplicateBlocks_ != 0L) {
+        output.writeInt64(4, duplicateBlocks_);
+      }
+      if (writeOpts_ != 0L) {
+        output.writeInt64(5, writeOpts_);
+      }
+      if (readOpts_ != 0L) {
+        output.writeInt64(6, readOpts_);
+      }
+      if (maxReadOps_ != 0L) {
+        output.writeInt64(7, maxReadOps_);
+      }
+      if (maxWriteOps_ != 0L) {
+        output.writeInt64(8, maxWriteOps_);
+      }
+      if (maxIops_ != 0L) {
+        output.writeInt64(9, maxIops_);
+      }
+      if (maxReadMbps_ != 0L) {
+        output.writeInt64(10, maxReadMbps_);
+      }
+      if (maxWriteMbps_ != 0L) {
+        output.writeInt64(11, maxWriteMbps_);
+      }
+      if (maxMbps_ != 0L) {
+        output.writeInt64(12, maxMbps_);
+      }
+      if (ioQos_ != 0) {
+        output.writeInt32(13, ioQos_);
+      }
+      if (!getIoProfileBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 14, ioProfile_);
+      }
+      if (maxRbps_ != 0L) {
+        output.writeInt64(15, maxRbps_);
+      }
+      if (maxWbps_ != 0L) {
+        output.writeInt64(16, maxWbps_);
+      }
+      if (maxBps_ != 0L) {
+        output.writeInt64(17, maxBps_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (virtualBytesWritten_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, virtualBytesWritten_);
+      }
+      if (actualBytesWritten_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, actualBytesWritten_);
+      }
+      if (bytesRead_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, bytesRead_);
+      }
+      if (duplicateBlocks_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, duplicateBlocks_);
+      }
+      if (writeOpts_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, writeOpts_);
+      }
+      if (readOpts_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(6, readOpts_);
+      }
+      if (maxReadOps_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(7, maxReadOps_);
+      }
+      if (maxWriteOps_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(8, maxWriteOps_);
+      }
+      if (maxIops_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(9, maxIops_);
+      }
+      if (maxReadMbps_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(10, maxReadMbps_);
+      }
+      if (maxWriteMbps_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(11, maxWriteMbps_);
+      }
+      if (maxMbps_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(12, maxMbps_);
+      }
+      if (ioQos_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(13, ioQos_);
+      }
+      if (!getIoProfileBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, ioProfile_);
+      }
+      if (maxRbps_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(15, maxRbps_);
+      }
+      if (maxWbps_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(16, maxWbps_);
+      }
+      if (maxBps_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(17, maxBps_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.FileInfo.IOMonitorResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.FileInfo.IOMonitorResponse other = (org.opendedup.grpc.FileInfo.IOMonitorResponse) obj;
+
+      if (getVirtualBytesWritten()
+          != other.getVirtualBytesWritten()) return false;
+      if (getActualBytesWritten()
+          != other.getActualBytesWritten()) return false;
+      if (getBytesRead()
+          != other.getBytesRead()) return false;
+      if (getDuplicateBlocks()
+          != other.getDuplicateBlocks()) return false;
+      if (getWriteOpts()
+          != other.getWriteOpts()) return false;
+      if (getReadOpts()
+          != other.getReadOpts()) return false;
+      if (getMaxReadOps()
+          != other.getMaxReadOps()) return false;
+      if (getMaxWriteOps()
+          != other.getMaxWriteOps()) return false;
+      if (getMaxIops()
+          != other.getMaxIops()) return false;
+      if (getMaxReadMbps()
+          != other.getMaxReadMbps()) return false;
+      if (getMaxWriteMbps()
+          != other.getMaxWriteMbps()) return false;
+      if (getMaxMbps()
+          != other.getMaxMbps()) return false;
+      if (getIoQos()
+          != other.getIoQos()) return false;
+      if (!getIoProfile()
+          .equals(other.getIoProfile())) return false;
+      if (getMaxRbps()
+          != other.getMaxRbps()) return false;
+      if (getMaxWbps()
+          != other.getMaxWbps()) return false;
+      if (getMaxBps()
+          != other.getMaxBps()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + VIRTUALBYTESWRITTEN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getVirtualBytesWritten());
+      hash = (37 * hash) + ACTUALBYTESWRITTEN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getActualBytesWritten());
+      hash = (37 * hash) + BYTESREAD_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getBytesRead());
+      hash = (37 * hash) + DUPLICATEBLOCKS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getDuplicateBlocks());
+      hash = (37 * hash) + WRITEOPTS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getWriteOpts());
+      hash = (37 * hash) + READOPTS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getReadOpts());
+      hash = (37 * hash) + MAXREADOPS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxReadOps());
+      hash = (37 * hash) + MAXWRITEOPS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxWriteOps());
+      hash = (37 * hash) + MAXIOPS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxIops());
+      hash = (37 * hash) + MAXREADMBPS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxReadMbps());
+      hash = (37 * hash) + MAXWRITEMBPS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxWriteMbps());
+      hash = (37 * hash) + MAXMBPS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxMbps());
+      hash = (37 * hash) + IOQOS_FIELD_NUMBER;
+      hash = (53 * hash) + getIoQos();
+      hash = (37 * hash) + IOPROFILE_FIELD_NUMBER;
+      hash = (53 * hash) + getIoProfile().hashCode();
+      hash = (37 * hash) + MAXRBPS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxRbps());
+      hash = (37 * hash) + MAXWBPS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxWbps());
+      hash = (37 * hash) + MAXBPS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMaxBps());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.FileInfo.IOMonitorResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.IOMonitorResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.IOMonitorResponse)
+        org.opendedup.grpc.FileInfo.IOMonitorResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_IOMonitorResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_IOMonitorResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.FileInfo.IOMonitorResponse.class, org.opendedup.grpc.FileInfo.IOMonitorResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.FileInfo.IOMonitorResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        virtualBytesWritten_ = 0L;
+
+        actualBytesWritten_ = 0L;
+
+        bytesRead_ = 0L;
+
+        duplicateBlocks_ = 0L;
+
+        writeOpts_ = 0L;
+
+        readOpts_ = 0L;
+
+        maxReadOps_ = 0L;
+
+        maxWriteOps_ = 0L;
+
+        maxIops_ = 0L;
+
+        maxReadMbps_ = 0L;
+
+        maxWriteMbps_ = 0L;
+
+        maxMbps_ = 0L;
+
+        ioQos_ = 0;
+
+        ioProfile_ = "";
+
+        maxRbps_ = 0L;
+
+        maxWbps_ = 0L;
+
+        maxBps_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_IOMonitorResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.IOMonitorResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.FileInfo.IOMonitorResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.IOMonitorResponse build() {
+        org.opendedup.grpc.FileInfo.IOMonitorResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.IOMonitorResponse buildPartial() {
+        org.opendedup.grpc.FileInfo.IOMonitorResponse result = new org.opendedup.grpc.FileInfo.IOMonitorResponse(this);
+        result.virtualBytesWritten_ = virtualBytesWritten_;
+        result.actualBytesWritten_ = actualBytesWritten_;
+        result.bytesRead_ = bytesRead_;
+        result.duplicateBlocks_ = duplicateBlocks_;
+        result.writeOpts_ = writeOpts_;
+        result.readOpts_ = readOpts_;
+        result.maxReadOps_ = maxReadOps_;
+        result.maxWriteOps_ = maxWriteOps_;
+        result.maxIops_ = maxIops_;
+        result.maxReadMbps_ = maxReadMbps_;
+        result.maxWriteMbps_ = maxWriteMbps_;
+        result.maxMbps_ = maxMbps_;
+        result.ioQos_ = ioQos_;
+        result.ioProfile_ = ioProfile_;
+        result.maxRbps_ = maxRbps_;
+        result.maxWbps_ = maxWbps_;
+        result.maxBps_ = maxBps_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.FileInfo.IOMonitorResponse) {
+          return mergeFrom((org.opendedup.grpc.FileInfo.IOMonitorResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.FileInfo.IOMonitorResponse other) {
+        if (other == org.opendedup.grpc.FileInfo.IOMonitorResponse.getDefaultInstance()) return this;
+        if (other.getVirtualBytesWritten() != 0L) {
+          setVirtualBytesWritten(other.getVirtualBytesWritten());
+        }
+        if (other.getActualBytesWritten() != 0L) {
+          setActualBytesWritten(other.getActualBytesWritten());
+        }
+        if (other.getBytesRead() != 0L) {
+          setBytesRead(other.getBytesRead());
+        }
+        if (other.getDuplicateBlocks() != 0L) {
+          setDuplicateBlocks(other.getDuplicateBlocks());
+        }
+        if (other.getWriteOpts() != 0L) {
+          setWriteOpts(other.getWriteOpts());
+        }
+        if (other.getReadOpts() != 0L) {
+          setReadOpts(other.getReadOpts());
+        }
+        if (other.getMaxReadOps() != 0L) {
+          setMaxReadOps(other.getMaxReadOps());
+        }
+        if (other.getMaxWriteOps() != 0L) {
+          setMaxWriteOps(other.getMaxWriteOps());
+        }
+        if (other.getMaxIops() != 0L) {
+          setMaxIops(other.getMaxIops());
+        }
+        if (other.getMaxReadMbps() != 0L) {
+          setMaxReadMbps(other.getMaxReadMbps());
+        }
+        if (other.getMaxWriteMbps() != 0L) {
+          setMaxWriteMbps(other.getMaxWriteMbps());
+        }
+        if (other.getMaxMbps() != 0L) {
+          setMaxMbps(other.getMaxMbps());
+        }
+        if (other.getIoQos() != 0) {
+          setIoQos(other.getIoQos());
+        }
+        if (!other.getIoProfile().isEmpty()) {
+          ioProfile_ = other.ioProfile_;
+          onChanged();
+        }
+        if (other.getMaxRbps() != 0L) {
+          setMaxRbps(other.getMaxRbps());
+        }
+        if (other.getMaxWbps() != 0L) {
+          setMaxWbps(other.getMaxWbps());
+        }
+        if (other.getMaxBps() != 0L) {
+          setMaxBps(other.getMaxBps());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.FileInfo.IOMonitorResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.FileInfo.IOMonitorResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long virtualBytesWritten_ ;
+      /**
+       * <code>int64 virtualBytesWritten = 1;</code>
+       * @return The virtualBytesWritten.
+       */
+      @java.lang.Override
+      public long getVirtualBytesWritten() {
+        return virtualBytesWritten_;
+      }
+      /**
+       * <code>int64 virtualBytesWritten = 1;</code>
+       * @param value The virtualBytesWritten to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVirtualBytesWritten(long value) {
+        
+        virtualBytesWritten_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 virtualBytesWritten = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVirtualBytesWritten() {
+        
+        virtualBytesWritten_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long actualBytesWritten_ ;
+      /**
+       * <code>int64 actualBytesWritten = 2;</code>
+       * @return The actualBytesWritten.
+       */
+      @java.lang.Override
+      public long getActualBytesWritten() {
+        return actualBytesWritten_;
+      }
+      /**
+       * <code>int64 actualBytesWritten = 2;</code>
+       * @param value The actualBytesWritten to set.
+       * @return This builder for chaining.
+       */
+      public Builder setActualBytesWritten(long value) {
+        
+        actualBytesWritten_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 actualBytesWritten = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearActualBytesWritten() {
+        
+        actualBytesWritten_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long bytesRead_ ;
+      /**
+       * <code>int64 bytesRead = 3;</code>
+       * @return The bytesRead.
+       */
+      @java.lang.Override
+      public long getBytesRead() {
+        return bytesRead_;
+      }
+      /**
+       * <code>int64 bytesRead = 3;</code>
+       * @param value The bytesRead to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBytesRead(long value) {
+        
+        bytesRead_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 bytesRead = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBytesRead() {
+        
+        bytesRead_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long duplicateBlocks_ ;
+      /**
+       * <code>int64 duplicateBlocks = 4;</code>
+       * @return The duplicateBlocks.
+       */
+      @java.lang.Override
+      public long getDuplicateBlocks() {
+        return duplicateBlocks_;
+      }
+      /**
+       * <code>int64 duplicateBlocks = 4;</code>
+       * @param value The duplicateBlocks to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDuplicateBlocks(long value) {
+        
+        duplicateBlocks_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 duplicateBlocks = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDuplicateBlocks() {
+        
+        duplicateBlocks_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long writeOpts_ ;
+      /**
+       * <code>int64 writeOpts = 5;</code>
+       * @return The writeOpts.
+       */
+      @java.lang.Override
+      public long getWriteOpts() {
+        return writeOpts_;
+      }
+      /**
+       * <code>int64 writeOpts = 5;</code>
+       * @param value The writeOpts to set.
+       * @return This builder for chaining.
+       */
+      public Builder setWriteOpts(long value) {
+        
+        writeOpts_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 writeOpts = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearWriteOpts() {
+        
+        writeOpts_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long readOpts_ ;
+      /**
+       * <code>int64 readOpts = 6;</code>
+       * @return The readOpts.
+       */
+      @java.lang.Override
+      public long getReadOpts() {
+        return readOpts_;
+      }
+      /**
+       * <code>int64 readOpts = 6;</code>
+       * @param value The readOpts to set.
+       * @return This builder for chaining.
+       */
+      public Builder setReadOpts(long value) {
+        
+        readOpts_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 readOpts = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearReadOpts() {
+        
+        readOpts_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long maxReadOps_ ;
+      /**
+       * <code>int64 maxReadOps = 7;</code>
+       * @return The maxReadOps.
+       */
+      @java.lang.Override
+      public long getMaxReadOps() {
+        return maxReadOps_;
+      }
+      /**
+       * <code>int64 maxReadOps = 7;</code>
+       * @param value The maxReadOps to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxReadOps(long value) {
+        
+        maxReadOps_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxReadOps = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxReadOps() {
+        
+        maxReadOps_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long maxWriteOps_ ;
+      /**
+       * <code>int64 maxWriteOps = 8;</code>
+       * @return The maxWriteOps.
+       */
+      @java.lang.Override
+      public long getMaxWriteOps() {
+        return maxWriteOps_;
+      }
+      /**
+       * <code>int64 maxWriteOps = 8;</code>
+       * @param value The maxWriteOps to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxWriteOps(long value) {
+        
+        maxWriteOps_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxWriteOps = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxWriteOps() {
+        
+        maxWriteOps_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long maxIops_ ;
+      /**
+       * <code>int64 maxIops = 9;</code>
+       * @return The maxIops.
+       */
+      @java.lang.Override
+      public long getMaxIops() {
+        return maxIops_;
+      }
+      /**
+       * <code>int64 maxIops = 9;</code>
+       * @param value The maxIops to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxIops(long value) {
+        
+        maxIops_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxIops = 9;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxIops() {
+        
+        maxIops_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long maxReadMbps_ ;
+      /**
+       * <code>int64 maxReadMbps = 10;</code>
+       * @return The maxReadMbps.
+       */
+      @java.lang.Override
+      public long getMaxReadMbps() {
+        return maxReadMbps_;
+      }
+      /**
+       * <code>int64 maxReadMbps = 10;</code>
+       * @param value The maxReadMbps to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxReadMbps(long value) {
+        
+        maxReadMbps_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxReadMbps = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxReadMbps() {
+        
+        maxReadMbps_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long maxWriteMbps_ ;
+      /**
+       * <code>int64 maxWriteMbps = 11;</code>
+       * @return The maxWriteMbps.
+       */
+      @java.lang.Override
+      public long getMaxWriteMbps() {
+        return maxWriteMbps_;
+      }
+      /**
+       * <code>int64 maxWriteMbps = 11;</code>
+       * @param value The maxWriteMbps to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxWriteMbps(long value) {
+        
+        maxWriteMbps_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxWriteMbps = 11;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxWriteMbps() {
+        
+        maxWriteMbps_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long maxMbps_ ;
+      /**
+       * <code>int64 maxMbps = 12;</code>
+       * @return The maxMbps.
+       */
+      @java.lang.Override
+      public long getMaxMbps() {
+        return maxMbps_;
+      }
+      /**
+       * <code>int64 maxMbps = 12;</code>
+       * @param value The maxMbps to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxMbps(long value) {
+        
+        maxMbps_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxMbps = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxMbps() {
+        
+        maxMbps_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private int ioQos_ ;
+      /**
+       * <code>int32 ioQos = 13;</code>
+       * @return The ioQos.
+       */
+      @java.lang.Override
+      public int getIoQos() {
+        return ioQos_;
+      }
+      /**
+       * <code>int32 ioQos = 13;</code>
+       * @param value The ioQos to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIoQos(int value) {
+        
+        ioQos_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 ioQos = 13;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIoQos() {
+        
+        ioQos_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object ioProfile_ = "";
+      /**
+       * <code>string ioProfile = 14;</code>
+       * @return The ioProfile.
+       */
+      public java.lang.String getIoProfile() {
+        java.lang.Object ref = ioProfile_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          ioProfile_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string ioProfile = 14;</code>
+       * @return The bytes for ioProfile.
+       */
+      public com.google.protobuf.ByteString
+          getIoProfileBytes() {
+        java.lang.Object ref = ioProfile_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          ioProfile_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string ioProfile = 14;</code>
+       * @param value The ioProfile to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIoProfile(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        ioProfile_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string ioProfile = 14;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIoProfile() {
+        
+        ioProfile_ = getDefaultInstance().getIoProfile();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string ioProfile = 14;</code>
+       * @param value The bytes for ioProfile to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIoProfileBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        ioProfile_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long maxRbps_ ;
+      /**
+       * <code>int64 maxRbps = 15;</code>
+       * @return The maxRbps.
+       */
+      @java.lang.Override
+      public long getMaxRbps() {
+        return maxRbps_;
+      }
+      /**
+       * <code>int64 maxRbps = 15;</code>
+       * @param value The maxRbps to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxRbps(long value) {
+        
+        maxRbps_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxRbps = 15;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxRbps() {
+        
+        maxRbps_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long maxWbps_ ;
+      /**
+       * <code>int64 maxWbps = 16;</code>
+       * @return The maxWbps.
+       */
+      @java.lang.Override
+      public long getMaxWbps() {
+        return maxWbps_;
+      }
+      /**
+       * <code>int64 maxWbps = 16;</code>
+       * @param value The maxWbps to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxWbps(long value) {
+        
+        maxWbps_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxWbps = 16;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxWbps() {
+        
+        maxWbps_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long maxBps_ ;
+      /**
+       * <code>int64 maxBps = 17;</code>
+       * @return The maxBps.
+       */
+      @java.lang.Override
+      public long getMaxBps() {
+        return maxBps_;
+      }
+      /**
+       * <code>int64 maxBps = 17;</code>
+       * @param value The maxBps to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMaxBps(long value) {
+        
+        maxBps_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 maxBps = 17;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMaxBps() {
+        
+        maxBps_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.IOMonitorResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.IOMonitorResponse)
+    private static final org.opendedup.grpc.FileInfo.IOMonitorResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.FileInfo.IOMonitorResponse();
+    }
+
+    public static org.opendedup.grpc.FileInfo.IOMonitorResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<IOMonitorResponse>
+        PARSER = new com.google.protobuf.AbstractParser<IOMonitorResponse>() {
+      @java.lang.Override
+      public IOMonitorResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new IOMonitorResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<IOMonitorResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<IOMonitorResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.IOMonitorResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface WFileAttributesRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.WFileAttributesRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> 
+        getFileAttributesList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    int getFileAttributesCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+        getFileAttributesOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
+        int index);
+
+    /**
+     * <code>string filePath = 2;</code>
+     * @return The filePath.
+     */
+    java.lang.String getFilePath();
+    /**
+     * <code>string filePath = 2;</code>
+     * @return The bytes for filePath.
+     */
+    com.google.protobuf.ByteString
+        getFilePathBytes();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.WFileAttributesRequest}
+   */
+  public static final class WFileAttributesRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.WFileAttributesRequest)
+      WFileAttributesRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use WFileAttributesRequest.newBuilder() to construct.
+    private WFileAttributesRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private WFileAttributesRequest() {
+      fileAttributes_ = java.util.Collections.emptyList();
+      filePath_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new WFileAttributesRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private WFileAttributesRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              fileAttributes_.add(
+                  input.readMessage(org.opendedup.grpc.FileInfo.FileAttributes.parser(), extensionRegistry));
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              filePath_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.FileInfo.WFileAttributesRequest.class, org.opendedup.grpc.FileInfo.WFileAttributesRequest.Builder.class);
+    }
+
+    public static final int FILEATTRIBUTES_FIELD_NUMBER = 1;
+    private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_;
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> getFileAttributesList() {
+      return fileAttributes_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+        getFileAttributesOrBuilderList() {
+      return fileAttributes_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public int getFileAttributesCount() {
+      return fileAttributes_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index) {
+      return fileAttributes_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
+        int index) {
+      return fileAttributes_.get(index);
+    }
+
+    public static final int FILEPATH_FIELD_NUMBER = 2;
+    private volatile java.lang.Object filePath_;
+    /**
+     * <code>string filePath = 2;</code>
+     * @return The filePath.
+     */
+    @java.lang.Override
+    public java.lang.String getFilePath() {
+      java.lang.Object ref = filePath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        filePath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string filePath = 2;</code>
+     * @return The bytes for filePath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFilePathBytes() {
+      java.lang.Object ref = filePath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        filePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < fileAttributes_.size(); i++) {
+        output.writeMessage(1, fileAttributes_.get(i));
+      }
+      if (!getFilePathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, filePath_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < fileAttributes_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, fileAttributes_.get(i));
+      }
+      if (!getFilePathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, filePath_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.FileInfo.WFileAttributesRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.FileInfo.WFileAttributesRequest other = (org.opendedup.grpc.FileInfo.WFileAttributesRequest) obj;
+
+      if (!getFileAttributesList()
+          .equals(other.getFileAttributesList())) return false;
+      if (!getFilePath()
+          .equals(other.getFilePath())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getFileAttributesCount() > 0) {
+        hash = (37 * hash) + FILEATTRIBUTES_FIELD_NUMBER;
+        hash = (53 * hash) + getFileAttributesList().hashCode();
+      }
+      hash = (37 * hash) + FILEPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getFilePath().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.FileInfo.WFileAttributesRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.WFileAttributesRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.WFileAttributesRequest)
+        org.opendedup.grpc.FileInfo.WFileAttributesRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.FileInfo.WFileAttributesRequest.class, org.opendedup.grpc.FileInfo.WFileAttributesRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.FileInfo.WFileAttributesRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getFileAttributesFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (fileAttributesBuilder_ == null) {
+          fileAttributes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          fileAttributesBuilder_.clear();
+        }
+        filePath_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.WFileAttributesRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.FileInfo.WFileAttributesRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.WFileAttributesRequest build() {
+        org.opendedup.grpc.FileInfo.WFileAttributesRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.WFileAttributesRequest buildPartial() {
+        org.opendedup.grpc.FileInfo.WFileAttributesRequest result = new org.opendedup.grpc.FileInfo.WFileAttributesRequest(this);
+        int from_bitField0_ = bitField0_;
+        if (fileAttributesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.fileAttributes_ = fileAttributes_;
+        } else {
+          result.fileAttributes_ = fileAttributesBuilder_.build();
+        }
+        result.filePath_ = filePath_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.FileInfo.WFileAttributesRequest) {
+          return mergeFrom((org.opendedup.grpc.FileInfo.WFileAttributesRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.FileInfo.WFileAttributesRequest other) {
+        if (other == org.opendedup.grpc.FileInfo.WFileAttributesRequest.getDefaultInstance()) return this;
+        if (fileAttributesBuilder_ == null) {
+          if (!other.fileAttributes_.isEmpty()) {
+            if (fileAttributes_.isEmpty()) {
+              fileAttributes_ = other.fileAttributes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureFileAttributesIsMutable();
+              fileAttributes_.addAll(other.fileAttributes_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.fileAttributes_.isEmpty()) {
+            if (fileAttributesBuilder_.isEmpty()) {
+              fileAttributesBuilder_.dispose();
+              fileAttributesBuilder_ = null;
+              fileAttributes_ = other.fileAttributes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              fileAttributesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getFileAttributesFieldBuilder() : null;
+            } else {
+              fileAttributesBuilder_.addAllMessages(other.fileAttributes_);
+            }
+          }
+        }
+        if (!other.getFilePath().isEmpty()) {
+          filePath_ = other.filePath_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.FileInfo.WFileAttributesRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.FileInfo.WFileAttributesRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_ =
+        java.util.Collections.emptyList();
+      private void ensureFileAttributesIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>(fileAttributes_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> fileAttributesBuilder_;
+
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> getFileAttributesList() {
+        if (fileAttributesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(fileAttributes_);
+        } else {
+          return fileAttributesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public int getFileAttributesCount() {
+        if (fileAttributesBuilder_ == null) {
+          return fileAttributes_.size();
+        } else {
+          return fileAttributesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index) {
+        if (fileAttributesBuilder_ == null) {
+          return fileAttributes_.get(index);
+        } else {
+          return fileAttributesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder setFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes value) {
+        if (fileAttributesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileAttributesIsMutable();
+          fileAttributes_.set(index, value);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder setFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes.Builder builderForValue) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          fileAttributesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addFileAttributes(org.opendedup.grpc.FileInfo.FileAttributes value) {
+        if (fileAttributesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(value);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes value) {
+        if (fileAttributesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(index, value);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addFileAttributes(
+          org.opendedup.grpc.FileInfo.FileAttributes.Builder builderForValue) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(builderForValue.build());
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes.Builder builderForValue) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addAllFileAttributes(
+          java.lang.Iterable<? extends org.opendedup.grpc.FileInfo.FileAttributes> values) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, fileAttributes_);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder clearFileAttributes() {
+        if (fileAttributesBuilder_ == null) {
+          fileAttributes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder removeFileAttributes(int index) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.remove(index);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes.Builder getFileAttributesBuilder(
+          int index) {
+        return getFileAttributesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
+          int index) {
+        if (fileAttributesBuilder_ == null) {
+          return fileAttributes_.get(index);  } else {
+          return fileAttributesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+           getFileAttributesOrBuilderList() {
+        if (fileAttributesBuilder_ != null) {
+          return fileAttributesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(fileAttributes_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes.Builder addFileAttributesBuilder() {
+        return getFileAttributesFieldBuilder().addBuilder(
+            org.opendedup.grpc.FileInfo.FileAttributes.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes.Builder addFileAttributesBuilder(
+          int index) {
+        return getFileAttributesFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.FileInfo.FileAttributes.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes.Builder> 
+           getFileAttributesBuilderList() {
+        return getFileAttributesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+          getFileAttributesFieldBuilder() {
+        if (fileAttributesBuilder_ == null) {
+          fileAttributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder>(
+                  fileAttributes_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          fileAttributes_ = null;
+        }
+        return fileAttributesBuilder_;
+      }
+
+      private java.lang.Object filePath_ = "";
+      /**
+       * <code>string filePath = 2;</code>
+       * @return The filePath.
+       */
+      public java.lang.String getFilePath() {
+        java.lang.Object ref = filePath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          filePath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string filePath = 2;</code>
+       * @return The bytes for filePath.
+       */
+      public com.google.protobuf.ByteString
+          getFilePathBytes() {
+        java.lang.Object ref = filePath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          filePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string filePath = 2;</code>
+       * @param value The filePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFilePath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        filePath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filePath = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFilePath() {
+        
+        filePath_ = getDefaultInstance().getFilePath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filePath = 2;</code>
+       * @param value The bytes for filePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFilePathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        filePath_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.WFileAttributesRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.WFileAttributesRequest)
+    private static final org.opendedup.grpc.FileInfo.WFileAttributesRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.FileInfo.WFileAttributesRequest();
+    }
+
+    public static org.opendedup.grpc.FileInfo.WFileAttributesRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<WFileAttributesRequest>
+        PARSER = new com.google.protobuf.AbstractParser<WFileAttributesRequest>() {
+      @java.lang.Override
+      public WFileAttributesRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new WFileAttributesRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<WFileAttributesRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<WFileAttributesRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.WFileAttributesRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface WFileAttributesResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.WFileAttributesResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.WFileAttributesResponse}
+   */
+  public static final class WFileAttributesResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.WFileAttributesResponse)
+      WFileAttributesResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use WFileAttributesResponse.newBuilder() to construct.
+    private WFileAttributesResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private WFileAttributesResponse() {
+      error_ = "";
+      errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new WFileAttributesResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private WFileAttributesResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.FileInfo.WFileAttributesResponse.class, org.opendedup.grpc.FileInfo.WFileAttributesResponse.Builder.class);
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 1;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    @java.lang.Override
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 2;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    @java.lang.Override public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
+     */
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(2, errorCode_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, errorCode_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.FileInfo.WFileAttributesResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.FileInfo.WFileAttributesResponse other = (org.opendedup.grpc.FileInfo.WFileAttributesResponse) obj;
+
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.FileInfo.WFileAttributesResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.WFileAttributesResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.WFileAttributesResponse)
+        org.opendedup.grpc.FileInfo.WFileAttributesResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.FileInfo.WFileAttributesResponse.class, org.opendedup.grpc.FileInfo.WFileAttributesResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.FileInfo.WFileAttributesResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        error_ = "";
+
+        errorCode_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_WFileAttributesResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.WFileAttributesResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.FileInfo.WFileAttributesResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.WFileAttributesResponse build() {
+        org.opendedup.grpc.FileInfo.WFileAttributesResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.WFileAttributesResponse buildPartial() {
+        org.opendedup.grpc.FileInfo.WFileAttributesResponse result = new org.opendedup.grpc.FileInfo.WFileAttributesResponse(this);
+        result.error_ = error_;
+        result.errorCode_ = errorCode_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.FileInfo.WFileAttributesResponse) {
+          return mergeFrom((org.opendedup.grpc.FileInfo.WFileAttributesResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.FileInfo.WFileAttributesResponse other) {
+        if (other == org.opendedup.grpc.FileInfo.WFileAttributesResponse.getDefaultInstance()) return this;
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.FileInfo.WFileAttributesResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.FileInfo.WFileAttributesResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 1;</code>
+       * @return The error.
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return The bytes for error.
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
+       */
+      @java.lang.Override public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCodeValue(int value) {
+        
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
+       */
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.WFileAttributesResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.WFileAttributesResponse)
+    private static final org.opendedup.grpc.FileInfo.WFileAttributesResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.FileInfo.WFileAttributesResponse();
+    }
+
+    public static org.opendedup.grpc.FileInfo.WFileAttributesResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<WFileAttributesResponse>
+        PARSER = new com.google.protobuf.AbstractParser<WFileAttributesResponse>() {
+      @java.lang.Override
+      public WFileAttributesResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new WFileAttributesResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<WFileAttributesResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<WFileAttributesResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.WFileAttributesResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RFileAttributesRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.RFileAttributesRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string filePath = 1;</code>
+     * @return The filePath.
+     */
+    java.lang.String getFilePath();
+    /**
+     * <code>string filePath = 1;</code>
+     * @return The bytes for filePath.
+     */
+    com.google.protobuf.ByteString
+        getFilePathBytes();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.RFileAttributesRequest}
+   */
+  public static final class RFileAttributesRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RFileAttributesRequest)
+      RFileAttributesRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RFileAttributesRequest.newBuilder() to construct.
+    private RFileAttributesRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RFileAttributesRequest() {
+      filePath_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RFileAttributesRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RFileAttributesRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              filePath_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.FileInfo.RFileAttributesRequest.class, org.opendedup.grpc.FileInfo.RFileAttributesRequest.Builder.class);
+    }
+
+    public static final int FILEPATH_FIELD_NUMBER = 1;
+    private volatile java.lang.Object filePath_;
+    /**
+     * <code>string filePath = 1;</code>
+     * @return The filePath.
+     */
+    @java.lang.Override
+    public java.lang.String getFilePath() {
+      java.lang.Object ref = filePath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        filePath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string filePath = 1;</code>
+     * @return The bytes for filePath.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFilePathBytes() {
+      java.lang.Object ref = filePath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        filePath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getFilePathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, filePath_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getFilePathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, filePath_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.FileInfo.RFileAttributesRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.FileInfo.RFileAttributesRequest other = (org.opendedup.grpc.FileInfo.RFileAttributesRequest) obj;
+
+      if (!getFilePath()
+          .equals(other.getFilePath())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + FILEPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getFilePath().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.FileInfo.RFileAttributesRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.RFileAttributesRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.RFileAttributesRequest)
+        org.opendedup.grpc.FileInfo.RFileAttributesRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.FileInfo.RFileAttributesRequest.class, org.opendedup.grpc.FileInfo.RFileAttributesRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.FileInfo.RFileAttributesRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        filePath_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.RFileAttributesRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.FileInfo.RFileAttributesRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.RFileAttributesRequest build() {
+        org.opendedup.grpc.FileInfo.RFileAttributesRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.RFileAttributesRequest buildPartial() {
+        org.opendedup.grpc.FileInfo.RFileAttributesRequest result = new org.opendedup.grpc.FileInfo.RFileAttributesRequest(this);
+        result.filePath_ = filePath_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.FileInfo.RFileAttributesRequest) {
+          return mergeFrom((org.opendedup.grpc.FileInfo.RFileAttributesRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.FileInfo.RFileAttributesRequest other) {
+        if (other == org.opendedup.grpc.FileInfo.RFileAttributesRequest.getDefaultInstance()) return this;
+        if (!other.getFilePath().isEmpty()) {
+          filePath_ = other.filePath_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.FileInfo.RFileAttributesRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.FileInfo.RFileAttributesRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object filePath_ = "";
+      /**
+       * <code>string filePath = 1;</code>
+       * @return The filePath.
+       */
+      public java.lang.String getFilePath() {
+        java.lang.Object ref = filePath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          filePath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string filePath = 1;</code>
+       * @return The bytes for filePath.
+       */
+      public com.google.protobuf.ByteString
+          getFilePathBytes() {
+        java.lang.Object ref = filePath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          filePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string filePath = 1;</code>
+       * @param value The filePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFilePath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        filePath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filePath = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFilePath() {
+        
+        filePath_ = getDefaultInstance().getFilePath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string filePath = 1;</code>
+       * @param value The bytes for filePath to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFilePathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        filePath_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.RFileAttributesRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.RFileAttributesRequest)
+    private static final org.opendedup.grpc.FileInfo.RFileAttributesRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.FileInfo.RFileAttributesRequest();
+    }
+
+    public static org.opendedup.grpc.FileInfo.RFileAttributesRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RFileAttributesRequest>
+        PARSER = new com.google.protobuf.AbstractParser<RFileAttributesRequest>() {
+      @java.lang.Override
+      public RFileAttributesRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RFileAttributesRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RFileAttributesRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RFileAttributesRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.RFileAttributesRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RFileAttributesResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.RFileAttributesResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> 
+        getFileAttributesList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    int getFileAttributesCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+        getFileAttributesOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
+        int index);
+
+    /**
+     * <code>string error = 2;</code>
+     * @return The error.
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 2;</code>
+     * @return The bytes for error.
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.RFileAttributesResponse}
+   */
+  public static final class RFileAttributesResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RFileAttributesResponse)
+      RFileAttributesResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RFileAttributesResponse.newBuilder() to construct.
+    private RFileAttributesResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RFileAttributesResponse() {
+      fileAttributes_ = java.util.Collections.emptyList();
+      error_ = "";
+      errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RFileAttributesResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RFileAttributesResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              fileAttributes_.add(
+                  input.readMessage(org.opendedup.grpc.FileInfo.FileAttributes.parser(), extensionRegistry));
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            case 24: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.FileInfo.RFileAttributesResponse.class, org.opendedup.grpc.FileInfo.RFileAttributesResponse.Builder.class);
+    }
+
+    public static final int FILEATTRIBUTES_FIELD_NUMBER = 1;
+    private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_;
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> getFileAttributesList() {
+      return fileAttributes_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+        getFileAttributesOrBuilderList() {
+      return fileAttributes_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public int getFileAttributesCount() {
+      return fileAttributes_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index) {
+      return fileAttributes_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
+        int index) {
+      return fileAttributes_.get(index);
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 2;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 2;</code>
+     * @return The error.
+     */
+    @java.lang.Override
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 2;</code>
+     * @return The bytes for error.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 3;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    @java.lang.Override public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
+     */
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < fileAttributes_.size(); i++) {
+        output.writeMessage(1, fileAttributes_.get(i));
+      }
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(3, errorCode_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < fileAttributes_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, fileAttributes_.get(i));
+      }
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, errorCode_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.FileInfo.RFileAttributesResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.FileInfo.RFileAttributesResponse other = (org.opendedup.grpc.FileInfo.RFileAttributesResponse) obj;
+
+      if (!getFileAttributesList()
+          .equals(other.getFileAttributesList())) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getFileAttributesCount() > 0) {
+        hash = (37 * hash) + FILEATTRIBUTES_FIELD_NUMBER;
+        hash = (53 * hash) + getFileAttributesList().hashCode();
+      }
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.FileInfo.RFileAttributesResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.RFileAttributesResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.RFileAttributesResponse)
+        org.opendedup.grpc.FileInfo.RFileAttributesResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.FileInfo.RFileAttributesResponse.class, org.opendedup.grpc.FileInfo.RFileAttributesResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.FileInfo.RFileAttributesResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getFileAttributesFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (fileAttributesBuilder_ == null) {
+          fileAttributes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          fileAttributesBuilder_.clear();
+        }
+        error_ = "";
+
+        errorCode_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_RFileAttributesResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.RFileAttributesResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.FileInfo.RFileAttributesResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.RFileAttributesResponse build() {
+        org.opendedup.grpc.FileInfo.RFileAttributesResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.RFileAttributesResponse buildPartial() {
+        org.opendedup.grpc.FileInfo.RFileAttributesResponse result = new org.opendedup.grpc.FileInfo.RFileAttributesResponse(this);
+        int from_bitField0_ = bitField0_;
+        if (fileAttributesBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.fileAttributes_ = fileAttributes_;
+        } else {
+          result.fileAttributes_ = fileAttributesBuilder_.build();
+        }
+        result.error_ = error_;
+        result.errorCode_ = errorCode_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.FileInfo.RFileAttributesResponse) {
+          return mergeFrom((org.opendedup.grpc.FileInfo.RFileAttributesResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.FileInfo.RFileAttributesResponse other) {
+        if (other == org.opendedup.grpc.FileInfo.RFileAttributesResponse.getDefaultInstance()) return this;
+        if (fileAttributesBuilder_ == null) {
+          if (!other.fileAttributes_.isEmpty()) {
+            if (fileAttributes_.isEmpty()) {
+              fileAttributes_ = other.fileAttributes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureFileAttributesIsMutable();
+              fileAttributes_.addAll(other.fileAttributes_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.fileAttributes_.isEmpty()) {
+            if (fileAttributesBuilder_.isEmpty()) {
+              fileAttributesBuilder_.dispose();
+              fileAttributesBuilder_ = null;
+              fileAttributes_ = other.fileAttributes_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              fileAttributesBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getFileAttributesFieldBuilder() : null;
+            } else {
+              fileAttributesBuilder_.addAllMessages(other.fileAttributes_);
+            }
+          }
+        }
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.FileInfo.RFileAttributesResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.FileInfo.RFileAttributesResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_ =
+        java.util.Collections.emptyList();
+      private void ensureFileAttributesIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>(fileAttributes_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> fileAttributesBuilder_;
+
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> getFileAttributesList() {
+        if (fileAttributesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(fileAttributes_);
+        } else {
+          return fileAttributesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public int getFileAttributesCount() {
+        if (fileAttributesBuilder_ == null) {
+          return fileAttributes_.size();
+        } else {
+          return fileAttributesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index) {
+        if (fileAttributesBuilder_ == null) {
+          return fileAttributes_.get(index);
+        } else {
+          return fileAttributesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder setFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes value) {
+        if (fileAttributesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileAttributesIsMutable();
+          fileAttributes_.set(index, value);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder setFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes.Builder builderForValue) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          fileAttributesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addFileAttributes(org.opendedup.grpc.FileInfo.FileAttributes value) {
+        if (fileAttributesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(value);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes value) {
+        if (fileAttributesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(index, value);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addFileAttributes(
+          org.opendedup.grpc.FileInfo.FileAttributes.Builder builderForValue) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(builderForValue.build());
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addFileAttributes(
+          int index, org.opendedup.grpc.FileInfo.FileAttributes.Builder builderForValue) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder addAllFileAttributes(
+          java.lang.Iterable<? extends org.opendedup.grpc.FileInfo.FileAttributes> values) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, fileAttributes_);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder clearFileAttributes() {
+        if (fileAttributesBuilder_ == null) {
+          fileAttributes_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public Builder removeFileAttributes(int index) {
+        if (fileAttributesBuilder_ == null) {
+          ensureFileAttributesIsMutable();
+          fileAttributes_.remove(index);
+          onChanged();
+        } else {
+          fileAttributesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes.Builder getFileAttributesBuilder(
+          int index) {
+        return getFileAttributesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
+          int index) {
+        if (fileAttributesBuilder_ == null) {
+          return fileAttributes_.get(index);  } else {
+          return fileAttributesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+           getFileAttributesOrBuilderList() {
+        if (fileAttributesBuilder_ != null) {
+          return fileAttributesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(fileAttributes_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes.Builder addFileAttributesBuilder() {
+        return getFileAttributesFieldBuilder().addBuilder(
+            org.opendedup.grpc.FileInfo.FileAttributes.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public org.opendedup.grpc.FileInfo.FileAttributes.Builder addFileAttributesBuilder(
+          int index) {
+        return getFileAttributesFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.FileInfo.FileAttributes.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
+       */
+      public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes.Builder> 
+           getFileAttributesBuilderList() {
+        return getFileAttributesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
+          getFileAttributesFieldBuilder() {
+        if (fileAttributesBuilder_ == null) {
+          fileAttributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder>(
+                  fileAttributes_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          fileAttributes_ = null;
+        }
+        return fileAttributesBuilder_;
+      }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 2;</code>
+       * @return The error.
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 2;</code>
+       * @return The bytes for error.
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 2;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 2;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The enum numeric value on the wire for errorCode.
+       */
+      @java.lang.Override public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCodeValue(int value) {
+        
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The errorCode.
+       */
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.RFileAttributesResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.RFileAttributesResponse)
+    private static final org.opendedup.grpc.FileInfo.RFileAttributesResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.FileInfo.RFileAttributesResponse();
+    }
+
+    public static org.opendedup.grpc.FileInfo.RFileAttributesResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RFileAttributesResponse>
+        PARSER = new com.google.protobuf.AbstractParser<RFileAttributesResponse>() {
+      @java.lang.Override
+      public RFileAttributesResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RFileAttributesResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RFileAttributesResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RFileAttributesResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.RFileAttributesResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface FileAttributesOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.FileAttributes)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string key = 1;</code>
+     * @return The key.
+     */
+    java.lang.String getKey();
+    /**
+     * <code>string key = 1;</code>
+     * @return The bytes for key.
+     */
+    com.google.protobuf.ByteString
+        getKeyBytes();
+
+    /**
+     * <code>string value = 2;</code>
+     * @return The value.
+     */
+    java.lang.String getValue();
+    /**
+     * <code>string value = 2;</code>
+     * @return The bytes for value.
+     */
+    com.google.protobuf.ByteString
+        getValueBytes();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.FileAttributes}
+   */
+  public static final class FileAttributes extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileAttributes)
+      FileAttributesOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use FileAttributes.newBuilder() to construct.
+    private FileAttributes(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private FileAttributes() {
+      key_ = "";
+      value_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileAttributes();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private FileAttributes(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              key_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              value_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileAttributes_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileAttributes_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.FileInfo.FileAttributes.class, org.opendedup.grpc.FileInfo.FileAttributes.Builder.class);
+    }
+
+    public static final int KEY_FIELD_NUMBER = 1;
+    private volatile java.lang.Object key_;
+    /**
+     * <code>string key = 1;</code>
+     * @return The key.
+     */
+    @java.lang.Override
+    public java.lang.String getKey() {
+      java.lang.Object ref = key_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        key_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string key = 1;</code>
+     * @return The bytes for key.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKeyBytes() {
+      java.lang.Object ref = key_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        key_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VALUE_FIELD_NUMBER = 2;
+    private volatile java.lang.Object value_;
+    /**
+     * <code>string value = 2;</code>
+     * @return The value.
+     */
+    @java.lang.Override
+    public java.lang.String getValue() {
+      java.lang.Object ref = value_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        value_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string value = 2;</code>
+     * @return The bytes for value.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getValueBytes() {
+      java.lang.Object ref = value_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        value_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getKeyBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
+      }
+      if (!getValueBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getKeyBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
+      }
+      if (!getValueBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, value_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.FileInfo.FileAttributes)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.FileInfo.FileAttributes other = (org.opendedup.grpc.FileInfo.FileAttributes) obj;
+
+      if (!getKey()
+          .equals(other.getKey())) return false;
+      if (!getValue()
+          .equals(other.getValue())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + KEY_FIELD_NUMBER;
+      hash = (53 * hash) + getKey().hashCode();
+      hash = (37 * hash) + VALUE_FIELD_NUMBER;
+      hash = (53 * hash) + getValue().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.FileInfo.FileAttributes parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.FileInfo.FileAttributes prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.FileAttributes}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.FileAttributes)
+        org.opendedup.grpc.FileInfo.FileAttributesOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileAttributes_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileAttributes_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.FileInfo.FileAttributes.class, org.opendedup.grpc.FileInfo.FileAttributes.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.FileInfo.FileAttributes.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        key_ = "";
+
+        value_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.FileInfo.internal_static_org_opendedup_grpc_FileAttributes_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileAttributes getDefaultInstanceForType() {
+        return org.opendedup.grpc.FileInfo.FileAttributes.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileAttributes build() {
+        org.opendedup.grpc.FileInfo.FileAttributes result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.FileAttributes buildPartial() {
+        org.opendedup.grpc.FileInfo.FileAttributes result = new org.opendedup.grpc.FileInfo.FileAttributes(this);
+        result.key_ = key_;
+        result.value_ = value_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.FileInfo.FileAttributes) {
+          return mergeFrom((org.opendedup.grpc.FileInfo.FileAttributes)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.FileInfo.FileAttributes other) {
+        if (other == org.opendedup.grpc.FileInfo.FileAttributes.getDefaultInstance()) return this;
+        if (!other.getKey().isEmpty()) {
+          key_ = other.key_;
+          onChanged();
+        }
+        if (!other.getValue().isEmpty()) {
+          value_ = other.value_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.FileInfo.FileAttributes parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.FileInfo.FileAttributes) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object key_ = "";
+      /**
+       * <code>string key = 1;</code>
+       * @return The key.
+       */
+      public java.lang.String getKey() {
+        java.lang.Object ref = key_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          key_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string key = 1;</code>
+       * @return The bytes for key.
+       */
+      public com.google.protobuf.ByteString
+          getKeyBytes() {
+        java.lang.Object ref = key_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          key_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string key = 1;</code>
+       * @param value The key to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKey(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        key_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string key = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKey() {
+        
+        key_ = getDefaultInstance().getKey();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string key = 1;</code>
+       * @param value The bytes for key to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKeyBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        key_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object value_ = "";
+      /**
+       * <code>string value = 2;</code>
+       * @return The value.
+       */
+      public java.lang.String getValue() {
+        java.lang.Object ref = value_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          value_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string value = 2;</code>
+       * @return The bytes for value.
+       */
+      public com.google.protobuf.ByteString
+          getValueBytes() {
+        java.lang.Object ref = value_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          value_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string value = 2;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValue(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        value_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string value = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearValue() {
+        
+        value_ = getDefaultInstance().getValue();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string value = 2;</code>
+       * @param value The bytes for value to set.
+       * @return This builder for chaining.
+       */
+      public Builder setValueBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        value_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.FileAttributes)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.FileAttributes)
+    private static final org.opendedup.grpc.FileInfo.FileAttributes DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.FileInfo.FileAttributes();
+    }
+
+    public static org.opendedup.grpc.FileInfo.FileAttributes getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<FileAttributes>
+        PARSER = new com.google.protobuf.AbstractParser<FileAttributes>() {
+      @java.lang.Override
+      public FileAttributes parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new FileAttributes(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<FileAttributes> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<FileAttributes> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.FileInfo.FileAttributes getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_FileInfoRequest_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_FileInfoRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_FileMessageResponse_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_FileMessageResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_FileInfoResponse_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_FileInfoResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_IOMonitorResponse_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_IOMonitorResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_WFileAttributesRequest_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_WFileAttributesRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_WFileAttributesResponse_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_WFileAttributesResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_RFileAttributesRequest_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_RFileAttributesRequest_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_RFileAttributesResponse_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_RFileAttributesResponse_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_FileAttributes_descriptor;
-  static final 
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_FileAttributes_fieldAccessorTable;
 
@@ -71,62 +14804,97 @@ public final class FileInfo {
       "\n\016FileInfo.proto\022\022org.opendedup.grpc\"]\n\017" +
       "FileInfoRequest\022\020\n\010fileName\030\001 \001(\t\022\017\n\007com" +
       "pact\030\002 \001(\010\022\025\n\rnumberOfFiles\030\003 \001(\005\022\020\n\010lis" +
-      "tGuid\030\004 \001(\t\"\315\002\n\023FileMessageResponse\022\r\n\005e" +
+      "tGuid\030\004 \001(\t\"\353\001\n\023FileMessageResponse\022\r\n\005e" +
       "rror\030\001 \001(\t\022\020\n\010listGuid\030\002 \001(\t\0226\n\010response" +
       "\030\003 \003(\0132$.org.opendedup.grpc.FileInfoResp" +
       "onse\0221\n\terrorCode\030\004 \001(\0162\036.org.opendedup." +
       "grpc.errorCodes\022\030\n\020maxNumberOfFiles\030\005 \001(" +
-      "\005\022B\n\006action\030\006 \001(\01622.org.opendedup.grpc.F" +
-      "ileMessageResponse.syncaction\"L\n\nsyncact" +
-      "ion\022\014\n\010DOWNLOAD\020\000\022\t\n\005WRITE\020\001\022\n\n\006DELETE\020\002" +
-      "\022\n\n\006UPLOAD\020\003\022\r\n\tKEEPALIVE\020\004\"\246\006\n\020FileInfo" +
-      "Response\022\020\n\010fileName\030\001 \001(\t\022\020\n\010filePath\030\002" +
-      " \001(\t\022;\n\004type\030\003 \001(\0162-.org.opendedup.grpc." +
-      "FileInfoResponse.fileType\022\020\n\010sdfsPath\030\004 " +
-      "\001(\t\022\r\n\005atime\030\005 \001(\003\022\r\n\005mtime\030\006 \001(\003\022\r\n\005cti" +
-      "me\030\007 \001(\003\022\016\n\006hidden\030\010 \001(\010\022\014\n\004size\030\t \001(\003\022\014" +
-      "\n\004open\030\n \001(\010\022\021\n\tfileGuild\030\013 \001(\t\022\017\n\007mapGu" +
-      "id\030\014 \001(\t\022\022\n\nlocalOwner\030\r \001(\010\022\017\n\007execute\030" +
-      "\016 \001(\010\022\014\n\004read\030\017 \001(\010\022\r\n\005write\030\020 \001(\010\022\021\n\tim" +
-      "porting\030\021 \001(\010\022\017\n\007symlink\030\022 \001(\010\022:\n\016fileAt" +
-      "tributes\030\023 \003(\0132\".org.opendedup.grpc.File" +
-      "Attributes\022\n\n\002id\030\024 \001(\t\0223\n\005files\030\025 \003(\0132$." +
-      "org.opendedup.grpc.FileInfoResponse\022\022\n\np" +
-      "arentPath\030\026 \001(\t\022\020\n\010volumeid\030\027 \001(\t\0228\n\tioM" +
-      "onitor\030\030 \001(\0132%.org.opendedup.grpc.IOMoni" +
-      "torResponse\022\023\n\013symlinkPath\030\031 \001(\t\022\020\n\010grou" +
-      "p_id\030\032 \001(\003\022\017\n\007user_id\030\033 \001(\003\022\023\n\013permissio" +
-      "ns\030\034 \001(\005\022\020\n\010hashcode\030\035 \001(\003\022\025\n\rretentionL" +
-      "ock\030\036 \001(\003\022\022\n\nattributes\030\037 \001(\003\022\017\n\007version" +
-      "\030  \001(\t\022\014\n\004mode\030! \001(\005\022\027\n\017delete_on_close\030" +
-      "\" \001(\010\"\035\n\010fileType\022\010\n\004FILE\020\000\022\007\n\003DIR\020\001\"\347\002\n" +
-      "\021IOMonitorResponse\022\033\n\023virtualBytesWritte" +
-      "n\030\001 \001(\003\022\032\n\022actualBytesWritten\030\002 \001(\003\022\021\n\tb" +
-      "ytesRead\030\003 \001(\003\022\027\n\017duplicateBlocks\030\004 \001(\003\022" +
-      "\021\n\twriteOpts\030\005 \001(\003\022\020\n\010readOpts\030\006 \001(\003\022\022\n\n" +
-      "maxReadOps\030\007 \001(\003\022\023\n\013maxWriteOps\030\010 \001(\003\022\017\n" +
-      "\007maxIops\030\t \001(\003\022\023\n\013maxReadMbps\030\n \001(\003\022\024\n\014m" +
-      "axWriteMbps\030\013 \001(\003\022\017\n\007maxMbps\030\014 \001(\003\022\r\n\005io" +
-      "Qos\030\r \001(\005\022\021\n\tioProfile\030\016 \001(\t\022\017\n\007maxRbps\030" +
-      "\017 \001(\003\022\017\n\007maxWbps\030\020 \001(\003\022\016\n\006maxBps\030\021 \001(\003\"f" +
-      "\n\026WFileAttributesRequest\022:\n\016fileAttribut" +
-      "es\030\001 \003(\0132\".org.opendedup.grpc.FileAttrib" +
-      "utes\022\020\n\010filePath\030\002 \001(\t\"[\n\027WFileAttribute" +
-      "sResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 " +
-      "\001(\0162\036.org.opendedup.grpc.errorCodes\"*\n\026R" +
-      "FileAttributesRequest\022\020\n\010filePath\030\001 \001(\t\"" +
-      "\227\001\n\027RFileAttributesResponse\022:\n\016fileAttri" +
-      "butes\030\001 \003(\0132\".org.opendedup.grpc.FileAtt" +
-      "ributes\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(" +
-      "\0162\036.org.opendedup.grpc.errorCodes\",\n\016Fil" +
-      "eAttributes\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*" +
-      "\315\001\n\nerrorCodes\022\t\n\005NOERR\020\000\022\n\n\006ENOENT\020\002\022\007\n" +
-      "\003EIO\020\005\022\n\n\006EAGAIN\020\013\022\n\n\006EEXIST\020\021\022\013\n\007ENOTDI" +
-      "R\020\024\022\013\n\007ENODATA\020=\022\013\n\007ENAVAIL\020w\022\t\n\005EPERM\020\001" +
-      "\022\n\n\006ENOSPC\020\034\022\n\n\006EACCES\020\r\022\r\n\tENOTEMPTY\020\'\022" +
-      "\n\n\006ENOSYS\020&\022\n\n\006ENODEV\020\023\022\n\n\006EBADFD\020M\022\n\n\006E" +
-      "ISDIR\020\025B2P\001Z.github.com/opendedup/sdfs-c" +
-      "lient-go/sdfs/;sdfsb\006proto3"
+      "\005\022.\n\006action\030\006 \001(\0162\036.org.opendedup.grpc.s" +
+      "yncaction\"\246\006\n\020FileInfoResponse\022\020\n\010fileNa" +
+      "me\030\001 \001(\t\022\020\n\010filePath\030\002 \001(\t\022;\n\004type\030\003 \001(\016" +
+      "2-.org.opendedup.grpc.FileInfoResponse.f" +
+      "ileType\022\020\n\010sdfsPath\030\004 \001(\t\022\r\n\005atime\030\005 \001(\003" +
+      "\022\r\n\005mtime\030\006 \001(\003\022\r\n\005ctime\030\007 \001(\003\022\016\n\006hidden" +
+      "\030\010 \001(\010\022\014\n\004size\030\t \001(\003\022\014\n\004open\030\n \001(\010\022\021\n\tfi" +
+      "leGuild\030\013 \001(\t\022\017\n\007mapGuid\030\014 \001(\t\022\022\n\nlocalO" +
+      "wner\030\r \001(\010\022\017\n\007execute\030\016 \001(\010\022\014\n\004read\030\017 \001(" +
+      "\010\022\r\n\005write\030\020 \001(\010\022\021\n\timporting\030\021 \001(\010\022\017\n\007s" +
+      "ymlink\030\022 \001(\010\022:\n\016fileAttributes\030\023 \003(\0132\".o" +
+      "rg.opendedup.grpc.FileAttributes\022\n\n\002id\030\024" +
+      " \001(\t\0223\n\005files\030\025 \003(\0132$.org.opendedup.grpc" +
+      ".FileInfoResponse\022\022\n\nparentPath\030\026 \001(\t\022\020\n" +
+      "\010volumeid\030\027 \001(\t\0228\n\tioMonitor\030\030 \001(\0132%.org" +
+      ".opendedup.grpc.IOMonitorResponse\022\023\n\013sym" +
+      "linkPath\030\031 \001(\t\022\020\n\010group_id\030\032 \001(\003\022\017\n\007user" +
+      "_id\030\033 \001(\003\022\023\n\013permissions\030\034 \001(\005\022\020\n\010hashco" +
+      "de\030\035 \001(\003\022\025\n\rretentionLock\030\036 \001(\003\022\022\n\nattri" +
+      "butes\030\037 \001(\003\022\017\n\007version\030  \001(\t\022\014\n\004mode\030! \001" +
+      "(\005\022\027\n\017delete_on_close\030\" \001(\010\"\035\n\010fileType\022" +
+      "\010\n\004FILE\020\000\022\007\n\003DIR\020\001\"\347\002\n\021IOMonitorResponse" +
+      "\022\033\n\023virtualBytesWritten\030\001 \001(\003\022\032\n\022actualB" +
+      "ytesWritten\030\002 \001(\003\022\021\n\tbytesRead\030\003 \001(\003\022\027\n\017" +
+      "duplicateBlocks\030\004 \001(\003\022\021\n\twriteOpts\030\005 \001(\003" +
+      "\022\020\n\010readOpts\030\006 \001(\003\022\022\n\nmaxReadOps\030\007 \001(\003\022\023" +
+      "\n\013maxWriteOps\030\010 \001(\003\022\017\n\007maxIops\030\t \001(\003\022\023\n\013" +
+      "maxReadMbps\030\n \001(\003\022\024\n\014maxWriteMbps\030\013 \001(\003\022" +
+      "\017\n\007maxMbps\030\014 \001(\003\022\r\n\005ioQos\030\r \001(\005\022\021\n\tioPro" +
+      "file\030\016 \001(\t\022\017\n\007maxRbps\030\017 \001(\003\022\017\n\007maxWbps\030\020" +
+      " \001(\003\022\016\n\006maxBps\030\021 \001(\003\"f\n\026WFileAttributesR" +
+      "equest\022:\n\016fileAttributes\030\001 \003(\0132\".org.ope" +
+      "ndedup.grpc.FileAttributes\022\020\n\010filePath\030\002" +
+      " \001(\t\"[\n\027WFileAttributesResponse\022\r\n\005error" +
+      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
+      "p.grpc.errorCodes\"*\n\026RFileAttributesRequ" +
+      "est\022\020\n\010filePath\030\001 \001(\t\"\227\001\n\027RFileAttribute" +
+      "sResponse\022:\n\016fileAttributes\030\001 \003(\0132\".org." +
+      "opendedup.grpc.FileAttributes\022\r\n\005error\030\002" +
+      " \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup." +
+      "grpc.errorCodes\",\n\016FileAttributes\022\013\n\003key" +
+      "\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*L\n\nsyncaction\022\014\n\010D" +
+      "OWNLOAD\020\000\022\t\n\005WRITE\020\001\022\n\n\006DELETE\020\002\022\n\n\006UPLO" +
+      "AD\020\003\022\r\n\tKEEPALIVE\020\004*\335\014\n\nerrorCodes\022\t\n\005NO" +
+      "ERR\020\000\022\t\n\005EPERM\020\001\022\n\n\006ENOENT\020\002\022\t\n\005ESRCH\020\003\022" +
+      "\t\n\005EINTR\020\004\022\007\n\003EIO\020\005\022\t\n\005ENXIO\020\006\022\t\n\005E2BIG\020" +
+      "\007\022\013\n\007ENOEXEC\020\010\022\t\n\005EBADF\020\t\022\n\n\006ECHILD\020\n\022\n\n" +
+      "\006EAGAIN\020\013\022\n\n\006ENOMEM\020\014\022\n\n\006EACCES\020\r\022\n\n\006EFA" +
+      "ULT\020\016\022\013\n\007ENOTBLK\020\017\022\t\n\005EBUSY\020\020\022\n\n\006EEXIST\020" +
+      "\021\022\t\n\005EXDEV\020\022\022\n\n\006ENODEV\020\023\022\013\n\007ENOTDIR\020\024\022\n\n" +
+      "\006EISDIR\020\025\022\n\n\006EINVAL\020\026\022\n\n\006ENFILE\020\027\022\n\n\006EMF" +
+      "ILE\020\030\022\n\n\006ENOTTY\020\031\022\013\n\007ETXTBSY\020\032\022\t\n\005EFBIG\020" +
+      "\033\022\n\n\006ENOSPC\020\034\022\n\n\006ESPIPE\020\035\022\t\n\005EROFS\020\036\022\n\n\006" +
+      "EMLINK\020\037\022\t\n\005EPIPE\020 \022\010\n\004EDOM\020!\022\n\n\006ERANGE\020" +
+      "\"\022\013\n\007EDEADLK\020#\022\020\n\014ENAMETOOLONG\020$\022\n\n\006ENOL" +
+      "CK\020%\022\n\n\006ENOSYS\020&\022\r\n\tENOTEMPTY\020\'\022\t\n\005ELOOP" +
+      "\020(\022\017\n\013EWOULDBLOCK\020)\022\n\n\006ENOMSG\020*\022\t\n\005EIDRM" +
+      "\020+\022\n\n\006ECHRNG\020,\022\014\n\010EL2NSYNC\020-\022\n\n\006EL3HLT\020." +
+      "\022\n\n\006EL3RST\020/\022\n\n\006ELNRNG\0200\022\013\n\007EUNATCH\0201\022\n\n" +
+      "\006ENOCSI\0202\022\n\n\006EL2HLT\0203\022\t\n\005EBADE\0204\022\t\n\005EBAD" +
+      "R\0205\022\n\n\006EXFULL\0206\022\n\n\006ENOANO\0207\022\013\n\007EBADRQC\0208" +
+      "\022\013\n\007EBADSLT\0209\022\r\n\tEDEADLOCK\020:\022\n\n\006EBFONT\020;" +
+      "\022\n\n\006ENOSTR\020<\022\013\n\007ENODATA\020=\022\t\n\005ETIME\020>\022\t\n\005" +
+      "ENOSR\020?\022\n\n\006ENONET\020@\022\n\n\006ENOPKG\020A\022\013\n\007EREMO" +
+      "TE\020B\022\013\n\007ENOLINK\020C\022\010\n\004EADV\020D\022\n\n\006ESRMNT\020E\022" +
+      "\t\n\005ECOMM\020F\022\n\n\006EPROTO\020G\022\r\n\tEMULTIHOP\020H\022\013\n" +
+      "\007EDOTDOT\020I\022\013\n\007EBADMSG\020J\022\r\n\tEOVERFLOW\020K\022\014" +
+      "\n\010ENOTUNIQ\020L\022\n\n\006EBADFD\020M\022\013\n\007EREMCHG\020N\022\013\n" +
+      "\007ELIBACC\020O\022\013\n\007ELIBBAD\020P\022\013\n\007ELIBSCN\020Q\022\013\n\007" +
+      "ELIBMAX\020R\022\014\n\010ELIBEXEC\020S\022\n\n\006EILSEQ\020T\022\014\n\010E" +
+      "RESTART\020U\022\014\n\010ESTRPIPE\020V\022\n\n\006EUSERS\020W\022\014\n\010E" +
+      "NOTSOCK\020X\022\020\n\014EDESTADDRREQ\020Y\022\014\n\010EMSGSIZE\020" +
+      "Z\022\016\n\nEPROTOTYPE\020[\022\017\n\013ENOPROTOOPT\020\\\022\023\n\017EP" +
+      "ROTONOSUPPORT\020]\022\023\n\017ESOCKTNOSUPPORT\020^\022\016\n\n" +
+      "EOPNOTSUPP\020_\022\020\n\014EPFNOSUPPORT\020`\022\020\n\014EAFNOS" +
+      "UPPORT\020a\022\016\n\nEADDRINUSE\020b\022\021\n\rEADDRNOTAVAI" +
+      "L\020c\022\014\n\010ENETDOWN\020d\022\017\n\013ENETUNREACH\020e\022\r\n\tEN" +
+      "ETRESET\020f\022\020\n\014ECONNABORTED\020g\022\016\n\nECONNRESE" +
+      "T\020h\022\013\n\007ENOBUFS\020i\022\013\n\007EISCONN\020j\022\014\n\010ENOTCON" +
+      "N\020k\022\r\n\tESHUTDOWN\020l\022\020\n\014ETOOMANYREFS\020m\022\r\n\t" +
+      "ETIMEDOUT\020n\022\020\n\014ECONNREFUSED\020o\022\r\n\tEHOSTDO" +
+      "WN\020p\022\020\n\014EHOSTUNREACH\020q\022\014\n\010EALREADY\020r\022\017\n\013" +
+      "EINPROGRESS\020s\022\n\n\006ESTALE\020t\022\013\n\007EUCLEAN\020u\022\013" +
+      "\n\007ENOTNAM\020v\022\013\n\007ENAVAIL\020w\022\n\n\006EISNAM\020x\022\r\n\t" +
+      "EREMOTEIO\020yB0Z.github.com/opendedup/sdfs" +
+      "-client-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -3,14 +3,13 @@
 ; Sets the theme path
 
 
-!define VERSION '3.10.4'
+!define VERSION '3.12.0'
 
 !define MUI_PRODUCT "SDFS Cloud File System"
 
 ;--------------------------------
 ;Include Modern UI
 !include LogicLib.nsh
-!include "EnvVarUpdate.nsh"
 !include x64.nsh
 !include "MUI2.nsh"
 !include WinVer.nsh
@@ -71,18 +70,18 @@
 ;Languages
  
   !insertmacro MUI_LANGUAGE "English"
-
+  !addplugindir "C:\Program Files (x86)\NSIS\Plugins\amd64-unicode"
 
   ;--------------------------------
   ;Version Information
-  VIProductVersion "3.10.4.0"
+  VIProductVersion "3.12.0.0"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" 3.10.4.0"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.10.4.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" 3.12.0.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.12.0.0"
 ;--------------------------------
 ;Installer Sections
 
@@ -97,14 +96,17 @@ Section "SDFS Setup" SecMain
   SetOutPath "$INSTDIR\bin"
   File /r bin\*
   SetOutPath "$INSTDIR\lib"
-  File ..\..\target\sdfs-${VERSION}-jar-with-dependencies.jar
-  File ..\..\target\lib\b2-2.0.3.jar
-  File ..\..\target\lib\google-cloud-storage-2.1.2.jar
+  File /oname=sdfs.jar ..\..\target\sdfs-${VERSION}.jar
+  File ..\..\target\lib\*.jar
   SetOutPath "$INSTDIR\etc"
   File etc\*
   ;Store installation folder
   WriteRegStr HKLM "Software\SDFS" "path" $INSTDIR
-  ${EnvVarUpdate} $0 "PATH" "A" "HKLM" $INSTDIR 
+  EnVar::SetHKLM
+  ; Add a value
+  EnVar::AddValue "path" "$INSTDIR"
+  Pop $0
+  DetailPrint "EnVar::AddValue returned=|$0|"
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   ; Write the uninstall keys for Windows
@@ -112,21 +114,21 @@ Section "SDFS Setup" SecMain
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS" "UninstallString" '"$INSTDIR\Uninstall.exe"'
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS" "NoRepair" 1
+  
   AccessControl::GrantOnFile \
     "$INSTDIR" "(BU)" "GenericRead + GenericWrite"
 SectionEnd
-Section "Dokan Setup" SecDokan
-	ExecWait '"$INSTDIR\DokanSetup_redist.exe'
-SectionEnd
-Section "-Quick Start Guide"
-	ExecShell "open" "http://opendedup.org/odd/windows-quickstart/"
+
+Section "Visual Studio Runtime"
+  SetOutPath "$INSTDIR"
+  ExecWait '"$INSTDIR\VC_redist.x64.exe" /quiet'
+  Delete "$INSTDIR\VC_redist.x64.exe"
 SectionEnd
 
 
 Function .onInstSuccess
   IfSilent noreboot
-    MessageBox MB_YESNO "A reboot is required to finish the installation. Do you wish to reboot now?" IDNO noreboot
-    Reboot
+    MessageBox MB_OK "You have successfully installed ${MUI_PRODUCT}."
   noreboot:
 FunctionEnd
  
@@ -146,7 +148,6 @@ Function .onInit
 	MessageBox MB_YESNO "Upgrade Existing Setup to ${VERSION}?" IDNO noupgrade
 	RMDir /r "$INSTDIR\bin"
 	RMDir /r "$INSTDIR\lib"
-	${UnSelectSection} ${SecDokan}
 	Goto done
   noupgrade:
 	Quit
@@ -156,11 +157,9 @@ FunctionEnd
 ;Descriptions
 ;Language strings
   LangString DESC_SecMain ${LANG_ENGLISH} "SDFS Volume Binaries Setup."
-  LangString DESC_SecDokan ${LANG_ENGLISH} "Dokan Windows FileSystem Driver."
 ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecMain} $(DESC_SecMain)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecDokan} $(DESC_SecDokan)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
@@ -172,7 +171,8 @@ Section "Uninstall"
   RMDir /r "$INSTDIR\bin"
   RMDir /r "$INSTDIR\lib"
   ReadRegStr $0 HKLM "Software\SDFS" "path"
-  ${un.EnvVarUpdate} $0 "PATH" "R" "HKLM" $INSTDIR
+  EnVar::SetHKLM
+  EnVar::DeleteValue "path" "$0"
   DeleteRegKey HKLM "Software\SDFS"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDFS"
 SectionEnd

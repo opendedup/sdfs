@@ -67,6 +67,7 @@ public class Main {
 
 	public static boolean sdfsCliSSL = true;
 	public static boolean sdfsCliRequireAuth = false;
+	public static boolean sdfsCliRequireMutualTLSAuth = false;
 	public static int sdfsCliPort = 6442;
 	public static boolean sdfsCliEnabled = true;
 	public static String sdfsCliListenAddr = "localhost";
@@ -93,7 +94,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.11.0";
+	public static String version = "3.12.0";
 
 	public static boolean readAhead = false;
 

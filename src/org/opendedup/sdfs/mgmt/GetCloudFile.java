@@ -92,7 +92,7 @@ public class GetCloudFile implements Runnable {
 			throw new IOException(dstfile + " already exists");
 		try {
 			File f = new File(Main.volume.getPath() + File.separator + sfile);
-			if (!overwrite && f.exists() && MetaDataDedupFile.getFile(f.getPath()).isLocalOwner())
+			if (!overwrite && f.exists())
 				throw new IOException("File [" + sfile + "] already exists and is owned locally.");
 			else {
 				MetaFileStore.removedCachedMF(new File(Main.volume.getPath() + File.separator + sfile).getPath());
@@ -136,7 +136,6 @@ public class GetCloudFile implements Runnable {
 				LongByteArrayMap mp = FileReplicationService.getDDB(_mf.getDfGuid());
 				mp.setIndexed(false);
 				mf = MetaFileStore.getMF(_mf.getPath());
-				mf.setLocalOwner(false);
 				SDFSLogger.getLog().info("downloaded ddb " + mf.getDfGuid());
 				if (df != null) {
 					sdf = mf.snapshot(df.getPath(), overwrite, fevt);

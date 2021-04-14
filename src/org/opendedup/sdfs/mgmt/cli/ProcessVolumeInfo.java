@@ -4,10 +4,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import org.opendedup.grpc.VolumeInfoRequest;
-import org.opendedup.grpc.VolumeInfoResponse;
 import org.opendedup.grpc.VolumeServiceGrpc;
 import org.opendedup.grpc.VolumeServiceGrpc.VolumeServiceBlockingStub;
+import org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse;
 import org.opendedup.util.StorageUnit;
 
 public class ProcessVolumeInfo {

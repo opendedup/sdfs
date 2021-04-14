@@ -1,15 +1,18 @@
 steps:
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: 'bash'
+  args:  ['/workspace/buildscripts/copybins.sh','${_DIST_BUCKET}','$BRANCH_NAME']
 - name: gcr.io/kaniko-project/executor:latest
   args:
-    - --destination=gcr.io/$PROJECT_ID/hybrics-build:$BRANCH_NAME
-    - --cache=true
-    - --cache-ttl=10h
-    - --target=builder
-    - --dockerfile=Dockerfile
+      - --destination=gcr.io/$PROJECT_ID/hybrics-bin:$BRANCH_NAME
+      - --cache=false
+      - --target=builder
+      - --cache-ttl=10h
+      - --dockerfile=Dockerfile
 - name: gcr.io/kaniko-project/executor:latest
   args:
       - --destination=gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME
-      - --cache=true
+      - --cache=false
       - --cache-ttl=10h
       - --dockerfile=Dockerfile
 - name: gcr.io/cloud-builders/gcloud
@@ -17,7 +20,7 @@ steps:
   args: [ '-c', "mkdir pkgs/" ]
 - name: gcr.io/cloud-builders/docker
   entrypoint: 'bash'
-  args: [ '-c', 'docker run --rm gcr.io/hybrics/hybrics-build:$BRANCH_NAME | tar --extract --verbose -C pkgs/']
+  args: [ '-c', 'docker run --rm gcr.io/hybrics/hybrics-bin:$BRANCH_NAME | tar --extract --verbose -C pkgs/']
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
   args: [ '-c', "gsutil cp pkgs/*.* gs://${_DIST_BUCKET}/pkgs/" ]

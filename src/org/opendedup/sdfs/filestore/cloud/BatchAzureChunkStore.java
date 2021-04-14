@@ -1,7 +1,8 @@
 package org.opendedup.sdfs.filestore.cloud;
 
-import java.io.BufferedInputStream;
+import static java.lang.Math.toIntExact;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -31,31 +32,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.opendedup.sdfs.filestore.HashBlobArchive;
-import org.opendedup.sdfs.filestore.StringResult;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.opendedup.collections.DataArchivedException;
-import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.AbstractBatchStore;
-import org.opendedup.sdfs.filestore.AbstractChunkStore;
-import org.opendedup.sdfs.filestore.ChunkData;
-import org.opendedup.sdfs.filestore.cloud.azure.BlobDataIO;
-import org.opendedup.sdfs.filestore.cloud.azure.BlobDataTracker;
-import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
-import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
-import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.util.CompressionUtils;
-import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.OSValidator;
-import org.opendedup.util.RandomGUID;
-import org.opendedup.util.StringUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-
-import static java.lang.Math.toIntExact;
-
 import com.google.common.hash.Funnels;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
@@ -75,10 +51,30 @@ import com.microsoft.azure.storage.blob.RehydrationStatus;
 import com.microsoft.azure.storage.blob.StandardBlobTier;
 import com.microsoft.azure.storage.core.Base64;
 
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
-import org.opendedup.grpc.FileInfo;
-import org.opendedup.grpc.FileInfoResponse;
-import org.opendedup.grpc.Stat;
+import org.opendedup.grpc.FileInfo.FileInfoResponse;
+import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.AbstractBatchStore;
+import org.opendedup.sdfs.filestore.AbstractChunkStore;
+import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
+import org.opendedup.sdfs.filestore.StringResult;
+import org.opendedup.sdfs.filestore.cloud.azure.BlobDataIO;
+import org.opendedup.sdfs.filestore.cloud.azure.BlobDataTracker;
+import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
+import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
+import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.CompressionUtils;
+import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.OSValidator;
+import org.opendedup.util.RandomGUID;
+import org.opendedup.util.StringUtils;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 
 /**
  * 
@@ -536,7 +532,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			blob.downloadAttributes();
 			return blob.getMetadata();
 		} catch (Exception e) {
-			SDFSLogger.getLog().info("unable to download attribute", e);
+			SDFSLogger.getLog().error("unable to download attribute", e);
 			throw new IOException(e);
 		}
 	}
@@ -591,7 +587,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			blob.setMetadata(md);
 			blob.uploadMetadata(null, null, opContext);
 		} catch (Exception e) {
-			SDFSLogger.getLog().info("unable to create backup of current volume info", e);
+			SDFSLogger.getLog().error("unable to create backup of current volume info", e);
 		}
 		iter = container.listBlobs("keys/").iterator();
 		if (this.standAlone) {
@@ -1055,7 +1051,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						Iterable<BlobDataTracker> tri = null;
 						if (this.tierImmedately) {
 							long mins = (Long.valueOf(this.tierInDays) * 60 * 1000) + 60000;
-							SDFSLogger.getLog().info("Checking how many archives are " + mins + " back");
+							SDFSLogger.getLog().debug("Checking how many archives are " + mins + " back");
 							tri = bio.getBlobDataTrackers(mins, dseID);
 						} else
 							tri = bio.getBlobDataTrackers(this.tierInDays, dseID);
@@ -1063,12 +1059,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 							String hashString = EncyptUtils.encHashArchiveName(Long.parseLong(bt.getRowKey()),
 									Main.chunkStoreEncryptionEnabled);
 							try {
-								SDFSLogger.getLog().info("Moving  blocks/" + hashString + " to " + this.tier);
+								SDFSLogger.getLog().debug("Moving  blocks/" + hashString + " to " + this.tier);
 								CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
 								blob.downloadAttributes();
 								if (!blob.getProperties().getStandardBlobTier().equals(tier)) {
 									blob.uploadStandardBlobTier(this.tier);
-									SDFSLogger.getLog().info("Moved  blocks/" + hashString + " to "
+									SDFSLogger.getLog().debug("Moved  blocks/" + hashString + " to "
 											+ blob.getProperties().getStandardBlobTier());
 								}
 								bio.removeBlobDataTracker(Long.parseLong(bt.getRowKey()), dseID);
@@ -1130,7 +1126,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 									}
 									HashBlobArchive.removeLocalArchive(k.longValue());
 									if (this.deleteUnclaimed) {
-										SDFSLogger.getLog().info("checking to delete " + k.longValue());
+										SDFSLogger.getLog().debug("checking to delete " + k.longValue());
 										this.verifyDelete(k.longValue());
 									} else {
 										// SDFSLogger.getLog().info("deleting " +

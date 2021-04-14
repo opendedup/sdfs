@@ -50,9 +50,6 @@ public class GetCloudMetaFile {
 		}
 		synchronized (obj) {
 			fevt = SDFSEvent.cfEvent(file);
-			if (dstfile != null && file.contentEquals(dstfile))
-				throw new IOException("local filename in the same as source name");
-
 			File df = null;
 			if (dstfile != null)
 				df = new File(Main.volume.getPath() + File.separator + dstfile);
@@ -65,7 +62,6 @@ public class GetCloudMetaFile {
 				fevt.setCurrentCount(1);
 				fevt.shortMsg = "Downloading [" + file + "]";
 				mf = FileReplicationService.getMF(file);
-				mf.setLocalOwner(true);
 				mf.sync();
 				fevt.endEvent("retrieved file " + file);
 				return (Element) root.cloneNode(true);

@@ -1,7 +1,7 @@
 syntax = "proto3";
 package org.opendedup.grpc;
 option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
-option java_multiple_files = true;
+//option java_multiple_files = true;
 
 message CloudMetaData {
     int64 date = 1;

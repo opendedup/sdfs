@@ -1,7 +1,8 @@
 package org.opendedup.sdfs.filestore.cloud;
 
-import java.io.BufferedInputStream;
+import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,50 +25,54 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.ws.rs.core.MediaType;
+
+import com.google.common.base.Supplier;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
+
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-
-import javax.ws.rs.core.MediaType;
-
-import org.jclouds.domain.Credentials;
-import org.jclouds.domain.Location;
-import org.jclouds.googlecloud.GoogleCredentialsFromJson;
-import com.google.common.base.Supplier;
-import org.jclouds.b2.*;
-import org.opendedup.sdfs.filestore.HashBlobArchive;
-import org.opendedup.sdfs.filestore.StringResult;
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.io.FilenameUtils;
+import org.jclouds.Constants;
 import org.jclouds.ContextBuilder;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.Blob;
-import org.jclouds.blobstore.domain.BlobMetadata;
 import org.jclouds.blobstore.domain.PageSet;
 import org.jclouds.blobstore.domain.StorageMetadata;
 import org.jclouds.blobstore.options.CopyOptions;
 import org.jclouds.blobstore.options.ListContainerOptions;
-import org.jclouds.io.ContentMetadata;
-import org.jclouds.Constants;
+import org.jclouds.domain.Credentials;
+import org.jclouds.domain.Location;
+import org.jclouds.googlecloud.GoogleCredentialsFromJson;
 import org.opendedup.collections.DataArchivedException;
+import org.opendedup.collections.HashExistsException;
+import org.opendedup.grpc.CloudFileInfo.CloudMetaData;
+import org.opendedup.grpc.FileInfo.FileInfoResponse;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.AbstractBatchStore;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
+import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -78,18 +83,6 @@ import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
-
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hashing;
-import com.google.common.io.BaseEncoding;
-
-import static org.jclouds.blobstore.options.PutOptions.Builder.multipart;
-
-import org.opendedup.collections.HashExistsException;
-import org.opendedup.grpc.CloudMetaData;
-import org.opendedup.grpc.FileInfo;
-import org.opendedup.grpc.FileInfoResponse;
-import org.opendedup.grpc.Stat;
 
 /**
  * 

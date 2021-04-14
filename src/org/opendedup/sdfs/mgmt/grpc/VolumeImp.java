@@ -1,10 +1,55 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
-import io.grpc.stub.StreamObserver;
-import org.opendedup.grpc.*;
+import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
+import com.google.common.io.BaseEncoding;
+import com.sun.management.UnixOperatingSystemMXBean;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.opendedup.grpc.Shutdown.ShutdownRequest;
+import org.opendedup.grpc.Shutdown.ShutdownResponse;
+import org.opendedup.grpc.VolumeServiceGrpc;
+import org.opendedup.grpc.FileInfo.errorCodes;
+import org.opendedup.grpc.VolumeServiceOuterClass.AuthenticationRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.AuthenticationResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.CleanStoreRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.CleanStoreResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.ConnectedVolumeInfo;
+import org.opendedup.grpc.VolumeServiceOuterClass.DSEInfo;
+import org.opendedup.grpc.VolumeServiceOuterClass.DSERequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.DSEResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.SetCacheSizeRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.SetCacheSizeResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.SetPasswordRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.SetPasswordResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.SetVolumeCapacityRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.SetVolumeCapacityResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.SpeedRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.SpeedResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.SyncFromVolRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.SyncFromVolResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.SyncVolResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.SystemInfo;
+import org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.HashFunctions;
-
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
@@ -18,22 +63,31 @@ import org.opendedup.sdfs.mgmt.SyncFromConnectedVolume;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.OSValidator;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
-import com.google.common.io.BaseEncoding;
-import com.sun.management.UnixOperatingSystemMXBean;
+import io.grpc.stub.StreamObserver;
+import net.sf.jpam.Pam;
 
 class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
   private static final int EXPIRY_DAYS = 90;
+  
+  private static Pam pam = null;
+  static {
+    if(!OSValidator.isWindows()) {
+      pam =  new Pam("login");
+    }
+  }
 
   @Override
   public void getVolumeInfo(VolumeInfoRequest req, StreamObserver<VolumeInfoResponse> responseObserver) {
+
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.VOLUME_READ)) {
+      VolumeInfoResponse.Builder b = VolumeInfoResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     VolumeInfoResponse reply = Main.volume.toProtoc();
     responseObserver.onNext(reply);
     responseObserver.onCompleted();
@@ -60,6 +114,37 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
         String token = new JWebToken(jwtPayload).toString();
         b.setToken(token);
+      } else if (!OSValidator.isWindows()){
+        if (!pam.authenticateSuccessful(req.getUsername(), req.getPassword())) {
+          b.setError("Unable to Authenticate User");
+          b.setErrorCode(errorCodes.EACCES);
+        } else {
+          List<String> groups = org.apache.hadoop.security.UserGroupInformation.getBestUGI(null, "root").getGroups();
+          JSONArray audArray = new JSONArray();
+          for (String group : groups) {
+            if (group.startsWith("sdfs")) {
+              audArray.put(group);
+            }
+          }
+          if (audArray.isEmpty()) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+          } else {
+
+            JSONObject jwtPayload = new JSONObject();
+            jwtPayload.put("status", 0);
+
+            jwtPayload.put("sub", req.getUsername());
+
+            jwtPayload.put("aud", audArray);
+            LocalDateTime ldt = LocalDateTime.now().plusDays(EXPIRY_DAYS);
+            jwtPayload.put("exp", ldt.toEpochSecond(ZoneOffset.UTC)); // this needs to be configured
+
+            String token = new JWebToken(jwtPayload).toString();
+            b.setToken(token);
+          }
+
+        }
       } else {
         b.setError("Unable to Authenticate User");
         b.setErrorCode(errorCodes.EACCES);
@@ -75,6 +160,14 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   @Override
   public void shutdownVolume(ShutdownRequest req, StreamObserver<ShutdownResponse> responseObserver) {
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+      ShutdownResponse.Builder b = ShutdownResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     ShutdownResponse.Builder b = ShutdownResponse.newBuilder();
     try {
       SDFSLogger.getLog().info("shutting down volume");
@@ -94,6 +187,14 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   @Override
   public void getConnectedVolumes(CloudVolumesRequest request, StreamObserver<CloudVolumesResponse> responseObserver) {
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.VOLUME_READ)) {
+      CloudVolumesResponse.Builder b = CloudVolumesResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     CloudVolumesResponse.Builder b = CloudVolumesResponse.newBuilder();
     try {
       RemoteVolumeInfo[] l = FileReplicationService.getConnectedVolumes();
@@ -110,10 +211,10 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
           info.setPort(vl.port);
           info.setSize(vl.data);
           info.setCompressedSize(vl.compressed);
-          if(vl.sdfsversion != null)
+          if (vl.sdfsversion != null)
             info.setSdfsVersion(vl.sdfsversion);
           info.setLastUpdate(vl.lastupdated);
-            info.setVersion(vl.version);
+          info.setVersion(vl.version);
           b.addVolumeInfo(info);
         }
       }
@@ -131,6 +232,14 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
   @Override
   public void setVolumeCapacity(SetVolumeCapacityRequest request,
       StreamObserver<SetVolumeCapacityResponse> responseObserver) {
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+      SetVolumeCapacityResponse.Builder b = SetVolumeCapacityResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     SetVolumeCapacityResponse.Builder b = SetVolumeCapacityResponse.newBuilder();
     try {
       Main.volume.setCapacity(request.getSize(), true);
@@ -144,10 +253,17 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       responseObserver.onCompleted();
     }
   }
-  
 
   @Override
   public void getGCSchedule(GCScheduleRequest request, StreamObserver<GCScheduleResponse> responseObserver) {
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_READ)) {
+      GCScheduleResponse.Builder b = GCScheduleResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     GCScheduleResponse.Builder b = GCScheduleResponse.newBuilder();
     try {
       b.setSchedule(Main.fDkiskSchedule);
@@ -164,36 +280,53 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   @Override
   public void setPassword(SetPasswordRequest request, StreamObserver<SetPasswordResponse> responseObserver) {
-    SetPasswordResponse.Builder b = SetPasswordResponse.newBuilder();
-    String oldPassword = Main.sdfsPassword;
-    String oeCloudSecretKey = Main.eCloudSecretKey;
-    try {
-      String newPassword = request.getPassword();
+    if (Main.sdfsCliRequireAuth
+        && !IOServer.AuthorizationInterceptor.USER_IDENTITY.get().getSubject().equals("admin")) {
+      SetPasswordResponse.Builder b = SetPasswordResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    } else {
+      SetPasswordResponse.Builder b = SetPasswordResponse.newBuilder();
+      String oldPassword = Main.sdfsPassword;
+      String oeCloudSecretKey = Main.eCloudSecretKey;
+      try {
+        String newPassword = request.getPassword();
 
-      String password = HashFunctions.getSHAHash(newPassword.getBytes(), Main.sdfsPasswordSalt.getBytes());
-      Main.sdfsPassword = password;
+        String password = HashFunctions.getSHAHash(newPassword.getBytes(), Main.sdfsPasswordSalt.getBytes());
+        Main.sdfsPassword = password;
 
-      if (Main.eCloudSecretKey != null) {
-        byte[] ec = EncryptUtils.encryptCBC(Main.cloudSecretKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
-        Main.eCloudSecretKey = BaseEncoding.base64Url().encode(ec);
+        if (Main.eCloudSecretKey != null) {
+          byte[] ec = EncryptUtils.encryptCBC(Main.cloudSecretKey.getBytes(), newPassword, Main.chunkStoreEncryptionIV);
+          Main.eCloudSecretKey = BaseEncoding.base64Url().encode(ec);
+        }
+        Main.volume.writeUpdate();
+        responseObserver.onNext(b.build());
+        responseObserver.onCompleted();
+      } catch (Exception e) {
+        SDFSLogger.getLog().error("password could not be changed" + e.toString(), e);
+        Main.sdfsPassword = oldPassword;
+        Main.eCloudSecretKey = oeCloudSecretKey;
+        b.setError("unable to fulfill request");
+        b.setErrorCode(errorCodes.EIO);
+        responseObserver.onNext(b.build());
+        responseObserver.onCompleted();
       }
-      Main.volume.writeUpdate();
-      responseObserver.onNext(b.build());
-      responseObserver.onCompleted();
-    } catch (Exception e) {
-      SDFSLogger.getLog().error("password could not be changed" + e.toString(), e);
-      Main.sdfsPassword = oldPassword;
-      Main.eCloudSecretKey = oeCloudSecretKey;
-      b.setError("unable to fulfill request");
-      b.setErrorCode(errorCodes.EIO);
-      responseObserver.onNext(b.build());
-      responseObserver.onCompleted();
     }
 
   }
 
   @Override
   public void setReadSpeed(SpeedRequest request, StreamObserver<SpeedResponse> responseObserver) {
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+      SpeedResponse.Builder b = SpeedResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     SpeedResponse.Builder b = SpeedResponse.newBuilder();
     try {
       SetReadSpeed r = new SetReadSpeed();
@@ -201,7 +334,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       b.setEventID(r.evt.uid);
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();
-    }catch (Exception e) {
+    } catch (Exception e) {
       SDFSLogger.getLog().error("unable to fulfill request", e);
       b.setError("unable to fulfill request");
       b.setErrorCode(errorCodes.EIO);
@@ -212,6 +345,14 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   @Override
   public void setWriteSpeed(SpeedRequest request, StreamObserver<SpeedResponse> responseObserver) {
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+      SpeedResponse.Builder b = SpeedResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     SpeedResponse.Builder b = SpeedResponse.newBuilder();
     try {
       SetWriteSpeed r = new SetWriteSpeed();
@@ -219,7 +360,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       b.setEventID(r.evt.uid);
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();
-    }catch (Exception e) {
+    } catch (Exception e) {
       SDFSLogger.getLog().error("unable to fulfill request", e);
       b.setError("unable to fulfill request");
       b.setErrorCode(errorCodes.EIO);
@@ -230,6 +371,14 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   @Override
   public void syncFromCloudVolume(SyncFromVolRequest request, StreamObserver<SyncFromVolResponse> responseObserver) {
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
+      SyncFromVolResponse.Builder b = SyncFromVolResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     SyncFromVolResponse.Builder b = SyncFromVolResponse.newBuilder();
     try {
       SyncFromConnectedVolume v = new SyncFromConnectedVolume();
@@ -248,6 +397,14 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   @Override
   public void syncCloudVolume(SyncVolRequest request, StreamObserver<SyncVolResponse> responseObserver) {
+    if (Main.sdfsCliRequireAuth && !AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
+      SyncVolResponse.Builder b = SyncVolResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     SyncVolResponse.Builder b = SyncVolResponse.newBuilder();
     try {
       SyncFSCmd f = new SyncFSCmd();
@@ -266,6 +423,14 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   @Override
   public void setCacheSize(SetCacheSizeRequest request, StreamObserver<SetCacheSizeResponse> responseObserver) {
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+      SetCacheSizeResponse.Builder b = SetCacheSizeResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     SetCacheSizeResponse.Builder b = SetCacheSizeResponse.newBuilder();
     try {
       SetCacheSize scz = new SetCacheSize();
@@ -280,10 +445,19 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();
     }
+
   }
 
   @Override
   public void systemInfo(SystemInfoRequest request, StreamObserver<SystemInfoResponse> responseObserver) {
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_READ)) {
+      SystemInfoResponse.Builder b = SystemInfoResponse.newBuilder();
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     SystemInfoResponse.Builder b = SystemInfoResponse.newBuilder();
     SystemInfo.Builder info = SystemInfo.newBuilder();
     try {
@@ -312,10 +486,32 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   }
 
+  @Override
+  public void setMaxAge(SetMaxAgeRequest request, StreamObserver<SetMaxAgeResponse> responseObserver) {
+    SetMaxAgeResponse.Builder b = SetMaxAgeResponse.newBuilder();
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
+    Main.maxAge = request.getMaxAge();
+    responseObserver.onNext(b.build());
+    responseObserver.onCompleted();
+
+  }
 
   @Override
   public void dSEInfo(DSERequest request, StreamObserver<DSEResponse> responseObserver) {
     DSEResponse.Builder b = DSEResponse.newBuilder();
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_READ)) {
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     DSEInfo.Builder info = DSEInfo.newBuilder();
     try {
       info.setMaxSize(HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size);
@@ -335,6 +531,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       info.setEncryptionKey(Main.chunkStoreEncryptionKey);
       info.setEncryptionIV(Main.chunkStoreEncryptionIV);
       info.setBucketName(HCServiceProxy.getChunkStore().getName());
+      info.setMaxAge(Main.maxAge);
       if (Main.cloudAccessKey != null)
         info.setCloudAccessKey(Main.cloudAccessKey);
       if (Main.cloudSecretKey != null)
@@ -355,11 +552,19 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
   @Override
   public void cleanStore(CleanStoreRequest request, StreamObserver<CleanStoreResponse> responseObserver) {
-    Thread th = new Thread(new RunCleanStore(request.getCompact()));
+
     CleanStoreResponse.Builder b = CleanStoreResponse.newBuilder();
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
+    Thread th = new Thread(new RunCleanStore(request.getCompact()));
     th.start();
     try {
-      while(ManualGC.evt == null) {
+      while (ManualGC.evt == null) {
         Thread.sleep(1);
       }
       b.setEventID(ManualGC.evt.uid);
@@ -377,10 +582,18 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
   @Override
   public void deleteCloudVolume(DeleteCloudVolumeRequest request,
       StreamObserver<DeleteCloudVolumeResponse> responseObserver) {
+
+    DeleteCloudVolumeResponse.Builder b = DeleteCloudVolumeResponse.newBuilder();
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
     org.opendedup.sdfs.notification.SDFSEvent evt = org.opendedup.sdfs.notification.SDFSEvent
         .deleteCloudVolumeEvent(request.getVolumeid());
     Thread th = new Thread(new DeleteCloudVolume(evt, request.getVolumeid()));
-    DeleteCloudVolumeResponse.Builder b = DeleteCloudVolumeResponse.newBuilder();
     th.start();
     try {
       b.setEventID(evt.uid);

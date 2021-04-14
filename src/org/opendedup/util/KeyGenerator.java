@@ -40,9 +40,13 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.jce.X509Principal;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.x509.X509V1CertificateGenerator;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.opendedup.logging.SDFSLogger;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
@@ -68,7 +72,7 @@ public class KeyGenerator {
 		KeyPair keyPair = keyPairGenerator.generateKeyPair();
 
 		// GENERATE THE X509 CERTIFICATE
-		X509V1CertificateGenerator certGen = new X509V1CertificateGenerator();
+		X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
 
 		certGen.setSerialNumber(BigInteger.valueOf(System.currentTimeMillis()));
 		certGen.setIssuerDN(new X509Principal("CN=" + hostName + ", OU=None, O=None L=None, C=None"));
@@ -77,7 +81,8 @@ public class KeyGenerator {
 		certGen.setNotAfter(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10)));
 		certGen.setPublicKey(keyPair.getPublic());
 		certGen.setSignatureAlgorithm("SHA256WithRSAEncryption");
-
+		GeneralNames subjectAltName = new GeneralNames(new GeneralName(GeneralName.dNSName, hostName));
+		certGen.addExtension(X509Extensions.SubjectAlternativeName, false, subjectAltName);
 		X509Certificate cert = certGen.generate(keyPair.getPrivate(), "BC");
 
 		keyStore.setKeyEntry("sdfs", keyPair.getPrivate(), "sdfs".toCharArray(),

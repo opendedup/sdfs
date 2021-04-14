@@ -12,10 +12,8 @@ OPTIND=1
 while getopts "v:z:f:p:e:anmqzcdshcrlw" opt; do
   case $opt in
     v)
-        echo "$OPTARG"
         CFG="/etc/sdfs/$OPTARG-volume-cfg.xml"
-        PF="$OPTARG.pid"
-        echo "Yahoo $CFG";;
+        PF="$OPTARG.pid";;
     z)
       MEM=$OPTARG;;
     f)

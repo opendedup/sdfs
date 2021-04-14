@@ -1,8 +1,8 @@
-FROM ubuntu:18.04
-
-LABEL email=samsilverberg@google.com
+FROM ubuntu:20.04
+ARG DEBIAN_FRONTEND=noninteractive
+LABEL email=sam.silverberg@gmail.com
 LABEL author="Sam Silverberg"
-RUN apt update && apt upgrade -y && apt install -y \
+RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
 		openjdk-11-jdk \
         maven \
         libfuse2 \
@@ -14,12 +14,14 @@ RUN apt update && apt upgrade -y && apt install -y \
         build-essential \
         libxml2-utils \
         fuse \
-        alien
+        alien \
+        git
 
 RUN gem install fpm
+COPY .git /sdfs-build/
 COPY pom.xml /sdfs-build/
 WORKDIR "/sdfs-build"
-ENV VERSION=3.11.0
+ENV VERSION=3.12.0
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
 WORKDIR "/sdfs-build/"
 RUN mvn dependency:copy-dependencies

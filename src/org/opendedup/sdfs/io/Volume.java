@@ -26,9 +26,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.opendedup.grpc.MessageQueueInfoResponse;
-import org.opendedup.grpc.VolumeInfoResponse;
-import org.opendedup.grpc.MessageQueueInfoResponse.MQType;
+import com.google.common.util.concurrent.AtomicDouble;
+
+import org.opendedup.grpc.VolumeServiceOuterClass.MessageQueueInfoResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.MessageQueueInfoResponse.MQType;
+import org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -43,8 +45,6 @@ import org.opendedup.util.StringUtils;
 import org.opendedup.util.XMLUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import com.google.common.util.concurrent.AtomicDouble;
 
 public class Volume {
 
@@ -592,7 +592,7 @@ public class Volume {
 	}
 
 	public VolumeInfoResponse toProtoc() {
-		org.opendedup.grpc.VolumeInfoResponse.Builder b = VolumeInfoResponse.newBuilder().setPath(path)
+		VolumeInfoResponse.Builder b = VolumeInfoResponse.newBuilder().setPath(path)
 		.setName(this.name).setCurrentSize(this.currentSize.get()).setCapactity(this.capacity)
 		.setMaxPercentageFull(this.fullPercentage).setDuplicateBytes(this.getDuplicateBytes())
 		.setReadBytes(this.getReadBytes()).setWriteBytes(this.getActualWriteBytes()).setSerialNumber(this.serialNumber)

@@ -18,9 +18,9 @@
  *******************************************************************************/
 package org.opendedup.sdfs.filestore.cloud;
 
+import static java.lang.Math.toIntExact;
+
 import java.io.BufferedInputStream;
-
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -46,11 +46,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -60,27 +60,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.crypto.spec.IvParameterSpec;
-
-import static java.lang.Math.toIntExact;
-
-import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.opendedup.collections.DataArchivedException;
-import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.AbstractBatchStore;
-import org.opendedup.sdfs.filestore.AbstractChunkStore;
-import org.opendedup.sdfs.filestore.ChunkData;
-import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.opendedup.util.CompressionUtils;
-import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.OSValidator;
-import org.opendedup.util.PassPhrase;
-import org.opendedup.util.RandomGUID;
-import org.opendedup.util.StringUtils;
-import org.w3c.dom.Element;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -95,6 +74,7 @@ import com.amazonaws.auth.SignerFactory;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.handlers.RequestHandler2;
+import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -107,17 +87,16 @@ import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.BucketLifecycleConfiguration.Transition;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
-import com.amazonaws.services.s3.model.ObjectListing;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PartETag;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.regions.Region;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.GlacierJobParameters;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PartETag;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.RestoreObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -126,6 +105,11 @@ import com.amazonaws.services.s3.model.Tier;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.amazonaws.services.s3.model.lifecycle.LifecycleFilter;
 import com.amazonaws.services.s3.model.lifecycle.LifecyclePrefixPredicate;
+import com.amazonaws.services.s3.transfer.Download;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -135,22 +119,33 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 
+import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
 import org.opendedup.fsync.SyncFSScheduler;
-import org.opendedup.grpc.CloudMetaData;
-import org.opendedup.grpc.FileInfoResponse;
-import org.opendedup.grpc.Stat;
+import org.opendedup.grpc.CloudFileInfo.CloudMetaData;
+import org.opendedup.grpc.FileInfo.FileInfoResponse;
+import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.AbstractBatchStore;
+import org.opendedup.sdfs.filestore.AbstractChunkStore;
+import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.StringResult;
+import org.opendedup.sdfs.filestore.cloud.gcp.GCPSessionCredentials;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
-import org.opendedup.sdfs.filestore.cloud.gcp.GCPSessionCredentials;
-
-import com.amazonaws.services.s3.transfer.Download;
-import com.amazonaws.services.s3.transfer.TransferManager;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
+import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.CompressionUtils;
+import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.OSValidator;
+import org.opendedup.util.PassPhrase;
+import org.opendedup.util.RandomGUID;
+import org.opendedup.util.StringUtils;
+import org.w3c.dom.Element;
 
 /**
  *
@@ -2115,7 +2110,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		try {
 			if (this.simpleS3) {
 				S3Object obj = null;
-				SDFSLogger.getLog().info("downloading " + pp + "/" + haName);
+				SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
 				obj = s3Service.getObject(this.name, pp + "/" + haName);
 				BufferedInputStream in = new BufferedInputStream(obj.getObjectContent());
 				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(p));
@@ -2131,7 +2126,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} catch (Exception e1) {
 				}
 			} else {
-				SDFSLogger.getLog().info("downloading " + pp + "/" + haName);
+				SDFSLogger.getLog().debug("downloading " + pp + "/" + haName);
 				this.multiPartDownload(pp + "/" + haName, p);
 				mp = this.getUserMetaData(pp + "/" + haName);
 				if (md5sum && mp.containsKey("md5sum")) {
@@ -2338,7 +2333,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (t_size >= 0) {
 				HashBlobArchive.setLength(t_size);
 			}
-			SDFSLogger.getLog().info("length = " + t_compressedsize + " " + t_size);
+			SDFSLogger.getLog().debug("length = " + t_compressedsize + " " + t_size);
 			return 0;
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -2966,7 +2961,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	private void refreshObject(long id) throws IOException {
 		String km = "blocks/" + EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
-		SDFSLogger.getLog().info("Refreshing " + km);
+		SDFSLogger.getLog().debug("Refreshing " + km);
 		CopyObjectRequest creq = new CopyObjectRequest(name, km + mdExt, name, km + mdExt);
 		s3Service.copyObject(creq);
 		creq = new CopyObjectRequest(name, km + this.dExt, name, km + this.dExt);

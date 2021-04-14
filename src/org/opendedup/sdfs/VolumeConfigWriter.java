@@ -109,6 +109,7 @@ public class VolumeConfigWriter {
 	String sdfsCliListenAddr = "localhost";
 	boolean sdfsCliSSL = true;
 	boolean sdfsCliRequireAuth = false;
+	boolean sdfsCliRequireMutualTLSAuth = false;
 	int sdfsCliPort = 6442;
 	boolean sdfsCliEnabled = true;
 	String bucketLocation = null;
@@ -137,11 +138,11 @@ public class VolumeConfigWriter {
 	private String userAgentPrefix = null;
 	private boolean encryptConfig = false;
 	private String glacierClass = "standard";
-	private long maxAge = 0;
+	private long maxAge = -1;
 	private String topic;
 	private String subscription;
 	private String gcpProject;
-	private String credsFile;
+	private long rmthreashold = 15 * 60 * 1000;
 
 	public VolumeConfigWriter() {
 		sn = new Random().nextLong();
@@ -173,6 +174,9 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("sdfscli-require-auth")) {
 			this.sdfsCliRequireAuth = true;
+		}
+		if (cmd.hasOption("sdfscli-require-mutual-tls")) {
+			this.sdfsCliRequireMutualTLSAuth = true;
 		}
 
 		if (cmd.hasOption("sdfscli-listen-port")) {
@@ -408,6 +412,9 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("user-agent-prefix")) {
 			this.userAgentPrefix = cmd.getOptionValue("user-agent-prefix");
+		}
+		if (cmd.hasOption("hashtable-rm-threshold")) {
+			this.rmthreashold = Long.parseLong(cmd.getOptionValue("hashtable-rm-threshold"));
 		}
 		if (this.awsEnabled || minIOEnabled) {
 			if (awsAim || (cmd.hasOption("cloud-secret-key") && cmd.hasOption("cloud-access-key"))
@@ -680,6 +687,7 @@ public class VolumeConfigWriter {
 		Element cs = xmldoc.createElement("local-chunkstore");
 		cs.setAttribute("average-chunk-size", Integer.toString(this.avgPgSz));
 		cs.setAttribute("allocation-size", Long.toString(this.chunk_store_allocation_size));
+		cs.setAttribute("hashtable-rm-threshold", Long.toString(this.rmthreashold));
 		cs.setAttribute("gc-class", this.gc_class);
 		cs.setAttribute("chunk-store", this.chunk_store_data_location);
 		cs.setAttribute("fpp", ".001");
@@ -698,6 +706,7 @@ public class VolumeConfigWriter {
 
 		Element sdfscli = xmldoc.createElement("sdfscli");
 		sdfscli.setAttribute("enable-auth", Boolean.toString(this.sdfsCliRequireAuth));
+		sdfscli.setAttribute("enable-mutual-tls-auth", Boolean.toString(this.sdfsCliRequireMutualTLSAuth));
 		sdfscli.setAttribute("listen-address", this.sdfsCliListenAddr);
 		sdfscli.setAttribute("use-ssl", Boolean.toString(this.sdfsCliSSL));
 		try {
@@ -711,7 +720,6 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("salt", this.sdfsCliSalt);
 		sdfscli.setAttribute("port", Integer.toString(this.sdfsCliPort));
 		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
-		
 
 		root.appendChild(sdfscli);
 		if (this.backblazeEnabled) {
@@ -934,6 +942,9 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("sdfscli-require-auth")
 				.withDescription("Require authentication to connect to the sdfscli managment interface").hasArg(false)
 				.create());
+		options.addOption(OptionBuilder.withLongOpt("sdfscli-require-mutual-tls")
+				.withDescription("Require authentication to connect to the sdfscli managment interface").hasArg(false)
+				.create());
 		options.addOption(OptionBuilder.withLongOpt("sdfscli-disable-ssl")
 				.withDescription("disables ssl to management interface").hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("sdfscli-listen-port")
@@ -953,6 +964,10 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"IP Listenting address for the sdfscli management interface. This defaults to \"localhost\"")
 				.hasArg(true).withArgName("ip address or host name").create());
+		options.addOption(OptionBuilder.withLongOpt("hashtable-rm-threshold").withDescription(
+				"The threashold in milliseconds to wait for unclaimed chucks to be available for garbage collection"
+						+ "The default is 15 minutes or 900000 ms,")
+				.hasArg(true).withArgName("time in milliseconds").create());
 		options.addOption(
 				OptionBuilder.withLongOpt("base-path")
 						.withDescription("the folder path for all volume data and meta data.\n Defaults to: \n "
