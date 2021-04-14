@@ -117,6 +117,29 @@ sudo mkdir /opt/sdfs1
 sudo docker run --name=sdfs1 --env BUCKET_NAME=ABUCKETNAME --env TYPE=GOOGLE --env=GCS_CREDS_FILE=/keys/service_account_key.json --env=PUBSUB_PROJECT=A_GCP_PROJECT --env CAPACITY=1TB --volume=/home/A_USER/keys:/keys --volume /home/A_USER/sdfs1:/opt/sdfs -p 0.0.0.0:6442:6442 -d gcr.io/hybrics/hybrics:3.12
 ```
 
+## Build Instructions
+
+	Linux Version Must be build from a Linux System and Windows must be build from a Windows System
+	
+	Linux build Requirements:
+		1. Docker
+		2. git 
+
+	
+	```bash
+	git clone https://github.com/opendedup/sdfs.git
+	cd sdfs
+	git fetch
+	git checkout -b 3.12 origin/3.12
+	#Build image with packages
+	docker build -t sdfs-package:latest --target build -f Dockerbuild.localbuild .
+	mkdir pkgs
+	#Extract Package
+	docker run --rm sdfs-package:latest | tar --extract --verbose -C pkgs/
+	#Build docker sdfs container
+	docker build -t sdfs:latest -f Dockerbuild.localbuild .
+	```
+
 
 
 

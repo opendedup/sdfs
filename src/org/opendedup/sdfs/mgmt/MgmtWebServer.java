@@ -1175,7 +1175,7 @@ public class MgmtWebServer implements Container {
 			}
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 			grpcServer = new IOServer();
-			grpcServer.start(useSSL,Main.sdfsCliListenAddr,Main.sdfsCliPort);
+			grpcServer.start(useSSL,Main.sdfsCliRequireMutualTLSAuth,Main.sdfsCliListenAddr, Main.sdfsCliPort);
 
 			if (Main.volume.rabbitMQNode != null) {
 				try {
