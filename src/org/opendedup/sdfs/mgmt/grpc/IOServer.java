@@ -38,6 +38,12 @@ public class IOServer {
     return GrpcSslContexts.configure(sslClientContextBuilder);
   }
 
+  private SslContextBuilder getSslContextBuilder(String certChainFilePath, String privateKeyFilePath,String clientCertPath) {
+    SslContextBuilder sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath),
+        new File(privateKeyFilePath));
+    return GrpcSslContexts.configure(sslClientContextBuilder);
+  }
+
   public static boolean keyFileExists() {
     String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
     String certChainFilePath = keydir + File.separator + "tls_key.pem";
@@ -58,10 +64,11 @@ public class IOServer {
     return true;
   }
 
-  public void start(boolean useSSL,String host,int port) throws IOException {
+  public void start(boolean useSSL,boolean useClientTLS,String host,int port) throws IOException {
     String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
     String certChainFilePath = keydir + File.separator + "tls_key.pem";
     String privateKeyFilePath = keydir + File.separator + "tls_key.key";
+    String clientKeyFilePath = keydir + File.separator + "client.key";
     Map<String, String> env = System.getenv();
     if (env.containsKey("SDFS_PRIVATE_KEY")) {
       privateKeyFilePath = env.get("SDFS_PRIVATE_KEY");
@@ -75,8 +82,14 @@ public class IOServer {
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
         .addService(new FileIOServiceImpl()).intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl());
     if (useSSL) {
-      b.sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath).build());
+      if(useClientTLS) {
+        b.sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath,clientKeyFilePath).build());
+      }else {
+        b.sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath).build());
+      }
+      
     }
+    
     server = b.build().start();
     logger.info("Server started, listening on " + host + ":"+port + " tls = " + useSSL);
     Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -98,16 +111,6 @@ public class IOServer {
   public void stop() throws InterruptedException {
     if (server != null) {
       server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * Await termination on the main thread since the grpc library uses daemon
-   * threads.
-   */
-  private void blockUntilShutdown() throws InterruptedException {
-    if (server != null) {
-      server.awaitTermination();
     }
   }
 

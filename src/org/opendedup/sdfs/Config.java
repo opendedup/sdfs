@@ -86,6 +86,7 @@ public class Config {
 			Main.sdfsCliSSL = Boolean.parseBoolean(cli.getAttribute("use-ssl"));
 		}
 		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli.getAttribute("enable-auth"));
+		Main.sdfsCliRequireMutualTLSAuth = Boolean.parseBoolean(cli.getAttribute("enable-mutual-tls-auth"));
 		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
 		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
 

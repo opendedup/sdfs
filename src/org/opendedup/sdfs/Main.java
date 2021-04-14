@@ -67,6 +67,7 @@ public class Main {
 
 	public static boolean sdfsCliSSL = true;
 	public static boolean sdfsCliRequireAuth = false;
+	public static boolean sdfsCliRequireMutualTLSAuth = false;
 	public static int sdfsCliPort = 6442;
 	public static boolean sdfsCliEnabled = true;
 	public static String sdfsCliListenAddr = "localhost";
