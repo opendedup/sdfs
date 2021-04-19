@@ -125,7 +125,7 @@ sudo docker run --name=sdfs1 --env BUCKET_NAME=ABUCKETNAME --env TYPE=GOOGLE --e
 		1. Docker
 		2. git 
 
-	
+	Docker Build Steps	
 	```bash
 	git clone https://github.com/opendedup/sdfs.git
 	cd sdfs

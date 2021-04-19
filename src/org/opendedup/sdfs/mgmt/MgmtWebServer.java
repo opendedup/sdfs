@@ -211,712 +211,710 @@ public class MgmtWebServer implements Container {
 				result.setAttribute("msg", "could not authenticate user");
 				if (auth) {
 					switch (cmd) {
-						case "shutdown":
-							new Shutdown().getResult();
-							result.setAttribute("status", "success");
-							result.setAttribute("msg", "shutting down volume manager");
-							break;
-						case "info":
-							try {
-								boolean shortList = false;
-								if (qry.containsKey("short")) {
-									shortList = Boolean.parseBoolean(qry.get("short"));
-								}
-								Element msg = new GetAttributes().getResult(cmdOptions, file, shortList);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().debug("info", e);
+					case "shutdown":
+						new Shutdown().getResult();
+						result.setAttribute("status", "success");
+						result.setAttribute("msg", "shutting down volume manager");
+						break;
+					case "info":
+						try {
+							boolean shortList = false;
+							if (qry.containsKey("short")) {
+								shortList = Boolean.parseBoolean(qry.get("short"));
 							}
-							break;
-						case "setattribute":
-							try {
-								String name = qry.get("name");
-								String value = null;
-								if (qry.containsKey("value"))
-									value = qry.get("value");
-								SetFileAttribute.getResult(file, name, value);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("info", e);
-							}
-							break;
-						case "ostevtgetseqnum":
-							try {
-								Element msg = OSTEventStore.getCurrentSeqNum();
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("info", e);
-							}
-							break;
-						case "ostevtresseqnum":
-							try {
-								Element msg = OSTEventStore.reserverSeqNum();
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("info", e);
-							}
-							break;
-						case "ostevtset":
-							try {
-								long seqnum = Long.parseLong(qry.get("num"));
-								String data = qry.get("event");
-								String payload = null;
-								if (qry.containsKey("payload"))
-									payload = qry.get("payload");
-								OSTEventStore.AddOSTEvent(seqnum, data, payload);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("info", e);
-							}
-							break;
-						case "ostevtsetpayload":
-							try {
-								long seqnum = Long.parseLong(qry.get("num"));
-								String payload = qry.get("payload");
-								OSTEventStore.SetOSTEventPayload(seqnum, payload);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("info", e);
-							}
-							break;
-						case "ostevtget":
-							try {
-								long seqnum = Long.parseLong(qry.get("num"));
-								Element msg = OSTEventStore.getOSTEvent(seqnum);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().debug("info", e);
-							}
-							break;
-						case "ostevtdelete":
-							try {
-								long seqnum = Long.parseLong(qry.get("num"));
-								OSTEventStore.DeleteOSTEvent(seqnum);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("info", e);
-							}
-							break;
-						case "ostevtgetall":
-							try {
-								Element msg = OSTEventStore.getOSTEvents();
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("info", e);
-							}
-							break;
-						case "connectedvolumes":
-							try {
-								Element msg = new GetConnectedVolumes().getResult();
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("connectedvolumes", e);
-							}
-							break;
-						case "raidbuckets":
-							try {
-								Element msg = new GetRaidVolumes().getResult();
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("connectedvolumes", e);
-							}
-							break;
-						case "syncvolume":
-							try {
-								new SyncFromConnectedVolume().getResult(Long.parseLong(qry.get("id")));
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("syncvolume", e);
-							}
-							break;
-						case "deletevolume":
-							try {
-								new DeleteConnectedVolume().getResult(Long.parseLong(qry.get("id")));
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("deletevolume", e);
-							}
-							break;
-						case "deletefile":
-							try {
-								String changeid = null;
-								if (qry.containsKey("changeid")) {
-									changeid = qry.get("changeid");
-								}
-								boolean rmlock = false;
-								boolean localonly = false;
-								if (qry.containsKey("retentionlock"))
-									rmlock = Boolean.parseBoolean(qry.get("retentionlock"));
-								if (qry.containsKey("localonly"))
-									localonly = Boolean.parseBoolean(qry.get("localonly"));
-								String msg = new DeleteFileCmd().getResult(cmdOptions, file, changeid, rmlock,
-										localonly);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.createTextNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().debug("deletefile", e);
-							}
-							break;
-						case "cloudfile":
-							try {
-
-								String dstfile = null;
-								if (qry.containsKey("dstfile")) {
-									dstfile = qry.get("dstfile");
-								}
-								boolean overwrite = false;
-								String changeid = null;
-								if (qry.containsKey("changeid"))
-									changeid = qry.get("changeid");
-								if (qry.containsKey("overwrite")) {
-									overwrite = Boolean.parseBoolean(qry.get("overwrite"));
-								}
-								Element msg = new GetCloudFile().getResult(file, dstfile, overwrite, changeid);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("cloudfile", e);
-							}
-							break;
-
-						case "syncfssize":
-							try {
-
-								Element msg = new FileSystemusageCheck().getResult();
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("cloudmfile", e);
-							}
-							break;
-
-						case "cloudmfile":
-							try {
-
-								String dstfile = null;
-								if (qry.containsKey("dstfile")) {
-									dstfile = qry.get("dstfile");
-								}
-								String changeid = qry.get("changeid");
-								Element msg = new GetCloudMetaFile().getResult(file, dstfile, changeid);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("cloudmfile", e);
-							}
-							break;
-						/*
-						 * case "clouddbfile": try { String changeid = qry.get("changeid"); Element msg
-						 * = new GetCloudDBFile().getResult(file, changeid);
-						 * result.setAttribute("status", "success"); result.setAttribute("msg",
-						 * "command completed successfully"); result.appendChild(doc.adoptNode(msg)); }
-						 * catch (IOException e) { result.setAttribute("status", "failed");
-						 * result.setAttribute("msg", e.toString());
-						 * SDFSLogger.getLog().warn("clouddbfile", e); } break;
-						 */
-						case "setcachesz":
-							try {
-								Element msg = new SetCacheSize().getResult(qry.get("sz"));
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn(e);
-							}
-							break;
-						case "setreadspeed":
-							try {
-								Element msg = new SetReadSpeed().getResult(qry.get("sp"));
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("setcachesz", e);
-							}
-							break;
-						case "syncfiles":
-
-							try {
-								Element msg = new SyncFSCmd().getResult();
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("syncfiles", e);
-							}
-							break;
-						case "setwritespeed":
-							try {
-								Element msg = new SetWriteSpeed().getResult(qry.get("sp"));
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("setwritespeed", e);
-							}
-							break;
-						case "deletearchive":
-
-							try {
-								String msg = new DeleteArchiveCmd().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.createTextNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("deletearchive", e);
-							}
-							break;
-						case "makefolder":
-							try {
-
-								String msg = new MakeFolderCmd().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.createTextNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("makefolder", e);
-							}
-							break;
-						case "copyextents":
-							try {
-								String srcfile = qry.get("srcfile");
-								String dstfile = qry.get("dstfile");
-								long sstart = Long.parseLong(qry.get("sstart"));
-								long len = Long.parseLong(qry.get("len"));
-								long dstart = Long.parseLong(qry.get("dstart"));
-
-								Element msg = new CopyExtents().getResult(srcfile, dstfile, sstart, len, dstart);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("copyextents", e);
-							}
-							break;
-
-						case "filteredinfo":
-							try {
-								boolean includeFiles = Boolean.parseBoolean(qry.get("includefiles"));
-								boolean includeFolders = Boolean.parseBoolean(qry.get("includefolders"));
-								int level = Integer.parseInt(qry.get("level"));
-								Element msg = new GetFilteredFileAttributes().getResult(cmdOptions, file, includeFiles,
-										includeFolders, level);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("filteredinfo", e);
-							}
-						case "dse-info":
-							try {
-								Element msg = new GetDSE().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("dse-info", e);
-							}
-							break;
-						case "close-file":
-							long fd = -1;
-							if (qry.containsKey("fd"))
-								fd = Long.parseLong(qry.get("fd"));
-							boolean written = false;
-							if (qry.containsKey("written"))
-								written = Boolean.parseBoolean(qry.get("written"));
-							new CloseFile().getResult(cmdOptions, written, file, fd);
+							Element msg = new GetAttributes().getResult(cmdOptions, file, shortList);
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", "command completed successfully");
-							break;
-						case "get-gc-schedule":
-							try {
-								Element msg = new GetGCSchedule().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().debug("info", e);
+						}
+						break;
+					case "setattribute":
+						try {
+							String name = qry.get("name");
+							String value = null;
+							if (qry.containsKey("value"))
+								value = qry.get("value");
+							SetFileAttribute.getResult(file, name, value);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info", e);
+						}
+						break;
+					case "ostevtgetseqnum":
+						try {
+							Element msg = OSTEventStore.getCurrentSeqNum();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info", e);
+						}
+						break;
+					case "ostevtresseqnum":
+						try {
+							Element msg = OSTEventStore.reserverSeqNum();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info", e);
+						}
+						break;
+					case "ostevtset":
+						try {
+							long seqnum = Long.parseLong(qry.get("num"));
+							String data = qry.get("event");
+							String payload = null;
+							if (qry.containsKey("payload"))
+								payload = qry.get("payload");
+							OSTEventStore.AddOSTEvent(seqnum, data, payload);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
 
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("get-gc-schedule", e);
-							}
-							break;
-						case "open-files":
-							try {
-								Element msg = new GetOpenFiles().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("open-files", e);
-							}
-							break;
-						case "debug-info":
-							try {
-								Element msg = new GetDebug().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("debug-info", e);
-							}
-							break; /*
-									 * else if (cmd.equalsIgnoreCase("events")) { try { String msg = new
-									 * GetEvents().getResult(cmdOptions, file); result =
-									 * "<result status=\"success\" msg=\"command completed successfully\">" ; result
-									 * = result + msg; result = result + "</result>"; } catch (IOException e) {
-									 * result.setAttribute("status", "failed"); result.setAttribute("msg",
-									 * e.toString()); SDFSLogger.getLog().warn(e); } }
-									 */
-						case "volume-info":
-							try {
-								Element msg = new GetVolume().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								result.appendChild(doc.adoptNode(msg));
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("volume-info", e);
-							}
-							break;
-						case "changepassword":
-							try {
-								String msg = new SetPasswordCmd().getResult("", qry.get("newpassword"));
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("changepassword", e);
-							}
-							break;
-						case "snapshot":
-							try {
-								Element msg = new SnapshotCmd().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "snapshot finished successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("snapshot", e);
-							}
-							break;
-						case "restorearchive":
-							try {
-								Element msg = new RestoreArchiveCmd().getResult(file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "replication finished successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("error", e);
-							}
-							break;
-						case "importarchive":
-							try {
-								String server = qry.get("server");
-								String password = qry.get("spasswd");
-								int port = Integer.parseInt(qry.get("port"));
-								boolean lz4 = false;
-								int maxSz = 30;
-								boolean useSSL = false;
-								if (qry.containsKey("maxsz"))
-									maxSz = Integer.parseInt(qry.get("maxsz"));
-								if (qry.containsKey("useSSL"))
-									useSSL = Boolean.parseBoolean(qry.get("useSSL"));
-								if (qry.containsKey("uselz4"))
-									lz4 = Boolean.parseBoolean(qry.get("uselz4"));
-								Element msg = new ImportArchiveCmd().getResult(file, cmdOptions, server, password, port,
-										maxSz, useSSL, lz4);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "replication started successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("importarchive", e);
-							}
-							break;
-						case "importfile":
-							try {
-								String srcFile = qry.get("srcfile");
-								String destFile = qry.get("dstfile");
-								String server = qry.get("server");
-								int maxsz = Integer.parseInt(qry.get("maxsz"));
-								Element msg = new ImportFileCmd().getResult(srcFile, destFile, server, maxsz);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "replication started successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("importarchive", e);
-							}
-							break;
-						case "batchgetblocks":
-							byte[] rb = com.google.common.io.BaseEncoding.base64Url()
-									.decode(request.getParameter("data"));
-							byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
-							long time = System.currentTimeMillis();
-							response.setContentType("application/octet-stream");
-							response.setValue("Server", "SDFS Management Server");
-							response.setDate("Date", time);
-							response.setDate("Last-Modified", time);
-							response.getOutputStream().write(rslt);
-							response.getOutputStream().flush();
-							try {
-								response.getOutputStream().close();
-							} catch (Exception e) {
-							}
-							try {
-								response.close();
-							} catch (Exception e) {
-							}
-							break;
-						case "cancelimport":
-							try {
-								String uuid = qry.get("uuid");
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", new CancelImportArchiveCmd().getResult(uuid));
-							} catch (Exception e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("cancelimport", e);
-							}
-							break;
-						case "archiveout":
-							try {
-								boolean uselz4 = false;
-								if (qry.containsKey("uselz4"))
-									uselz4 = Boolean.parseBoolean(qry.get("uselz4"));
-								Element msg = new ArchiveOutCmd().getResult(cmdOptions, file, uselz4);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "archive out started successfully");
-								doc.adoptNode(msg);
-								result.appendChild(msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("archiveout", e);
-							}
-							break;
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info", e);
+						}
+						break;
+					case "ostevtsetpayload":
+						try {
+							long seqnum = Long.parseLong(qry.get("num"));
+							String payload = qry.get("payload");
+							OSTEventStore.SetOSTEventPayload(seqnum, payload);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
 
-						case "msnapshot":
-							try {
-								int snaps = Integer.parseInt(qry.get("snaps"));
-								String msg = new MultiSnapshotCmd(snaps).getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("msnapshot", e);
-							}
-							break;
-						case "flush":
-							try {
-								String msg = new FlushBuffersCmd().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn(e);
-							}
-							break;
-						case "expandvolume":
-							try {
-								String size = qry.get("size");
-								String msg = new ExpandVolumeCmd().getResult(cmdOptions, size);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", msg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("expandvolume", e);
-							}
-							break;
-						case "volumeconfigpath":
-							try {
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", Main.volume.getConfigPath());
-							} catch (java.lang.NullPointerException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("volumeconfigpath", e);
-							}
-							break;
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info", e);
+						}
+						break;
+					case "ostevtget":
+						try {
+							long seqnum = Long.parseLong(qry.get("num"));
+							Element msg = OSTEventStore.getOSTEvent(seqnum);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().debug("info", e);
+						}
+						break;
+					case "ostevtdelete":
+						try {
+							long seqnum = Long.parseLong(qry.get("num"));
+							OSTEventStore.DeleteOSTEvent(seqnum);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
 
-						case "perfmon":
-							String msg = new SetEnablePerfMonCmd().getResult(cmdOptions, file);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info", e);
+						}
+						break;
+					case "ostevtgetall":
+						try {
+							Element msg = OSTEventStore.getOSTEvents();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("info", e);
+						}
+						break;
+					case "connectedvolumes":
+						try {
+							Element msg = new GetConnectedVolumes().getResult();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("connectedvolumes", e);
+						}
+						break;
+					case "raidbuckets":
+						try {
+							Element msg = new GetRaidVolumes().getResult();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("connectedvolumes", e);
+						}
+						break;
+					case "syncvolume":
+						try {
+							new SyncFromConnectedVolume().getResult(Long.parseLong(qry.get("id")));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("syncvolume", e);
+						}
+						break;
+					case "deletevolume":
+						try {
+							new DeleteConnectedVolume().getResult(Long.parseLong(qry.get("id")));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("deletevolume", e);
+						}
+						break;
+					case "deletefile":
+						try {
+							String changeid = null;
+							if (qry.containsKey("changeid")) {
+								changeid = qry.get("changeid");
+							}
+							boolean rmlock = false;
+							boolean localonly = false;
+							if (qry.containsKey("retentionlock"))
+								rmlock = Boolean.parseBoolean(qry.get("retentionlock"));
+							if (qry.containsKey("localonly"))
+								localonly = Boolean.parseBoolean(qry.get("localonly"));
+							String msg = new DeleteFileCmd().getResult(cmdOptions, file, changeid, rmlock, localonly);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.createTextNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().debug("deletefile", e);
+						}
+						break;
+					case "cloudfile":
+						try {
+
+							String dstfile = null;
+							if (qry.containsKey("dstfile")) {
+								dstfile = qry.get("dstfile");
+							}
+							boolean overwrite = false;
+							String changeid = null;
+							if (qry.containsKey("changeid"))
+								changeid = qry.get("changeid");
+							if (qry.containsKey("overwrite")) {
+								overwrite = Boolean.parseBoolean(qry.get("overwrite"));
+							}
+							Element msg = new GetCloudFile().getResult(file, dstfile, overwrite, changeid);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("cloudfile", e);
+						}
+						break;
+
+					case "syncfssize":
+						try {
+
+							Element msg = new FileSystemusageCheck().getResult();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("cloudmfile", e);
+						}
+						break;
+
+					case "cloudmfile":
+						try {
+
+							String dstfile = null;
+							if (qry.containsKey("dstfile")) {
+								dstfile = qry.get("dstfile");
+							}
+							String changeid = qry.get("changeid");
+							Element msg = new GetCloudMetaFile().getResult(file, dstfile, changeid);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("cloudmfile", e);
+						}
+						break;
+					/*
+					 * case "clouddbfile": try { String changeid = qry.get("changeid"); Element msg
+					 * = new GetCloudDBFile().getResult(file, changeid);
+					 * result.setAttribute("status", "success"); result.setAttribute("msg",
+					 * "command completed successfully"); result.appendChild(doc.adoptNode(msg)); }
+					 * catch (IOException e) { result.setAttribute("status", "failed");
+					 * result.setAttribute("msg", e.toString());
+					 * SDFSLogger.getLog().warn("clouddbfile", e); } break;
+					 */
+					case "setcachesz":
+						try {
+							Element msg = new SetCacheSize().getResult(qry.get("sz"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+						break;
+					case "setreadspeed":
+						try {
+							Element msg = new SetReadSpeed().getResult(qry.get("sp"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("setcachesz", e);
+						}
+						break;
+					case "syncfiles":
+
+						try {
+							Element msg = new SyncFSCmd().getResult();
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("syncfiles", e);
+						}
+						break;
+					case "setwritespeed":
+						try {
+							Element msg = new SetWriteSpeed().getResult(qry.get("sp"));
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("setwritespeed", e);
+						}
+						break;
+					case "deletearchive":
+
+						try {
+							String msg = new DeleteArchiveCmd().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.createTextNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("deletearchive", e);
+						}
+						break;
+					case "makefolder":
+						try {
+
+							String msg = new MakeFolderCmd().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.createTextNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("makefolder", e);
+						}
+						break;
+					case "copyextents":
+						try {
+							String srcfile = qry.get("srcfile");
+							String dstfile = qry.get("dstfile");
+							long sstart = Long.parseLong(qry.get("sstart"));
+							long len = Long.parseLong(qry.get("len"));
+							long dstart = Long.parseLong(qry.get("dstart"));
+
+							Element msg = new CopyExtents().getResult(srcfile, dstfile, sstart, len, dstart);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("copyextents", e);
+						}
+						break;
+
+					case "filteredinfo":
+						try {
+							boolean includeFiles = Boolean.parseBoolean(qry.get("includefiles"));
+							boolean includeFolders = Boolean.parseBoolean(qry.get("includefolders"));
+							int level = Integer.parseInt(qry.get("level"));
+							Element msg = new GetFilteredFileAttributes().getResult(cmdOptions, file, includeFiles,
+									includeFolders, level);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("filteredinfo", e);
+						}
+					case "dse-info":
+						try {
+							Element msg = new GetDSE().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("dse-info", e);
+						}
+						break;
+					case "close-file":
+						long fd = -1;
+						if (qry.containsKey("fd"))
+							fd = Long.parseLong(qry.get("fd"));
+						boolean written = false;
+						if (qry.containsKey("written"))
+							written = Boolean.parseBoolean(qry.get("written"));
+						new CloseFile().getResult(cmdOptions, written, file, fd);
+						result.setAttribute("status", "success");
+						result.setAttribute("msg", "command completed successfully");
+						break;
+					case "get-gc-schedule":
+						try {
+							Element msg = new GetGCSchedule().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("get-gc-schedule", e);
+						}
+						break;
+					case "open-files":
+						try {
+							Element msg = new GetOpenFiles().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("open-files", e);
+						}
+						break;
+					case "debug-info":
+						try {
+							Element msg = new GetDebug().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("debug-info", e);
+						}
+						break; /*
+								 * else if (cmd.equalsIgnoreCase("events")) { try { String msg = new
+								 * GetEvents().getResult(cmdOptions, file); result =
+								 * "<result status=\"success\" msg=\"command completed successfully\">" ; result
+								 * = result + msg; result = result + "</result>"; } catch (IOException e) {
+								 * result.setAttribute("status", "failed"); result.setAttribute("msg",
+								 * e.toString()); SDFSLogger.getLog().warn(e); } }
+								 */
+					case "volume-info":
+						try {
+							Element msg = new GetVolume().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							result.appendChild(doc.adoptNode(msg));
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("volume-info", e);
+						}
+						break;
+					case "changepassword":
+						try {
+							String msg = new SetPasswordCmd().getResult("", qry.get("newpassword"));
 							result.setAttribute("status", "success");
 							result.setAttribute("msg", msg);
-							break;
-						case "cleanstore":
-							try {
-								boolean compact = false;
-								if (qry.containsKey("compact"))
-									compact = Boolean.parseBoolean(qry.get("compact"));
-								Element emsg = new CleanStoreCmd().getResult(compact);
-								result.setAttribute("status", "success");
-								doc.adoptNode(emsg);
-								result.appendChild(emsg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("cleanstore", e);
-							}
-							break;
-						case "fdisk":
-							try {
-								Element emsg = new FDISKCmd().getResult(cmdOptions, file);
-								result.setAttribute("status", "success");
-								doc.adoptNode(emsg);
-								result.appendChild(emsg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("fdisk", e);
-							}
-							break;
-						case "cacheinfo":
-							try {
-								Element msg1 = new GetCachePercentage().getResult(file);
-								result.setAttribute("status", "success");
-								result.setAttribute("msg", "command completed successfully");
-								doc.adoptNode(msg1);
-								result.appendChild(msg1);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().debug("info", e);
-							}
-							break;
-						case "event":
-							try {
-								String uuid = qry.get("uuid");
-								Element emsg = new GetEvent().getResult(uuid);
-								result.setAttribute("status", "success");
-								doc.adoptNode(emsg);
-								result.appendChild(emsg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("event", e);
-							}
-							break;
-						case "events":
-							try {
-								Element emsg = new GetEvents().getResult();
-								result.setAttribute("status", "success");
-								doc.adoptNode(emsg);
-								result.appendChild(emsg);
-							} catch (IOException e) {
-								result.setAttribute("status", "failed");
-								result.setAttribute("msg", e.toString());
-								SDFSLogger.getLog().warn("events", e);
-							}
-							break;
-						default:
+						} catch (IOException e) {
 							result.setAttribute("status", "failed");
-							result.setAttribute("msg", "no command specified");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("changepassword", e);
+						}
+						break;
+					case "snapshot":
+						try {
+							Element msg = new SnapshotCmd().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "snapshot finished successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("snapshot", e);
+						}
+						break;
+					case "restorearchive":
+						try {
+							Element msg = new RestoreArchiveCmd().getResult(file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "replication finished successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("error", e);
+						}
+						break;
+					case "importarchive":
+						try {
+							String server = qry.get("server");
+							String password = qry.get("spasswd");
+							int port = Integer.parseInt(qry.get("port"));
+							boolean lz4 = false;
+							int maxSz = 30;
+							boolean useSSL = false;
+							if (qry.containsKey("maxsz"))
+								maxSz = Integer.parseInt(qry.get("maxsz"));
+							if (qry.containsKey("useSSL"))
+								useSSL = Boolean.parseBoolean(qry.get("useSSL"));
+							if (qry.containsKey("uselz4"))
+								lz4 = Boolean.parseBoolean(qry.get("uselz4"));
+							Element msg = new ImportArchiveCmd().getResult(file, cmdOptions, server, password, port,
+									maxSz, useSSL, lz4);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "replication started successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("importarchive", e);
+						}
+						break;
+					case "importfile":
+						try {
+							String srcFile = qry.get("srcfile");
+							String destFile = qry.get("dstfile");
+							String server = qry.get("server");
+							int maxsz = Integer.parseInt(qry.get("maxsz"));
+							Element msg = new ImportFileCmd().getResult(srcFile, destFile, server, maxsz);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "replication started successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("importarchive", e);
+						}
+						break;
+					case "batchgetblocks":
+						byte[] rb = com.google.common.io.BaseEncoding.base64Url().decode(request.getParameter("data"));
+						byte[] rslt = new BatchGetBlocksCmd().getResult(rb);
+						long time = System.currentTimeMillis();
+						response.setContentType("application/octet-stream");
+						response.setValue("Server", "SDFS Management Server");
+						response.setDate("Date", time);
+						response.setDate("Last-Modified", time);
+						response.getOutputStream().write(rslt);
+						response.getOutputStream().flush();
+						try {
+							response.getOutputStream().close();
+						} catch (Exception e) {
+						}
+						try {
+							response.close();
+						} catch (Exception e) {
+						}
+						break;
+					case "cancelimport":
+						try {
+							String uuid = qry.get("uuid");
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", new CancelImportArchiveCmd().getResult(uuid));
+						} catch (Exception e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("cancelimport", e);
+						}
+						break;
+					case "archiveout":
+						try {
+							boolean uselz4 = false;
+							if (qry.containsKey("uselz4"))
+								uselz4 = Boolean.parseBoolean(qry.get("uselz4"));
+							Element msg = new ArchiveOutCmd().getResult(cmdOptions, file, uselz4);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "archive out started successfully");
+							doc.adoptNode(msg);
+							result.appendChild(msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("archiveout", e);
+						}
+						break;
+
+					case "msnapshot":
+						try {
+							int snaps = Integer.parseInt(qry.get("snaps"));
+							String msg = new MultiSnapshotCmd(snaps).getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("msnapshot", e);
+						}
+						break;
+					case "flush":
+						try {
+							String msg = new FlushBuffersCmd().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn(e);
+						}
+						break;
+					case "expandvolume":
+						try {
+							String size = qry.get("size");
+							String msg = new ExpandVolumeCmd().getResult(cmdOptions, size);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", msg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("expandvolume", e);
+						}
+						break;
+					case "volumeconfigpath":
+						try {
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", Main.volume.getConfigPath());
+						} catch (java.lang.NullPointerException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("volumeconfigpath", e);
+						}
+						break;
+
+					case "perfmon":
+						String msg = new SetEnablePerfMonCmd().getResult(cmdOptions, file);
+						result.setAttribute("status", "success");
+						result.setAttribute("msg", msg);
+						break;
+					case "cleanstore":
+						try {
+							boolean compact = false;
+							if (qry.containsKey("compact"))
+								compact = Boolean.parseBoolean(qry.get("compact"));
+							Element emsg = new CleanStoreCmd().getResult(compact);
+							result.setAttribute("status", "success");
+							doc.adoptNode(emsg);
+							result.appendChild(emsg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("cleanstore", e);
+						}
+						break;
+					case "fdisk":
+						try {
+							Element emsg = new FDISKCmd().getResult(cmdOptions, file);
+							result.setAttribute("status", "success");
+							doc.adoptNode(emsg);
+							result.appendChild(emsg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("fdisk", e);
+						}
+						break;
+					case "cacheinfo":
+						try {
+							Element msg1 = new GetCachePercentage().getResult(file);
+							result.setAttribute("status", "success");
+							result.setAttribute("msg", "command completed successfully");
+							doc.adoptNode(msg1);
+							result.appendChild(msg1);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().debug("info", e);
+						}
+						break;
+					case "event":
+						try {
+							String uuid = qry.get("uuid");
+							Element emsg = new GetEvent().getResult(uuid);
+							result.setAttribute("status", "success");
+							doc.adoptNode(emsg);
+							result.appendChild(emsg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("event", e);
+						}
+						break;
+					case "events":
+						try {
+							Element emsg = new GetEvents().getResult();
+							result.setAttribute("status", "success");
+							doc.adoptNode(emsg);
+							result.appendChild(emsg);
+						} catch (IOException e) {
+							result.setAttribute("status", "failed");
+							result.setAttribute("msg", e.toString());
+							SDFSLogger.getLog().warn("events", e);
+						}
+						break;
+					default:
+						result.setAttribute("status", "failed");
+						result.setAttribute("msg", "no command specified");
 					}
 
 				} else {
@@ -1147,35 +1145,20 @@ public class MgmtWebServer implements Container {
 		}
 	}
 
-	public static void start(boolean useSSL) throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException,
-			CertificateException, NoSuchProviderException, SignatureException, IOException, UnrecoverableKeyException,
-			KeyManagementException {
-		SSLContext sslContext = null;
+	public static void start(boolean useSSL) throws IOException {
 
 		if (Main.sdfsCliEnabled) {
 
 			if (useSSL) {
 				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
-				String key = keydir + File.separator + "volume.keystore";
+				String key = keydir + File.separator + "tls_key.pem";
 				if (!new File(key).exists() || !IOServer.keyFileExists()) {
 					KeyGenerator.generateKey(new File(key));
 				}
-				FileInputStream keyFile = new FileInputStream(key);
-				KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-				keyStore.load(keyFile, "sdfs".toCharArray());
-				// init KeyManagerFactory
-				KeyManagerFactory keyManagerFactory = KeyManagerFactory
-						.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-				keyManagerFactory.init(keyStore, "sdfs".toCharArray());
-				// init KeyManager
-				sslContext = SSLContext.getInstance("TLSv1.3");
-				// sslContext.init(keyManagerFactory.getKeyManagers(), new
-				// TrustManager[]{new NaiveX509TrustManager()}, null);
-				sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
 			}
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 			grpcServer = new IOServer();
-			grpcServer.start(useSSL,Main.sdfsCliRequireMutualTLSAuth,Main.sdfsCliListenAddr, Main.sdfsCliPort);
+			grpcServer.start(useSSL, Main.sdfsCliRequireMutualTLSAuth, Main.sdfsCliListenAddr, Main.sdfsCliPort);
 
 			if (Main.volume.rabbitMQNode != null) {
 				try {
@@ -1193,34 +1176,6 @@ public class MgmtWebServer implements Container {
 				} catch (TimeoutException e) {
 					throw new IOException(e);
 				}
-			}
-			if (Main.useLegacy) {
-				Map<String, Service> routes = new HashMap<String, Service>();
-				routes.put("/metadatasocket", new MetaDataUpdate());
-				routes.put("/ddbsocket", new DDBUpdate());
-				if (Main.matcher != null) {
-					Main.matcher.start();
-					routes.put(Main.matcher.getWSPath(), Main.matcher);
-				}
-				routes.put("/uploadsocket", new MetaDataUpload());
-				routes.put("/ping", new PingService());
-				Router negotiator = new PathRouter(routes, new PingService());
-				if (!Main.blockDev)
-					io = new Io(Main.volume.getPath(), Main.volumeMountPoint);
-				Container container = new MgmtWebServer();
-				RouterContainer rn = new RouterContainer(container, negotiator, Main.writeThreads);
-				SocketProcessor server = new ContainerSocketProcessor(rn, new FileAllocator(1024 * 1024 * 8),
-						Main.writeThreads, 4);
-				connection = new SocketConnection(server);
-				Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
-				SocketAddress address = new InetSocketAddress(Main.sdfsCliListenAddr, Main.sdfsCliPort);
-				connection = new SocketConnection(server);
-				if (sslContext != null)
-					connection.connect(address, sslContext);
-				else
-					connection.connect(address);
-				SDFSLogger.getLog().info("###################### SDFSCLI SSL Management WebServer Started at "
-						+ address.toString() + " #########################");
 			}
 
 		}
