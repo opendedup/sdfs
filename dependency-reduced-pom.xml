@@ -4,7 +4,7 @@
   <groupId>org.opendedup</groupId>
   <artifactId>sdfs</artifactId>
   <name>sdfs</name>
-  <version>3.12.0</version>
+  <version>master</version>
   <url>http://maven.apache.org</url>
   <build>
     <sourceDirectory>./src/</sourceDirectory>
