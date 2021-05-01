@@ -23,7 +23,6 @@ import org.w3c.dom.Element;
 
 import com.google.common.io.BaseEncoding;
 
-import org.opendedup.sdfs.io.AbstractStreamMatcher;
 
 public class Config {
 	public static boolean encrypted = false;
@@ -223,7 +222,6 @@ public class Config {
 		if (localChunkStore.hasAttribute("encrypt")) {
 			Main.chunkStoreEncryptionEnabled = Boolean.parseBoolean(localChunkStore.getAttribute("encrypt"));
 			Main.chunkStoreEncryptionKey = localChunkStore.getAttribute("encryption-key");
-
 		}
 		if (localChunkStore.hasAttribute("encryption-iv"))
 			Main.chunkStoreEncryptionIV = localChunkStore.getAttribute("encryption-iv");
@@ -284,15 +282,12 @@ public class Config {
 			Main.cloudBucket = azure.getAttribute("azure-bucket-name");
 			Main.cloudChunkStore = Boolean.parseBoolean(azure.getAttribute("enabled"));
 		}
-		if (doc.getElementsByTagName("matcher").getLength() > 0) {
-			Element matcher = (Element) doc.getElementsByTagName("matcher").item(0);
-			Main.matcher = (AbstractStreamMatcher) Class.forName(matcher.getAttribute("class")).newInstance();
-			Main.matcher.initialize(matcher);
-		}
+		
 
 		if (password != null) {
 			if (Main.cloudSecretKey != null) {
 				Main.eCloudSecretKey = Main.cloudSecretKey;
+
 				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.cloudSecretKey), password,
 						Main.chunkStoreEncryptionIV);
 				Main.cloudSecretKey = new String(dc);
@@ -310,20 +305,6 @@ public class Config {
 					SDFSLogger.getLog().warn("unable to decrypt encrytion key " + oc, e);
 				}
 
-			}
-		}
-		if (password != null) {
-			if (Main.cloudSecretKey != null) {
-				Main.eCloudSecretKey = Main.cloudSecretKey;
-				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.cloudSecretKey), password,
-						Main.chunkStoreEncryptionIV);
-				Main.cloudSecretKey = new String(dc);
-			}
-			if (Main.chunkStoreEncryptionKey != null) {
-				Main.eChunkStoreEncryptionKey = Main.chunkStoreEncryptionKey;
-				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.chunkStoreEncryptionKey),
-						password, Main.chunkStoreEncryptionIV);
-				Main.chunkStoreEncryptionKey = new String(dc);
 			}
 		}
 		if (Main.chunkStoreEncryptionEnabled)
