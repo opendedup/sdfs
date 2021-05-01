@@ -87,9 +87,7 @@ public class MetaDataPush {
 		publisher = b.build();
 		FileReplicationService.registerEvents(this);
 
-		if (Main.matcher != null) {
-			Main.matcher.registerEvents(this);
-		}
+		
 		new MetaDataSubscriber(topicName, subName, project, credsPath);
 	}
 

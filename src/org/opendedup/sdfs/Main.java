@@ -4,7 +4,6 @@ import java.io.File;
 
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
-import org.opendedup.sdfs.io.AbstractStreamMatcher;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
@@ -42,7 +41,6 @@ public class Main {
 	// public static VolumeConfigWriterThread wth = null;
 	public static boolean runConsistancyCheck = false;
 	public static boolean blockDev = false;
-	public static AbstractStreamMatcher matcher = null;
 
 	public static boolean firstRun = true;
 	public static boolean disableGC = false;
@@ -125,9 +123,9 @@ public class Main {
 	/**
 	 * Secret Key to Encrypt chunks in DSE.
 	 */
-	public static String chunkStoreEncryptionKey = "nw";
+	public static String chunkStoreEncryptionKey = null;
 	public static String eChunkStoreEncryptionKey = null;
-	public static String chunkStoreEncryptionIV = "5d212ccaff6611eb4307c6ec3c9f8795";
+	public static String chunkStoreEncryptionIV = null;
 	/**
 	 * whether encryption should be enabled for the DSE
 	 */

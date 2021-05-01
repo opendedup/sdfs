@@ -143,7 +143,7 @@ Function .onInit
 	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows for x64."
       Abort
   ${EndIf}
-  IfFileExists "$INSTDIR\*.*" file_found done 
+  IfFileExists "$INSTDIR\lib\sdfs.jar" file_found done 
   file_found:
 	MessageBox MB_YESNO "Upgrade Existing Setup to ${VERSION}?" IDNO noupgrade
 	RMDir /r "$INSTDIR\bin"
