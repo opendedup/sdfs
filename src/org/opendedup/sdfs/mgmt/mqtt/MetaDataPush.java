@@ -67,9 +67,7 @@ public class MetaDataPush {
 		channel = connection.createChannel();
 		channel.exchangeDeclare(this.topic, "fanout");
 		FileReplicationService.registerEvents(this);
-		if (Main.matcher != null) {
-			Main.matcher.registerEvents(this);
-		}
+		
 		new MetaDataSubscriber(this.channel, this.topic);
 		SDFSLogger.getLog().info(String.format("Connected to MQTT %s:%d", host, port));
 	}

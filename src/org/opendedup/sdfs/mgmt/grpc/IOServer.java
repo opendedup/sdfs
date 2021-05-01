@@ -73,7 +73,7 @@ public class IOServer {
     String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
     String certChainFilePath = keydir + File.separator + "tls_key.pem";
     String privateKeyFilePath = keydir + File.separator + "tls_key.key";
-    String trustCertCollectionFilePath =  keydir + File.separator + "signer_key.pem";
+    String trustCertCollectionFilePath =  keydir + File.separator + "signer_key.crt";
     Map<String, String> env = System.getenv();
     if (env.containsKey("SDFS_PRIVATE_KEY")) {
       privateKeyFilePath = env.get("SDFS_PRIVATE_KEY");
@@ -81,6 +81,11 @@ public class IOServer {
     if (env.containsKey("SDFS_CERT_CHAIN")) {
       certChainFilePath = env.get("SDFS_CERT_CHAIN");
     }
+
+    if (env.containsKey("SDFS_SIGNER_CHAIN")) {
+      trustCertCollectionFilePath = env.get("SDFS_SIGNER_CHAIN");
+    }
+
     /* The port on which the server should run */
     logger.info(
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads);
@@ -98,7 +103,7 @@ public class IOServer {
     }
 
     server = b.build().start();
-    logger.info("Server started, listening on " + host + ":" + port + " tls = " + useSSL);
+    logger.info("Server started, listening on " + host + ":" + port + " tls = " + useSSL + " mtls = " + useClientTLS);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
