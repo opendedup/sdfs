@@ -92,7 +92,7 @@ public class Main {
 	/**
 	 * The Version of SDFS this is
 	 */
-	public static String version = "3.12.0";
+	public static String version = "master";
 
 	public static boolean readAhead = false;
 
