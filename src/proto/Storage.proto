@@ -9,13 +9,10 @@ message CheckHashesRequest {
   repeated bytes hashes =1;
 }
 
-message CheckHashesEntry {
-  bytes hash = 1;
-  bool exists = 2;
-}
+
 
 message CheckHashesResponse {
-  repeated CheckHashesEntry contains = 1;
+  repeated int64 locations = 1;
   string error = 2;
   errorCodes errorCode = 3;
 }
@@ -29,9 +26,10 @@ message SparseDedupeFileRequest {
 }
 
 message ChunkResponse {
-  bytes file =1;
-  string error = 2;
-  errorCodes errorCode = 3;
+  bytes data =1;
+  int32 len =2;
+  string error = 3;
+  errorCodes errorCode = 4;
 }
 
 message ChunkEntry {
@@ -40,12 +38,15 @@ message ChunkEntry {
 }
 
 message WriteChunksRequest {
+ 
   repeated ChunkEntry chunks= 1;
+  int64 fileHandle =2;
 }
 
 message WriteChunksResponse {
   string error = 1;
   errorCodes errorCode = 2;
+  repeated InsertRecord insertRecords = 3;
 }
 
 
@@ -92,6 +93,7 @@ message SparseDataChunkP {
 message SparseDedupeChunkWriteRequest {
   SparseDataChunkP chunk = 1;
   int64 fileHandle = 2;
+  int64 fileLocation = 3;
 }
 
 message SparseDedupeChunkWriteResponse {
@@ -115,14 +117,22 @@ message HashingInfoResponse {
   int64 minSegmentSize = 2;
   int64 maxSegmentSize = 3;
   int64 polyNumber = 4;
-  int64 hashSeed = 5;
+  int64 windowSize = 5;
   hashtype hashtype = 6;
   int32 mapVersion = 7;
+  string error = 8;
+  errorCodes errorCode = 9;
+}
+
+message InsertRecord {
+  int64 hashloc = 1;
+  bool inserted =2;
 }
 
 enum hashtype {
   SHA256=0; //Sha256
   MD5=1; //md5
+  UNSUPPORTED=2; //Sha256 using only the first 160 bits
 }
 
 // Defining a Service, a Service can have multiple RPC operations

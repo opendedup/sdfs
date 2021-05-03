@@ -642,13 +642,35 @@ public class SparseDedupFile implements DedupFile {
 			bdb.put(filePosition, chunk);
 			eventBus.post(new SFileWritten(this, filePosition));
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("unable to write " + writeBuffer.getFilePosition() + " closing " + mf.getPath(),
+			SDFSLogger.getLog().fatal("unable to write " + writeBuffer.getFilePosition() + " updating map " + mf.getPath(),
 					e);
 			throw new IOException(e);
 		} finally {
 			chunk = null;
 		}
 
+	}
+
+	public void updateMap(SparseDataChunk chunk, long filePosition) throws FileClosedException, IOException {
+		if (this.closed) {
+			throw new FileClosedException("file already closed");
+		}
+		if(filePosition % Main.CHUNK_LENGTH != 0) {
+			SDFSLogger.getLog().error("file position requested " + filePosition + " is not divisible by " + Main.CHUNK_LENGTH);
+			throw new IOException("file position requested " + filePosition + " is not divisible by " + Main.CHUNK_LENGTH);
+		}
+		try {
+			this.writeBuffers.invalidate(filePosition);
+			chunk.setVersion(this.bdb.getVersion());
+			bdb.put(filePosition, chunk);
+			eventBus.post(new SFileWritten(this, filePosition));
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to write " + filePosition + " updating map " + mf.getPath(),
+					e);
+			throw new IOException(e);
+		} finally {
+			chunk = null;
+		}
 	}
 
 	/*

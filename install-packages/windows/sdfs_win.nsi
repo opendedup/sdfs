@@ -141,15 +141,19 @@ Function .onInit
     
   ${Else}
 	MessageBox MB_OK "Your OS is not supported. ${MUI_PRODUCT} supports Windows for x64."
+      SetErrorlevel 1
       Abort
   ${EndIf}
-  IfFileExists "$INSTDIR\lib\sdfs.jar" file_found done 
-  file_found:
+  ReadRegStr $0 HKLM "Software\SDFS" "path"
+  IfErrors 0 +2
+    Goto done
+  StrCpy $ISNTDIR $0
 	MessageBox MB_YESNO "Upgrade Existing Setup to ${VERSION}?" IDNO noupgrade
 	RMDir /r "$INSTDIR\bin"
 	RMDir /r "$INSTDIR\lib"
 	Goto done
   noupgrade:
+  SetErrorlevel 1
 	Quit
   done:
 FunctionEnd

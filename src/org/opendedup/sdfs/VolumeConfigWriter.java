@@ -137,6 +137,7 @@ public class VolumeConfigWriter {
 	private String volumeType = "standard";
 	private String userAgentPrefix = null;
 	private boolean encryptConfig = false;
+	private String encryptConfigPassword = null;
 	private String glacierClass = "standard";
 	private long maxAge = -1;
 	private String topic;
@@ -159,7 +160,12 @@ public class VolumeConfigWriter {
 			System.exit(1);
 		}
 		if (cmd.hasOption("encrypt-config")) {
+			if (cmd.getOptionValue("encrypt-config").length() < 6) {
+				System.out.println("--encrypt-config must be greater than 6 characters");
+				System.exit(-1);
+			}
 			this.encryptConfig = true;
+			this.encryptConfigPassword = cmd.getOptionValue("encrypt-config");
 		}
 		if (cmd.hasOption("sdfscli-salt")) {
 			if (cmd.getOptionValue("sdfscli-salt").length() < 6) {
@@ -170,6 +176,10 @@ public class VolumeConfigWriter {
 			}
 		}
 		if (cmd.hasOption("sdfscli-password")) {
+			if (cmd.getOptionValue("sdfscli-password").length() < 6) {
+				System.out.println("--sdfscli-password must be greater than 6 characters");
+				System.exit(-1);
+			}
 			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
 		}
 		if (cmd.hasOption("sdfscli-require-auth")) {
@@ -587,9 +597,12 @@ public class VolumeConfigWriter {
 		}
 		File file = new File(OSValidator.getConfigPath() + this.volume_name.trim() + "-volume-cfg.xml");
 		if (this.encryptConfig) {
-			System.out.println("Encrypting Configuration");
-			String password = this.sdfsCliPassword;
+			Main.chunkStoreEncryptionIV = this.chunk_store_iv;
+			Main.chunkStoreEncryptionKey = this.chunk_store_encryption_key;
+			System.out.println("Encrypting Configuration with " + this.encryptConfigPassword + " " + this.chunk_store_iv);
+			String password = this.encryptConfigPassword;
 			String iv = this.chunk_store_iv;
+			System.out.println("Chunkstore encryption key is " + this.chunk_store_encryption_key);
 			byte[] ec = EncryptUtils.encryptCBC(this.chunk_store_encryption_key.getBytes(), password, iv);
 			this.chunk_store_encryption_key = BaseEncoding.base64Url().encode(ec);
 			ec = EncryptUtils.encryptCBC(this.cloudSecretKey.getBytes(), password, iv);
@@ -1127,8 +1140,8 @@ public class VolumeConfigWriter {
 				"The encryption  initialization vector (IV) used for encrypting data. If not specified a strong key will be generated automatically")
 				.hasArg().withArgName("String").create());
 		options.addOption(OptionBuilder.withLongOpt("encrypt-config")
-				.withDescription("Encrypt security sensitive encryption parameters with the admin password")
-				.hasArg(false).create());
+				.withDescription("Encrypt security sensitive encryption parameters with the password provided")
+				.hasArg(true).withArgName("a password").create());
 		options.addOption(OptionBuilder.withLongOpt("aws-enabled").withDescription(
 				"Set to true to enable this volume to store to Amazon S3 Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());

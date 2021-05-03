@@ -20,6 +20,7 @@ package org.opendedup.collections;
 
 import com.google.common.primitives.Longs;
 
+
 public class InsertRecord {
 	private boolean inserted;
 	private byte[] hashlocs;
@@ -44,6 +45,13 @@ public class InsertRecord {
 
 	public byte[] getHashLocs() {
 		return this.hashlocs;
+	}
+
+	public org.opendedup.grpc.Storage.InsertRecord toProtoBuf() {
+		org.opendedup.grpc.Storage.InsertRecord.Builder b = org.opendedup.grpc.Storage.InsertRecord.newBuilder();
+		b.setHashloc(Longs.fromByteArray(this.hashlocs));
+		b.setInserted(this.inserted);
+		return b.build();
 	}
 
 }

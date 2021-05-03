@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.opendedup.grpc.Storage.HashLocPairP;
 import org.opendedup.grpc.Storage.SparseDataChunkP;
 import org.opendedup.grpc.Storage.SparseDataFlags;
 import org.opendedup.hashing.HashFunctionPool;
@@ -61,6 +62,25 @@ public class SparseDataChunk {
 			this.ar.put(p.pos, p);
 		}
 
+	}
+
+	public SparseDataChunk(SparseDataChunkP pb) throws IOException {
+		this.doop = pb.getDoop();
+		this.fpos = pb.getFpos();
+		this.len = pb.getLen();
+		this.prevdoop = pb.getPrevdoop();
+		for(SparseDataFlags f : pb.getFlagsList()) {
+			if(f == SparseDataFlags.RECONSTRUCTED) {
+				this.flags = RECONSTRUCTED;
+			}
+		}
+		for (Entry<Integer, HashLocPairP> hl : pb.getArMap().entrySet()) {
+			this.ar.put(hl.getKey(), HashLocPair.fromProtoBuf(hl.getValue()));
+		}
+	}
+
+	public void setVersion(byte version) {
+		this.version = version;
 	}
 	
 	public byte getVersion() {

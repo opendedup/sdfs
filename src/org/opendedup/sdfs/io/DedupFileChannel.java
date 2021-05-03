@@ -623,7 +623,7 @@ public class DedupFileChannel {
 
 	}
 
-	public DedupFile getDedupFile() {
+	public SparseDedupFile getDedupFile() {
 		return this.df;
 	}
 

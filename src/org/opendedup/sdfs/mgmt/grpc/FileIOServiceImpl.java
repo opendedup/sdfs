@@ -59,7 +59,6 @@ import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 
 import org.opendedup.grpc.FileIOServiceGrpc;
-import org.opendedup.grpc.FileInfo;
 import org.opendedup.grpc.FileInfo.FileAttributes;
 import org.opendedup.grpc.FileInfo.FileInfoRequest;
 import org.opendedup.grpc.FileInfo.FileMessageResponse;
@@ -124,10 +123,7 @@ import org.opendedup.grpc.IOService.UnlinkRequest;
 import org.opendedup.grpc.IOService.UnlinkResponse;
 import org.opendedup.grpc.IOService.UtimeRequest;
 import org.opendedup.grpc.IOService.UtimeResponse;
-import org.opendedup.grpc.FileIOServiceGrpc.FileIOServiceBlockingStub;
-import org.opendedup.grpc.FileIOServiceGrpc.FileIOServiceFutureStub;
-import org.opendedup.grpc.FileIOServiceGrpc.FileIOServiceImplBase;
-import org.opendedup.grpc.FileIOServiceGrpc.FileIOServiceStub;
+
 
 public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     AtomicLong nextHandleNo = new AtomicLong(1000);
@@ -143,10 +139,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 }
 
             });
-    ConcurrentHashMap<Long, DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long, DedupFileChannel>();
-    public String mountedVolume;
-    public String connicalMountedVolume;
-    public String mountPoint;
+    static ConcurrentHashMap<Long, DedupFileChannel> dedupChannels = new ConcurrentHashMap<Long, DedupFileChannel>();
+    public static String mountedVolume;
+    public static String connicalMountedVolume;
+    public static String mountPoint;
     public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 
     private static EventBus eventBus = new EventBus();
@@ -156,20 +152,20 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     public FileIOServiceImpl() throws IOException {
-        this.mountedVolume = Main.volume.getPath();
-        if (!this.mountedVolume.endsWith("/"))
-            this.mountedVolume = this.mountedVolume + "/";
-        this.connicalMountedVolume = new File(this.mountedVolume).getCanonicalPath();
-        this.mountPoint = Main.volumeMountPoint;
+        FileIOServiceImpl.mountedVolume = Main.volume.getPath();
+        if (!FileIOServiceImpl.mountedVolume.endsWith("/"))
+            FileIOServiceImpl.mountedVolume = FileIOServiceImpl.mountedVolume + "/";
+        FileIOServiceImpl.connicalMountedVolume = new File(FileIOServiceImpl.mountedVolume).getCanonicalPath();
+        FileIOServiceImpl.mountPoint = Main.volumeMountPoint;
         if (!mountPoint.endsWith("/"))
             mountPoint = mountPoint + "/";
 
-        File f = new File(this.mountedVolume);
+        File f = new File(FileIOServiceImpl.mountedVolume);
         if (!f.exists())
             f.mkdirs();
     }
 
-    private void checkInFS(File f) throws FileIOError {
+    private static void checkInFS(File f) throws FileIOError {
         try {
 
             if (!f.getCanonicalPath().startsWith(connicalMountedVolume)) {
@@ -183,7 +179,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
-    private File resolvePath(String path) throws FileIOError {
+    protected static File resolvePath(String path) throws FileIOError {
         String pt = mountedVolume + path.trim();
         File _f = new File(pt);
         
@@ -198,7 +194,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             }
         }
         try {
-            this.checkInFS(_f);
+            checkInFS(_f);
         } catch (FileIOError e) {
             SDFSLogger.getLog().warn("unable", e);
             throw e;
@@ -214,17 +210,17 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     private DedupFileChannel getFileChannel(String path, long handleNo) throws FileIOError {
-        DedupFileChannel ch = this.dedupChannels.get(handleNo);
+        DedupFileChannel ch = dedupChannels.get(handleNo);
         if (ch == null) {
-            File f = this.resolvePath(path);
+            File f = FileIOServiceImpl.resolvePath(path);
             try {
                 MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
                 ch = mf.getDedupFile(false).getChannel(-2);
-                if (this.dedupChannels.containsKey(handleNo)) {
+                if (dedupChannels.containsKey(handleNo)) {
                     ch.getDedupFile().unRegisterChannel(ch, -2);
-                    ch = this.dedupChannels.get(handleNo);
+                    ch = dedupChannels.get(handleNo);
                 } else {
-                    this.dedupChannels.put(handleNo, ch);
+                    dedupChannels.put(handleNo, ch);
                 }
                 // SDFSLogger.getLog().info("Getting attributes for " + f.getPath());
 
@@ -242,7 +238,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     private DedupFileChannel getFileChannel(long handleNo) throws FileIOError {
-        DedupFileChannel ch = this.dedupChannels.get(handleNo);
+        DedupFileChannel ch = dedupChannels.get(handleNo);
         if (ch == null) {
             SDFSLogger.getLog().debug("unable to read file " + handleNo);
             throw new FileIOError("unable to read file " + handleNo, errorCodes.EBADFD);
@@ -260,9 +256,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
         } else {
             MkDirResponse.Builder b = MkDirResponse.newBuilder();
-            File f = new File(this.mountedVolume + request.getPath());
+            File f = new File(FileIOServiceImpl.mountedVolume + request.getPath());
             try {
-                this.checkInFS(f);
+                FileIOServiceImpl.checkInFS(f);
             } catch (FileIOError e) {
                 SDFSLogger.getLog().warn("unable", e);
                 b.setError(e.message);
@@ -328,9 +324,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
         } else {
 
-            File f = new File(this.mountedVolume + request.getPath());
+            File f = new File(FileIOServiceImpl.mountedVolume + request.getPath());
             try {
-                this.checkInFS(f);
+                FileIOServiceImpl.checkInFS(f);
             } catch (FileIOError e) {
                 SDFSLogger.getLog().warn("unable", e);
                 b.setError(e.message);
@@ -489,11 +485,12 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
                     // SDFSLogger.getLog().info("deleting symlink " + f.getCanonicalPath());
                     if (!f.delete()) {
-                        f = null;
+                        
                         b.setError("unable to delete " + f.getPath());
                         b.setErrorCode(errorCodes.EACCES);
                         responseObserver.onNext(b.build());
                         responseObserver.onCompleted();
+                        f = null;
                         return;
                     }
                     responseObserver.onNext(b.build());
@@ -617,7 +614,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     Path p = new File(mountedVolume + path).toPath();
                     // SDFSLogger.getLog().info("deleting symlink " + f.getPath());
                     try {
-                        MetaDataDedupFile mf = MetaFileStore.getMF(this.resolvePath(path));
+                        MetaDataDedupFile mf = MetaFileStore.getMF(FileIOServiceImpl.resolvePath(path));
                         eventBus.post(new MFileDeleted(mf));
                         Files.delete(p);
                         responseObserver.onNext(b.build());
@@ -632,7 +629,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                         return;
                     }
                 } else {
-                    File f = this.resolvePath(path);
+                    File f = FileIOServiceImpl.resolvePath(path);
                     try {
                         MetaFileStore.getMF(f).clearRetentionLock();
                         if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
@@ -753,7 +750,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
         } else {
             try {
-                DedupFileChannel ch = this.dedupChannels.remove(request.getFileHandle());
+                DedupFileChannel ch = dedupChannels.remove(request.getFileHandle());
 
                 if (!Main.safeClose)
                     return;
@@ -790,7 +787,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         } else {
             try {
                 String path = request.getPath();
-                File f = new File(this.mountedVolume + path);
+                File f = new File(FileIOServiceImpl.mountedVolume + path);
 
                 if (Main.volume.isOffLine()) {
                     b.setError("Volume Offline");
@@ -1217,7 +1214,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     Path p = null;
                     BasicFileAttributes attrs = null;
                     try {
-                        p = Paths.get(this.mountedVolume + path);
+                        p = Paths.get(FileIOServiceImpl.mountedVolume + path);
                         int uid = 0;
                         int gid = 0;
                         int mode = 0000;
@@ -1371,10 +1368,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         } else {
             String path = request.getPath();
             try {
-                Path p = Paths.get(this.mountedVolume + path);
+                Path p = Paths.get(FileIOServiceImpl.mountedVolume + path);
                 String lpath = Files.readSymbolicLink(p).toString();
-                if (new File(lpath).getPath().startsWith(this.mountedVolume))
-                    lpath = this.mountPoint + lpath.substring(this.mountedVolume.length());
+                if (new File(lpath).getPath().startsWith(FileIOServiceImpl.mountedVolume))
+                    lpath = FileIOServiceImpl.mountPoint + lpath.substring(FileIOServiceImpl.mountedVolume.length());
                 b.setLinkPath(lpath);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
@@ -1403,9 +1400,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             try {
                 File src = null;
                 File fr = new File(mountedVolume + from);
-                if (fr.getCanonicalPath().startsWith(this.mountPoint)) {
+                if (fr.getCanonicalPath().startsWith(FileIOServiceImpl.mountPoint)) {
                     from = from.substring(mountPoint.length());
-                    this.resolvePath(from);
+                    FileIOServiceImpl.resolvePath(from);
                     src = new File(mountedVolume + from);
                 } else if (!Main.allowExternalSymlinks) {
                     b.setError("external symlinks are not allowed " + from + " to " + to);
@@ -1418,7 +1415,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 }
                 File dst = new File(mountedVolume + to);
                 try {
-                    this.checkInFS(dst);
+                    FileIOServiceImpl.checkInFS(dst);
                 } catch (FileIOError e) {
                     b.setError(e.message);
                     b.setErrorCode(e.code);
@@ -1516,7 +1513,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             long atime = request.getAtime();
             long mtime = request.getMtime();
             try {
-                File f = this.resolvePath(path);
+                File f = FileIOServiceImpl.resolvePath(path);
                 if (f.isFile()) {
                     MetaDataDedupFile mf = MetaFileStore.getMF(f);
                     mf.setLastAccessed(atime);
@@ -1566,11 +1563,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             String path = request.getPath();
             String name = request.getAttr();
             try {
-                this.resolvePath(path);
+                FileIOServiceImpl.resolvePath(path);
                 int ftype = this.getFtype(path);
                 if (ftype != FuseFtypeConstants.TYPE_SYMLINK) {
 
-                    File f = this.resolvePath(path);
+                    File f = FileIOServiceImpl.resolvePath(path);
                     MetaDataDedupFile mf = MetaFileStore.getMF(f);
                     String st = mf.getXAttribute(name);
                     if (st != null)
@@ -1619,11 +1616,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             String path = request.getPath();
             String name = request.getAttr();
             try {
-                this.resolvePath(path);
+                FileIOServiceImpl.resolvePath(path);
                 int ftype = this.getFtype(path);
                 if (ftype != FuseFtypeConstants.TYPE_SYMLINK) {
 
-                    File f = this.resolvePath(path);
+                    File f = FileIOServiceImpl.resolvePath(path);
                     MetaDataDedupFile mf = MetaFileStore.getMF(f);
                     String st = mf.getXAttribute(name);
                     if (st != null)
@@ -1672,7 +1669,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             String name = request.getAttr();
             String value = request.getValue();
             try {
-                File f = this.resolvePath(path);
+                File f = FileIOServiceImpl.resolvePath(path);
                 MetaDataDedupFile mf = MetaFileStore.getMF(f);
                 mf.addXAttribute(name, value);
                 if (mf.isFile())
@@ -1709,7 +1706,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             String path = request.getPath();
             String name = request.getAttr();
             try {
-                File f = this.resolvePath(path);
+                File f = FileIOServiceImpl.resolvePath(path);
                 if (!f.exists()) {
                     b.setError("cannot get extended attributes for " + path);
                     b.setErrorCode(errorCodes.ENOENT);
@@ -1873,7 +1870,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     return;
                 }
                 try {
-                    this.checkInFS(nf);
+                    FileIOServiceImpl.checkInFS(nf);
                 } catch (FileIOError e) {
                     b.setError(e.getMessage());
                     b.setErrorCode(e.code);
@@ -2154,7 +2151,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
-    private static class FileIOError extends Exception {
+    protected static class FileIOError extends Exception {
         /**
          *
          */
