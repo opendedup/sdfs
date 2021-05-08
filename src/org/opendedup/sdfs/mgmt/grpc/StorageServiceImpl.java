@@ -189,7 +189,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
                     responses.add(ir.toProtoBuf());
                 } else {
-                    responses.add(new InsertRecord(false,-1).toProtoBuf())
+                    responses.add(new InsertRecord(false,-1).toProtoBuf());
                 }
             }
             b.addAllInsertRecords(responses);
