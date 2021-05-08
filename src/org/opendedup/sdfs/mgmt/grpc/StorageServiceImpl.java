@@ -178,23 +178,24 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     request.getChunksCount());
             for (ChunkEntry ent : request.getChunksList()) {
                 byte[] chunk = ent.getData().toByteArray();
-                /*
-                byte [] hash = ent.getHash().toByteArray();
-                byte [] ek = SparseDedupFile.eng.getHash(chunk);
-                if(!Arrays.equals(hash, ek)) {
-                    SDFSLogger.getLog().info("noooo");
+                if (chunk.length > 0) {
+                    /*
+                     * byte [] hash = ent.getHash().toByteArray(); byte [] ek =
+                     * SparseDedupFile.eng.getHash(chunk); if(!Arrays.equals(hash, ek)) {
+                     * SDFSLogger.getLog().info("noooo"); }
+                     */
+                    ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
+                            ch.getDedupFile().getGUID());
+                    InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
+                    responses.add(ir.toProtoBuf());
+                } else {
+                    responses.add(new InsertRecord(false,-1).toProtoBuf())
                 }
-                */
-                ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
-                        ch.getDedupFile().getGUID());
-                InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
-                responses.add(ir.toProtoBuf());
             }
             b.addAllInsertRecords(responses);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
-
         } catch (Exception e) {
             SDFSLogger.getLog().error("unable to write chunks ", e);
             b.setError("unable to write chunks");
@@ -225,9 +226,10 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             long ep = sp.getFpos() + sp.len;
             if (ep > ch.getFile().length()) {
                 ch.getFile().setLength(ep, false);
-                SDFSLogger.getLog().info("Set length to " + ep+ " " + sp.len + " ");
+                SDFSLogger.getLog().info("Set length to " + ep + " " + sp.len + " ");
             } else {
-                SDFSLogger.getLog().info("no length to " + sp.getFpos() +  " " +request.getChunk().getLen() + " " + sp.len );
+                SDFSLogger.getLog()
+                        .info("no length to " + sp.getFpos() + " " + request.getChunk().getLen() + " " + sp.len);
             }
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
