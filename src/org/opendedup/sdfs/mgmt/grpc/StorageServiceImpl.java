@@ -196,8 +196,8 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             return;
 
         } catch (Exception e) {
-            SDFSLogger.getLog().error("unable to check hashes ", e);
-            b.setError("unable to check hashes");
+            SDFSLogger.getLog().error("unable to write chunks ", e);
+            b.setError("unable to write chunks");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
