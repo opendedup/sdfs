@@ -64,7 +64,6 @@ import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
 import org.rocksdb.WriteOptions;
 
-
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 
@@ -184,7 +183,6 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				options.setCreateIfMissing(true);
 				options.setCompactionStyle(CompactionStyle.LEVEL);
 				options.setCompressionType(CompressionType.NO_COMPRESSION);
-				
 
 				// options.setMinWriteBufferNumberToMerge(2);
 				// options.setMaxWriteBufferNumber(6);
@@ -445,11 +443,11 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					keyb.put(hash);
 					keyb.putLong(val);
 					byte[] key = keyb.array();
-					v = this.armdb.get(this.armdbHsAr,hash);
-					
+					v = this.armdb.get(this.armdbHsAr, hash);
+
 					if (v != null) {
 						ByteBuffer bk = ByteBuffer.wrap(v);
-						byte [] nb = this.getArVal(bk, val);
+						byte[] nb = this.getArVal(bk, val);
 						if (nb.length > 0) {
 							ByteBuffer _nbf = ByteBuffer.wrap(nb);
 							_nbf.position(8);
@@ -506,16 +504,16 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			}
 		}
 		entries.position(0);
-		return-1;
+		return -1;
 	}
 
-	private byte [] getArVal(ByteBuffer entries, long archive) {
+	private byte[] getArVal(ByteBuffer entries, long archive) {
 		entries.position(0);
 		while (entries.hasRemaining()) {
 			long _ar = entries.getLong();
 			if (_ar == archive) {
-				byte [] b = new byte[24];
-				entries.position(entries.position()-8);
+				byte[] b = new byte[24];
+				entries.position(entries.position() - 8);
 				entries.get(b);
 				return b;
 			} else {
@@ -532,7 +530,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			long _ar = entries.getLong();
 			if (_ar == archive) {
 				entries.putLong(ct);
-			} else if(entries.hasRemaining()) {
+			} else if (entries.hasRemaining()) {
 				entries.position(entries.position() + 16);
 			}
 		}
@@ -640,7 +638,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						if (System.currentTimeMillis() > tm) {
 							boolean recovered = false;
 							byte[] arVal = this.armdb.get(this.armdbHsAr, hash);
-							
+
 							if (arVal != null && this.getArRefs(ByteBuffer.wrap(arVal), pos) > 0) {
 								ndct++;
 								recovered = true;
@@ -935,7 +933,22 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					return -1;
 				} else {
 					ByteBuffer bk = ByteBuffer.wrap(v);
-					return bk.getLong();
+					long pos = bk.getLong();
+					if (v.length >= 24 && Main.maxAge > -1) {
+						long age = bk.getLong(16);
+						if (age + Main.maxAge < System.currentTimeMillis()) {
+							byte[] arVal = armdb.get(this.armdbHsAr, key);
+							if (arVal == null) {
+								armdb.put(this.armdbHsAr, key, v);
+							} else {
+								ByteBuffer _nbf = this.addArRef(ByteBuffer.wrap(arVal), v);
+								armdb.put(this.armdbHsAr, key, _nbf.array());
+							}
+							this.getDB(key).delete(key);
+							return this.get(key);
+						}
+					}
+					return pos;
 				}
 			} catch (RocksDBException e) {
 				throw new IOException(e);
@@ -1061,7 +1074,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			bar.update(i);
 			i++;
 			try {
-				this.armdb.flush(new FlushOptions(),this.armdbHsAr);
+				this.armdb.flush(new FlushOptions(), this.armdbHsAr);
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("While closing hashtable ", e);
 			}
