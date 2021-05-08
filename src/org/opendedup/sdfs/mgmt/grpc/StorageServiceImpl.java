@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,11 +41,11 @@ import io.grpc.stub.StreamObserver;
 public class StorageServiceImpl extends StorageServiceImplBase {
 
     public static final String VARIABLE_SHA256 = "VARIABLE_SHA256";
-	public static final String VARIABLE_SHA256_160 = "VARIABLE_SHA256_160";
-	public static final String VARIABLE_HWY_160 = "VARIABLE_HWY_160";
-	public static final String VARIABLE_HWY_128 = "VARIABLE_HWY_128";
-	public static final String VARIABLE_HWY_256 = "VARIABLE_HWY_256";
-	public static final String VARIABLE_MD5 = "VARIABLE_MD5";
+    public static final String VARIABLE_SHA256_160 = "VARIABLE_SHA256_160";
+    public static final String VARIABLE_HWY_160 = "VARIABLE_HWY_160";
+    public static final String VARIABLE_HWY_128 = "VARIABLE_HWY_128";
+    public static final String VARIABLE_HWY_256 = "VARIABLE_HWY_256";
+    public static final String VARIABLE_MD5 = "VARIABLE_MD5";
 
     public StorageServiceImpl() {
 
@@ -179,12 +178,22 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     request.getChunksCount());
             for (ChunkEntry ent : request.getChunksList()) {
                 byte[] chunk = ent.getData().toByteArray();
+                /*
+                byte [] hash = ent.getHash().toByteArray();
+                byte [] ek = SparseDedupFile.eng.getHash(chunk);
+                if(!Arrays.equals(hash, ek)) {
+                    SDFSLogger.getLog().info("noooo");
+                }
+                */
                 ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
                         ch.getDedupFile().getGUID());
                 InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
                 responses.add(ir.toProtoBuf());
             }
             b.addAllInsertRecords(responses);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
 
         } catch (Exception e) {
             SDFSLogger.getLog().error("unable to check hashes ", e);
@@ -213,6 +222,13 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             }
             SparseDataChunk sp = new SparseDataChunk(request.getChunk());
             ch.getDedupFile().updateMap(sp, request.getFileLocation());
+            long ep = sp.getFpos() + sp.len;
+            if (ep > ch.getFile().length()) {
+                ch.getFile().setLength(ep, false);
+                SDFSLogger.getLog().info("Set length to " + ep+ " " + sp.len + " ");
+            } else {
+                SDFSLogger.getLog().info("no length to " + sp.getFpos() +  " " +request.getChunk().getLen() + " " + sp.len );
+            }
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
             return;
@@ -232,13 +248,11 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         HashingInfoResponse.Builder b = HashingInfoResponse.newBuilder();
         try {
             b.setChunkSize(Main.CHUNK_LENGTH);
-            if(Main.hashType.equalsIgnoreCase(VARIABLE_MD5)) {
+            if (Main.hashType.equalsIgnoreCase(VARIABLE_MD5)) {
                 b.setHashtype(hashtype.MD5);
-            }
-            else if(Main.hashType.equalsIgnoreCase(VARIABLE_SHA256)) {
+            } else if (Main.hashType.equalsIgnoreCase(VARIABLE_SHA256)) {
                 b.setHashtype(hashtype.SHA256);
-            }
-            else {
+            } else {
                 b.setHashtype(hashtype.UNSUPPORTED);
             }
             b.setMapVersion(Main.MAPVERSION);

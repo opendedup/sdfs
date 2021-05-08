@@ -660,7 +660,11 @@ public class SparseDedupFile implements DedupFile {
 			throw new IOException("file position requested " + filePosition + " is not divisible by " + Main.CHUNK_LENGTH);
 		}
 		try {
+
 			this.writeBuffers.invalidate(filePosition);
+			mf.getIOMonitor().addVirtualBytesWritten(chunk.len, true);
+			mf.getIOMonitor().addActualBytesWritten(chunk.len - chunk.getDoop(), true);
+			mf.getIOMonitor().addDulicateData(chunk.getDoop(), true);
 			chunk.setVersion(this.bdb.getVersion());
 			bdb.put(filePosition, chunk);
 			eventBus.post(new SFileWritten(this, filePosition));

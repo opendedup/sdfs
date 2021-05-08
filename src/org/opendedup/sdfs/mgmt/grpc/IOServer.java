@@ -90,7 +90,7 @@ public class IOServer {
     logger.info(
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads);
     SocketAddress address = new InetSocketAddress(host, port);
-    NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
+    NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl()).addService(new StorageServiceImpl())
         .executor(Executors.newFixedThreadPool(Main.writeThreads)).addService(new FileIOServiceImpl())
         .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl());
     if (useSSL) {
