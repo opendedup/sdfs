@@ -16,6 +16,7 @@ RUN wget https://cdn.azul.com/zulu/bin/zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.g
 RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
         git
 ENV VERSION=master
+ENV PKG_VERSION=0.0.1
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
 ENV DEBFILE="sdfs_${VERSION}_amd64.deb"
 RUN echo $DEBFILE
@@ -30,14 +31,15 @@ RUN cp target/lib/*.jar install-packages/deb/usr/share/sdfs/lib/ && \
 WORKDIR "/sdfs-build/install-packages/"
 RUN rm -rf *.deb *.rpm && \
     cp ../src/readme.txt deb/usr/share/sdfs/ && \
-    fpm -s dir -t deb -n sdfs -v $VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -d libxml2-utils -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" && \
-    fpm -s dir -t rpm -n sdfs -v $VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" 
+    fpm -s dir -t deb -n sdfs -v $PKG_VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -d libxml2-utils -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" && \
+    fpm -s dir -t rpm -n sdfs -v $PKG_VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" 
 WORKDIR "/sdfs-build/install-packages/"
-RUN echo "tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm" > export_data.sh && \
+RUN echo "tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm" > export_data.sh && \
     chmod 700 export_data.sh
-ENTRYPOINT tar cvf - sdfs-${VERSION}.jar sdfs_${VERSION}_amd64.deb sdfs-${VERSION}-1.x86_64.rpm
+ENTRYPOINT tar cvf - sdfs-${VERSION}.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm
 FROM ubuntu:20.04
 ENV VERSION=master
+ENV PKG_VERSION=0.0.1
 LABEL email=samsilverberg@google.com
 LABEL author="Sam Silverberg"
 RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
@@ -53,9 +55,9 @@ RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteracti
         libxml2-utils \
         fuse
 WORKDIR "/tmp"
-COPY --from=0 /sdfs-build/install-packages/sdfs_${VERSION}_amd64.deb .
-RUN dpkg -i sdfs_${VERSION}_amd64.deb && \
-    rm sdfs_${VERSION}_amd64.deb
+COPY --from=0 /sdfs-build/install-packages/sdfs_${PKG_VERSION}_amd64.deb .
+RUN dpkg -i sdfs_${PKG_VERSION}_amd64.deb && \
+    rm sdfs_${PKG_VERSION}_amd64.deb
 RUN echo "* hard nofile 65535" >> /etc/security/limits.conf
 RUN	echo "* soft nofile 65535" >> /etc/security/limits.conf
 COPY --from=0 /sdfs-build/install-packages/docker_run.sh /usr/share/sdfs/docker_run.sh
