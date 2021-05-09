@@ -17,6 +17,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -83,6 +84,15 @@ public class Config {
 		Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
 		if (cli.hasAttribute("use-ssl")) {
 			Main.sdfsCliSSL = Boolean.parseBoolean(cli.getAttribute("use-ssl"));
+		}
+		if (cli.hasAttribute("permissions-file")) {
+			Main.permissionsFile = cli.getAttribute("permissions-file");
+			File f  = new File(Main.permissionsFile);
+			if(!f.exists()){
+				f.getParentFile().mkdirs();
+
+			}
+
 		}
 		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli.getAttribute("enable-auth"));
 		Main.sdfsCliRequireMutualTLSAuth = Boolean.parseBoolean(cli.getAttribute("enable-mutual-tls-auth"));

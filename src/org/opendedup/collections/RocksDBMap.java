@@ -1051,8 +1051,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		this.syncLock.lock();
 		try {
 			this.closed = true;
-			CommandLineProgressBar bar = new CommandLineProgressBar("Closing Hash Tables", dbs.length + 2, System.out);
-			int i = 0;
+			//CommandLineProgressBar bar = new CommandLineProgressBar("Closing Hash Tables", dbs.length + 2, System.out);
+			//int i = 0;
 			for (RocksDB db : dbs) {
 
 				try {
@@ -1063,24 +1063,24 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn("While closing hashtable ", e);
 				}
-				bar.update(i);
-				i++;
+				//bar.update(i);
+				//i++;
 			}
 			try {
 				this.rmdb.flush(new FlushOptions());
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("While closing hashtable ", e);
 			}
-			bar.update(i);
-			i++;
+			//bar.update(i);
+			//i++;
 			try {
 				this.armdb.flush(new FlushOptions(), this.armdbHsAr);
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("While closing hashtable ", e);
 			}
-			bar.update(i);
-			i++;
-			bar.finish();
+			//bar.update(i);
+			//i++;
+			//bar.finish();
 
 		} finally {
 			this.syncLock.unlock();

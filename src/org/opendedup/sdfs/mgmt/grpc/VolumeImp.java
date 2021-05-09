@@ -7,6 +7,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 import com.google.common.io.BaseEncoding;
+import com.google.protobuf.util.JsonFormat;
 import com.sun.management.UnixOperatingSystemMXBean;
 
 import org.json.JSONArray;
@@ -15,6 +16,8 @@ import org.opendedup.grpc.Shutdown.ShutdownRequest;
 import org.opendedup.grpc.Shutdown.ShutdownResponse;
 import org.opendedup.grpc.VolumeServiceGrpc;
 import org.opendedup.grpc.FileInfo.errorCodes;
+import org.opendedup.grpc.SDFSCli.SdfsPermissions;
+import org.opendedup.grpc.SDFSCli.SdfsUser;
 import org.opendedup.grpc.VolumeServiceOuterClass.AuthenticationRequest;
 import org.opendedup.grpc.VolumeServiceOuterClass.AuthenticationResponse;
 import org.opendedup.grpc.VolumeServiceOuterClass.CleanStoreRequest;
@@ -69,11 +72,11 @@ import net.sf.jpam.Pam;
 
 class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
   private static final int EXPIRY_DAYS = 90;
-  
+
   private static Pam pam = null;
   static {
-    if(!OSValidator.isWindows()) {
-      pam =  new Pam("login");
+    if (!OSValidator.isWindows()) {
+      pam = new Pam("login");
     }
   }
 
@@ -104,50 +107,43 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
         JSONObject jwtPayload = new JSONObject();
         jwtPayload.put("status", 0);
 
-        JSONArray audArray = new JSONArray();
-        audArray.put("admin");
         jwtPayload.put("sub", req.getUsername());
-
-        jwtPayload.put("aud", audArray);
+        SdfsPermissions.Builder permb = SdfsPermissions.newBuilder();
+        permb.setADMIN(true);
+        jwtPayload.put("aud", BaseEncoding.base64().encode(permb.build().toByteArray()));
         LocalDateTime ldt = LocalDateTime.now().plusDays(EXPIRY_DAYS);
         jwtPayload.put("exp", ldt.toEpochSecond(ZoneOffset.UTC)); // this needs to be configured
 
         String token = new JWebToken(jwtPayload).toString();
         b.setToken(token);
-      } else if (!OSValidator.isWindows()){
-        if (!pam.authenticateSuccessful(req.getUsername(), req.getPassword())) {
-          b.setError("Unable to Authenticate User");
+      } else {
+        SdfsUser user = SdfsUserServiceImpl.getUser(req.getUsername());
+        if (user == null) {
+          b.setError("Unable to Authenticate User " + req.getUsername());
           b.setErrorCode(errorCodes.EACCES);
-        } else {
-          List<String> groups = org.apache.hadoop.security.UserGroupInformation.getBestUGI(null, "root").getGroups();
-          JSONArray audArray = new JSONArray();
-          for (String group : groups) {
-            if (group.startsWith("sdfs")) {
-              audArray.put(group);
-            }
-          }
-          if (audArray.isEmpty()) {
-            b.setError("User is not a member of any group with access");
-            b.setErrorCode(errorCodes.EACCES);
-          } else {
 
+        } else {
+          hash = HashFunctions.getSHAHash(req.getPassword().trim().getBytes(), user.getSalt().getBytes());
+          if (!hash.equals(user.getPasswordHash())) {
+            b.setError("Unable to Authenticate User");
+            b.setErrorCode(errorCodes.EACCES);
+            SdfsUserServiceImpl.setLastFailedLogin(req.getUsername());
+
+          } else {
             JSONObject jwtPayload = new JSONObject();
             jwtPayload.put("status", 0);
 
             jwtPayload.put("sub", req.getUsername());
 
-            jwtPayload.put("aud", audArray);
+            jwtPayload.put("aud", BaseEncoding.base64().encode(user.getPermissions().toByteArray()));
             LocalDateTime ldt = LocalDateTime.now().plusDays(EXPIRY_DAYS);
             jwtPayload.put("exp", ldt.toEpochSecond(ZoneOffset.UTC)); // this needs to be configured
 
             String token = new JWebToken(jwtPayload).toString();
             b.setToken(token);
+            SdfsUserServiceImpl.setLastLogin(req.getUsername());
           }
-
         }
-      } else {
-        b.setError("Unable to Authenticate User");
-        b.setErrorCode(errorCodes.EACCES);
       }
     } catch (Exception e) {
       SDFSLogger.getLog().error("unable to authenticat user", e);

@@ -1308,8 +1308,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @param propigateEvent TODO
 	 **/
 	public void setLastAccessed(long lastAccessed, boolean propigateEvent) {
-		
-			this.lastAccessed.get();
+		this.writeLock.lock();
+		try {
+			this.lastModified.set(lastAccessed);
+			this.dirty = true;
+		} finally {
+			this.writeLock.unlock();
+		}
 	}
 
 	public long getLastAccessed() {

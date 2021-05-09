@@ -54,84 +54,101 @@ public class StorageServiceImpl extends StorageServiceImplBase {
     @Override
     public void getMetaDataDedupeFile(MetaDataDedupeFileRequest request,
             StreamObserver<ChunkResponse> responseObserver) {
+
         InputStream is = null;
-
-        try {
-            File f = FileIOServiceImpl.resolvePath(request.getFilePath());
-
-            is = new FileInputStream(f);
-            byte[] buffer = new byte[32 * 1024];
-            int length;
-            while ((length = is.read(buffer)) > 0) {
-                ChunkResponse.Builder b = ChunkResponse.newBuilder();
-                b.setData(ByteString.copyFrom(ByteBuffer.wrap(buffer), length));
-                b.setLen(length);
-                responseObserver.onNext(b.build());
-            }
-            responseObserver.onCompleted();
-        } catch (FileIOError e) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
             ChunkResponse.Builder b = ChunkResponse.newBuilder();
-            b.setError(e.message);
-            b.setErrorCode(e.code);
-            responseObserver.onNext(b.build());
-            responseObserver.onCompleted();
-            return;
-        } catch (Exception e) {
-            ChunkResponse.Builder b = ChunkResponse.newBuilder();
-            SDFSLogger.getLog().error("unable to get chunk for " + request.getFilePath(), e);
-            b.setError("unable to get chunk for " + request.getFilePath());
+            b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
-            return;
+        } else {
 
-        } finally {
             try {
-                is.close();
-            } catch (IOException e) {
+                File f = FileIOServiceImpl.resolvePath(request.getFilePath());
 
+                is = new FileInputStream(f);
+                byte[] buffer = new byte[32 * 1024];
+                int length;
+                while ((length = is.read(buffer)) > 0) {
+                    ChunkResponse.Builder b = ChunkResponse.newBuilder();
+                    b.setData(ByteString.copyFrom(ByteBuffer.wrap(buffer), length));
+                    b.setLen(length);
+                    responseObserver.onNext(b.build());
+                }
+                responseObserver.onCompleted();
+            } catch (FileIOError e) {
+                ChunkResponse.Builder b = ChunkResponse.newBuilder();
+                b.setError(e.message);
+                b.setErrorCode(e.code);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            } catch (Exception e) {
+                ChunkResponse.Builder b = ChunkResponse.newBuilder();
+                SDFSLogger.getLog().error("unable to get chunk for " + request.getFilePath(), e);
+                b.setError("unable to get chunk for " + request.getFilePath());
+                b.setErrorCode(errorCodes.EACCES);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+
+                }
             }
         }
     }
 
     @Override
     public void getSparseDedupeFile(SparseDedupeFileRequest request, StreamObserver<ChunkResponse> responseObserver) {
-        InputStream is = null;
-        try {
-
-            File f = LongByteArrayMap.getFile(request.getGuid());
-            if (!f.exists()) {
-                ChunkResponse.Builder b = ChunkResponse.newBuilder();
-                b.setError("Guild " + request.getGuid() + " does not exists");
-                b.setErrorCode(errorCodes.ENOENT);
-                responseObserver.onNext(b.build());
-                responseObserver.onCompleted();
-            }
-
-            is = new FileInputStream(f);
-            byte[] buffer = new byte[32 * 1024];
-            int length;
-            while ((length = is.read(buffer)) > 0) {
-                ChunkResponse.Builder b = ChunkResponse.newBuilder();
-                b.setData(ByteString.copyFrom(ByteBuffer.wrap(buffer), length));
-                b.setLen(length);
-                responseObserver.onNext(b.build());
-            }
-            responseObserver.onCompleted();
-        } catch (Exception e) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
             ChunkResponse.Builder b = ChunkResponse.newBuilder();
-            SDFSLogger.getLog().error("unable to get chunk for " + request.getGuid(), e);
-            b.setError("unable to get chunk for " + request.getGuid());
+            b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
-            return;
-
-        } finally {
+        } else {
+            InputStream is = null;
             try {
-                is.close();
-            } catch (IOException e) {
 
+                File f = LongByteArrayMap.getFile(request.getGuid());
+                if (!f.exists()) {
+                    ChunkResponse.Builder b = ChunkResponse.newBuilder();
+                    b.setError("Guild " + request.getGuid() + " does not exists");
+                    b.setErrorCode(errorCodes.ENOENT);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                }
+
+                is = new FileInputStream(f);
+                byte[] buffer = new byte[32 * 1024];
+                int length;
+                while ((length = is.read(buffer)) > 0) {
+                    ChunkResponse.Builder b = ChunkResponse.newBuilder();
+                    b.setData(ByteString.copyFrom(ByteBuffer.wrap(buffer), length));
+                    b.setLen(length);
+                    responseObserver.onNext(b.build());
+                }
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                ChunkResponse.Builder b = ChunkResponse.newBuilder();
+                SDFSLogger.getLog().error("unable to get chunk for " + request.getGuid(), e);
+                b.setError("unable to get chunk for " + request.getGuid());
+                b.setErrorCode(errorCodes.EACCES);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+
+                }
             }
         }
     }
@@ -139,71 +156,85 @@ public class StorageServiceImpl extends StorageServiceImplBase {
     @Override
     public void checkHashes(CheckHashesRequest request, StreamObserver<CheckHashesResponse> responseObserver) {
         CheckHashesResponse.Builder b = CheckHashesResponse.newBuilder();
-        try {
-
-            List<ByteString> hashes = request.getHashesList();
-            List<Long> responses = new ArrayList<Long>(hashes.size());
-            for (ByteString bs : hashes) {
-                responses.add(HCServiceProxy.getHashesMap().get(bs.toByteArray()));
-            }
-            b.addAllLocations(responses);
-            responseObserver.onNext(b.build());
-            responseObserver.onCompleted();
-        } catch (Exception e) {
-            SDFSLogger.getLog().error("unable to check hashes ", e);
-            b.setError("unable to check hashes");
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
+            b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
-            return;
+        } else {
+            try {
 
+                List<ByteString> hashes = request.getHashesList();
+                List<Long> responses = new ArrayList<Long>(hashes.size());
+                for (ByteString bs : hashes) {
+                    responses.add(HCServiceProxy.getHashesMap().get(bs.toByteArray()));
+                }
+                b.addAllLocations(responses);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                SDFSLogger.getLog().error("unable to check hashes ", e);
+                b.setError("unable to check hashes");
+                b.setErrorCode(errorCodes.EACCES);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+
+            }
         }
     }
 
     @Override
     public void writeChunks(WriteChunksRequest request, StreamObserver<WriteChunksResponse> responseObserver) {
         WriteChunksResponse.Builder b = WriteChunksResponse.newBuilder();
-        try {
-            DedupFileChannel ch = FileIOServiceImpl.dedupChannels.get(request.getFileHandle());
-            if (ch == null) {
-                SDFSLogger.getLog().error("file handle " + request.getFileHandle() + " does not exist");
-                b.setError("file handle " + request.getFileHandle() + " does not exist");
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            try {
+                DedupFileChannel ch = FileIOServiceImpl.dedupChannels.get(request.getFileHandle());
+                if (ch == null) {
+                    SDFSLogger.getLog().error("file handle " + request.getFileHandle() + " does not exist");
+                    b.setError("file handle " + request.getFileHandle() + " does not exist");
+                    b.setErrorCode(errorCodes.EACCES);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+
+                List<org.opendedup.grpc.Storage.InsertRecord> responses = new ArrayList<org.opendedup.grpc.Storage.InsertRecord>(
+                        request.getChunksCount());
+                for (ChunkEntry ent : request.getChunksList()) {
+                    byte[] chunk = ent.getData().toByteArray();
+                    if (chunk.length > 0) {
+                        /*
+                         * byte [] hash = ent.getHash().toByteArray(); byte [] ek =
+                         * SparseDedupFile.eng.getHash(chunk); if(!Arrays.equals(hash, ek)) {
+                         * SDFSLogger.getLog().info("noooo"); }
+                         */
+                        ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
+                                ch.getDedupFile().getGUID());
+                        InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
+                        responses.add(ir.toProtoBuf());
+                    } else {
+                        responses.add(new InsertRecord(false, -1).toProtoBuf());
+                    }
+                }
+                b.addAllInsertRecords(responses);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            } catch (Exception e) {
+                SDFSLogger.getLog().error("unable to write chunks ", e);
+                b.setError("unable to write chunks");
                 b.setErrorCode(errorCodes.EACCES);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
-            }
 
-            List<org.opendedup.grpc.Storage.InsertRecord> responses = new ArrayList<org.opendedup.grpc.Storage.InsertRecord>(
-                    request.getChunksCount());
-            for (ChunkEntry ent : request.getChunksList()) {
-                byte[] chunk = ent.getData().toByteArray();
-                if (chunk.length > 0) {
-                    /*
-                     * byte [] hash = ent.getHash().toByteArray(); byte [] ek =
-                     * SparseDedupFile.eng.getHash(chunk); if(!Arrays.equals(hash, ek)) {
-                     * SDFSLogger.getLog().info("noooo"); }
-                     */
-                    ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
-                            ch.getDedupFile().getGUID());
-                    InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
-                    responses.add(ir.toProtoBuf());
-                } else {
-                    responses.add(new InsertRecord(false,-1).toProtoBuf());
-                }
             }
-            b.addAllInsertRecords(responses);
-            responseObserver.onNext(b.build());
-            responseObserver.onCompleted();
-            return;
-        } catch (Exception e) {
-            SDFSLogger.getLog().error("unable to write chunks ", e);
-            b.setError("unable to write chunks");
-            b.setErrorCode(errorCodes.EACCES);
-            responseObserver.onNext(b.build());
-            responseObserver.onCompleted();
-            return;
-
         }
     }
 
@@ -211,69 +242,83 @@ public class StorageServiceImpl extends StorageServiceImplBase {
     public void writeSparseDataChunk(SparseDedupeChunkWriteRequest request,
             StreamObserver<SparseDedupeChunkWriteResponse> responseObserver) {
         SparseDedupeChunkWriteResponse.Builder b = SparseDedupeChunkWriteResponse.newBuilder();
-        try {
-            DedupFileChannel ch = FileIOServiceImpl.dedupChannels.get(request.getFileHandle());
-            if (ch == null) {
-                SDFSLogger.getLog().error("file handle " + request.getFileHandle() + " does not exist");
-                b.setError("file handle " + request.getFileHandle() + " does not exist");
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            try {
+                DedupFileChannel ch = FileIOServiceImpl.dedupChannels.get(request.getFileHandle());
+                if (ch == null) {
+                    SDFSLogger.getLog().error("file handle " + request.getFileHandle() + " does not exist");
+                    b.setError("file handle " + request.getFileHandle() + " does not exist");
+                    b.setErrorCode(errorCodes.EACCES);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+                SparseDataChunk sp = new SparseDataChunk(request.getChunk());
+                ch.getDedupFile().updateMap(sp, request.getFileLocation());
+                long ep = sp.getFpos() + sp.len;
+                if (ep > ch.getFile().length()) {
+                    ch.getFile().setLength(ep, false);
+                    SDFSLogger.getLog().info("Set length to " + ep + " " + sp.len + " ");
+                } else {
+                    SDFSLogger.getLog()
+                            .info("no length to " + sp.getFpos() + " " + request.getChunk().getLen() + " " + sp.len);
+                }
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            } catch (Exception e) {
+                SDFSLogger.getLog().error("unable to write sparse data chunk", e);
+                b.setError("unable to write sparse data chunk");
                 b.setErrorCode(errorCodes.EACCES);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
-            }
-            SparseDataChunk sp = new SparseDataChunk(request.getChunk());
-            ch.getDedupFile().updateMap(sp, request.getFileLocation());
-            long ep = sp.getFpos() + sp.len;
-            if (ep > ch.getFile().length()) {
-                ch.getFile().setLength(ep, false);
-                SDFSLogger.getLog().info("Set length to " + ep + " " + sp.len + " ");
-            } else {
-                SDFSLogger.getLog()
-                        .info("no length to " + sp.getFpos() + " " + request.getChunk().getLen() + " " + sp.len);
-            }
-            responseObserver.onNext(b.build());
-            responseObserver.onCompleted();
-            return;
-        } catch (Exception e) {
-            SDFSLogger.getLog().error("unable to write sparse data chunk", e);
-            b.setError("unable to write sparse data chunk");
-            b.setErrorCode(errorCodes.EACCES);
-            responseObserver.onNext(b.build());
-            responseObserver.onCompleted();
-            return;
 
+            }
         }
     }
 
     @Override
     public void hashingInfo(HashingInfoRequest request, StreamObserver<HashingInfoResponse> responseObserver) {
         HashingInfoResponse.Builder b = HashingInfoResponse.newBuilder();
-        try {
-            b.setChunkSize(Main.CHUNK_LENGTH);
-            if (Main.hashType.equalsIgnoreCase(VARIABLE_MD5)) {
-                b.setHashtype(hashtype.MD5);
-            } else if (Main.hashType.equalsIgnoreCase(VARIABLE_SHA256)) {
-                b.setHashtype(hashtype.SHA256);
-            } else {
-                b.setHashtype(hashtype.UNSUPPORTED);
-            }
-            b.setMapVersion(Main.MAPVERSION);
-            b.setMaxSegmentSize(HashFunctionPool.maxLen);
-            b.setMinSegmentSize(HashFunctionPool.minLen);
-            b.setWindowSize(HashFunctionPool.bytesPerWindow);
-            b.setPolyNumber(10923124345206883L);
-            responseObserver.onNext(b.build());
-            responseObserver.onCompleted();
-            return;
-        } catch (Exception e) {
-
-            SDFSLogger.getLog().error("unable get hashing info", e);
-            b.setError("unable get hashing info");
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_READ)) {
+            b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
-            return;
+        } else {
+            try {
+                b.setChunkSize(Main.CHUNK_LENGTH);
+                if (Main.hashType.equalsIgnoreCase(VARIABLE_MD5)) {
+                    b.setHashtype(hashtype.MD5);
+                } else if (Main.hashType.equalsIgnoreCase(VARIABLE_SHA256)) {
+                    b.setHashtype(hashtype.SHA256);
+                } else {
+                    b.setHashtype(hashtype.UNSUPPORTED);
+                }
+                b.setMapVersion(Main.MAPVERSION);
+                b.setMaxSegmentSize(HashFunctionPool.maxLen);
+                b.setMinSegmentSize(HashFunctionPool.minLen);
+                b.setWindowSize(HashFunctionPool.bytesPerWindow);
+                b.setPolyNumber(10923124345206883L);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            } catch (Exception e) {
 
+                SDFSLogger.getLog().error("unable get hashing info", e);
+                b.setError("unable get hashing info");
+                b.setErrorCode(errorCodes.EACCES);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+
+            }
         }
     }
 

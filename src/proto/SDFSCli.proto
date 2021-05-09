@@ -1,0 +1,95 @@
+syntax = "proto3";
+package org.opendedup.grpc;
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
+
+import "FileInfo.proto";
+
+message SdfsUser {
+    string user = 1;
+    string description =2;
+    string passwordHash = 3;
+    string salt = 4;
+    SdfsPermissions permissions = 5;
+    int64 lastLogin = 6;
+    int64 lastFailedLogin = 7;
+    
+}
+
+message SdfsPermissions {
+    bool METADATA_READ=1;
+    bool METADATA_WRITE=2;
+    bool FILE_READ=3;
+    bool FILE_WRITE=4;
+    bool FILE_DELETE=5;
+    bool VOLUME_READ=6;
+    bool CONFIG_READ=7;
+    bool CONFIG_WRITE=8;
+    bool EVENT_READ=9;
+    bool AUTH_READ=10;
+    bool AUTH_WRITE=11;
+    bool ADMIN=12;
+}
+
+message SdfsUsers {
+    map<string, SdfsUser> users = 1;
+
+}
+
+message AddUserRequest {
+    string user =1;
+    string password =2;
+    string description = 3;
+    SdfsPermissions permissions =5;
+}
+
+message AddUserResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message DeleteUserRequest {
+    string user=1;
+}
+
+message DeleteUserResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message SetPermissionsRequest {
+    string user =1;
+    SdfsPermissions permissions =5;
+}
+
+message SetPermissionsResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message SetUserPasswordRequest {
+    string user =1;
+    string password =2;
+}
+
+message SetUserPasswordResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message ListUsersRequest {
+
+}
+
+message ListUsersResponse {
+    repeated SdfsUser users=1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
+service SdfsUserService {
+    rpc AddUser(AddUserRequest) returns (AddUserResponse);
+    rpc DeleteUser(DeleteUserRequest) returns(DeleteUserResponse);
+    rpc SetSdfsPermissions(SetPermissionsRequest) returns(SetPermissionsResponse);
+    rpc SetSdfsPassword(SetUserPasswordRequest) returns(SetUserPasswordResponse);
+    rpc ListUsers(ListUsersRequest) returns(ListUsersResponse);
+}

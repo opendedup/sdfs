@@ -143,6 +143,7 @@ public class VolumeConfigWriter {
 	private String topic;
 	private String subscription;
 	private String gcpProject;
+	private String permissionsFile;
 	private long rmthreashold = 15 * 60 * 1000;
 
 	public VolumeConfigWriter() {
@@ -182,6 +183,7 @@ public class VolumeConfigWriter {
 			}
 			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
 		}
+		
 		if (cmd.hasOption("sdfscli-require-auth")) {
 			this.sdfsCliRequireAuth = true;
 		}
@@ -241,10 +243,13 @@ public class VolumeConfigWriter {
 		}
 		this.io_log = this.base_path + File.separator + "ioperf.log";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
+		this.permissionsFile = this.base_path + File.separator + "permssions" + File.separator + "volume_permissions.pb";
 		this.dedup_dbtrash_store = this.base_path + File.separator + "ddb_trash";
 		this.chunk_store_data_location = this.base_path + File.separator + "chunkstore" + File.separator + "chunks";
-		this.chunk_store_hashdb_location = this.base_path + File.separator + "chunkstore" + File.separator + "hdb-"
-				+ this.sn;
+		this.chunk_store_hashdb_location = this.base_path + File.separator + "chunkstore" + File.separator + "hdb-"+ this.sn;
+		if (cmd.hasOption("sdfscli-permissions-file")) {
+				this.permissionsFile = cmd.getOptionValue("sdfscli-permissions-file");
+		}
 		if (cmd.hasOption("dedup-db-store")) {
 			this.dedup_db_store = cmd.getOptionValue("dedup-db-store");
 		}
@@ -722,6 +727,7 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("enable-mutual-tls-auth", Boolean.toString(this.sdfsCliRequireMutualTLSAuth));
 		sdfscli.setAttribute("listen-address", this.sdfsCliListenAddr);
 		sdfscli.setAttribute("use-ssl", Boolean.toString(this.sdfsCliSSL));
+		sdfscli.setAttribute("permissions-file", this.permissionsFile);
 		try {
 			sdfscli.setAttribute("password",
 					HashFunctions.getSHAHash(this.sdfsCliPassword.getBytes(), this.sdfsCliSalt.getBytes()));

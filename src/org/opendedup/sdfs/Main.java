@@ -203,6 +203,10 @@ public class Main {
 	public static String vmdkMountOptions = "rw";
 	public static int defaultOffset = 2048;
 
+	public static String permissionsFile = null;
+
+	public static String PasswordPattern = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}";
+
 	/**
 	 * The maximum number of dedup files that can be open at any one time. This
 	 * can be changed based on the amount of memory on a specfic system. Files

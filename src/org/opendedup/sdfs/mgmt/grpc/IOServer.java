@@ -6,6 +6,7 @@ import org.opendedup.sdfs.Main;
 
 import io.grpc.Context;
 import io.grpc.Contexts;
+import io.grpc.Grpc;
 import io.grpc.Metadata;
 import io.grpc.Server;
 import io.grpc.ServerInterceptor;
@@ -23,6 +24,8 @@ import java.net.SocketAddress;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLSession;
 
 import io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.NettyServerBuilder;
@@ -52,7 +55,7 @@ public class IOServer {
     String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
     String certChainFilePath = keydir + File.separator + "tls_key.pem";
     String privateKeyFilePath = keydir + File.separator + "tls_key.key";
-    
+
     Map<String, String> env = System.getenv();
     if (env.containsKey("SDFS_PRIVATE_KEY")) {
       privateKeyFilePath = env.get("SDFS_PRIVATE_KEY");
@@ -73,7 +76,7 @@ public class IOServer {
     String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
     String certChainFilePath = keydir + File.separator + "tls_key.pem";
     String privateKeyFilePath = keydir + File.separator + "tls_key.key";
-    String trustCertCollectionFilePath =  keydir + File.separator + "signer_key.crt";
+    String trustCertCollectionFilePath = keydir + File.separator + "signer_key.crt";
     Map<String, String> env = System.getenv();
     if (env.containsKey("SDFS_PRIVATE_KEY")) {
       privateKeyFilePath = env.get("SDFS_PRIVATE_KEY");
@@ -90,9 +93,9 @@ public class IOServer {
     logger.info(
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads);
     SocketAddress address = new InetSocketAddress(host, port);
-    NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl()).addService(new StorageServiceImpl())
-        .executor(Executors.newFixedThreadPool(Main.writeThreads)).addService(new FileIOServiceImpl())
-        .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl());
+    NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
+        .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
+        .addService(new FileIOServiceImpl()).intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl()).addService(new SdfsUserServiceImpl());
     if (useSSL) {
       if (useClientTLS) {
         b.sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath).build());
@@ -129,6 +132,7 @@ public class IOServer {
 
   public static class AuthorizationInterceptor implements ServerInterceptor {
     public static final Context.Key<JWebToken> USER_IDENTITY = Context.key("identity");
+    public final static Context.Key<SSLSession> SSL_SESSION_CONTEXT = Context.key("SSLSession");
 
     @Override
     public <ReqT, RespT> Listener<ReqT> interceptCall(ServerCall<ReqT, RespT> call, Metadata headers,
@@ -142,18 +146,28 @@ public class IOServer {
           final String auth_token = headers.get(Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER));
           SDFSLogger.getLog().debug("Token is " + auth_token);
           if (auth_token == null) {
-            throw new StatusRuntimeException(Status.UNAUTHENTICATED);
+            if (Main.sdfsCliRequireMutualTLSAuth) {
+              SSLSession sslSession = call.getAttributes().get(Grpc.TRANSPORT_ATTR_SSL_SESSION);
+              if (sslSession == null) {
+                throw new StatusRuntimeException(Status.UNAUTHENTICATED);
+              }
+              Context context = Context.current().withValue(SSL_SESSION_CONTEXT, sslSession);
+              return Contexts.interceptCall(context, call, headers, next);
+            } else {
+              throw new StatusRuntimeException(Status.UNAUTHENTICATED);
+            }
+
           } else {
             String[] tokens = auth_token.split(" ");
             if (tokens.length == 2 && tokens[0].toLowerCase().equals("bearer")) {
               try {
                 JWebToken token = new JWebToken(tokens[1]);
                 if (!token.isValid()) {
-                  SDFSLogger.getLog().warn("token not valid for user " + token.getAudience());
+                  SDFSLogger.getLog().warn("token not valid for user " + token.getSubject());
                   throw new StatusRuntimeException(Status.UNAUTHENTICATED);
                 } else {
                   Context context = Context.current().withValue(USER_IDENTITY, token);
-                  SDFSLogger.getLog().debug("authenticated " + token.getAudience());
+                  SDFSLogger.getLog().debug("authenticated " +token.getSubject());
                   return Contexts.interceptCall(context, call, headers, next);
                 }
               } catch (Exception e) {
