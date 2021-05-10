@@ -219,6 +219,8 @@ public class SdfsUserServiceImpl extends SdfsUserServiceImplBase {
 
                         ub.setPasswordHash(hashedPassword);
                         paddUser(ub.build());
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
                     } catch (Exception e) {
                         SDFSLogger.getLog().error("unable to persist user " + request.getUser(), e);
                         b.setError("unable to persist user " + request.getUser());
