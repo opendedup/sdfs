@@ -17,6 +17,7 @@
 #include <cstdio>
 #include <signal.h>
 #include <comdef.h>
+#include <fstream>
 
 #define BUFSIZE 8192 
 
@@ -233,7 +234,7 @@ int _tmain(int argc, TCHAR *argv[])
 	_tcsncat_s(cmd, _T(" -XX:+UseG1GC -Djava.awt.headless=true -server "), 2048);
 	_tcsncat_s(cmd, _T("-cp \""), 2048);
 	_tcsncat_s(cmd, path, 2048);
-	_tcsncat_s(cmd, "\\lib\\*\" fuse.SDFS.MountSDFS", 2048);
+	_tcsncat_s(cmd,  _T("\\lib\\*\" fuse.SDFS.MountSDFS"), 2048);
 
 	for (int i = 1; i < argc; i++) {
 		if (!_tcsncmp(argv[i], _T("-mem"), 4)) {
@@ -343,38 +344,59 @@ void ReadFromPipe(void *param)
 {
 	DWORD dwRead, dwWritten;
 	CHAR chBuf[BUFSIZE];
+	CHAR rchBuf[1];
+	CHAR nl[1];
 	BOOL bSuccess = FALSE;
 	BOOL rSuccess = FALSE;
 	hParentStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-
+	std::string str;
+	DWORD offset =0;
+	nl[0] = '\n';
 	while (!processCompleted)
 	{
-		rSuccess = ReadFile(g_hChildStd_OUT_Rd, chBuf, BUFSIZE, &dwRead, NULL);
-		std::string contents = string(chBuf);
-		if (!cpt && strcmp(chBuf, "volumemounted") > 0) {
-			bSuccess = WriteFile(hParentStdOut, "volume mounted\n",
-				dwRead, &dwWritten, NULL);
-			bSuccess = WriteFile(hParentStdOut, "\n",
-				dwRead, &dwWritten, NULL);
-			processCompleted = true;
-			break;
-		}
-		else {
-
-			bSuccess = WriteFile(hParentStdOut, contents.c_str(),
-				dwRead, &dwWritten, NULL);
-		}
-		if (!bSuccess) {
-			processCompleted = true;
-			break;
-		}
-		else {
-			dataWritten = true;
-		}
+		rSuccess = ReadFile(g_hChildStd_OUT_Rd, rchBuf, 1, &dwRead, NULL);
 		if (!rSuccess || dwRead == 0) {
 			processCompleted = true;
 			break;
 		}
+		chBuf[offset] = rchBuf[0];
+		offset++;
+		std::string contents = string(chBuf);
+		if (rchBuf[0] == nl[0]) {
+			
+			
+			if (!cpt && strcmp(chBuf, "volumemounted") > 0) {
+				bSuccess = WriteFile(hParentStdOut, "\n",
+					2, &dwWritten, NULL);
+				bSuccess = WriteFile(hParentStdOut, "volume mounted\n",
+					16, &dwWritten, NULL);
+				bSuccess = WriteFile(hParentStdOut, "\n",
+					2, &dwWritten, NULL);
+				processCompleted = true;
+				break;
+			}
+			else {
+
+				bSuccess = WriteFile(hParentStdOut, contents.c_str(),
+					offset, &dwWritten, NULL);
+			}
+			if (!bSuccess) {
+				processCompleted = true;
+				break;
+			}
+			else {
+				dataWritten = true;
+			}
+			memset(chBuf, 0, sizeof(chBuf));
+			offset = 0;
+		}
+		/*
+		else {
+			bSuccess = WriteFile(hParentStdOut,"ww\n",
+				8, &dwWritten, NULL);
+		}
+		*/
+		
 	}
 	threadFinished = true;
 }

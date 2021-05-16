@@ -119,6 +119,7 @@ public class WinSDFS implements DokanOperations {
 		dokanOptions.optionsMode = DokanOptionsMode.Mode.REMOVABLE_DRIVE.getValue();
 		// dokanOptions.uncPath = "\\opendedupe\\awesome";
 		log.info("######## mounting " + mountedVolume + " to " + driveLetter + " #############");
+		System.out.println("");
 		System.out.println("volumemounted");
 		System.out.println("");
 		int result = Dokan.mount(dokanOptions, this, debug);

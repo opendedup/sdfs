@@ -168,6 +168,7 @@ public class MountSDFS {
 		ShutdownHook shutdownHook = new ShutdownHook(sdfsService, cmd.getOptionValue("m"));
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (nm) {
+			System.out.println("");
 			System.out.println("volumemounted");
 			System.out.println("");
 			while (!SDFSService.isStopped()) {

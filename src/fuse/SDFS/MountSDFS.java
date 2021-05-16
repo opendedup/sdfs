@@ -62,6 +62,7 @@ public class MountSDFS implements Daemon, Runnable {
 				FuseMount.mount(sFal, new SDFSFileSystem(Main.volume.getPath(), Main.volumeMountPoint), log);
 				System.exit(0);
 			} else {
+				System.out.println("");
 				System.out.println("volumemounted");
 				System.out.println("");
 				while (!SDFSService.isStopped()) {

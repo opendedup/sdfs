@@ -48,11 +48,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.mapdb.CC;
 import org.opendedup.collections.LongByteArrayMap;
-import org.opendedup.grpc.FileInfo;
 import org.opendedup.grpc.FileInfo.FileAttributes;
 import org.opendedup.grpc.FileInfo.FileInfoResponse;
 import org.opendedup.grpc.FileInfo.FileInfoResponse.fileType;
