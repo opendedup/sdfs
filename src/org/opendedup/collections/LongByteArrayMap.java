@@ -916,7 +916,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			if (OSValidator.isWindows()) {
 				srcC = (FileChannel) Files.newByteChannel(Paths.get(src.getPath()), StandardOpenOption.READ,
 						StandardOpenOption.SPARSE);
-				dstC = (FileChannel) Files.newByteChannel(Paths.get(src.getPath()), StandardOpenOption.CREATE,
+				dstC = (FileChannel) Files.newByteChannel(Paths.get(dest.getPath()), StandardOpenOption.CREATE,
 						StandardOpenOption.WRITE, StandardOpenOption.SPARSE);
 				srcC.transferTo(0, src.length(), dstC);
 			} else {
