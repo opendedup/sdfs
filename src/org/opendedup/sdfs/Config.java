@@ -17,7 +17,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.EncryptUtils;
-import org.opendedup.util.OSValidator;
 import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -313,6 +312,8 @@ public class Config {
 					Main.chunkStoreEncryptionKey = oc;
 					Main.eChunkStoreEncryptionKey = null;
 					SDFSLogger.getLog().warn("unable to decrypt encrytion key " + oc, e);
+					System.err.println("Unable to decrypt encryption key");
+					System.exit(1);
 				}
 
 			}
