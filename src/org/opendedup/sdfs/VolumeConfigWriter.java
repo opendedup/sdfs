@@ -228,7 +228,16 @@ public class VolumeConfigWriter {
 			this.safe_sync = false;
 		}
 		if (cmd.hasOption("base-path")) {
-			this.base_path = cmd.getOptionValue("base-path");
+			String basebath = "";
+			for (String v : cmd.getOptionValues("base-path")) {
+				if(basebath.length() == 0) {
+					basebath = v;
+				}else {
+					basebath = basebath + " " + v;
+				}
+				
+			}
+			this.base_path =basebath.trim();
 		}
 		if (cmd.hasOption("backup-volume")) {
 			this.mdCompresstion = true;
@@ -991,7 +1000,7 @@ public class VolumeConfigWriter {
 				OptionBuilder.withLongOpt("base-path")
 						.withDescription("the folder path for all volume data and meta data.\n Defaults to: \n "
 								+ OSValidator.getProgramBasePath() + "<volume name>")
-						.hasArg().withArgName("PATH").create());
+						.hasArgs().withArgName("PATH").create());
 		options.addOption(OptionBuilder.withLongOpt("cloud-url")
 				.withDescription("The url of the blob server. e.g. http://s3server.localdomain/s3/").hasArg()
 				.withArgName("url").create());
@@ -1001,11 +1010,6 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("aws-disable-dns-bucket").withDescription(
 				"disable the use of dns bucket names to prepent the cloud url. This is set to true by default when cloud-url is set")
 				.hasArg().withArgName("true|false").create());
-		options.addOption(
-				OptionBuilder.withLongOpt("base-path")
-						.withDescription("the folder path for all volume data and meta data.\n Defaults to: \n "
-								+ OSValidator.getProgramBasePath() + "<volume name>")
-						.hasArg().withArgName("PATH").create());
 		options.addOption(OptionBuilder.withLongOpt("gc-class")
 				.withDescription(
 						"The class used for intelligent block garbage collection.\n Defaults to: \n " + Main.gcClass)

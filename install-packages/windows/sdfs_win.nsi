@@ -2,8 +2,9 @@
 ; MUI Settings / Icons
 ; Sets the theme path
 
-
+Unicode True
 !define VERSION '3.12.0'
+!define JARVERISON 'master'
 
 !define MUI_PRODUCT "SDFS Cloud File System"
 
@@ -96,7 +97,7 @@ Section "SDFS Setup" SecMain
   SetOutPath "$INSTDIR\bin"
   File /r bin\*
   SetOutPath "$INSTDIR\lib"
-  File /oname=sdfs.jar ..\..\target\sdfs-${VERSION}.jar
+  File /oname=sdfs.jar ..\..\target\sdfs-${JARVERISON}.jar
   File ..\..\target\lib\*.jar
   SetOutPath "$INSTDIR\etc"
   File etc\*
@@ -147,7 +148,7 @@ Function .onInit
   ReadRegStr $0 HKLM "Software\SDFS" "path"
   IfErrors 0 +2
     Goto done
-  StrCpy $ISNTDIR $0
+  ReadRegStr $INSTDIR HKLM "Software\SDFS" "path"
 	MessageBox MB_YESNO "Upgrade Existing Setup to ${VERSION}?" IDNO noupgrade
 	RMDir /r "$INSTDIR\bin"
 	RMDir /r "$INSTDIR\lib"
