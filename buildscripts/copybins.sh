@@ -16,4 +16,14 @@ cp /tmp/mount.sdfs-$2  /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs
 chmod 777 /workspace/install-packages/deb/sbin/mount.sdfs 
 chmod 777 /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs
 ls -lah /workspace/install-packages/deb/sbin/
+gsutil cp gs://$1/sdfs-proxy/sdfs-proxy-$2 /tmp/ 
+rm -rf /workspace/install-packages/deb/sbin/sdfs-proxy
+rm -rf /workspace/install-packages/deb/usr/share/sdfs/sdfs-proxy
+cp /tmp/sdfs-proxy-$2  /workspace/install-packages/deb/sbin/sdfs-proxy 
+cp /tmp/sdfs-proxy-$2  /workspace/install-packages/deb/usr/share/sdfs/sdfs-proxy
+md5sum /workspace/install-packages/deb/sbin/sdfs-proxy
+md5sum /tmp/sdfs-proxy-$2
+chmod 777 /workspace/install-packages/deb/sbin/sdfs-proxy
+chmod 777 /workspace/install-packages/deb/usr/share/sdfs/sdfs-proxy
+rm /tmp/sdfs-proxy-$2
 
