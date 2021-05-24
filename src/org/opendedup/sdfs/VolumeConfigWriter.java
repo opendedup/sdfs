@@ -106,7 +106,7 @@ public class VolumeConfigWriter {
 	String hash_db_class = Main.hashesDBClass;
 	String sdfsCliPassword = "admin";
 	String sdfsCliSalt = HashFunctions.getRandomString(24);
-	String sdfsCliListenAddr = "localhost";
+	String sdfsCliListenAddr = "0.0.0.0";
 	boolean sdfsCliSSL = true;
 	boolean sdfsCliRequireAuth = false;
 	boolean sdfsCliRequireMutualTLSAuth = false;
