@@ -8,6 +8,18 @@ COPY src /sdfs-build/src/
 COPY .git /sdfs-build/.git
 COPY install-packages /sdfs-build/install-packages/
 WORKDIR "/sdfs-build"
+RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
+    -y nsis
+RUN wget wget https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip && \
+    unzip EnVar_plugin.zip -d /usr/share/nsis/
+RUN wget https://nsis.sourceforge.io/mediawiki/images/4/4a/AccessControl.zip && \
+    unzip AccessControl.zip -d /usr/share/nsis/ && \
+    cp /usr/share/nsis/Plugins/i386-unicode/AccessControl.dll /usr/share/nsis/Plugins/x86-unicode/
+RUN wget https://cdn.azul.com/zulu/bin/zulu11.48.21-ca-jre11.0.11-win_x64.zip && \
+    rm -rf install-packages/windows/bin/jre && \
+    unzip zulu11.48.21-ca-jre11.0.11-win_x64.zip -d /tmp/ && \
+    mv /tmp/zulu11.48.21-ca-jre11.0.11-win_x64  install-packages/windows/bin/jre
+
 RUN wget https://cdn.azul.com/zulu/bin/zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz && \
     rm -rf install-packages/deb/usr/share/sdfs/bin/jre && \
     tar -xzvf zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz && \
@@ -25,16 +37,19 @@ RUN rm -rf deb/usr/share/sdfs/lib/*
 WORKDIR "/sdfs-build/"
 RUN mvn package
 
+
 RUN cp target/lib/*.jar install-packages/deb/usr/share/sdfs/lib/ && \
     cp target/sdfs-${VERSION}.jar install-packages/deb/usr/share/sdfs/lib/sdfs.jar && \
     cp target/sdfs-${VERSION}.jar install-packages
+WORKDIR "/sdfs-build/install-packages/windows"
+RUN makensis -V4 -DVERSION=${PKG_VERSION} -DJARVERSION=${VERSION} sdfs_win.nsi 
 WORKDIR "/sdfs-build/install-packages/"
 RUN rm -rf *.deb *.rpm && \
     cp ../src/readme.txt deb/usr/share/sdfs/ && \
     fpm -s dir -t deb -n sdfs -v $PKG_VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -d libxml2-utils -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" && \
     fpm -s dir -t rpm -n sdfs -v $PKG_VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" 
 WORKDIR "/sdfs-build/install-packages/"
-RUN echo "tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm" > export_data.sh && \
+RUN echo "tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm SDFS-${PKG_VERSION}-Setup.exe" > export_data.sh && \
     chmod 700 export_data.sh
 ENTRYPOINT tar cvf - sdfs-${VERSION}.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm
 FROM ubuntu:20.04

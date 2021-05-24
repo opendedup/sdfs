@@ -3,8 +3,8 @@
 ; Sets the theme path
 
 Unicode True
-!define VERSION '3.12.0'
-!define JARVERISON 'master'
+#!define VERSION
+#!define JARVERSION
 
 !define MUI_PRODUCT "SDFS Cloud File System"
 
@@ -75,14 +75,14 @@ Unicode True
 
   ;--------------------------------
   ;Version Information
-  VIProductVersion "3.12.0.0"
+  VIProductVersion "${VERSION}.0"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDedupe SDFS"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "A Cloud Deduplication FileSystem"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "Datish Systems"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "Copyright Datish Systems LLC"
   VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "SDFS Setup"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" 3.12.0.0"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "3.12.0.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${VERSION}.0"
+  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductVersion" "${VERSION}.0"
 ;--------------------------------
 ;Installer Sections
 
@@ -97,7 +97,7 @@ Section "SDFS Setup" SecMain
   SetOutPath "$INSTDIR\bin"
   File /r bin\*
   SetOutPath "$INSTDIR\lib"
-  File /oname=sdfs.jar ..\..\target\sdfs-${JARVERISON}.jar
+  File /oname=sdfs.jar ..\..\target\sdfs-${JARVERSION}.jar
   File ..\..\target\lib\*.jar
   SetOutPath "$INSTDIR\etc"
   File etc\*
