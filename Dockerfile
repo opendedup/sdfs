@@ -10,7 +10,7 @@ COPY install-packages /sdfs-build/install-packages/
 WORKDIR "/sdfs-build"
 RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
     -y nsis
-RUN wget wget https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip && \
+RUN wget https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip && \
     unzip EnVar_plugin.zip -d /usr/share/nsis/
 RUN wget https://nsis.sourceforge.io/mediawiki/images/4/4a/AccessControl.zip && \
     unzip AccessControl.zip -d /usr/share/nsis/ && \
