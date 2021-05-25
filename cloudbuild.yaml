@@ -19,10 +19,8 @@ steps:
       - --cache-ttl=10h
       - --dockerfile=Dockerfile
   env:
-  - name: VERSION
-    value: $BRANCH_NAME
-  - name: PKG_VERSION
-    value: "0.0.1"
+  - 'VERSION=${BRANCH_NAME}'
+  - 'PKG_VERSION=0.0.1'
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
   args: [ '-c', "mkdir pkgs/" ]
