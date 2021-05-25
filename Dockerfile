@@ -49,9 +49,9 @@ RUN rm -rf *.deb *.rpm && \
     fpm -s dir -t deb -n sdfs -v $PKG_VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -d libxml2-utils -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" && \
     fpm -s dir -t rpm -n sdfs -v $PKG_VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" 
 WORKDIR "/sdfs-build/install-packages/"
-RUN echo "tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm SDFS-${PKG_VERSION}-Setup.exe" > export_data.sh && \
+RUN echo "tar cvf - sdfs-${VERSION}.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm SDFS-${PKG_VERSION}-Setup.exe" > export_data.sh && \
     chmod 700 export_data.sh
-ENTRYPOINT tar cvf - sdfs-${VERSION}.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm
+ENTRYPOINT tar cvf - sdfs-${VERSION}.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm SDFS-${PKG_VERSION}-Setup.exe
 FROM ubuntu:20.04
 ENV VERSION=master
 ENV PKG_VERSION=0.0.1
