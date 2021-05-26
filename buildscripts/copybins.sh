@@ -35,9 +35,9 @@ chmod 777 /workspace/install-packages/deb/usr/share/sdfs/sdfs-proxy
 rm /tmp/sdfs-proxy
 gsutil cp gs://$1/sdfs-proxy/sdfs-proxy-$2.exe /tmp/sdfs-proxy.exe 
 rm -rf /workspace/install-packages/windows/sdfs-proxy.exe
-cp /tmp/sdfs-proxy.exe  /workspace/install-packages/windows/sdfs-proxy.exe
+cp /tmp/sdfs-proxy.exe  /workspace/install-packages/windows/sdfs-proxy-s.exe
 md5sum /workspace/install-packages/windows/sdfs-proxy.exe
 md5sum /tmp/sdfs-proxy.exe
-chmod 777 /workspace/install-packages/windows/sdfs-proxy.exe
+chmod 777 /workspace/install-packages/windows/sdfs-proxy-s.exe
 rm /tmp/sdfs-proxy.exe
 
