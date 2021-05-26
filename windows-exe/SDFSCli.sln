@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mountsdfs", "mountsdfs\moun
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "startsdfs", "ConsoleApplication1\ConsoleApplication1.vcxproj", "{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sdfs-proxy-d", "sdfs-proxy-d\sdfs-proxy-d.vcxproj", "{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -69,6 +71,18 @@ Global
 		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Release|Win32.Build.0 = Release|Win32
 		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Release|x64.ActiveCfg = Release|x64
 		{66621C4F-40BF-4723-BFB4-A7C0D231CCFC}.Release|x64.Build.0 = Release|x64
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Debug|Win32.Build.0 = Debug|Win32
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Debug|x64.ActiveCfg = Debug|x64
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Debug|x64.Build.0 = Debug|x64
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Release|Win32.ActiveCfg = Release|Win32
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Release|Win32.Build.0 = Release|Win32
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Release|x64.ActiveCfg = Release|x64
+		{F9BB4F88-1A7C-41AE-A537-15CAF6B86EF7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

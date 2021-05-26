@@ -273,6 +273,7 @@ int _tmain(int argc, TCHAR *argv[])
 				/*
 				std::cout << "exit code=" << exit_code << "\n";
 				*/
+				Sleep(100);
 				break;
 			}
 		}
