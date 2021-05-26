@@ -1,8 +1,39 @@
-# SDFS TLS
+# SDFS Encryption
+
+## XML Config Encryption
+
+SDFS supports encryption of the encryption key and secret key within the xml file using AES 256 bit encryption. To use this feature it must be enabled at volume creation using:
+
+```bash
+mkfs.sdfs --volume-name=pool0 --volume-capacity=100GB --encrypt-config <a password greater than 6 characters>
+```
+
+To start the volume you must then run:
+
+```bash
+startsdfs -v pool0 -n -e <the password greater than 6 characters>
+```
+
+## Encryption of data at Rest
+
+SDFS Supports Encryption at rest using AES-256. At rest encyption can be enabled at initalization using:
+
+```bash
+mkfs.sdfs --volume-name=pool0 --volume-capacity=100GB --chunk-store-encrypt true 
+```
+
+To specify the key to use for encryption
+
+```bash
+mkfs.sdfs --volume-name=pool0 --volume-capacity=100GB --chunk-store-encrypt true --chunk-store-encryption-key <a long key>
+```
+
+
+## TLS - Encryption in Transit
 
 SDFS supports TLS with the GRPC API and is used by default unless otherwise specified.
 
-## Default Configuration
+### Default Configuration
 By Default SDFS uses TLS v1.3 for all GRPC API traffic using a self signed certificate generated on initialization. The keys are stored in /opt/sdfs/volumes/<volume-name>/keys/ at follows:
 * tls_key.key - A pkcs8 private key
 * tls_key.pem - A public cert for the generated private key
@@ -16,7 +47,7 @@ These keypaths can be changed by setting environmental variables during mount of
 | SDFS_SIGNER_CHAIN | The optional signer public cert of the public cert signer. This file is required for mutual tls| /opt/sdfs/volumes/<volume-name>/keys/signer_key.crt|
 
 
-## Disable TLS
+### Disable TLS
 
 To disable TLS during mkfs.sdfs creation.
 
@@ -30,11 +61,12 @@ To disable TLS after creation edit the xml config located in /etc/sdfs/<volume-n
 ```
 
 
-## Mutual TLS Configuration
+### Mutual TLS Configuration
 
 Mutual TLS can also be configured for SDFS. With mutual TLS both the client and the server authenticate to eachother using a certificated signed by the same CA. To use mutual TLS use the following steps
 
-### Requirements
+#### Requirements
+
 * SDFS Installed
 * Certstrap - https://github.com/square/certstrap
 * Openssl
@@ -77,7 +109,6 @@ startsdfscli -v pool0 -n
 ```
 
 #### Configuring sdfscli
-config -trust-all -root-ca keys/signer_key.crt -mtls-key keys/scooby.key -mtls-cert keys/scooby.crt -mtls -dse
 
 1. Create a signed certificate with the same signer cert at the server cert. Make sure you are in the same directory where you created the signer cert and it is located in a subdirectory as out/signer_key.key and out/signer_key.crt
 ```bash

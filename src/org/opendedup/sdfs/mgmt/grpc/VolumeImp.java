@@ -4,13 +4,10 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 
 import com.google.common.io.BaseEncoding;
-import com.google.protobuf.util.JsonFormat;
 import com.sun.management.UnixOperatingSystemMXBean;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.opendedup.grpc.Shutdown.ShutdownRequest;
 import org.opendedup.grpc.Shutdown.ShutdownResponse;
@@ -524,7 +521,11 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       info.setCacheSize(HCServiceProxy.getCacheSize());
       info.setMaxCacheSize(HCServiceProxy.getMaxCacheSize());
       info.setListenEncrypted(Main.sdfsCliSSL);
+      if(Main.eChunkStoreEncryptionKey != null) {
+        info.setEncryptionKey(Main.eChunkStoreEncryptionKey);
+      } else {
       info.setEncryptionKey(Main.chunkStoreEncryptionKey);
+      }
       info.setEncryptionIV(Main.chunkStoreEncryptionIV);
       info.setBucketName(HCServiceProxy.getChunkStore().getName());
       info.setMaxAge(Main.maxAge);

@@ -9,12 +9,18 @@ steps:
       - --target=builder
       - --cache-ttl=10h
       - --dockerfile=Dockerfile
+  env:
+  - 'VERSION=${BRANCH_NAME}'
+  - 'PKG_VERSION=0.0.1'
 - name: gcr.io/kaniko-project/executor:latest
   args:
       - --destination=gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME
       - --cache=false
       - --cache-ttl=10h
       - --dockerfile=Dockerfile
+  env:
+  - 'VERSION=${BRANCH_NAME}'
+  - 'PKG_VERSION=0.0.1'
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
   args: [ '-c', "mkdir pkgs/" ]
