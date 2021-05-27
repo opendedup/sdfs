@@ -132,7 +132,7 @@ int _tmain(int argc, TCHAR* argv[])
 
 	for (int i = 1; i < argc; i++) {
 
-		if (!_tcsncmp(argv[i], _T("-cp"), 3)) {
+		if (!_tcsncmp(argv[i], _T("-s"), 3)) {
 			cpt = true;
 		}
 		else {
