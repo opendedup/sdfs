@@ -7,6 +7,10 @@ md5sum /workspace/install-packages/deb/sbin/sdfscli
 md5sum /tmp/sdfscli-$2
 chmod 777 /workspace/install-packages/deb/sbin/sdfscli
 chmod 777 /workspace/install-packages/deb/usr/share/sdfs/sdfscli
+chown root /workspace/install-packages/deb/sbin/sdfscli
+chown root /workspace/install-packages/deb/usr/share/sdfs/sdfscli
+chgrp root /workspace/install-packages/deb/sbin/sdfscli
+chgrp root /workspace/install-packages/deb/usr/share/sdfs/sdfscli
 rm /tmp/sdfscli-$2
 gsutil cp gs://$1/sdfscli/sdfscli-$2.exe /tmp/ 
 rm -rf  /workspace/install-packages/windows/sdfscli.exe
@@ -22,6 +26,10 @@ cp /tmp/mount.sdfs-$2  /workspace/install-packages/deb/sbin/mount.sdfs
 cp /tmp/mount.sdfs-$2  /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs
 chmod 777 /workspace/install-packages/deb/sbin/mount.sdfs 
 chmod 777 /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs
+chown root /workspace/install-packages/deb/sbin/mount.sdfs
+chown root /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs
+chgrp root /workspace/install-packages/deb/sbin/mount.sdfs
+chgrp root /workspace/install-packages/deb/usr/share/sdfs/mount.sdfs
 ls -lah /workspace/install-packages/deb/sbin/
 gsutil cp gs://$1/sdfs-proxy/sdfs-proxy-$2 /tmp/sdfs-proxy 
 rm -rf /workspace/install-packages/deb/sbin/sdfs-proxy
@@ -32,6 +40,10 @@ md5sum /workspace/install-packages/deb/sbin/sdfs-proxy
 md5sum /tmp/sdfs-proxy
 chmod 777 /workspace/install-packages/deb/sbin/sdfs-proxy
 chmod 777 /workspace/install-packages/deb/usr/share/sdfs/sdfs-proxy
+chown root /workspace/install-packages/deb/sbin/sdfs-proxy
+chown root /workspace/install-packages/deb/usr/share/sdfs/sdfs-proxy
+chgrp root /workspace/install-packages/deb/sbin/sdfs-proxy
+chgrp root /workspace/install-packages/deb/usr/share/sdfs/sdfs-proxy
 rm /tmp/sdfs-proxy
 gsutil cp gs://$1/sdfs-proxy/sdfs-proxy-$2.exe /tmp/sdfs-proxy.exe 
 rm -rf /workspace/install-packages/windows/sdfs-proxy-s.exe
