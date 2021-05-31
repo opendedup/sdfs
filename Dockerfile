@@ -44,6 +44,9 @@ RUN cp target/lib/*.jar install-packages/deb/usr/share/sdfs/lib/ && \
 WORKDIR "/sdfs-build/install-packages/windows"
 RUN makensis -V4 -DVERSION=${PKG_VERSION} -DJARVERSION=${VERSION} sdfs_win.nsi 
 WORKDIR "/sdfs-build/install-packages/"
+RUN chmod 777 deb/sbin/sdfscli && \
+    deb/usr/share/sdfs/sdfscli
+
 RUN rm -rf *.deb *.rpm && \
     cp ../src/readme.txt deb/usr/share/sdfs/ && \
     fpm -s dir -t deb -n sdfs -v $PKG_VERSION -C deb/ -d fuse --url http://www.opendedup.org -d libxml2 -d libxml2-utils -m sam.silverberg@gmail.com --vendor datishsystems --description "SDFS is an inline deduplication based filesystem" && \
