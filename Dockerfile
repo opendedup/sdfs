@@ -45,7 +45,7 @@ WORKDIR "/sdfs-build/install-packages/windows"
 RUN makensis -V4 -DVERSION=${PKG_VERSION} -DJARVERSION=${VERSION} sdfs_win.nsi 
 WORKDIR "/sdfs-build/install-packages/"
 RUN chmod 777 deb/sbin/sdfscli && \
-    deb/usr/share/sdfs/sdfscli
+    chmod 777 deb/usr/share/sdfs/sdfscli
 
 RUN rm -rf *.deb *.rpm && \
     cp ../src/readme.txt deb/usr/share/sdfs/ && \
