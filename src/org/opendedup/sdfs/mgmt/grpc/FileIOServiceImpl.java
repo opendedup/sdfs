@@ -743,7 +743,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     public void release(FileCloseRequest request, StreamObserver<FileCloseResponse> responseObserver) {
         FileCloseResponse.Builder b = FileCloseResponse.newBuilder();
         if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)
-                || !AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+                || !AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
             b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());

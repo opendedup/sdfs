@@ -212,7 +212,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                         /*
                          * byte [] hash = ent.getHash().toByteArray(); byte [] ek =
                          * SparseDedupFile.eng.getHash(chunk); if(!Arrays.equals(hash, ek)) {
-                         * SDFSLogger.getLog().info("noooo"); }
+                         * SDFSLogger.getLog().info("failed"); }
                          */
                         ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
                                 ch.getDedupFile().getGUID());
@@ -263,10 +263,10 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 long ep = sp.getFpos() + sp.len;
                 if (ep > ch.getFile().length()) {
                     ch.getFile().setLength(ep, false);
-                    SDFSLogger.getLog().info("Set length to " + ep + " " + sp.len + " ");
+                    SDFSLogger.getLog().debug("Set length to " + ep + " " + sp.len + " ");
                 } else {
                     SDFSLogger.getLog()
-                            .info("no length to " + sp.getFpos() + " " + request.getChunk().getLen() + " " + sp.len);
+                            .debug("no length to " + sp.getFpos() + " " + request.getChunk().getLen() + " " + sp.len);
                 }
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();

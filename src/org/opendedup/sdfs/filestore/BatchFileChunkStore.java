@@ -20,8 +20,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
-import org.opendedup.sdfs.filestore.AbstractChunkStore;
-import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.cloud.MultiDownload;
 import org.opendedup.util.DeleteDir;
 import org.opendedup.util.StorageUnit;
@@ -96,6 +94,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 			fout.flush();
 			fout.close();
 		} catch (Exception e) {
+			new File(this.container_location, "BucketInfo").delete();
 			SDFSLogger.getLog().error("error closing container", e);
 		}
 		try {
@@ -133,7 +132,6 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 
 	@Override
 	public long size() {
-		// TODO Auto-generated method stub
 		return HashBlobArchive.getCompressedLength();
 	}
 
