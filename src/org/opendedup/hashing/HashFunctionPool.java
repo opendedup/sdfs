@@ -51,9 +51,7 @@ public class HashFunctionPool {
 	public static long bytesPerWindow = 48;
 
 	static {
-		if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
-			hashLength = Murmur3HashEngine.getHashLenth();
-		} else if (Main.hashType.toUpperCase().startsWith("VARIABLE_")) {
+		if (Main.hashType.toUpperCase().startsWith("VARIABLE_")) {
 			if(Main.hashType.endsWith("256")) {
 				hashLength = 32;
 			}
@@ -105,28 +103,11 @@ public class HashFunctionPool {
 			 {
 		try {
 		AbstractHashEngine hc = null;
-		if (Main.hashType.equalsIgnoreCase(MURMUR3_16)) {
-			hc = new Murmur3HashEngine();
-		} else if (Main.hashType.equalsIgnoreCase("VARIABLE_MURMUR3")) {
-			hc = new VariableHashEngine();
-		}
-		else if (Main.hashType.equalsIgnoreCase("VARIABLE_SIP") || Main.hashType.equalsIgnoreCase("VARIABLE_SIP2")) {
-			hc = new VariableMD5HashEngine();
-		}
-		else if (Main.hashType.equalsIgnoreCase(VARIABLE_SHA256)) {
+		if (Main.hashType.equalsIgnoreCase(VARIABLE_SHA256)) {
 			hc = new VariableSha256HashEngine(VariableSha256HashEngine.HASHTYPE.HASH256);
 		}
 		else if (Main.hashType.equalsIgnoreCase(VARIABLE_SHA256_160)) {
 			hc = new VariableSha256HashEngine(VariableSha256HashEngine.HASHTYPE.HASH160);
-		}
-		else if (Main.hashType.equalsIgnoreCase(VARIABLE_HWY_128)) {
-			hc = new VariableHighwayHashEngine(VariableHighwayHashEngine.HASHTYPE.HASH128);
-		}
-		else if (Main.hashType.equalsIgnoreCase(VARIABLE_HWY_160)) {
-			hc = new VariableHighwayHashEngine(VariableHighwayHashEngine.HASHTYPE.HASH160);
-		}
-		else if (Main.hashType.equalsIgnoreCase(VARIABLE_HWY_256)) {
-			hc = new VariableHighwayHashEngine(VariableHighwayHashEngine.HASHTYPE.HASH256);
 		}
 		else if (Main.hashType.equalsIgnoreCase(VARIABLE_MD5)) {
 			hc = new VariableMD5HashEngine();
