@@ -62,11 +62,8 @@ public class SDFSService {
 		System.out.println("reading config file = " + this.configFile);
 	}
 
-	public void start(boolean useSSL, int port, String password) throws Exception {
+	public void start(int port, String password) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile, password);
-		if(!useSSL){
-			useSSL = Main.sdfsCliSSL;
-		}
 		if (port != -1)
 			Main.sdfsCliPort = port;
 		if (Main.version.startsWith("0") || Main.version.startsWith("1")) {
@@ -85,7 +82,7 @@ public class SDFSService {
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");
-		MgmtWebServer.start(useSSL);
+		MgmtWebServer.start(Main.sdfsCliSSL);
 
 		Main.pFullSched = new StandAloneGCScheduler();
 		try {

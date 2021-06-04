@@ -67,7 +67,6 @@ public class MountSDFS {
 		int port = -1;
 		String volumeConfigFile = null;
 		String password = null;
-		boolean useSSL = true;
 		boolean debug = false;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
@@ -142,9 +141,7 @@ public class MountSDFS {
 			}
 			volumeConfigFile = f.getPath();
 		}
-		if (cmd.hasOption("nossl")) {
-			useSSL = false;
-		}
+		
 
 		if (volumeConfigFile == null) {
 			System.out.println("error : volume or path to volume configuration file not defined");
@@ -157,9 +154,11 @@ public class MountSDFS {
 		File lf = new File(Main.logPath);
 		lf.getParentFile().mkdirs();
 		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
-
+		if (cmd.hasOption("nossl")) {
+			Main.sdfsCliSSL = false;
+		}
 		try {
-			sdfsService.start(useSSL, port, password);
+			sdfsService.start(port, password);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());

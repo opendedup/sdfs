@@ -101,7 +101,6 @@ public class MountSDFS implements Daemon, Runnable {
 		String volumeConfigFile = null;
 		CommandLineParser parser = new PosixParser();
 		Options options = buildOptions();
-		boolean useSSL = true;
 		CommandLine cmd = parser.parse(options, args);
 		ArrayList<String> fal = new ArrayList<String>();
 		ArrayList<String> volumes = new ArrayList<String>();
@@ -178,9 +177,7 @@ public class MountSDFS implements Daemon, Runnable {
 			}
 			volumeConfigFile = f.getPath();
 		}
-		if (cmd.hasOption("s")) {
-			useSSL = false;
-		}
+		
 
 		if (volumeConfigFile == null) {
 			System.out.println("error : volume or path to volume configuration file not defined");
@@ -200,8 +197,11 @@ public class MountSDFS implements Daemon, Runnable {
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
+		if (cmd.hasOption("s")) {
+			Main.sdfsCliSSL = false;
+		}
 		try {
-			sdfsService.start(useSSL, port, password);
+			sdfsService.start(port, password);
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());
