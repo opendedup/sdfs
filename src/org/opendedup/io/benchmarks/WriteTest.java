@@ -222,6 +222,7 @@ public class WriteTest implements Runnable {
 		}
 		for (int i = 0; i < r; i++) {
 			int start = i * Integer.parseInt(args[3]);
+			Date startdate = new Date();
 			float[] results = test(args[0], Integer.parseInt(args[1]),
 					Integer.parseInt(args[2]), Integer.parseInt(args[3]), start,rnds);
 
@@ -234,10 +235,10 @@ public class WriteTest implements Runnable {
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.APPEND);
 			if (nf) {
-				String header = "test-name,date,mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),precent unique,runs\n";
+				String header = "test-name,start-date,end-date,mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),precent unique,runs\n";
 				ch.write(ByteBuffer.wrap(header.getBytes()));
 			}
-			String output = testName + "," + new Date() + ","
+			String output = testName + "," + startdate + "," + new Date() + ","
 					+ findMean(results) + "," + findMedian(results) + ","
 					+ findMode(results) + "," + findTotal(results) + ","
 					+ args[1] + "," + args[2] + "," + args[3] + "\n";
