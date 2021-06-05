@@ -6,13 +6,6 @@ steps:
     - --cache-ttl=10h
     - --dockerfile=Dockerfile.base
     - --cleanup
-- name: gcr.io/kaniko-project/executor:latest
-  args:
-    - --destination=gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME
-    - --cache=false
-    - --cache-ttl=10h
-    - --cleanup
-    - --dockerfile=Dockerfile
 timeout: 10800s
 options:
   machineType: 'N1_HIGHCPU_32'
