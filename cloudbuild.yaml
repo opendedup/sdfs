@@ -5,7 +5,7 @@ steps:
 - name: gcr.io/kaniko-project/executor:latest
   args:
       - --destination=gcr.io/$PROJECT_ID/hybrics-bin:$BRANCH_NAME
-      - --cache=false
+      - --cache=true
       - --target=builder
       - --cache-ttl=10h
       - --dockerfile=Dockerfile
@@ -15,7 +15,7 @@ steps:
 - name: gcr.io/kaniko-project/executor:latest
   args:
       - --destination=gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME
-      - --cache=false
+      - --cache=true
       - --cache-ttl=10h
       - --dockerfile=Dockerfile
   env:

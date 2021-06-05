@@ -98,7 +98,7 @@ public class WriteTest implements Runnable {
 
 	public float results() {
 		float mb = size;
-		float mbps = (mb / duration) * 1000;
+		float mbps = mb / (duration / 1000);
 		return mbps;
 	}
 
@@ -235,10 +235,15 @@ public class WriteTest implements Runnable {
 					StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 					StandardOpenOption.APPEND);
 			if (nf) {
-				String header = "test-name,start-date,end-date,mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),precent unique,runs\n";
+				
+				String header = "test-name,start-date,end-date,duration (ms),mb/s, mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),precent unique,runs\n";
 				ch.write(ByteBuffer.wrap(header.getBytes()));
 			}
+			long difdate = (System.currentTimeMillis() - startdate.getTime())/1000;
+			long totaldata =  (Long.parseLong(args[1])*Long.parseLong(args[3]));
+			long mbps = totaldata/difdate;
 			String output = testName + "," + startdate + "," + new Date() + ","
+					+ difdate+","+mbps + ","
 					+ findMean(results) + "," + findMedian(results) + ","
 					+ findMode(results) + "," + findTotal(results) + ","
 					+ args[1] + "," + args[2] + "," + args[3] + "\n";
