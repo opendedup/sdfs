@@ -197,11 +197,9 @@ public class MountSDFS implements Daemon, Runnable {
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
-		if (cmd.hasOption("s")) {
-			Main.sdfsCliSSL = false;
-		}
+		
 		try {
-			sdfsService.start(port, password);
+			sdfsService.start(port, password,cmd.hasOption("s"));
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());

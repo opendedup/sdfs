@@ -62,8 +62,11 @@ public class SDFSService {
 		System.out.println("reading config file = " + this.configFile);
 	}
 
-	public void start(int port, String password) throws Exception {
+	public void start(int port, String password,boolean disableSSL) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile, password);
+		if(disableSSL) {
+			Main.sdfsCliSSL = false;
+		}
 		if (port != -1)
 			Main.sdfsCliPort = port;
 		if (Main.version.startsWith("0") || Main.version.startsWith("1")) {

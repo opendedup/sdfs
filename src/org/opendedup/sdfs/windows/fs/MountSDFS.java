@@ -154,11 +154,8 @@ public class MountSDFS {
 		File lf = new File(Main.logPath);
 		lf.getParentFile().mkdirs();
 		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
-		if (cmd.hasOption("nossl")) {
-			Main.sdfsCliSSL = false;
-		}
 		try {
-			sdfsService.start(port, password);
+			sdfsService.start(port, password,cmd.hasOption("nossl"));
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());
