@@ -46,7 +46,7 @@ public class IOServer {
       String trustCertCollectionFilePath) {
     SslContextBuilder sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath),
         new File(privateKeyFilePath));
-    sslClientContextBuilder.trustManager(new File(trustCertCollectionFilePath));
+    sslClientContextBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE);
     sslClientContextBuilder.clientAuth(ClientAuth.REQUIRE);
     return GrpcSslContexts.configure(sslClientContextBuilder);
   }
