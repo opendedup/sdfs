@@ -124,7 +124,6 @@ import org.opendedup.grpc.IOService.UnlinkResponse;
 import org.opendedup.grpc.IOService.UtimeRequest;
 import org.opendedup.grpc.IOService.UtimeResponse;
 
-
 public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     AtomicLong nextHandleNo = new AtomicLong(1000);
     private static final int BLOCK_SIZE = 32768;
@@ -182,7 +181,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     protected static File resolvePath(String path) throws FileIOError {
         String pt = mountedVolume + path.trim();
         File _f = new File(pt);
-        
+
         if (!OSValidator.isWindows() && Files.isSymbolicLink(_f.toPath())) {
             try {
                 _f = Files.readSymbolicLink(_f.toPath()).toFile();
@@ -209,32 +208,37 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         return _f;
     }
 
-    private DedupFileChannel getFileChannel(String path, long handleNo) throws FileIOError {
-        DedupFileChannel ch = dedupChannels.get(handleNo);
-        if (ch == null) {
-            File f = FileIOServiceImpl.resolvePath(path);
-            try {
-                MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
-                ch = mf.getDedupFile(false).getChannel(-2);
-                if (dedupChannels.containsKey(handleNo)) {
-                    ch.getDedupFile().unRegisterChannel(ch, -2);
-                    ch = dedupChannels.get(handleNo);
-                } else {
-                    dedupChannels.put(handleNo, ch);
-                }
-                // SDFSLogger.getLog().info("Getting attributes for " + f.getPath());
-
-            } catch (Exception e) {
-                SDFSLogger.getLog().error(
-                        "error processing get file channel for [" + path + "] and " + "file channel [" + handleNo + "]",
-                        e);
-                throw new FileIOError(
-                        "error processing get file channel for [" + path + "] and " + "file channel [" + handleNo + "]",
-                        errorCodes.EIO);
-
+    private DedupFileChannel getFileChannel(String path, long handleNo, boolean register) throws FileIOError {
+        synchronized (dedupChannels) {
+            DedupFileChannel ch = dedupChannels.get(handleNo);
+            if (!register) {
+                ch = null;
             }
+            if (ch == null) {
+                File f = FileIOServiceImpl.resolvePath(path);
+                try {
+                    MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+                    ch = mf.getDedupFile(false).getChannel(-2);
+                    if (!register) {
+                        return ch;
+                    } else if (dedupChannels.containsKey(handleNo)) {
+                        ch.getDedupFile().unRegisterChannel(ch, -2);
+                        ch = dedupChannels.get(handleNo);
+                    } else {
+                        dedupChannels.put(handleNo, ch);
+                    }
+                    // SDFSLogger.getLog().info("Getting attributes for " + f.getPath());
+
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("error processing get file channel for [" + path + "] and "
+                            + "file channel [" + handleNo + "]", e);
+                    throw new FileIOError("error processing get file channel for [" + path + "] and " + "file channel ["
+                            + handleNo + "]", errorCodes.EIO);
+
+                }
+            }
+            return ch;
         }
-        return ch;
     }
 
     private DedupFileChannel getFileChannel(long handleNo) throws FileIOError {
@@ -485,7 +489,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
                     // SDFSLogger.getLog().info("deleting symlink " + f.getCanonicalPath());
                     if (!f.delete()) {
-                        
+
                         b.setError("unable to delete " + f.getPath());
                         b.setErrorCode(errorCodes.EACCES);
                         responseObserver.onNext(b.build());
@@ -599,7 +603,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     SDFSLogger.getLog().debug("removing " + path);
                 if (!Main.safeClose) {
                     try {
-                        this.getFileChannel(path, -1).getDedupFile().forceClose();
+                        this.getFileChannel(path, -1, true).getDedupFile().forceClose();
                     } catch (IOException e) {
                         SDFSLogger.getLog().error("unable to close file " + path, e);
                     }
@@ -750,8 +754,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
         } else {
             try {
-                DedupFileChannel ch = dedupChannels.remove(request.getFileHandle());
-
+                DedupFileChannel ch = null;
+                synchronized (dedupChannels) {
+                    ch = dedupChannels.remove(request.getFileHandle());
+                }
                 if (!Main.safeClose)
                     return;
                 if (ch != null) {
@@ -857,7 +863,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             try {
                 String path = request.getPath();
                 long z = this.nextHandleNo.incrementAndGet();
-                this.getFileChannel(path, z);
+                this.getFileChannel(path, z, true);
                 // SDFSLogger.getLog().info("555=" + path + " z=" + z);
                 b.setFileHandle(z);
                 responseObserver.onNext(b.build());
@@ -1140,7 +1146,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     responseObserver.onCompleted();
                     return;
                 }
-                DedupFileChannel ch = this.getFileChannel(path, (Long) fh);
+                DedupFileChannel ch = this.getFileChannel(path, (Long) fh, true);
                 ch.force(true);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
@@ -1177,7 +1183,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             }
             try {
                 if (Main.safeSync) {
-                    DedupFileChannel ch = this.getFileChannel(path, (Long) fh);
+                    DedupFileChannel ch = this.getFileChannel(path, (Long) fh, true);
                     ch.force(true);
                 }
                 responseObserver.onNext(b.build());
@@ -1477,13 +1483,15 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             String path = request.getPath();
             long size = request.getLength();
             try {
-                DedupFileChannel ch = this.getFileChannel(path, -1);
+                DedupFileChannel ch = this.getFileChannel(path, -1, false);
                 ch.truncateFile(size);
+
                 ch.getDedupFile().unRegisterChannel(ch, -1);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
             } catch (FileIOError e) {
+                SDFSLogger.getLog().error(path, e);
                 b.setError(e.message);
                 b.setErrorCode(e.code);
                 responseObserver.onNext(b.build());

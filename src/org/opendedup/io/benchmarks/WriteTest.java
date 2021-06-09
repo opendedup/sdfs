@@ -236,7 +236,7 @@ public class WriteTest implements Runnable {
 					StandardOpenOption.APPEND);
 			if (nf) {
 				
-				String header = "test-name,start-date,end-date,duration (ms),mb/s, mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),precent unique,runs\n";
+				String header = "test-name,start-date,end-date,duration (s),mb/s, mean (MB/s),median (MB/s),mode (MB/S),total (MB/s),sample size (GB),precent unique,runs\n";
 				ch.write(ByteBuffer.wrap(header.getBytes()));
 			}
 			long difdate = (System.currentTimeMillis() - startdate.getTime())/1000;
