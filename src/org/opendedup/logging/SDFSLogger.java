@@ -25,8 +25,14 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
-import org.apache.log4j.spi.RootLogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.opendedup.sdfs.Main;
+
+import io.grpc.netty.shaded.io.netty.util.internal.logging.InternalLoggerFactory;
+import io.grpc.netty.shaded.io.netty.util.internal.logging.Log4JLoggerFactory;
 
 public class SDFSLogger {
 
@@ -37,9 +43,17 @@ public class SDFSLogger {
 	private static Logger basicLog = Logger.getLogger("bsdfs");
 	private static boolean debug = false;
 	private static boolean fsdebug = false;
+	private static LoggerConfig grpcLoggerConfig;
 	static RollingFileAppender app = null;
 	private static String msgPattern = "%d [%p] [%c] [%C] [%L] [%t] %x - %m%n";
 	static {
+		InternalLoggerFactory.setDefaultFactory(Log4JLoggerFactory.INSTANCE);
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        Configuration config = ctx.getConfiguration();
+		
+        grpcLoggerConfig = config.getLoggerConfig("io.netty");
+        grpcLoggerConfig.setLevel(org.apache.logging.log4j.Level.FATAL);
+        ctx.updateLoggers();
 
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
 		basicLog.addAppender(bapp);
@@ -54,6 +68,7 @@ public class SDFSLogger {
 			log.debug("unable to change appender", e);
 		}
 		awslog.setLevel(Level.WARN);
+
 		quartzLog.setLevel(Level.INFO);
 		awslog.removeAllAppenders();
 		quartzLog.removeAllAppenders();
