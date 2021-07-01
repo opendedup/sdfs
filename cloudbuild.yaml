@@ -28,6 +28,9 @@ steps:
   secretEnv: ['USERNAME', 'PASSWORD']
 - name: 'gcr.io/cloud-builders/docker'
   entrypoint: 'bash'
+  args: ['-c', 'docker pull  gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME']
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
   args: ['-c', 'docker tag  gcr.io/$PROJECT_ID/hybrics:$BRANCH_NAME $$USERNAME/sdfs:$BRANCH_NAME']
   secretEnv: ['USERNAME']
 - name: 'gcr.io/cloud-builders/docker'
