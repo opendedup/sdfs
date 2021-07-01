@@ -576,18 +576,30 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				Map<String, String> env = System.getenv();
 				if (config.hasAttribute("auth-file") || env.containsKey("GOOGLE_APPLICATION_CREDENTIALS")) {
 					String credPath = null;
-					if(config.hasAttribute("auth-file")){
+					if (config.hasAttribute("auth-file")) {
 						credPath = config.getAttribute("auth-file");
 					} else {
 						credPath = env.get("GOOGLE_APPLICATION_CREDENTIALS");
 					}
-					 
-					ServiceAccountCredentials sourceCredentials = ServiceAccountCredentials
+					GoogleCredentials sourceCredentials = null;
+					if (credPath.equalsIgnoreCase("default")) {
+						sourceCredentials = ServiceAccountCredentials.getApplicationDefault();
+					}
+
+					sourceCredentials = (GoogleCredentials) ServiceAccountCredentials
 							.fromStream(new FileInputStream(credPath));
 					sourceCredentials = (ServiceAccountCredentials) sourceCredentials
 							.createScoped(Arrays.asList("https://www.googleapis.com/auth/cloud-platform"));
 
-					String projectId = sourceCredentials.getProjectId();
+					String _projectId = null;
+					if (env.containsKey("GOOGLE_PROJECT_ID")) {
+						_projectId = env.get("GOOGLE_PROJECT_ID");
+					} else if (sourceCredentials instanceof ServiceAccountCredentials) {
+						_projectId = ((ServiceAccountCredentials) sourceCredentials).getProjectId();
+					}
+
+					final String projectId = _projectId;
+
 					GCPSessionCredentials creds = new GCPSessionCredentials((GoogleCredentials) sourceCredentials);
 
 					SignerFactory.registerSigner("org.opendedup.sdfs.filestore.cloud.gcp.CustomGCPSigner",
@@ -599,7 +611,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							.withRequestHandlers(new RequestHandler2() {
 								@Override
 								public void beforeRequest(Request<?> request) {
-									request.addHeader("x-goog-project-id", projectId);
+									if (projectId != null) {
+										request.addHeader("x-goog-project-id", projectId);
+									}
 								}
 							}).withCredentials(new AWSStaticCredentialsProvider(creds));
 
@@ -1480,8 +1494,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			CloudMetaData.Builder bl = CloudMetaData.newBuilder().mergeFrom(in.readAllBytes());
 			try {
 				Map<String, String> md = new HashMap<String, String>();
-				for (Entry<String,String> entry : bl.build().getAttributesMap().entrySet()) {
-					md.put(entry.getKey(),entry.getValue());
+				for (Entry<String, String> entry : bl.build().getAttributesMap().entrySet()) {
+					md.put(entry.getKey(), entry.getValue());
 				}
 				return md;
 			} catch (Exception e) {
@@ -2373,7 +2387,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					String fname = EncyptUtils.decString(pt, encrypt);
 					nobjPos.incrementAndGet();
 					return fname;
-					
+
 				}
 			} else {
 				nobjPos.incrementAndGet();
