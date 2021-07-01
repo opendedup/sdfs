@@ -3,6 +3,8 @@ package org.opendedup.sdfs.mgmt.grpc;
 import org.apache.log4j.Logger;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.mgmt.grpc.tls.DynamicTrustManager;
+import org.opendedup.sdfs.mgmt.grpc.tls.WatchForFile;
 
 import io.grpc.Context;
 import io.grpc.Contexts;
@@ -21,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -43,11 +47,15 @@ public class IOServer {
   }
 
   private SslContextBuilder getSslContextBuilder(String certChainFilePath, String privateKeyFilePath,
-      String trustCertCollectionFilePath) {
+      String trustCertCollectionFilePath) throws NoSuchAlgorithmException, KeyStoreException {
     SslContextBuilder sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath),
         new File(privateKeyFilePath));
-    sslClientContextBuilder.trustManager(new File(trustCertCollectionFilePath));
+    DynamicTrustManager tm = new DynamicTrustManager(new File(trustCertCollectionFilePath).getParent());
+    sslClientContextBuilder.trustManager(tm);
     sslClientContextBuilder.clientAuth(ClientAuth.REQUIRE);
+    WatchForFile wf = new WatchForFile(tm);
+    Thread th = new Thread(wf);
+    th.start();
     return GrpcSslContexts.configure(sslClientContextBuilder);
   }
 
@@ -94,11 +102,18 @@ public class IOServer {
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads);
     SocketAddress address = new InetSocketAddress(host, port);
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
-        .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads)).maxInboundMessageSize(9999999).maxInboundMetadataSize(9999999)
-        .addService(new FileIOServiceImpl()).intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl()).addService(new SdfsUserServiceImpl());
+        .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
+        .maxInboundMessageSize(9999999).maxInboundMetadataSize(9999999).addService(new FileIOServiceImpl())
+        .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())
+        .addService(new SdfsUserServiceImpl());
     if (useSSL) {
       if (useClientTLS) {
-        b.sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath).build());
+        try {
+          b.sslContext(
+              getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath).build());
+        } catch (Exception e) {
+          throw new IOException(e);
+        }
       } else {
         b.sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath).build());
       }
@@ -167,7 +182,7 @@ public class IOServer {
                   throw new StatusRuntimeException(Status.UNAUTHENTICATED);
                 } else {
                   Context context = Context.current().withValue(USER_IDENTITY, token);
-                  SDFSLogger.getLog().debug("authenticated " +token.getSubject());
+                  SDFSLogger.getLog().debug("authenticated " + token.getSubject());
                   return Contexts.interceptCall(context, call, headers, next);
                 }
               } catch (Exception e) {

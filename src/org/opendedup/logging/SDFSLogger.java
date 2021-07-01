@@ -52,7 +52,7 @@ public class SDFSLogger {
         Configuration config = ctx.getConfiguration();
 		
         grpcLoggerConfig = config.getLoggerConfig("io.netty");
-        grpcLoggerConfig.setLevel(org.apache.logging.log4j.Level.FATAL);
+        grpcLoggerConfig.setLevel(org.apache.logging.log4j.Level.ERROR);
         ctx.updateLoggers();
 
 		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
