@@ -679,11 +679,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			if (s3Target != null && !gcsSigner && s3Target.toLowerCase().startsWith("https")) {
 				TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+
 					@Override
 					public boolean isTrusted(X509Certificate[] certificate, String authType) {
 						return true;
 					}
 				};
+
 				SSLSocketFactory sf = new SSLSocketFactory(acceptingTrustStrategy,
 						SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
 				clientConfig.getApacheHttpClientConfig().withSslSocketFactory(sf);
@@ -716,6 +718,26 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			s3Service = builder.build();
 
 			this.binm = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+			boolean connected = false;
+
+			for (int i = 0; i < 4; i++) {
+				try {
+					s3Service.doesBucketExist(this.name);
+					connected = true;
+
+				} catch (Exception e) {
+					try {
+						SDFSLogger.getLog().warn("unable to connect to server",e);
+						Thread.sleep(20*1000);
+					} catch(Exception e1) {
+						
+					}
+					i++;
+				}
+			}
+			if (!connected) {
+				throw new IOException("Failed to connect to storage bucket. Exiting");
+			}
 			if (!s3Service.doesBucketExist(this.name)) {
 				s3Service.createBucket(this.name);
 				SDFSLogger.getLog().info("created new store " + name);
@@ -810,8 +832,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					try {
 						ObjectMetadata omd = new ObjectMetadata();
 						omd.setUserMetadata(obj);
+
 						updateObject(binm, omd);
-					} catch (Exception e) {
+					} catch (
+
+					Exception e) {
 						SDFSLogger.getLog().warn("unable to update bucket info in init", e);
 						SDFSLogger.getLog().info("created new store " + name);
 						ObjectMetadata md = new ObjectMetadata();
