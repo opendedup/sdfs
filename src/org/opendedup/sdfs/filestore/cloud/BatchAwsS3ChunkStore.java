@@ -588,9 +588,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 						sourceCredentials = (GoogleCredentials) ServiceAccountCredentials
 								.fromStream(new FileInputStream(credPath));
-						sourceCredentials = (ServiceAccountCredentials) sourceCredentials
-								.createScoped(Arrays.asList("https://www.googleapis.com/auth/cloud-platform"));
 					}
+					sourceCredentials = (GoogleCredentials) sourceCredentials
+								.createScoped(Arrays.asList("https://www.googleapis.com/auth/cloud-platform"));
 					
 
 					String _projectId = null;
