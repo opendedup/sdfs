@@ -584,10 +584,11 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					GoogleCredentials sourceCredentials = null;
 					if (credPath.equalsIgnoreCase("default")) {
 						sourceCredentials = ServiceAccountCredentials.getApplicationDefault();
-					}
+					} else {
 
-					sourceCredentials = (GoogleCredentials) ServiceAccountCredentials
-							.fromStream(new FileInputStream(credPath));
+						sourceCredentials = (GoogleCredentials) ServiceAccountCredentials
+								.fromStream(new FileInputStream(credPath));
+					}
 					sourceCredentials = (ServiceAccountCredentials) sourceCredentials
 							.createScoped(Arrays.asList("https://www.googleapis.com/auth/cloud-platform"));
 
@@ -727,10 +728,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				} catch (Exception e) {
 					try {
-						SDFSLogger.getLog().warn("unable to connect to server",e);
-						Thread.sleep(20*1000);
-					} catch(Exception e1) {
-						
+						SDFSLogger.getLog().warn("unable to connect to server", e);
+						Thread.sleep(20 * 1000);
+					} catch (Exception e1) {
+
 					}
 					i++;
 				}
