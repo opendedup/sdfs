@@ -33,6 +33,11 @@ if [ -n "${TYPE}" ]; then
         RUNCMD+=" --pubsub-authfile ${GCS_CREDS_FILE}"
     fi
 fi
+if  [ -n "${LOCAL_CACHE_SIZE}" ]; then
+    if [ ${LOCAL_CACHE_SIZE} = true ]; then
+        RUNCMD+=" --local-cache-size ${LOCAL_CACHE_SIZE}"
+    fi
+fi
 if [ -n "${BACKUP_VOLUME}" ]; then
     if [ ${BACKUP_VOLUME} = true ]; then
         RUNCMD+=" --backup-volume"

@@ -53,7 +53,7 @@ options:
   machineType: 'N1_HIGHCPU_32'
 availableSecrets:
    secretManager:
-   - versionName: projects/739187472495/secrets/docker-password/versions/1
+   - versionName: projects/$PROJECT_NUMBER/secrets/docker-password/versions/1
      env: 'PASSWORD'
-   - versionName: projects/739187472495/secrets/docker-username/versions/1
+   - versionName: projects/$PROJECT_NUMBER/secrets/docker-username/versions/1
      env: 'USERNAME'
