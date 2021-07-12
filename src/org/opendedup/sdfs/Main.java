@@ -29,6 +29,7 @@ public class Main {
 	public static int hashSeed=6442;
 	public static double fpp = .01;
 	public static String logSize="10MB";
+	public static int logFiles=10;
 	public static boolean ignoreDSEHTSize = true;
 	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;

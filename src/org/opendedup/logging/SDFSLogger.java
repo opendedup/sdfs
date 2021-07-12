@@ -60,9 +60,10 @@ public class SDFSLogger {
 
 		basicLog.setLevel(Level.WARN);
 		try {
+			//Todo: log-index-size
 			app = new RollingFileAppender(new PatternLayout(
 					msgPattern), Main.logPath, true);
-			app.setMaxBackupIndex(100);
+			app.setMaxBackupIndex(Main.logFiles);
 			app.setMaxFileSize(Main.logSize);
 		} catch (IOException e) {
 			log.debug("unable to change appender", e);
@@ -147,8 +148,8 @@ public class SDFSLogger {
 		try {
 			app = new RollingFileAppender(new PatternLayout(
 					"%d [%c] [%t] %x - %m%n"), file, true);
-			app.setMaxBackupIndex(100);
-			app.setMaxFileSize("10MB");
+			app.setMaxBackupIndex(Main.logFiles);
+			app.setMaxFileSize(Main.logSize);
 		} catch (IOException e) {
 			System.out.println("Unable to initialize logger");
 			e.printStackTrace();
