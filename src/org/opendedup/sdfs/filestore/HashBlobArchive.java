@@ -83,6 +83,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static int MAX_HM_OPSZ = 0;
 	private static double LEN_VARIANCE = .25;
 	public static int THREAD_SLEEP_TIME = 5000;
+	public static boolean SINGLE_WRITER = false;
 	public static int VARIANCE_THREAD_SLEEP_TIME = 2000;
 
 	IvParameterSpec ivspec = new IvParameterSpec(EncryptUtils.iv);
@@ -728,7 +729,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		try {
 			if (closed)
 				throw new IOException("Closed");
-			if (uuid == null || uuid.trim() == "") {
+			if (uuid == null || uuid.trim() == "" || SINGLE_WRITER) {
 				uuid = "default";
 			}
 

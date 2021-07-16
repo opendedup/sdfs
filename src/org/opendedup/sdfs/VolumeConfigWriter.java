@@ -768,7 +768,7 @@ public class VolumeConfigWriter {
 			if (this.dExt != null)
 				extended.setAttribute("data-appendix", this.dExt);
 			extended.setAttribute("allow-sync", "false");
-			extended.setAttribute("upload-thread-sleep-time", "300000");
+			extended.setAttribute("upload-thread-sleep-time", "600000");
 			extended.setAttribute("sync-files", "true");
 			if (this.userAgentPrefix != null)
 				extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
@@ -803,7 +803,7 @@ public class VolumeConfigWriter {
 				if (!this.tcpKeepAlive)
 					extended.setAttribute("tcp-keepalive", "false");
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "300000");
+				extended.setAttribute("upload-thread-sleep-time", "600000");
 				extended.setAttribute("sync-files", "true");
 				if (this.userAgentPrefix != null)
 					extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
@@ -895,7 +895,7 @@ public class VolumeConfigWriter {
 				extended.setAttribute("service-type", "azureblob");
 				extended.setAttribute("block-size", this.blockSize);
 				extended.setAttribute("allow-sync", "false");
-				extended.setAttribute("upload-thread-sleep-time", "300000");
+				extended.setAttribute("upload-thread-sleep-time", "600000");
 				if (this.userAgentPrefix != null)
 					extended.setAttribute("user-agent-prefix", this.userAgentPrefix);
 				extended.setAttribute("sync-files", "true");
@@ -920,7 +920,7 @@ public class VolumeConfigWriter {
 			if (!this.tcpKeepAlive)
 				extended.setAttribute("tcp-keepalive", "false");
 			extended.setAttribute("allow-sync", "false");
-			extended.setAttribute("upload-thread-sleep-time", "1500");
+			extended.setAttribute("upload-thread-sleep-time", "600000");
 			extended.setAttribute("sync-files", "false");
 			if (this.userAgentPrefix != null)
 				extended.setAttribute("user-agent-prefix", this.userAgentPrefix);

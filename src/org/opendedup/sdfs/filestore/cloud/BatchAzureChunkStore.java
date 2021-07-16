@@ -352,6 +352,11 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		if (this.standAlone && config.hasAttribute("upload-thread-sleep-time")) {
 			int tm = Integer.parseInt(config.getAttribute("upload-thread-sleep-time"));
 			HashBlobArchive.THREAD_SLEEP_TIME = tm;
+		}else {
+			HashBlobArchive.THREAD_SLEEP_TIME = 1000 * 60 * 10;
+		}
+		if (config.hasAttribute("single-writer")) {
+			HashBlobArchive.SINGLE_WRITER = Boolean.parseBoolean("singel-writer");
 		}
 		if (this.standAlone && config.hasAttribute("local-cache-size")) {
 			long sz = StringUtils.parseSize(config.getAttribute("local-cache-size"));
