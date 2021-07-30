@@ -26,10 +26,16 @@ package org.opendedup.util;
  *
  */
 
+import java.io.File;
+import java.io.FileFilter;
+import java.io.InputStream;
+import java.nio.file.Files;
+
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.TrustManager;
@@ -38,6 +44,11 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
+import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.mgmt.grpc.IOServer;
+
+import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 
 /**
  * <p>
@@ -66,21 +77,21 @@ public class EasyX509TrustManager implements X509TrustManager {
 	/** Log object for this class. */
 	private static final Log LOG = LogFactory
 			.getLog(EasyX509TrustManager.class);
+	private Logger logger = SDFSLogger.getLog();
 
 	/**
 	 * Constructor for EasyX509TrustManager.
 	 */
-	public EasyX509TrustManager(KeyStore keystore)
+	public EasyX509TrustManager()
 			throws NoSuchAlgorithmException, KeyStoreException {
 		super();
-		TrustManagerFactory factory = TrustManagerFactory
-				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-		factory.init(keystore);
-		TrustManager[] trustmanagers = factory.getTrustManagers();
-		if (trustmanagers.length == 0) {
-			throw new NoSuchAlgorithmException("no trust manager found");
+		File trustedCertificatesDir=new File(IOServer.trustStoreDir);
+		try {
+			loadTrustManager(trustedCertificatesDir,ClientAuth.REQUIRE);
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			throw new KeyStoreException("Error occurred while setting up trust manager." + e1.getCause(), e1);
 		}
-		this.standardTrustManager = (X509TrustManager) trustmanagers[0];
 	}
 
 	/**
@@ -89,7 +100,15 @@ public class EasyX509TrustManager implements X509TrustManager {
 	 */
 	public void checkClientTrusted(X509Certificate[] certificates,
 			String authType) throws CertificateException {
-		standardTrustManager.checkClientTrusted(certificates, authType);
+		try {
+			logger.info("EASYX509 checkClientTrusted");
+			File trustedCertificatesDir=new File(IOServer.trustStoreDir);
+			loadTrustManager(trustedCertificatesDir,ClientAuth.REQUIRE);
+			standardTrustManager.checkClientTrusted(certificates, authType);
+        } catch (Exception e) {
+        	logger.info("EASYX509 checkClientTrusted caught exception");
+			throw new CertificateException("Error occurred while setting up trust manager." + e.getCause(), e);
+        }	
 	}
 
 	/**
@@ -116,5 +135,65 @@ public class EasyX509TrustManager implements X509TrustManager {
 	 */
 	public X509Certificate[] getAcceptedIssuers() {
 		return this.standardTrustManager.getAcceptedIssuers();
+	}
+	
+	public void loadTrustManager(File trustedCertificatesDir,ClientAuth clientAuth) throws Exception {
+		SDFSLogger.getLog().info("Load Trust Manager");
+		KeyStore trustStore = KeyStore.getInstance( KeyStore.getDefaultType() );
+	    trustStore.load( null, null );
+	      
+	    //Implementing FileFilter to retrieve only the files in the directory 
+		FileFilter fileFilter = new FileFilter() {		
+		    @Override
+		    public boolean accept(File file) {
+		        if(file.isDirectory()) {
+		        	SDFSLogger.getLog().warn("Directory, skipping it to add in TrustStore.");
+		            return false;
+		        } else {
+		            return true;
+		        }
+		    }
+		};
+	      
+	    File[] trustedCertFiles = trustedCertificatesDir.listFiles(fileFilter);
+
+	    if ( trustedCertFiles == null ) {
+	          throw new RuntimeException( "Could not find or list files in trusted directory: " +trustedCertificatesDir  );
+	    } else if ( clientAuth == ClientAuth.REQUIRE && trustedCertFiles.length == 0 ) {
+	          throw new RuntimeException( "Client auth is required but no trust anchors found in: " + trustedCertificatesDir  );
+	    }
+
+	    int i = 0;
+	    for ( File trustedCertFile : trustedCertFiles ) {
+	        CertificateFactory certificateFactory = CertificateFactory.getInstance( "X.509" );
+            try ( InputStream input = Files.newInputStream( trustedCertFile.toPath() ) ) {
+            	while ( input.available() > 0 ) {
+            		try {
+            			X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate( input );
+                        trustStore.setCertificateEntry( Integer.toString( i++ ), cert );
+                    } catch (CertificateException e) {
+                    	SDFSLogger.getLog().warn("Not a certificate file, skipping it to add in TrustStore.");
+                        continue;
+                    } catch ( Exception e )
+            		{
+                    	throw new CertificateException( "Error loading certificate file: " + trustedCertFile, e );
+                    }
+                }
+	        }
+	    }
+	    
+	    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance( TrustManagerFactory.getDefaultAlgorithm() );
+	    trustManagerFactory.init( trustStore );
+	      
+	    TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
+	    for (TrustManager t : trustManagers) {
+	    	if (t instanceof X509TrustManager) {
+	        	  standardTrustManager = (X509TrustManager) t;
+	        	  return;
+	        }
+	    }
+	      
+	    throw new NoSuchAlgorithmException(
+		    	        "No X509TrustManager in TrustManagerFactory");      
 	}
 }

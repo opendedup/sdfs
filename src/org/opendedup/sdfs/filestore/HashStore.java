@@ -252,6 +252,10 @@ public class HashStore {
 	public long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
 		return this.bdb.claimRecords(evt,compact);
 	}
+
+	public void compactDB() throws IOException {
+		this.bdb.commitCompact(true);
+	}
 	
 	public void clearRefMap() throws IOException {
 		this.bdb.clearRefMap();

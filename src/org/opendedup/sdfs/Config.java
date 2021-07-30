@@ -96,6 +96,12 @@ public class Config {
 		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli.getAttribute("enable-auth"));
 		Main.sdfsCliRequireMutualTLSAuth = Boolean.parseBoolean(cli.getAttribute("enable-mutual-tls-auth"));
 		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
+		if (cli.hasAttribute("auth-utility-jar-file-path")) {
+			Main.jarFilePath = cli.getAttribute("auth-utility-jar-file-path");
+		}
+		if (cli.hasAttribute("auth-class-info")) {
+			Main.classInfo = cli.getAttribute("auth-class-info");
+		}
 		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
 
 		Main.version = version;
@@ -381,6 +387,8 @@ public class Config {
 		cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
 		cli.setAttribute("enable-auth", Boolean.toString(Main.sdfsCliRequireAuth));
 		cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
+		cli.setAttribute("auth-utility-jar-file-path", Main.jarFilePath);
+		cli.setAttribute("auth-class-info", Main.classInfo);
 
 		Element localChunkStore = (Element) doc.getElementsByTagName("local-chunkstore").item(0);
 		if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {

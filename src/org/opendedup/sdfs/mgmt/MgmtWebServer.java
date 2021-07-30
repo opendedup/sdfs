@@ -11,14 +11,14 @@ import org.opendedup.sdfs.mgmt.mqtt.MetaDataPush;
 import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.KeyGenerator;
 
-public class MgmtWebServer  {
+public class MgmtWebServer {
 	private static IOServer grpcServer = null;
 
 	public static void start(boolean useSSL) throws IOException {
 
 		if (Main.sdfsCliEnabled) {
 
-			if (useSSL) {
+			if (useSSL && Main.jarFilePath.equals("") && Main.classInfo.equals("")) {
 				String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
 				String key = keydir + File.separator + "tls_key.pem";
 				if (!new File(key).exists() || !IOServer.keyFileExists()) {

@@ -5,6 +5,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.mgmt.grpc.tls.DynamicTrustManager;
 import org.opendedup.sdfs.mgmt.grpc.tls.WatchForFile;
+import org.opendedup.util.EasyX509TrustManager;
 
 import io.grpc.Context;
 import io.grpc.Contexts;
@@ -20,11 +21,17 @@ import io.grpc.ServerCallHandler;
 import io.grpc.Metadata.Key;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.security.PrivateKey;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.List;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -36,9 +43,36 @@ import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+
 public class IOServer {
   private Server server;
   private Logger logger = SDFSLogger.getLog();
+  private static final String DELIMITER = ";;";
+  public static String trustStoreDir;
+
+  private X509Certificate getX509Certificate(String certPath) throws Exception {
+    FileInputStream is = null;
+    try {
+      CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+      is = new FileInputStream(certPath);
+      X509Certificate cer = (X509Certificate) certFactory.generateCertificate(is);
+      return cer;
+    } catch (CertificateException e) {
+      SDFSLogger.getLog().error("Certification exception caught");
+      throw new Exception(e);
+    } catch (FileNotFoundException e) {
+      SDFSLogger.getLog().error("Certificate file not found");
+      throw new Exception(e);
+    } finally {
+      if (is != null) {
+        is.close();
+      }
+    }
+  }
 
   private SslContextBuilder getSslContextBuilder(String certChainFilePath, String privateKeyFilePath) {
     SslContextBuilder sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath),
@@ -47,15 +81,51 @@ public class IOServer {
   }
 
   private SslContextBuilder getSslContextBuilder(String certChainFilePath, String privateKeyFilePath,
-      String trustCertCollectionFilePath) throws NoSuchAlgorithmException, KeyStoreException {
-    SslContextBuilder sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath),
-        new File(privateKeyFilePath));
-    DynamicTrustManager tm = new DynamicTrustManager(new File(trustCertCollectionFilePath).getParent());
-    sslClientContextBuilder.trustManager(tm);
-    sslClientContextBuilder.clientAuth(ClientAuth.REQUIRE);
-    WatchForFile wf = new WatchForFile(tm);
-    Thread th = new Thread(wf);
-    th.start();
+      String trustCertCollectionFilePath) throws Exception {
+    SslContextBuilder sslClientContextBuilder = null;
+    if (!Main.jarFilePath.equals("") && !Main.classInfo.equals("")) {
+      /*
+       * Main.classInfo contains class name and its two methods to load separated by
+       * ;;
+       */
+      List<String> classInfo = Arrays.asList(Main.classInfo.split(DELIMITER));
+      String loadclass = classInfo.get(0);
+      String key_method = classInfo.get(1);
+      String path_method = classInfo.get(2);
+
+      URL[] classLoaderUrls = new URL[] { new URL("file:" + Main.jarFilePath) };
+      // Create a new URLClassLoader
+      URLClassLoader urlClassLoader = new URLClassLoader(classLoaderUrls);
+      // Load the target class
+      Class<?> beanClass = urlClassLoader.loadClass(loadclass);
+      // Create a new instance from the loaded class
+      Constructor<?> constructor = beanClass.getConstructor();
+      Object beanObj = constructor.newInstance();
+      // Getting a method from the loaded class and invoke it
+      Method method = beanClass.getMethod(path_method);
+      String path = (String) method.invoke(beanObj);
+      List<String> prodInfo = Arrays.asList(path.split(DELIMITER));
+      certChainFilePath = prodInfo.get(0);
+      trustStoreDir = prodInfo.get(1);
+      // Getting a method from the loaded class and invoke it
+      Method method2 = beanClass.getMethod(key_method);
+      PrivateKey pvtKey = (PrivateKey) method2.invoke(beanObj);
+      urlClassLoader.close();
+
+      X509Certificate serverCertChain = getX509Certificate(certChainFilePath);
+      EasyX509TrustManager tm = new EasyX509TrustManager();
+
+      sslClientContextBuilder = SslContextBuilder.forServer(pvtKey, serverCertChain).clientAuth(ClientAuth.REQUIRE)
+          .trustManager(tm);
+    } else {
+      sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath), new File(privateKeyFilePath));
+      DynamicTrustManager tm = new DynamicTrustManager(new File(trustCertCollectionFilePath).getParent());
+      sslClientContextBuilder.trustManager(tm);
+      sslClientContextBuilder.clientAuth(ClientAuth.REQUIRE);
+      WatchForFile wf = new WatchForFile(tm);
+      Thread th = new Thread(wf);
+      th.start();
+    }
     return GrpcSslContexts.configure(sslClientContextBuilder);
   }
 
@@ -103,7 +173,7 @@ public class IOServer {
     SocketAddress address = new InetSocketAddress(host, port);
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
         .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
-        .maxInboundMessageSize(9999999).maxInboundMetadataSize(9999999).addService(new FileIOServiceImpl())
+        .maxInboundMessageSize(17825792).maxInboundMetadataSize(17825792).addService(new FileIOServiceImpl())
         .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())
         .addService(new SdfsUserServiceImpl());
     if (useSSL) {
@@ -112,6 +182,7 @@ public class IOServer {
           b.sslContext(
               getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath).build());
         } catch (Exception e) {
+          SDFSLogger.getLog().error("Unable to build ssl context" + e);
           throw new IOException(e);
         }
       } else {

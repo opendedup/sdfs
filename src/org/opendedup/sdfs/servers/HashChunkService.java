@@ -278,4 +278,10 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hs.claimKey(key,val,ct);
 	}
 
+	@Override
+	public void compactDB() throws IOException {
+		hs.compactDB();
+		
+	}
+
 }
