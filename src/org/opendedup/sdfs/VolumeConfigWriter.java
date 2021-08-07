@@ -147,6 +147,7 @@ public class VolumeConfigWriter {
 	private String gcpProject;
 	private String permissionsFile;
 	private long rmthreashold = 15 * 60 * 1000;
+	private String sdfsBasePath = "";
 
 	public VolumeConfigWriter() {
 		sn = new Random().nextLong();
@@ -202,6 +203,9 @@ public class VolumeConfigWriter {
 			this.jarFilePath = cmd.getOptionValue("auth-utility-jar-file-path");
 		if (cmd.hasOption("auth-class-info"))
 			this.classInfo = cmd.getOptionValue("auth-class-info");
+		if (cmd.hasOption("sdfs-base-path"))
+			this.sdfsBasePath = cmd.getOptionValue("sdfs-base-path");
+		Main.sdfsBasePath = this.sdfsBasePath;
 		if (!cmd.hasOption("volume-name")) {
 			System.out.println("--volume-name and --volume-capacity are required options");
 			printHelp(options);
@@ -244,6 +248,10 @@ public class VolumeConfigWriter {
 
 			}
 			this.base_path = basebath.trim();
+		}
+		if (OSValidator.isUnix()) {
+			this.base_path = new File(this.base_path).getParent() + File.separator + "."
+					+ new File(this.base_path).getName();
 		}
 		if (cmd.hasOption("backup-volume")) {
 			this.mdCompresstion = true;
@@ -1007,8 +1015,11 @@ public class VolumeConfigWriter {
 				"The threashold in milliseconds to wait for unclaimed chucks to be available for garbage collection"
 						+ "The default is 15 minutes or 900000 ms,")
 				.hasArg(true).withArgName("time in milliseconds").create());
-		options.addOption(OptionBuilder.withLongOpt("auth-utility-jar-file-path").withDescription("Utility jar file path.")
-				.hasArg(true).withArgName("JAR-PATH").create());
+		options.addOption(OptionBuilder.withLongOpt("sdfs-base-path").withDescription(
+				"Folder basepath for sdfs to be used in linux os.\n Defaults to: \n " + OSValidator.getConfigPath())
+				.hasArgs().withArgName("PATH").create());
+		options.addOption(OptionBuilder.withLongOpt("auth-utility-jar-file-path")
+				.withDescription("Utility jar file path.").hasArg(true).withArgName("JAR-PATH").create());
 		options.addOption(OptionBuilder.withLongOpt("auth-class-info")
 				.withDescription("Class to load and its methods separated by ;;.").hasArg(true)
 				.withArgName("CLASS-INFO").create());

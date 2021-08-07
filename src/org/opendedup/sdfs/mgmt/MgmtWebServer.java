@@ -14,7 +14,7 @@ import org.opendedup.util.KeyGenerator;
 public class MgmtWebServer {
 	private static IOServer grpcServer = null;
 
-	public static void start(boolean useSSL) throws IOException {
+	public static void start(boolean useSSL) throws IOException, InterruptedException {
 
 		if (Main.sdfsCliEnabled) {
 
@@ -25,6 +25,9 @@ public class MgmtWebServer {
 					KeyGenerator.generateKey(new File(key));
 				}
 			}
+			FindOpenPort port = new FindOpenPort();
+			port.lock();
+			
 			Main.sdfsCliPort = FindOpenPort.pickFreePort(Main.sdfsCliPort);
 			grpcServer = new IOServer();
 			grpcServer.start(useSSL, Main.sdfsCliRequireMutualTLSAuth, Main.sdfsCliListenAddr, Main.sdfsCliPort);

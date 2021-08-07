@@ -20,8 +20,51 @@ package org.opendedup.util;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.channels.FileChannel;
+
+import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 
 public class FindOpenPort {
+
+	static FileChannel fileChannel;
+	static String portfilepath;
+
+	@SuppressWarnings("resource")
+	public void lock() throws IOException, InterruptedException {
+		if (OSValidator.isUnix()) {
+			if (Main.sdfsBasePath.equals("")) {
+				portfilepath = "/var/log/sdfs/" + "port.lock";
+			} else {
+				portfilepath = OSValidator.getProgramBasePath() + "/var/log/sdfs/" + "port.lock";
+			}
+		}
+		if (OSValidator.isWindows()) {
+			String fn = "port.lock";
+			portfilepath = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + fn;
+			File lf = new File(portfilepath);
+			lf.getParentFile().mkdirs();
+		}
+
+		SDFSLogger.getLog().info("Lock FindOpenPort");
+		File file = new File(portfilepath);
+		fileChannel = new FileOutputStream(file, true).getChannel();
+
+		while (fileChannel.lock() == null) { // the process checks if the channel is free to write to the file
+			Thread.sleep(5000);
+		}
+	}
+
+	public void unlock() throws IOException, InterruptedException {
+		SDFSLogger.getLog().info("Unlock FindOpenPort");
+		Thread.sleep(3000);
+		fileChannel.close();
+		File file = new File(portfilepath);
+		file.delete();
+		SDFSLogger.getLog().info("Unlock Done");
+	}
 
 	public static int pickFreePort(int start)
 

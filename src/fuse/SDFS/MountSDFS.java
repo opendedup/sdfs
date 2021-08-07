@@ -51,6 +51,9 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("s", false, "If set ssl will not be used sdfscli traffic.");
 		options.addOption("w", false, "Sync With All Files in Cloud.");
 		options.addOption("q", false, "Use Console Logging.");
+		options.addOption("b", true,
+				"Folder basepath for sdfs to be used in linux os, same as sdfs-base-path in mkfs.sdfs. \n e.g. /opt/test");
+		options.addOption("t", true, "Temporary directory for sdfs to be used in linux os. \n e.g. /tmp");
 		return options;
 	}
 
@@ -112,6 +115,9 @@ public class MountSDFS implements Daemon, Runnable {
 		if (cmd.hasOption("n")) {
 			nm = true;
 		}
+		if (cmd.hasOption("b")) {
+			Main.sdfsBasePath = cmd.getOptionValue("b").trim();
+		}
 		if (cmd.hasOption("c")) {
 			Main.runConsistancyCheck = true;
 		}
@@ -151,7 +157,7 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 		if (cmd.hasOption("v")) {
 			File f = new File("/etc/sdfs/" + cmd.getOptionValue("v").trim() + "-volume-cfg.xml");
-			if (OSValidator.isWindows()) {
+			if (OSValidator.isWindows() || OSValidator.isUnix()) {
 				f = new File(OSValidator.getConfigPath() + cmd.getOptionValue("v").trim() + "-volume-cfg.xml");
 			}
 			volname = f.getName();
@@ -177,15 +183,20 @@ public class MountSDFS implements Daemon, Runnable {
 			}
 			volumeConfigFile = f.getPath();
 		}
-		
 
 		if (volumeConfigFile == null) {
 			System.out.println("error : volume or path to volume configuration file not defined");
 			printHelp(options);
 			System.exit(-1);
 		}
-		if (OSValidator.isUnix())
-			Main.logPath = "/var/log/sdfs/" + volname + ".log";
+		if (OSValidator.isUnix()) {
+			if (Main.sdfsBasePath.equals("")) {
+				Main.logPath = "/var/log/sdfs/" + volname + ".log";
+			} else {
+				Main.logPath = OSValidator.getProgramBasePath() + "/var/log/sdfs/" + volname + ".log";
+			}
+		}
+		Main.logPath = "/var/log/sdfs/" + volname + ".log";
 		if (OSValidator.isWindows()) {
 			File cf = new File(volumeConfigFile);
 			String fn = cf.getName().substring(0, cf.getName().lastIndexOf(".")) + ".log";
@@ -197,9 +208,9 @@ public class MountSDFS implements Daemon, Runnable {
 		if (cmd.hasOption("d")) {
 			SDFSLogger.setLevel(0);
 		}
-		
+
 		try {
-			sdfsService.start(port, password,cmd.hasOption("s"));
+			sdfsService.start(port, password, cmd.hasOption("s"));
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());

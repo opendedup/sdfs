@@ -19,6 +19,7 @@
 package org.opendedup.util;
 
 import java.io.File;
+import org.opendedup.sdfs.Main;
 
 import org.opendedup.sdfs.windows.utils.WinRegistry;
 
@@ -67,7 +68,11 @@ public class OSValidator {
 
 	public static String getProgramBasePath() {
 		if (isUnix() || isMac())
-			return "/opt/sdfs/";
+		if(Main.sdfsBasePath.equals("")) {
+							return "/opt/sdfs/";
+						} else {
+							return Main.sdfsBasePath;
+					}
 		else {
 			try {
 				return WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE,
