@@ -185,7 +185,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private String secretKey = Main.cloudSecretKey;
 	private boolean standAlone = true;
 	private int transferSize = 10 * 1024 * 1024;
-	private com.amazonaws.services.s3.model.Tier glacierTier = Tier.Standard;
+	private com.amazonaws.services.s3.model.Tier glacierTier = Tier.Bulk;
 	boolean gcsSigner = false;
 	TransferManager tx = null;
 	static {
@@ -2553,7 +2553,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		for (int i = 0; i < 9; i++) {
 			try {
 
-				RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName + this.dExt, 2);
+				RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName + this.dExt, 30);
 				GlacierJobParameters params = new GlacierJobParameters();
 				params.setTier(this.glacierTier);
 				request.setGlacierJobParameters(params);
