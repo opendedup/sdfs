@@ -2612,24 +2612,30 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 		try {
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id + this.dExt);
-			ObjectMetadata momd = omd;
-			momd = s3Service.getObjectMetadata(this.name, "blocks/" + id + mdExt);
+			ObjectMetadata momd = s3Service.getObjectMetadata(this.name, "blocks/" + id + mdExt);
 			if (omd == null || momd == null) {
 				SDFSLogger.getLog().warn("Object with id " + id + " is null");
 				return false;
-			} else if (omd.getStorageClass() == null) {
-				return true;
-			} else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER")
-					&& !momd.getStorageClass().equalsIgnoreCase("GLACIER")) {
-				SDFSLogger.getLog().warn("Object with id " + id + " is restored");
-				return true;
-			} else if (omd.getOngoingRestore() || momd.getOngoingRestore()) {
+			} if (omd.getOngoingRestore() || momd.getOngoingRestore()) {
 				SDFSLogger.getLog().warn("Object with id " + id + " is still restoring");
 				return false;
-			} else
+			} else if (omd.getStorageClass() == null && omd.getStorageClass() == null) {
+				SDFSLogger.getLog().warn("Block Object and md with id " + id + " is restored sc = null");
 				return true;
+			} else if (omd.getStorageClass() != null && omd.getStorageClass().equalsIgnoreCase("GLACIER")
+					) {
+				SDFSLogger.getLog().warn("Block Object with id " + id + " is still glacier");
+				return false;
+			} else if (momd.getStorageClass() != null && !momd.getStorageClass().equalsIgnoreCase("GLACIER")) {
+				SDFSLogger.getLog().warn("Metadata Object with id " + id + " is still glacier");
+				return false;
+			}
+			else {
+				SDFSLogger.getLog().warn("Object with id " + id + " preconditions met for glacier restore");
+				return true;
+			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error while checking block restored", e);
+			SDFSLogger.getLog().error("error while checking block restored", e);
 			return false;
 		}
 	}
