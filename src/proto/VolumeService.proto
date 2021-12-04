@@ -11,6 +11,13 @@ message VolumeInfoRequest {
   string pvolumeID =1;
 }
 
+message ProxyVolumeInfoRequest {
+}
+
+message ProxyVolumeInfoResponse {
+  repeated VolumeInfoResponse volumeInfoResponse = 1;
+}
+
 message VolumeInfoResponse {
   string path = 1;
   string name = 2;

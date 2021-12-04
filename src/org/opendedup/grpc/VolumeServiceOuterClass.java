@@ -590,6 +590,1217 @@ public final class VolumeServiceOuterClass {
 
   }
 
+  public interface ProxyVolumeInfoRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.ProxyVolumeInfoRequest)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.ProxyVolumeInfoRequest}
+   */
+  public static final class ProxyVolumeInfoRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ProxyVolumeInfoRequest)
+      ProxyVolumeInfoRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ProxyVolumeInfoRequest.newBuilder() to construct.
+    private ProxyVolumeInfoRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ProxyVolumeInfoRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ProxyVolumeInfoRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ProxyVolumeInfoRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest) obj;
+
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.ProxyVolumeInfoRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.ProxyVolumeInfoRequest)
+        org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest build() {
+        org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest buildPartial() {
+        org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest) {
+          return mergeFrom((org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest other) {
+        if (other == org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.ProxyVolumeInfoRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.ProxyVolumeInfoRequest)
+    private static final org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest();
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ProxyVolumeInfoRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ProxyVolumeInfoRequest>() {
+      @java.lang.Override
+      public ProxyVolumeInfoRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ProxyVolumeInfoRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ProxyVolumeInfoRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ProxyVolumeInfoRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ProxyVolumeInfoResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.ProxyVolumeInfoResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    java.util.List<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse> 
+        getVolumeInfoResponseList();
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse getVolumeInfoResponse(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    int getVolumeInfoResponseCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder> 
+        getVolumeInfoResponseOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder getVolumeInfoResponseOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.ProxyVolumeInfoResponse}
+   */
+  public static final class ProxyVolumeInfoResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ProxyVolumeInfoResponse)
+      ProxyVolumeInfoResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ProxyVolumeInfoResponse.newBuilder() to construct.
+    private ProxyVolumeInfoResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ProxyVolumeInfoResponse() {
+      volumeInfoResponse_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ProxyVolumeInfoResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ProxyVolumeInfoResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                volumeInfoResponse_ = new java.util.ArrayList<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              volumeInfoResponse_.add(
+                  input.readMessage(org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.parser(), extensionRegistry));
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          volumeInfoResponse_ = java.util.Collections.unmodifiableList(volumeInfoResponse_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse.class, org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse.Builder.class);
+    }
+
+    public static final int VOLUMEINFORESPONSE_FIELD_NUMBER = 1;
+    private java.util.List<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse> volumeInfoResponse_;
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse> getVolumeInfoResponseList() {
+      return volumeInfoResponse_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder> 
+        getVolumeInfoResponseOrBuilderList() {
+      return volumeInfoResponse_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    @java.lang.Override
+    public int getVolumeInfoResponseCount() {
+      return volumeInfoResponse_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse getVolumeInfoResponse(int index) {
+      return volumeInfoResponse_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder getVolumeInfoResponseOrBuilder(
+        int index) {
+      return volumeInfoResponse_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < volumeInfoResponse_.size(); i++) {
+        output.writeMessage(1, volumeInfoResponse_.get(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < volumeInfoResponse_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, volumeInfoResponse_.get(i));
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse other = (org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse) obj;
+
+      if (!getVolumeInfoResponseList()
+          .equals(other.getVolumeInfoResponseList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getVolumeInfoResponseCount() > 0) {
+        hash = (37 * hash) + VOLUMEINFORESPONSE_FIELD_NUMBER;
+        hash = (53 * hash) + getVolumeInfoResponseList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.ProxyVolumeInfoResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.ProxyVolumeInfoResponse)
+        org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse.class, org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getVolumeInfoResponseFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (volumeInfoResponseBuilder_ == null) {
+          volumeInfoResponse_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          volumeInfoResponseBuilder_.clear();
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse build() {
+        org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse buildPartial() {
+        org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse result = new org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse(this);
+        int from_bitField0_ = bitField0_;
+        if (volumeInfoResponseBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            volumeInfoResponse_ = java.util.Collections.unmodifiableList(volumeInfoResponse_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.volumeInfoResponse_ = volumeInfoResponse_;
+        } else {
+          result.volumeInfoResponse_ = volumeInfoResponseBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse) {
+          return mergeFrom((org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse other) {
+        if (other == org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse.getDefaultInstance()) return this;
+        if (volumeInfoResponseBuilder_ == null) {
+          if (!other.volumeInfoResponse_.isEmpty()) {
+            if (volumeInfoResponse_.isEmpty()) {
+              volumeInfoResponse_ = other.volumeInfoResponse_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureVolumeInfoResponseIsMutable();
+              volumeInfoResponse_.addAll(other.volumeInfoResponse_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.volumeInfoResponse_.isEmpty()) {
+            if (volumeInfoResponseBuilder_.isEmpty()) {
+              volumeInfoResponseBuilder_.dispose();
+              volumeInfoResponseBuilder_ = null;
+              volumeInfoResponse_ = other.volumeInfoResponse_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              volumeInfoResponseBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getVolumeInfoResponseFieldBuilder() : null;
+            } else {
+              volumeInfoResponseBuilder_.addAllMessages(other.volumeInfoResponse_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse> volumeInfoResponse_ =
+        java.util.Collections.emptyList();
+      private void ensureVolumeInfoResponseIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          volumeInfoResponse_ = new java.util.ArrayList<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse>(volumeInfoResponse_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder> volumeInfoResponseBuilder_;
+
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public java.util.List<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse> getVolumeInfoResponseList() {
+        if (volumeInfoResponseBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(volumeInfoResponse_);
+        } else {
+          return volumeInfoResponseBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public int getVolumeInfoResponseCount() {
+        if (volumeInfoResponseBuilder_ == null) {
+          return volumeInfoResponse_.size();
+        } else {
+          return volumeInfoResponseBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse getVolumeInfoResponse(int index) {
+        if (volumeInfoResponseBuilder_ == null) {
+          return volumeInfoResponse_.get(index);
+        } else {
+          return volumeInfoResponseBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public Builder setVolumeInfoResponse(
+          int index, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse value) {
+        if (volumeInfoResponseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureVolumeInfoResponseIsMutable();
+          volumeInfoResponse_.set(index, value);
+          onChanged();
+        } else {
+          volumeInfoResponseBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public Builder setVolumeInfoResponse(
+          int index, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder builderForValue) {
+        if (volumeInfoResponseBuilder_ == null) {
+          ensureVolumeInfoResponseIsMutable();
+          volumeInfoResponse_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          volumeInfoResponseBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public Builder addVolumeInfoResponse(org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse value) {
+        if (volumeInfoResponseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureVolumeInfoResponseIsMutable();
+          volumeInfoResponse_.add(value);
+          onChanged();
+        } else {
+          volumeInfoResponseBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public Builder addVolumeInfoResponse(
+          int index, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse value) {
+        if (volumeInfoResponseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureVolumeInfoResponseIsMutable();
+          volumeInfoResponse_.add(index, value);
+          onChanged();
+        } else {
+          volumeInfoResponseBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public Builder addVolumeInfoResponse(
+          org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder builderForValue) {
+        if (volumeInfoResponseBuilder_ == null) {
+          ensureVolumeInfoResponseIsMutable();
+          volumeInfoResponse_.add(builderForValue.build());
+          onChanged();
+        } else {
+          volumeInfoResponseBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public Builder addVolumeInfoResponse(
+          int index, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder builderForValue) {
+        if (volumeInfoResponseBuilder_ == null) {
+          ensureVolumeInfoResponseIsMutable();
+          volumeInfoResponse_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          volumeInfoResponseBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public Builder addAllVolumeInfoResponse(
+          java.lang.Iterable<? extends org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse> values) {
+        if (volumeInfoResponseBuilder_ == null) {
+          ensureVolumeInfoResponseIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, volumeInfoResponse_);
+          onChanged();
+        } else {
+          volumeInfoResponseBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public Builder clearVolumeInfoResponse() {
+        if (volumeInfoResponseBuilder_ == null) {
+          volumeInfoResponse_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          volumeInfoResponseBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public Builder removeVolumeInfoResponse(int index) {
+        if (volumeInfoResponseBuilder_ == null) {
+          ensureVolumeInfoResponseIsMutable();
+          volumeInfoResponse_.remove(index);
+          onChanged();
+        } else {
+          volumeInfoResponseBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder getVolumeInfoResponseBuilder(
+          int index) {
+        return getVolumeInfoResponseFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder getVolumeInfoResponseOrBuilder(
+          int index) {
+        if (volumeInfoResponseBuilder_ == null) {
+          return volumeInfoResponse_.get(index);  } else {
+          return volumeInfoResponseBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder> 
+           getVolumeInfoResponseOrBuilderList() {
+        if (volumeInfoResponseBuilder_ != null) {
+          return volumeInfoResponseBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(volumeInfoResponse_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder addVolumeInfoResponseBuilder() {
+        return getVolumeInfoResponseFieldBuilder().addBuilder(
+            org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder addVolumeInfoResponseBuilder(
+          int index) {
+        return getVolumeInfoResponseFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
+       */
+      public java.util.List<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder> 
+           getVolumeInfoResponseBuilderList() {
+        return getVolumeInfoResponseFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder> 
+          getVolumeInfoResponseFieldBuilder() {
+        if (volumeInfoResponseBuilder_ == null) {
+          volumeInfoResponseBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder>(
+                  volumeInfoResponse_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          volumeInfoResponse_ = null;
+        }
+        return volumeInfoResponseBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.ProxyVolumeInfoResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.ProxyVolumeInfoResponse)
+    private static final org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse();
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ProxyVolumeInfoResponse>
+        PARSER = new com.google.protobuf.AbstractParser<ProxyVolumeInfoResponse>() {
+      @java.lang.Override
+      public ProxyVolumeInfoResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ProxyVolumeInfoResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ProxyVolumeInfoResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ProxyVolumeInfoResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface VolumeInfoResponseOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.VolumeInfoResponse)
       com.google.protobuf.MessageOrBuilder {
@@ -30465,6 +31676,16 @@ public final class VolumeServiceOuterClass {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_VolumeInfoRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_VolumeInfoResponse_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -30640,152 +31861,155 @@ public final class VolumeServiceOuterClass {
     java.lang.String[] descriptorData = {
       "\n\023VolumeService.proto\022\022org.opendedup.grp" +
       "c\032\016Shutdown.proto\032\016FileInfo.proto\"&\n\021Vol" +
-      "umeInfoRequest\022\021\n\tpvolumeID\030\001 \001(\t\"\350\005\n\022Vo" +
-      "lumeInfoResponse\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002" +
-      " \001(\t\022\023\n\013currentSize\030\003 \001(\003\022\021\n\tcapactity\030\004" +
-      " \001(\003\022\031\n\021maxPercentageFull\030\005 \001(\001\022\026\n\016dupli" +
-      "cateBytes\030\006 \001(\003\022\021\n\treadBytes\030\007 \001(\001\022\022\n\nwr" +
-      "iteBytes\030\010 \001(\003\022\024\n\014serialNumber\030\t \001(\003\022\017\n\007" +
-      "dseSize\030\n \001(\003\022\023\n\013dseCompSize\030\013 \001(\003\022\017\n\007re" +
-      "adOps\030\014 \001(\001\022\020\n\010writeOps\030\r \001(\001\022\022\n\nreadErr" +
-      "ors\030\016 \001(\003\022\023\n\013writeErrors\030\017 \001(\003\022\r\n\005files\030" +
-      "\020 \001(\003\022\030\n\020closedGracefully\030\021 \001(\010\022\032\n\022allow" +
-      "ExternalLinks\030\022 \001(\010\022\022\n\nusePerfMon\030\023 \001(\010\022" +
-      "\021\n\tclusterId\030\024 \001(\t\022\027\n\017VolumeClustered\030\025 " +
-      "\001(\010\022\032\n\022readTimeoutSeconds\030\026 \001(\005\022\033\n\023write" +
-      "TimeoutSeconds\030\027 \001(\005\022\032\n\022compressedMetaDa" +
-      "ta\030\030 \001(\010\022\021\n\tsyncFiles\030\031 \001(\010\022\023\n\013maxPageSi" +
-      "ze\030\032 \001(\003\022B\n\014messageQueue\030\033 \003(\0132,.org.ope" +
-      "ndedup.grpc.MessageQueueInfoResponse\022\023\n\013" +
-      "perfMonFile\030\034 \001(\t\022\017\n\007offline\030\035 \001(\010\022\r\n\005er" +
-      "ror\030\036 \001(\t\0221\n\terrorCode\030\037 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\"\337\001\n\nSystemInfo\022\025\n\ra" +
-      "ctiveThreads\030\001 \001(\005\022\024\n\014blocksStored\030\002 \001(\005" +
-      "\022\027\n\017maxBlocksStored\030\003 \001(\005\022\022\n\ntotalSpace\030" +
-      "\004 \001(\003\022\021\n\tfreeSpace\030\005 \001(\003\022\024\n\014totalCpuLoad" +
-      "\030\006 \001(\001\022\020\n\010cpuCores\030\007 \001(\001\022\023\n\013sdfsCpuLoad\030" +
-      "\010 \001(\001\022\023\n\013totalMemory\030\n \001(\001\022\022\n\nfreeMemory" +
-      "\030\013 \001(\001\"&\n\021SystemInfoRequest\022\021\n\tpvolumeID" +
-      "\030\001 \001(\t\"\260\001\n\023ConnectedVolumeInfo\022\n\n\002id\030\001 \001" +
-      "(\003\022\r\n\005local\030\002 \001(\010\022\020\n\010hostname\030\003 \001(\t\022\014\n\004p" +
-      "ort\030\004 \001(\005\022\014\n\004size\030\005 \001(\003\022\026\n\016compressedSiz" +
-      "e\030\006 \001(\003\022\023\n\013sdfsVersion\030\007 \001(\t\022\022\n\nlastUpda" +
-      "te\030\010 \001(\003\022\017\n\007version\030\t \001(\005\"&\n\021GCScheduleR" +
-      "equest\022\021\n\tpvolumeID\030\001 \001(\t\"h\n\022GCScheduleR" +
-      "esponse\022\020\n\010schedule\030\001 \001(\t\022\r\n\005error\030\002 \001(\t" +
-      "\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc" +
-      ".errorCodes\"(\n\023CloudVolumesRequest\022\021\n\tpv" +
-      "olumeID\030\001 \001(\t\"\225\001\n\024CloudVolumesResponse\022;" +
-      "\n\nvolumeInfo\030\001 \003(\0132\'.org.opendedup.grpc." +
-      "ConnectedVolumeInfo\022\r\n\005error\030\002 \001(\t\0221\n\ter" +
-      "rorCode\030\003 \001(\0162\036.org.opendedup.grpc.error" +
-      "Codes\"\204\001\n\022SystemInfoResponse\022,\n\004info\030\001 \001" +
-      "(\0132\036.org.opendedup.grpc.SystemInfo\022\r\n\005er" +
-      "ror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\"\245\003\n\007DSEInfo\022\017\n\007maxS" +
-      "ize\030\001 \001(\003\022\023\n\013currentSize\030\002 \001(\003\022\017\n\007entrie" +
-      "s\030\003 \001(\003\022\026\n\016compressedSize\030\004 \001(\003\022\022\n\nfreeB" +
-      "locks\030\005 \001(\003\022\020\n\010pageSize\030\006 \001(\003\022\023\n\013storage" +
-      "Type\030\007 \001(\t\022\022\n\nlistenPort\030\010 \001(\005\022\022\n\nlisten" +
-      "Host\030\t \001(\t\022\021\n\treadSpeed\030\n \001(\005\022\022\n\nwriteSp" +
-      "eed\030\013 \001(\005\022\021\n\tcacheSize\030\014 \001(\003\022\024\n\014maxCache" +
-      "Size\030\r \001(\003\022\027\n\017listenEncrypted\030\016 \001(\010\022\025\n\re" +
-      "ncryptionKey\030\017 \001(\t\022\024\n\014encryptionIV\030\020 \001(\t" +
-      "\022\026\n\016cloudAccessKey\030\021 \001(\t\022\026\n\016cloudSecretK" +
-      "ey\030\022 \001(\t\022\022\n\nbucketName\030\023 \001(\t\022\016\n\006maxAge\030\024" +
-      " \001(\003\"\037\n\nDSERequest\022\021\n\tpvolumeID\030\001 \001(\t\"z\n" +
-      "\013DSEResponse\022)\n\004info\030\001 \001(\0132\033.org.opended" +
-      "up.grpc.DSEInfo\022\r\n\005error\030\002 \001(\t\0221\n\terrorC" +
-      "ode\030\003 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\"N\n\025AuthenticationRequest\022\020\n\010username\030\001" +
-      " \001(\t\022\020\n\010password\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(" +
-      "\t\"i\n\026AuthenticationResponse\022\r\n\005token\030\001 \001" +
-      "(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.o" +
-      "rg.opendedup.grpc.errorCodes\"\353\001\n\030Message" +
-      "QueueInfoResponse\022\020\n\010hostName\030\001 \001(\t\022C\n\006m" +
-      "qType\030\002 \001(\01623.org.opendedup.grpc.Message" +
-      "QueueInfoResponse.MQType\022\014\n\004port\030\003 \001(\005\022\r" +
-      "\n\005topic\030\004 \001(\t\022\020\n\010authInfo\030\005 \001(\t\022\024\n\014subSc" +
-      "ription\030\006 \001(\t\022\017\n\007project\030\007 \001(\t\"\"\n\006MQType" +
-      "\022\014\n\010RabbitMQ\020\000\022\n\n\006PubSub\020\001\"7\n\021CleanStore" +
-      "Request\022\017\n\007compact\030\001 \001(\010\022\021\n\tpvolumeID\030\002 " +
-      "\001(\t\"g\n\022CleanStoreResponse\022\017\n\007eventID\030\001 \001" +
-      "(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.o" +
-      "rg.opendedup.grpc.errorCodes\";\n\023SetCache" +
-      "SizeRequest\022\021\n\tcacheSize\030\001 \001(\003\022\021\n\tpvolum" +
-      "eID\030\002 \001(\t\"i\n\024SetCacheSizeResponse\022\017\n\007eve" +
-      "ntID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003" +
-      " \001(\0162\036.org.opendedup.grpc.errorCodes\"?\n\030" +
-      "DeleteCloudVolumeRequest\022\020\n\010rmvolume\030\001 \001" +
-      "(\003\022\021\n\tpvolumeID\030\002 \001(\t\"n\n\031DeleteCloudVolu" +
-      "meResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001" +
-      "(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.gr" +
-      "pc.errorCodes\";\n\030SetVolumeCapacityReques" +
-      "t\022\014\n\004size\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\t\"]\n\031Se" +
-      "tVolumeCapacityResponse\022\r\n\005error\030\001 \001(\t\0221" +
-      "\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc.e" +
-      "rrorCodes\"9\n\022SetPasswordRequest\022\020\n\010passw" +
-      "ord\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\t\"W\n\023SetPassw" +
-      "ordResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
-      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"9\n" +
-      "\014SpeedRequest\022\026\n\016requestedSpeed\030\001 \001(\005\022\021\n" +
-      "\tpvolumeID\030\002 \001(\t\"b\n\rSpeedResponse\022\017\n\007eve" +
-      "ntID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003" +
-      " \001(\0162\036.org.opendedup.grpc.errorCodes\"9\n\022" +
-      "SyncFromVolRequest\022\020\n\010volumeid\030\001 \001(\003\022\021\n\t" +
-      "pvolumeID\030\002 \001(\t\"h\n\023SyncFromVolResponse\022\017" +
-      "\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorC" +
-      "ode\030\003 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\"#\n\016SyncVolRequest\022\021\n\tpvolumeID\030\001 \001(\t\"d" +
-      "\n\017SyncVolResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005er" +
-      "ror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\"5\n\020SetMaxAgeRequest" +
-      "\022\016\n\006maxAge\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\t\"U\n\021S" +
-      "etMaxAgeResponse\022\r\n\005error\030\001 \001(\t\0221\n\terror" +
-      "Code\030\002 \001(\0162\036.org.opendedup.grpc.errorCod" +
-      "es2\367\014\n\rVolumeService\022i\n\020AuthenticateUser" +
-      "\022).org.opendedup.grpc.AuthenticationRequ" +
-      "est\032*.org.opendedup.grpc.AuthenticationR" +
-      "esponse\022^\n\rGetVolumeInfo\022%.org.opendedup" +
-      ".grpc.VolumeInfoRequest\032&.org.opendedup." +
-      "grpc.VolumeInfoResponse\022[\n\016ShutdownVolum" +
-      "e\022#.org.opendedup.grpc.ShutdownRequest\032$" +
-      ".org.opendedup.grpc.ShutdownResponse\022[\n\n" +
-      "CleanStore\022%.org.opendedup.grpc.CleanSto" +
-      "reRequest\032&.org.opendedup.grpc.CleanStor" +
-      "eResponse\022p\n\021DeleteCloudVolume\022,.org.ope" +
-      "ndedup.grpc.DeleteCloudVolumeRequest\032-.o" +
-      "rg.opendedup.grpc.DeleteCloudVolumeRespo" +
-      "nse\022J\n\007DSEInfo\022\036.org.opendedup.grpc.DSER" +
-      "equest\032\037.org.opendedup.grpc.DSEResponse\022" +
-      "[\n\nSystemInfo\022%.org.opendedup.grpc.Syste" +
-      "mInfoRequest\032&.org.opendedup.grpc.System" +
-      "InfoResponse\022p\n\021SetVolumeCapacity\022,.org." +
-      "opendedup.grpc.SetVolumeCapacityRequest\032" +
-      "-.org.opendedup.grpc.SetVolumeCapacityRe" +
-      "sponse\022h\n\023GetConnectedVolumes\022\'.org.open" +
-      "dedup.grpc.CloudVolumesRequest\032(.org.ope" +
-      "ndedup.grpc.CloudVolumesResponse\022^\n\rGetG" +
-      "CSchedule\022%.org.opendedup.grpc.GCSchedul" +
-      "eRequest\032&.org.opendedup.grpc.GCSchedule" +
-      "Response\022a\n\014SetCacheSize\022\'.org.opendedup" +
-      ".grpc.SetCacheSizeRequest\032(.org.opendedu" +
-      "p.grpc.SetCacheSizeResponse\022^\n\013SetPasswo" +
-      "rd\022&.org.opendedup.grpc.SetPasswordReque" +
-      "st\032\'.org.opendedup.grpc.SetPasswordRespo" +
-      "nse\022S\n\014SetReadSpeed\022 .org.opendedup.grpc" +
-      ".SpeedRequest\032!.org.opendedup.grpc.Speed" +
-      "Response\022T\n\rSetWriteSpeed\022 .org.opendedu" +
-      "p.grpc.SpeedRequest\032!.org.opendedup.grpc" +
-      ".SpeedResponse\022f\n\023SyncFromCloudVolume\022&." +
-      "org.opendedup.grpc.SyncFromVolRequest\032\'." +
-      "org.opendedup.grpc.SyncFromVolResponse\022Z" +
-      "\n\017SyncCloudVolume\022\".org.opendedup.grpc.S" +
-      "yncVolRequest\032#.org.opendedup.grpc.SyncV" +
-      "olResponse\022X\n\tSetMaxAge\022$.org.opendedup." +
-      "grpc.SetMaxAgeRequest\032%.org.opendedup.gr" +
-      "pc.SetMaxAgeResponseB0Z.github.com/opend" +
-      "edup/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "umeInfoRequest\022\021\n\tpvolumeID\030\001 \001(\t\"\030\n\026Pro" +
+      "xyVolumeInfoRequest\"]\n\027ProxyVolumeInfoRe" +
+      "sponse\022B\n\022volumeInfoResponse\030\001 \003(\0132&.org" +
+      ".opendedup.grpc.VolumeInfoResponse\"\350\005\n\022V" +
+      "olumeInfoResponse\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030" +
+      "\002 \001(\t\022\023\n\013currentSize\030\003 \001(\003\022\021\n\tcapactity\030" +
+      "\004 \001(\003\022\031\n\021maxPercentageFull\030\005 \001(\001\022\026\n\016dupl" +
+      "icateBytes\030\006 \001(\003\022\021\n\treadBytes\030\007 \001(\001\022\022\n\nw" +
+      "riteBytes\030\010 \001(\003\022\024\n\014serialNumber\030\t \001(\003\022\017\n" +
+      "\007dseSize\030\n \001(\003\022\023\n\013dseCompSize\030\013 \001(\003\022\017\n\007r" +
+      "eadOps\030\014 \001(\001\022\020\n\010writeOps\030\r \001(\001\022\022\n\nreadEr" +
+      "rors\030\016 \001(\003\022\023\n\013writeErrors\030\017 \001(\003\022\r\n\005files" +
+      "\030\020 \001(\003\022\030\n\020closedGracefully\030\021 \001(\010\022\032\n\022allo" +
+      "wExternalLinks\030\022 \001(\010\022\022\n\nusePerfMon\030\023 \001(\010" +
+      "\022\021\n\tclusterId\030\024 \001(\t\022\027\n\017VolumeClustered\030\025" +
+      " \001(\010\022\032\n\022readTimeoutSeconds\030\026 \001(\005\022\033\n\023writ" +
+      "eTimeoutSeconds\030\027 \001(\005\022\032\n\022compressedMetaD" +
+      "ata\030\030 \001(\010\022\021\n\tsyncFiles\030\031 \001(\010\022\023\n\013maxPageS" +
+      "ize\030\032 \001(\003\022B\n\014messageQueue\030\033 \003(\0132,.org.op" +
+      "endedup.grpc.MessageQueueInfoResponse\022\023\n" +
+      "\013perfMonFile\030\034 \001(\t\022\017\n\007offline\030\035 \001(\010\022\r\n\005e" +
+      "rror\030\036 \001(\t\0221\n\terrorCode\030\037 \001(\0162\036.org.open" +
+      "dedup.grpc.errorCodes\"\337\001\n\nSystemInfo\022\025\n\r" +
+      "activeThreads\030\001 \001(\005\022\024\n\014blocksStored\030\002 \001(" +
+      "\005\022\027\n\017maxBlocksStored\030\003 \001(\005\022\022\n\ntotalSpace" +
+      "\030\004 \001(\003\022\021\n\tfreeSpace\030\005 \001(\003\022\024\n\014totalCpuLoa" +
+      "d\030\006 \001(\001\022\020\n\010cpuCores\030\007 \001(\001\022\023\n\013sdfsCpuLoad" +
+      "\030\010 \001(\001\022\023\n\013totalMemory\030\n \001(\001\022\022\n\nfreeMemor" +
+      "y\030\013 \001(\001\"&\n\021SystemInfoRequest\022\021\n\tpvolumeI" +
+      "D\030\001 \001(\t\"\260\001\n\023ConnectedVolumeInfo\022\n\n\002id\030\001 " +
+      "\001(\003\022\r\n\005local\030\002 \001(\010\022\020\n\010hostname\030\003 \001(\t\022\014\n\004" +
+      "port\030\004 \001(\005\022\014\n\004size\030\005 \001(\003\022\026\n\016compressedSi" +
+      "ze\030\006 \001(\003\022\023\n\013sdfsVersion\030\007 \001(\t\022\022\n\nlastUpd" +
+      "ate\030\010 \001(\003\022\017\n\007version\030\t \001(\005\"&\n\021GCSchedule" +
+      "Request\022\021\n\tpvolumeID\030\001 \001(\t\"h\n\022GCSchedule" +
+      "Response\022\020\n\010schedule\030\001 \001(\t\022\r\n\005error\030\002 \001(" +
+      "\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grp" +
+      "c.errorCodes\"(\n\023CloudVolumesRequest\022\021\n\tp" +
+      "volumeID\030\001 \001(\t\"\225\001\n\024CloudVolumesResponse\022" +
+      ";\n\nvolumeInfo\030\001 \003(\0132\'.org.opendedup.grpc" +
+      ".ConnectedVolumeInfo\022\r\n\005error\030\002 \001(\t\0221\n\te" +
+      "rrorCode\030\003 \001(\0162\036.org.opendedup.grpc.erro" +
+      "rCodes\"\204\001\n\022SystemInfoResponse\022,\n\004info\030\001 " +
+      "\001(\0132\036.org.opendedup.grpc.SystemInfo\022\r\n\005e" +
+      "rror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.open" +
+      "dedup.grpc.errorCodes\"\245\003\n\007DSEInfo\022\017\n\007max" +
+      "Size\030\001 \001(\003\022\023\n\013currentSize\030\002 \001(\003\022\017\n\007entri" +
+      "es\030\003 \001(\003\022\026\n\016compressedSize\030\004 \001(\003\022\022\n\nfree" +
+      "Blocks\030\005 \001(\003\022\020\n\010pageSize\030\006 \001(\003\022\023\n\013storag" +
+      "eType\030\007 \001(\t\022\022\n\nlistenPort\030\010 \001(\005\022\022\n\nliste" +
+      "nHost\030\t \001(\t\022\021\n\treadSpeed\030\n \001(\005\022\022\n\nwriteS" +
+      "peed\030\013 \001(\005\022\021\n\tcacheSize\030\014 \001(\003\022\024\n\014maxCach" +
+      "eSize\030\r \001(\003\022\027\n\017listenEncrypted\030\016 \001(\010\022\025\n\r" +
+      "encryptionKey\030\017 \001(\t\022\024\n\014encryptionIV\030\020 \001(" +
+      "\t\022\026\n\016cloudAccessKey\030\021 \001(\t\022\026\n\016cloudSecret" +
+      "Key\030\022 \001(\t\022\022\n\nbucketName\030\023 \001(\t\022\016\n\006maxAge\030" +
+      "\024 \001(\003\"\037\n\nDSERequest\022\021\n\tpvolumeID\030\001 \001(\t\"z" +
+      "\n\013DSEResponse\022)\n\004info\030\001 \001(\0132\033.org.opende" +
+      "dup.grpc.DSEInfo\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
+      "Code\030\003 \001(\0162\036.org.opendedup.grpc.errorCod" +
+      "es\"N\n\025AuthenticationRequest\022\020\n\010username\030" +
+      "\001 \001(\t\022\020\n\010password\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001" +
+      "(\t\"i\n\026AuthenticationResponse\022\r\n\005token\030\001 " +
+      "\001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\"\353\001\n\030Messag" +
+      "eQueueInfoResponse\022\020\n\010hostName\030\001 \001(\t\022C\n\006" +
+      "mqType\030\002 \001(\01623.org.opendedup.grpc.Messag" +
+      "eQueueInfoResponse.MQType\022\014\n\004port\030\003 \001(\005\022" +
+      "\r\n\005topic\030\004 \001(\t\022\020\n\010authInfo\030\005 \001(\t\022\024\n\014subS" +
+      "cription\030\006 \001(\t\022\017\n\007project\030\007 \001(\t\"\"\n\006MQTyp" +
+      "e\022\014\n\010RabbitMQ\020\000\022\n\n\006PubSub\020\001\"7\n\021CleanStor" +
+      "eRequest\022\017\n\007compact\030\001 \001(\010\022\021\n\tpvolumeID\030\002" +
+      " \001(\t\"g\n\022CleanStoreResponse\022\017\n\007eventID\030\001 " +
+      "\001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\";\n\023SetCach" +
+      "eSizeRequest\022\021\n\tcacheSize\030\001 \001(\003\022\021\n\tpvolu" +
+      "meID\030\002 \001(\t\"i\n\024SetCacheSizeResponse\022\017\n\007ev" +
+      "entID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030" +
+      "\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"?\n" +
+      "\030DeleteCloudVolumeRequest\022\020\n\010rmvolume\030\001 " +
+      "\001(\003\022\021\n\tpvolumeID\030\002 \001(\t\"n\n\031DeleteCloudVol" +
+      "umeResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 " +
+      "\001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.g" +
+      "rpc.errorCodes\";\n\030SetVolumeCapacityReque" +
+      "st\022\014\n\004size\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\t\"]\n\031S" +
+      "etVolumeCapacityResponse\022\r\n\005error\030\001 \001(\t\022" +
+      "1\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc." +
+      "errorCodes\"9\n\022SetPasswordRequest\022\020\n\010pass" +
+      "word\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\t\"W\n\023SetPass" +
+      "wordResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode" +
+      "\030\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"9" +
+      "\n\014SpeedRequest\022\026\n\016requestedSpeed\030\001 \001(\005\022\021" +
+      "\n\tpvolumeID\030\002 \001(\t\"b\n\rSpeedResponse\022\017\n\007ev" +
+      "entID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030" +
+      "\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"9\n" +
+      "\022SyncFromVolRequest\022\020\n\010volumeid\030\001 \001(\003\022\021\n" +
+      "\tpvolumeID\030\002 \001(\t\"h\n\023SyncFromVolResponse\022" +
+      "\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
+      "Code\030\003 \001(\0162\036.org.opendedup.grpc.errorCod" +
+      "es\"#\n\016SyncVolRequest\022\021\n\tpvolumeID\030\001 \001(\t\"" +
+      "d\n\017SyncVolResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005e" +
+      "rror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.open" +
+      "dedup.grpc.errorCodes\"5\n\020SetMaxAgeReques" +
+      "t\022\016\n\006maxAge\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\t\"U\n\021" +
+      "SetMaxAgeResponse\022\r\n\005error\030\001 \001(\t\0221\n\terro" +
+      "rCode\030\002 \001(\0162\036.org.opendedup.grpc.errorCo" +
+      "des2\367\014\n\rVolumeService\022i\n\020AuthenticateUse" +
+      "r\022).org.opendedup.grpc.AuthenticationReq" +
+      "uest\032*.org.opendedup.grpc.Authentication" +
+      "Response\022^\n\rGetVolumeInfo\022%.org.opendedu" +
+      "p.grpc.VolumeInfoRequest\032&.org.opendedup" +
+      ".grpc.VolumeInfoResponse\022[\n\016ShutdownVolu" +
+      "me\022#.org.opendedup.grpc.ShutdownRequest\032" +
+      "$.org.opendedup.grpc.ShutdownResponse\022[\n" +
+      "\nCleanStore\022%.org.opendedup.grpc.CleanSt" +
+      "oreRequest\032&.org.opendedup.grpc.CleanSto" +
+      "reResponse\022p\n\021DeleteCloudVolume\022,.org.op" +
+      "endedup.grpc.DeleteCloudVolumeRequest\032-." +
+      "org.opendedup.grpc.DeleteCloudVolumeResp" +
+      "onse\022J\n\007DSEInfo\022\036.org.opendedup.grpc.DSE" +
+      "Request\032\037.org.opendedup.grpc.DSEResponse" +
+      "\022[\n\nSystemInfo\022%.org.opendedup.grpc.Syst" +
+      "emInfoRequest\032&.org.opendedup.grpc.Syste" +
+      "mInfoResponse\022p\n\021SetVolumeCapacity\022,.org" +
+      ".opendedup.grpc.SetVolumeCapacityRequest" +
+      "\032-.org.opendedup.grpc.SetVolumeCapacityR" +
+      "esponse\022h\n\023GetConnectedVolumes\022\'.org.ope" +
+      "ndedup.grpc.CloudVolumesRequest\032(.org.op" +
+      "endedup.grpc.CloudVolumesResponse\022^\n\rGet" +
+      "GCSchedule\022%.org.opendedup.grpc.GCSchedu" +
+      "leRequest\032&.org.opendedup.grpc.GCSchedul" +
+      "eResponse\022a\n\014SetCacheSize\022\'.org.opendedu" +
+      "p.grpc.SetCacheSizeRequest\032(.org.opended" +
+      "up.grpc.SetCacheSizeResponse\022^\n\013SetPassw" +
+      "ord\022&.org.opendedup.grpc.SetPasswordRequ" +
+      "est\032\'.org.opendedup.grpc.SetPasswordResp" +
+      "onse\022S\n\014SetReadSpeed\022 .org.opendedup.grp" +
+      "c.SpeedRequest\032!.org.opendedup.grpc.Spee" +
+      "dResponse\022T\n\rSetWriteSpeed\022 .org.opended" +
+      "up.grpc.SpeedRequest\032!.org.opendedup.grp" +
+      "c.SpeedResponse\022f\n\023SyncFromCloudVolume\022&" +
+      ".org.opendedup.grpc.SyncFromVolRequest\032\'" +
+      ".org.opendedup.grpc.SyncFromVolResponse\022" +
+      "Z\n\017SyncCloudVolume\022\".org.opendedup.grpc." +
+      "SyncVolRequest\032#.org.opendedup.grpc.Sync" +
+      "VolResponse\022X\n\tSetMaxAge\022$.org.opendedup" +
+      ".grpc.SetMaxAgeRequest\032%.org.opendedup.g" +
+      "rpc.SetMaxAgeResponseB0Z.github.com/open" +
+      "dedup/sdfs-client-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -30799,200 +32023,212 @@ public final class VolumeServiceOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_VolumeInfoRequest_descriptor,
         new java.lang.String[] { "PvolumeID", });
-    internal_static_org_opendedup_grpc_VolumeInfoResponse_descriptor =
+    internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
+    internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_descriptor,
+        new java.lang.String[] { });
+    internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_ProxyVolumeInfoResponse_descriptor,
+        new java.lang.String[] { "VolumeInfoResponse", });
+    internal_static_org_opendedup_grpc_VolumeInfoResponse_descriptor =
+      getDescriptor().getMessageTypes().get(3);
     internal_static_org_opendedup_grpc_VolumeInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_VolumeInfoResponse_descriptor,
         new java.lang.String[] { "Path", "Name", "CurrentSize", "Capactity", "MaxPercentageFull", "DuplicateBytes", "ReadBytes", "WriteBytes", "SerialNumber", "DseSize", "DseCompSize", "ReadOps", "WriteOps", "ReadErrors", "WriteErrors", "Files", "ClosedGracefully", "AllowExternalLinks", "UsePerfMon", "ClusterId", "VolumeClustered", "ReadTimeoutSeconds", "WriteTimeoutSeconds", "CompressedMetaData", "SyncFiles", "MaxPageSize", "MessageQueue", "PerfMonFile", "Offline", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SystemInfo_descriptor =
-      getDescriptor().getMessageTypes().get(2);
+      getDescriptor().getMessageTypes().get(4);
     internal_static_org_opendedup_grpc_SystemInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SystemInfo_descriptor,
         new java.lang.String[] { "ActiveThreads", "BlocksStored", "MaxBlocksStored", "TotalSpace", "FreeSpace", "TotalCpuLoad", "CpuCores", "SdfsCpuLoad", "TotalMemory", "FreeMemory", });
     internal_static_org_opendedup_grpc_SystemInfoRequest_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(5);
     internal_static_org_opendedup_grpc_SystemInfoRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SystemInfoRequest_descriptor,
         new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_ConnectedVolumeInfo_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(6);
     internal_static_org_opendedup_grpc_ConnectedVolumeInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ConnectedVolumeInfo_descriptor,
         new java.lang.String[] { "Id", "Local", "Hostname", "Port", "Size", "CompressedSize", "SdfsVersion", "LastUpdate", "Version", });
     internal_static_org_opendedup_grpc_GCScheduleRequest_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_org_opendedup_grpc_GCScheduleRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_GCScheduleRequest_descriptor,
         new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_GCScheduleResponse_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_org_opendedup_grpc_GCScheduleResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_GCScheduleResponse_descriptor,
         new java.lang.String[] { "Schedule", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_CloudVolumesRequest_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_org_opendedup_grpc_CloudVolumesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CloudVolumesRequest_descriptor,
         new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_CloudVolumesResponse_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_org_opendedup_grpc_CloudVolumesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CloudVolumesResponse_descriptor,
         new java.lang.String[] { "VolumeInfo", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SystemInfoResponse_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_org_opendedup_grpc_SystemInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SystemInfoResponse_descriptor,
         new java.lang.String[] { "Info", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_DSEInfo_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_org_opendedup_grpc_DSEInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSEInfo_descriptor,
         new java.lang.String[] { "MaxSize", "CurrentSize", "Entries", "CompressedSize", "FreeBlocks", "PageSize", "StorageType", "ListenPort", "ListenHost", "ReadSpeed", "WriteSpeed", "CacheSize", "MaxCacheSize", "ListenEncrypted", "EncryptionKey", "EncryptionIV", "CloudAccessKey", "CloudSecretKey", "BucketName", "MaxAge", });
     internal_static_org_opendedup_grpc_DSERequest_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_org_opendedup_grpc_DSERequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSERequest_descriptor,
         new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_DSEResponse_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_org_opendedup_grpc_DSEResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSEResponse_descriptor,
         new java.lang.String[] { "Info", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_AuthenticationRequest_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_org_opendedup_grpc_AuthenticationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_AuthenticationRequest_descriptor,
         new java.lang.String[] { "Username", "Password", "PvolumeID", });
     internal_static_org_opendedup_grpc_AuthenticationResponse_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_org_opendedup_grpc_AuthenticationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_AuthenticationResponse_descriptor,
         new java.lang.String[] { "Token", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_MessageQueueInfoResponse_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_org_opendedup_grpc_MessageQueueInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_MessageQueueInfoResponse_descriptor,
         new java.lang.String[] { "HostName", "MqType", "Port", "Topic", "AuthInfo", "SubScription", "Project", });
     internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor,
         new java.lang.String[] { "Compact", "PvolumeID", });
     internal_static_org_opendedup_grpc_CleanStoreResponse_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_org_opendedup_grpc_CleanStoreResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CleanStoreResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SetCacheSizeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_org_opendedup_grpc_SetCacheSizeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetCacheSizeRequest_descriptor,
         new java.lang.String[] { "CacheSize", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetCacheSizeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_org_opendedup_grpc_SetCacheSizeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetCacheSizeResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_descriptor,
         new java.lang.String[] { "Rmvolume", "PvolumeID", });
     internal_static_org_opendedup_grpc_DeleteCloudVolumeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_org_opendedup_grpc_DeleteCloudVolumeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DeleteCloudVolumeResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_descriptor,
         new java.lang.String[] { "Size", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetVolumeCapacityResponse_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_org_opendedup_grpc_SetVolumeCapacityResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetVolumeCapacityResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SetPasswordRequest_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_org_opendedup_grpc_SetPasswordRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetPasswordRequest_descriptor,
         new java.lang.String[] { "Password", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetPasswordResponse_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_org_opendedup_grpc_SetPasswordResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetPasswordResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SpeedRequest_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_org_opendedup_grpc_SpeedRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SpeedRequest_descriptor,
         new java.lang.String[] { "RequestedSpeed", "PvolumeID", });
     internal_static_org_opendedup_grpc_SpeedResponse_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_org_opendedup_grpc_SpeedResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SpeedResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SyncFromVolRequest_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_org_opendedup_grpc_SyncFromVolRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncFromVolRequest_descriptor,
         new java.lang.String[] { "Volumeid", "PvolumeID", });
     internal_static_org_opendedup_grpc_SyncFromVolResponse_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_org_opendedup_grpc_SyncFromVolResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncFromVolResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SyncVolRequest_descriptor =
-      getDescriptor().getMessageTypes().get(30);
+      getDescriptor().getMessageTypes().get(32);
     internal_static_org_opendedup_grpc_SyncVolRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncVolRequest_descriptor,
         new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_SyncVolResponse_descriptor =
-      getDescriptor().getMessageTypes().get(31);
+      getDescriptor().getMessageTypes().get(33);
     internal_static_org_opendedup_grpc_SyncVolResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncVolResponse_descriptor,
         new java.lang.String[] { "EventID", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SetMaxAgeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(32);
+      getDescriptor().getMessageTypes().get(34);
     internal_static_org_opendedup_grpc_SetMaxAgeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetMaxAgeRequest_descriptor,
         new java.lang.String[] { "MaxAge", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(33);
+      getDescriptor().getMessageTypes().get(35);
     internal_static_org_opendedup_grpc_SetMaxAgeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor,

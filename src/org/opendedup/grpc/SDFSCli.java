@@ -3439,6 +3439,18 @@ public final class SDFSCli {
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
      */
     org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder getPermissionsOrBuilder();
+
+    /**
+     * <code>string pvolumeID = 6;</code>
+     * @return The pvolumeID.
+     */
+    java.lang.String getPvolumeID();
+    /**
+     * <code>string pvolumeID = 6;</code>
+     * @return The bytes for pvolumeID.
+     */
+    com.google.protobuf.ByteString
+        getPvolumeIDBytes();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.AddUserRequest}
@@ -3456,6 +3468,7 @@ public final class SDFSCli {
       user_ = "";
       password_ = "";
       description_ = "";
+      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -3517,6 +3530,12 @@ public final class SDFSCli {
                 permissions_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              pvolumeID_ = s;
               break;
             }
             default: {
@@ -3691,6 +3710,44 @@ public final class SDFSCli {
       return getPermissions();
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 6;
+    private volatile java.lang.Object pvolumeID_;
+    /**
+     * <code>string pvolumeID = 6;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public java.lang.String getPvolumeID() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvolumeID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string pvolumeID = 6;</code>
+     * @return The bytes for pvolumeID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvolumeIDBytes() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvolumeID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -3717,6 +3774,9 @@ public final class SDFSCli {
       if (permissions_ != null) {
         output.writeMessage(5, getPermissions());
       }
+      if (!getPvolumeIDBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3738,6 +3798,9 @@ public final class SDFSCli {
       if (permissions_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getPermissions());
+      }
+      if (!getPvolumeIDBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3765,6 +3828,8 @@ public final class SDFSCli {
         if (!getPermissions()
             .equals(other.getPermissions())) return false;
       }
+      if (!getPvolumeID()
+          .equals(other.getPvolumeID())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3786,6 +3851,8 @@ public final class SDFSCli {
         hash = (37 * hash) + PERMISSIONS_FIELD_NUMBER;
         hash = (53 * hash) + getPermissions().hashCode();
       }
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + getPvolumeID().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -3931,6 +3998,8 @@ public final class SDFSCli {
           permissions_ = null;
           permissionsBuilder_ = null;
         }
+        pvolumeID_ = "";
+
         return this;
       }
 
@@ -3965,6 +4034,7 @@ public final class SDFSCli {
         } else {
           result.permissions_ = permissionsBuilder_.build();
         }
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -4027,6 +4097,10 @@ public final class SDFSCli {
         }
         if (other.hasPermissions()) {
           mergePermissions(other.getPermissions());
+        }
+        if (!other.getPvolumeID().isEmpty()) {
+          pvolumeID_ = other.pvolumeID_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4402,6 +4476,82 @@ public final class SDFSCli {
           permissions_ = null;
         }
         return permissionsBuilder_;
+      }
+
+      private java.lang.Object pvolumeID_ = "";
+      /**
+       * <code>string pvolumeID = 6;</code>
+       * @return The pvolumeID.
+       */
+      public java.lang.String getPvolumeID() {
+        java.lang.Object ref = pvolumeID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvolumeID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 6;</code>
+       * @return The bytes for pvolumeID.
+       */
+      public com.google.protobuf.ByteString
+          getPvolumeIDBytes() {
+        java.lang.Object ref = pvolumeID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvolumeID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 6;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = getDefaultInstance().getPvolumeID();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 6;</code>
+       * @param value The bytes for pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -5146,6 +5296,18 @@ public final class SDFSCli {
      */
     com.google.protobuf.ByteString
         getUserBytes();
+
+    /**
+     * <code>string pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    java.lang.String getPvolumeID();
+    /**
+     * <code>string pvolumeID = 2;</code>
+     * @return The bytes for pvolumeID.
+     */
+    com.google.protobuf.ByteString
+        getPvolumeIDBytes();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DeleteUserRequest}
@@ -5161,6 +5323,7 @@ public final class SDFSCli {
     }
     private DeleteUserRequest() {
       user_ = "";
+      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -5197,6 +5360,12 @@ public final class SDFSCli {
               java.lang.String s = input.readStringRequireUtf8();
 
               user_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              pvolumeID_ = s;
               break;
             }
             default: {
@@ -5269,6 +5438,44 @@ public final class SDFSCli {
       }
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object pvolumeID_;
+    /**
+     * <code>string pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public java.lang.String getPvolumeID() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvolumeID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string pvolumeID = 2;</code>
+     * @return The bytes for pvolumeID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvolumeIDBytes() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvolumeID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -5286,6 +5493,9 @@ public final class SDFSCli {
       if (!getUserBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, user_);
       }
+      if (!getPvolumeIDBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -5297,6 +5507,9 @@ public final class SDFSCli {
       size = 0;
       if (!getUserBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, user_);
+      }
+      if (!getPvolumeIDBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -5315,6 +5528,8 @@ public final class SDFSCli {
 
       if (!getUser()
           .equals(other.getUser())) return false;
+      if (!getPvolumeID()
+          .equals(other.getPvolumeID())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -5328,6 +5543,8 @@ public final class SDFSCli {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + USER_FIELD_NUMBER;
       hash = (53 * hash) + getUser().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + getPvolumeID().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -5463,6 +5680,8 @@ public final class SDFSCli {
         super.clear();
         user_ = "";
 
+        pvolumeID_ = "";
+
         return this;
       }
 
@@ -5490,6 +5709,7 @@ public final class SDFSCli {
       public org.opendedup.grpc.SDFSCli.DeleteUserRequest buildPartial() {
         org.opendedup.grpc.SDFSCli.DeleteUserRequest result = new org.opendedup.grpc.SDFSCli.DeleteUserRequest(this);
         result.user_ = user_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -5540,6 +5760,10 @@ public final class SDFSCli {
         if (other == org.opendedup.grpc.SDFSCli.DeleteUserRequest.getDefaultInstance()) return this;
         if (!other.getUser().isEmpty()) {
           user_ = other.user_;
+          onChanged();
+        }
+        if (!other.getPvolumeID().isEmpty()) {
+          pvolumeID_ = other.pvolumeID_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -5643,6 +5867,82 @@ public final class SDFSCli {
   checkByteStringIsUtf8(value);
         
         user_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object pvolumeID_ = "";
+      /**
+       * <code>string pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      public java.lang.String getPvolumeID() {
+        java.lang.Object ref = pvolumeID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvolumeID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 2;</code>
+       * @return The bytes for pvolumeID.
+       */
+      public com.google.protobuf.ByteString
+          getPvolumeIDBytes() {
+        java.lang.Object ref = pvolumeID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvolumeID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = getDefaultInstance().getPvolumeID();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 2;</code>
+       * @param value The bytes for pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        pvolumeID_ = value;
         onChanged();
         return this;
       }
@@ -6391,19 +6691,31 @@ public final class SDFSCli {
         getUserBytes();
 
     /**
-     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
      * @return Whether the permissions field is set.
      */
     boolean hasPermissions();
     /**
-     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
      * @return The permissions.
      */
     org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions();
     /**
-     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
      */
     org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder getPermissionsOrBuilder();
+
+    /**
+     * <code>string pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    java.lang.String getPvolumeID();
+    /**
+     * <code>string pvolumeID = 3;</code>
+     * @return The bytes for pvolumeID.
+     */
+    com.google.protobuf.ByteString
+        getPvolumeIDBytes();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetPermissionsRequest}
@@ -6419,6 +6731,7 @@ public final class SDFSCli {
     }
     private SetPermissionsRequest() {
       user_ = "";
+      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -6457,7 +6770,7 @@ public final class SDFSCli {
               user_ = s;
               break;
             }
-            case 42: {
+            case 18: {
               org.opendedup.grpc.SDFSCli.SdfsPermissions.Builder subBuilder = null;
               if (permissions_ != null) {
                 subBuilder = permissions_.toBuilder();
@@ -6468,6 +6781,12 @@ public final class SDFSCli {
                 permissions_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              pvolumeID_ = s;
               break;
             }
             default: {
@@ -6540,10 +6859,10 @@ public final class SDFSCli {
       }
     }
 
-    public static final int PERMISSIONS_FIELD_NUMBER = 5;
+    public static final int PERMISSIONS_FIELD_NUMBER = 2;
     private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_;
     /**
-     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
      * @return Whether the permissions field is set.
      */
     @java.lang.Override
@@ -6551,7 +6870,7 @@ public final class SDFSCli {
       return permissions_ != null;
     }
     /**
-     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
      * @return The permissions.
      */
     @java.lang.Override
@@ -6559,11 +6878,49 @@ public final class SDFSCli {
       return permissions_ == null ? org.opendedup.grpc.SDFSCli.SdfsPermissions.getDefaultInstance() : permissions_;
     }
     /**
-     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
      */
     @java.lang.Override
     public org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder getPermissionsOrBuilder() {
       return getPermissions();
+    }
+
+    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    private volatile java.lang.Object pvolumeID_;
+    /**
+     * <code>string pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public java.lang.String getPvolumeID() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvolumeID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string pvolumeID = 3;</code>
+     * @return The bytes for pvolumeID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvolumeIDBytes() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvolumeID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     private byte memoizedIsInitialized = -1;
@@ -6584,7 +6941,10 @@ public final class SDFSCli {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, user_);
       }
       if (permissions_ != null) {
-        output.writeMessage(5, getPermissions());
+        output.writeMessage(2, getPermissions());
+      }
+      if (!getPvolumeIDBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, pvolumeID_);
       }
       unknownFields.writeTo(output);
     }
@@ -6600,7 +6960,10 @@ public final class SDFSCli {
       }
       if (permissions_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, getPermissions());
+          .computeMessageSize(2, getPermissions());
+      }
+      if (!getPvolumeIDBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -6624,6 +6987,8 @@ public final class SDFSCli {
         if (!getPermissions()
             .equals(other.getPermissions())) return false;
       }
+      if (!getPvolumeID()
+          .equals(other.getPvolumeID())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -6641,6 +7006,8 @@ public final class SDFSCli {
         hash = (37 * hash) + PERMISSIONS_FIELD_NUMBER;
         hash = (53 * hash) + getPermissions().hashCode();
       }
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + getPvolumeID().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -6782,6 +7149,8 @@ public final class SDFSCli {
           permissions_ = null;
           permissionsBuilder_ = null;
         }
+        pvolumeID_ = "";
+
         return this;
       }
 
@@ -6814,6 +7183,7 @@ public final class SDFSCli {
         } else {
           result.permissions_ = permissionsBuilder_.build();
         }
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -6868,6 +7238,10 @@ public final class SDFSCli {
         }
         if (other.hasPermissions()) {
           mergePermissions(other.getPermissions());
+        }
+        if (!other.getPvolumeID().isEmpty()) {
+          pvolumeID_ = other.pvolumeID_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -6978,14 +7352,14 @@ public final class SDFSCli {
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.SDFSCli.SdfsPermissions, org.opendedup.grpc.SDFSCli.SdfsPermissions.Builder, org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder> permissionsBuilder_;
       /**
-       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
        * @return Whether the permissions field is set.
        */
       public boolean hasPermissions() {
         return permissionsBuilder_ != null || permissions_ != null;
       }
       /**
-       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
        * @return The permissions.
        */
       public org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions() {
@@ -6996,7 +7370,7 @@ public final class SDFSCli {
         }
       }
       /**
-       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
        */
       public Builder setPermissions(org.opendedup.grpc.SDFSCli.SdfsPermissions value) {
         if (permissionsBuilder_ == null) {
@@ -7012,7 +7386,7 @@ public final class SDFSCli {
         return this;
       }
       /**
-       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
        */
       public Builder setPermissions(
           org.opendedup.grpc.SDFSCli.SdfsPermissions.Builder builderForValue) {
@@ -7026,7 +7400,7 @@ public final class SDFSCli {
         return this;
       }
       /**
-       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
        */
       public Builder mergePermissions(org.opendedup.grpc.SDFSCli.SdfsPermissions value) {
         if (permissionsBuilder_ == null) {
@@ -7044,7 +7418,7 @@ public final class SDFSCli {
         return this;
       }
       /**
-       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
        */
       public Builder clearPermissions() {
         if (permissionsBuilder_ == null) {
@@ -7058,7 +7432,7 @@ public final class SDFSCli {
         return this;
       }
       /**
-       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
        */
       public org.opendedup.grpc.SDFSCli.SdfsPermissions.Builder getPermissionsBuilder() {
         
@@ -7066,7 +7440,7 @@ public final class SDFSCli {
         return getPermissionsFieldBuilder().getBuilder();
       }
       /**
-       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
        */
       public org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder getPermissionsOrBuilder() {
         if (permissionsBuilder_ != null) {
@@ -7077,7 +7451,7 @@ public final class SDFSCli {
         }
       }
       /**
-       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.SDFSCli.SdfsPermissions, org.opendedup.grpc.SDFSCli.SdfsPermissions.Builder, org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder> 
@@ -7091,6 +7465,82 @@ public final class SDFSCli {
           permissions_ = null;
         }
         return permissionsBuilder_;
+      }
+
+      private java.lang.Object pvolumeID_ = "";
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @return The pvolumeID.
+       */
+      public java.lang.String getPvolumeID() {
+        java.lang.Object ref = pvolumeID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvolumeID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @return The bytes for pvolumeID.
+       */
+      public com.google.protobuf.ByteString
+          getPvolumeIDBytes() {
+        java.lang.Object ref = pvolumeID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvolumeID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = getDefaultInstance().getPvolumeID();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @param value The bytes for pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -7847,6 +8297,18 @@ public final class SDFSCli {
      */
     com.google.protobuf.ByteString
         getPasswordBytes();
+
+    /**
+     * <code>string pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    java.lang.String getPvolumeID();
+    /**
+     * <code>string pvolumeID = 3;</code>
+     * @return The bytes for pvolumeID.
+     */
+    com.google.protobuf.ByteString
+        getPvolumeIDBytes();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetUserPasswordRequest}
@@ -7863,6 +8325,7 @@ public final class SDFSCli {
     private SetUserPasswordRequest() {
       user_ = "";
       password_ = "";
+      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -7905,6 +8368,12 @@ public final class SDFSCli {
               java.lang.String s = input.readStringRequireUtf8();
 
               password_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              pvolumeID_ = s;
               break;
             }
             default: {
@@ -8015,6 +8484,44 @@ public final class SDFSCli {
       }
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    private volatile java.lang.Object pvolumeID_;
+    /**
+     * <code>string pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public java.lang.String getPvolumeID() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvolumeID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string pvolumeID = 3;</code>
+     * @return The bytes for pvolumeID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvolumeIDBytes() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvolumeID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8035,6 +8542,9 @@ public final class SDFSCli {
       if (!getPasswordBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, password_);
       }
+      if (!getPvolumeIDBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -8049,6 +8559,9 @@ public final class SDFSCli {
       }
       if (!getPasswordBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, password_);
+      }
+      if (!getPvolumeIDBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -8069,6 +8582,8 @@ public final class SDFSCli {
           .equals(other.getUser())) return false;
       if (!getPassword()
           .equals(other.getPassword())) return false;
+      if (!getPvolumeID()
+          .equals(other.getPvolumeID())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -8084,6 +8599,8 @@ public final class SDFSCli {
       hash = (53 * hash) + getUser().hashCode();
       hash = (37 * hash) + PASSWORD_FIELD_NUMBER;
       hash = (53 * hash) + getPassword().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + getPvolumeID().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8221,6 +8738,8 @@ public final class SDFSCli {
 
         password_ = "";
 
+        pvolumeID_ = "";
+
         return this;
       }
 
@@ -8249,6 +8768,7 @@ public final class SDFSCli {
         org.opendedup.grpc.SDFSCli.SetUserPasswordRequest result = new org.opendedup.grpc.SDFSCli.SetUserPasswordRequest(this);
         result.user_ = user_;
         result.password_ = password_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -8303,6 +8823,10 @@ public final class SDFSCli {
         }
         if (!other.getPassword().isEmpty()) {
           password_ = other.password_;
+          onChanged();
+        }
+        if (!other.getPvolumeID().isEmpty()) {
+          pvolumeID_ = other.pvolumeID_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -8482,6 +9006,82 @@ public final class SDFSCli {
   checkByteStringIsUtf8(value);
         
         password_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object pvolumeID_ = "";
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @return The pvolumeID.
+       */
+      public java.lang.String getPvolumeID() {
+        java.lang.Object ref = pvolumeID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvolumeID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @return The bytes for pvolumeID.
+       */
+      public com.google.protobuf.ByteString
+          getPvolumeIDBytes() {
+        java.lang.Object ref = pvolumeID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvolumeID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = getDefaultInstance().getPvolumeID();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 3;</code>
+       * @param value The bytes for pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        pvolumeID_ = value;
         onChanged();
         return this;
       }
@@ -9216,6 +9816,18 @@ public final class SDFSCli {
   public interface ListUsersRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.ListUsersRequest)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    java.lang.String getPvolumeID();
+    /**
+     * <code>string pvolumeID = 1;</code>
+     * @return The bytes for pvolumeID.
+     */
+    com.google.protobuf.ByteString
+        getPvolumeIDBytes();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ListUsersRequest}
@@ -9230,6 +9842,7 @@ public final class SDFSCli {
       super(builder);
     }
     private ListUsersRequest() {
+      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -9262,6 +9875,12 @@ public final class SDFSCli {
             case 0:
               done = true;
               break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              pvolumeID_ = s;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -9294,6 +9913,44 @@ public final class SDFSCli {
               org.opendedup.grpc.SDFSCli.ListUsersRequest.class, org.opendedup.grpc.SDFSCli.ListUsersRequest.Builder.class);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object pvolumeID_;
+    /**
+     * <code>string pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public java.lang.String getPvolumeID() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        pvolumeID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string pvolumeID = 1;</code>
+     * @return The bytes for pvolumeID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getPvolumeIDBytes() {
+      java.lang.Object ref = pvolumeID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        pvolumeID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -9308,6 +9965,9 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (!getPvolumeIDBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -9317,6 +9977,9 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
+      if (!getPvolumeIDBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -9332,6 +9995,8 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.ListUsersRequest other = (org.opendedup.grpc.SDFSCli.ListUsersRequest) obj;
 
+      if (!getPvolumeID()
+          .equals(other.getPvolumeID())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -9343,6 +10008,8 @@ public final class SDFSCli {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + getPvolumeID().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -9476,6 +10143,8 @@ public final class SDFSCli {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        pvolumeID_ = "";
+
         return this;
       }
 
@@ -9502,6 +10171,7 @@ public final class SDFSCli {
       @java.lang.Override
       public org.opendedup.grpc.SDFSCli.ListUsersRequest buildPartial() {
         org.opendedup.grpc.SDFSCli.ListUsersRequest result = new org.opendedup.grpc.SDFSCli.ListUsersRequest(this);
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -9550,6 +10220,10 @@ public final class SDFSCli {
 
       public Builder mergeFrom(org.opendedup.grpc.SDFSCli.ListUsersRequest other) {
         if (other == org.opendedup.grpc.SDFSCli.ListUsersRequest.getDefaultInstance()) return this;
+        if (!other.getPvolumeID().isEmpty()) {
+          pvolumeID_ = other.pvolumeID_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -9576,6 +10250,82 @@ public final class SDFSCli {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private java.lang.Object pvolumeID_ = "";
+      /**
+       * <code>string pvolumeID = 1;</code>
+       * @return The pvolumeID.
+       */
+      public java.lang.String getPvolumeID() {
+        java.lang.Object ref = pvolumeID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          pvolumeID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 1;</code>
+       * @return The bytes for pvolumeID.
+       */
+      public com.google.protobuf.ByteString
+          getPvolumeIDBytes() {
+        java.lang.Object ref = pvolumeID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          pvolumeID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = getDefaultInstance().getPvolumeID();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string pvolumeID = 1;</code>
+       * @param value The bytes for pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        pvolumeID_ = value;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -10776,42 +11526,44 @@ public final class SDFSCli {
       "users\030\001 \003(\0132(.org.opendedup.grpc.SdfsUse" +
       "rs.UsersEntry\032J\n\nUsersEntry\022\013\n\003key\030\001 \001(\t" +
       "\022+\n\005value\030\002 \001(\0132\034.org.opendedup.grpc.Sdf" +
-      "sUser:\0028\001\"\177\n\016AddUserRequest\022\014\n\004user\030\001 \001(" +
-      "\t\022\020\n\010password\030\002 \001(\t\022\023\n\013description\030\003 \001(\t" +
-      "\0228\n\013permissions\030\005 \001(\0132#.org.opendedup.gr" +
-      "pc.SdfsPermissions\"S\n\017AddUserResponse\022\r\n" +
-      "\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.op" +
-      "endedup.grpc.errorCodes\"!\n\021DeleteUserReq" +
-      "uest\022\014\n\004user\030\001 \001(\t\"V\n\022DeleteUserResponse" +
-      "\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org" +
-      ".opendedup.grpc.errorCodes\"_\n\025SetPermiss" +
-      "ionsRequest\022\014\n\004user\030\001 \001(\t\0228\n\013permissions" +
-      "\030\005 \001(\0132#.org.opendedup.grpc.SdfsPermissi" +
-      "ons\"Z\n\026SetPermissionsResponse\022\r\n\005error\030\001" +
-      " \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup." +
-      "grpc.errorCodes\"8\n\026SetUserPasswordReques" +
-      "t\022\014\n\004user\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\"[\n\027Set" +
-      "UserPasswordResponse\022\r\n\005error\030\001 \001(\t\0221\n\te" +
-      "rrorCode\030\002 \001(\0162\036.org.opendedup.grpc.erro" +
-      "rCodes\"\022\n\020ListUsersRequest\"\202\001\n\021ListUsers" +
-      "Response\022+\n\005users\030\001 \003(\0132\034.org.opendedup." +
-      "grpc.SdfsUser\022\r\n\005error\030\002 \001(\t\0221\n\terrorCod" +
-      "e\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes2" +
-      "\365\003\n\017SdfsUserService\022R\n\007AddUser\022\".org.ope" +
-      "ndedup.grpc.AddUserRequest\032#.org.opended" +
-      "up.grpc.AddUserResponse\022[\n\nDeleteUser\022%." +
-      "org.opendedup.grpc.DeleteUserRequest\032&.o" +
-      "rg.opendedup.grpc.DeleteUserResponse\022k\n\022" +
-      "SetSdfsPermissions\022).org.opendedup.grpc." +
-      "SetPermissionsRequest\032*.org.opendedup.gr" +
-      "pc.SetPermissionsResponse\022j\n\017SetSdfsPass" +
-      "word\022*.org.opendedup.grpc.SetUserPasswor" +
-      "dRequest\032+.org.opendedup.grpc.SetUserPas" +
-      "swordResponse\022X\n\tListUsers\022$.org.opended" +
-      "up.grpc.ListUsersRequest\032%.org.opendedup" +
-      ".grpc.ListUsersResponseB0Z.github.com/op" +
-      "endedup/sdfs-client-go/sdfs/;sdfsb\006proto" +
-      "3"
+      "sUser:\0028\001\"\222\001\n\016AddUserRequest\022\014\n\004user\030\001 \001" +
+      "(\t\022\020\n\010password\030\002 \001(\t\022\023\n\013description\030\003 \001(" +
+      "\t\0228\n\013permissions\030\005 \001(\0132#.org.opendedup.g" +
+      "rpc.SdfsPermissions\022\021\n\tpvolumeID\030\006 \001(\t\"S" +
+      "\n\017AddUserResponse\022\r\n\005error\030\001 \001(\t\0221\n\terro" +
+      "rCode\030\002 \001(\0162\036.org.opendedup.grpc.errorCo" +
+      "des\"4\n\021DeleteUserRequest\022\014\n\004user\030\001 \001(\t\022\021" +
+      "\n\tpvolumeID\030\002 \001(\t\"V\n\022DeleteUserResponse\022" +
+      "\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org." +
+      "opendedup.grpc.errorCodes\"r\n\025SetPermissi" +
+      "onsRequest\022\014\n\004user\030\001 \001(\t\0228\n\013permissions\030" +
+      "\002 \001(\0132#.org.opendedup.grpc.SdfsPermissio" +
+      "ns\022\021\n\tpvolumeID\030\003 \001(\t\"Z\n\026SetPermissionsR" +
+      "esponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(" +
+      "\0162\036.org.opendedup.grpc.errorCodes\"K\n\026Set" +
+      "UserPasswordRequest\022\014\n\004user\030\001 \001(\t\022\020\n\010pas" +
+      "sword\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\t\"[\n\027SetUse" +
+      "rPasswordResponse\022\r\n\005error\030\001 \001(\t\0221\n\terro" +
+      "rCode\030\002 \001(\0162\036.org.opendedup.grpc.errorCo" +
+      "des\"%\n\020ListUsersRequest\022\021\n\tpvolumeID\030\001 \001" +
+      "(\t\"\202\001\n\021ListUsersResponse\022+\n\005users\030\001 \003(\0132" +
+      "\034.org.opendedup.grpc.SdfsUser\022\r\n\005error\030\002" +
+      " \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup." +
+      "grpc.errorCodes2\365\003\n\017SdfsUserService\022R\n\007A" +
+      "ddUser\022\".org.opendedup.grpc.AddUserReque" +
+      "st\032#.org.opendedup.grpc.AddUserResponse\022" +
+      "[\n\nDeleteUser\022%.org.opendedup.grpc.Delet" +
+      "eUserRequest\032&.org.opendedup.grpc.Delete" +
+      "UserResponse\022k\n\022SetSdfsPermissions\022).org" +
+      ".opendedup.grpc.SetPermissionsRequest\032*." +
+      "org.opendedup.grpc.SetPermissionsRespons" +
+      "e\022j\n\017SetSdfsPassword\022*.org.opendedup.grp" +
+      "c.SetUserPasswordRequest\032+.org.opendedup" +
+      ".grpc.SetUserPasswordResponse\022X\n\tListUse" +
+      "rs\022$.org.opendedup.grpc.ListUsersRequest" +
+      "\032%.org.opendedup.grpc.ListUsersResponseB" +
+      "0Z.github.com/opendedup/sdfs-client-go/s" +
+      "dfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -10847,7 +11599,7 @@ public final class SDFSCli {
     internal_static_org_opendedup_grpc_AddUserRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_AddUserRequest_descriptor,
-        new java.lang.String[] { "User", "Password", "Description", "Permissions", });
+        new java.lang.String[] { "User", "Password", "Description", "Permissions", "PvolumeID", });
     internal_static_org_opendedup_grpc_AddUserResponse_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_org_opendedup_grpc_AddUserResponse_fieldAccessorTable = new
@@ -10859,7 +11611,7 @@ public final class SDFSCli {
     internal_static_org_opendedup_grpc_DeleteUserRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DeleteUserRequest_descriptor,
-        new java.lang.String[] { "User", });
+        new java.lang.String[] { "User", "PvolumeID", });
     internal_static_org_opendedup_grpc_DeleteUserResponse_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_org_opendedup_grpc_DeleteUserResponse_fieldAccessorTable = new
@@ -10871,7 +11623,7 @@ public final class SDFSCli {
     internal_static_org_opendedup_grpc_SetPermissionsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetPermissionsRequest_descriptor,
-        new java.lang.String[] { "User", "Permissions", });
+        new java.lang.String[] { "User", "Permissions", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetPermissionsResponse_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_org_opendedup_grpc_SetPermissionsResponse_fieldAccessorTable = new
@@ -10883,7 +11635,7 @@ public final class SDFSCli {
     internal_static_org_opendedup_grpc_SetUserPasswordRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetUserPasswordRequest_descriptor,
-        new java.lang.String[] { "User", "Password", });
+        new java.lang.String[] { "User", "Password", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetUserPasswordResponse_descriptor =
       getDescriptor().getMessageTypes().get(10);
     internal_static_org_opendedup_grpc_SetUserPasswordResponse_fieldAccessorTable = new
@@ -10895,7 +11647,7 @@ public final class SDFSCli {
     internal_static_org_opendedup_grpc_ListUsersRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ListUsersRequest_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_ListUsersResponse_descriptor =
       getDescriptor().getMessageTypes().get(12);
     internal_static_org_opendedup_grpc_ListUsersResponse_fieldAccessorTable = new
