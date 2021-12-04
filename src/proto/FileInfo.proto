@@ -9,6 +9,7 @@ message FileInfoRequest {
     bool compact =2;
     int32 numberOfFiles =3;
     string listGuid=4;
+	string pvolumeID =5;
 }
 
 message FileMessageResponse {
@@ -181,7 +182,7 @@ message FileInfoResponse {
     string id = 20;
     repeated FileInfoResponse files = 21;
     string parentPath = 22;
-    string volumeid = 23;
+    string pvolumeID = 23;
     IOMonitorResponse ioMonitor = 24;
     string symlinkPath = 25;
     int64 group_id = 26;
@@ -219,6 +220,7 @@ message IOMonitorResponse {
 message WFileAttributesRequest {
     repeated FileAttributes fileAttributes = 1;
     string filePath =2;
+	string pvolumeID =3;
 }
 
 message WFileAttributesResponse {
@@ -228,6 +230,7 @@ message WFileAttributesResponse {
 
 message RFileAttributesRequest {
     string filePath = 1;
+	string pvolumeID =2;
 }
 
 message RFileAttributesResponse {

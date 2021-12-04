@@ -26,6 +26,7 @@ message SDFSEvent {
 
 message SDFSEventRequest {
     string uuid = 1;
+    string pvolumeID =2;
 }
 
 message SDFSEventResponse {
@@ -35,6 +36,7 @@ message SDFSEventResponse {
 }
 
 message SDFSEventListRequest {
+    string pvolumeID =1;
 }
 
 message SDFSEventListResponse {

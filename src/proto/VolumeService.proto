@@ -8,6 +8,7 @@ import "FileInfo.proto";
 
 // Request payload
 message VolumeInfoRequest {
+  string pvolumeID =1;
 }
 
 message VolumeInfoResponse {
@@ -59,6 +60,7 @@ message SystemInfo {
 }
 
 message SystemInfoRequest {
+  string pvolumeID =1;
 
 }
 
@@ -75,6 +77,7 @@ message ConnectedVolumeInfo {
 }
 
 message GCScheduleRequest {
+  string pvolumeID =1;
 
 }
 
@@ -85,6 +88,7 @@ message GCScheduleResponse {
 }
 
 message CloudVolumesRequest {
+  string pvolumeID =1;
 
 }
 
@@ -123,7 +127,9 @@ message DSEInfo {
   int64 maxAge = 20;
 }
 
-message DSERequest {}
+message DSERequest {
+  string pvolumeID =1;
+}
 
 message DSEResponse {
   DSEInfo info = 1;
@@ -134,6 +140,7 @@ message DSEResponse {
 message AuthenticationRequest {
   string username = 1;
   string password = 2;
+  string pvolumeID =3;
 }
 
 message AuthenticationResponse {
@@ -159,6 +166,7 @@ message MessageQueueInfoResponse {
 
 message CleanStoreRequest {
   bool compact =1;
+  string pvolumeID =2;
 }
 
 message CleanStoreResponse {
@@ -169,6 +177,7 @@ message CleanStoreResponse {
 
 message SetCacheSizeRequest {
   int64 cacheSize = 1;
+  string pvolumeID =2;
 }
 
 message SetCacheSizeResponse {
@@ -178,7 +187,8 @@ message SetCacheSizeResponse {
 }
 
 message DeleteCloudVolumeRequest{
-  int64 volumeid = 1;
+  int64 rmvolume = 1;
+  string pvolumeID =2;
 }
 
 message DeleteCloudVolumeResponse {
@@ -189,6 +199,7 @@ message DeleteCloudVolumeResponse {
 
 message SetVolumeCapacityRequest {
   int64 size = 1;
+  string pvolumeID =2;
 }
 
 message SetVolumeCapacityResponse {
@@ -198,6 +209,7 @@ message SetVolumeCapacityResponse {
 
 message SetPasswordRequest {
   string password = 1;
+  string pvolumeID =2;
 }
 
 message SetPasswordResponse {
@@ -207,6 +219,7 @@ message SetPasswordResponse {
 
 message SpeedRequest {
   int32 requestedSpeed = 1;
+  string pvolumeID =2;
 }
 
 message SpeedResponse {
@@ -217,6 +230,7 @@ message SpeedResponse {
 
 message SyncFromVolRequest {
   int64 volumeid = 1;
+  string pvolumeID =2;
 }
 
 message SyncFromVolResponse {
@@ -226,6 +240,7 @@ message SyncFromVolResponse {
 }
 
 message SyncVolRequest {
+  string pvolumeID =1;
 
 }
 
@@ -237,6 +252,7 @@ message SyncVolResponse {
 
 message SetMaxAgeRequest {
   int64 maxAge = 1;
+  string pvolumeID =2;
 }
 
 message SetMaxAgeResponse {

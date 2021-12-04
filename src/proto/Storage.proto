@@ -7,6 +7,7 @@ import "FileInfo.proto";
 
 message CheckHashesRequest {
   repeated bytes hashes =1;
+  string pvolumeID =2;
 }
 
 
@@ -19,10 +20,12 @@ message CheckHashesResponse {
 
 message MetaDataDedupeFileRequest {
   string filePath =1;
+  string pvolumeID =2;
 }
 
 message SparseDedupeFileRequest {
   string guid =1;
+  string pvolumeID =2;
 }
 
 message ChunkResponse {
@@ -41,6 +44,7 @@ message WriteChunksRequest {
  
   repeated ChunkEntry chunks= 1;
   int64 fileHandle =2;
+  string pvolumeID =3;
 }
 
 message WriteChunksResponse {
@@ -52,6 +56,7 @@ message WriteChunksResponse {
 
 message ReadChunksRequest {
   repeated ChunkEntry chunks= 1;
+  string pvolumeID =2;
 }
 
 message ReadChunksResponse {
@@ -63,6 +68,7 @@ message HashingInfoRequest {
   repeated ChunkEntry chunks = 1;
   string error = 2;
   errorCodes errorCode = 3;
+  string pvolumeID =4;
 }
 
 message HashLocPairP {
@@ -94,6 +100,7 @@ message SparseDedupeChunkWriteRequest {
   SparseDataChunkP chunk = 1;
   int64 fileHandle = 2;
   int64 fileLocation = 3;
+  string pvolumeID =4;
 }
 
 message SparseDedupeChunkWriteResponse {
@@ -104,6 +111,7 @@ message SparseDedupeChunkWriteResponse {
 message SparseDedupeChunkReadRequest {
   int64 offset = 1;
   int64 fileHandle = 2;
+  string pvolumeID =3;
 }
 
 message SparseDedupeChunkReadResponse {
@@ -122,6 +130,7 @@ message HashingInfoResponse {
   int32 mapVersion = 7;
   string error = 8;
   errorCodes errorCode = 9;
+
 }
 
 message InsertRecord {
