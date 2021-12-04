@@ -6,5 +6,5 @@ option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
 message CloudMetaData {
     int64 date = 1;
     map<string,string> attributes = 2;
-
+    string volumeID =3;
 }
