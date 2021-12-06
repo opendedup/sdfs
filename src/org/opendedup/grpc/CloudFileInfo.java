@@ -59,16 +59,10 @@ public final class CloudFileInfo {
         java.lang.String key);
 
     /**
-     * <code>string pvolumeID = 3;</code>
+     * <code>int64 pvolumeID = 3;</code>
      * @return The pvolumeID.
      */
-    java.lang.String getPvolumeID();
-    /**
-     * <code>string pvolumeID = 3;</code>
-     * @return The bytes for pvolumeID.
-     */
-    com.google.protobuf.ByteString
-        getPvolumeIDBytes();
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CloudMetaData}
@@ -83,7 +77,6 @@ public final class CloudFileInfo {
       super(builder);
     }
     private CloudMetaData() {
-      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -135,10 +128,9 @@ public final class CloudFileInfo {
                   attributes__.getKey(), attributes__.getValue());
               break;
             }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 24: {
 
-              pvolumeID_ = s;
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -278,41 +270,14 @@ public final class CloudFileInfo {
     }
 
     public static final int PVOLUMEID_FIELD_NUMBER = 3;
-    private volatile java.lang.Object pvolumeID_;
+    private long pvolumeID_;
     /**
-     * <code>string pvolumeID = 3;</code>
+     * <code>int64 pvolumeID = 3;</code>
      * @return The pvolumeID.
      */
     @java.lang.Override
-    public java.lang.String getPvolumeID() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        pvolumeID_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string pvolumeID = 3;</code>
-     * @return The bytes for pvolumeID.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPvolumeIDBytes() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        pvolumeID_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getPvolumeID() {
+      return pvolumeID_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -338,8 +303,8 @@ public final class CloudFileInfo {
           internalGetAttributes(),
           AttributesDefaultEntryHolder.defaultEntry,
           2);
-      if (!getPvolumeIDBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(3, pvolumeID_);
       }
       unknownFields.writeTo(output);
     }
@@ -364,8 +329,9 @@ public final class CloudFileInfo {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(2, attributes__);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -386,8 +352,8 @@ public final class CloudFileInfo {
           != other.getDate()) return false;
       if (!internalGetAttributes().equals(
           other.internalGetAttributes())) return false;
-      if (!getPvolumeID()
-          .equals(other.getPvolumeID())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -407,7 +373,8 @@ public final class CloudFileInfo {
         hash = (53 * hash) + internalGetAttributes().hashCode();
       }
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
-      hash = (53 * hash) + getPvolumeID().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -566,7 +533,7 @@ public final class CloudFileInfo {
         date_ = 0L;
 
         internalGetMutableAttributes().clear();
-        pvolumeID_ = "";
+        pvolumeID_ = 0L;
 
         return this;
       }
@@ -652,9 +619,8 @@ public final class CloudFileInfo {
         }
         internalGetMutableAttributes().mergeFrom(
             other.internalGetAttributes());
-        if (!other.getPvolumeID().isEmpty()) {
-          pvolumeID_ = other.pvolumeID_;
-          onChanged();
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -845,78 +811,33 @@ public final class CloudFileInfo {
         return this;
       }
 
-      private java.lang.Object pvolumeID_ = "";
+      private long pvolumeID_ ;
       /**
-       * <code>string pvolumeID = 3;</code>
+       * <code>int64 pvolumeID = 3;</code>
        * @return The pvolumeID.
        */
-      public java.lang.String getPvolumeID() {
-        java.lang.Object ref = pvolumeID_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          pvolumeID_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
       }
       /**
-       * <code>string pvolumeID = 3;</code>
-       * @return The bytes for pvolumeID.
-       */
-      public com.google.protobuf.ByteString
-          getPvolumeIDBytes() {
-        java.lang.Object ref = pvolumeID_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          pvolumeID_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string pvolumeID = 3;</code>
+       * <code>int64 pvolumeID = 3;</code>
        * @param value The pvolumeID to set.
        * @return This builder for chaining.
        */
-      public Builder setPvolumeID(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setPvolumeID(long value) {
+        
         pvolumeID_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string pvolumeID = 3;</code>
+       * <code>int64 pvolumeID = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
-        pvolumeID_ = getDefaultInstance().getPvolumeID();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string pvolumeID = 3;</code>
-       * @param value The bytes for pvolumeID to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPvolumeIDBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        pvolumeID_ = value;
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -996,7 +917,7 @@ public final class CloudFileInfo {
       "c\"\252\001\n\rCloudMetaData\022\014\n\004date\030\001 \001(\003\022E\n\natt" +
       "ributes\030\002 \003(\01321.org.opendedup.grpc.Cloud" +
       "MetaData.AttributesEntry\022\021\n\tpvolumeID\030\003 " +
-      "\001(\t\0321\n\017AttributesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005v" +
+      "\001(\003\0321\n\017AttributesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005v" +
       "alue\030\002 \001(\t:\0028\001B0Z.github.com/opendedup/s" +
       "dfs-client-go/sdfs/;sdfsb\006proto3"
     };

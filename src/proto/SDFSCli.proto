@@ -40,7 +40,7 @@ message AddUserRequest {
     string password =2;
     string description = 3;
     SdfsPermissions permissions =5;
-    string pvolumeID =6;
+    int64 pvolumeID =6;
 }
 
 message AddUserResponse {
@@ -50,7 +50,7 @@ message AddUserResponse {
 
 message DeleteUserRequest {
     string user=1;
-    string pvolumeID =2;
+    int64 pvolumeID =2;
 }
 
 message DeleteUserResponse {
@@ -61,7 +61,7 @@ message DeleteUserResponse {
 message SetPermissionsRequest {
     string user =1;
     SdfsPermissions permissions =2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message SetPermissionsResponse {
@@ -73,7 +73,7 @@ message SetPermissionsResponse {
 message SetUserPasswordRequest {
     string user =1;
     string password =2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message SetUserPasswordResponse {
@@ -82,7 +82,7 @@ message SetUserPasswordResponse {
 }
 
 message ListUsersRequest {
-    string pvolumeID =1;
+    int64 pvolumeID =1;
 
 }
 

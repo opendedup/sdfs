@@ -2386,16 +2386,10 @@ public final class FileInfo {
         getListGuidBytes();
 
     /**
-     * <code>string pvolumeID = 5;</code>
+     * <code>int64 pvolumeID = 5;</code>
      * @return The pvolumeID.
      */
-    java.lang.String getPvolumeID();
-    /**
-     * <code>string pvolumeID = 5;</code>
-     * @return The bytes for pvolumeID.
-     */
-    com.google.protobuf.ByteString
-        getPvolumeIDBytes();
+    long getPvolumeID();
   }
   /**
    * <pre>
@@ -2416,7 +2410,6 @@ public final class FileInfo {
     private FileInfoRequest() {
       fileName_ = "";
       listGuid_ = "";
-      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -2471,10 +2464,9 @@ public final class FileInfo {
               listGuid_ = s;
               break;
             }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 40: {
 
-              pvolumeID_ = s;
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -2608,41 +2600,14 @@ public final class FileInfo {
     }
 
     public static final int PVOLUMEID_FIELD_NUMBER = 5;
-    private volatile java.lang.Object pvolumeID_;
+    private long pvolumeID_;
     /**
-     * <code>string pvolumeID = 5;</code>
+     * <code>int64 pvolumeID = 5;</code>
      * @return The pvolumeID.
      */
     @java.lang.Override
-    public java.lang.String getPvolumeID() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        pvolumeID_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string pvolumeID = 5;</code>
-     * @return The bytes for pvolumeID.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPvolumeIDBytes() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        pvolumeID_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getPvolumeID() {
+      return pvolumeID_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -2671,8 +2636,8 @@ public final class FileInfo {
       if (!getListGuidBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, listGuid_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(5, pvolumeID_);
       }
       unknownFields.writeTo(output);
     }
@@ -2697,8 +2662,9 @@ public final class FileInfo {
       if (!getListGuidBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, listGuid_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2723,8 +2689,8 @@ public final class FileInfo {
           != other.getNumberOfFiles()) return false;
       if (!getListGuid()
           .equals(other.getListGuid())) return false;
-      if (!getPvolumeID()
-          .equals(other.getPvolumeID())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -2746,7 +2712,8 @@ public final class FileInfo {
       hash = (37 * hash) + LISTGUID_FIELD_NUMBER;
       hash = (53 * hash) + getListGuid().hashCode();
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
-      hash = (53 * hash) + getPvolumeID().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2892,7 +2859,7 @@ public final class FileInfo {
 
         listGuid_ = "";
 
-        pvolumeID_ = "";
+        pvolumeID_ = 0L;
 
         return this;
       }
@@ -2987,9 +2954,8 @@ public final class FileInfo {
           listGuid_ = other.listGuid_;
           onChanged();
         }
-        if (!other.getPvolumeID().isEmpty()) {
-          pvolumeID_ = other.pvolumeID_;
-          onChanged();
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -3234,78 +3200,33 @@ public final class FileInfo {
         return this;
       }
 
-      private java.lang.Object pvolumeID_ = "";
+      private long pvolumeID_ ;
       /**
-       * <code>string pvolumeID = 5;</code>
+       * <code>int64 pvolumeID = 5;</code>
        * @return The pvolumeID.
        */
-      public java.lang.String getPvolumeID() {
-        java.lang.Object ref = pvolumeID_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          pvolumeID_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
       }
       /**
-       * <code>string pvolumeID = 5;</code>
-       * @return The bytes for pvolumeID.
-       */
-      public com.google.protobuf.ByteString
-          getPvolumeIDBytes() {
-        java.lang.Object ref = pvolumeID_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          pvolumeID_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string pvolumeID = 5;</code>
+       * <code>int64 pvolumeID = 5;</code>
        * @param value The pvolumeID to set.
        * @return This builder for chaining.
        */
-      public Builder setPvolumeID(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setPvolumeID(long value) {
+        
         pvolumeID_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string pvolumeID = 5;</code>
+       * <code>int64 pvolumeID = 5;</code>
        * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
-        pvolumeID_ = getDefaultInstance().getPvolumeID();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string pvolumeID = 5;</code>
-       * @param value The bytes for pvolumeID to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPvolumeIDBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        pvolumeID_ = value;
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -4959,16 +4880,10 @@ public final class FileInfo {
         getParentPathBytes();
 
     /**
-     * <code>string pvolumeID = 23;</code>
+     * <code>int64 pvolumeID = 23;</code>
      * @return The pvolumeID.
      */
-    java.lang.String getPvolumeID();
-    /**
-     * <code>string pvolumeID = 23;</code>
-     * @return The bytes for pvolumeID.
-     */
-    com.google.protobuf.ByteString
-        getPvolumeIDBytes();
+    long getPvolumeID();
 
     /**
      * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
@@ -5080,7 +4995,6 @@ public final class FileInfo {
       id_ = "";
       files_ = java.util.Collections.emptyList();
       parentPath_ = "";
-      pvolumeID_ = "";
       symlinkPath_ = "";
       version_ = "";
     }
@@ -5242,10 +5156,9 @@ public final class FileInfo {
               parentPath_ = s;
               break;
             }
-            case 186: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 184: {
 
-              pvolumeID_ = s;
+              pvolumeID_ = input.readInt64();
               break;
             }
             case 194: {
@@ -5957,41 +5870,14 @@ public final class FileInfo {
     }
 
     public static final int PVOLUMEID_FIELD_NUMBER = 23;
-    private volatile java.lang.Object pvolumeID_;
+    private long pvolumeID_;
     /**
-     * <code>string pvolumeID = 23;</code>
+     * <code>int64 pvolumeID = 23;</code>
      * @return The pvolumeID.
      */
     @java.lang.Override
-    public java.lang.String getPvolumeID() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        pvolumeID_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string pvolumeID = 23;</code>
-     * @return The bytes for pvolumeID.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPvolumeIDBytes() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        pvolumeID_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getPvolumeID() {
+      return pvolumeID_;
     }
 
     public static final int IOMONITOR_FIELD_NUMBER = 24;
@@ -6264,8 +6150,8 @@ public final class FileInfo {
       if (!getParentPathBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 22, parentPath_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 23, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(23, pvolumeID_);
       }
       if (ioMonitor_ != null) {
         output.writeMessage(24, getIoMonitor());
@@ -6390,8 +6276,9 @@ public final class FileInfo {
       if (!getParentPathBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(22, parentPath_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(23, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(23, pvolumeID_);
       }
       if (ioMonitor_ != null) {
         size += com.google.protobuf.CodedOutputStream
@@ -6493,8 +6380,8 @@ public final class FileInfo {
           .equals(other.getFilesList())) return false;
       if (!getParentPath()
           .equals(other.getParentPath())) return false;
-      if (!getPvolumeID()
-          .equals(other.getPvolumeID())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (hasIoMonitor() != other.hasIoMonitor()) return false;
       if (hasIoMonitor()) {
         if (!getIoMonitor()
@@ -6592,7 +6479,8 @@ public final class FileInfo {
       hash = (37 * hash) + PARENTPATH_FIELD_NUMBER;
       hash = (53 * hash) + getParentPath().hashCode();
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
-      hash = (53 * hash) + getPvolumeID().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       if (hasIoMonitor()) {
         hash = (37 * hash) + IOMONITOR_FIELD_NUMBER;
         hash = (53 * hash) + getIoMonitor().hashCode();
@@ -6810,7 +6698,7 @@ public final class FileInfo {
         }
         parentPath_ = "";
 
-        pvolumeID_ = "";
+        pvolumeID_ = 0L;
 
         if (ioMonitorBuilder_ == null) {
           ioMonitor_ = null;
@@ -7086,9 +6974,8 @@ public final class FileInfo {
           parentPath_ = other.parentPath_;
           onChanged();
         }
-        if (!other.getPvolumeID().isEmpty()) {
-          pvolumeID_ = other.pvolumeID_;
-          onChanged();
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         if (other.hasIoMonitor()) {
           mergeIoMonitor(other.getIoMonitor());
@@ -8593,78 +8480,33 @@ public final class FileInfo {
         return this;
       }
 
-      private java.lang.Object pvolumeID_ = "";
+      private long pvolumeID_ ;
       /**
-       * <code>string pvolumeID = 23;</code>
+       * <code>int64 pvolumeID = 23;</code>
        * @return The pvolumeID.
        */
-      public java.lang.String getPvolumeID() {
-        java.lang.Object ref = pvolumeID_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          pvolumeID_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
       }
       /**
-       * <code>string pvolumeID = 23;</code>
-       * @return The bytes for pvolumeID.
-       */
-      public com.google.protobuf.ByteString
-          getPvolumeIDBytes() {
-        java.lang.Object ref = pvolumeID_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          pvolumeID_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string pvolumeID = 23;</code>
+       * <code>int64 pvolumeID = 23;</code>
        * @param value The pvolumeID to set.
        * @return This builder for chaining.
        */
-      public Builder setPvolumeID(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setPvolumeID(long value) {
+        
         pvolumeID_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string pvolumeID = 23;</code>
+       * <code>int64 pvolumeID = 23;</code>
        * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
-        pvolumeID_ = getDefaultInstance().getPvolumeID();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string pvolumeID = 23;</code>
-       * @param value The bytes for pvolumeID to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPvolumeIDBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        pvolumeID_ = value;
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -10984,16 +10826,10 @@ public final class FileInfo {
         getFilePathBytes();
 
     /**
-     * <code>string pvolumeID = 3;</code>
+     * <code>int64 pvolumeID = 3;</code>
      * @return The pvolumeID.
      */
-    java.lang.String getPvolumeID();
-    /**
-     * <code>string pvolumeID = 3;</code>
-     * @return The bytes for pvolumeID.
-     */
-    com.google.protobuf.ByteString
-        getPvolumeIDBytes();
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.WFileAttributesRequest}
@@ -11010,7 +10846,6 @@ public final class FileInfo {
     private WFileAttributesRequest() {
       fileAttributes_ = java.util.Collections.emptyList();
       filePath_ = "";
-      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -11059,10 +10894,9 @@ public final class FileInfo {
               filePath_ = s;
               break;
             }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 24: {
 
-              pvolumeID_ = s;
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -11179,41 +11013,14 @@ public final class FileInfo {
     }
 
     public static final int PVOLUMEID_FIELD_NUMBER = 3;
-    private volatile java.lang.Object pvolumeID_;
+    private long pvolumeID_;
     /**
-     * <code>string pvolumeID = 3;</code>
+     * <code>int64 pvolumeID = 3;</code>
      * @return The pvolumeID.
      */
     @java.lang.Override
-    public java.lang.String getPvolumeID() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        pvolumeID_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string pvolumeID = 3;</code>
-     * @return The bytes for pvolumeID.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPvolumeIDBytes() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        pvolumeID_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getPvolumeID() {
+      return pvolumeID_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -11236,8 +11043,8 @@ public final class FileInfo {
       if (!getFilePathBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, filePath_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(3, pvolumeID_);
       }
       unknownFields.writeTo(output);
     }
@@ -11255,8 +11062,9 @@ public final class FileInfo {
       if (!getFilePathBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, filePath_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -11277,8 +11085,8 @@ public final class FileInfo {
           .equals(other.getFileAttributesList())) return false;
       if (!getFilePath()
           .equals(other.getFilePath())) return false;
-      if (!getPvolumeID()
-          .equals(other.getPvolumeID())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -11297,7 +11105,8 @@ public final class FileInfo {
       hash = (37 * hash) + FILEPATH_FIELD_NUMBER;
       hash = (53 * hash) + getFilePath().hashCode();
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
-      hash = (53 * hash) + getPvolumeID().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -11440,7 +11249,7 @@ public final class FileInfo {
         }
         filePath_ = "";
 
-        pvolumeID_ = "";
+        pvolumeID_ = 0L;
 
         return this;
       }
@@ -11558,9 +11367,8 @@ public final class FileInfo {
           filePath_ = other.filePath_;
           onChanged();
         }
-        if (!other.getPvolumeID().isEmpty()) {
-          pvolumeID_ = other.pvolumeID_;
-          onChanged();
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -11908,78 +11716,33 @@ public final class FileInfo {
         return this;
       }
 
-      private java.lang.Object pvolumeID_ = "";
+      private long pvolumeID_ ;
       /**
-       * <code>string pvolumeID = 3;</code>
+       * <code>int64 pvolumeID = 3;</code>
        * @return The pvolumeID.
        */
-      public java.lang.String getPvolumeID() {
-        java.lang.Object ref = pvolumeID_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          pvolumeID_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
       }
       /**
-       * <code>string pvolumeID = 3;</code>
-       * @return The bytes for pvolumeID.
-       */
-      public com.google.protobuf.ByteString
-          getPvolumeIDBytes() {
-        java.lang.Object ref = pvolumeID_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          pvolumeID_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string pvolumeID = 3;</code>
+       * <code>int64 pvolumeID = 3;</code>
        * @param value The pvolumeID to set.
        * @return This builder for chaining.
        */
-      public Builder setPvolumeID(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setPvolumeID(long value) {
+        
         pvolumeID_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string pvolumeID = 3;</code>
+       * <code>int64 pvolumeID = 3;</code>
        * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
-        pvolumeID_ = getDefaultInstance().getPvolumeID();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string pvolumeID = 3;</code>
-       * @param value The bytes for pvolumeID to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPvolumeIDBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        pvolumeID_ = value;
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -12728,16 +12491,10 @@ public final class FileInfo {
         getFilePathBytes();
 
     /**
-     * <code>string pvolumeID = 2;</code>
+     * <code>int64 pvolumeID = 2;</code>
      * @return The pvolumeID.
      */
-    java.lang.String getPvolumeID();
-    /**
-     * <code>string pvolumeID = 2;</code>
-     * @return The bytes for pvolumeID.
-     */
-    com.google.protobuf.ByteString
-        getPvolumeIDBytes();
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.RFileAttributesRequest}
@@ -12753,7 +12510,6 @@ public final class FileInfo {
     }
     private RFileAttributesRequest() {
       filePath_ = "";
-      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -12792,10 +12548,9 @@ public final class FileInfo {
               filePath_ = s;
               break;
             }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 16: {
 
-              pvolumeID_ = s;
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -12869,41 +12624,14 @@ public final class FileInfo {
     }
 
     public static final int PVOLUMEID_FIELD_NUMBER = 2;
-    private volatile java.lang.Object pvolumeID_;
+    private long pvolumeID_;
     /**
-     * <code>string pvolumeID = 2;</code>
+     * <code>int64 pvolumeID = 2;</code>
      * @return The pvolumeID.
      */
     @java.lang.Override
-    public java.lang.String getPvolumeID() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        pvolumeID_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string pvolumeID = 2;</code>
-     * @return The bytes for pvolumeID.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPvolumeIDBytes() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        pvolumeID_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getPvolumeID() {
+      return pvolumeID_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -12923,8 +12651,8 @@ public final class FileInfo {
       if (!getFilePathBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, filePath_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
       }
       unknownFields.writeTo(output);
     }
@@ -12938,8 +12666,9 @@ public final class FileInfo {
       if (!getFilePathBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, filePath_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -12958,8 +12687,8 @@ public final class FileInfo {
 
       if (!getFilePath()
           .equals(other.getFilePath())) return false;
-      if (!getPvolumeID()
-          .equals(other.getPvolumeID())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -12974,7 +12703,8 @@ public final class FileInfo {
       hash = (37 * hash) + FILEPATH_FIELD_NUMBER;
       hash = (53 * hash) + getFilePath().hashCode();
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
-      hash = (53 * hash) + getPvolumeID().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -13110,7 +12840,7 @@ public final class FileInfo {
         super.clear();
         filePath_ = "";
 
-        pvolumeID_ = "";
+        pvolumeID_ = 0L;
 
         return this;
       }
@@ -13192,9 +12922,8 @@ public final class FileInfo {
           filePath_ = other.filePath_;
           onChanged();
         }
-        if (!other.getPvolumeID().isEmpty()) {
-          pvolumeID_ = other.pvolumeID_;
-          onChanged();
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -13301,78 +13030,33 @@ public final class FileInfo {
         return this;
       }
 
-      private java.lang.Object pvolumeID_ = "";
+      private long pvolumeID_ ;
       /**
-       * <code>string pvolumeID = 2;</code>
+       * <code>int64 pvolumeID = 2;</code>
        * @return The pvolumeID.
        */
-      public java.lang.String getPvolumeID() {
-        java.lang.Object ref = pvolumeID_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          pvolumeID_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
       }
       /**
-       * <code>string pvolumeID = 2;</code>
-       * @return The bytes for pvolumeID.
-       */
-      public com.google.protobuf.ByteString
-          getPvolumeIDBytes() {
-        java.lang.Object ref = pvolumeID_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          pvolumeID_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string pvolumeID = 2;</code>
+       * <code>int64 pvolumeID = 2;</code>
        * @param value The pvolumeID to set.
        * @return This builder for chaining.
        */
-      public Builder setPvolumeID(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setPvolumeID(long value) {
+        
         pvolumeID_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string pvolumeID = 2;</code>
+       * <code>int64 pvolumeID = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
-        pvolumeID_ = getDefaultInstance().getPvolumeID();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string pvolumeID = 2;</code>
-       * @param value The bytes for pvolumeID to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPvolumeIDBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        pvolumeID_ = value;
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -15254,7 +14938,7 @@ public final class FileInfo {
       "\n\016FileInfo.proto\022\022org.opendedup.grpc\"p\n\017" +
       "FileInfoRequest\022\020\n\010fileName\030\001 \001(\t\022\017\n\007com" +
       "pact\030\002 \001(\010\022\025\n\rnumberOfFiles\030\003 \001(\005\022\020\n\010lis" +
-      "tGuid\030\004 \001(\t\022\021\n\tpvolumeID\030\005 \001(\t\"\353\001\n\023FileM" +
+      "tGuid\030\004 \001(\t\022\021\n\tpvolumeID\030\005 \001(\003\"\353\001\n\023FileM" +
       "essageResponse\022\r\n\005error\030\001 \001(\t\022\020\n\010listGui" +
       "d\030\002 \001(\t\0226\n\010response\030\003 \003(\0132$.org.opendedu" +
       "p.grpc.FileInfoResponse\0221\n\terrorCode\030\004 \001" +
@@ -15273,7 +14957,7 @@ public final class FileInfo {
       "ttributes\030\023 \003(\0132\".org.opendedup.grpc.Fil" +
       "eAttributes\022\n\n\002id\030\024 \001(\t\0223\n\005files\030\025 \003(\0132$" +
       ".org.opendedup.grpc.FileInfoResponse\022\022\n\n" +
-      "parentPath\030\026 \001(\t\022\021\n\tpvolumeID\030\027 \001(\t\0228\n\ti" +
+      "parentPath\030\026 \001(\t\022\021\n\tpvolumeID\030\027 \001(\003\0228\n\ti" +
       "oMonitor\030\030 \001(\0132%.org.opendedup.grpc.IOMo" +
       "nitorResponse\022\023\n\013symlinkPath\030\031 \001(\t\022\020\n\010gr" +
       "oup_id\030\032 \001(\003\022\017\n\007user_id\030\033 \001(\003\022\023\n\013permiss" +
@@ -15293,10 +14977,10 @@ public final class FileInfo {
       "\"y\n\026WFileAttributesRequest\022:\n\016fileAttrib" +
       "utes\030\001 \003(\0132\".org.opendedup.grpc.FileAttr" +
       "ibutes\022\020\n\010filePath\030\002 \001(\t\022\021\n\tpvolumeID\030\003 " +
-      "\001(\t\"[\n\027WFileAttributesResponse\022\r\n\005error\030" +
+      "\001(\003\"[\n\027WFileAttributesResponse\022\r\n\005error\030" +
       "\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup" +
       ".grpc.errorCodes\"=\n\026RFileAttributesReque" +
-      "st\022\020\n\010filePath\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\t\"" +
+      "st\022\020\n\010filePath\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"" +
       "\227\001\n\027RFileAttributesResponse\022:\n\016fileAttri" +
       "butes\030\001 \003(\0132\".org.opendedup.grpc.FileAtt" +
       "ributes\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(" +

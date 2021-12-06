@@ -2613,16 +2613,10 @@ public final class SDFSEventOuterClass {
         getUuidBytes();
 
     /**
-     * <code>string pvolumeID = 2;</code>
+     * <code>int64 pvolumeID = 2;</code>
      * @return The pvolumeID.
      */
-    java.lang.String getPvolumeID();
-    /**
-     * <code>string pvolumeID = 2;</code>
-     * @return The bytes for pvolumeID.
-     */
-    com.google.protobuf.ByteString
-        getPvolumeIDBytes();
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SDFSEventRequest}
@@ -2638,7 +2632,6 @@ public final class SDFSEventOuterClass {
     }
     private SDFSEventRequest() {
       uuid_ = "";
-      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -2677,10 +2670,9 @@ public final class SDFSEventOuterClass {
               uuid_ = s;
               break;
             }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 16: {
 
-              pvolumeID_ = s;
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -2754,41 +2746,14 @@ public final class SDFSEventOuterClass {
     }
 
     public static final int PVOLUMEID_FIELD_NUMBER = 2;
-    private volatile java.lang.Object pvolumeID_;
+    private long pvolumeID_;
     /**
-     * <code>string pvolumeID = 2;</code>
+     * <code>int64 pvolumeID = 2;</code>
      * @return The pvolumeID.
      */
     @java.lang.Override
-    public java.lang.String getPvolumeID() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        pvolumeID_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string pvolumeID = 2;</code>
-     * @return The bytes for pvolumeID.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPvolumeIDBytes() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        pvolumeID_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getPvolumeID() {
+      return pvolumeID_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -2808,8 +2773,8 @@ public final class SDFSEventOuterClass {
       if (!getUuidBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, uuid_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
       }
       unknownFields.writeTo(output);
     }
@@ -2823,8 +2788,9 @@ public final class SDFSEventOuterClass {
       if (!getUuidBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, uuid_);
       }
-      if (!getPvolumeIDBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2843,8 +2809,8 @@ public final class SDFSEventOuterClass {
 
       if (!getUuid()
           .equals(other.getUuid())) return false;
-      if (!getPvolumeID()
-          .equals(other.getPvolumeID())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -2859,7 +2825,8 @@ public final class SDFSEventOuterClass {
       hash = (37 * hash) + UUID_FIELD_NUMBER;
       hash = (53 * hash) + getUuid().hashCode();
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
-      hash = (53 * hash) + getPvolumeID().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2995,7 +2962,7 @@ public final class SDFSEventOuterClass {
         super.clear();
         uuid_ = "";
 
-        pvolumeID_ = "";
+        pvolumeID_ = 0L;
 
         return this;
       }
@@ -3077,9 +3044,8 @@ public final class SDFSEventOuterClass {
           uuid_ = other.uuid_;
           onChanged();
         }
-        if (!other.getPvolumeID().isEmpty()) {
-          pvolumeID_ = other.pvolumeID_;
-          onChanged();
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -3186,78 +3152,33 @@ public final class SDFSEventOuterClass {
         return this;
       }
 
-      private java.lang.Object pvolumeID_ = "";
+      private long pvolumeID_ ;
       /**
-       * <code>string pvolumeID = 2;</code>
+       * <code>int64 pvolumeID = 2;</code>
        * @return The pvolumeID.
        */
-      public java.lang.String getPvolumeID() {
-        java.lang.Object ref = pvolumeID_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          pvolumeID_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
       }
       /**
-       * <code>string pvolumeID = 2;</code>
-       * @return The bytes for pvolumeID.
-       */
-      public com.google.protobuf.ByteString
-          getPvolumeIDBytes() {
-        java.lang.Object ref = pvolumeID_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          pvolumeID_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string pvolumeID = 2;</code>
+       * <code>int64 pvolumeID = 2;</code>
        * @param value The pvolumeID to set.
        * @return This builder for chaining.
        */
-      public Builder setPvolumeID(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setPvolumeID(long value) {
+        
         pvolumeID_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string pvolumeID = 2;</code>
+       * <code>int64 pvolumeID = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
-        pvolumeID_ = getDefaultInstance().getPvolumeID();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string pvolumeID = 2;</code>
-       * @param value The bytes for pvolumeID to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPvolumeIDBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        pvolumeID_ = value;
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -4197,16 +4118,10 @@ public final class SDFSEventOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string pvolumeID = 1;</code>
+     * <code>int64 pvolumeID = 1;</code>
      * @return The pvolumeID.
      */
-    java.lang.String getPvolumeID();
-    /**
-     * <code>string pvolumeID = 1;</code>
-     * @return The bytes for pvolumeID.
-     */
-    com.google.protobuf.ByteString
-        getPvolumeIDBytes();
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SDFSEventListRequest}
@@ -4221,7 +4136,6 @@ public final class SDFSEventOuterClass {
       super(builder);
     }
     private SDFSEventListRequest() {
-      pvolumeID_ = "";
     }
 
     @java.lang.Override
@@ -4254,10 +4168,9 @@ public final class SDFSEventOuterClass {
             case 0:
               done = true;
               break;
-            case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
+            case 8: {
 
-              pvolumeID_ = s;
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -4293,41 +4206,14 @@ public final class SDFSEventOuterClass {
     }
 
     public static final int PVOLUMEID_FIELD_NUMBER = 1;
-    private volatile java.lang.Object pvolumeID_;
+    private long pvolumeID_;
     /**
-     * <code>string pvolumeID = 1;</code>
+     * <code>int64 pvolumeID = 1;</code>
      * @return The pvolumeID.
      */
     @java.lang.Override
-    public java.lang.String getPvolumeID() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        pvolumeID_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string pvolumeID = 1;</code>
-     * @return The bytes for pvolumeID.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPvolumeIDBytes() {
-      java.lang.Object ref = pvolumeID_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        pvolumeID_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public long getPvolumeID() {
+      return pvolumeID_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -4344,8 +4230,8 @@ public final class SDFSEventOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getPvolumeIDBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(1, pvolumeID_);
       }
       unknownFields.writeTo(output);
     }
@@ -4356,8 +4242,9 @@ public final class SDFSEventOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!getPvolumeIDBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, pvolumeID_);
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4374,8 +4261,8 @@ public final class SDFSEventOuterClass {
       }
       org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest other = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest) obj;
 
-      if (!getPvolumeID()
-          .equals(other.getPvolumeID())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4388,7 +4275,8 @@ public final class SDFSEventOuterClass {
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
-      hash = (53 * hash) + getPvolumeID().hashCode();
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4522,7 +4410,7 @@ public final class SDFSEventOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        pvolumeID_ = "";
+        pvolumeID_ = 0L;
 
         return this;
       }
@@ -4599,9 +4487,8 @@ public final class SDFSEventOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest other) {
         if (other == org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest.getDefaultInstance()) return this;
-        if (!other.getPvolumeID().isEmpty()) {
-          pvolumeID_ = other.pvolumeID_;
-          onChanged();
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4632,78 +4519,33 @@ public final class SDFSEventOuterClass {
         return this;
       }
 
-      private java.lang.Object pvolumeID_ = "";
+      private long pvolumeID_ ;
       /**
-       * <code>string pvolumeID = 1;</code>
+       * <code>int64 pvolumeID = 1;</code>
        * @return The pvolumeID.
        */
-      public java.lang.String getPvolumeID() {
-        java.lang.Object ref = pvolumeID_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          pvolumeID_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
       }
       /**
-       * <code>string pvolumeID = 1;</code>
-       * @return The bytes for pvolumeID.
-       */
-      public com.google.protobuf.ByteString
-          getPvolumeIDBytes() {
-        java.lang.Object ref = pvolumeID_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          pvolumeID_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string pvolumeID = 1;</code>
+       * <code>int64 pvolumeID = 1;</code>
        * @param value The pvolumeID to set.
        * @return This builder for chaining.
        */
-      public Builder setPvolumeID(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      public Builder setPvolumeID(long value) {
+        
         pvolumeID_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string pvolumeID = 1;</code>
+       * <code>int64 pvolumeID = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
-        pvolumeID_ = getDefaultInstance().getPvolumeID();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string pvolumeID = 1;</code>
-       * @param value The bytes for pvolumeID to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPvolumeIDBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        pvolumeID_ = value;
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -5861,12 +5703,12 @@ public final class SDFSEventOuterClass {
       "\003(\0132-.org.opendedup.grpc.SDFSEvent.Attri" +
       "butesEntry\0321\n\017AttributesEntry\022\013\n\003key\030\001 \001" +
       "(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"3\n\020SDFSEventReques" +
-      "t\022\014\n\004uuid\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\t\"\203\001\n\021S" +
+      "t\022\014\n\004uuid\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"\203\001\n\021S" +
       "DFSEventResponse\022\r\n\005error\030\001 \001(\t\0221\n\terror" +
       "Code\030\002 \001(\0162\036.org.opendedup.grpc.errorCod" +
       "es\022,\n\005event\030\003 \001(\0132\035.org.opendedup.grpc.S" +
       "DFSEvent\")\n\024SDFSEventListRequest\022\021\n\tpvol" +
-      "umeID\030\001 \001(\t\"\210\001\n\025SDFSEventListResponse\022\r\n" +
+      "umeID\030\001 \001(\003\"\210\001\n\025SDFSEventListResponse\022\r\n" +
       "\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.op" +
       "endedup.grpc.errorCodes\022-\n\006events\030\003 \003(\0132" +
       "\035.org.opendedup.grpc.SDFSEvent2\257\002\n\020SDFSE" +

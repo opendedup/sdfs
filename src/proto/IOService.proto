@@ -10,7 +10,7 @@ message DataWriteRequest {
     int64 start =2;
     int32 len = 3;
     bytes data = 4;
-    string pvolumeID =5;
+    int64 pvolumeID =5;
 }
 
 message DataWriteResponse {
@@ -21,7 +21,7 @@ message DataWriteResponse {
 message MkDirRequest {
     string path = 1;
     int32 mode = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message MkDirResponse {
@@ -31,7 +31,7 @@ message MkDirResponse {
 
 message RmDirRequest {
     string path = 1;
-    string pvolumeID =2;
+    int64 pvolumeID =2;
 }
 
 message RmDirResponse {
@@ -41,7 +41,7 @@ message RmDirResponse {
 
 message UnlinkRequest {
     string path = 1;
-    string pvolumeID =2;
+    int64 pvolumeID =2;
 }
 
 message UnlinkResponse {
@@ -53,7 +53,7 @@ message DataReadRequest {
     int64 fileHandle = 1;
     int64 start =2;
     int32 len = 3;
-    string pvolumeID =4;
+    int64 pvolumeID =4;
 }
 
 message DataReadResponse {
@@ -65,7 +65,7 @@ message DataReadResponse {
 
 message FileCloseRequest {
     int64 fileHandle = 1;
-    string pvolumeID =2;
+    int64 pvolumeID =2;
 
 }
 
@@ -78,7 +78,7 @@ message MkNodRequest {
     string path = 1;
     int32 mode = 2;
     int32 rdev =3;
-    string pvolumeID =4;
+    int64 pvolumeID =4;
 
 }
 
@@ -90,13 +90,13 @@ message MkNodResponse {
 message FileOpenRequest {
     string path = 1;
     int32 flags =2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 
 }
 
 message FileExistsRequest {
     string path = 1;
-    string pvolumeID =2;
+    int64 pvolumeID =2;
 
 }
 
@@ -104,7 +104,7 @@ message FileExistsResponse {
     bool exists = 1;
     string error = 2;
     errorCodes errorCode = 3;
-    string pvolumeID =4;
+    int64 pvolumeID =4;
 
 }
 
@@ -117,7 +117,7 @@ message FileOpenResponse {
 message FileSnapshotRequest {
     string src =1;
     string dest = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message FileSnapshotResponse {
@@ -129,7 +129,7 @@ message FileSnapshotResponse {
 message FileRenameRequest {
     string src =1;
     string dest = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message FileRenameResponse {
@@ -143,7 +143,7 @@ message CopyExtentRequest {
     int64 srcStart = 3;
     int64 dstStart = 4;
     int64 length = 5;
-    string pvolumeID =6;
+    int64 pvolumeID =6;
 }
 
 message CopyExtentResponse {
@@ -155,7 +155,7 @@ message CopyExtentResponse {
 message SetUserMetaDataRequest {
     repeated FileAttributes fileAttributes = 1;
     string Path =2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message SetUserMetaDataResponse {
@@ -169,7 +169,7 @@ message GetCloudFileRequest {
     string dstfile = 2;
     bool overwrite = 3;
     string changeid = 4;
-    string pvolumeID =5;
+    int64 pvolumeID =5;
 }
 
 message GetCloudFileResponse {
@@ -181,7 +181,7 @@ message GetCloudFileResponse {
 message ChmodRequest {
     string path = 1;
     int32 mode = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message ChmodResponse {
@@ -193,7 +193,7 @@ message ChownRequest {
     string path = 1;
     int32 uid = 2;
     int32 gid = 3;
-    string pvolumeID =4;
+    int64 pvolumeID =4;
 }
 
 message ChownResponse {
@@ -204,7 +204,7 @@ message ChownResponse {
 message FlushRequest {
     string path = 1;
     int64 fd = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message FlushResponse {
@@ -230,7 +230,7 @@ message Stat {
 
 message StatRequest {
     string path =1;
-    string pvolumeID =2;
+    int64 pvolumeID =2;
 }
 
 message StatResponse {
@@ -241,7 +241,7 @@ message StatResponse {
 
 message LinkRequest {
     string path = 1;
-    string pvolumeID =2;
+    int64 pvolumeID =2;
 }
 
 message LinkResponse {
@@ -265,7 +265,7 @@ message StatFS {
 }
 
 message StatFSRequest {
-    string pvolumeID =1;
+    int64 pvolumeID =1;
 }
 
 message StatFSResponse {
@@ -277,7 +277,7 @@ message StatFSResponse {
 message SymLinkRequest {
     string from =1;
     string to = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message SymLinkResponse {
@@ -288,7 +288,7 @@ message SymLinkResponse {
 message TruncateRequest {
     string path = 1;
     int64 length = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message TruncateResponse {
@@ -300,7 +300,7 @@ message UtimeRequest {
     string path = 1;
     int64 atime = 2;
     int64 mtime = 3;
-    string pvolumeID =4;
+    int64 pvolumeID =4;
 }
 
 message UtimeResponse {
@@ -311,7 +311,7 @@ message UtimeResponse {
 message GetXAttrRequest {
     string attr = 1;
     string path = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message GetXAttrResponse {
@@ -324,7 +324,7 @@ message SetXAttrRequest {
     string attr = 1;
     string value = 2;
     string path = 3;
-    string pvolumeID =4;
+    int64 pvolumeID =4;
 }
 
 message SetXAttrResponse {
@@ -341,7 +341,7 @@ message SetXAttrResponse {
 message RemoveXAttrRequest {
     string attr = 1;
     string path = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message RemoveXAttrResponse {
@@ -352,7 +352,7 @@ message RemoveXAttrResponse {
 message GetXAttrSizeRequest {
     string attr = 1;
     string path = 2;
-    string pvolumeID =3;
+    int64 pvolumeID =3;
 }
 
 message GetXAttrSizeResponse {
@@ -365,7 +365,7 @@ message FsyncRequest {
     string path = 1;
     int64 fh = 2;
     bool datasync = 3;
-    string pvolumeID =4;
+    int64 pvolumeID =4;
 }
 
 message FsyncResponse {
@@ -375,7 +375,7 @@ message FsyncResponse {
 
 message SyncNotificationSubscription {
     string uid = 1;
-    string pvolumeID =2;
+    int64 pvolumeID =2;
 }
 
 
