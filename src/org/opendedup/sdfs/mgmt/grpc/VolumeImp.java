@@ -589,8 +589,8 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       return;
     }
     org.opendedup.sdfs.notification.SDFSEvent evt = org.opendedup.sdfs.notification.SDFSEvent
-        .deleteCloudVolumeEvent(request.getVolumeid());
-    Thread th = new Thread(new DeleteCloudVolume(evt, request.getVolumeid()));
+        .deleteCloudVolumeEvent(request.getPvolumeID());
+    Thread th = new Thread(new DeleteCloudVolume(evt, request.getPvolumeID()));
     th.start();
     try {
       b.setEventID(evt.uid);
