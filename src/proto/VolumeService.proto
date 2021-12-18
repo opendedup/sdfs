@@ -287,4 +287,5 @@ service VolumeService {
   rpc SyncFromCloudVolume(SyncFromVolRequest) returns (SyncFromVolResponse);
   rpc SyncCloudVolume(SyncVolRequest) returns (SyncVolResponse);
   rpc SetMaxAge(SetMaxAgeRequest) returns (SetMaxAgeResponse);
+  rpc GetProxyVolumes(ProxyVolumeInfoRequest) returns (ProxyVolumeInfoResponse);
 }
