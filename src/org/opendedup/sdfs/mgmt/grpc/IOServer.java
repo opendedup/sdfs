@@ -103,7 +103,7 @@ public class IOServer {
     SocketAddress address = new InetSocketAddress(host, port);
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
         .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
-        .maxInboundMessageSize(Main.CHUNK_LENGTH*2).maxInboundMetadataSize(Main.CHUNK_LENGTH*2).addService(new FileIOServiceImpl())
+        .maxInboundMessageSize(Main.CHUNK_LENGTH*3).maxInboundMetadataSize(Main.CHUNK_LENGTH*3).addService(new FileIOServiceImpl())
         .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())
         .addService(new SdfsUserServiceImpl());
     if (useSSL) {
