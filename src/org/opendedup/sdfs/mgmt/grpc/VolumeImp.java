@@ -65,17 +65,10 @@ import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.OSValidator;
 
 import io.grpc.stub.StreamObserver;
-import net.sf.jpam.Pam;
 
 class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
   private static final int EXPIRY_DAYS = 90;
 
-  private static Pam pam = null;
-  static {
-    if (!OSValidator.isWindows()) {
-      pam = new Pam("login");
-    }
-  }
 
   @Override
   public void getVolumeInfo(VolumeInfoRequest req, StreamObserver<VolumeInfoResponse> responseObserver) {
