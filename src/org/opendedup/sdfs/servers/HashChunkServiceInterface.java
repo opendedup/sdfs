@@ -66,6 +66,8 @@ public interface HashChunkServiceInterface {
 
 	public abstract long processHashClaims(SDFSEvent evt,boolean compact) throws IOException;
 
+	public abstract void compactDB() throws IOException;
+
 	public abstract void commitChunks();
 
 	public abstract AbstractHashesMap getHashesMap();

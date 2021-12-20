@@ -54,6 +54,8 @@ public class VolumeConfigWriter {
 	boolean safe_close = true;
 	boolean vrts_appliance = false;
 	boolean safe_sync = true;
+	String jarFilePath = "";
+	String classInfo = "";
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
 	int chunk_size = 256;
@@ -145,6 +147,7 @@ public class VolumeConfigWriter {
 	private String gcpProject;
 	private String permissionsFile;
 	private long rmthreashold = 15 * 60 * 1000;
+	private String sdfsBasePath = "";
 
 	public VolumeConfigWriter() {
 		sn = new Random().nextLong();
@@ -183,7 +186,7 @@ public class VolumeConfigWriter {
 			}
 			this.sdfsCliPassword = cmd.getOptionValue("sdfscli-password");
 		}
-		
+
 		if (cmd.hasOption("sdfscli-require-auth")) {
 			this.sdfsCliRequireAuth = true;
 		}
@@ -196,6 +199,13 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("sdfscli-listen-addr"))
 			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
+		if (cmd.hasOption("auth-utility-jar-file-path"))
+			this.jarFilePath = cmd.getOptionValue("auth-utility-jar-file-path");
+		if (cmd.hasOption("auth-class-info"))
+			this.classInfo = cmd.getOptionValue("auth-class-info");
+		if (cmd.hasOption("sdfs-base-path"))
+			this.sdfsBasePath = cmd.getOptionValue("sdfs-base-path");
+		Main.sdfsBasePath = this.sdfsBasePath;
 		if (!cmd.hasOption("volume-name")) {
 			System.out.println("--volume-name and --volume-capacity are required options");
 			printHelp(options);
@@ -230,14 +240,18 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("base-path")) {
 			String basebath = "";
 			for (String v : cmd.getOptionValues("base-path")) {
-				if(basebath.length() == 0) {
+				if (basebath.length() == 0) {
 					basebath = v;
-				}else {
+				} else {
 					basebath = basebath + " " + v;
 				}
-				
+
 			}
-			this.base_path =basebath.trim();
+			this.base_path = basebath.trim();
+		}
+		if (OSValidator.isUnix()) {
+			this.base_path = new File(this.base_path).getParent() + File.separator + "."
+					+ new File(this.base_path).getName();
 		}
 		if (cmd.hasOption("backup-volume")) {
 			this.mdCompresstion = true;
@@ -252,12 +266,14 @@ public class VolumeConfigWriter {
 		}
 		this.io_log = this.base_path + File.separator + "ioperf.log";
 		this.dedup_db_store = this.base_path + File.separator + "ddb";
-		this.permissionsFile = this.base_path + File.separator + "permssions" + File.separator + "volume_permissions.pb";
+		this.permissionsFile = this.base_path + File.separator + "permssions" + File.separator
+				+ "volume_permissions.pb";
 		this.dedup_dbtrash_store = this.base_path + File.separator + "ddb_trash";
 		this.chunk_store_data_location = this.base_path + File.separator + "chunkstore" + File.separator + "chunks";
-		this.chunk_store_hashdb_location = this.base_path + File.separator + "chunkstore" + File.separator + "hdb-"+ this.sn;
+		this.chunk_store_hashdb_location = this.base_path + File.separator + "chunkstore" + File.separator + "hdb-"
+				+ this.sn;
 		if (cmd.hasOption("sdfscli-permissions-file")) {
-				this.permissionsFile = cmd.getOptionValue("sdfscli-permissions-file");
+			this.permissionsFile = cmd.getOptionValue("sdfscli-permissions-file");
 		}
 		if (cmd.hasOption("dedup-db-store")) {
 			this.dedup_db_store = cmd.getOptionValue("dedup-db-store");
@@ -613,7 +629,8 @@ public class VolumeConfigWriter {
 		if (this.encryptConfig) {
 			Main.chunkStoreEncryptionIV = this.chunk_store_iv;
 			Main.chunkStoreEncryptionKey = this.chunk_store_encryption_key;
-			System.out.println("Encrypting Configuration with " + this.encryptConfigPassword + " " + this.chunk_store_iv);
+			System.out
+					.println("Encrypting Configuration with " + this.encryptConfigPassword + " " + this.chunk_store_iv);
 			String password = this.encryptConfigPassword;
 			String iv = this.chunk_store_iv;
 			System.out.println("Chunkstore encryption key is " + this.chunk_store_encryption_key);
@@ -735,6 +752,8 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("enable-auth", Boolean.toString(this.sdfsCliRequireAuth));
 		sdfscli.setAttribute("enable-mutual-tls-auth", Boolean.toString(this.sdfsCliRequireMutualTLSAuth));
 		sdfscli.setAttribute("listen-address", this.sdfsCliListenAddr);
+		sdfscli.setAttribute("auth-utility-jar-file-path", this.jarFilePath);
+		sdfscli.setAttribute("auth-class-info", this.classInfo);
 		sdfscli.setAttribute("use-ssl", Boolean.toString(this.sdfsCliSSL));
 		sdfscli.setAttribute("permissions-file", this.permissionsFile);
 		try {
@@ -996,6 +1015,14 @@ public class VolumeConfigWriter {
 				"The threashold in milliseconds to wait for unclaimed chucks to be available for garbage collection"
 						+ "The default is 15 minutes or 900000 ms,")
 				.hasArg(true).withArgName("time in milliseconds").create());
+		options.addOption(OptionBuilder.withLongOpt("sdfs-base-path").withDescription(
+				"Folder basepath for sdfs to be used in linux os.\n Defaults to: \n " + OSValidator.getConfigPath())
+				.hasArgs().withArgName("PATH").create());
+		options.addOption(OptionBuilder.withLongOpt("auth-utility-jar-file-path")
+				.withDescription("Utility jar file path.").hasArg(true).withArgName("JAR-PATH").create());
+		options.addOption(OptionBuilder.withLongOpt("auth-class-info")
+				.withDescription("Class to load and its methods separated by ;;.").hasArg(true)
+				.withArgName("CLASS-INFO").create());
 		options.addOption(
 				OptionBuilder.withLongOpt("base-path")
 						.withDescription("the folder path for all volume data and meta data.\n Defaults to: \n "

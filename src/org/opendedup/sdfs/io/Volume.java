@@ -20,6 +20,8 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Paths;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -39,6 +41,7 @@ import org.opendedup.sdfs.monitor.VolumeIOMeter;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.RandomGUID;
 import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
@@ -78,7 +81,7 @@ public class Volume {
 	private transient VolumeIOMeter ioMeter = null;
 	private String configPath = null;
 	private String uuid = null;
-	
+
 	AtomicLong writeErrors = new AtomicLong(0);
 	AtomicLong readErrors = new AtomicLong(0);
 	private long serialNumber = 0;
@@ -91,7 +94,7 @@ public class Volume {
 	public String rabbitMQUser = null;
 	public String rabbitMQPassword = null;
 	public int rabbitMQPort = 5672;
-	public String pubsubTopic =null;
+	public String pubsubTopic = null;
 	public String pubsubSubscription = null;
 	public String gcpProject = null;
 	public String gcpCredsPath = null;
@@ -99,8 +102,6 @@ public class Volume {
 	public boolean isClustered() {
 		return this.clustered;
 	}
-
-	
 
 	public static void setStorageConnected(boolean connected) {
 		if (connected && !storageConnected) {
@@ -184,6 +185,10 @@ public class Volume {
 		SDFSLogger.getLog().info("Mounting volume " + pathF.getPath());
 		if (!pathF.exists())
 			pathF.mkdirs();
+		if (OSValidator.isWindows()) {
+			Files.setAttribute(Paths.get(pathF.getParentFile().getPath()), "dos:hidden", true,
+					LinkOption.NOFOLLOW_LINKS);
+		}
 		this.path = pathF.getPath();
 		this.connicalPath = pathF.getCanonicalPath();
 		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
@@ -270,7 +275,7 @@ public class Volume {
 		else
 			SDFSLogger.getLog().info("Setting maximum capacity to infinite");
 		this.startThreads();
-		
+
 		if (vol.getElementsByTagName("rabbitmq-node").getLength() > 0) {
 			Element el = (Element) vol.getElementsByTagName("rabbitmq-node").item(0);
 			this.rabbitMQNode = el.getAttribute("hostname");
@@ -285,23 +290,23 @@ public class Volume {
 			if (el.hasAttribute("topic")) {
 				this.rabbitMQTopic = el.getAttribute("topic");
 			}
-			
+
 		}
 		if (vol.getElementsByTagName("gcp-pubsub").getLength() > 0) {
 			SDFSLogger.getLog().info("Reading Pubsub Settings");
 			Element el = (Element) vol.getElementsByTagName("gcp-pubsub").item(0);
-			if(el.hasAttribute("topic")) {
+			if (el.hasAttribute("topic")) {
 				this.pubsubTopic = el.getAttribute("topic");
-			}else {
+			} else {
 				this.pubsubTopic = "sdfsvolume";
 			}
-			if(el.hasAttribute("subscription")) {
+			if (el.hasAttribute("subscription")) {
 				this.pubsubSubscription = el.getAttribute("subscription");
-			}else {
+			} else {
 				this.pubsubSubscription = Long.toString(serialNumber);
 			}
 			this.gcpProject = el.getAttribute("project-id");
-			if(el.hasAttribute("auth-file")) {
+			if (el.hasAttribute("auth-file")) {
 				this.gcpCredsPath = el.getAttribute("auth-file");
 			} else {
 				this.gcpCredsPath = null;
@@ -310,24 +315,17 @@ public class Volume {
 	}
 
 	public Volume() {
-		
+
 	}
 
 	public void init() throws Exception {
-		
 
 		DedupFileStore.init();
 	}
 
-	
-
 	public void writeUpdate() throws Exception {
 		this.writer.writeConfig();
 	}
-
-	
-
-	
 
 	private void startThreads() {
 		this.writer = new VolumeConfigWriterThread(this.configPath);
@@ -490,7 +488,7 @@ public class Volume {
 		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
-		
+
 		try {
 			root.setAttribute("dse-comp-size", Long.toString(HCServiceProxy.getDSECompressedSize()));
 			root.setAttribute("dse-size", Long.toString(HCServiceProxy.getDSESize()));
@@ -503,10 +501,10 @@ public class Volume {
 			rmq.setAttribute("hostname", this.rabbitMQNode);
 			rmq.setAttribute("port", Integer.toString(this.rabbitMQPort));
 			rmq.setAttribute("topic", this.rabbitMQTopic);
-			if(this.rabbitMQUser != null) {
+			if (this.rabbitMQUser != null) {
 				rmq.setAttribute("username", this.rabbitMQUser);
 			}
-			if(this.rabbitMQPassword != null) {
+			if (this.rabbitMQPassword != null) {
 				rmq.setAttribute("password", this.rabbitMQPassword);
 			}
 			doc.adoptNode(rmq);
@@ -517,7 +515,7 @@ public class Volume {
 			pbm.setAttribute("project-id", this.gcpProject);
 			pbm.setAttribute("topic", this.pubsubTopic);
 			pbm.setAttribute("subscription", this.pubsubSubscription);
-			if(this.gcpCredsPath != null) {
+			if (this.gcpCredsPath != null) {
 				pbm.setAttribute("auth-file", this.gcpCredsPath);
 			}
 			doc.adoptNode(pbm);
@@ -525,8 +523,6 @@ public class Volume {
 		}
 		return root;
 	}
-
-	
 
 	public Document toXMLDocument() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("volume");
@@ -562,16 +558,16 @@ public class Volume {
 		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
-		
+
 		if (this.rabbitMQNode != null) {
 			Element rmq = doc.createElement("rabbitmq-node");
 			rmq.setAttribute("hostname", this.rabbitMQNode);
 			rmq.setAttribute("port", Integer.toString(this.rabbitMQPort));
 			rmq.setAttribute("topic", this.rabbitMQTopic);
-			if(this.rabbitMQUser != null) {
+			if (this.rabbitMQUser != null) {
 				rmq.setAttribute("username", this.rabbitMQUser);
 			}
-			if(this.rabbitMQPassword != null) {
+			if (this.rabbitMQPassword != null) {
 				rmq.setAttribute("password", this.rabbitMQPassword);
 			}
 			doc.adoptNode(rmq);
@@ -582,7 +578,7 @@ public class Volume {
 			pbm.setAttribute("project-id", this.gcpProject);
 			pbm.setAttribute("topic", this.pubsubTopic);
 			pbm.setAttribute("subscription", this.pubsubSubscription);
-			if(this.gcpCredsPath != null) {
+			if (this.gcpCredsPath != null) {
 				pbm.setAttribute("auth-file", this.gcpCredsPath);
 			}
 			doc.adoptNode(pbm);
@@ -592,26 +588,29 @@ public class Volume {
 	}
 
 	public VolumeInfoResponse toProtoc() {
-		VolumeInfoResponse.Builder b = VolumeInfoResponse.newBuilder().setPath(path)
-		.setName(this.name).setCurrentSize(this.currentSize.get()).setCapactity(this.capacity)
-		.setMaxPercentageFull(this.fullPercentage).setDuplicateBytes(this.getDuplicateBytes())
-		.setReadBytes(this.getReadBytes()).setWriteBytes(this.getActualWriteBytes()).setSerialNumber(this.serialNumber)
-		.setMaxPageSize(HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size).setDseSize(HCServiceProxy.getDSESize())
-		.setDseCompSize(HCServiceProxy.getDSECompressedSize()).setReadOps(this.readOperations.get())
-		.setWriteOps(this.writeOperations.get()).setReadErrors(this.readErrors.get()).setWriteErrors(this.writeErrors.get())
-		.setFiles(this.getFiles()).setClosedGracefully(this.closedGracefully).setAllowExternalLinks(this.allowExternalSymlinks)
-		.setUsePerfMon(this.usePerfMon).setVolumeClustered(clustered).setClusterId(this.uuid).setPerfMonFile(this.perfMonFile)
-		.setReadTimeoutSeconds(Main.readTimeoutSeconds).setWriteTimeoutSeconds(Main.writeTimeoutSeconds)
-		.setCompressedMetaData(Main.COMPRESS_METADATA).setSyncFiles(Main.syncDL).setOffline(this.isOffLine());
+		VolumeInfoResponse.Builder b = VolumeInfoResponse.newBuilder().setPath(path).setName(this.name)
+				.setCurrentSize(this.currentSize.get()).setCapactity(this.capacity)
+				.setMaxPercentageFull(this.fullPercentage).setDuplicateBytes(this.getDuplicateBytes())
+				.setReadBytes(this.getReadBytes()).setWriteBytes(this.getActualWriteBytes())
+				.setSerialNumber(this.serialNumber)
+				.setMaxPageSize(HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size)
+				.setDseSize(HCServiceProxy.getDSESize()).setDseCompSize(HCServiceProxy.getDSECompressedSize())
+				.setReadOps(this.readOperations.get()).setWriteOps(this.writeOperations.get())
+				.setReadErrors(this.readErrors.get()).setWriteErrors(this.writeErrors.get()).setFiles(this.getFiles())
+				.setClosedGracefully(this.closedGracefully).setAllowExternalLinks(this.allowExternalSymlinks)
+				.setUsePerfMon(this.usePerfMon).setVolumeClustered(clustered).setClusterId(this.uuid)
+				.setPerfMonFile(this.perfMonFile).setReadTimeoutSeconds(Main.readTimeoutSeconds)
+				.setWriteTimeoutSeconds(Main.writeTimeoutSeconds).setCompressedMetaData(Main.COMPRESS_METADATA)
+				.setSyncFiles(Main.syncDL).setOffline(this.isOffLine());
 		if (this.rabbitMQNode != null) {
-			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setHostName(this.rabbitMQNode).setMqType(MQType.RabbitMQ)
-			.setPort(this.rabbitMQPort).setTopic(this.rabbitMQTopic);
+			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setHostName(this.rabbitMQNode)
+					.setMqType(MQType.RabbitMQ).setPort(this.rabbitMQPort).setTopic(this.rabbitMQTopic);
 			b.addMessageQueue(mb);
 		}
-		if(this.gcpProject != null) {
+		if (this.gcpProject != null) {
 			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setMqType(MQType.PubSub)
-			.setTopic(this.pubsubTopic).setSubScription(this.pubsubSubscription).setAuthInfo(this.gcpCredsPath)
-			.setProject(this.gcpProject);
+					.setTopic(this.pubsubTopic).setSubScription(this.pubsubSubscription).setAuthInfo(this.gcpCredsPath)
+					.setProject(this.gcpProject);
 			b.addMessageQueue(mb);
 		}
 		return b.build();

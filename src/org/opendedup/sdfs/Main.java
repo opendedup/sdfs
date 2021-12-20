@@ -28,6 +28,8 @@ public class Main {
 	public static boolean checkArchiveOnRead = true;
 	public static int hashSeed=6442;
 	public static double fpp = .01;
+	public static String jarFilePath="";
+	public static String classInfo="";
 	public static String logSize="10MB";
 	public static int logFiles=10;
 	public static boolean ignoreDSEHTSize = true;
@@ -75,6 +77,7 @@ public class Main {
 	public static byte [] decKey = null;
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
+	public static String sdfsBasePath = "";
 
 	public static SDFSEvent mountEvent = null;
 

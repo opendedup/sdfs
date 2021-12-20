@@ -99,6 +99,7 @@ import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.RestoreObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.amazonaws.services.s3.model.Tier;
@@ -595,8 +596,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 								.fromStream(new FileInputStream(credPath));
 					}
 					sourceCredentials = (GoogleCredentials) sourceCredentials
-								.createScoped(Arrays.asList("https://www.googleapis.com/auth/cloud-platform"));
-					
+							.createScoped(Arrays.asList("https://www.googleapis.com/auth/cloud-platform"));
 
 					String _projectId = null;
 					if (env.containsKey("GOOGLE_PROJECT_ID")) {
@@ -946,10 +946,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		int cl = (int) sobj.getObjectMetadata().getContentLength();
 
 		byte[] data = new byte[cl];
-		DataInputStream in = null;
+		S3ObjectInputStream in = null;
 		try {
-			in = new DataInputStream(sobj.getObjectContent());
-			in.readFully(data);
+
+			in = sobj.getObjectContent();
+			int ncl = IOUtils.readFully(in, data);
+			if (ncl != cl) {
+				SDFSLogger.getLog().warn("Read less bytes that expected. Expected " + cl + " read " + ncl);
+			}
 
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -1255,12 +1259,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			GetObjectRequest gr = new GetObjectRequest(this.name, "blocks/" + haName + this.dExt);
 			gr.setRange(from, to - 1);
 			sobj = s3Service.getObject(gr);
-			InputStream in = sobj.getObjectContent();
+			S3ObjectInputStream in = sobj.getObjectContent();
 			data = new byte[cl];
-			IOUtils.readFully(in, data);
+			int ncl = IOUtils.readFully(in, data);
+			if (ncl != cl) {
+				SDFSLogger.getLog().warn("Read less bytes that expected. Expected " + cl + " read " + ncl);
+			}
 			IOUtils.closeQuietly(in);
 			double dtm = (System.currentTimeMillis() - tm) / 1000d;
-			double bps = (cl / 1024) / dtm;
+			double bps = (ncl / 1024) / dtm;
 			SDFSLogger.getLog().debug("read [" + id + "] at " + bps + " kbps");
 			// mp = this.getUserMetaData(omd);
 			/*
@@ -1520,10 +1527,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		}
 		// this.s3clientLock.readLock().lock();
 		if (s3Service.doesObjectExist(this.name, name + mdExt)) {
-
+			ObjectMetadata _md = s3Service.getObjectMetadata(this.name, name + mdExt);
+			int cl = (int) _md.getContentLength();
 			S3Object sobj = s3Service.getObject(this.name, name + mdExt);
-			BufferedInputStream in = new BufferedInputStream(sobj.getObjectContent());
-			CloudMetaData.Builder bl = CloudMetaData.newBuilder().mergeFrom(in.readAllBytes());
+			byte[] data = new byte[cl];
+			S3ObjectInputStream in = sobj.getObjectContent();
+			IOUtils.readFully(in, data);
+			CloudMetaData.Builder bl = CloudMetaData.newBuilder().mergeFrom(data);
 			try {
 				Map<String, String> md = new HashMap<String, String>();
 				for (Entry<String, String> entry : bl.build().getAttributesMap().entrySet()) {
@@ -1535,6 +1545,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} finally {
 				if (in != null)
 					IOUtils.closeQuietly(in);
+				sobj.close();
 			}
 		} else {
 			return new HashMap<String, String>();
@@ -1752,16 +1763,22 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			int cl = (int) md.getContentLength();
 
 			byte[] data = new byte[cl];
-			DataInputStream in = null;
+			S3ObjectInputStream in = null;
 			try {
-				in = new DataInputStream(sobj.getObjectContent());
-				in.readFully(data);
+				in = sobj.getObjectContent();
+				int ncl = IOUtils.readFully(in, data);
+				if (ncl != cl) {
+					SDFSLogger.getLog().warn("Read less bytes that expected. Expected " + cl + " read " + ncl);
+				}
 
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
 				if (in != null)
 					in.close();
+				if (sobj != null) {
+					sobj.close();
+				}
 			}
 			boolean encrypt = false;
 			boolean compress = false;
@@ -2118,6 +2135,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			out.flush();
 			out.close();
 			in.close();
+			obj.close();
 		} else {
 			try {
 				Download myDownload = tx.download(this.name, keyName, f);

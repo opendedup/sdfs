@@ -2,7 +2,7 @@ steps:
 
 - name: gcr.io/cloud-builders/gcloud
   entrypoint: 'bash'
-  args:  ['/workspace/buildscripts/copybins.sh','${_DIST_BUCKET}','$BRANCH_NAME']
+  args:  ['/workspace/buildscripts/copybins.sh','${_DIST_BUCKET}','master']
 - name: gcr.io/kaniko-project/executor:latest
   args:
       - --destination=gcr.io/$PROJECT_ID/hybrics-bin:$BRANCH_NAME

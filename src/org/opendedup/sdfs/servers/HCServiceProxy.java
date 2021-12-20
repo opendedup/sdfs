@@ -27,6 +27,7 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
+import org.opendedup.grpc.FileInfo.syncaction;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
@@ -57,6 +58,11 @@ public class HCServiceProxy {
 	public static synchronized long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
 			return hcService.processHashClaims(evt,compact);
 		
+	}
+
+	public static synchronized void compactDB() throws IOException {
+		hcService.compactDB();
+
 	}
 
 	public static void clearRefMap() throws IOException {
