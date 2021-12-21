@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -38,20 +38,24 @@ public interface HashChunkServiceInterface {
 	public abstract String restoreBlock(byte[] hash,long id) throws IOException;
 
 	public abstract boolean blockRestored(String id) throws IOException;
-	
+
+	public abstract boolean get_move_blob();
+
+	public abstract void set_move_blob(boolean status);
+
 	public abstract boolean mightContainKey(byte [] key,long id);
 
 	public abstract long getChunksFetched();
 
 	public abstract AbstractChunkStore getChuckStore();
-	
+
 	public abstract long claimKey(byte [] key,long val,long ct) throws IOException;
-	
+
 
 	public abstract InsertRecord writeChunk(byte[] hash, byte[] aContents,
 			boolean compressed,long ct,String uuid) throws IOException, HashtableFullException;
 
-	
+
 
 	public abstract long hashExists(byte[] hash) throws IOException,
 			HashtableFullException;
@@ -109,7 +113,7 @@ public interface HashChunkServiceInterface {
 	public abstract int getWriteSpeed();
 
 	public abstract void setCacheSize(long sz) throws IOException;
-	
+
 	public abstract void setDseSize(long sz) throws IOException;
 
 	public abstract RemoteVolumeInfo[] getConnectedVolumes() throws IOException;

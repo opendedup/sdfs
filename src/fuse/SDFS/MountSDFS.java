@@ -54,6 +54,7 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("b", true,
 				"Folder basepath for sdfs to be used in linux os, same as sdfs-base-path in mkfs.sdfs. \n e.g. /opt/test");
 		options.addOption("t", true, "Temporary directory for sdfs to be used in linux os. \n e.g. /tmp");
+		options.addOption("a", false, "Runs Consistency Check Periodically");
 		return options;
 	}
 
@@ -120,6 +121,9 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 		if (cmd.hasOption("c")) {
 			Main.runConsistancyCheck = true;
+		}
+		if (cmd.hasOption("a")) {
+			Main.runConsistancyCheckPeriodically = true;
 		}
 		if (cmd.hasOption("q")) {
 			SDFSLogger.useConsoleLogger();

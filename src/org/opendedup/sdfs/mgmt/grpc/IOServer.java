@@ -23,15 +23,15 @@ import io.grpc.Metadata.Key;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -83,17 +83,16 @@ public class IOServer {
   private SslContextBuilder getSslContextBuilder(String certChainFilePath, String privateKeyFilePath,
       String trustCertCollectionFilePath) throws Exception {
     SslContextBuilder sslClientContextBuilder = null;
-    if (!Main.jarFilePath.equals("") && !Main.classInfo.equals("")) {
+    if (!Main.authJarFilePath.equals("") && !Main.authClassInfo.equals("")) {
       /*
        * Main.classInfo contains class name and its two methods to load separated by
        * ;;
        */
-      List<String> classInfo = Arrays.asList(Main.classInfo.split(DELIMITER));
+      List<String> classInfo = Arrays.asList(Main.authClassInfo.split(DELIMITER));
       String loadclass = classInfo.get(0);
       String key_method = classInfo.get(1);
       String path_method = classInfo.get(2);
-
-      URL[] classLoaderUrls = new URL[] { new URL("file:" + Main.jarFilePath) };
+      URL[] classLoaderUrls = new URL[] { new URL("file:" + Main.authJarFilePath) };
       // Create a new URLClassLoader
       URLClassLoader urlClassLoader = new URLClassLoader(classLoaderUrls);
       // Load the target class
@@ -114,11 +113,12 @@ public class IOServer {
 
       X509Certificate serverCertChain = getX509Certificate(certChainFilePath);
       EasyX509TrustManager tm = new EasyX509TrustManager();
+      sslClientContextBuilder = SslContextBuilder.forServer(pvtKey, serverCertChain)
+          .clientAuth(ClientAuth.REQUIRE).trustManager(tm);
 
-      sslClientContextBuilder = SslContextBuilder.forServer(pvtKey, serverCertChain).clientAuth(ClientAuth.REQUIRE)
-          .trustManager(tm);
     } else {
-      sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath), new File(privateKeyFilePath));
+      sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath),
+          new File(privateKeyFilePath));
       DynamicTrustManager tm = new DynamicTrustManager(new File(trustCertCollectionFilePath).getParent());
       sslClientContextBuilder.trustManager(tm);
       sslClientContextBuilder.clientAuth(ClientAuth.REQUIRE);
@@ -173,10 +173,11 @@ public class IOServer {
     SocketAddress address = new InetSocketAddress(host, port);
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
         .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
-        .maxInboundMessageSize(Main.CHUNK_LENGTH*3).maxInboundMetadataSize(Main.CHUNK_LENGTH*3).addService(new FileIOServiceImpl())
+        .maxInboundMessageSize(Main.CHUNK_LENGTH * 3).maxInboundMetadataSize(Main.CHUNK_LENGTH * 3)
+        .addService(new FileIOServiceImpl())
         .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())
         .addService(new SdfsUserServiceImpl());
-    SDFSLogger.getLog().info("Set Max Message Size to " +(Main.CHUNK_LENGTH*2));
+    SDFSLogger.getLog().info("Set Max Message Size to " + (Main.CHUNK_LENGTH * 2));
     if (useSSL) {
       if (useClientTLS) {
         try {

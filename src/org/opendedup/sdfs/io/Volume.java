@@ -192,10 +192,13 @@ public class Volume {
 		this.path = pathF.getPath();
 		this.connicalPath = pathF.getCanonicalPath();
 		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
-		if (vol.hasAttribute("name"))
+		if (vol.hasAttribute("name")) {
 			this.name = vol.getAttribute("name");
-		else
+			Main.sdfsVolName=this.name;
+		} else {
 			this.name = pathF.getParentFile().getName();
+			Main.sdfsVolName=this.name;
+		}
 		if (vol.hasAttribute("read-timeout-seconds"))
 			Main.readTimeoutSeconds = Integer.parseInt(vol.getAttribute("read-timeout-seconds"));
 		if (vol.hasAttribute("write-timeout-seconds"))
@@ -381,6 +384,22 @@ public class Volume {
 		 * } if (this.fullPercentage < 0 || this.currentSize == 0) return false; else {
 		 * return (this.currentSize > this.absoluteLength); }
 		 */
+	}
+
+	public boolean isPartitionFull()
+	{
+		long avail = pathF.getUsableSpace();
+
+		if (avail < (1400000000)) {
+			if(!this.volumeFull) {
+			SDFSLogger.getLog().warn(
+					"Volume - Drive is almost full space left is [" + avail + "]");
+
+			}
+			this.volumeFull = true;
+			return true;
+		}
+		return false;
 	}
 
 	public void setPath(String path) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -75,8 +75,8 @@ public class OSValidator {
 					}
 		else {
 			try {
-				return WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE,
-						"SOFTWARE\\Wow6432Node\\SDFS", "path") + File.separator;
+				return WinRegistry.readRegistry(
+						"HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\SDFS", "path") + File.separator;
 			} catch (Exception e) {
 				return System.getenv("programfiles") + File.separator + "sdfs"
 						+ File.separator;
@@ -89,8 +89,8 @@ public class OSValidator {
 			return "/etc/sdfs/";
 		else
 			try {
-				return WinRegistry.readString(WinRegistry.HKEY_LOCAL_MACHINE,
-						"SOFTWARE\\Wow6432Node\\SDFS", "path")
+				return WinRegistry.readRegistry(
+						"HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\SDFS", "path")
 						+ File.separator
 						+ "etc" + File.separator;
 			} catch (Exception e) {

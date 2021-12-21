@@ -54,8 +54,6 @@ public class VolumeConfigWriter {
 	boolean safe_close = true;
 	boolean vrts_appliance = false;
 	boolean safe_sync = true;
-	String jarFilePath = "";
-	String classInfo = "";
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
 	int chunk_size = 256;
@@ -109,6 +107,10 @@ public class VolumeConfigWriter {
 	String sdfsCliPassword = "admin";
 	String sdfsCliSalt = HashFunctions.getRandomString(24);
 	String sdfsCliListenAddr = "0.0.0.0";
+	String authJarFilePath = "";
+	String authClassInfo = "";
+	String prodConfigFilePath = "";
+	String prodConfigVariable = "";
 	boolean sdfsCliSSL = true;
 	boolean sdfsCliRequireAuth = false;
 	boolean sdfsCliRequireMutualTLSAuth = false;
@@ -200,9 +202,13 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("sdfscli-listen-addr"))
 			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
 		if (cmd.hasOption("auth-utility-jar-file-path"))
-			this.jarFilePath = cmd.getOptionValue("auth-utility-jar-file-path");
+			this.authJarFilePath = cmd.getOptionValue("auth-utility-jar-file-path");
 		if (cmd.hasOption("auth-class-info"))
-			this.classInfo = cmd.getOptionValue("auth-class-info");
+			this.authClassInfo = cmd.getOptionValue("auth-class-info");
+		if (cmd.hasOption("prod-config-file-path"))
+			this.prodConfigFilePath = cmd.getOptionValue("prod-config-file-path");
+		if (cmd.hasOption("prod-config-variable"))
+			this.prodConfigVariable = cmd.getOptionValue("prod-config-variable");
 		if (cmd.hasOption("sdfs-base-path"))
 			this.sdfsBasePath = cmd.getOptionValue("sdfs-base-path");
 		Main.sdfsBasePath = this.sdfsBasePath;
@@ -277,9 +283,21 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("dedup-db-store")) {
 			this.dedup_db_store = cmd.getOptionValue("dedup-db-store");
+			if (OSValidator.isUnix()) {
+				this.dedup_db_store = this.dedup_db_store + File.separator + "." + volume_name + File.separator + "ddb";
+			} else {
+				this.dedup_db_store = this.dedup_db_store + File.separator + volume_name + File.separator + "ddb";
+			}
 		}
 		if (cmd.hasOption("dedup-dbtrash-store")) {
 			this.dedup_dbtrash_store = cmd.getOptionValue("dedup-dbtrash-store");
+			if (cmd.hasOption("azure-storage-tier")) {
+				String cln = cmd.getOptionValue("azure-storage-tier");
+				if (cln.equalsIgnoreCase("hot") || cln.equalsIgnoreCase("cool")
+						|| cln.equalsIgnoreCase("archive")) {
+					this.azurestorageTier = cln;
+				}
+			}
 		}
 		if (cmd.hasOption("enable-batch-gc")) {
 			this.dedup_db_trash_enabled = true;
@@ -370,6 +388,13 @@ public class VolumeConfigWriter {
 			this.aruzreArchiveInDays = Integer.parseInt(cmd.getOptionValue("azurearchive-in-days"));
 			this.azurestorageTier = "archive";
 			this.refreshBlobs = true;
+			if (cmd.hasOption("azure-storage-tier")) {
+				String cln = cmd.getOptionValue("azure-storage-tier");
+				if (cln.equalsIgnoreCase("hot") || cln.equalsIgnoreCase("cool")
+						|| cln.equalsIgnoreCase("archive")) {
+					this.azurestorageTier = cln;
+				}
+			}
 		}
 
 		if (cmd.hasOption("no-simple-metadata")) {
@@ -421,6 +446,15 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("chunk-store-hashdb-location")) {
 			this.chunk_store_hashdb_location = cmd.getOptionValue("chunk-store-hashdb-location");
+			if (OSValidator.isUnix()) {
+				this.chunk_store_hashdb_location = this.chunk_store_hashdb_location + File.separator + "." + volume_name
+						+ File.separator + "chunkstore" + File.separator + "hdb-"
+						+ this.sn;
+			} else {
+				this.chunk_store_hashdb_location = this.chunk_store_hashdb_location + File.separator + volume_name
+						+ File.separator + "chunkstore" + File.separator + "hdb-"
+						+ this.sn;
+			}
 		}
 		if (cmd.hasOption("chunk-store-hashdb-class")) {
 			this.hash_db_class = cmd.getOptionValue("chunk-store-hashdb-class");
@@ -752,8 +786,10 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("enable-auth", Boolean.toString(this.sdfsCliRequireAuth));
 		sdfscli.setAttribute("enable-mutual-tls-auth", Boolean.toString(this.sdfsCliRequireMutualTLSAuth));
 		sdfscli.setAttribute("listen-address", this.sdfsCliListenAddr);
-		sdfscli.setAttribute("auth-utility-jar-file-path", this.jarFilePath);
-		sdfscli.setAttribute("auth-class-info", this.classInfo);
+		sdfscli.setAttribute("auth-utility-jar-file-path", this.authJarFilePath);
+		sdfscli.setAttribute("auth-class-info", this.authClassInfo);
+		sdfscli.setAttribute("prod-config-file-path", this.prodConfigFilePath);
+		sdfscli.setAttribute("prod-config-variable", this.prodConfigVariable);
 		sdfscli.setAttribute("use-ssl", Boolean.toString(this.sdfsCliSSL));
 		sdfscli.setAttribute("permissions-file", this.permissionsFile);
 		try {
@@ -1011,6 +1047,24 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"IP Listenting address for the sdfscli management interface. This defaults to \"localhost\"")
 				.hasArg(true).withArgName("ip address or host name").create());
+		options.addOption(OptionBuilder.withLongOpt("auth-utility-jar-file-path")
+				.withDescription(
+						"Authentication Utility jar file path."
+								+ " \n e.g. --auth-utility-jar-file-path=C:\\odd\\utilitly\\tool.jar")
+				.hasArg(true).withArgName("AUTH-JAR-PATH").create());
+		options.addOption(OptionBuilder.withLongOpt("auth-class-info")
+				.withDescription(
+						"Authentication Class to load and its methods separated by ;;."
+								+ " \n e.g.--auth-class-info=com.odd.KeyInfo;;getInfo1;;getInfo2")
+				.hasArg(true).withArgName("AUTH-CLASS-INFO").create());
+		options.addOption(OptionBuilder.withLongOpt("prod-config-file-path")
+				.withDescription(
+						"Product configuration file path.")
+				.hasArg(true).withArgName("CONFIG-FILE-PATH").create());
+		options.addOption(OptionBuilder.withLongOpt("prod-config-variable")
+				.withDescription(
+						"Product configuration variable.")
+				.hasArg(true).withArgName("CONF-VARIABLE").create());
 		options.addOption(OptionBuilder.withLongOpt("hashtable-rm-threshold").withDescription(
 				"The threashold in milliseconds to wait for unclaimed chucks to be available for garbage collection"
 						+ "The default is 15 minutes or 900000 ms,")
@@ -1018,15 +1072,15 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("sdfs-base-path").withDescription(
 				"Folder basepath for sdfs to be used in linux os.\n Defaults to: \n " + OSValidator.getConfigPath())
 				.hasArgs().withArgName("PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("auth-utility-jar-file-path")
-				.withDescription("Utility jar file path.").hasArg(true).withArgName("JAR-PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("auth-class-info")
-				.withDescription("Class to load and its methods separated by ;;.").hasArg(true)
-				.withArgName("CLASS-INFO").create());
 		options.addOption(
 				OptionBuilder.withLongOpt("base-path")
 						.withDescription("the folder path for all volume data and meta data.\n Defaults to: \n "
 								+ OSValidator.getProgramBasePath() + "<volume name>")
+						.hasArgs().withArgName("PATH").create());
+		options.addOption(
+				OptionBuilder.withLongOpt("sdfs-base-path")
+						.withDescription("Folder basepath for sdfs to be used in linux os.\n Defaults to: \n "
+								+ OSValidator.getConfigPath())
 						.hasArgs().withArgName("PATH").create());
 		options.addOption(OptionBuilder.withLongOpt("cloud-url")
 				.withDescription("The url of the blob server. e.g. http://s3server.localdomain/s3/").hasArg()
@@ -1224,6 +1278,9 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("azure-enabled").withDescription(
 				"Set to true to enable this volume to store to Microsoft Azure Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder.withLongOpt("azure-storage-tier")
+				.withDescription("Set the tier type to move from hot storage tier. ").hasArg()
+				.withArgName("hot|cool|archive").create());
 		options.addOption(OptionBuilder.withLongOpt("glacier-restore-class")
 				.withDescription("Set the class used to restore glacier data. ").hasArg()
 				.withArgName("expedited|standard|bulk").create());

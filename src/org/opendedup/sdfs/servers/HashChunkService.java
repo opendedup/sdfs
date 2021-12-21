@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -58,7 +58,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 
 	}
 
-	public HashChunkService() {
+	public HashChunkService() throws InterruptedException {
 		try {
 			fileStore = (AbstractChunkStore) Class
 					.forName(Main.chunkStoreClass).newInstance();
@@ -67,10 +67,16 @@ public class HashChunkService implements HashChunkServiceInterface {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
 			System.err.println("Unable to initiate ChunkStore");
 			e.printStackTrace();
-			System.exit(-1);
+			if (Main.sdfsSyncEnabled) {
+				throw new InterruptedException("Exception occured while syncSDFS is enabled. " + e);
+			} else {
+				System.exit(-1);
+			}
 		}
 		try {
 			hs = new HashStore(this);
+		} catch (InterruptedException e) {
+			throw new InterruptedException(e.getMessage());
 		} catch (Exception e) {
 			SDFSLogger.getLog().fatal("unable to start hashstore", e);
 			System.err.println("Unable to initiate hashstore");
@@ -90,14 +96,14 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	public InsertRecord writeChunk(byte[] hash, byte[] aContents,
-			boolean compressed,long ct,String uuid) throws IOException, HashtableFullException {
+			boolean compressed, long ct, String uuid) throws IOException, HashtableFullException {
 		if (aContents.length > Main.chunkStorePageSize)
 			throw new IOException("content size out of bounds ["
 					+ aContents.length + "] > [" + Main.chunkStorePageSize
 					+ "]");
 		chunksRead++;
 		InsertRecord written = hs.addHashChunk(new HashChunk(hash, aContents,
-				compressed,ct,uuid));
+				compressed, ct, uuid));
 		if (written.getInserted()) {
 			unComittedChunks++;
 			chunksWritten++;
@@ -110,6 +116,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 		}
 		return written;
 	}
+
 	@Override
 	public void clearRefMap() throws IOException {
 		hs.clearRefMap();
@@ -131,16 +138,14 @@ public class HashChunkService implements HashChunkServiceInterface {
 		hs.bdb.setMaxSize(sz);
 	}
 
-	
-
 	public long hashExists(byte[] hash) throws IOException,
 			HashtableFullException {
 		return hs.hashExists(hash);
 	}
 
-	public HashChunk fetchChunk(byte[] hash,long pos) throws IOException,
+	public HashChunk fetchChunk(byte[] hash, long pos) throws IOException,
 			DataArchivedException {
-		HashChunk hashChunk = hs.getHashChunk(hash,pos);
+		HashChunk hashChunk = hs.getHashChunk(hash, pos);
 		byte[] data = hashChunk.getData();
 		kBytesFetched = kBytesFetched + (data.length / KBYTE);
 		chunksFetched++;
@@ -163,8 +168,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 		return hashRoute;
 	}
 
-	public long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
-		return hs.processHashClaims(evt,compact);
+	public long processHashClaims(SDFSEvent evt, boolean compact) throws IOException {
+		return hs.processHashClaims(evt, compact);
 	}
 
 	public void commitChunks() {
@@ -212,7 +217,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	public void init() throws IOException {
-		
+
 	}
 
 	@Override
@@ -250,8 +255,8 @@ public class HashChunkService implements HashChunkServiceInterface {
 	}
 
 	@Override
-	public String restoreBlock(byte[] hash,long id) throws IOException {
-		return hs.restoreBlock(hash,id);
+	public String restoreBlock(byte[] hash, long id) throws IOException {
+		return hs.restoreBlock(hash, id);
 	}
 
 	@Override
@@ -262,26 +267,35 @@ public class HashChunkService implements HashChunkServiceInterface {
 	@Override
 	public RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
 		if (fileStore instanceof AbstractCloudFileSync) {
-			AbstractCloudFileSync af = (AbstractCloudFileSync)fileStore;
+			AbstractCloudFileSync af = (AbstractCloudFileSync) fileStore;
 			return af.getConnectedVolumes();
 		} else
 			return null;
 	}
 
 	@Override
-	public boolean mightContainKey(byte[] key,long id) {
-		return hs.mightContainKey(key,id);
+	public boolean mightContainKey(byte[] key, long id) {
+		return hs.mightContainKey(key, id);
 	}
 
 	@Override
-	public long claimKey(byte[] key,long val,long ct) throws IOException {
-		return hs.claimKey(key,val,ct);
+	public long claimKey(byte[] key, long val, long ct) throws IOException {
+		return hs.claimKey(key, val, ct);
 	}
 
 	@Override
 	public void compactDB() throws IOException {
 		hs.compactDB();
-		
+
+	}
+	@Override
+	public boolean get_move_blob() {
+		return hs.get_move_blob();
+	}
+
+	@Override
+	public void set_move_blob(boolean status) {
+		hs.set_move_blob(status);
 	}
 
 }

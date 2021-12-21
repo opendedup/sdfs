@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -33,7 +33,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
-import org.opendedup.sdfs.windows.utils.DriveIcon;
 import org.opendedup.util.OSValidator;
 
 public class MountSDFS {
@@ -141,7 +140,7 @@ public class MountSDFS {
 			}
 			volumeConfigFile = f.getPath();
 		}
-		
+
 
 		if (volumeConfigFile == null) {
 			System.out.println("error : volume or path to volume configuration file not defined");
@@ -182,7 +181,7 @@ public class MountSDFS {
 					// System.out.println(sFal[i]);
 				}
 				try {
-					DriveIcon.addIcon(cmd.getOptionValue("m"));
+					//DriveIcon.addIcon(cmd.getOptionValue("m"));
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.err.println("Unable to add icon for drive " + cmd.getOptionValue("m"));

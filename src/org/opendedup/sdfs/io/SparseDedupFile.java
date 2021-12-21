@@ -20,6 +20,9 @@ package org.opendedup.sdfs.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +61,7 @@ import org.opendedup.sdfs.io.events.SFileDeleted;
 import org.opendedup.sdfs.io.events.SFileWritten;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.DeleteDir;
+import org.opendedup.util.OSValidator;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -132,7 +136,10 @@ public class SparseDedupFile implements DedupFile {
 		if (!f.exists())
 			f.mkdirs();
 		try {
-
+			if (OSValidator.isWindows()) {
+				Files.setAttribute(Paths.get(f.getParentFile().getPath()), "dos:hidden", true,
+						LinkOption.NOFOLLOW_LINKS);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(2);

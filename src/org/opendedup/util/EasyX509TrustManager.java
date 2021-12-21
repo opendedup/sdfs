@@ -60,10 +60,10 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
  * reasons, unless it is a concious decision and you are perfectly aware of
  * security implications of accepting self-signed certificates
  * </p>
- * 
+ *
  * @author <a href="mailto:adrian.sutton@ephox.com">Adrian Sutton</a>
  * @author <a href="mailto:oleg@ural.ru">Oleg Kalnichevski</a>
- * 
+ *
  *         <p>
  *         DISCLAIMER: HttpClient developers DO NOT actively support this
  *         component. The component is provided as a reference material, which
@@ -108,7 +108,7 @@ public class EasyX509TrustManager implements X509TrustManager {
         } catch (Exception e) {
         	logger.info("EASYX509 checkClientTrusted caught exception");
 			throw new CertificateException("Error occurred while setting up trust manager." + e.getCause(), e);
-        }	
+        }
 	}
 
 	/**
@@ -136,14 +136,14 @@ public class EasyX509TrustManager implements X509TrustManager {
 	public X509Certificate[] getAcceptedIssuers() {
 		return this.standardTrustManager.getAcceptedIssuers();
 	}
-	
+
 	public void loadTrustManager(File trustedCertificatesDir,ClientAuth clientAuth) throws Exception {
 		SDFSLogger.getLog().info("Load Trust Manager");
 		KeyStore trustStore = KeyStore.getInstance( KeyStore.getDefaultType() );
 	    trustStore.load( null, null );
-	      
-	    //Implementing FileFilter to retrieve only the files in the directory 
-		FileFilter fileFilter = new FileFilter() {		
+
+	    //Implementing FileFilter to retrieve only the files in the directory
+		FileFilter fileFilter = new FileFilter() {
 		    @Override
 		    public boolean accept(File file) {
 		        if(file.isDirectory()) {
@@ -154,7 +154,7 @@ public class EasyX509TrustManager implements X509TrustManager {
 		        }
 		    }
 		};
-	      
+
 	    File[] trustedCertFiles = trustedCertificatesDir.listFiles(fileFilter);
 
 	    if ( trustedCertFiles == null ) {
@@ -181,10 +181,10 @@ public class EasyX509TrustManager implements X509TrustManager {
                 }
 	        }
 	    }
-	    
+
 	    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance( TrustManagerFactory.getDefaultAlgorithm() );
 	    trustManagerFactory.init( trustStore );
-	      
+
 	    TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
 	    for (TrustManager t : trustManagers) {
 	    	if (t instanceof X509TrustManager) {
@@ -192,8 +192,8 @@ public class EasyX509TrustManager implements X509TrustManager {
 	        	  return;
 	        }
 	    }
-	      
+
 	    throw new NoSuchAlgorithmException(
-		    	        "No X509TrustManager in TrustManagerFactory");      
+		    	        "No X509TrustManager in TrustManagerFactory");
 	}
 }

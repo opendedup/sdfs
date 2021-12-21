@@ -10,6 +10,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -47,6 +49,7 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import com.microsoft.azure.storage.blob.CopyStatus;
 import com.microsoft.azure.storage.blob.ListBlobItem;
+import com.microsoft.azure.storage.blob.RehydratePriority;
 import com.microsoft.azure.storage.blob.RehydrationStatus;
 import com.microsoft.azure.storage.blob.StandardBlobTier;
 import com.microsoft.azure.storage.core.Base64;
@@ -55,6 +58,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
+import org.opendedup.fsync.SyncFSScheduler;
 import org.opendedup.grpc.FileInfo.FileInfoResponse;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -95,6 +99,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	OperationContext opContext = new OperationContext();
 	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
 	boolean closed = false;
+	boolean move_blob = false;
 	boolean deleteUnclaimed = true;
 	boolean clustered = true;
 	private int checkInterval = 15000;
@@ -425,6 +430,20 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			account = CloudStorageAccount.parse(storageConnectionString);
 			serviceClient = account.createCloudBlobClient();
+
+			String proxy = System.getenv("HTTP_PROXY");
+			SDFSLogger.getLog().info("PROXY= "+proxy);
+			if(proxy != null)
+			{
+				String[] tokens = proxy.split(":");
+				String hostname = tokens[1].substring(2);//proxy env variable will be in the form http://proxy_server:proxt_port
+				String port = tokens[2];
+				int Port = Integer.parseInt(port);
+				SDFSLogger.getLog().info("proxyhostname=" + hostname);
+				SDFSLogger.getLog().info("proxyport=" + Port);
+				OperationContext.setDefaultProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hostname,Port)));
+			}
+
 			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads * 2);
 			if (tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))) {
 				this.bio = new BlobDataIO(this.name + "table", this.accessKey, this.secretKey, connectionProtocol);
@@ -511,6 +530,17 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				HashBlobArchive.setLength(sz);
 				HashBlobArchive.setCompressedLength(cl);
 
+				if (config.hasAttribute("allow-sync")) {
+					HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
+					if (config.hasAttribute("sync-check-schedule")) {
+						try {
+							new SyncFSScheduler(config.getAttribute("sync-check-schedule"));
+						} catch (Exception e) {
+							SDFSLogger.getLog().error("unable to start sync scheduler", e);
+						}
+					}
+
+				}
 			}
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -1052,6 +1082,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						this.refresh.clear();
 					}
 					long currentTime = System.currentTimeMillis();
+					if(get_move_blob())
+						this.closed=true;
 					if (currentTime > startTime) {
 						Iterable<BlobDataTracker> tri = null;
 						if (this.tierImmedately) {
@@ -1614,7 +1646,24 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
 			blob.downloadAttributes();
 			if (blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.ARCHIVE)) {
-				blob.uploadStandardBlobTier(StandardBlobTier.HOT);
+				if(!Main.retrievalTier.equals("")) {
+					String ts = Main.retrievalTier;
+					if (ts.equalsIgnoreCase("high"))
+					{
+						SDFSLogger.getLog().info("restoring block using rehydration priority: " + ts);
+						blob.uploadStandardBlobTier(StandardBlobTier.HOT, RehydratePriority.HIGH, null, null);
+					}
+					else
+					{
+						SDFSLogger.getLog().info("restoring block using rehydration priority: standard");
+						blob.uploadStandardBlobTier(StandardBlobTier.HOT);
+					}
+				}
+				else
+				{
+					SDFSLogger.getLog().info("restoring block using standard rehydration priority");
+					blob.uploadStandardBlobTier(StandardBlobTier.HOT);
+				}
 				bio.removeBlobDataTracker(id,
 						EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
 				this.restoreRequests.put(Long.valueOf(id), haName);
@@ -1643,7 +1692,24 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (blob.getProperties().getRehydrationStatus() == null
 						|| blob.getProperties().getRehydrationStatus().equals(RehydrationStatus.UNKNOWN)) {
 					SDFSLogger.getLog().warn("rehydration status unknow for " + id + " will attempt to rehydrate");
-					blob.uploadStandardBlobTier(StandardBlobTier.HOT);
+					if(!Main.retrievalTier.equals("")) {
+						String ts = Main.retrievalTier;
+						if (ts.equalsIgnoreCase("high"))
+						{
+							SDFSLogger.getLog().info("blockRestored: restoring block using rehydration priority: " + ts);
+							blob.uploadStandardBlobTier(StandardBlobTier.HOT, RehydratePriority.HIGH, null, null);
+						}
+						else
+						{
+							SDFSLogger.getLog().info("blockRestored: restoring block using rehydration priority: standard");
+							blob.uploadStandardBlobTier(StandardBlobTier.HOT);
+						}
+					}
+					else
+					{
+						SDFSLogger.getLog().info("blockRestored: restoring block using standard rehydration priority");
+						blob.uploadStandardBlobTier(StandardBlobTier.HOT);
+					}
 				}
 				return false;
 			}
@@ -1651,6 +1717,16 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			SDFSLogger.getLog().warn("error while checking block [" + id + "] restored", e);
 			return false;
 		}
+	}
+
+	@Override
+	public boolean get_move_blob(){
+		return this.move_blob;
+	}
+
+	@Override
+	public void set_move_blob(boolean status){
+		this.move_blob = status;
 	}
 
 	@Override

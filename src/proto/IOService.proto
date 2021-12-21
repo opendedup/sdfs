@@ -161,7 +161,7 @@ message SetUserMetaDataRequest {
 message SetUserMetaDataResponse {
     string error = 1;
     errorCodes errorCode = 2;
-    
+
 }
 
 message GetCloudFileRequest {
@@ -257,7 +257,7 @@ message StatFS {
     int64 bavail = 4;/* Free blocks available to unprivileged user */
     int64 files = 5; /* Total inodes in filesystem */
     int64 ffree = 6; /* Free inodes in filesystem */
-    int64 fsid = 7; /* Filesystem ID */ 
+    int64 fsid = 7; /* Filesystem ID */
     int32 namelen = 8; /* Maximum length of filenames */
     int32 frsize = 9; /* Fragment size (since Linux 2.6) */
     int32 flags = 10;  /* Mount flags of filesystem */
@@ -378,6 +378,24 @@ message SyncNotificationSubscription {
     int64 pvolumeID =2;
 }
 
+message SetRetrievalTierRequest {
+    string tierType = 1;
+}
+
+message SetRetrievalTierResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message GetRetrievalTierRequest {
+}
+
+message GetRetrievalTierResponse {
+    string tierType = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
 
 service FileIOService {
     // Define a RPC operation
@@ -414,5 +432,7 @@ service FileIOService {
     rpc GetCloudMetaFile(GetCloudFileRequest) returns (GetCloudFileResponse);
     rpc StatFS(StatFSRequest) returns (StatFSResponse);
     rpc fileNotification (SyncNotificationSubscription) returns (stream FileMessageResponse) {};
+    rpc SetRetrievalTier(SetRetrievalTierRequest) returns (SetRetrievalTierResponse);
+	rpc GetRetrievalTier(GetRetrievalTierRequest) returns (GetRetrievalTierResponse);
   }
 

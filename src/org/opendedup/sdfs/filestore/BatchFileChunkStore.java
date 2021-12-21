@@ -31,13 +31,13 @@ import com.google.common.io.BaseEncoding;
 import org.opendedup.collections.HashExistsException;
 
 /**
- * 
+ *
  * @author Sam Silverberg The S3 chunk store implements the AbstractChunkStore
  *         and is used to store deduped chunks to AWS S3 data storage. It is
  *         used if the aws tag is used within the chunk store config file. It is
  *         important to make the chunk size very large on the client when using
  *         this chunk store since S3 charges per http request.
- * 
+ *
  */
 public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable {
 	private String name;
@@ -739,5 +739,14 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	public long getAllObjSummary(String pp, long id) throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public boolean get_move_blob() {
+		return false;
+	}
+
+	@Override
+	public void set_move_blob(boolean status) {
 	}
 }

@@ -97,10 +97,10 @@ public class Config {
 		Main.sdfsCliRequireMutualTLSAuth = Boolean.parseBoolean(cli.getAttribute("enable-mutual-tls-auth"));
 		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
 		if (cli.hasAttribute("auth-utility-jar-file-path")) {
-			Main.jarFilePath = cli.getAttribute("auth-utility-jar-file-path");
+			Main.authJarFilePath = cli.getAttribute("auth-utility-jar-file-path");
 		}
 		if (cli.hasAttribute("auth-class-info")) {
-			Main.classInfo = cli.getAttribute("auth-class-info");
+			Main.authClassInfo = cli.getAttribute("auth-class-info");
 		}
 		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
 
@@ -188,7 +188,7 @@ public class Config {
 		if (localChunkStore.hasAttribute("fpp")) {
 			Main.fpp = Double.parseDouble(localChunkStore.getAttribute("fpp"));
 		}
-		
+
 		if (localChunkStore.hasAttribute("average-chunk-size")) {
 			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore.getAttribute("average-chunk-size"));
 		}
@@ -202,7 +202,7 @@ public class Config {
 			Main.HT_RM_THRESH = Long.parseLong(localChunkStore.getAttribute("hashtable-rm-threshold"));
 			SDFSLogger.getLog().info("HT_RM_THRESH = " + Main.HT_RM_THRESH);
 		}
-		
+
 		if (localChunkStore.hasAttribute("max-chunk-age")) {
 			Main.maxAge = Long.parseLong(localChunkStore.getAttribute("max-chunk-age"));
 		}
@@ -215,7 +215,7 @@ public class Config {
 		if(localChunkStore.hasAttribute("enable-batch-gc")) {
 			Main.DDB_TRASH_ENABLED = Boolean.parseBoolean(localChunkStore.getAttribute("enable-batch-gc"));
 		}
-		
+
 		if (localChunkStore.hasAttribute("gc-class"))
 			Main.gcClass = localChunkStore.getAttribute("gc-class");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
@@ -300,7 +300,7 @@ public class Config {
 			Main.cloudBucket = azure.getAttribute("azure-bucket-name");
 			Main.cloudChunkStore = Boolean.parseBoolean(azure.getAttribute("enabled"));
 		}
-		
+
 
 		if (password != null) {
 			if (Main.cloudSecretKey != null) {
@@ -387,8 +387,8 @@ public class Config {
 		cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
 		cli.setAttribute("enable-auth", Boolean.toString(Main.sdfsCliRequireAuth));
 		cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
-		cli.setAttribute("auth-utility-jar-file-path", Main.jarFilePath);
-		cli.setAttribute("auth-class-info", Main.classInfo);
+		cli.setAttribute("auth-utility-jar-file-path", Main.authJarFilePath);
+		cli.setAttribute("auth-class-info", Main.authClassInfo);
 
 		Element localChunkStore = (Element) doc.getElementsByTagName("local-chunkstore").item(0);
 		if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {

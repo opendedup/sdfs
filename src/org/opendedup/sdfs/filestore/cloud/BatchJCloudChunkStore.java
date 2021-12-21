@@ -2335,4 +2335,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 		return null;
 	}
 
+	@Override
+	public boolean get_move_blob() {
+		return false;
+	}
+
+	@Override
+	public void set_move_blob(boolean status) {
+	}
 }
