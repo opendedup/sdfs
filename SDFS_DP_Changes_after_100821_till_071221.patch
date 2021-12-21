@@ -1,0 +1,36 @@
+diff --git a/src/proto/IOService.proto b/src/proto/IOService.proto
+index 1ce0e1b6..723a175d 100644
+--- a/src/proto/IOService.proto
++++ b/src/proto/IOService.proto
+@@ -342,6 +342,23 @@ message SyncNotificationSubscription {
+     string uid = 1;
+ }
+
++message SetRetrievalTierRequest {
++    string tierType = 1;
++}
++
++message SetRetrievalTierResponse {
++    string error = 1;
++    errorCodes errorCode = 2;
++}
++
++message GetRetrievalTierRequest {
++}
++
++message GetRetrievalTierResponse {
++    string tierType = 1;
++    string error = 2;
++    errorCodes errorCode = 3;
++}
+
+ service FileIOService {
+     // Define a RPC operation
+@@ -378,5 +395,7 @@ service FileIOService {
+     rpc GetCloudMetaFile(GetCloudFileRequest) returns (GetCloudFileResponse);
+     rpc StatFS(StatFSRequest) returns (StatFSResponse);
+     rpc fileNotification (SyncNotificationSubscription) returns (stream FileMessageResponse) {};
++	rpc SetRetrievalTier(SetRetrievalTierRequest) returns (SetRetrievalTierResponse);
++	rpc GetRetrievalTier(GetRetrievalTierRequest) returns (GetRetrievalTierResponse);
+   }
+
