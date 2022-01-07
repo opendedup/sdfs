@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -100,7 +100,7 @@ public class SparseDedupFile implements DedupFile {
 	private ConcurrentHashMap<Long, WritableCacheBuffer> openBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
 			256, .75f);
 	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers = CacheBuilder.newBuilder()
-			.maximumSize(maxWriteBuffers).expireAfterAccess(60, TimeUnit.SECONDS).concurrencyLevel(64)
+			.maximumSize(maxWriteBuffers).expireAfterAccess(60, TimeUnit.SECONDS).concurrencyLevel(Main.writeThreads)
 			.removalListener(new RemovalListener<Long, WritableCacheBuffer>() {
 				public void onRemoval(RemovalNotification<Long, WritableCacheBuffer> removal) {
 					WritableCacheBuffer ck = removal.getValue();
@@ -183,7 +183,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @seecom.annesam.sdfs.io.AbstractDedupFile#snapshot(com.annesam.sdfs.io.
 	 * MetaDataDedupFile)
 	 */
@@ -228,7 +228,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @seecom.annesam.sdfs.io.AbstractDedupFile#snapshot(com.annesam.sdfs.io.
 	 * MetaDataDedupFile)
 	 */
@@ -325,7 +325,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#isClosed()
 	 */
 	@Override
@@ -617,7 +617,7 @@ public class SparseDedupFile implements DedupFile {
 		 * writeBuffer.getDoop(), true); } else { int prev = (writeBuffer.capacity() -
 		 * writeBuffer.getPrevDoop()); int nw = writeBuffer.capacity() -
 		 * writeBuffer.getDoop();
-		 * 
+		 *
 		 * mf.getIOMonitor().addActualBytesWritten(nw - prev, true); }
 		 * mf.getIOMonitor().addDulicateData((writeBuffer.capacity() -
 		 * writeBuffer.getPrevDoop()), true);
@@ -686,7 +686,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getWriteBuffer(long)
 	 */
 
@@ -781,7 +781,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getNumberofChunks()
 	 */
 	@Override
@@ -801,7 +801,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#sync()
 	 */
 	public void sync(boolean force) throws FileClosedException, IOException {
@@ -871,7 +871,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getChannel()
 	 */
 	@Override
@@ -905,7 +905,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#unRegisterChannel(com.annesam.sdfs
 	 * .io.DedupFileChannel)
 	 */
@@ -942,7 +942,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#unRegisterChannel(com.annesam.sdfs
 	 * .io.DedupFileChannel)
 	 */
@@ -1002,7 +1002,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#close()
 	 */
 	@Override
@@ -1118,7 +1118,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getGUID()
 	 */
 	@Override
@@ -1128,7 +1128,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getMetaFile()
 	 */
 	@Override
@@ -1138,7 +1138,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#removeLock(com.annesam.sdfs.io.
 	 * DedupFileLock)
 	 */
@@ -1154,7 +1154,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @seecom.annesam.sdfs.io.AbstractDedupFile#addLock(com.annesam.sdfs.io.
 	 * DedupFileChannel, long, long, boolean)
 	 */
@@ -1218,7 +1218,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#lastModified()
 	 */
 	@Override
@@ -1228,7 +1228,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getHash(long, boolean)
 	 */
 	@Override
@@ -1273,7 +1273,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#removeHash(long)
 	 */
 	@Override
@@ -1329,7 +1329,7 @@ public class SparseDedupFile implements DedupFile {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.sdfs.io.AbstractDedupFile#getChuckPosition(long)
 	 */
 	@Override

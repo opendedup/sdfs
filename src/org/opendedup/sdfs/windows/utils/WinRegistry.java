@@ -21,65 +21,99 @@ package org.opendedup.sdfs.windows.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 
+import org.opendedup.logging.SDFSLogger;
 
 public class WinRegistry {
-	public static final int HKEY_LOCAL_MACHINE = 0x80000002;
 
-	public static final int KEY_SZ = 0;
+    public static final int KEY_SZ = 0;
     public static final int KEY_DWORD = 1;
+    private static final String REG_QUERY = "reg query ";
+    private static final String REG_STR = "REG_SZ";
+    private static final String REG_DWORD = "REG_DWORD";
 
+    static String readRegistryRegQuery(String key) throws IOException {
+        String useKey = REG_QUERY + key;
+        int keyType = -1;
+        // Run reg query, then read output with StreamReader (internal class)
+        Process process = Runtime.getRuntime().exec(useKey);
+        StreamReader reader = new StreamReader(process.getInputStream());
 
-	public static final String readRegistry(String location, String key){
+        reader.start();
         try {
-            // Run reg query, then read output with StreamReader (internal class)
-            Process process = Runtime.getRuntime().exec("reg query " +
-                    '"'+ location + "\" /v " + key);
-
-            StreamReader reader = new StreamReader(process.getInputStream());
-            reader.start();
             process.waitFor();
             reader.join();
-            String output = reader.getResult();
-
-            // Output has the following format:
-            // \n<Version information>\n\n<key>\t<registry type>\t<value>
-            if( ! output.contains("\t")){
-                    return null;
-            }
-
-            // Parse out the value
-            String[] parsed = output.split("\t");
-            return parsed[parsed.length-1];
+        } catch (InterruptedException e) {
+            SDFSLogger.getLog().error(e.getMessage());
+            Thread.currentThread().interrupt();
         }
-        catch (Exception e) {
+
+        // Parse out the value
+
+        String result = reader.getResult();
+        int p = -1;
+        if (result.contains(REG_STR)) {
+            p = result.indexOf(REG_STR);
+            keyType = KEY_SZ;
+        } else if (result.contains(REG_DWORD)) {
+            p = result.indexOf(REG_DWORD);
+            keyType = KEY_DWORD;
+        }
+        if (p == -1) {
             return null;
+        }
+
+        switch (keyType) {
+            case KEY_SZ:
+                return result.substring(p + REG_STR.length()).trim();
+            case KEY_DWORD:
+                String temp = result.substring(p + REG_DWORD.length()).trim();
+                return Integer.toString((Integer.parseInt(temp.substring("0x".length()), 16)));
+            default:
+                return "";
         }
 
     }
 
     static class StreamReader extends Thread {
-        private InputStream is;
-        private StringWriter sw= new StringWriter();
+
+        private final InputStream mIs;
+        private final StringWriter mSw;
 
         public StreamReader(InputStream is) {
-            this.is = is;
+            this.mIs = is;
+            mSw = new StringWriter();
         }
 
         public void run() {
             try {
                 int c;
-                while ((c = is.read()) != -1)
-                    sw.write(c);
+                while ((c = mIs.read()) != -1)
+                    mSw.write(c);
+            } catch (IOException e) {
+                SDFSLogger.getLog().error(e.getMessage());
             }
-            catch (IOException e) {
-        }
         }
 
         public String getResult() {
-            return sw.toString();
+            return mSw.toString();
         }
     }
 
+    public static String readRegistry(String location, String key) throws IOException {
+        String pathkey = "\"" +
+                location +
+                "\" /v " +
+                key;
+        return readRegistryRegQuery(pathkey);
+    }
+
+    public static void main(String[] args) throws IllegalArgumentException,
+            IllegalAccessException, InvocationTargetException {
+        // System.out.println(WinRegistry.readString(HKEY_LOCAL_MACHINE,
+        // "SOFTWARE\\Wow6432Node\\SDFS", "path"));
+        System.out.println("Running Winregistry class");
+    }
 
 }

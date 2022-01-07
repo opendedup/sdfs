@@ -1050,6 +1050,68 @@ public final class FileIOServiceGrpc {
     return getFileNotificationMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.SetRetrievalTierRequest,
+      org.opendedup.grpc.IOService.SetRetrievalTierResponse> getSetRetrievalTierMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetRetrievalTier",
+      requestType = org.opendedup.grpc.IOService.SetRetrievalTierRequest.class,
+      responseType = org.opendedup.grpc.IOService.SetRetrievalTierResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.SetRetrievalTierRequest,
+      org.opendedup.grpc.IOService.SetRetrievalTierResponse> getSetRetrievalTierMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.SetRetrievalTierRequest, org.opendedup.grpc.IOService.SetRetrievalTierResponse> getSetRetrievalTierMethod;
+    if ((getSetRetrievalTierMethod = FileIOServiceGrpc.getSetRetrievalTierMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getSetRetrievalTierMethod = FileIOServiceGrpc.getSetRetrievalTierMethod) == null) {
+          FileIOServiceGrpc.getSetRetrievalTierMethod = getSetRetrievalTierMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.IOService.SetRetrievalTierRequest, org.opendedup.grpc.IOService.SetRetrievalTierResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetRetrievalTier"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.IOService.SetRetrievalTierRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.IOService.SetRetrievalTierResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("SetRetrievalTier"))
+              .build();
+        }
+      }
+    }
+    return getSetRetrievalTierMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.GetRetrievalTierRequest,
+      org.opendedup.grpc.IOService.GetRetrievalTierResponse> getGetRetrievalTierMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetRetrievalTier",
+      requestType = org.opendedup.grpc.IOService.GetRetrievalTierRequest.class,
+      responseType = org.opendedup.grpc.IOService.GetRetrievalTierResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.GetRetrievalTierRequest,
+      org.opendedup.grpc.IOService.GetRetrievalTierResponse> getGetRetrievalTierMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.GetRetrievalTierRequest, org.opendedup.grpc.IOService.GetRetrievalTierResponse> getGetRetrievalTierMethod;
+    if ((getGetRetrievalTierMethod = FileIOServiceGrpc.getGetRetrievalTierMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getGetRetrievalTierMethod = FileIOServiceGrpc.getGetRetrievalTierMethod) == null) {
+          FileIOServiceGrpc.getGetRetrievalTierMethod = getGetRetrievalTierMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.IOService.GetRetrievalTierRequest, org.opendedup.grpc.IOService.GetRetrievalTierResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetRetrievalTier"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.IOService.GetRetrievalTierRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.IOService.GetRetrievalTierResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("GetRetrievalTier"))
+              .build();
+        }
+      }
+    }
+    return getGetRetrievalTierMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -1332,6 +1394,20 @@ public final class FileIOServiceGrpc {
       asyncUnimplementedUnaryCall(getFileNotificationMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void setRetrievalTier(org.opendedup.grpc.IOService.SetRetrievalTierRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.SetRetrievalTierResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getSetRetrievalTierMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void getRetrievalTier(org.opendedup.grpc.IOService.GetRetrievalTierRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.GetRetrievalTierResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetRetrievalTierMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -1565,6 +1641,20 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.IOService.SyncNotificationSubscription,
                 org.opendedup.grpc.FileInfo.FileMessageResponse>(
                   this, METHODID_FILE_NOTIFICATION)))
+          .addMethod(
+            getSetRetrievalTierMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.IOService.SetRetrievalTierRequest,
+                org.opendedup.grpc.IOService.SetRetrievalTierResponse>(
+                  this, METHODID_SET_RETRIEVAL_TIER)))
+          .addMethod(
+            getGetRetrievalTierMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.IOService.GetRetrievalTierRequest,
+                org.opendedup.grpc.IOService.GetRetrievalTierResponse>(
+                  this, METHODID_GET_RETRIEVAL_TIER)))
           .build();
     }
   }
@@ -1849,6 +1939,22 @@ public final class FileIOServiceGrpc {
       asyncServerStreamingCall(
           getChannel().newCall(getFileNotificationMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void setRetrievalTier(org.opendedup.grpc.IOService.SetRetrievalTierRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.SetRetrievalTierResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getSetRetrievalTierMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void getRetrievalTier(org.opendedup.grpc.IOService.GetRetrievalTierRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.GetRetrievalTierResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetRetrievalTierMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -2098,6 +2204,20 @@ public final class FileIOServiceGrpc {
         org.opendedup.grpc.IOService.SyncNotificationSubscription request) {
       return blockingServerStreamingCall(
           getChannel(), getFileNotificationMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.IOService.SetRetrievalTierResponse setRetrievalTier(org.opendedup.grpc.IOService.SetRetrievalTierRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getSetRetrievalTierMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.IOService.GetRetrievalTierResponse getRetrievalTier(org.opendedup.grpc.IOService.GetRetrievalTierRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetRetrievalTierMethod(), getCallOptions(), request);
     }
   }
 
@@ -2373,6 +2493,22 @@ public final class FileIOServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getStatFSMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.IOService.SetRetrievalTierResponse> setRetrievalTier(
+        org.opendedup.grpc.IOService.SetRetrievalTierRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getSetRetrievalTierMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.IOService.GetRetrievalTierResponse> getRetrievalTier(
+        org.opendedup.grpc.IOService.GetRetrievalTierRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetRetrievalTierMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_XATTR_SIZE = 0;
@@ -2408,6 +2544,8 @@ public final class FileIOServiceGrpc {
   private static final int METHODID_GET_CLOUD_META_FILE = 30;
   private static final int METHODID_STAT_FS = 31;
   private static final int METHODID_FILE_NOTIFICATION = 32;
+  private static final int METHODID_SET_RETRIEVAL_TIER = 33;
+  private static final int METHODID_GET_RETRIEVAL_TIER = 34;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -2558,6 +2696,14 @@ public final class FileIOServiceGrpc {
           serviceImpl.fileNotification((org.opendedup.grpc.IOService.SyncNotificationSubscription) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.FileInfo.FileMessageResponse>) responseObserver);
           break;
+        case METHODID_SET_RETRIEVAL_TIER:
+          serviceImpl.setRetrievalTier((org.opendedup.grpc.IOService.SetRetrievalTierRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.SetRetrievalTierResponse>) responseObserver);
+          break;
+        case METHODID_GET_RETRIEVAL_TIER:
+          serviceImpl.getRetrievalTier((org.opendedup.grpc.IOService.GetRetrievalTierRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.GetRetrievalTierResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -2652,6 +2798,8 @@ public final class FileIOServiceGrpc {
               .addMethod(getGetCloudMetaFileMethod())
               .addMethod(getStatFSMethod())
               .addMethod(getFileNotificationMethod())
+              .addMethod(getSetRetrievalTierMethod())
+              .addMethod(getGetRetrievalTierMethod())
               .build();
         }
       }

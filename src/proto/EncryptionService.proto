@@ -1,0 +1,21 @@
+syntax = "proto3";
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
+package org.opendedup.grpc;
+//option java_multiple_files = true;
+import "FileInfo.proto";
+
+
+// Request payload
+message EncryptionKeyVerifyRequest {
+  bytes data = 1;
+}
+
+message EncryptionKeyVerifyResponse {
+  bool accept =1;
+  errorCodes errorCode = 2;
+}
+
+// Defining a Service, a Service can have multiple RPC operations
+service EncryptionService {
+  rpc ValidateCertificate(EncryptionKeyVerifyRequest) returns (EncryptionKeyVerifyResponse);
+}

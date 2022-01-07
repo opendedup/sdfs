@@ -10,8 +10,10 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.mgmt.CloseFile;
 import org.opendedup.sdfs.mgmt.GetCloudFile;
+import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.mgmt.GetCloudMetaFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.OSValidator;
 
 import fuse.FuseFtypeConstants;
@@ -123,6 +125,10 @@ import org.opendedup.grpc.IOService.UnlinkRequest;
 import org.opendedup.grpc.IOService.UnlinkResponse;
 import org.opendedup.grpc.IOService.UtimeRequest;
 import org.opendedup.grpc.IOService.UtimeResponse;
+import org.opendedup.grpc.IOService.SetRetrievalTierRequest;
+import org.opendedup.grpc.IOService.SetRetrievalTierResponse;
+import org.opendedup.grpc.IOService.GetRetrievalTierRequest;
+import org.opendedup.grpc.IOService.GetRetrievalTierResponse;
 
 public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     AtomicLong nextHandleNo = new AtomicLong(1000);
@@ -619,6 +625,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     // SDFSLogger.getLog().info("deleting symlink " + f.getPath());
                     try {
                         MetaDataDedupFile mf = MetaFileStore.getMF(FileIOServiceImpl.resolvePath(path));
+                        SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + path);
+                        ImmuteLinuxFDFileFile(path, false);
                         eventBus.post(new MFileDeleted(mf));
                         Files.delete(p);
                         responseObserver.onNext(b.build());
@@ -635,6 +643,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 } else {
                     File f = FileIOServiceImpl.resolvePath(path);
                     try {
+                        SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + f.getPath());
+                        ImmuteLinuxFDFileFile(f.getPath(), false);
                         MetaFileStore.getMF(f).clearRetentionLock();
                         if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
                             // SDFSLogger.getLog().info("deleted file " +
@@ -693,7 +703,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 return;
             }
             try {
-                if (Main.volume.isFull()) {
+                if (Main.volume.isFull() || Main.volume.isPartitionFull()) {
                     b.setError("Volume Full");
                     b.setErrorCode(errorCodes.ENOSPC);
                     responseObserver.onNext(b.build());
@@ -761,8 +771,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 if (!Main.safeClose)
                     return;
                 if (ch != null) {
+                    ImmuteLinuxFDFileFile(ch.getPath(), false);
                     ch.getDedupFile().unRegisterChannel(ch, -2);
                     CloseFile.close(ch.getFile(), ch.isWrittenTo());
+                    ImmuteLinuxFDFileFile(ch.getPath(), true);
                     ch = null;
                     responseObserver.onNext(b.build());
                     responseObserver.onCompleted();
@@ -778,6 +790,25 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
+            }
+        }
+    }
+
+    public void ImmuteLinuxFDFileFile(String filePath, Boolean isImmutable) {
+        if (OSValidator.isUnix()) {
+            String strCommand = "";
+            if (filePath != null && !filePath.isEmpty()) {
+
+                if (isImmutable) {
+                    SDFSLogger.getLog().info("chattr set Immutable, file: " + filePath);
+                    SDFSLogger.getLog().info("Command::sudo chattr +i -V " + filePath);
+                    strCommand = "sudo chattr +i -V " + filePath;
+                } else {
+                    SDFSLogger.getLog().info("chattr set non-Immutable, file: " + filePath);
+                    SDFSLogger.getLog().info("COmmand::sudo chattr -i -V " + filePath);
+                    strCommand = "sudo chattr -i -V " + filePath;
+                }
+                MgmtWebServer.executeLinuxCmd(strCommand);
             }
         }
     }
@@ -913,6 +944,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 b.setData(ByteString.copyFrom(buf, read));
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
+                HCServiceProxy.set_move_blob(false);
                 return;
             } catch (FileIOError e) {
                 b.setError(e.message);
@@ -2158,6 +2190,78 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             }
         }
     }
+
+    public void setRetrievalTier(SetRetrievalTierRequest req, StreamObserver<SetRetrievalTierResponse> responseObserver) {
+        SetRetrievalTierResponse.Builder b = SetRetrievalTierResponse.newBuilder();
+               if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+                   b.setError("User is not a member of any group with access");
+                   b.setErrorCode(errorCodes.EACCES);
+                   responseObserver.onNext(b.build());
+                   responseObserver.onCompleted();
+               } else {
+               	synchronized(this) {
+               		try {
+                       	String tierType = req.getTierType();
+                       	if (!tierType.isEmpty()) {
+               				SDFSLogger.getLog().info("Tier type: "+tierType);
+               				if(tierType.equalsIgnoreCase("expedited") || tierType.equalsIgnoreCase("standard")
+               						|| tierType.equalsIgnoreCase("bulk") || tierType.equalsIgnoreCase("high")) {
+               					Main.retrievalTier = tierType;
+               					SDFSLogger.getLog().info("Retrieval tier is set to: " +Main.retrievalTier);
+               				} else {
+                   				b.setError("SetRetrievalTier error, not a proper retrieval tier: " +req.getTierType());
+                                   b.setErrorCode(errorCodes.EIO);
+               				}
+               			} else {
+               				b.setError("SetRetrievalTier error, retrieval tier is empty " +req.getTierType());
+                               b.setErrorCode(errorCodes.EIO);
+               			}
+                           responseObserver.onNext(b.build());
+                           responseObserver.onCompleted();
+                           return;
+                       } catch (Exception e) {
+                           b.setError("SetRetrievalTier error "+ req.getTierType());
+                           b.setErrorCode(errorCodes.EIO);
+                           responseObserver.onNext(b.build());
+                           responseObserver.onCompleted();
+                           return;
+                       }
+               	}
+               }
+           }
+
+
+           public void getRetrievalTier(GetRetrievalTierRequest req, StreamObserver<GetRetrievalTierResponse> responseObserver) {
+        GetRetrievalTierResponse.Builder b = GetRetrievalTierResponse.newBuilder();
+               if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+                   b.setError("User is not a member of any group with access");
+                   b.setErrorCode(errorCodes.EACCES);
+                   responseObserver.onNext(b.build());
+                   responseObserver.onCompleted();
+               } else {
+               	synchronized(this) {
+               		try {
+                       	String tierType = Main.retrievalTier;
+                       	if (tierType.equals("")) {
+                       		b.setError("GetRetrievalTier error, retrieval tier is not set explicitly");
+                               b.setErrorCode(errorCodes.EIO);
+               			} else {
+                       		b.setTierType("Tier type: " +tierType);
+                       	}
+                           responseObserver.onNext(b.build());
+                           responseObserver.onCompleted();
+                           return;
+                       } catch (Exception e) {
+                       	b.setTierType("");
+                           b.setError("GetRetrievalTier error");
+                           b.setErrorCode(errorCodes.EIO);
+                           responseObserver.onNext(b.build());
+                           responseObserver.onCompleted();
+                           return;
+                       }
+               	}
+               }
+           }
 
     protected static class FileIOError extends Exception {
         /**

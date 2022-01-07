@@ -30782,7 +30782,7 @@ public final class VolumeServiceOuterClass {
       "t\022\016\n\006maxAge\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"U\n\021" +
       "SetMaxAgeResponse\022\r\n\005error\030\001 \001(\t\0221\n\terro" +
       "rCode\030\002 \001(\0162\036.org.opendedup.grpc.errorCo" +
-      "des2\367\014\n\rVolumeService\022i\n\020AuthenticateUse" +
+      "des2\343\r\n\rVolumeService\022i\n\020AuthenticateUse" +
       "r\022).org.opendedup.grpc.AuthenticationReq" +
       "uest\032*.org.opendedup.grpc.Authentication" +
       "Response\022^\n\rGetVolumeInfo\022%.org.opendedu" +
@@ -30823,8 +30823,11 @@ public final class VolumeServiceOuterClass {
       "SyncVolRequest\032#.org.opendedup.grpc.Sync" +
       "VolResponse\022X\n\tSetMaxAge\022$.org.opendedup" +
       ".grpc.SetMaxAgeRequest\032%.org.opendedup.g" +
-      "rpc.SetMaxAgeResponseB0Z.github.com/open" +
-      "dedup/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "rpc.SetMaxAgeResponse\022j\n\017GetProxyVolumes" +
+      "\022*.org.opendedup.grpc.ProxyVolumeInfoReq" +
+      "uest\032+.org.opendedup.grpc.ProxyVolumeInf" +
+      "oResponseB0Z.github.com/opendedup/sdfs-c" +
+      "lient-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

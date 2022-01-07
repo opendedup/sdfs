@@ -218,7 +218,12 @@ public class MountSDFS implements Daemon, Runnable {
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());
-			System.exit(-1);
+			if(e1.toString().contains("No port Available in range Specified"))
+			{
+				System.exit(-2);
+			}
+			else
+				System.exit(-1);
 		}
 		shutdownHook = new ShutdownHook(sdfsService, cmd.getOptionValue("m"));
 		mountOptions = cmd.getOptionValue("m");

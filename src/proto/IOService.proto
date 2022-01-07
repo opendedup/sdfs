@@ -380,6 +380,7 @@ message SyncNotificationSubscription {
 
 message SetRetrievalTierRequest {
     string tierType = 1;
+    int64 pvolumeID = 2;
 }
 
 message SetRetrievalTierResponse {
@@ -388,6 +389,7 @@ message SetRetrievalTierResponse {
 }
 
 message GetRetrievalTierRequest {
+     int64 pvolumeID = 1;
 }
 
 message GetRetrievalTierResponse {

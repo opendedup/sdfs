@@ -557,6 +557,37 @@ public final class VolumeServiceGrpc {
     return getSetMaxAgeMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest,
+      org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse> getGetProxyVolumesMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetProxyVolumes",
+      requestType = org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest.class,
+      responseType = org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest,
+      org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse> getGetProxyVolumesMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest, org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse> getGetProxyVolumesMethod;
+    if ((getGetProxyVolumesMethod = VolumeServiceGrpc.getGetProxyVolumesMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getGetProxyVolumesMethod = VolumeServiceGrpc.getGetProxyVolumesMethod) == null) {
+          VolumeServiceGrpc.getGetProxyVolumesMethod = getGetProxyVolumesMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest, org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetProxyVolumes"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("GetProxyVolumes"))
+              .build();
+        }
+      }
+    }
+    return getGetProxyVolumesMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -727,6 +758,13 @@ public final class VolumeServiceGrpc {
       asyncUnimplementedUnaryCall(getSetMaxAgeMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void getProxyVolumes(org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetProxyVolumesMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -848,6 +886,13 @@ public final class VolumeServiceGrpc {
                 org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest,
                 org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse>(
                   this, METHODID_SET_MAX_AGE)))
+          .addMethod(
+            getGetProxyVolumesMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest,
+                org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse>(
+                  this, METHODID_GET_PROXY_VOLUMES)))
           .build();
     }
   }
@@ -1004,6 +1049,14 @@ public final class VolumeServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getSetMaxAgeMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void getProxyVolumes(org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetProxyVolumesMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -1140,6 +1193,13 @@ public final class VolumeServiceGrpc {
     public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse setMaxAge(org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest request) {
       return blockingUnaryCall(
           getChannel(), getSetMaxAgeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse getProxyVolumes(org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetProxyVolumesMethod(), getCallOptions(), request);
     }
   }
 
@@ -1295,6 +1355,14 @@ public final class VolumeServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getSetMaxAgeMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse> getProxyVolumes(
+        org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetProxyVolumesMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_AUTHENTICATE_USER = 0;
@@ -1314,6 +1382,7 @@ public final class VolumeServiceGrpc {
   private static final int METHODID_SYNC_FROM_CLOUD_VOLUME = 14;
   private static final int METHODID_SYNC_CLOUD_VOLUME = 15;
   private static final int METHODID_SET_MAX_AGE = 16;
+  private static final int METHODID_GET_PROXY_VOLUMES = 17;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1400,6 +1469,10 @@ public final class VolumeServiceGrpc {
           serviceImpl.setMaxAge((org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse>) responseObserver);
           break;
+        case METHODID_GET_PROXY_VOLUMES:
+          serviceImpl.getProxyVolumes((org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.ProxyVolumeInfoResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -1478,6 +1551,7 @@ public final class VolumeServiceGrpc {
               .addMethod(getSyncFromCloudVolumeMethod())
               .addMethod(getSyncCloudVolumeMethod())
               .addMethod(getSetMaxAgeMethod())
+              .addMethod(getGetProxyVolumesMethod())
               .build();
         }
       }

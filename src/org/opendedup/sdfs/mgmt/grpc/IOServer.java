@@ -1,5 +1,9 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
+
+import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFactory;
+
+
 import org.apache.log4j.Logger;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -33,6 +37,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -40,6 +45,7 @@ import javax.net.ssl.SSLSession;
 
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
+import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 
@@ -47,6 +53,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
+import java.util.concurrent.ForkJoinWorkerThread;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class IOServer {
   private Server server;
@@ -171,8 +183,9 @@ public class IOServer {
     logger.info(
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads);
     SocketAddress address = new InetSocketAddress(host, port);
+
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
-        .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
+        .addService(new StorageServiceImpl()).executor(getExecutor(Main.writeThreads))
         .maxInboundMessageSize(Main.CHUNK_LENGTH * 3).maxInboundMetadataSize(Main.CHUNK_LENGTH * 3)
         .addService(new FileIOServiceImpl())
         .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())
@@ -279,4 +292,30 @@ public class IOServer {
     }
   }
 
+  ExecutorService getExecutor(int asyncThreads) {
+    // TODO(carl-mastrangelo): This should not be necessary.  I don't know where this should be
+    // put.  Move it somewhere else, or remove it if no longer necessary.
+    // See: https://github.com/grpc/grpc-java/issues/2119
+    return new ForkJoinPool(asyncThreads,
+        new ForkJoinWorkerThreadFactory() {
+          final AtomicInteger num = new AtomicInteger();
+          @Override
+          public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+            ForkJoinWorkerThread thread = defaultForkJoinWorkerThreadFactory.newThread(pool);
+            thread.setDaemon(true);
+            thread.setName("server-worker-" + "-" + num.getAndIncrement());
+            return thread;
+          }
+        }, new EHanderler(), true /* async */);
+  }
+
+  private static class EHanderler implements Thread.UncaughtExceptionHandler {
+
+    @Override
+    public void uncaughtException(Thread arg0, Throwable arg1) {
+      SDFSLogger.getLog().warn("in thread " + arg0.toString(),arg1);
+
+    }
+
+  }
 }
