@@ -13,6 +13,7 @@ message EncryptionKeyVerifyRequest {
 message EncryptionKeyVerifyResponse {
   bool accept =1;
   errorCodes errorCode = 2;
+  string error = 3;
 }
 
 // Defining a Service, a Service can have multiple RPC operations

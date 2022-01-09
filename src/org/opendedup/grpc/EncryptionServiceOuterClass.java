@@ -534,6 +534,18 @@ public final class EncryptionServiceOuterClass {
      * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+
+    /**
+     * <code>string error = 3;</code>
+     * @return The error.
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 3;</code>
+     * @return The bytes for error.
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.EncryptionKeyVerifyResponse}
@@ -549,6 +561,7 @@ public final class EncryptionServiceOuterClass {
     }
     private EncryptionKeyVerifyResponse() {
       errorCode_ = 0;
+      error_ = "";
     }
 
     @java.lang.Override
@@ -590,6 +603,12 @@ public final class EncryptionServiceOuterClass {
               int rawValue = input.readEnum();
 
               errorCode_ = rawValue;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
               break;
             }
             default: {
@@ -654,6 +673,44 @@ public final class EncryptionServiceOuterClass {
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
     }
 
+    public static final int ERROR_FIELD_NUMBER = 3;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 3;</code>
+     * @return The error.
+     */
+    @java.lang.Override
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 3;</code>
+     * @return The bytes for error.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -674,6 +731,9 @@ public final class EncryptionServiceOuterClass {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(2, errorCode_);
       }
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, error_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -690,6 +750,9 @@ public final class EncryptionServiceOuterClass {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, errorCode_);
+      }
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, error_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -709,6 +772,8 @@ public final class EncryptionServiceOuterClass {
       if (getAccept()
           != other.getAccept()) return false;
       if (errorCode_ != other.errorCode_) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -725,6 +790,8 @@ public final class EncryptionServiceOuterClass {
           getAccept());
       hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
       hash = (53 * hash) + errorCode_;
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -862,6 +929,8 @@ public final class EncryptionServiceOuterClass {
 
         errorCode_ = 0;
 
+        error_ = "";
+
         return this;
       }
 
@@ -890,6 +959,7 @@ public final class EncryptionServiceOuterClass {
         org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse result = new org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse(this);
         result.accept_ = accept_;
         result.errorCode_ = errorCode_;
+        result.error_ = error_;
         onBuilt();
         return result;
       }
@@ -943,6 +1013,10 @@ public final class EncryptionServiceOuterClass {
         }
         if (other.errorCode_ != 0) {
           setErrorCodeValue(other.getErrorCodeValue());
+        }
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -1057,6 +1131,82 @@ public final class EncryptionServiceOuterClass {
         onChanged();
         return this;
       }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 3;</code>
+       * @return The error.
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 3;</code>
+       * @return The bytes for error.
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 3;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 3;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -1131,15 +1281,15 @@ public final class EncryptionServiceOuterClass {
     java.lang.String[] descriptorData = {
       "\n\027EncryptionService.proto\022\022org.opendedup" +
       ".grpc\032\016FileInfo.proto\"*\n\032EncryptionKeyVe" +
-      "rifyRequest\022\014\n\004data\030\001 \001(\014\"`\n\033EncryptionK" +
+      "rifyRequest\022\014\n\004data\030\001 \001(\014\"o\n\033EncryptionK" +
       "eyVerifyResponse\022\016\n\006accept\030\001 \001(\010\0221\n\terro" +
       "rCode\030\002 \001(\0162\036.org.opendedup.grpc.errorCo" +
-      "des2\213\001\n\021EncryptionService\022v\n\023ValidateCer" +
-      "tificate\022..org.opendedup.grpc.Encryption" +
-      "KeyVerifyRequest\032/.org.opendedup.grpc.En" +
-      "cryptionKeyVerifyResponseB0Z.github.com/" +
-      "opendedup/sdfs-client-go/sdfs/;sdfsb\006pro" +
-      "to3"
+      "des\022\r\n\005error\030\003 \001(\t2\213\001\n\021EncryptionService" +
+      "\022v\n\023ValidateCertificate\022..org.opendedup." +
+      "grpc.EncryptionKeyVerifyRequest\032/.org.op" +
+      "endedup.grpc.EncryptionKeyVerifyResponse" +
+      "B0Z.github.com/opendedup/sdfs-client-go/" +
+      "sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1157,7 +1307,7 @@ public final class EncryptionServiceOuterClass {
     internal_static_org_opendedup_grpc_EncryptionKeyVerifyResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_EncryptionKeyVerifyResponse_descriptor,
-        new java.lang.String[] { "Accept", "ErrorCode", });
+        new java.lang.String[] { "Accept", "ErrorCode", "Error", });
     org.opendedup.grpc.FileInfo.getDescriptor();
   }
 

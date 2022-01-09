@@ -127,7 +127,6 @@ public class IOServer {
       EasyX509TrustManager tm = new EasyX509TrustManager();
       sslClientContextBuilder = SslContextBuilder.forServer(pvtKey, serverCertChain)
           .clientAuth(ClientAuth.REQUIRE).trustManager(tm);
-
     } else {
       sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath),
           new File(privateKeyFilePath));
@@ -189,7 +188,7 @@ public class IOServer {
         .maxInboundMessageSize(Main.CHUNK_LENGTH * 3).maxInboundMetadataSize(Main.CHUNK_LENGTH * 3)
         .addService(new FileIOServiceImpl())
         .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())
-        .addService(new SdfsUserServiceImpl());
+        .addService(new SdfsUserServiceImpl()).addService(new EncryptionService());
     SDFSLogger.getLog().info("Set Max Message Size to " + (Main.CHUNK_LENGTH * 2));
     if (useSSL) {
       if (useClientTLS) {
