@@ -1,8 +1,6 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
-
 import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFactory;
-
 
 import org.apache.log4j.Logger;
 import org.opendedup.logging.SDFSLogger;
@@ -24,10 +22,13 @@ import io.grpc.ServerCall.Listener;
 import io.grpc.ServerCallHandler;
 import io.grpc.Metadata.Key;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.security.PrivateKey;
@@ -59,6 +60,7 @@ import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.xml.bind.DatatypeConverter;
 
 public class IOServer {
   private Server server;
@@ -69,6 +71,7 @@ public class IOServer {
   private X509Certificate getX509Certificate(String certPath) throws Exception {
     FileInputStream is = null;
     try {
+      SDFSLogger.getLog().info("Cert Path  = " + certPath);
       CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
       is = new FileInputStream(certPath);
       X509Certificate cer = (X509Certificate) certFactory.generateCertificate(is);
@@ -122,8 +125,23 @@ public class IOServer {
       Method method2 = beanClass.getMethod(key_method);
       PrivateKey pvtKey = (PrivateKey) method2.invoke(beanObj);
       urlClassLoader.close();
-
+      String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
+      new File(keydir).mkdirs();
+      String _certChainFilePath = keydir + File.separator + "tls_key.pem";
+      String _privateKeyFilePath = keydir + File.separator + "tls_key.key";
+      FileOutputStream fout = new FileOutputStream(_privateKeyFilePath);
+      try {
+        writeKey(fout, pvtKey);
+      } catch (Exception e) {
+        SDFSLogger.getLog().error(e);
+      }
+      fout = new FileOutputStream(_certChainFilePath);
       X509Certificate serverCertChain = getX509Certificate(certChainFilePath);
+      try {
+        writeCertificate(fout, serverCertChain);
+      } catch (Exception e) {
+        SDFSLogger.getLog().error(e);
+      }
       EasyX509TrustManager tm = new EasyX509TrustManager();
       sslClientContextBuilder = SslContextBuilder.forServer(pvtKey, serverCertChain)
           .clientAuth(ClientAuth.REQUIRE).trustManager(tm);
@@ -138,6 +156,45 @@ public class IOServer {
       th.start();
     }
     return GrpcSslContexts.configure(sslClientContextBuilder);
+  }
+
+  static void writeBufferBase64(OutputStream out, byte[] bufIn) throws IOException {
+    final byte[] buf = DatatypeConverter.printBase64Binary(bufIn).getBytes();
+    final int BLOCK_SIZE = 64;
+    for (int i = 0; i < buf.length; i += BLOCK_SIZE) {
+      out.write(buf, i, Math.min(BLOCK_SIZE, buf.length - i));
+      out.write('\r');
+      out.write('\n');
+    }
+  }
+
+  static void writeCertificate(OutputStream out, X509Certificate crt) throws Exception {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    baos.write("-----BEGIN CERTIFICATE-----\r\n".getBytes());
+    writeBufferBase64(baos, crt.getEncoded());
+    baos.write("-----END CERTIFICATE-----\r\n".getBytes());
+    out.write(baos.toByteArray());
+    out.flush();
+    out.close();
+    System.out.println(baos.toString());
+  }
+
+  static void writeKey(OutputStream out, PrivateKey pk) throws Exception {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final String fmt = pk.getFormat();
+    if ("PKCS#8".equals(fmt)) {
+      baos.write("-----BEGIN PRIVATE KEY-----\r\n".getBytes());
+      writeBufferBase64(baos, pk.getEncoded());
+      baos.write("-----END PRIVATE KEY-----\r\n".getBytes());
+    } else if ("PKCS#1".equals(fmt)) {
+      baos.write("-----BEGIN RSA PRIVATE KEY-----\r\n".getBytes());
+      writeBufferBase64(baos, pk.getEncoded());
+      baos.write("-----END RSA PRIVATE KEY-----\r\n".getBytes());
+    }
+    out.write(baos.toByteArray());
+    out.flush();
+    out.close();
+    System.out.println(baos.toString());
   }
 
   public static boolean keyFileExists() {
@@ -195,6 +252,14 @@ public class IOServer {
         try {
           b.sslContext(
               getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath).build());
+        } catch (Exception e) {
+          SDFSLogger.getLog().error("Unable to build ssl context" + e);
+          throw new IOException(e);
+        }
+      } else if (!Main.authJarFilePath.equals("") && !Main.authClassInfo.equals("")) {
+        try {
+          //Export Server Cert
+              getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath);
         } catch (Exception e) {
           SDFSLogger.getLog().error("Unable to build ssl context" + e);
           throw new IOException(e);
@@ -292,12 +357,14 @@ public class IOServer {
   }
 
   ExecutorService getExecutor(int asyncThreads) {
-    // TODO(carl-mastrangelo): This should not be necessary.  I don't know where this should be
-    // put.  Move it somewhere else, or remove it if no longer necessary.
+    // TODO(carl-mastrangelo): This should not be necessary. I don't know where this
+    // should be
+    // put. Move it somewhere else, or remove it if no longer necessary.
     // See: https://github.com/grpc/grpc-java/issues/2119
     return new ForkJoinPool(asyncThreads,
         new ForkJoinWorkerThreadFactory() {
           final AtomicInteger num = new AtomicInteger();
+
           @Override
           public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
             ForkJoinWorkerThread thread = defaultForkJoinWorkerThreadFactory.newThread(pool);
@@ -312,7 +379,7 @@ public class IOServer {
 
     @Override
     public void uncaughtException(Thread arg0, Throwable arg1) {
-      SDFSLogger.getLog().warn("in thread " + arg0.toString(),arg1);
+      SDFSLogger.getLog().warn("in thread " + arg0.toString(), arg1);
 
     }
 

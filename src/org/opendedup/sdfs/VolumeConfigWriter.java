@@ -792,6 +792,7 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("prod-config-variable", this.prodConfigVariable);
 		sdfscli.setAttribute("use-ssl", Boolean.toString(this.sdfsCliSSL));
 		sdfscli.setAttribute("permissions-file", this.permissionsFile);
+		sdfscli.setAttribute("encrypt-config", Boolean.toString(this.encryptConfig));
 		try {
 			sdfscli.setAttribute("password",
 					HashFunctions.getSHAHash(this.sdfsCliPassword.getBytes(), this.sdfsCliSalt.getBytes()));
