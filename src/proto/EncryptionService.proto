@@ -7,7 +7,7 @@ import "FileInfo.proto";
 
 // Request payload
 message EncryptionKeyVerifyRequest {
-  bytes data = 1;
+  string hash = 1;
 }
 
 message EncryptionKeyVerifyResponse {

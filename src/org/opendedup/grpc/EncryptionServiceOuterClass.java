@@ -19,10 +19,16 @@ public final class EncryptionServiceOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>bytes data = 1;</code>
-     * @return The data.
+     * <code>string hash = 1;</code>
+     * @return The hash.
      */
-    com.google.protobuf.ByteString getData();
+    java.lang.String getHash();
+    /**
+     * <code>string hash = 1;</code>
+     * @return The bytes for hash.
+     */
+    com.google.protobuf.ByteString
+        getHashBytes();
   }
   /**
    * <pre>
@@ -41,7 +47,7 @@ public final class EncryptionServiceOuterClass {
       super(builder);
     }
     private EncryptionKeyVerifyRequest() {
-      data_ = com.google.protobuf.ByteString.EMPTY;
+      hash_ = "";
     }
 
     @java.lang.Override
@@ -75,8 +81,9 @@ public final class EncryptionServiceOuterClass {
               done = true;
               break;
             case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
 
-              data_ = input.readBytes();
+              hash_ = s;
               break;
             }
             default: {
@@ -111,15 +118,42 @@ public final class EncryptionServiceOuterClass {
               org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest.class, org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest.Builder.class);
     }
 
-    public static final int DATA_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString data_;
+    public static final int HASH_FIELD_NUMBER = 1;
+    private volatile java.lang.Object hash_;
     /**
-     * <code>bytes data = 1;</code>
-     * @return The data.
+     * <code>string hash = 1;</code>
+     * @return The hash.
      */
     @java.lang.Override
-    public com.google.protobuf.ByteString getData() {
-      return data_;
+    public java.lang.String getHash() {
+      java.lang.Object ref = hash_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        hash_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string hash = 1;</code>
+     * @return The bytes for hash.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getHashBytes() {
+      java.lang.Object ref = hash_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        hash_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     private byte memoizedIsInitialized = -1;
@@ -136,8 +170,8 @@ public final class EncryptionServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!data_.isEmpty()) {
-        output.writeBytes(1, data_);
+      if (!getHashBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, hash_);
       }
       unknownFields.writeTo(output);
     }
@@ -148,9 +182,8 @@ public final class EncryptionServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!data_.isEmpty()) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, data_);
+      if (!getHashBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, hash_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -167,8 +200,8 @@ public final class EncryptionServiceOuterClass {
       }
       org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest other = (org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest) obj;
 
-      if (!getData()
-          .equals(other.getData())) return false;
+      if (!getHash()
+          .equals(other.getHash())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -180,8 +213,8 @@ public final class EncryptionServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + DATA_FIELD_NUMBER;
-      hash = (53 * hash) + getData().hashCode();
+      hash = (37 * hash) + HASH_FIELD_NUMBER;
+      hash = (53 * hash) + getHash().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -319,7 +352,7 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        data_ = com.google.protobuf.ByteString.EMPTY;
+        hash_ = "";
 
         return this;
       }
@@ -347,7 +380,7 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest buildPartial() {
         org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest result = new org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest(this);
-        result.data_ = data_;
+        result.hash_ = hash_;
         onBuilt();
         return result;
       }
@@ -396,8 +429,9 @@ public final class EncryptionServiceOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest other) {
         if (other == org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest.getDefaultInstance()) return this;
-        if (other.getData() != com.google.protobuf.ByteString.EMPTY) {
-          setData(other.getData());
+        if (!other.getHash().isEmpty()) {
+          hash_ = other.hash_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -428,36 +462,78 @@ public final class EncryptionServiceOuterClass {
         return this;
       }
 
-      private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
+      private java.lang.Object hash_ = "";
       /**
-       * <code>bytes data = 1;</code>
-       * @return The data.
+       * <code>string hash = 1;</code>
+       * @return The hash.
        */
-      @java.lang.Override
-      public com.google.protobuf.ByteString getData() {
-        return data_;
+      public java.lang.String getHash() {
+        java.lang.Object ref = hash_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          hash_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
       }
       /**
-       * <code>bytes data = 1;</code>
-       * @param value The data to set.
+       * <code>string hash = 1;</code>
+       * @return The bytes for hash.
+       */
+      public com.google.protobuf.ByteString
+          getHashBytes() {
+        java.lang.Object ref = hash_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          hash_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string hash = 1;</code>
+       * @param value The hash to set.
        * @return This builder for chaining.
        */
-      public Builder setData(com.google.protobuf.ByteString value) {
+      public Builder setHash(
+          java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        data_ = value;
+        hash_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>bytes data = 1;</code>
+       * <code>string hash = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearData() {
+      public Builder clearHash() {
         
-        data_ = getDefaultInstance().getData();
+        hash_ = getDefaultInstance().getHash();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string hash = 1;</code>
+       * @param value The bytes for hash to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHashBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        hash_ = value;
         onChanged();
         return this;
       }
@@ -3787,7 +3863,7 @@ public final class EncryptionServiceOuterClass {
     java.lang.String[] descriptorData = {
       "\n\027EncryptionService.proto\022\022org.opendedup" +
       ".grpc\032\016FileInfo.proto\"*\n\032EncryptionKeyVe" +
-      "rifyRequest\022\014\n\004data\030\001 \001(\014\"o\n\033EncryptionK" +
+      "rifyRequest\022\014\n\004hash\030\001 \001(\t\"o\n\033EncryptionK" +
       "eyVerifyResponse\022\016\n\006accept\030\001 \001(\010\0221\n\terro" +
       "rCode\030\002 \001(\0162\036.org.opendedup.grpc.errorCo" +
       "des\022\r\n\005error\030\003 \001(\t\"\031\n\027ExportServerCertRe" +
@@ -3820,7 +3896,7 @@ public final class EncryptionServiceOuterClass {
     internal_static_org_opendedup_grpc_EncryptionKeyVerifyRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_EncryptionKeyVerifyRequest_descriptor,
-        new java.lang.String[] { "Data", });
+        new java.lang.String[] { "Hash", });
     internal_static_org_opendedup_grpc_EncryptionKeyVerifyResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_org_opendedup_grpc_EncryptionKeyVerifyResponse_fieldAccessorTable = new

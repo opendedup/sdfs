@@ -69,15 +69,22 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
         }
         try {
             this.hl.readLock().lock();
-            if (certFactory == null) {
-                certFactory = CertificateFactory.getInstance("X.509");
+            boolean found = this.keys.contains(request.getHash());
+            if (!found) {
+                this.hl.readLock().unlock();
+                try {
+                    this.hl.writeLock().lock();
+                    found = this.keys.contains(request.getHash());
+                    if (!found) {
+                        this.loadTrustManager();
+                        found = this.keys.contains(request.getHash());
+                    }
+                } finally {
+                    this.hl.writeLock().unlock();
+                    this.hl.readLock().lock();
+                }
             }
-            byte[] bt = new byte[request.getData().size()];
-            request.getData().copyTo(bt, 0);
-            InputStream in = new ByteArrayInputStream(bt);
-            X509Certificate cert = (X509Certificate) certFactory.generateCertificate(in);
-            SDFSLogger.getLog().info("Recieved Cert " + cert.getSubjectDN());
-            b.setAccept(true);
+            b.setAccept(found);
         } catch (NullPointerException e) {
             b.setError(e.getMessage());
             b.setErrorCode(errorCodes.ENOENT);
