@@ -16,9 +16,6 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
- * <pre>
- * Defining a Service, a Service can have multiple RPC operations
- * </pre>
  */
 @javax.annotation.Generated(
     value = "by gRPC proto compiler (version 1.30.2)",
@@ -59,6 +56,37 @@ public final class EncryptionServiceGrpc {
       }
     }
     return getValidateCertificateMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest,
+      org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse> getExportServerCertificateMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ExportServerCertificate",
+      requestType = org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest.class,
+      responseType = org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest,
+      org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse> getExportServerCertificateMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest, org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse> getExportServerCertificateMethod;
+    if ((getExportServerCertificateMethod = EncryptionServiceGrpc.getExportServerCertificateMethod) == null) {
+      synchronized (EncryptionServiceGrpc.class) {
+        if ((getExportServerCertificateMethod = EncryptionServiceGrpc.getExportServerCertificateMethod) == null) {
+          EncryptionServiceGrpc.getExportServerCertificateMethod = getExportServerCertificateMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest, org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ExportServerCertificate"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new EncryptionServiceMethodDescriptorSupplier("ExportServerCertificate"))
+              .build();
+        }
+      }
+    }
+    return getExportServerCertificateMethod;
   }
 
   /**
@@ -106,9 +134,6 @@ public final class EncryptionServiceGrpc {
   }
 
   /**
-   * <pre>
-   * Defining a Service, a Service can have multiple RPC operations
-   * </pre>
    */
   public static abstract class EncryptionServiceImplBase implements io.grpc.BindableService {
 
@@ -117,6 +142,13 @@ public final class EncryptionServiceGrpc {
     public void validateCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getValidateCertificateMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void exportServerCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getExportServerCertificateMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -128,14 +160,18 @@ public final class EncryptionServiceGrpc {
                 org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest,
                 org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse>(
                   this, METHODID_VALIDATE_CERTIFICATE)))
+          .addMethod(
+            getExportServerCertificateMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest,
+                org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse>(
+                  this, METHODID_EXPORT_SERVER_CERTIFICATE)))
           .build();
     }
   }
 
   /**
-   * <pre>
-   * Defining a Service, a Service can have multiple RPC operations
-   * </pre>
    */
   public static final class EncryptionServiceStub extends io.grpc.stub.AbstractAsyncStub<EncryptionServiceStub> {
     private EncryptionServiceStub(
@@ -156,12 +192,17 @@ public final class EncryptionServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getValidateCertificateMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void exportServerCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getExportServerCertificateMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
-   * <pre>
-   * Defining a Service, a Service can have multiple RPC operations
-   * </pre>
    */
   public static final class EncryptionServiceBlockingStub extends io.grpc.stub.AbstractBlockingStub<EncryptionServiceBlockingStub> {
     private EncryptionServiceBlockingStub(
@@ -181,12 +222,16 @@ public final class EncryptionServiceGrpc {
       return blockingUnaryCall(
           getChannel(), getValidateCertificateMethod(), getCallOptions(), request);
     }
+
+    /**
+     */
+    public org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse exportServerCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getExportServerCertificateMethod(), getCallOptions(), request);
+    }
   }
 
   /**
-   * <pre>
-   * Defining a Service, a Service can have multiple RPC operations
-   * </pre>
    */
   public static final class EncryptionServiceFutureStub extends io.grpc.stub.AbstractFutureStub<EncryptionServiceFutureStub> {
     private EncryptionServiceFutureStub(
@@ -207,9 +252,18 @@ public final class EncryptionServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getValidateCertificateMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse> exportServerCertificate(
+        org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getExportServerCertificateMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_VALIDATE_CERTIFICATE = 0;
+  private static final int METHODID_EXPORT_SERVER_CERTIFICATE = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -231,6 +285,10 @@ public final class EncryptionServiceGrpc {
         case METHODID_VALIDATE_CERTIFICATE:
           serviceImpl.validateCertificate((org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse>) responseObserver);
+          break;
+        case METHODID_EXPORT_SERVER_CERTIFICATE:
+          serviceImpl.exportServerCertificate((org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -294,6 +352,7 @@ public final class EncryptionServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new EncryptionServiceFileDescriptorSupplier())
               .addMethod(getValidateCertificateMethod())
+              .addMethod(getExportServerCertificateMethod())
               .build();
         }
       }

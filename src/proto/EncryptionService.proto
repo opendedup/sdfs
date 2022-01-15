@@ -16,7 +16,17 @@ message EncryptionKeyVerifyResponse {
   string error = 3;
 }
 
-// Defining a Service, a Service can have multiple RPC operations
+message ExportServerCertRequest {
+}
+
+message ExportServerCertResponse {
+  string privateKeyFilePath = 1;
+  string certChainFilePath = 2;
+  errorCodes errorCode = 3;
+  string error = 4;
+}
+
 service EncryptionService {
   rpc ValidateCertificate(EncryptionKeyVerifyRequest) returns (EncryptionKeyVerifyResponse);
+  rpc ExportServerCertificate(ExportServerCertRequest) returns (ExportServerCertResponse);
 }

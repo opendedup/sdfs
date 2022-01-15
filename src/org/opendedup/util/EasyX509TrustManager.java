@@ -101,12 +101,12 @@ public class EasyX509TrustManager implements X509TrustManager {
 	public void checkClientTrusted(X509Certificate[] certificates,
 			String authType) throws CertificateException {
 		try {
-			logger.info("EASYX509 checkClientTrusted");
+			logger.info("EASYX509 checkClientTrusted authtype="+authType);
 			File trustedCertificatesDir=new File(IOServer.trustStoreDir);
 			loadTrustManager(trustedCertificatesDir,ClientAuth.REQUIRE);
 			standardTrustManager.checkClientTrusted(certificates, authType);
         } catch (Exception e) {
-        	logger.info("EASYX509 checkClientTrusted caught exception");
+        	logger.error("EASYX509 checkClientTrusted caught exception",e);
 			throw new CertificateException("Error occurred while setting up trust manager." + e.getCause(), e);
         }
 	}

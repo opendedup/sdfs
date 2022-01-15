@@ -123,23 +123,7 @@ public class IOServer {
       Method method2 = beanClass.getMethod(key_method);
       PrivateKey pvtKey = (PrivateKey) method2.invoke(beanObj);
       urlClassLoader.close();
-      String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
-      new File(keydir).mkdirs();
-      String _certChainFilePath = keydir + File.separator + "tls_key.pem";
-      String _privateKeyFilePath = keydir + File.separator + "tls_key.key";
-      FileOutputStream fout = new FileOutputStream(_privateKeyFilePath);
-      try {
-        writeKey(fout, pvtKey);
-      } catch (Exception e) {
-        SDFSLogger.getLog().error(e);
-      }
-      fout = new FileOutputStream(_certChainFilePath);
       X509Certificate serverCertChain = getX509Certificate(certChainFilePath);
-      try {
-        writeCertificate(fout, serverCertChain);
-      } catch (Exception e) {
-        SDFSLogger.getLog().error(e);
-      }
       EasyX509TrustManager tm = new EasyX509TrustManager();
       sslClientContextBuilder = SslContextBuilder.forServer(pvtKey, serverCertChain)
           .clientAuth(ClientAuth.REQUIRE).trustManager(tm);
@@ -174,7 +158,6 @@ public class IOServer {
     out.write(baos.toByteArray());
     out.flush();
     out.close();
-    System.out.println(baos.toString());
   }
 
   static void writeKey(OutputStream out, PrivateKey pk) throws Exception {
@@ -192,7 +175,6 @@ public class IOServer {
     out.write(baos.toByteArray());
     out.flush();
     out.close();
-    System.out.println(baos.toString());
   }
 
   public static boolean keyFileExists() {
@@ -214,6 +196,37 @@ public class IOServer {
       return false;
     }
     return true;
+  }
+
+  private EncryptionService getEncService() throws Exception {
+    try {
+      List<String> classInfo = Arrays.asList(Main.authClassInfo.split(DELIMITER));
+      String loadclass = classInfo.get(0);
+      String key_method = classInfo.get(1);
+      String path_method = classInfo.get(2);
+      URL[] classLoaderUrls = new URL[] { new URL("file:" + Main.authJarFilePath) };
+      // Create a new URLClassLoader
+      URLClassLoader urlClassLoader = new URLClassLoader(classLoaderUrls);
+      // Load the target class
+      Class<?> beanClass = urlClassLoader.loadClass(loadclass);
+      // Create a new instance from the loaded class
+      Constructor<?> constructor = beanClass.getConstructor();
+      Object beanObj = constructor.newInstance();
+      // Getting a method from the loaded class and invoke it
+      Method method = beanClass.getMethod(path_method);
+      String path = (String) method.invoke(beanObj);
+      List<String> prodInfo = Arrays.asList(path.split(DELIMITER));
+      String certChainFilePath = prodInfo.get(0);
+      trustStoreDir = prodInfo.get(1);
+      // Getting a method from the loaded class and invoke it
+      Method method2 = beanClass.getMethod(key_method);
+      PrivateKey pvtKey = (PrivateKey) method2.invoke(beanObj);
+      urlClassLoader.close();
+      X509Certificate serverCertChain = getX509Certificate(certChainFilePath);
+      return new EncryptionService(trustStoreDir, pvtKey, serverCertChain);
+    } catch (Exception e) {
+      throw new Exception(e);
+    }
   }
 
   public void start(boolean useSSL, boolean useClientTLS, String host, int port) throws IOException {
@@ -243,21 +256,22 @@ public class IOServer {
         .maxInboundMessageSize(Main.CHUNK_LENGTH * 3).maxInboundMetadataSize(Main.CHUNK_LENGTH * 3)
         .addService(new FileIOServiceImpl())
         .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())
-        .addService(new SdfsUserServiceImpl()).addService(new EncryptionService());
+        .addService(new SdfsUserServiceImpl());
+    if (!Main.authJarFilePath.equals("") && !Main.authClassInfo.equals("")) {
+      try {
+        b.addService(this.getEncService());
+        SDFSLogger.getLog().info("Added EncryptionService");
+      } catch (Exception e) {
+        SDFSLogger.getLog().error(e);
+        throw new IOException(e);
+      }
+    }
     SDFSLogger.getLog().info("Set Max Message Size to " + (Main.CHUNK_LENGTH * 2));
     if (useSSL) {
       if (useClientTLS) {
         try {
           b.sslContext(
               getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath).build());
-        } catch (Exception e) {
-          SDFSLogger.getLog().error("Unable to build ssl context" + e);
-          throw new IOException(e);
-        }
-      } else if (!Main.authJarFilePath.equals("") && !Main.authClassInfo.equals("")) {
-        try {
-          //Export Server Cert
-              getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath);
         } catch (Exception e) {
           SDFSLogger.getLog().error("Unable to build ssl context" + e);
           throw new IOException(e);
