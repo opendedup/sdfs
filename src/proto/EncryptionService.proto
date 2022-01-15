@@ -26,7 +26,16 @@ message ExportServerCertResponse {
   string error = 4;
 }
 
+message DeleteExportedCertRequest {
+}
+
+message DeleteExportedCertResponse {
+  errorCodes errorCode = 1;
+  string error = 2;
+}
+
 service EncryptionService {
   rpc ValidateCertificate(EncryptionKeyVerifyRequest) returns (EncryptionKeyVerifyResponse);
   rpc ExportServerCertificate(ExportServerCertRequest) returns (ExportServerCertResponse);
+  rpc DeleteExportedCert(DeleteExportedCertRequest) returns (DeleteExportedCertResponse);
 }

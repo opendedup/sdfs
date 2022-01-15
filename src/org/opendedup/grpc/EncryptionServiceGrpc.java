@@ -89,6 +89,37 @@ public final class EncryptionServiceGrpc {
     return getExportServerCertificateMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest,
+      org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse> getDeleteExportedCertMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteExportedCert",
+      requestType = org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest.class,
+      responseType = org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest,
+      org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse> getDeleteExportedCertMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest, org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse> getDeleteExportedCertMethod;
+    if ((getDeleteExportedCertMethod = EncryptionServiceGrpc.getDeleteExportedCertMethod) == null) {
+      synchronized (EncryptionServiceGrpc.class) {
+        if ((getDeleteExportedCertMethod = EncryptionServiceGrpc.getDeleteExportedCertMethod) == null) {
+          EncryptionServiceGrpc.getDeleteExportedCertMethod = getDeleteExportedCertMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest, org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteExportedCert"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new EncryptionServiceMethodDescriptorSupplier("DeleteExportedCert"))
+              .build();
+        }
+      }
+    }
+    return getDeleteExportedCertMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -151,6 +182,13 @@ public final class EncryptionServiceGrpc {
       asyncUnimplementedUnaryCall(getExportServerCertificateMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void deleteExportedCert(org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getDeleteExportedCertMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -167,6 +205,13 @@ public final class EncryptionServiceGrpc {
                 org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest,
                 org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse>(
                   this, METHODID_EXPORT_SERVER_CERTIFICATE)))
+          .addMethod(
+            getDeleteExportedCertMethod(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest,
+                org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse>(
+                  this, METHODID_DELETE_EXPORTED_CERT)))
           .build();
     }
   }
@@ -200,6 +245,14 @@ public final class EncryptionServiceGrpc {
       asyncUnaryCall(
           getChannel().newCall(getExportServerCertificateMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void deleteExportedCert(org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getDeleteExportedCertMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -228,6 +281,13 @@ public final class EncryptionServiceGrpc {
     public org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse exportServerCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest request) {
       return blockingUnaryCall(
           getChannel(), getExportServerCertificateMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse deleteExportedCert(org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getDeleteExportedCertMethod(), getCallOptions(), request);
     }
   }
 
@@ -260,10 +320,19 @@ public final class EncryptionServiceGrpc {
       return futureUnaryCall(
           getChannel().newCall(getExportServerCertificateMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse> deleteExportedCert(
+        org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getDeleteExportedCertMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_VALIDATE_CERTIFICATE = 0;
   private static final int METHODID_EXPORT_SERVER_CERTIFICATE = 1;
+  private static final int METHODID_DELETE_EXPORTED_CERT = 2;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -289,6 +358,10 @@ public final class EncryptionServiceGrpc {
         case METHODID_EXPORT_SERVER_CERTIFICATE:
           serviceImpl.exportServerCertificate((org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse>) responseObserver);
+          break;
+        case METHODID_DELETE_EXPORTED_CERT:
+          serviceImpl.deleteExportedCert((org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -353,6 +426,7 @@ public final class EncryptionServiceGrpc {
               .setSchemaDescriptor(new EncryptionServiceFileDescriptorSupplier())
               .addMethod(getValidateCertificateMethod())
               .addMethod(getExportServerCertificateMethod())
+              .addMethod(getDeleteExportedCertMethod())
               .build();
         }
       }

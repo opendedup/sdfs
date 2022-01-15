@@ -23,6 +23,8 @@ import java.io.FileOutputStream;
 import javax.xml.bind.DatatypeConverter;
 
 import org.opendedup.grpc.EncryptionServiceGrpc.EncryptionServiceImplBase;
+import org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest;
+import org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse;
 import org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest;
 import org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse;
 import org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest;
@@ -131,6 +133,34 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
         return;
     }
 
+    @Override
+    public void deleteExportedCert(DeleteExportedCertRequest request,
+            StreamObserver<DeleteExportedCertResponse> responseObserver) {
+        DeleteExportedCertResponse.Builder b = DeleteExportedCertResponse.newBuilder();
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.EVENT_READ)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        try {
+            this.hl.writeLock().lock();
+            File fp = new File(privateKeyFilePath);
+            File sc = new File(certChainFilePath);
+            sc.delete();
+            fp.delete();
+
+        } catch (Exception e) {
+            SDFSLogger.getLog().error("unable to delete server keys", e);
+            b.setError("unable to delete keys");
+            b.setErrorCode(errorCodes.EIO);
+        } finally {
+            this.hl.writeLock().unlock();
+        }
+
+    }
+
     static void writeCertificate(OutputStream out, X509Certificate crt) throws Exception {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write("-----BEGIN CERTIFICATE-----\r\n".getBytes());
@@ -170,31 +200,31 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
 
     @Override
     public void run() {
-        for(;;) {
+        for (;;) {
             try {
-                Thread.sleep(300*1000);
+                Thread.sleep(300 * 1000);
                 loadTrustManager();
-                long tm = System.currentTimeMillis()-(300*1000);
+                long tm = System.currentTimeMillis() - (300 * 1000);
                 try {
                     this.hl.writeLock().lock();
-                    File fp =new File(privateKeyFilePath);
-                    File sc =new File(certChainFilePath);
-                    if(sc.lastModified() < tm) {
+                    File fp = new File(privateKeyFilePath);
+                    File sc = new File(certChainFilePath);
+                    if (sc.lastModified() < tm) {
                         sc.delete();
                     }
-                    if(fp.lastModified() < tm) {
+                    if (fp.lastModified() < tm) {
                         fp.delete();
                     }
 
-                }catch(Exception e) {
-                    SDFSLogger.getLog().error("unable to delete server keys",e);
-                }finally {
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("unable to delete server keys", e);
+                } finally {
                     this.hl.writeLock().unlock();
                 }
             } catch (InterruptedException e) {
 
             } catch (Exception e) {
-                SDFSLogger.getLog().error("error in EncryptionService Thread",e);
+                SDFSLogger.getLog().error("error in EncryptionService Thread", e);
             }
         }
 
