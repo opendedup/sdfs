@@ -711,8 +711,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     return;
                 }
                 DedupFileChannel ch = this.getFileChannel(request.getFileHandle());
-                ByteBuffer buf = ByteBuffer.allocate(request.getLen());
-                request.getData().copyTo(buf);
+                ByteBuffer buf = request.getData().asReadOnlyByteBuffer();
                 buf.position(0);
                 try {
                     SDFSLogger.getLog().debug("Writing " + ch.openFile().getPath() + " pos=" + request.getStart()

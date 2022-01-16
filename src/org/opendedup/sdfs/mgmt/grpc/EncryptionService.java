@@ -254,8 +254,7 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
             keys.clear();
             File trustedCertificatesDir = new File(this.trustStoreDir);
             SDFSLogger.getLog().info("Load Trust Manager from " + trustedCertificatesDir.getPath());
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            trustStore.load(null, null);
+
 
             // Implementing FileFilter to retrieve only the files in the directory
             FileFilter fileFilter = new FileFilter() {
@@ -296,9 +295,6 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
                     }
                 }
             }
-
-            throw new NoSuchAlgorithmException(
-                    "No X509TrustManager in TrustManagerFactory");
         } finally {
             hl.writeLock().unlock();
         }
