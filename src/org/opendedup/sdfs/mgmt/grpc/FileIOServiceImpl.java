@@ -933,7 +933,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 return;
             }
             try {
-                ByteBuffer buf = ByteBuffer.allocate(request.getLen());
+                ByteBuffer buf = ByteBuffer.allocateDirect(request.getLen());
                 DedupFileChannel ch = this.getFileChannel((Long) request.getFileHandle());
                 int read = ch.read(buf, 0, buf.capacity(), request.getStart());
                 if (read == -1)
