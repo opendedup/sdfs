@@ -56,6 +56,7 @@ public class MountSDFS {
 		options.addOption("rv", true,
 				"comma separated list of remote volumes that should also be accounted for when doing garbage collection. "
 						+ "If not entered the volume will attempt to identify other volumes in the cluster.");
+		options.addOption("use-portredirector", false, "Disables TLS and forces localhost");
 		options.addOption("h", false, "display available options");
 		return options;
 	}
@@ -139,6 +140,9 @@ public class MountSDFS {
 				System.exit(-1);
 			}
 			volumeConfigFile = f.getPath();
+		}
+		if(cmd.hasOption("use-portredirector")) {
+			Main.usePortRedirector = true;
 		}
 
 

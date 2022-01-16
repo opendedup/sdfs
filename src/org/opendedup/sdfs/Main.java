@@ -108,6 +108,8 @@ public class Main {
 	 */
 	public static String chunkStore = "";
 
+	public static boolean usePortRedirector;
+
 	/**
 	 * Future implementation for pluggable chunkstores
 	 */

@@ -328,6 +328,11 @@ public class Config {
 
 			}
 		}
+		if(Main.usePortRedirector) {
+			Main.sdfsCliRequireMutualTLSAuth = false;
+			Main.sdfsCliSSL = false;
+			Main.sdfsCliListenAddr = "localhost";
+		}
 		if (Main.chunkStoreEncryptionEnabled)
 			SDFSLogger.getLog().info("################## Encryption is enabled ##################");
 		else
