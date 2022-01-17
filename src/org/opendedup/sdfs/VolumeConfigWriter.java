@@ -148,7 +148,7 @@ public class VolumeConfigWriter {
 	private String subscription;
 	private String gcpProject;
 	private String permissionsFile;
-	private long rmthreashold = 15 * 60 * 1000;
+	private long rmthreashold = 5 * 60 * 1000;
 	private String sdfsBasePath = "";
 
 	public VolumeConfigWriter() {

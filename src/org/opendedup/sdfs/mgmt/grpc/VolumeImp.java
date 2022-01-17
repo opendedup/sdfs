@@ -158,7 +158,9 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
     try {
       SDFSLogger.getLog().info("shutting down volume");
       System.out.println("shutting down volume");
-      System.exit(0);
+      ShutdownVol sh = new ShutdownVol();
+      Thread th = new Thread(sh);
+      th.start();
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();
     } catch (Exception e) {
@@ -650,6 +652,22 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       }
 
     }
+  }
+
+  private static class ShutdownVol implements Runnable{
+
+    @Override
+    public void run() {
+     try {
+      Thread.sleep(10000);
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+     System.exit(0);
+
+    }
+
   }
 
 }

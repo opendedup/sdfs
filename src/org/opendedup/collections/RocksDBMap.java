@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -94,6 +94,10 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	FlushOptions flo = null;
 	private ConcurrentHashMap<ByteArrayWrapper, ByteBuffer> tempHt = new ConcurrentHashMap<ByteArrayWrapper, ByteBuffer>(
 			1024, 0.75f, Main.writeThreads);
+	private AtomicLong rmct = new AtomicLong();
+	private AtomicLong nrmct = new AtomicLong();
+	private AtomicLong trmct = new AtomicLong();
+	private AtomicLong tnrmct = new AtomicLong();
 
 	static {
 		RocksDB.loadLibrary();
@@ -398,6 +402,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					bk.putLong(System.currentTimeMillis() + Main.HT_RM_THRESH);
 					rmdb.put(this.rmdbHsAr, wo, key, bk.array());
 					this.tempHt.remove(new ByteArrayWrapper(hash), bk);
+					trmct.incrementAndGet();
 				} else {
 					if (rmdb.get(this.rmdbHsAr, key) != null) {
 
@@ -406,6 +411,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					bk.putLong(8, ct);
 					bk.position(0);
 					this.tempHt.put(new ByteArrayWrapper(hash), bk);
+					tnrmct.incrementAndGet();
 				}
 				return val;
 			} else {
@@ -427,6 +433,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						_rbk.putLong(System.currentTimeMillis() + Main.HT_RM_THRESH);
 						rmdb.put(this.rmdbHsAr, key, _rbk.array());
 						getDB(hash).delete(hash);
+						rmct.incrementAndGet();
 					} else {
 						if (rmdb.get(this.rmdbHsAr, key) != null) {
 							rmdb.delete(this.rmdbHsAr, key);
@@ -436,6 +443,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						} else {
 							bk.putLong(v.length - 8, ct);
 						}
+						nrmct.incrementAndGet();
 						getDB(hash).put(wo, hash, v);
 					}
 					return oval;
@@ -616,7 +624,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		long ndct = 0;
 		try {
 			RocksIterator iter = rmdb.newIterator(this.rmdbHsAr);
-			SDFSLogger.getLog().info("Removing hashes ");
+			SDFSLogger.getLog().info("Removing hashes rmct=" + rmct.get() +
+			" nrmct=" + nrmct.get() + " trmct=" + trmct.get() + " tnrmct=" + tnrmct);
+			rmct.set(0);
+			nrmct.set(0);
+			trmct.set(0);
+			tnrmct.set(0);
 			ByteBuffer bk = ByteBuffer.allocateDirect(24);
 
 			for (iter.seekToFirst(); iter.isValid(); iter.next()) {
@@ -702,7 +715,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	/**
 	 * initializes the Object set of this hash table.
-	 * 
+	 *
 	 * @param initialCapacity an <code>int</code> value
 	 * @return an <code>int</code> value
 	 * @throws HashtableFullException
@@ -726,7 +739,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	/**
 	 * Searches the set for <tt>obj</tt>
-	 * 
+	 *
 	 * @param obj an <code>Object</code> value
 	 * @return a <code>boolean</code> value
 	 * @throws IOException
@@ -880,7 +893,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.AbstractHashesMap#update(org.opendedup.sdfs
 	 * .filestore.ChunkData)
 	 */

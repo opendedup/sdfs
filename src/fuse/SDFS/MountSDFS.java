@@ -55,7 +55,7 @@ public class MountSDFS implements Daemon, Runnable {
 				"Folder basepath for sdfs to be used in linux os, same as sdfs-base-path in mkfs.sdfs. \n e.g. /opt/test");
 		options.addOption("t", true, "Temporary directory for sdfs to be used in linux os. \n e.g. /tmp");
 		options.addOption("a", false, "Runs Consistency Check Periodically");
-		options.addOption("use-portredirector", false, "Disables TLS and forces localhost");
+		options.addOption("u", false, "Disables TLS and forces localhost");
 		return options;
 	}
 
@@ -201,7 +201,7 @@ public class MountSDFS implements Daemon, Runnable {
 				Main.logPath = OSValidator.getProgramBasePath() + "/var/log/sdfs/" + volname + ".log";
 			}
 		}
-		if(cmd.hasOption("use-portredirector")) {
+		if(cmd.hasOption("u")) {
 			Main.usePortRedirector = true;
 		}
 		Main.logPath = "/var/log/sdfs/" + volname + ".log";
