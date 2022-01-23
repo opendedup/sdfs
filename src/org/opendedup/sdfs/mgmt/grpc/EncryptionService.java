@@ -1,13 +1,11 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -45,6 +43,7 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
     String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
     String certChainFilePath = keydir + File.separator + "tls_key.pem";
     String privateKeyFilePath = keydir + File.separator + "tls_key.key";
+    private final String certHash;
 
     public EncryptionService(String trustStoreDir, PrivateKey pvtKey, X509Certificate serverCertChain)
             throws Exception {
@@ -52,8 +51,10 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
         this.trustStoreDir = trustStoreDir;
         this.pvtKey = pvtKey;
         this.serverCertChain = serverCertChain;
+        this.certHash = this.getThumbprint(serverCertChain);
         this.loadTrustManager();
-
+        Thread th = new Thread(this);
+        th.start();
     }
 
     @Override
@@ -69,19 +70,25 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
         }
         try {
             this.hl.readLock().lock();
-            boolean found = this.keys.contains(request.getHash());
-            if (!found) {
-                this.hl.readLock().unlock();
-                try {
-                    this.hl.writeLock().lock();
-                    found = this.keys.contains(request.getHash());
-                    if (!found) {
-                        this.loadTrustManager();
+            boolean found;
+            if (certHash.equalsIgnoreCase(this.certHash)) {
+                found = false;
+            } else {
+
+                found = this.keys.contains(request.getHash());
+                if (!found) {
+                    this.hl.readLock().unlock();
+                    try {
+                        this.hl.writeLock().lock();
                         found = this.keys.contains(request.getHash());
+                        if (!found) {
+                            this.loadTrustManager();
+                            found = this.keys.contains(request.getHash());
+                        }
+                    } finally {
+                        this.hl.writeLock().unlock();
+                        this.hl.readLock().lock();
                     }
-                } finally {
-                    this.hl.writeLock().unlock();
-                    this.hl.readLock().lock();
                 }
             }
             b.setAccept(found);
@@ -254,7 +261,6 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
             keys.clear();
             File trustedCertificatesDir = new File(this.trustStoreDir);
             SDFSLogger.getLog().info("Load Trust Manager from " + trustedCertificatesDir.getPath());
-
 
             // Implementing FileFilter to retrieve only the files in the directory
             FileFilter fileFilter = new FileFilter() {
