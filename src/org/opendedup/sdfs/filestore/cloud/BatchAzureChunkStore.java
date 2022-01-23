@@ -532,7 +532,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				if (config.hasAttribute("allow-sync")) {
 					HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
-					if (config.hasAttribute("sync-check-schedule")) {
+					if (config.hasAttribute("sync-check-schedule") && !config.getAttribute("sync-check-schedule").equalsIgnoreCase("none")) {
 						try {
 							new SyncFSScheduler(config.getAttribute("sync-check-schedule"));
 						} catch (Exception e) {

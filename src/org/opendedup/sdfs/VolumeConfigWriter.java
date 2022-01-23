@@ -78,7 +78,7 @@ public class VolumeConfigWriter {
 	// String fdisk_schedule = "0 59 23 * * ?";
 	String fdisk_schedule = "0 0 12 ? * SUN";
 	String ltrfdisk_schedule = "0 15 10 L * ?";
-	String syncfs_schedule = "4 59 23 * * ?";
+	String syncfs_schedule = null;
 	private String dExt = null;
 	boolean azureEnabled = false;
 	boolean tcpKeepAlive = true;
@@ -832,7 +832,9 @@ public class VolumeConfigWriter {
 			extended.setAttribute("map-cache-size", "200");
 			extended.setAttribute("io-threads", "16");
 			extended.setAttribute("delete-unclaimed", "true");
-			extended.setAttribute("sync-check-schedule", syncfs_schedule);
+			if (syncfs_schedule != null) {
+				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+			}
 			extended.setAttribute("backlog-size", this.backlogSize);
 			cs.appendChild(extended);
 
@@ -871,7 +873,9 @@ public class VolumeConfigWriter {
 				extended.setAttribute("glacier-archive-days", Integer.toString(this.glacierInDays));
 				extended.setAttribute("glacier-tier", this.glacierClass);
 				extended.setAttribute("simple-metadata", Boolean.toString(this.simpleMD));
-				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				if (syncfs_schedule != null) {
+					extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				}
 				extended.setAttribute("use-basic-signer", Boolean.toString(this.usebasicsigner));
 				extended.setAttribute("backlog-size", this.backlogSize);
 				if (this.genericS3) {
@@ -928,7 +932,9 @@ public class VolumeConfigWriter {
 				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
-				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				if (syncfs_schedule != null) {
+					extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				}
 				extended.setAttribute("backlog-size", this.backlogSize);
 				if (this.bucketLocation != null)
 					extended.setAttribute("default-bucket-location", this.bucketLocation);
@@ -959,7 +965,9 @@ public class VolumeConfigWriter {
 				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
-				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				if (syncfs_schedule != null) {
+					extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				}
 				extended.setAttribute("azure-tier-in-days", Integer.toString(aruzreArchiveInDays));
 				extended.setAttribute("backlog-size", this.backlogSize);
 				if (this.azurestorageTier != null) {
