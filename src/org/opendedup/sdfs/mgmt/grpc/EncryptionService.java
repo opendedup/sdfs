@@ -223,10 +223,10 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
                     this.hl.writeLock().lock();
                     File fp = new File(privateKeyFilePath);
                     File sc = new File(certChainFilePath);
-                    if (sc.lastModified() < tm) {
+                    if (sc.exists() && sc.lastModified() < tm) {
                         sc.delete();
                     }
-                    if (fp.lastModified() < tm) {
+                    if (fp.exists() && fp.lastModified() < tm) {
                         fp.delete();
                     }
 
