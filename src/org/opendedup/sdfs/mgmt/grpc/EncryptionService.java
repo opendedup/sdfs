@@ -71,24 +71,20 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
         try {
             this.hl.readLock().lock();
             boolean found;
-            if (certHash.equalsIgnoreCase(this.certHash)) {
-                found = false;
-            } else {
 
-                found = this.keys.contains(request.getHash());
-                if (!found) {
-                    this.hl.readLock().unlock();
-                    try {
-                        this.hl.writeLock().lock();
+            found = this.keys.contains(request.getHash());
+            if (!found) {
+                this.hl.readLock().unlock();
+                try {
+                    this.hl.writeLock().lock();
+                    found = this.keys.contains(request.getHash());
+                    if (!found) {
+                        this.loadTrustManager();
                         found = this.keys.contains(request.getHash());
-                        if (!found) {
-                            this.loadTrustManager();
-                            found = this.keys.contains(request.getHash());
-                        }
-                    } finally {
-                        this.hl.writeLock().unlock();
-                        this.hl.readLock().lock();
                     }
+                } finally {
+                    this.hl.writeLock().unlock();
+                    this.hl.readLock().lock();
                 }
             }
             b.setAccept(found);
