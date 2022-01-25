@@ -753,7 +753,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 return;
             }
             try {
-                if (Main.volume.isFull() || Main.volume.isPartitionFull()) {
+                if (Main.volume.isFull()) {
                     b.setError("Volume Full");
                     b.setErrorCode(errorCodes.ENOSPC);
                     responseObserver.onNext(b.build());
