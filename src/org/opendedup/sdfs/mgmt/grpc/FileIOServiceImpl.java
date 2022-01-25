@@ -595,6 +595,56 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     @Override
+    public StreamObserver<DataWriteRequest> streamWrite(StreamObserver<DataWriteResponse> responseObserver) {
+        return new StreamObserver<DataWriteRequest>() {
+
+            AtomicLong written = new AtomicLong();
+
+            @Override
+            public void onNext(DataWriteRequest request) {
+                if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
+                    SDFSLogger.getLog().error("User is not a member of any group with access");
+                    this.onError(new Exception("User is not a member of any group with access"));
+                } else {
+                    if (Main.volume.isOffLine()) {
+                        SDFSLogger.getLog().error("Volume is Offline");
+                        this.onError(new Exception("Volume is Offline"));
+                    }
+                    if (Main.volume.isFull()) {
+                        SDFSLogger.getLog().error("Volume Full");
+                        this.onError(new Exception("Volume Full"));
+                    }
+                    try {
+                        DedupFileChannel ch = getFileChannel(request.getFileHandle());
+                        ByteBuffer buf = request.getData().asReadOnlyByteBuffer();
+                        buf.position(0);
+                        ch.writeFile(buf, buf.capacity(), 0, request.getStart(), true);
+                        written.addAndGet(buf.capacity());
+                    } catch (Exception e) {
+                        SDFSLogger.getLog().error("Error while stream writing", e);
+                        this.onError(e);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                SDFSLogger.getLog().error("error while writing", t);
+
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onNext(DataWriteResponse.newBuilder().setWritten(written.get())
+                        .build());
+                responseObserver.onCompleted();
+
+            }
+
+        };
+    }
+
+    @Override
     public void unlink(UnlinkRequest request, StreamObserver<UnlinkResponse> responseObserver) {
         UnlinkResponse.Builder b = UnlinkResponse.newBuilder();
         if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_DELETE)) {
@@ -2190,77 +2240,78 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
-    public void setRetrievalTier(SetRetrievalTierRequest req, StreamObserver<SetRetrievalTierResponse> responseObserver) {
+    public void setRetrievalTier(SetRetrievalTierRequest req,
+            StreamObserver<SetRetrievalTierResponse> responseObserver) {
         SetRetrievalTierResponse.Builder b = SetRetrievalTierResponse.newBuilder();
-               if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
-                   b.setError("User is not a member of any group with access");
-                   b.setErrorCode(errorCodes.EACCES);
-                   responseObserver.onNext(b.build());
-                   responseObserver.onCompleted();
-               } else {
-               	synchronized(this) {
-               		try {
-                       	String tierType = req.getTierType();
-                       	if (!tierType.isEmpty()) {
-               				SDFSLogger.getLog().info("Tier type: "+tierType);
-               				if(tierType.equalsIgnoreCase("expedited") || tierType.equalsIgnoreCase("standard")
-               						|| tierType.equalsIgnoreCase("bulk") || tierType.equalsIgnoreCase("high")) {
-               					Main.retrievalTier = tierType;
-               					SDFSLogger.getLog().info("Retrieval tier is set to: " +Main.retrievalTier);
-               				} else {
-                   				b.setError("SetRetrievalTier error, not a proper retrieval tier: " +req.getTierType());
-                                   b.setErrorCode(errorCodes.EIO);
-               				}
-               			} else {
-               				b.setError("SetRetrievalTier error, retrieval tier is empty " +req.getTierType());
-                               b.setErrorCode(errorCodes.EIO);
-               			}
-                           responseObserver.onNext(b.build());
-                           responseObserver.onCompleted();
-                           return;
-                       } catch (Exception e) {
-                           b.setError("SetRetrievalTier error "+ req.getTierType());
-                           b.setErrorCode(errorCodes.EIO);
-                           responseObserver.onNext(b.build());
-                           responseObserver.onCompleted();
-                           return;
-                       }
-               	}
-               }
-           }
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            synchronized (this) {
+                try {
+                    String tierType = req.getTierType();
+                    if (!tierType.isEmpty()) {
+                        SDFSLogger.getLog().info("Tier type: " + tierType);
+                        if (tierType.equalsIgnoreCase("expedited") || tierType.equalsIgnoreCase("standard")
+                                || tierType.equalsIgnoreCase("bulk") || tierType.equalsIgnoreCase("high")) {
+                            Main.retrievalTier = tierType;
+                            SDFSLogger.getLog().info("Retrieval tier is set to: " + Main.retrievalTier);
+                        } else {
+                            b.setError("SetRetrievalTier error, not a proper retrieval tier: " + req.getTierType());
+                            b.setErrorCode(errorCodes.EIO);
+                        }
+                    } else {
+                        b.setError("SetRetrievalTier error, retrieval tier is empty " + req.getTierType());
+                        b.setErrorCode(errorCodes.EIO);
+                    }
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                } catch (Exception e) {
+                    b.setError("SetRetrievalTier error " + req.getTierType());
+                    b.setErrorCode(errorCodes.EIO);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+            }
+        }
+    }
 
-
-           public void getRetrievalTier(GetRetrievalTierRequest req, StreamObserver<GetRetrievalTierResponse> responseObserver) {
+    public void getRetrievalTier(GetRetrievalTierRequest req,
+            StreamObserver<GetRetrievalTierResponse> responseObserver) {
         GetRetrievalTierResponse.Builder b = GetRetrievalTierResponse.newBuilder();
-               if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
-                   b.setError("User is not a member of any group with access");
-                   b.setErrorCode(errorCodes.EACCES);
-                   responseObserver.onNext(b.build());
-                   responseObserver.onCompleted();
-               } else {
-               	synchronized(this) {
-               		try {
-                       	String tierType = Main.retrievalTier;
-                       	if (tierType.equals("")) {
-                       		b.setError("GetRetrievalTier error, retrieval tier is not set explicitly");
-                               b.setErrorCode(errorCodes.EIO);
-               			} else {
-                       		b.setTierType("Tier type: " +tierType);
-                       	}
-                           responseObserver.onNext(b.build());
-                           responseObserver.onCompleted();
-                           return;
-                       } catch (Exception e) {
-                       	b.setTierType("");
-                           b.setError("GetRetrievalTier error");
-                           b.setErrorCode(errorCodes.EIO);
-                           responseObserver.onNext(b.build());
-                           responseObserver.onCompleted();
-                           return;
-                       }
-               	}
-               }
-           }
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            synchronized (this) {
+                try {
+                    String tierType = Main.retrievalTier;
+                    if (tierType.equals("")) {
+                        b.setError("GetRetrievalTier error, retrieval tier is not set explicitly");
+                        b.setErrorCode(errorCodes.EIO);
+                    } else {
+                        b.setTierType("Tier type: " + tierType);
+                    }
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                } catch (Exception e) {
+                    b.setTierType("");
+                    b.setError("GetRetrievalTier error");
+                    b.setErrorCode(errorCodes.EIO);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+            }
+        }
+    }
 
     protected static class FileIOError extends Exception {
         /**

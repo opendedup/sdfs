@@ -554,6 +554,37 @@ public final class FileIOServiceGrpc {
     return getWriteMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.DataWriteRequest,
+      org.opendedup.grpc.IOService.DataWriteResponse> getStreamWriteMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "StreamWrite",
+      requestType = org.opendedup.grpc.IOService.DataWriteRequest.class,
+      responseType = org.opendedup.grpc.IOService.DataWriteResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.DataWriteRequest,
+      org.opendedup.grpc.IOService.DataWriteResponse> getStreamWriteMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.DataWriteRequest, org.opendedup.grpc.IOService.DataWriteResponse> getStreamWriteMethod;
+    if ((getStreamWriteMethod = FileIOServiceGrpc.getStreamWriteMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getStreamWriteMethod = FileIOServiceGrpc.getStreamWriteMethod) == null) {
+          FileIOServiceGrpc.getStreamWriteMethod = getStreamWriteMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.IOService.DataWriteRequest, org.opendedup.grpc.IOService.DataWriteResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "StreamWrite"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.IOService.DataWriteRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.IOService.DataWriteResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("StreamWrite"))
+              .build();
+        }
+      }
+    }
+    return getStreamWriteMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.DataReadRequest,
       org.opendedup.grpc.IOService.DataReadResponse> getReadMethod;
 
@@ -1284,6 +1315,13 @@ public final class FileIOServiceGrpc {
 
     /**
      */
+    public io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.DataWriteRequest> streamWrite(
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.DataWriteResponse> responseObserver) {
+      return asyncUnimplementedStreamingCall(getStreamWriteMethod(), responseObserver);
+    }
+
+    /**
+     */
     public void read(org.opendedup.grpc.IOService.DataReadRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.DataReadResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getReadMethod(), responseObserver);
@@ -1529,6 +1567,13 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.IOService.DataWriteRequest,
                 org.opendedup.grpc.IOService.DataWriteResponse>(
                   this, METHODID_WRITE)))
+          .addMethod(
+            getStreamWriteMethod(),
+            asyncClientStreamingCall(
+              new MethodHandlers<
+                org.opendedup.grpc.IOService.DataWriteRequest,
+                org.opendedup.grpc.IOService.DataWriteResponse>(
+                  this, METHODID_STREAM_WRITE)))
           .addMethod(
             getReadMethod(),
             asyncUnaryCall(
@@ -1810,6 +1855,14 @@ public final class FileIOServiceGrpc {
         io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.DataWriteResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getWriteMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.DataWriteRequest> streamWrite(
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.DataWriteResponse> responseObserver) {
+      return asyncClientStreamingCall(
+          getChannel().newCall(getStreamWriteMethod(), getCallOptions()), responseObserver);
     }
 
     /**
@@ -2546,6 +2599,7 @@ public final class FileIOServiceGrpc {
   private static final int METHODID_FILE_NOTIFICATION = 32;
   private static final int METHODID_SET_RETRIEVAL_TIER = 33;
   private static final int METHODID_GET_RETRIEVAL_TIER = 34;
+  private static final int METHODID_STREAM_WRITE = 35;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -2714,6 +2768,9 @@ public final class FileIOServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_STREAM_WRITE:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.streamWrite(
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.DataWriteResponse>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -2782,6 +2839,7 @@ public final class FileIOServiceGrpc {
               .addMethod(getRmDirMethod())
               .addMethod(getUnlinkMethod())
               .addMethod(getWriteMethod())
+              .addMethod(getStreamWriteMethod())
               .addMethod(getReadMethod())
               .addMethod(getReleaseMethod())
               .addMethod(getMknodMethod())

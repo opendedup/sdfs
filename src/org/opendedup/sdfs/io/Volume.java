@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -380,7 +380,7 @@ public class Volume {
 		 * long avail = pathF.getUsableSpace(); if(avail < minFree) {
 		 * SDFSLogger.getLog().warn("Drive is almost full space left is [" + avail +
 		 * "]"); return true;
-		 * 
+		 *
 		 * } if (this.fullPercentage < 0 || this.currentSize == 0) return false; else {
 		 * return (this.currentSize > this.absoluteLength); }
 		 */

@@ -16,6 +16,7 @@ message DataWriteRequest {
 message DataWriteResponse {
     string error = 1;
     errorCodes errorCode = 2;
+    int64 written = 3;
 }
 
 message MkDirRequest {
@@ -418,6 +419,7 @@ service FileIOService {
     rpc RmDir(RmDirRequest) returns (RmDirResponse);
     rpc Unlink(UnlinkRequest) returns (UnlinkResponse);
     rpc Write(DataWriteRequest) returns (DataWriteResponse);
+    rpc StreamWrite(stream DataWriteRequest) returns (DataWriteResponse) {}
     rpc Read(DataReadRequest) returns (DataReadResponse);
     rpc Release(FileCloseRequest) returns (FileCloseResponse);
     rpc Mknod(MkNodRequest) returns (MkNodResponse);

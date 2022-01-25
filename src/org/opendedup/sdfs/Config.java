@@ -397,6 +397,7 @@ public class Config {
 		cli.setAttribute("auth-class-info", Main.authClassInfo);
 		cli.setAttribute("prod-config-file-path", Main.prodConfigFilePath);
 		cli.setAttribute("prod-config-variable", Main.prodConfigVariable);
+		cli.setAttribute("use-ssl", Boolean.toString(Main.sdfsCliSSL));
 
 		Element localChunkStore = (Element) doc.getElementsByTagName("local-chunkstore").item(0);
 		if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {
