@@ -39,7 +39,7 @@ message ChunkEntry {
   bytes hash = 1;
   bytes data = 2;
   bool compressed = 3;
-  int32 compressedLenght = 4;
+  int32 compressedLength = 4;
 }
 
 message WriteChunksRequest {

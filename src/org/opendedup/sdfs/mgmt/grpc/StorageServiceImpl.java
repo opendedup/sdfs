@@ -190,6 +190,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         WriteChunksResponse.Builder b = WriteChunksResponse.newBuilder();
         if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
             b.setError("User is not a member of any group with access");
+
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
@@ -211,7 +212,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     byte[] chunk = ent.getData().toByteArray();
                     if (chunk.length > 0) {
                         if(ent.getCompressed()) {
-                            chunk = CompressionUtils.decompressLz4(chunk, ent.getCompressedLenght());
+                            chunk = CompressionUtils.decompressLz4(chunk, ent.getCompressedLength());
                         }
                         ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
                                 ch.getDedupFile().getGUID());

@@ -3914,10 +3914,10 @@ public final class Storage {
     boolean getCompressed();
 
     /**
-     * <code>int32 compressedLenght = 4;</code>
-     * @return The compressedLenght.
+     * <code>int32 compressedLength = 4;</code>
+     * @return The compressedLength.
      */
-    int getCompressedLenght();
+    int getCompressedLength();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ChunkEntry}
@@ -3983,7 +3983,7 @@ public final class Storage {
             }
             case 32: {
 
-              compressedLenght_ = input.readInt32();
+              compressedLength_ = input.readInt32();
               break;
             }
             default: {
@@ -4051,15 +4051,15 @@ public final class Storage {
       return compressed_;
     }
 
-    public static final int COMPRESSEDLENGHT_FIELD_NUMBER = 4;
-    private int compressedLenght_;
+    public static final int COMPRESSEDLENGTH_FIELD_NUMBER = 4;
+    private int compressedLength_;
     /**
-     * <code>int32 compressedLenght = 4;</code>
-     * @return The compressedLenght.
+     * <code>int32 compressedLength = 4;</code>
+     * @return The compressedLength.
      */
     @java.lang.Override
-    public int getCompressedLenght() {
-      return compressedLenght_;
+    public int getCompressedLength() {
+      return compressedLength_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -4085,8 +4085,8 @@ public final class Storage {
       if (compressed_ != false) {
         output.writeBool(3, compressed_);
       }
-      if (compressedLenght_ != 0) {
-        output.writeInt32(4, compressedLenght_);
+      if (compressedLength_ != 0) {
+        output.writeInt32(4, compressedLength_);
       }
       unknownFields.writeTo(output);
     }
@@ -4109,9 +4109,9 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, compressed_);
       }
-      if (compressedLenght_ != 0) {
+      if (compressedLength_ != 0) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(4, compressedLenght_);
+          .computeInt32Size(4, compressedLength_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4134,8 +4134,8 @@ public final class Storage {
           .equals(other.getData())) return false;
       if (getCompressed()
           != other.getCompressed()) return false;
-      if (getCompressedLenght()
-          != other.getCompressedLenght()) return false;
+      if (getCompressedLength()
+          != other.getCompressedLength()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4154,8 +4154,8 @@ public final class Storage {
       hash = (37 * hash) + COMPRESSED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getCompressed());
-      hash = (37 * hash) + COMPRESSEDLENGHT_FIELD_NUMBER;
-      hash = (53 * hash) + getCompressedLenght();
+      hash = (37 * hash) + COMPRESSEDLENGTH_FIELD_NUMBER;
+      hash = (53 * hash) + getCompressedLength();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4295,7 +4295,7 @@ public final class Storage {
 
         compressed_ = false;
 
-        compressedLenght_ = 0;
+        compressedLength_ = 0;
 
         return this;
       }
@@ -4326,7 +4326,7 @@ public final class Storage {
         result.hash_ = hash_;
         result.data_ = data_;
         result.compressed_ = compressed_;
-        result.compressedLenght_ = compressedLenght_;
+        result.compressedLength_ = compressedLength_;
         onBuilt();
         return result;
       }
@@ -4384,8 +4384,8 @@ public final class Storage {
         if (other.getCompressed() != false) {
           setCompressed(other.getCompressed());
         }
-        if (other.getCompressedLenght() != 0) {
-          setCompressedLenght(other.getCompressedLenght());
+        if (other.getCompressedLength() != 0) {
+          setCompressedLength(other.getCompressedLength());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4515,33 +4515,33 @@ public final class Storage {
         return this;
       }
 
-      private int compressedLenght_ ;
+      private int compressedLength_ ;
       /**
-       * <code>int32 compressedLenght = 4;</code>
-       * @return The compressedLenght.
+       * <code>int32 compressedLength = 4;</code>
+       * @return The compressedLength.
        */
       @java.lang.Override
-      public int getCompressedLenght() {
-        return compressedLenght_;
+      public int getCompressedLength() {
+        return compressedLength_;
       }
       /**
-       * <code>int32 compressedLenght = 4;</code>
-       * @param value The compressedLenght to set.
+       * <code>int32 compressedLength = 4;</code>
+       * @param value The compressedLength to set.
        * @return This builder for chaining.
        */
-      public Builder setCompressedLenght(int value) {
+      public Builder setCompressedLength(int value) {
         
-        compressedLenght_ = value;
+        compressedLength_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int32 compressedLenght = 4;</code>
+       * <code>int32 compressedLength = 4;</code>
        * @return This builder for chaining.
        */
-      public Builder clearCompressedLenght() {
+      public Builder clearCompressedLength() {
         
-        compressedLenght_ = 0;
+        compressedLength_ = 0;
         onChanged();
         return this;
       }
@@ -16638,7 +16638,7 @@ public final class Storage {
       "\t\0221\n\terrorCode\030\004 \001(\0162\036.org.opendedup.grp" +
       "c.errorCodes\"V\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014" +
       "\022\014\n\004data\030\002 \001(\014\022\022\n\ncompressed\030\003 \001(\010\022\030\n\020co" +
-      "mpressedLenght\030\004 \001(\005\"k\n\022WriteChunksReque" +
+      "mpressedLength\030\004 \001(\005\"k\n\022WriteChunksReque" +
       "st\022.\n\006chunks\030\001 \003(\0132\036.org.opendedup.grpc." +
       "ChunkEntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolum" +
       "eID\030\003 \001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005err" +
@@ -16750,7 +16750,7 @@ public final class Storage {
     internal_static_org_opendedup_grpc_ChunkEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ChunkEntry_descriptor,
-        new java.lang.String[] { "Hash", "Data", "Compressed", "CompressedLenght", });
+        new java.lang.String[] { "Hash", "Data", "Compressed", "CompressedLength", });
     internal_static_org_opendedup_grpc_WriteChunksRequest_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_org_opendedup_grpc_WriteChunksRequest_fieldAccessorTable = new
