@@ -3906,6 +3906,18 @@ public final class Storage {
      * @return The data.
      */
     com.google.protobuf.ByteString getData();
+
+    /**
+     * <code>bool compressed = 3;</code>
+     * @return The compressed.
+     */
+    boolean getCompressed();
+
+    /**
+     * <code>int32 compressedLenght = 4;</code>
+     * @return The compressedLenght.
+     */
+    int getCompressedLenght();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ChunkEntry}
@@ -3964,6 +3976,16 @@ public final class Storage {
               data_ = input.readBytes();
               break;
             }
+            case 24: {
+
+              compressed_ = input.readBool();
+              break;
+            }
+            case 32: {
+
+              compressedLenght_ = input.readInt32();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -4018,6 +4040,28 @@ public final class Storage {
       return data_;
     }
 
+    public static final int COMPRESSED_FIELD_NUMBER = 3;
+    private boolean compressed_;
+    /**
+     * <code>bool compressed = 3;</code>
+     * @return The compressed.
+     */
+    @java.lang.Override
+    public boolean getCompressed() {
+      return compressed_;
+    }
+
+    public static final int COMPRESSEDLENGHT_FIELD_NUMBER = 4;
+    private int compressedLenght_;
+    /**
+     * <code>int32 compressedLenght = 4;</code>
+     * @return The compressedLenght.
+     */
+    @java.lang.Override
+    public int getCompressedLenght() {
+      return compressedLenght_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4038,6 +4082,12 @@ public final class Storage {
       if (!data_.isEmpty()) {
         output.writeBytes(2, data_);
       }
+      if (compressed_ != false) {
+        output.writeBool(3, compressed_);
+      }
+      if (compressedLenght_ != 0) {
+        output.writeInt32(4, compressedLenght_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -4054,6 +4104,14 @@ public final class Storage {
       if (!data_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, data_);
+      }
+      if (compressed_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, compressed_);
+      }
+      if (compressedLenght_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, compressedLenght_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4074,6 +4132,10 @@ public final class Storage {
           .equals(other.getHash())) return false;
       if (!getData()
           .equals(other.getData())) return false;
+      if (getCompressed()
+          != other.getCompressed()) return false;
+      if (getCompressedLenght()
+          != other.getCompressedLenght()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4089,6 +4151,11 @@ public final class Storage {
       hash = (53 * hash) + getHash().hashCode();
       hash = (37 * hash) + DATA_FIELD_NUMBER;
       hash = (53 * hash) + getData().hashCode();
+      hash = (37 * hash) + COMPRESSED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCompressed());
+      hash = (37 * hash) + COMPRESSEDLENGHT_FIELD_NUMBER;
+      hash = (53 * hash) + getCompressedLenght();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4226,6 +4293,10 @@ public final class Storage {
 
         data_ = com.google.protobuf.ByteString.EMPTY;
 
+        compressed_ = false;
+
+        compressedLenght_ = 0;
+
         return this;
       }
 
@@ -4254,6 +4325,8 @@ public final class Storage {
         org.opendedup.grpc.Storage.ChunkEntry result = new org.opendedup.grpc.Storage.ChunkEntry(this);
         result.hash_ = hash_;
         result.data_ = data_;
+        result.compressed_ = compressed_;
+        result.compressedLenght_ = compressedLenght_;
         onBuilt();
         return result;
       }
@@ -4307,6 +4380,12 @@ public final class Storage {
         }
         if (other.getData() != com.google.protobuf.ByteString.EMPTY) {
           setData(other.getData());
+        }
+        if (other.getCompressed() != false) {
+          setCompressed(other.getCompressed());
+        }
+        if (other.getCompressedLenght() != 0) {
+          setCompressedLenght(other.getCompressedLenght());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4401,6 +4480,68 @@ public final class Storage {
       public Builder clearData() {
         
         data_ = getDefaultInstance().getData();
+        onChanged();
+        return this;
+      }
+
+      private boolean compressed_ ;
+      /**
+       * <code>bool compressed = 3;</code>
+       * @return The compressed.
+       */
+      @java.lang.Override
+      public boolean getCompressed() {
+        return compressed_;
+      }
+      /**
+       * <code>bool compressed = 3;</code>
+       * @param value The compressed to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressed(boolean value) {
+        
+        compressed_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool compressed = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressed() {
+        
+        compressed_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int compressedLenght_ ;
+      /**
+       * <code>int32 compressedLenght = 4;</code>
+       * @return The compressedLenght.
+       */
+      @java.lang.Override
+      public int getCompressedLenght() {
+        return compressedLenght_;
+      }
+      /**
+       * <code>int32 compressedLenght = 4;</code>
+       * @param value The compressedLenght to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressedLenght(int value) {
+        
+        compressedLenght_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 compressedLenght = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressedLenght() {
+        
+        compressedLenght_ = 0;
         onChanged();
         return this;
       }
@@ -16495,78 +16636,79 @@ public final class Storage {
       "\001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"l\n\rChunkResponse\022" +
       "\014\n\004data\030\001 \001(\014\022\013\n\003len\030\002 \001(\005\022\r\n\005error\030\003 \001(" +
       "\t\0221\n\terrorCode\030\004 \001(\0162\036.org.opendedup.grp" +
-      "c.errorCodes\"(\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014" +
-      "\022\014\n\004data\030\002 \001(\014\"k\n\022WriteChunksRequest\022.\n\006" +
-      "chunks\030\001 \003(\0132\036.org.opendedup.grpc.ChunkE" +
-      "ntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolumeID\030\003 " +
-      "\001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005error\030\001 \001" +
-      "(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup.gr" +
-      "pc.errorCodes\0227\n\rinsertRecords\030\003 \003(\0132 .o" +
-      "rg.opendedup.grpc.InsertRecord\"V\n\021ReadCh" +
-      "unksRequest\022.\n\006chunks\030\001 \003(\0132\036.org.opende" +
-      "dup.grpc.ChunkEntry\022\021\n\tpvolumeID\030\002 \001(\003\"D" +
-      "\n\022ReadChunksResponse\022.\n\006chunks\030\001 \003(\0132\036.o" +
-      "rg.opendedup.grpc.ChunkEntry\"\231\001\n\022Hashing" +
-      "InfoRequest\022.\n\006chunks\030\001 \003(\0132\036.org.opende" +
-      "dup.grpc.ChunkEntry\022\r\n\005error\030\002 \001(\t\0221\n\ter" +
-      "rorCode\030\003 \001(\0162\036.org.opendedup.grpc.error" +
-      "Codes\022\021\n\tpvolumeID\030\004 \001(\003\"\204\001\n\014HashLocPair" +
-      "P\022\014\n\004hash\030\001 \001(\014\022\017\n\007hashloc\030\002 \001(\003\022\013\n\003len\030" +
-      "\003 \001(\005\022\013\n\003pos\030\004 \001(\005\022\016\n\006offset\030\005 \001(\005\022\014\n\004nl" +
-      "en\030\006 \001(\005\022\013\n\003dup\030\007 \001(\010\022\020\n\010inserted\030\010 \001(\010\"" +
-      "\231\002\n\020SparseDataChunkP\022\014\n\004fpos\030\001 \001(\003\022\013\n\003le" +
-      "n\030\002 \001(\005\0222\n\005flags\030\003 \003(\0162#.org.opendedup.g" +
-      "rpc.SparseDataFlags\022\017\n\007version\030\004 \001(\005\0228\n\002" +
-      "ar\030\005 \003(\0132,.org.opendedup.grpc.SparseData" +
-      "ChunkP.ArEntry\022\014\n\004doop\030\006 \001(\005\022\020\n\010prevdoop" +
-      "\030\007 \001(\005\032K\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005value\030" +
-      "\002 \001(\0132 .org.opendedup.grpc.HashLocPairP:" +
-      "\0028\001\"\221\001\n\035SparseDedupeChunkWriteRequest\0223\n" +
-      "\005chunk\030\001 \001(\0132$.org.opendedup.grpc.Sparse" +
-      "DataChunkP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014fileLo" +
-      "cation\030\003 \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\"b\n\036Spars" +
-      "eDedupeChunkWriteResponse\022\r\n\005error\030\001 \001(\t" +
-      "\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc" +
-      ".errorCodes\"U\n\034SparseDedupeChunkReadRequ" +
-      "est\022\016\n\006offset\030\001 \001(\003\022\022\n\nfileHandle\030\002 \001(\003\022" +
-      "\021\n\tpvolumeID\030\003 \001(\003\"\226\001\n\035SparseDedupeChunk" +
-      "ReadResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode" +
-      "\030\002 \001(\0162\036.org.opendedup.grpc.errorCodes\0223" +
-      "\n\005chunk\030\003 \001(\0132$.org.opendedup.grpc.Spars" +
-      "eDataChunkP\"\206\002\n\023HashingInfoResponse\022\021\n\tc" +
-      "hunkSize\030\001 \001(\003\022\026\n\016minSegmentSize\030\002 \001(\003\022\026" +
-      "\n\016maxSegmentSize\030\003 \001(\003\022\022\n\npolyNumber\030\004 \001" +
-      "(\003\022\022\n\nwindowSize\030\005 \001(\003\022.\n\010hashtype\030\006 \001(\016" +
-      "2\034.org.opendedup.grpc.hashtype\022\022\n\nmapVer" +
-      "sion\030\007 \001(\005\022\r\n\005error\030\010 \001(\t\0221\n\terrorCode\030\t" +
-      " \001(\0162\036.org.opendedup.grpc.errorCodes\"1\n\014" +
-      "InsertRecord\022\017\n\007hashloc\030\001 \001(\003\022\020\n\010inserte" +
-      "d\030\002 \001(\010*$\n\017SparseDataFlags\022\021\n\rRECONSTRUC" +
-      "TED\020\000*0\n\010hashtype\022\n\n\006SHA256\020\000\022\007\n\003MD5\020\001\022\017" +
-      "\n\013UNSUPPORTED\020\0022\336\006\n\016StorageService\022^\n\013Ha" +
-      "shingInfo\022&.org.opendedup.grpc.HashingIn" +
-      "foRequest\032\'.org.opendedup.grpc.HashingIn" +
-      "foResponse\022^\n\013CheckHashes\022&.org.opendedu" +
-      "p.grpc.CheckHashesRequest\032\'.org.opendedu" +
-      "p.grpc.CheckHashesResponse\022^\n\013WriteChunk" +
-      "s\022&.org.opendedup.grpc.WriteChunksReques" +
-      "t\032\'.org.opendedup.grpc.WriteChunksRespon" +
-      "se\022[\n\nReadChunks\022%.org.opendedup.grpc.Re" +
-      "adChunksRequest\032&.org.opendedup.grpc.Rea" +
-      "dChunksResponse\022}\n\024WriteSparseDataChunk\022" +
-      "1.org.opendedup.grpc.SparseDedupeChunkWr" +
-      "iteRequest\0322.org.opendedup.grpc.SparseDe" +
-      "dupeChunkWriteResponse\022z\n\023ReadSparseData" +
-      "Chunk\0220.org.opendedup.grpc.SparseDedupeC" +
-      "hunkReadRequest\0321.org.opendedup.grpc.Spa" +
-      "rseDedupeChunkReadResponse\022k\n\025GetMetaDat" +
-      "aDedupeFile\022-.org.opendedup.grpc.MetaDat" +
-      "aDedupeFileRequest\032!.org.opendedup.grpc." +
-      "ChunkResponse0\001\022g\n\023GetSparseDedupeFile\022+" +
-      ".org.opendedup.grpc.SparseDedupeFileRequ" +
-      "est\032!.org.opendedup.grpc.ChunkResponse0\001" +
-      "B0Z.github.com/opendedup/sdfs-client-go/" +
-      "sdfs/;sdfsb\006proto3"
+      "c.errorCodes\"V\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014" +
+      "\022\014\n\004data\030\002 \001(\014\022\022\n\ncompressed\030\003 \001(\010\022\030\n\020co" +
+      "mpressedLenght\030\004 \001(\005\"k\n\022WriteChunksReque" +
+      "st\022.\n\006chunks\030\001 \003(\0132\036.org.opendedup.grpc." +
+      "ChunkEntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolum" +
+      "eID\030\003 \001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005err" +
+      "or\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opende" +
+      "dup.grpc.errorCodes\0227\n\rinsertRecords\030\003 \003" +
+      "(\0132 .org.opendedup.grpc.InsertRecord\"V\n\021" +
+      "ReadChunksRequest\022.\n\006chunks\030\001 \003(\0132\036.org." +
+      "opendedup.grpc.ChunkEntry\022\021\n\tpvolumeID\030\002" +
+      " \001(\003\"D\n\022ReadChunksResponse\022.\n\006chunks\030\001 \003" +
+      "(\0132\036.org.opendedup.grpc.ChunkEntry\"\231\001\n\022H" +
+      "ashingInfoRequest\022.\n\006chunks\030\001 \003(\0132\036.org." +
+      "opendedup.grpc.ChunkEntry\022\r\n\005error\030\002 \001(\t" +
+      "\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc" +
+      ".errorCodes\022\021\n\tpvolumeID\030\004 \001(\003\"\204\001\n\014HashL" +
+      "ocPairP\022\014\n\004hash\030\001 \001(\014\022\017\n\007hashloc\030\002 \001(\003\022\013" +
+      "\n\003len\030\003 \001(\005\022\013\n\003pos\030\004 \001(\005\022\016\n\006offset\030\005 \001(\005" +
+      "\022\014\n\004nlen\030\006 \001(\005\022\013\n\003dup\030\007 \001(\010\022\020\n\010inserted\030" +
+      "\010 \001(\010\"\231\002\n\020SparseDataChunkP\022\014\n\004fpos\030\001 \001(\003" +
+      "\022\013\n\003len\030\002 \001(\005\0222\n\005flags\030\003 \003(\0162#.org.opend" +
+      "edup.grpc.SparseDataFlags\022\017\n\007version\030\004 \001" +
+      "(\005\0228\n\002ar\030\005 \003(\0132,.org.opendedup.grpc.Spar" +
+      "seDataChunkP.ArEntry\022\014\n\004doop\030\006 \001(\005\022\020\n\010pr" +
+      "evdoop\030\007 \001(\005\032K\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005" +
+      "value\030\002 \001(\0132 .org.opendedup.grpc.HashLoc" +
+      "PairP:\0028\001\"\221\001\n\035SparseDedupeChunkWriteRequ" +
+      "est\0223\n\005chunk\030\001 \001(\0132$.org.opendedup.grpc." +
+      "SparseDataChunkP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014" +
+      "fileLocation\030\003 \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\"b\n" +
+      "\036SparseDedupeChunkWriteResponse\022\r\n\005error" +
+      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
+      "p.grpc.errorCodes\"U\n\034SparseDedupeChunkRe" +
+      "adRequest\022\016\n\006offset\030\001 \001(\003\022\022\n\nfileHandle\030" +
+      "\002 \001(\003\022\021\n\tpvolumeID\030\003 \001(\003\"\226\001\n\035SparseDedup" +
+      "eChunkReadResponse\022\r\n\005error\030\001 \001(\t\0221\n\terr" +
+      "orCode\030\002 \001(\0162\036.org.opendedup.grpc.errorC" +
+      "odes\0223\n\005chunk\030\003 \001(\0132$.org.opendedup.grpc" +
+      ".SparseDataChunkP\"\206\002\n\023HashingInfoRespons" +
+      "e\022\021\n\tchunkSize\030\001 \001(\003\022\026\n\016minSegmentSize\030\002" +
+      " \001(\003\022\026\n\016maxSegmentSize\030\003 \001(\003\022\022\n\npolyNumb" +
+      "er\030\004 \001(\003\022\022\n\nwindowSize\030\005 \001(\003\022.\n\010hashtype" +
+      "\030\006 \001(\0162\034.org.opendedup.grpc.hashtype\022\022\n\n" +
+      "mapVersion\030\007 \001(\005\022\r\n\005error\030\010 \001(\t\0221\n\terror" +
+      "Code\030\t \001(\0162\036.org.opendedup.grpc.errorCod" +
+      "es\"1\n\014InsertRecord\022\017\n\007hashloc\030\001 \001(\003\022\020\n\010i" +
+      "nserted\030\002 \001(\010*$\n\017SparseDataFlags\022\021\n\rRECO" +
+      "NSTRUCTED\020\000*0\n\010hashtype\022\n\n\006SHA256\020\000\022\007\n\003M" +
+      "D5\020\001\022\017\n\013UNSUPPORTED\020\0022\336\006\n\016StorageService" +
+      "\022^\n\013HashingInfo\022&.org.opendedup.grpc.Has" +
+      "hingInfoRequest\032\'.org.opendedup.grpc.Has" +
+      "hingInfoResponse\022^\n\013CheckHashes\022&.org.op" +
+      "endedup.grpc.CheckHashesRequest\032\'.org.op" +
+      "endedup.grpc.CheckHashesResponse\022^\n\013Writ" +
+      "eChunks\022&.org.opendedup.grpc.WriteChunks" +
+      "Request\032\'.org.opendedup.grpc.WriteChunks" +
+      "Response\022[\n\nReadChunks\022%.org.opendedup.g" +
+      "rpc.ReadChunksRequest\032&.org.opendedup.gr" +
+      "pc.ReadChunksResponse\022}\n\024WriteSparseData" +
+      "Chunk\0221.org.opendedup.grpc.SparseDedupeC" +
+      "hunkWriteRequest\0322.org.opendedup.grpc.Sp" +
+      "arseDedupeChunkWriteResponse\022z\n\023ReadSpar" +
+      "seDataChunk\0220.org.opendedup.grpc.SparseD" +
+      "edupeChunkReadRequest\0321.org.opendedup.gr" +
+      "pc.SparseDedupeChunkReadResponse\022k\n\025GetM" +
+      "etaDataDedupeFile\022-.org.opendedup.grpc.M" +
+      "etaDataDedupeFileRequest\032!.org.opendedup" +
+      ".grpc.ChunkResponse0\001\022g\n\023GetSparseDedupe" +
+      "File\022+.org.opendedup.grpc.SparseDedupeFi" +
+      "leRequest\032!.org.opendedup.grpc.ChunkResp" +
+      "onse0\001B0Z.github.com/opendedup/sdfs-clie" +
+      "nt-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -16608,7 +16750,7 @@ public final class Storage {
     internal_static_org_opendedup_grpc_ChunkEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ChunkEntry_descriptor,
-        new java.lang.String[] { "Hash", "Data", });
+        new java.lang.String[] { "Hash", "Data", "Compressed", "CompressedLenght", });
     internal_static_org_opendedup_grpc_WriteChunksRequest_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_org_opendedup_grpc_WriteChunksRequest_fieldAccessorTable = new

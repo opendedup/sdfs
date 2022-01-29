@@ -11,6 +11,7 @@ import java.util.List;
 import com.google.protobuf.ByteString;
 
 import org.opendedup.collections.InsertRecord;
+import org.opendedup.util.CompressionUtils;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.grpc.FileInfo.errorCodes;
@@ -209,11 +210,9 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 for (ChunkEntry ent : request.getChunksList()) {
                     byte[] chunk = ent.getData().toByteArray();
                     if (chunk.length > 0) {
-                        /*
-                         * byte [] hash = ent.getHash().toByteArray(); byte [] ek =
-                         * SparseDedupFile.eng.getHash(chunk); if(!Arrays.equals(hash, ek)) {
-                         * SDFSLogger.getLog().info("failed"); }
-                         */
+                        if(ent.getCompressed()) {
+                            chunk = CompressionUtils.decompressLz4(chunk, ent.getCompressedLenght());
+                        }
                         ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
                                 ch.getDedupFile().getGUID());
                         InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);

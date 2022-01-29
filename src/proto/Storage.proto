@@ -38,10 +38,11 @@ message ChunkResponse {
 message ChunkEntry {
   bytes hash = 1;
   bytes data = 2;
+  bool compressed = 3;
+  int32 compressedLenght = 4;
 }
 
 message WriteChunksRequest {
- 
   repeated ChunkEntry chunks= 1;
   int64 fileHandle =2;
   int64 pvolumeID =3;
