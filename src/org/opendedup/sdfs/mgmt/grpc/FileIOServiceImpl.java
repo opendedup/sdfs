@@ -14,6 +14,7 @@ import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.mgmt.GetCloudMetaFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.OSValidator;
 
 import fuse.FuseFtypeConstants;
@@ -617,6 +618,12 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     try {
                         DedupFileChannel ch = getFileChannel(request.getFileHandle());
                         ByteBuffer buf = request.getData().asReadOnlyByteBuffer();
+                        if(request.getCompressed()) {
+                            byte[] b = new byte[buf.capacity()];
+                            buf.get(b);
+                            byte [] chunk = CompressionUtils.decompressLz4(b, request.getLen());
+                            buf = ByteBuffer.wrap(chunk);
+                        }
                         buf.position(0);
                         ch.writeFile(buf, buf.capacity(), 0, request.getStart(), true);
                         written.addAndGet(buf.capacity());
@@ -762,6 +769,12 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 }
                 DedupFileChannel ch = this.getFileChannel(request.getFileHandle());
                 ByteBuffer buf = request.getData().asReadOnlyByteBuffer();
+                if(request.getCompressed()) {
+                    byte[] bf = new byte[buf.capacity()];
+                    buf.get(bf);
+                    byte [] chunk = CompressionUtils.decompressLz4(bf, request.getLen());
+                    buf = ByteBuffer.wrap(chunk);
+                }
                 buf.position(0);
                 try {
                     SDFSLogger.getLog().debug("Writing " + ch.openFile().getPath() + " pos=" + request.getStart()
@@ -983,13 +996,20 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 return;
             }
             try {
-                ByteBuffer buf = ByteBuffer.allocateDirect(request.getLen());
+                ByteBuffer buf = ByteBuffer.wrap(new byte[request.getLen()]);
                 DedupFileChannel ch = this.getFileChannel((Long) request.getFileHandle());
                 int read = ch.read(buf, 0, buf.capacity(), request.getStart());
                 if (read == -1)
                     read = 0;
-                buf.position(0);
+                
                 b.setRead(read);
+                if (read > 1) {
+                byte [] chunk = CompressionUtils.compressLz4(buf.array());
+                if(read < chunk.length) {
+                    buf = ByteBuffer.wrap(chunk);
+                }
+                }
+                buf.position(0);
                 b.setData(ByteString.copyFrom(buf, read));
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();

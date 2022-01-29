@@ -11,6 +11,7 @@ message DataWriteRequest {
     int32 len = 3;
     bytes data = 4;
     int64 pvolumeID =5;
+    bool compressed =6;
 }
 
 message DataWriteResponse {
@@ -62,6 +63,7 @@ message DataReadResponse {
     int32 read = 2;
     string error = 3;
     errorCodes errorCode = 4;
+    bool compressed = 5;
 }
 
 message FileCloseRequest {

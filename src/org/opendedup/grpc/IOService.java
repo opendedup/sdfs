@@ -47,6 +47,12 @@ public final class IOService {
      * @return The pvolumeID.
      */
     long getPvolumeID();
+
+    /**
+     * <code>bool compressed = 6;</code>
+     * @return The compressed.
+     */
+    boolean getCompressed();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DataWriteRequest}
@@ -117,6 +123,11 @@ public final class IOService {
             case 40: {
 
               pvolumeID_ = input.readInt64();
+              break;
+            }
+            case 48: {
+
+              compressed_ = input.readBool();
               break;
             }
             default: {
@@ -206,6 +217,17 @@ public final class IOService {
       return pvolumeID_;
     }
 
+    public static final int COMPRESSED_FIELD_NUMBER = 6;
+    private boolean compressed_;
+    /**
+     * <code>bool compressed = 6;</code>
+     * @return The compressed.
+     */
+    @java.lang.Override
+    public boolean getCompressed() {
+      return compressed_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -234,6 +256,9 @@ public final class IOService {
       }
       if (pvolumeID_ != 0L) {
         output.writeInt64(5, pvolumeID_);
+      }
+      if (compressed_ != false) {
+        output.writeBool(6, compressed_);
       }
       unknownFields.writeTo(output);
     }
@@ -264,6 +289,10 @@ public final class IOService {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(5, pvolumeID_);
       }
+      if (compressed_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(6, compressed_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -289,6 +318,8 @@ public final class IOService {
           .equals(other.getData())) return false;
       if (getPvolumeID()
           != other.getPvolumeID()) return false;
+      if (getCompressed()
+          != other.getCompressed()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -313,6 +344,9 @@ public final class IOService {
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getPvolumeID());
+      hash = (37 * hash) + COMPRESSED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCompressed());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -456,6 +490,8 @@ public final class IOService {
 
         pvolumeID_ = 0L;
 
+        compressed_ = false;
+
         return this;
       }
 
@@ -487,6 +523,7 @@ public final class IOService {
         result.len_ = len_;
         result.data_ = data_;
         result.pvolumeID_ = pvolumeID_;
+        result.compressed_ = compressed_;
         onBuilt();
         return result;
       }
@@ -549,6 +586,9 @@ public final class IOService {
         }
         if (other.getPvolumeID() != 0L) {
           setPvolumeID(other.getPvolumeID());
+        }
+        if (other.getCompressed() != false) {
+          setCompressed(other.getCompressed());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -733,6 +773,37 @@ public final class IOService {
       public Builder clearPvolumeID() {
         
         pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private boolean compressed_ ;
+      /**
+       * <code>bool compressed = 6;</code>
+       * @return The compressed.
+       */
+      @java.lang.Override
+      public boolean getCompressed() {
+        return compressed_;
+      }
+      /**
+       * <code>bool compressed = 6;</code>
+       * @param value The compressed to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressed(boolean value) {
+        
+        compressed_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool compressed = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressed() {
+        
+        compressed_ = false;
         onChanged();
         return this;
       }
@@ -6286,6 +6357,12 @@ public final class IOService {
      * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+
+    /**
+     * <code>bool compressed = 5;</code>
+     * @return The compressed.
+     */
+    boolean getCompressed();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DataReadResponse}
@@ -6355,6 +6432,11 @@ public final class IOService {
               int rawValue = input.readEnum();
 
               errorCode_ = rawValue;
+              break;
+            }
+            case 40: {
+
+              compressed_ = input.readBool();
               break;
             }
             default: {
@@ -6468,6 +6550,17 @@ public final class IOService {
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
     }
 
+    public static final int COMPRESSED_FIELD_NUMBER = 5;
+    private boolean compressed_;
+    /**
+     * <code>bool compressed = 5;</code>
+     * @return The compressed.
+     */
+    @java.lang.Override
+    public boolean getCompressed() {
+      return compressed_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -6494,6 +6587,9 @@ public final class IOService {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(4, errorCode_);
       }
+      if (compressed_ != false) {
+        output.writeBool(5, compressed_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -6518,6 +6614,10 @@ public final class IOService {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(4, errorCode_);
       }
+      if (compressed_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, compressed_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -6540,6 +6640,8 @@ public final class IOService {
       if (!getError()
           .equals(other.getError())) return false;
       if (errorCode_ != other.errorCode_) return false;
+      if (getCompressed()
+          != other.getCompressed()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -6559,6 +6661,9 @@ public final class IOService {
       hash = (53 * hash) + getError().hashCode();
       hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
       hash = (53 * hash) + errorCode_;
+      hash = (37 * hash) + COMPRESSED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCompressed());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -6700,6 +6805,8 @@ public final class IOService {
 
         errorCode_ = 0;
 
+        compressed_ = false;
+
         return this;
       }
 
@@ -6730,6 +6837,7 @@ public final class IOService {
         result.read_ = read_;
         result.error_ = error_;
         result.errorCode_ = errorCode_;
+        result.compressed_ = compressed_;
         onBuilt();
         return result;
       }
@@ -6790,6 +6898,9 @@ public final class IOService {
         }
         if (other.errorCode_ != 0) {
           setErrorCodeValue(other.getErrorCodeValue());
+        }
+        if (other.getCompressed() != false) {
+          setCompressed(other.getCompressed());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -7011,6 +7122,37 @@ public final class IOService {
       public Builder clearErrorCode() {
         
         errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean compressed_ ;
+      /**
+       * <code>bool compressed = 5;</code>
+       * @return The compressed.
+       */
+      @java.lang.Override
+      public boolean getCompressed() {
+        return compressed_;
+      }
+      /**
+       * <code>bool compressed = 5;</code>
+       * @param value The compressed to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressed(boolean value) {
+        
+        compressed_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool compressed = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressed() {
+        
+        compressed_ = false;
         onChanged();
         return this;
       }
@@ -48391,227 +48533,229 @@ public final class IOService {
   static {
     java.lang.String[] descriptorData = {
       "\n\017IOService.proto\022\022org.opendedup.grpc\032\016F" +
-      "ileInfo.proto\"c\n\020DataWriteRequest\022\022\n\nfil" +
+      "ileInfo.proto\"w\n\020DataWriteRequest\022\022\n\nfil" +
       "eHandle\030\001 \001(\003\022\r\n\005start\030\002 \001(\003\022\013\n\003len\030\003 \001(" +
-      "\005\022\014\n\004data\030\004 \001(\014\022\021\n\tpvolumeID\030\005 \001(\003\"f\n\021Da" +
-      "taWriteResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorC" +
-      "ode\030\002 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\022\017\n\007written\030\003 \001(\003\"=\n\014MkDirRequest\022\014\n\004pa" +
-      "th\030\001 \001(\t\022\014\n\004mode\030\002 \001(\005\022\021\n\tpvolumeID\030\003 \001(" +
-      "\003\"Q\n\rMkDirResponse\022\r\n\005error\030\001 \001(\t\0221\n\terr" +
-      "orCode\030\002 \001(\0162\036.org.opendedup.grpc.errorC" +
-      "odes\"/\n\014RmDirRequest\022\014\n\004path\030\001 \001(\t\022\021\n\tpv" +
-      "olumeID\030\002 \001(\003\"Q\n\rRmDirResponse\022\r\n\005error\030" +
-      "\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup" +
-      ".grpc.errorCodes\"0\n\rUnlinkRequest\022\014\n\004pat" +
-      "h\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"R\n\016UnlinkResp" +
-      "onse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036" +
-      ".org.opendedup.grpc.errorCodes\"T\n\017DataRe" +
-      "adRequest\022\022\n\nfileHandle\030\001 \001(\003\022\r\n\005start\030\002" +
-      " \001(\003\022\013\n\003len\030\003 \001(\005\022\021\n\tpvolumeID\030\004 \001(\003\"p\n\020" +
-      "DataReadResponse\022\014\n\004data\030\001 \001(\014\022\014\n\004read\030\002" +
-      " \001(\005\022\r\n\005error\030\003 \001(\t\0221\n\terrorCode\030\004 \001(\0162\036" +
-      ".org.opendedup.grpc.errorCodes\"9\n\020FileCl" +
-      "oseRequest\022\022\n\nfileHandle\030\001 \001(\003\022\021\n\tpvolum" +
-      "eID\030\002 \001(\003\"U\n\021FileCloseResponse\022\r\n\005error\030" +
-      "\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup" +
-      ".grpc.errorCodes\"K\n\014MkNodRequest\022\014\n\004path" +
-      "\030\001 \001(\t\022\014\n\004mode\030\002 \001(\005\022\014\n\004rdev\030\003 \001(\005\022\021\n\tpv" +
-      "olumeID\030\004 \001(\003\"Q\n\rMkNodResponse\022\r\n\005error\030" +
-      "\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup" +
-      ".grpc.errorCodes\"A\n\017FileOpenRequest\022\014\n\004p" +
-      "ath\030\001 \001(\t\022\r\n\005flags\030\002 \001(\005\022\021\n\tpvolumeID\030\003 " +
-      "\001(\003\"4\n\021FileExistsRequest\022\014\n\004path\030\001 \001(\t\022\021" +
-      "\n\tpvolumeID\030\002 \001(\003\"y\n\022FileExistsResponse\022" +
-      "\016\n\006exists\030\001 \001(\010\022\r\n\005error\030\002 \001(\t\0221\n\terrorC" +
-      "ode\030\003 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\022\021\n\tpvolumeID\030\004 \001(\003\"h\n\020FileOpenResponse" +
-      "\022\022\n\nfileHandle\030\001 \001(\003\022\r\n\005error\030\002 \001(\t\0221\n\te" +
-      "rrorCode\030\003 \001(\0162\036.org.opendedup.grpc.erro" +
-      "rCodes\"C\n\023FileSnapshotRequest\022\013\n\003src\030\001 \001" +
-      "(\t\022\014\n\004dest\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\"i\n\024F" +
-      "ileSnapshotResponse\022\r\n\005error\030\001 \001(\t\0221\n\ter" +
-      "rorCode\030\002 \001(\0162\036.org.opendedup.grpc.error" +
-      "Codes\022\017\n\007eventID\030\003 \001(\t\"A\n\021FileRenameRequ" +
-      "est\022\013\n\003src\030\001 \001(\t\022\014\n\004dest\030\002 \001(\t\022\021\n\tpvolum" +
-      "eID\030\003 \001(\003\"V\n\022FileRenameResponse\022\r\n\005error" +
-      "\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedu" +
-      "p.grpc.errorCodes\"|\n\021CopyExtentRequest\022\017" +
-      "\n\007srcFile\030\001 \001(\t\022\017\n\007dstFile\030\002 \001(\t\022\020\n\010srcS" +
-      "tart\030\003 \001(\003\022\020\n\010dstStart\030\004 \001(\003\022\016\n\006length\030\005" +
-      " \001(\003\022\021\n\tpvolumeID\030\006 \001(\003\"g\n\022CopyExtentRes" +
-      "ponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162" +
-      "\036.org.opendedup.grpc.errorCodes\022\017\n\007writt" +
-      "en\030\003 \001(\003\"u\n\026SetUserMetaDataRequest\022:\n\016fi" +
-      "leAttributes\030\001 \003(\0132\".org.opendedup.grpc." +
-      "FileAttributes\022\014\n\004Path\030\002 \001(\t\022\021\n\tpvolumeI" +
-      "D\030\003 \001(\003\"[\n\027SetUserMetaDataResponse\022\r\n\005er" +
-      "ror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\"l\n\023GetCloudFileRequ" +
-      "est\022\014\n\004file\030\001 \001(\t\022\017\n\007dstfile\030\002 \001(\t\022\021\n\tov" +
-      "erwrite\030\003 \001(\010\022\020\n\010changeid\030\004 \001(\t\022\021\n\tpvolu" +
-      "meID\030\005 \001(\003\"i\n\024GetCloudFileResponse\022\017\n\007ev" +
-      "entID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030" +
-      "\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"=\n" +
-      "\014ChmodRequest\022\014\n\004path\030\001 \001(\t\022\014\n\004mode\030\002 \001(" +
-      "\005\022\021\n\tpvolumeID\030\003 \001(\003\"Q\n\rChmodResponse\022\r\n" +
-      "\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.op" +
-      "endedup.grpc.errorCodes\"I\n\014ChownRequest\022" +
-      "\014\n\004path\030\001 \001(\t\022\013\n\003uid\030\002 \001(\005\022\013\n\003gid\030\003 \001(\005\022" +
-      "\021\n\tpvolumeID\030\004 \001(\003\"Q\n\rChownResponse\022\r\n\005e" +
+      "\005\022\014\n\004data\030\004 \001(\014\022\021\n\tpvolumeID\030\005 \001(\003\022\022\n\nco" +
+      "mpressed\030\006 \001(\010\"f\n\021DataWriteResponse\022\r\n\005e" +
       "rror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.open" +
-      "dedup.grpc.errorCodes\";\n\014FlushRequest\022\014\n" +
-      "\004path\030\001 \001(\t\022\n\n\002fd\030\002 \001(\003\022\021\n\tpvolumeID\030\003 \001" +
-      "(\003\"Q\n\rFlushResponse\022\r\n\005error\030\001 \001(\t\0221\n\ter" +
-      "rorCode\030\002 \001(\0162\036.org.opendedup.grpc.error" +
-      "Codes\"\277\001\n\004Stat\022\013\n\003dev\030\001 \001(\003\022\013\n\003ino\030\002 \001(\003" +
-      "\022\014\n\004mode\030\003 \001(\005\022\r\n\005nlink\030\004 \001(\005\022\013\n\003uid\030\005 \001" +
-      "(\005\022\013\n\003gid\030\006 \001(\005\022\014\n\004rdev\030\007 \001(\005\022\014\n\004size\030\010 " +
-      "\001(\003\022\017\n\007blksize\030\t \001(\005\022\016\n\006blocks\030\n \001(\003\022\r\n\005" +
-      "atime\030\013 \001(\003\022\014\n\004mtim\030\014 \001(\003\022\014\n\004ctim\030\r \001(\003\"" +
-      ".\n\013StatRequest\022\014\n\004path\030\001 \001(\t\022\021\n\tpvolumeI" +
-      "D\030\002 \001(\003\"x\n\014StatResponse\022&\n\004stat\030\001 \001(\0132\030." +
-      "org.opendedup.grpc.Stat\022\r\n\005error\030\002 \001(\t\0221" +
-      "\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc.e" +
-      "rrorCodes\".\n\013LinkRequest\022\014\n\004path\030\001 \001(\t\022\021" +
-      "\n\tpvolumeID\030\002 \001(\003\"b\n\014LinkResponse\022\020\n\010lin" +
-      "kPath\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030" +
-      "\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"\260\001" +
-      "\n\006StatFS\022\r\n\005bsize\030\001 \001(\005\022\016\n\006blocks\030\002 \001(\003\022" +
-      "\r\n\005bfree\030\003 \001(\003\022\016\n\006bavail\030\004 \001(\003\022\r\n\005files\030" +
-      "\005 \001(\003\022\r\n\005ffree\030\006 \001(\003\022\014\n\004fsid\030\007 \001(\003\022\017\n\007na" +
-      "melen\030\010 \001(\005\022\016\n\006frsize\030\t \001(\005\022\r\n\005flags\030\n \001" +
-      "(\005\022\014\n\004type\030\013 \001(\005\"\"\n\rStatFSRequest\022\021\n\tpvo" +
-      "lumeID\030\001 \001(\003\"|\n\016StatFSResponse\022(\n\004stat\030\001" +
-      " \001(\0132\032.org.opendedup.grpc.StatFS\022\r\n\005erro" +
-      "r\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opended" +
-      "up.grpc.errorCodes\"=\n\016SymLinkRequest\022\014\n\004" +
-      "from\030\001 \001(\t\022\n\n\002to\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(" +
-      "\003\"S\n\017SymLinkResponse\022\r\n\005error\030\001 \001(\t\0221\n\te" +
-      "rrorCode\030\002 \001(\0162\036.org.opendedup.grpc.erro" +
-      "rCodes\"B\n\017TruncateRequest\022\014\n\004path\030\001 \001(\t\022" +
-      "\016\n\006length\030\002 \001(\003\022\021\n\tpvolumeID\030\003 \001(\003\"T\n\020Tr" +
-      "uncateResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCo" +
-      "de\030\002 \001(\0162\036.org.opendedup.grpc.errorCodes" +
-      "\"M\n\014UtimeRequest\022\014\n\004path\030\001 \001(\t\022\r\n\005atime\030" +
-      "\002 \001(\003\022\r\n\005mtime\030\003 \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\"" +
-      "Q\n\rUtimeResponse\022\r\n\005error\030\001 \001(\t\0221\n\terror" +
-      "Code\030\002 \001(\0162\036.org.opendedup.grpc.errorCod" +
-      "es\"@\n\017GetXAttrRequest\022\014\n\004attr\030\001 \001(\t\022\014\n\004p" +
-      "ath\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\"c\n\020GetXAttr" +
-      "Response\022\r\n\005value\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221" +
-      "\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc.e" +
-      "rrorCodes\"O\n\017SetXAttrRequest\022\014\n\004attr\030\001 \001" +
-      "(\t\022\r\n\005value\030\002 \001(\t\022\014\n\004path\030\003 \001(\t\022\021\n\tpvolu" +
-      "meID\030\004 \001(\003\"\305\001\n\020SetXAttrResponse\022\r\n\005error" +
+      "dedup.grpc.errorCodes\022\017\n\007written\030\003 \001(\003\"=" +
+      "\n\014MkDirRequest\022\014\n\004path\030\001 \001(\t\022\014\n\004mode\030\002 \001" +
+      "(\005\022\021\n\tpvolumeID\030\003 \001(\003\"Q\n\rMkDirResponse\022\r" +
+      "\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.o" +
+      "pendedup.grpc.errorCodes\"/\n\014RmDirRequest" +
+      "\022\014\n\004path\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"Q\n\rRmD" +
+      "irResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002" +
+      " \001(\0162\036.org.opendedup.grpc.errorCodes\"0\n\r" +
+      "UnlinkRequest\022\014\n\004path\030\001 \001(\t\022\021\n\tpvolumeID" +
+      "\030\002 \001(\003\"R\n\016UnlinkResponse\022\r\n\005error\030\001 \001(\t\022" +
+      "1\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc." +
+      "errorCodes\"T\n\017DataReadRequest\022\022\n\nfileHan" +
+      "dle\030\001 \001(\003\022\r\n\005start\030\002 \001(\003\022\013\n\003len\030\003 \001(\005\022\021\n" +
+      "\tpvolumeID\030\004 \001(\003\"\204\001\n\020DataReadResponse\022\014\n" +
+      "\004data\030\001 \001(\014\022\014\n\004read\030\002 \001(\005\022\r\n\005error\030\003 \001(\t" +
+      "\0221\n\terrorCode\030\004 \001(\0162\036.org.opendedup.grpc" +
+      ".errorCodes\022\022\n\ncompressed\030\005 \001(\010\"9\n\020FileC" +
+      "loseRequest\022\022\n\nfileHandle\030\001 \001(\003\022\021\n\tpvolu" +
+      "meID\030\002 \001(\003\"U\n\021FileCloseResponse\022\r\n\005error" +
       "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
-      "p.grpc.errorCodes\022=\n\005flags\030\003 \001(\0162..org.o" +
-      "pendedup.grpc.SetXAttrResponse.flagsenum" +
-      "\"0\n\tflagsenum\022\020\n\014XATTR_CREATE\020\000\022\021\n\rXATTR" +
-      "_REPLACE\020\001\"C\n\022RemoveXAttrRequest\022\014\n\004attr" +
+      "p.grpc.errorCodes\"K\n\014MkNodRequest\022\014\n\004pat" +
+      "h\030\001 \001(\t\022\014\n\004mode\030\002 \001(\005\022\014\n\004rdev\030\003 \001(\005\022\021\n\tp" +
+      "volumeID\030\004 \001(\003\"Q\n\rMkNodResponse\022\r\n\005error" +
+      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
+      "p.grpc.errorCodes\"A\n\017FileOpenRequest\022\014\n\004" +
+      "path\030\001 \001(\t\022\r\n\005flags\030\002 \001(\005\022\021\n\tpvolumeID\030\003" +
+      " \001(\003\"4\n\021FileExistsRequest\022\014\n\004path\030\001 \001(\t\022" +
+      "\021\n\tpvolumeID\030\002 \001(\003\"y\n\022FileExistsResponse" +
+      "\022\016\n\006exists\030\001 \001(\010\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
+      "Code\030\003 \001(\0162\036.org.opendedup.grpc.errorCod" +
+      "es\022\021\n\tpvolumeID\030\004 \001(\003\"h\n\020FileOpenRespons" +
+      "e\022\022\n\nfileHandle\030\001 \001(\003\022\r\n\005error\030\002 \001(\t\0221\n\t" +
+      "errorCode\030\003 \001(\0162\036.org.opendedup.grpc.err" +
+      "orCodes\"C\n\023FileSnapshotRequest\022\013\n\003src\030\001 " +
+      "\001(\t\022\014\n\004dest\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\"i\n\024" +
+      "FileSnapshotResponse\022\r\n\005error\030\001 \001(\t\0221\n\te" +
+      "rrorCode\030\002 \001(\0162\036.org.opendedup.grpc.erro" +
+      "rCodes\022\017\n\007eventID\030\003 \001(\t\"A\n\021FileRenameReq" +
+      "uest\022\013\n\003src\030\001 \001(\t\022\014\n\004dest\030\002 \001(\t\022\021\n\tpvolu" +
+      "meID\030\003 \001(\003\"V\n\022FileRenameResponse\022\r\n\005erro" +
+      "r\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opended" +
+      "up.grpc.errorCodes\"|\n\021CopyExtentRequest\022" +
+      "\017\n\007srcFile\030\001 \001(\t\022\017\n\007dstFile\030\002 \001(\t\022\020\n\010src" +
+      "Start\030\003 \001(\003\022\020\n\010dstStart\030\004 \001(\003\022\016\n\006length\030" +
+      "\005 \001(\003\022\021\n\tpvolumeID\030\006 \001(\003\"g\n\022CopyExtentRe" +
+      "sponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\016" +
+      "2\036.org.opendedup.grpc.errorCodes\022\017\n\007writ" +
+      "ten\030\003 \001(\003\"u\n\026SetUserMetaDataRequest\022:\n\016f" +
+      "ileAttributes\030\001 \003(\0132\".org.opendedup.grpc" +
+      ".FileAttributes\022\014\n\004Path\030\002 \001(\t\022\021\n\tpvolume" +
+      "ID\030\003 \001(\003\"[\n\027SetUserMetaDataResponse\022\r\n\005e" +
+      "rror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.open" +
+      "dedup.grpc.errorCodes\"l\n\023GetCloudFileReq" +
+      "uest\022\014\n\004file\030\001 \001(\t\022\017\n\007dstfile\030\002 \001(\t\022\021\n\to" +
+      "verwrite\030\003 \001(\010\022\020\n\010changeid\030\004 \001(\t\022\021\n\tpvol" +
+      "umeID\030\005 \001(\003\"i\n\024GetCloudFileResponse\022\017\n\007e" +
+      "ventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode" +
+      "\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"=" +
+      "\n\014ChmodRequest\022\014\n\004path\030\001 \001(\t\022\014\n\004mode\030\002 \001" +
+      "(\005\022\021\n\tpvolumeID\030\003 \001(\003\"Q\n\rChmodResponse\022\r" +
+      "\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.o" +
+      "pendedup.grpc.errorCodes\"I\n\014ChownRequest" +
+      "\022\014\n\004path\030\001 \001(\t\022\013\n\003uid\030\002 \001(\005\022\013\n\003gid\030\003 \001(\005" +
+      "\022\021\n\tpvolumeID\030\004 \001(\003\"Q\n\rChownResponse\022\r\n\005" +
+      "error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.ope" +
+      "ndedup.grpc.errorCodes\";\n\014FlushRequest\022\014" +
+      "\n\004path\030\001 \001(\t\022\n\n\002fd\030\002 \001(\003\022\021\n\tpvolumeID\030\003 " +
+      "\001(\003\"Q\n\rFlushResponse\022\r\n\005error\030\001 \001(\t\0221\n\te" +
+      "rrorCode\030\002 \001(\0162\036.org.opendedup.grpc.erro" +
+      "rCodes\"\277\001\n\004Stat\022\013\n\003dev\030\001 \001(\003\022\013\n\003ino\030\002 \001(" +
+      "\003\022\014\n\004mode\030\003 \001(\005\022\r\n\005nlink\030\004 \001(\005\022\013\n\003uid\030\005 " +
+      "\001(\005\022\013\n\003gid\030\006 \001(\005\022\014\n\004rdev\030\007 \001(\005\022\014\n\004size\030\010" +
+      " \001(\003\022\017\n\007blksize\030\t \001(\005\022\016\n\006blocks\030\n \001(\003\022\r\n" +
+      "\005atime\030\013 \001(\003\022\014\n\004mtim\030\014 \001(\003\022\014\n\004ctim\030\r \001(\003" +
+      "\".\n\013StatRequest\022\014\n\004path\030\001 \001(\t\022\021\n\tpvolume" +
+      "ID\030\002 \001(\003\"x\n\014StatResponse\022&\n\004stat\030\001 \001(\0132\030" +
+      ".org.opendedup.grpc.Stat\022\r\n\005error\030\002 \001(\t\022" +
+      "1\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc." +
+      "errorCodes\".\n\013LinkRequest\022\014\n\004path\030\001 \001(\t\022" +
+      "\021\n\tpvolumeID\030\002 \001(\003\"b\n\014LinkResponse\022\020\n\010li" +
+      "nkPath\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode" +
+      "\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"\260" +
+      "\001\n\006StatFS\022\r\n\005bsize\030\001 \001(\005\022\016\n\006blocks\030\002 \001(\003" +
+      "\022\r\n\005bfree\030\003 \001(\003\022\016\n\006bavail\030\004 \001(\003\022\r\n\005files" +
+      "\030\005 \001(\003\022\r\n\005ffree\030\006 \001(\003\022\014\n\004fsid\030\007 \001(\003\022\017\n\007n" +
+      "amelen\030\010 \001(\005\022\016\n\006frsize\030\t \001(\005\022\r\n\005flags\030\n " +
+      "\001(\005\022\014\n\004type\030\013 \001(\005\"\"\n\rStatFSRequest\022\021\n\tpv" +
+      "olumeID\030\001 \001(\003\"|\n\016StatFSResponse\022(\n\004stat\030" +
+      "\001 \001(\0132\032.org.opendedup.grpc.StatFS\022\r\n\005err" +
+      "or\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opende" +
+      "dup.grpc.errorCodes\"=\n\016SymLinkRequest\022\014\n" +
+      "\004from\030\001 \001(\t\022\n\n\002to\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001" +
+      "(\003\"S\n\017SymLinkResponse\022\r\n\005error\030\001 \001(\t\0221\n\t" +
+      "errorCode\030\002 \001(\0162\036.org.opendedup.grpc.err" +
+      "orCodes\"B\n\017TruncateRequest\022\014\n\004path\030\001 \001(\t" +
+      "\022\016\n\006length\030\002 \001(\003\022\021\n\tpvolumeID\030\003 \001(\003\"T\n\020T" +
+      "runcateResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorC" +
+      "ode\030\002 \001(\0162\036.org.opendedup.grpc.errorCode" +
+      "s\"M\n\014UtimeRequest\022\014\n\004path\030\001 \001(\t\022\r\n\005atime" +
+      "\030\002 \001(\003\022\r\n\005mtime\030\003 \001(\003\022\021\n\tpvolumeID\030\004 \001(\003" +
+      "\"Q\n\rUtimeResponse\022\r\n\005error\030\001 \001(\t\0221\n\terro" +
+      "rCode\030\002 \001(\0162\036.org.opendedup.grpc.errorCo" +
+      "des\"@\n\017GetXAttrRequest\022\014\n\004attr\030\001 \001(\t\022\014\n\004" +
+      "path\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\"c\n\020GetXAtt" +
+      "rResponse\022\r\n\005value\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\022" +
+      "1\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc." +
+      "errorCodes\"O\n\017SetXAttrRequest\022\014\n\004attr\030\001 " +
+      "\001(\t\022\r\n\005value\030\002 \001(\t\022\014\n\004path\030\003 \001(\t\022\021\n\tpvol" +
+      "umeID\030\004 \001(\003\"\305\001\n\020SetXAttrResponse\022\r\n\005erro" +
+      "r\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opended" +
+      "up.grpc.errorCodes\022=\n\005flags\030\003 \001(\0162..org." +
+      "opendedup.grpc.SetXAttrResponse.flagsenu" +
+      "m\"0\n\tflagsenum\022\020\n\014XATTR_CREATE\020\000\022\021\n\rXATT" +
+      "R_REPLACE\020\001\"C\n\022RemoveXAttrRequest\022\014\n\004att" +
+      "r\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003" +
+      "\"W\n\023RemoveXAttrResponse\022\r\n\005error\030\001 \001(\t\0221" +
+      "\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc.e" +
+      "rrorCodes\"D\n\023GetXAttrSizeRequest\022\014\n\004attr" +
       "\030\001 \001(\t\022\014\n\004path\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\"" +
-      "W\n\023RemoveXAttrResponse\022\r\n\005error\030\001 \001(\t\0221\n" +
-      "\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc.er" +
-      "rorCodes\"D\n\023GetXAttrSizeRequest\022\014\n\004attr\030" +
-      "\001 \001(\t\022\014\n\004path\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\"h" +
-      "\n\024GetXAttrSizeResponse\022\016\n\006length\030\001 \001(\005\022\r" +
-      "\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.o" +
-      "pendedup.grpc.errorCodes\"M\n\014FsyncRequest" +
-      "\022\014\n\004path\030\001 \001(\t\022\n\n\002fh\030\002 \001(\003\022\020\n\010datasync\030\003" +
-      " \001(\010\022\021\n\tpvolumeID\030\004 \001(\003\"Q\n\rFsyncResponse" +
-      "\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org" +
-      ".opendedup.grpc.errorCodes\">\n\034SyncNotifi" +
-      "cationSubscription\022\013\n\003uid\030\001 \001(\t\022\021\n\tpvolu" +
-      "meID\030\002 \001(\003\">\n\027SetRetrievalTierRequest\022\020\n" +
-      "\010tierType\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"\\\n\030Se" +
-      "tRetrievalTierResponse\022\r\n\005error\030\001 \001(\t\0221\n" +
-      "\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc.er" +
-      "rorCodes\",\n\027GetRetrievalTierRequest\022\021\n\tp" +
-      "volumeID\030\001 \001(\003\"n\n\030GetRetrievalTierRespon" +
-      "se\022\020\n\010tierType\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\te" +
-      "rrorCode\030\003 \001(\0162\036.org.opendedup.grpc.erro" +
-      "rCodes2\215\031\n\rFileIOService\022a\n\014GetXAttrSize" +
-      "\022\'.org.opendedup.grpc.GetXAttrSizeReques" +
-      "t\032(.org.opendedup.grpc.GetXAttrSizeRespo" +
-      "nse\022L\n\005Fsync\022 .org.opendedup.grpc.FsyncR" +
-      "equest\032!.org.opendedup.grpc.FsyncRespons" +
-      "e\022U\n\010SetXAttr\022#.org.opendedup.grpc.SetXA" +
-      "ttrRequest\032$.org.opendedup.grpc.SetXAttr" +
-      "Response\022^\n\013RemoveXAttr\022&.org.opendedup." +
-      "grpc.RemoveXAttrRequest\032\'.org.opendedup." +
-      "grpc.RemoveXAttrResponse\022U\n\010GetXAttr\022#.o" +
-      "rg.opendedup.grpc.GetXAttrRequest\032$.org." +
-      "opendedup.grpc.GetXAttrResponse\022L\n\005Utime" +
-      "\022 .org.opendedup.grpc.UtimeRequest\032!.org" +
-      ".opendedup.grpc.UtimeResponse\022U\n\010Truncat" +
-      "e\022#.org.opendedup.grpc.TruncateRequest\032$" +
-      ".org.opendedup.grpc.TruncateResponse\022R\n\007" +
-      "SymLink\022\".org.opendedup.grpc.SymLinkRequ" +
-      "est\032#.org.opendedup.grpc.SymLinkResponse" +
-      "\022M\n\010ReadLink\022\037.org.opendedup.grpc.LinkRe" +
-      "quest\032 .org.opendedup.grpc.LinkResponse\022" +
-      "L\n\007GetAttr\022\037.org.opendedup.grpc.StatRequ" +
-      "est\032 .org.opendedup.grpc.StatResponse\022L\n" +
-      "\005Flush\022 .org.opendedup.grpc.FlushRequest" +
-      "\032!.org.opendedup.grpc.FlushResponse\022L\n\005C" +
-      "hown\022 .org.opendedup.grpc.ChownRequest\032!" +
-      ".org.opendedup.grpc.ChownResponse\022L\n\005Chm" +
-      "od\022 .org.opendedup.grpc.ChmodRequest\032!.o" +
-      "rg.opendedup.grpc.ChmodResponse\022L\n\005MkDir" +
-      "\022 .org.opendedup.grpc.MkDirRequest\032!.org" +
-      ".opendedup.grpc.MkDirResponse\022L\n\005RmDir\022 " +
-      ".org.opendedup.grpc.RmDirRequest\032!.org.o" +
-      "pendedup.grpc.RmDirResponse\022O\n\006Unlink\022!." +
-      "org.opendedup.grpc.UnlinkRequest\032\".org.o" +
-      "pendedup.grpc.UnlinkResponse\022T\n\005Write\022$." +
-      "org.opendedup.grpc.DataWriteRequest\032%.or" +
-      "g.opendedup.grpc.DataWriteResponse\022^\n\013St" +
-      "reamWrite\022$.org.opendedup.grpc.DataWrite" +
-      "Request\032%.org.opendedup.grpc.DataWriteRe" +
-      "sponse\"\000(\001\022Q\n\004Read\022#.org.opendedup.grpc." +
-      "DataReadRequest\032$.org.opendedup.grpc.Dat" +
-      "aReadResponse\022V\n\007Release\022$.org.opendedup" +
-      ".grpc.FileCloseRequest\032%.org.opendedup.g" +
-      "rpc.FileCloseResponse\022L\n\005Mknod\022 .org.ope" +
-      "ndedup.grpc.MkNodRequest\032!.org.opendedup" +
-      ".grpc.MkNodResponse\022Q\n\004Open\022#.org.opende" +
-      "dup.grpc.FileOpenRequest\032$.org.opendedup" +
-      ".grpc.FileOpenResponse\022[\n\013GetFileInfo\022#." +
-      "org.opendedup.grpc.FileInfoRequest\032\'.org" +
-      ".opendedup.grpc.FileMessageResponse\022_\n\nC" +
-      "reateCopy\022\'.org.opendedup.grpc.FileSnaps" +
-      "hotRequest\032(.org.opendedup.grpc.FileSnap" +
-      "shotResponse\022[\n\nFileExists\022%.org.opended" +
-      "up.grpc.FileExistsRequest\032&.org.opendedu" +
-      "p.grpc.FileExistsResponse\022O\n\010MkDirAll\022 ." +
-      "org.opendedup.grpc.MkDirRequest\032!.org.op" +
-      "endedup.grpc.MkDirResponse\022T\n\004Stat\022#.org" +
-      ".opendedup.grpc.FileInfoRequest\032\'.org.op" +
-      "endedup.grpc.FileMessageResponse\022W\n\006Rena" +
-      "me\022%.org.opendedup.grpc.FileRenameReques" +
-      "t\032&.org.opendedup.grpc.FileRenameRespons" +
-      "e\022[\n\nCopyExtent\022%.org.opendedup.grpc.Cop" +
-      "yExtentRequest\032&.org.opendedup.grpc.Copy" +
-      "ExtentResponse\022j\n\017SetUserMetaData\022*.org." +
-      "opendedup.grpc.SetUserMetaDataRequest\032+." +
-      "org.opendedup.grpc.SetUserMetaDataRespon" +
-      "se\022a\n\014GetCloudFile\022\'.org.opendedup.grpc." +
-      "GetCloudFileRequest\032(.org.opendedup.grpc" +
-      ".GetCloudFileResponse\022e\n\020GetCloudMetaFil" +
-      "e\022\'.org.opendedup.grpc.GetCloudFileReque" +
-      "st\032(.org.opendedup.grpc.GetCloudFileResp" +
-      "onse\022O\n\006StatFS\022!.org.opendedup.grpc.Stat" +
-      "FSRequest\032\".org.opendedup.grpc.StatFSRes" +
-      "ponse\022q\n\020fileNotification\0220.org.opendedu" +
-      "p.grpc.SyncNotificationSubscription\032\'.or" +
-      "g.opendedup.grpc.FileMessageResponse\"\0000\001" +
-      "\022m\n\020SetRetrievalTier\022+.org.opendedup.grp" +
-      "c.SetRetrievalTierRequest\032,.org.opendedu" +
-      "p.grpc.SetRetrievalTierResponse\022m\n\020GetRe" +
-      "trievalTier\022+.org.opendedup.grpc.GetRetr" +
-      "ievalTierRequest\032,.org.opendedup.grpc.Ge" +
-      "tRetrievalTierResponseB0Z.github.com/ope" +
-      "ndedup/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "h\n\024GetXAttrSizeResponse\022\016\n\006length\030\001 \001(\005\022" +
+      "\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org." +
+      "opendedup.grpc.errorCodes\"M\n\014FsyncReques" +
+      "t\022\014\n\004path\030\001 \001(\t\022\n\n\002fh\030\002 \001(\003\022\020\n\010datasync\030" +
+      "\003 \001(\010\022\021\n\tpvolumeID\030\004 \001(\003\"Q\n\rFsyncRespons" +
+      "e\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.or" +
+      "g.opendedup.grpc.errorCodes\">\n\034SyncNotif" +
+      "icationSubscription\022\013\n\003uid\030\001 \001(\t\022\021\n\tpvol" +
+      "umeID\030\002 \001(\003\">\n\027SetRetrievalTierRequest\022\020" +
+      "\n\010tierType\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"\\\n\030S" +
+      "etRetrievalTierResponse\022\r\n\005error\030\001 \001(\t\0221" +
+      "\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc.e" +
+      "rrorCodes\",\n\027GetRetrievalTierRequest\022\021\n\t" +
+      "pvolumeID\030\001 \001(\003\"n\n\030GetRetrievalTierRespo" +
+      "nse\022\020\n\010tierType\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\t" +
+      "errorCode\030\003 \001(\0162\036.org.opendedup.grpc.err" +
+      "orCodes2\215\031\n\rFileIOService\022a\n\014GetXAttrSiz" +
+      "e\022\'.org.opendedup.grpc.GetXAttrSizeReque" +
+      "st\032(.org.opendedup.grpc.GetXAttrSizeResp" +
+      "onse\022L\n\005Fsync\022 .org.opendedup.grpc.Fsync" +
+      "Request\032!.org.opendedup.grpc.FsyncRespon" +
+      "se\022U\n\010SetXAttr\022#.org.opendedup.grpc.SetX" +
+      "AttrRequest\032$.org.opendedup.grpc.SetXAtt" +
+      "rResponse\022^\n\013RemoveXAttr\022&.org.opendedup" +
+      ".grpc.RemoveXAttrRequest\032\'.org.opendedup" +
+      ".grpc.RemoveXAttrResponse\022U\n\010GetXAttr\022#." +
+      "org.opendedup.grpc.GetXAttrRequest\032$.org" +
+      ".opendedup.grpc.GetXAttrResponse\022L\n\005Utim" +
+      "e\022 .org.opendedup.grpc.UtimeRequest\032!.or" +
+      "g.opendedup.grpc.UtimeResponse\022U\n\010Trunca" +
+      "te\022#.org.opendedup.grpc.TruncateRequest\032" +
+      "$.org.opendedup.grpc.TruncateResponse\022R\n" +
+      "\007SymLink\022\".org.opendedup.grpc.SymLinkReq" +
+      "uest\032#.org.opendedup.grpc.SymLinkRespons" +
+      "e\022M\n\010ReadLink\022\037.org.opendedup.grpc.LinkR" +
+      "equest\032 .org.opendedup.grpc.LinkResponse" +
+      "\022L\n\007GetAttr\022\037.org.opendedup.grpc.StatReq" +
+      "uest\032 .org.opendedup.grpc.StatResponse\022L" +
+      "\n\005Flush\022 .org.opendedup.grpc.FlushReques" +
+      "t\032!.org.opendedup.grpc.FlushResponse\022L\n\005" +
+      "Chown\022 .org.opendedup.grpc.ChownRequest\032" +
+      "!.org.opendedup.grpc.ChownResponse\022L\n\005Ch" +
+      "mod\022 .org.opendedup.grpc.ChmodRequest\032!." +
+      "org.opendedup.grpc.ChmodResponse\022L\n\005MkDi" +
+      "r\022 .org.opendedup.grpc.MkDirRequest\032!.or" +
+      "g.opendedup.grpc.MkDirResponse\022L\n\005RmDir\022" +
+      " .org.opendedup.grpc.RmDirRequest\032!.org." +
+      "opendedup.grpc.RmDirResponse\022O\n\006Unlink\022!" +
+      ".org.opendedup.grpc.UnlinkRequest\032\".org." +
+      "opendedup.grpc.UnlinkResponse\022T\n\005Write\022$" +
+      ".org.opendedup.grpc.DataWriteRequest\032%.o" +
+      "rg.opendedup.grpc.DataWriteResponse\022^\n\013S" +
+      "treamWrite\022$.org.opendedup.grpc.DataWrit" +
+      "eRequest\032%.org.opendedup.grpc.DataWriteR" +
+      "esponse\"\000(\001\022Q\n\004Read\022#.org.opendedup.grpc" +
+      ".DataReadRequest\032$.org.opendedup.grpc.Da" +
+      "taReadResponse\022V\n\007Release\022$.org.opendedu" +
+      "p.grpc.FileCloseRequest\032%.org.opendedup." +
+      "grpc.FileCloseResponse\022L\n\005Mknod\022 .org.op" +
+      "endedup.grpc.MkNodRequest\032!.org.opendedu" +
+      "p.grpc.MkNodResponse\022Q\n\004Open\022#.org.opend" +
+      "edup.grpc.FileOpenRequest\032$.org.opendedu" +
+      "p.grpc.FileOpenResponse\022[\n\013GetFileInfo\022#" +
+      ".org.opendedup.grpc.FileInfoRequest\032\'.or" +
+      "g.opendedup.grpc.FileMessageResponse\022_\n\n" +
+      "CreateCopy\022\'.org.opendedup.grpc.FileSnap" +
+      "shotRequest\032(.org.opendedup.grpc.FileSna" +
+      "pshotResponse\022[\n\nFileExists\022%.org.opende" +
+      "dup.grpc.FileExistsRequest\032&.org.opended" +
+      "up.grpc.FileExistsResponse\022O\n\010MkDirAll\022 " +
+      ".org.opendedup.grpc.MkDirRequest\032!.org.o" +
+      "pendedup.grpc.MkDirResponse\022T\n\004Stat\022#.or" +
+      "g.opendedup.grpc.FileInfoRequest\032\'.org.o" +
+      "pendedup.grpc.FileMessageResponse\022W\n\006Ren" +
+      "ame\022%.org.opendedup.grpc.FileRenameReque" +
+      "st\032&.org.opendedup.grpc.FileRenameRespon" +
+      "se\022[\n\nCopyExtent\022%.org.opendedup.grpc.Co" +
+      "pyExtentRequest\032&.org.opendedup.grpc.Cop" +
+      "yExtentResponse\022j\n\017SetUserMetaData\022*.org" +
+      ".opendedup.grpc.SetUserMetaDataRequest\032+" +
+      ".org.opendedup.grpc.SetUserMetaDataRespo" +
+      "nse\022a\n\014GetCloudFile\022\'.org.opendedup.grpc" +
+      ".GetCloudFileRequest\032(.org.opendedup.grp" +
+      "c.GetCloudFileResponse\022e\n\020GetCloudMetaFi" +
+      "le\022\'.org.opendedup.grpc.GetCloudFileRequ" +
+      "est\032(.org.opendedup.grpc.GetCloudFileRes" +
+      "ponse\022O\n\006StatFS\022!.org.opendedup.grpc.Sta" +
+      "tFSRequest\032\".org.opendedup.grpc.StatFSRe" +
+      "sponse\022q\n\020fileNotification\0220.org.opended" +
+      "up.grpc.SyncNotificationSubscription\032\'.o" +
+      "rg.opendedup.grpc.FileMessageResponse\"\0000" +
+      "\001\022m\n\020SetRetrievalTier\022+.org.opendedup.gr" +
+      "pc.SetRetrievalTierRequest\032,.org.opended" +
+      "up.grpc.SetRetrievalTierResponse\022m\n\020GetR" +
+      "etrievalTier\022+.org.opendedup.grpc.GetRet" +
+      "rievalTierRequest\032,.org.opendedup.grpc.G" +
+      "etRetrievalTierResponseB0Z.github.com/op" +
+      "endedup/sdfs-client-go/sdfs/;sdfsb\006proto" +
+      "3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -48623,7 +48767,7 @@ public final class IOService {
     internal_static_org_opendedup_grpc_DataWriteRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DataWriteRequest_descriptor,
-        new java.lang.String[] { "FileHandle", "Start", "Len", "Data", "PvolumeID", });
+        new java.lang.String[] { "FileHandle", "Start", "Len", "Data", "PvolumeID", "Compressed", });
     internal_static_org_opendedup_grpc_DataWriteResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_org_opendedup_grpc_DataWriteResponse_fieldAccessorTable = new
@@ -48677,7 +48821,7 @@ public final class IOService {
     internal_static_org_opendedup_grpc_DataReadResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DataReadResponse_descriptor,
-        new java.lang.String[] { "Data", "Read", "Error", "ErrorCode", });
+        new java.lang.String[] { "Data", "Read", "Error", "ErrorCode", "Compressed", });
     internal_static_org_opendedup_grpc_FileCloseRequest_descriptor =
       getDescriptor().getMessageTypes().get(10);
     internal_static_org_opendedup_grpc_FileCloseRequest_fieldAccessorTable = new
