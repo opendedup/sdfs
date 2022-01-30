@@ -1003,7 +1003,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     read = 0;
 
                 b.setRead(read);
-
                 if (request.getCompress() && read > 1) {
                     byte[] chunk = CompressionUtils.compressLz4(buf.array());
                     if (read < chunk.length) {
