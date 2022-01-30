@@ -618,10 +618,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     try {
                         DedupFileChannel ch = getFileChannel(request.getFileHandle());
                         ByteBuffer buf = request.getData().asReadOnlyByteBuffer();
-                        if(request.getCompressed()) {
+                        if (request.getCompressed()) {
                             byte[] b = new byte[buf.capacity()];
                             buf.get(b);
-                            byte [] chunk = CompressionUtils.decompressLz4(b, request.getLen());
+                            byte[] chunk = CompressionUtils.decompressLz4(b, request.getLen());
                             buf = ByteBuffer.wrap(chunk);
                         }
                         buf.position(0);
@@ -769,10 +769,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 }
                 DedupFileChannel ch = this.getFileChannel(request.getFileHandle());
                 ByteBuffer buf = request.getData().asReadOnlyByteBuffer();
-                if(request.getCompressed()) {
+                if (request.getCompressed()) {
                     byte[] bf = new byte[buf.capacity()];
                     buf.get(bf);
-                    byte [] chunk = CompressionUtils.decompressLz4(bf, request.getLen());
+                    byte[] chunk = CompressionUtils.decompressLz4(bf, request.getLen());
                     buf = ByteBuffer.wrap(chunk);
                 }
                 buf.position(0);
@@ -1001,13 +1001,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 int read = ch.read(buf, 0, buf.capacity(), request.getStart());
                 if (read == -1)
                     read = 0;
-                
+
                 b.setRead(read);
-                if (read > 1) {
-                byte [] chunk = CompressionUtils.compressLz4(buf.array());
-                if(read < chunk.length) {
-                    buf = ByteBuffer.wrap(chunk);
-                }
+
+                if (request.getCompress() && read > 1) {
+                    byte[] chunk = CompressionUtils.compressLz4(buf.array());
+                    if (read < chunk.length) {
+                        buf = ByteBuffer.wrap(chunk);
+                    }
                 }
                 buf.position(0);
                 b.setData(ByteString.copyFrom(buf, read));
