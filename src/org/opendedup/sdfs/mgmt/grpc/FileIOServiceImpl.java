@@ -777,8 +777,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 }
                 buf.position(0);
                 try {
-                    SDFSLogger.getLog().debug("Writing " + ch.openFile().getPath() + " pos=" + request.getStart()
-                            + " len=" + buf.capacity());
+                    SDFSLogger.getLog().info("Writing " + ch.openFile().getPath() + " pos=" + request.getStart()
+                            + " len=" + buf.capacity() + " compressed=" + request.getCompressed());
                     /*
                      * byte[] k = new byte[buf.capacity()]; buf.get(k); buf.position(0);
                      * Files.write(Paths.get("c:/temp/" + ch.openFile().getName()), new

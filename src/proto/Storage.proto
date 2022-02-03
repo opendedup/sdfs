@@ -10,8 +10,6 @@ message CheckHashesRequest {
   int64 pvolumeID =2;
 }
 
-
-
 message CheckHashesResponse {
   repeated int64 locations = 1;
   string error = 2;
