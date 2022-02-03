@@ -220,7 +220,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                             chunk = CompressionUtils.decompressLz4(chunk, ent.getCompressedLength());
                         }
                         if (compressed > 0) {
-                            SDFSLogger.getLog().info("wrote " + compressed + " blocks");
+                            SDFSLogger.getLog().debug("wrote " + compressed + " blocks");
                         }
                         ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
                                 ch.getDedupFile().getGUID());

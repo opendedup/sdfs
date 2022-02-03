@@ -777,7 +777,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 }
                 buf.position(0);
                 try {
-                    SDFSLogger.getLog().info("Writing " + ch.openFile().getPath() + " pos=" + request.getStart()
+                    SDFSLogger.getLog().debug("Writing " + ch.openFile().getPath() + " pos=" + request.getStart()
                             + " len=" + buf.capacity() + " compressed=" + request.getCompressed());
                     /*
                      * byte[] k = new byte[buf.capacity()]; buf.get(k); buf.position(0);
@@ -862,12 +862,12 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             if (filePath != null && !filePath.isEmpty()) {
 
                 if (isImmutable) {
-                    SDFSLogger.getLog().info("chattr set Immutable, file: " + filePath);
-                    SDFSLogger.getLog().info("Command::sudo chattr +i -V " + filePath);
+                    SDFSLogger.getLog().debug("chattr set Immutable, file: " + filePath);
+                    SDFSLogger.getLog().debug("Command::sudo chattr +i -V " + filePath);
                     strCommand = "sudo chattr +i -V " + filePath;
                 } else {
-                    SDFSLogger.getLog().info("chattr set non-Immutable, file: " + filePath);
-                    SDFSLogger.getLog().info("COmmand::sudo chattr -i -V " + filePath);
+                    SDFSLogger.getLog().debug("chattr set non-Immutable, file: " + filePath);
+                    SDFSLogger.getLog().debug("COmmand::sudo chattr -i -V " + filePath);
                     strCommand = "sudo chattr -i -V " + filePath;
                 }
                 MgmtWebServer.executeLinuxCmd(strCommand);
@@ -1022,7 +1022,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             } catch (DataArchivedException e) {
-                SDFSLogger.getLog().info("Readin 4");
+                SDFSLogger.getLog().debug("Readin 4");
                 SDFSLogger.getLog().warn("Data is archived");
                 b.setError("Data is archived");
                 b.setErrorCode(errorCodes.ENODATA);
@@ -1051,7 +1051,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             File f = new File(internalPath);
             SDFSLogger.getLog().debug("looking for " + f.getPath());
             if (!f.exists()) {
-                SDFSLogger.getLog().info("File not found " + req.getFileName());
+                SDFSLogger.getLog().debug("File not found " + req.getFileName());
                 b.setError("File not found " + req.getFileName());
                 b.setErrorCode(errorCodes.ENOENT);
                 responseObserver.onNext(b.build());
@@ -1090,7 +1090,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             String path = req.getPath();
             int mode = req.getMode();
             if (!f.exists()) {
-                SDFSLogger.getLog().info("File not found " + req.getPath());
+                SDFSLogger.getLog().debug("File not found " + req.getPath());
                 b.setError("File not found " + req.getPath());
                 b.setErrorCode(errorCodes.ENOENT);
                 responseObserver.onNext(b.build());
@@ -1176,7 +1176,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 if (ftype == FuseFtypeConstants.TYPE_SYMLINK || ftype == FuseFtypeConstants.TYPE_DIR) {
                     Path p = Paths.get(f.getCanonicalPath());
                     try {
-                        SDFSLogger.getLog().info("setting uid " + uid + "and gid " + gid);
+                        SDFSLogger.getLog().debug("setting uid " + uid + "and gid " + gid);
                         if (!OSValidator.isWindows()) {
                             Files.setAttribute(p, "unix:uid", Integer.valueOf(uid), LinkOption.NOFOLLOW_LINKS);
                             Files.setAttribute(p, "unix:gid", Integer.valueOf(gid), LinkOption.NOFOLLOW_LINKS);
@@ -2444,7 +2444,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 try {
                     responseObserver.onNext(b.build());
 
-                    SDFSLogger.getLog().info("Sent message");
+                    SDFSLogger.getLog().debug("Sent message");
                 } catch (Exception e) {
                     SDFSLogger.getLog().error("Unable to send message", e);
                     this.close();
@@ -2469,7 +2469,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 try {
                     responseObserver.onNext(b.build());
 
-                    SDFSLogger.getLog().info("Sent message");
+                    SDFSLogger.getLog().debug("Sent message");
                 } catch (Exception e) {
                     SDFSLogger.getLog().error("Unable to send message", e);
                     this.close();
@@ -2493,7 +2493,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 try {
                     responseObserver.onNext(b.build());
 
-                    SDFSLogger.getLog().info("Sent message");
+                    SDFSLogger.getLog().debug("Sent message");
                 } catch (Exception e) {
                     SDFSLogger.getLog().error("Unable to send message", e);
                     this.close();
@@ -2517,7 +2517,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 try {
                     responseObserver.onNext(b.build());
 
-                    SDFSLogger.getLog().info("Sent message");
+                    SDFSLogger.getLog().debug("Sent message");
                 } catch (Exception e) {
                     SDFSLogger.getLog().error("Unable to send message", e);
                     this.close();
