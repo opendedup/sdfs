@@ -212,7 +212,7 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
     public void run() {
         for (;;) {
             try {
-                Thread.sleep(300 * 1000);
+                Thread.sleep(300 * 1000*3);
                 loadTrustManager();
                 long tm = System.currentTimeMillis() - (300 * 1000);
                 try {
@@ -256,14 +256,14 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
             hl.writeLock().lock();
             keys.clear();
             File trustedCertificatesDir = new File(this.trustStoreDir);
-            SDFSLogger.getLog().info("Load Trust Manager from " + trustedCertificatesDir.getPath());
+            SDFSLogger.getLog().debug("Load Trust Manager from " + trustedCertificatesDir.getPath());
 
             // Implementing FileFilter to retrieve only the files in the directory
             FileFilter fileFilter = new FileFilter() {
                 @Override
                 public boolean accept(File file) {
                     if (file.isDirectory()) {
-                        SDFSLogger.getLog().warn("Directory, skipping it to add in TrustStore.");
+                        SDFSLogger.getLog().debug("Directory, skipping it to add in TrustStore.");
                         return false;
                     } else {
                         return true;
