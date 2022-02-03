@@ -24,6 +24,7 @@ import org.opendedup.grpc.Storage.HashLocPairP;
 import org.opendedup.grpc.Storage.HashingInfoRequest;
 import org.opendedup.grpc.Storage.HashingInfoResponse;
 import org.opendedup.grpc.Storage.MetaDataDedupeFileRequest;
+import org.opendedup.grpc.Storage.SparseDataChunkP;
 import org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest;
 import org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse;
 import org.opendedup.grpc.Storage.SparseDedupeFileRequest;
@@ -266,7 +267,15 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     responseObserver.onCompleted();
                     return;
                 }
-                SparseDataChunk sp = new SparseDataChunk(request.getChunk());
+                SparseDataChunk sp = null;
+                if(request.getCompressed()) {
+                    byte[] chunk = CompressionUtils.decompressLz4(request.getCompressedChunk().toByteArray(),
+                     request.getUncompressedLen());
+
+                     sp = new SparseDataChunk(SparseDataChunkP.parseFrom(chunk));
+                } else {
+                    sp = new SparseDataChunk(request.getChunk());
+                }
                 for (Entry<Integer, HashLocPairP> e : request.getChunk().getArMap().entrySet()) {
                     if (e.getValue().getDup()) {
                         long pos = DedupFileStore.addRef(e.getValue().getHash().toByteArray(),

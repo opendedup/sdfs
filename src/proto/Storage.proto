@@ -100,6 +100,9 @@ message SparseDedupeChunkWriteRequest {
   int64 fileHandle = 2;
   int64 fileLocation = 3;
   int64 pvolumeID =4;
+  bool compressed =5;
+  bytes compressedChunk = 6;
+  int32 uncompressedLen =7;
 }
 
 message SparseDedupeChunkWriteResponse {
