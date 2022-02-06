@@ -38,8 +38,10 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl.FileIOError;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+import com.google.common.primitives.Longs;
 
 import io.grpc.stub.StreamObserver;
 
@@ -172,8 +174,11 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 List<ByteString> hashes = request.getHashesList();
                 List<Long> responses = new ArrayList<Long>(hashes.size());
                 for (ByteString bs : hashes) {
-                    responses.add(HCServiceProxy.getHashesMap().get(bs.toByteArray()));
+                    long archive = HCServiceProxy.getHashesMap().get(bs.toByteArray());
+                    responses.add(archive);
+                    SDFSLogger.getLog().debug("dedupe archive is " + archive);
                 }
+
                 b.addAllLocations(responses);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
@@ -226,6 +231,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                         ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
                                 ch.getDedupFile().getGUID());
                         InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
+                        SDFSLogger.getLog().debug("write archive is " + Longs.fromByteArray(ir.getHashLocs()));
                         responses.add(ir.toProtoBuf());
                     } else {
                         responses.add(new InsertRecord(false, -1).toProtoBuf());
@@ -276,17 +282,19 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 } else {
                     sp = new SparseDataChunk(request.getChunk());
                 }
-                for (Entry<Integer, HashLocPairP> e : request.getChunk().getArMap().entrySet()) {
-                    if (e.getValue().getDup()) {
-                        long pos = DedupFileStore.addRef(e.getValue().getHash().toByteArray(),
-                                e.getValue().getHashloc(), 1);
-                        if (pos != e.getValue().getHashloc()) {
+                for (Entry<Integer, HashLocPair> e : sp.getFingers().entrySet()) {
+                    long hp = Longs.fromByteArray(e.getValue().hashloc);
+                    SDFSLogger.getLog().debug("Storing " +  hp + " dedupe " + e.getValue().inserted);
+                    if (!e.getValue().inserted) {
+                        long pos = DedupFileStore.addRef(e.getValue().hash,
+                                hp, 1);
+
+                        if (pos != hp) {
                             throw new IOException("Inserted Archive does not match current current=" +
-                                    pos + " interted=" + e.getValue().getHashloc());
+                                    pos + " interted=" + hp);
                         }
                     }
                 }
-
                 ch.getDedupFile().updateMap(sp, request.getFileLocation());
                 long ep = sp.getFpos() + sp.len;
                 if (ep > ch.getFile().length()) {
