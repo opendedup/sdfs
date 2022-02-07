@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -170,7 +171,6 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             responseObserver.onCompleted();
         } else {
             try {
-
                 List<ByteString> hashes = request.getHashesList();
                 List<Long> responses = new ArrayList<Long>(hashes.size());
                 for (ByteString bs : hashes) {
@@ -274,25 +274,39 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     return;
                 }
                 SparseDataChunk sp = null;
-                if(request.getCompressed()) {
+                if (request.getCompressed()) {
                     byte[] chunk = CompressionUtils.decompressLz4(request.getCompressedChunk().toByteArray(),
-                     request.getUncompressedLen());
+                            request.getUncompressedLen());
 
-                     sp = new SparseDataChunk(SparseDataChunkP.parseFrom(chunk));
+                    sp = new SparseDataChunk(SparseDataChunkP.parseFrom(chunk));
                 } else {
                     sp = new SparseDataChunk(request.getChunk());
                 }
+                HashMap<byte[], kv> hs = new HashMap<byte[], kv>();
                 for (Entry<Integer, HashLocPair> e : sp.getFingers().entrySet()) {
-                    long hp = Longs.fromByteArray(e.getValue().hashloc);
-                    SDFSLogger.getLog().debug("Storing " +  hp + " dedupe " + e.getValue().inserted);
                     if (!e.getValue().inserted) {
-                        long pos = DedupFileStore.addRef(e.getValue().hash,
-                                hp, 1);
+                        if (!hs.containsKey(e.getValue().hash)) {
 
-                        if (pos != hp) {
-                            throw new IOException("Inserted Archive does not match current current=" +
-                                    pos + " interted=" + hp);
+                            kv _kv = new kv();
+                            _kv.ct = 0;
+                            _kv.pos = Longs.fromByteArray(e.getValue().hashloc);
+                            hs.put(e.getValue().hash, new kv());
                         }
+                        kv _kv = hs.get(e.getValue().hash);
+                        _kv.pos++;
+                    }
+                }
+                for (Entry<byte[], kv> e : hs.entrySet()) {
+                    long pos = DedupFileStore.addRef(e.getKey(),
+                            e.getValue().pos, e.getValue().ct);
+                    if (e.getValue().ct <= 0) {
+                        throw new IOException("Count must be positive" +
+                                e.getValue().ct);
+                    }
+
+                    if (pos != e.getValue().pos) {
+                        throw new IOException("Inserted Archive does not match current current=" +
+                                pos + " interted=" + e.getValue().pos);
                     }
                 }
                 ch.getDedupFile().updateMap(sp, request.getFileLocation());
@@ -356,6 +370,12 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
             }
         }
+    }
+
+    private static class kv {
+        byte[] key;
+        long pos;
+        int ct = 0;
     }
 
 }

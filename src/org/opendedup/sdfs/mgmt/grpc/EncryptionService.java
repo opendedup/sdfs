@@ -289,7 +289,7 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
                             X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate(input);
                             keys.add(this.getThumbprint(cert));
                         } catch (CertificateException e) {
-                            SDFSLogger.getLog().warn("Not a certificate file, skipping it to add in TrustStore.");
+                            SDFSLogger.getLog().debug("Not a certificate file, skipping it to add in TrustStore.");
                             continue;
                         } catch (Exception e) {
                             throw new CertificateException("Error loading certificate file: " + trustedCertFile, e);

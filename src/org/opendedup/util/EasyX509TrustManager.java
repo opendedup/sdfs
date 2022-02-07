@@ -172,7 +172,7 @@ public class EasyX509TrustManager implements X509TrustManager {
             			X509Certificate cert = (X509Certificate) certificateFactory.generateCertificate( input );
                         trustStore.setCertificateEntry( Integer.toString( i++ ), cert );
                     } catch (CertificateException e) {
-                    	SDFSLogger.getLog().warn("Not a certificate file, skipping it to add in TrustStore.");
+                    	SDFSLogger.getLog().debug("Not a certificate file, skipping it to add in TrustStore.");
                         continue;
                     } catch ( Exception e )
             		{
