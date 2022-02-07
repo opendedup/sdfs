@@ -21,7 +21,6 @@ import org.opendedup.grpc.Storage.CheckHashesRequest;
 import org.opendedup.grpc.Storage.CheckHashesResponse;
 import org.opendedup.grpc.Storage.ChunkEntry;
 import org.opendedup.grpc.Storage.ChunkResponse;
-import org.opendedup.grpc.Storage.HashLocPairP;
 import org.opendedup.grpc.Storage.HashingInfoRequest;
 import org.opendedup.grpc.Storage.HashingInfoResponse;
 import org.opendedup.grpc.Storage.MetaDataDedupeFileRequest;
@@ -42,6 +41,8 @@ import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl.FileIOError;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+
+import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Longs;
 
 import io.grpc.stub.StreamObserver;
@@ -282,25 +283,26 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 } else {
                     sp = new SparseDataChunk(request.getChunk());
                 }
-                HashMap<byte[], kv> hs = new HashMap<byte[], kv>();
+                HashMap<String, kv> hs = new HashMap<String, kv>();
                 for (Entry<Integer, HashLocPair> e : sp.getFingers().entrySet()) {
                     if (!e.getValue().inserted) {
-                        if (!hs.containsKey(e.getValue().hash)) {
-
+                        String key = BaseEncoding.base64().encode(e.getValue().hash);
+                        if (!hs.containsKey(key)) {
                             kv _kv = new kv();
                             _kv.ct = 0;
+                            _kv.key=e.getValue().hash;
                             _kv.pos = Longs.fromByteArray(e.getValue().hashloc);
-                            hs.put(e.getValue().hash, new kv());
+                            hs.put(key, _kv);
                         }
-                        kv _kv = hs.get(e.getValue().hash);
-                        _kv.pos++;
+                        kv _kv = hs.get(key);
+                        _kv.ct += 1 ;
                     }
                 }
-                for (Entry<byte[], kv> e : hs.entrySet()) {
-                    long pos = DedupFileStore.addRef(e.getKey(),
+                for (Entry<String, kv> e : hs.entrySet()) {
+                    long pos = DedupFileStore.addRef(e.getValue().key,
                             e.getValue().pos, e.getValue().ct);
                     if (e.getValue().ct <= 0) {
-                        throw new IOException("Count must be positive" +
+                        throw new IOException("Count must be positive ct=" +
                                 e.getValue().ct);
                     }
 
@@ -373,9 +375,9 @@ public class StorageServiceImpl extends StorageServiceImplBase {
     }
 
     private static class kv {
-        byte[] key;
         long pos;
         int ct = 0;
+        byte [] key;
     }
 
 }
