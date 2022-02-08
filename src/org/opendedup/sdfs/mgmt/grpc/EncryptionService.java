@@ -107,7 +107,7 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
     public void exportServerCertificate(ExportServerCertRequest request,
             StreamObserver<ExportServerCertResponse> responseObserver) {
         ExportServerCertResponse.Builder b = ExportServerCertResponse.newBuilder();
-        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.EVENT_READ)) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.ENCRYPTION_READ)) {
             b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
@@ -147,7 +147,7 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
     public void deleteExportedCert(DeleteExportedCertRequest request,
             StreamObserver<DeleteExportedCertResponse> responseObserver) {
         DeleteExportedCertResponse.Builder b = DeleteExportedCertResponse.newBuilder();
-        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.EVENT_READ)) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.ENCRYPTION_WRITE)) {
             b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
@@ -158,8 +158,7 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
             this.hl.writeLock().lock();
             File fp = new File(privateKeyFilePath);
             File sc = new File(certChainFilePath);
-            sc.delete();
-            fp.delete();
+            SDFSLogger.getLog().info(" sdc =" + sc.exists() + " fpc=" + fp.exists());
 
         } catch (Exception e) {
             SDFSLogger.getLog().error("unable to delete server keys", e);
@@ -210,11 +209,16 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
 
     @Override
     public void run() {
+        int k = 0;
         for (;;) {
             try {
-                Thread.sleep(300 * 1000*3);
-                loadTrustManager();
-                long tm = System.currentTimeMillis() - (300 * 1000);
+                Thread.sleep(15 * 1000);
+                if (k == 20) {
+                    loadTrustManager();
+                    k = 0;
+                }
+                k++;
+                long tm = System.currentTimeMillis() - (15 * 1000);
                 try {
                     this.hl.writeLock().lock();
                     File fp = new File(privateKeyFilePath);

@@ -878,7 +878,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			if (rmct.get() > 0) {
 				SDFSLogger.getLog().warn("unable to remove orphaned reference total=" + rmct.get());
 			}
-			SDFSLogger.getLog().info("decremented " + dct.get() +" for " + this.filePath );
+			SDFSLogger.getLog().debug("decremented " + dct.get() +" for " + this.filePath );
 
 		} catch (Exception e) {
 			throw new IOException(e);
