@@ -672,6 +672,10 @@ public class VolumeConfigWriter {
 			this.chunk_store_encryption_key = BaseEncoding.base64Url().encode(ec);
 			ec = EncryptUtils.encryptCBC(this.cloudSecretKey.getBytes(), password, iv);
 			this.cloudSecretKey = BaseEncoding.base64Url().encode(ec);
+			ec = EncryptUtils.encryptCBC(this.sdfsCliPassword.getBytes(), password, iv);
+			this.sdfsCliPassword = BaseEncoding.base64Url().encode(ec);
+			ec = EncryptUtils.encryptCBC(this.sdfsCliSalt.getBytes(), password, iv);
+			this.sdfsCliSalt = BaseEncoding.base64Url().encode(ec);
 		}
 
 		if (vrts_appliance) {
