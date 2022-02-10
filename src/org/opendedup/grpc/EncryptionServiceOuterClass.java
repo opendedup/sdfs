@@ -1759,28 +1759,16 @@ public final class EncryptionServiceOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string privateKeyFilePath = 1;</code>
-     * @return The privateKeyFilePath.
+     * <code>bytes privateKey = 1;</code>
+     * @return The privateKey.
      */
-    java.lang.String getPrivateKeyFilePath();
-    /**
-     * <code>string privateKeyFilePath = 1;</code>
-     * @return The bytes for privateKeyFilePath.
-     */
-    com.google.protobuf.ByteString
-        getPrivateKeyFilePathBytes();
+    com.google.protobuf.ByteString getPrivateKey();
 
     /**
-     * <code>string certChainFilePath = 2;</code>
-     * @return The certChainFilePath.
+     * <code>bytes certChain = 2;</code>
+     * @return The certChain.
      */
-    java.lang.String getCertChainFilePath();
-    /**
-     * <code>string certChainFilePath = 2;</code>
-     * @return The bytes for certChainFilePath.
-     */
-    com.google.protobuf.ByteString
-        getCertChainFilePathBytes();
+    com.google.protobuf.ByteString getCertChain();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
@@ -1818,8 +1806,8 @@ public final class EncryptionServiceOuterClass {
       super(builder);
     }
     private ExportServerCertResponse() {
-      privateKeyFilePath_ = "";
-      certChainFilePath_ = "";
+      privateKey_ = com.google.protobuf.ByteString.EMPTY;
+      certChain_ = com.google.protobuf.ByteString.EMPTY;
       errorCode_ = 0;
       error_ = "";
     }
@@ -1855,15 +1843,13 @@ public final class EncryptionServiceOuterClass {
               done = true;
               break;
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
 
-              privateKeyFilePath_ = s;
+              privateKey_ = input.readBytes();
               break;
             }
             case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
 
-              certChainFilePath_ = s;
+              certChain_ = input.readBytes();
               break;
             }
             case 24: {
@@ -1910,80 +1896,26 @@ public final class EncryptionServiceOuterClass {
               org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse.class, org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse.Builder.class);
     }
 
-    public static final int PRIVATEKEYFILEPATH_FIELD_NUMBER = 1;
-    private volatile java.lang.Object privateKeyFilePath_;
+    public static final int PRIVATEKEY_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString privateKey_;
     /**
-     * <code>string privateKeyFilePath = 1;</code>
-     * @return The privateKeyFilePath.
+     * <code>bytes privateKey = 1;</code>
+     * @return The privateKey.
      */
     @java.lang.Override
-    public java.lang.String getPrivateKeyFilePath() {
-      java.lang.Object ref = privateKeyFilePath_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        privateKeyFilePath_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string privateKeyFilePath = 1;</code>
-     * @return The bytes for privateKeyFilePath.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getPrivateKeyFilePathBytes() {
-      java.lang.Object ref = privateKeyFilePath_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        privateKeyFilePath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.google.protobuf.ByteString getPrivateKey() {
+      return privateKey_;
     }
 
-    public static final int CERTCHAINFILEPATH_FIELD_NUMBER = 2;
-    private volatile java.lang.Object certChainFilePath_;
+    public static final int CERTCHAIN_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString certChain_;
     /**
-     * <code>string certChainFilePath = 2;</code>
-     * @return The certChainFilePath.
+     * <code>bytes certChain = 2;</code>
+     * @return The certChain.
      */
     @java.lang.Override
-    public java.lang.String getCertChainFilePath() {
-      java.lang.Object ref = certChainFilePath_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        certChainFilePath_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string certChainFilePath = 2;</code>
-     * @return The bytes for certChainFilePath.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getCertChainFilePathBytes() {
-      java.lang.Object ref = certChainFilePath_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        certChainFilePath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.google.protobuf.ByteString getCertChain() {
+      return certChain_;
     }
 
     public static final int ERRORCODE_FIELD_NUMBER = 3;
@@ -2057,11 +1989,11 @@ public final class EncryptionServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getPrivateKeyFilePathBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, privateKeyFilePath_);
+      if (!privateKey_.isEmpty()) {
+        output.writeBytes(1, privateKey_);
       }
-      if (!getCertChainFilePathBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, certChainFilePath_);
+      if (!certChain_.isEmpty()) {
+        output.writeBytes(2, certChain_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(3, errorCode_);
@@ -2078,11 +2010,13 @@ public final class EncryptionServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (!getPrivateKeyFilePathBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, privateKeyFilePath_);
+      if (!privateKey_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, privateKey_);
       }
-      if (!getCertChainFilePathBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, certChainFilePath_);
+      if (!certChain_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, certChain_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
@@ -2106,10 +2040,10 @@ public final class EncryptionServiceOuterClass {
       }
       org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse other = (org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse) obj;
 
-      if (!getPrivateKeyFilePath()
-          .equals(other.getPrivateKeyFilePath())) return false;
-      if (!getCertChainFilePath()
-          .equals(other.getCertChainFilePath())) return false;
+      if (!getPrivateKey()
+          .equals(other.getPrivateKey())) return false;
+      if (!getCertChain()
+          .equals(other.getCertChain())) return false;
       if (errorCode_ != other.errorCode_) return false;
       if (!getError()
           .equals(other.getError())) return false;
@@ -2124,10 +2058,10 @@ public final class EncryptionServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + PRIVATEKEYFILEPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getPrivateKeyFilePath().hashCode();
-      hash = (37 * hash) + CERTCHAINFILEPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getCertChainFilePath().hashCode();
+      hash = (37 * hash) + PRIVATEKEY_FIELD_NUMBER;
+      hash = (53 * hash) + getPrivateKey().hashCode();
+      hash = (37 * hash) + CERTCHAIN_FIELD_NUMBER;
+      hash = (53 * hash) + getCertChain().hashCode();
       hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
       hash = (53 * hash) + errorCode_;
       hash = (37 * hash) + ERROR_FIELD_NUMBER;
@@ -2265,9 +2199,9 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        privateKeyFilePath_ = "";
+        privateKey_ = com.google.protobuf.ByteString.EMPTY;
 
-        certChainFilePath_ = "";
+        certChain_ = com.google.protobuf.ByteString.EMPTY;
 
         errorCode_ = 0;
 
@@ -2299,8 +2233,8 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse buildPartial() {
         org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse result = new org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse(this);
-        result.privateKeyFilePath_ = privateKeyFilePath_;
-        result.certChainFilePath_ = certChainFilePath_;
+        result.privateKey_ = privateKey_;
+        result.certChain_ = certChain_;
         result.errorCode_ = errorCode_;
         result.error_ = error_;
         onBuilt();
@@ -2351,13 +2285,11 @@ public final class EncryptionServiceOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse other) {
         if (other == org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse.getDefaultInstance()) return this;
-        if (!other.getPrivateKeyFilePath().isEmpty()) {
-          privateKeyFilePath_ = other.privateKeyFilePath_;
-          onChanged();
+        if (other.getPrivateKey() != com.google.protobuf.ByteString.EMPTY) {
+          setPrivateKey(other.getPrivateKey());
         }
-        if (!other.getCertChainFilePath().isEmpty()) {
-          certChainFilePath_ = other.certChainFilePath_;
-          onChanged();
+        if (other.getCertChain() != com.google.protobuf.ByteString.EMPTY) {
+          setCertChain(other.getCertChain());
         }
         if (other.errorCode_ != 0) {
           setErrorCodeValue(other.getErrorCodeValue());
@@ -2395,154 +2327,70 @@ public final class EncryptionServiceOuterClass {
         return this;
       }
 
-      private java.lang.Object privateKeyFilePath_ = "";
+      private com.google.protobuf.ByteString privateKey_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>string privateKeyFilePath = 1;</code>
-       * @return The privateKeyFilePath.
+       * <code>bytes privateKey = 1;</code>
+       * @return The privateKey.
        */
-      public java.lang.String getPrivateKeyFilePath() {
-        java.lang.Object ref = privateKeyFilePath_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          privateKeyFilePath_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public com.google.protobuf.ByteString getPrivateKey() {
+        return privateKey_;
       }
       /**
-       * <code>string privateKeyFilePath = 1;</code>
-       * @return The bytes for privateKeyFilePath.
-       */
-      public com.google.protobuf.ByteString
-          getPrivateKeyFilePathBytes() {
-        java.lang.Object ref = privateKeyFilePath_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          privateKeyFilePath_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string privateKeyFilePath = 1;</code>
-       * @param value The privateKeyFilePath to set.
+       * <code>bytes privateKey = 1;</code>
+       * @param value The privateKey to set.
        * @return This builder for chaining.
        */
-      public Builder setPrivateKeyFilePath(
-          java.lang.String value) {
+      public Builder setPrivateKey(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        privateKeyFilePath_ = value;
+        privateKey_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string privateKeyFilePath = 1;</code>
+       * <code>bytes privateKey = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearPrivateKeyFilePath() {
+      public Builder clearPrivateKey() {
         
-        privateKeyFilePath_ = getDefaultInstance().getPrivateKeyFilePath();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string privateKeyFilePath = 1;</code>
-       * @param value The bytes for privateKeyFilePath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setPrivateKeyFilePathBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        privateKeyFilePath_ = value;
+        privateKey_ = getDefaultInstance().getPrivateKey();
         onChanged();
         return this;
       }
 
-      private java.lang.Object certChainFilePath_ = "";
+      private com.google.protobuf.ByteString certChain_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>string certChainFilePath = 2;</code>
-       * @return The certChainFilePath.
+       * <code>bytes certChain = 2;</code>
+       * @return The certChain.
        */
-      public java.lang.String getCertChainFilePath() {
-        java.lang.Object ref = certChainFilePath_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          certChainFilePath_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      @java.lang.Override
+      public com.google.protobuf.ByteString getCertChain() {
+        return certChain_;
       }
       /**
-       * <code>string certChainFilePath = 2;</code>
-       * @return The bytes for certChainFilePath.
-       */
-      public com.google.protobuf.ByteString
-          getCertChainFilePathBytes() {
-        java.lang.Object ref = certChainFilePath_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          certChainFilePath_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string certChainFilePath = 2;</code>
-       * @param value The certChainFilePath to set.
+       * <code>bytes certChain = 2;</code>
+       * @param value The certChain to set.
        * @return This builder for chaining.
        */
-      public Builder setCertChainFilePath(
-          java.lang.String value) {
+      public Builder setCertChain(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        certChainFilePath_ = value;
+        certChain_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>string certChainFilePath = 2;</code>
+       * <code>bytes certChain = 2;</code>
        * @return This builder for chaining.
        */
-      public Builder clearCertChainFilePath() {
+      public Builder clearCertChain() {
         
-        certChainFilePath_ = getDefaultInstance().getCertChainFilePath();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string certChainFilePath = 2;</code>
-       * @param value The bytes for certChainFilePath to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCertChainFilePathBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        certChainFilePath_ = value;
+        certChain_ = getDefaultInstance().getCertChain();
         onChanged();
         return this;
       }
@@ -3867,24 +3715,24 @@ public final class EncryptionServiceOuterClass {
       "eyVerifyResponse\022\016\n\006accept\030\001 \001(\010\0221\n\terro" +
       "rCode\030\002 \001(\0162\036.org.opendedup.grpc.errorCo" +
       "des\022\r\n\005error\030\003 \001(\t\"\031\n\027ExportServerCertRe" +
-      "quest\"\223\001\n\030ExportServerCertResponse\022\032\n\022pr" +
-      "ivateKeyFilePath\030\001 \001(\t\022\031\n\021certChainFileP" +
-      "ath\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\022\r\n\005error\030\004 \001(\t\"\033\n\031D" +
-      "eleteExportedCertRequest\"^\n\032DeleteExport" +
-      "edCertResponse\0221\n\terrorCode\030\001 \001(\0162\036.org." +
-      "opendedup.grpc.errorCodes\022\r\n\005error\030\002 \001(\t" +
-      "2\366\002\n\021EncryptionService\022v\n\023ValidateCertif" +
-      "icate\022..org.opendedup.grpc.EncryptionKey" +
-      "VerifyRequest\032/.org.opendedup.grpc.Encry" +
-      "ptionKeyVerifyResponse\022t\n\027ExportServerCe" +
-      "rtificate\022+.org.opendedup.grpc.ExportSer" +
-      "verCertRequest\032,.org.opendedup.grpc.Expo" +
-      "rtServerCertResponse\022s\n\022DeleteExportedCe" +
-      "rt\022-.org.opendedup.grpc.DeleteExportedCe" +
-      "rtRequest\032..org.opendedup.grpc.DeleteExp" +
-      "ortedCertResponseB0Z.github.com/opendedu" +
-      "p/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "quest\"\203\001\n\030ExportServerCertResponse\022\022\n\npr" +
+      "ivateKey\030\001 \001(\014\022\021\n\tcertChain\030\002 \001(\014\0221\n\terr" +
+      "orCode\030\003 \001(\0162\036.org.opendedup.grpc.errorC" +
+      "odes\022\r\n\005error\030\004 \001(\t\"\033\n\031DeleteExportedCer" +
+      "tRequest\"^\n\032DeleteExportedCertResponse\0221" +
+      "\n\terrorCode\030\001 \001(\0162\036.org.opendedup.grpc.e" +
+      "rrorCodes\022\r\n\005error\030\002 \001(\t2\366\002\n\021EncryptionS" +
+      "ervice\022v\n\023ValidateCertificate\022..org.open" +
+      "dedup.grpc.EncryptionKeyVerifyRequest\032/." +
+      "org.opendedup.grpc.EncryptionKeyVerifyRe" +
+      "sponse\022t\n\027ExportServerCertificate\022+.org." +
+      "opendedup.grpc.ExportServerCertRequest\032," +
+      ".org.opendedup.grpc.ExportServerCertResp" +
+      "onse\022s\n\022DeleteExportedCert\022-.org.opended" +
+      "up.grpc.DeleteExportedCertRequest\032..org." +
+      "opendedup.grpc.DeleteExportedCertRespons" +
+      "eB0Z.github.com/opendedup/sdfs-client-go" +
+      "/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -3914,7 +3762,7 @@ public final class EncryptionServiceOuterClass {
     internal_static_org_opendedup_grpc_ExportServerCertResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ExportServerCertResponse_descriptor,
-        new java.lang.String[] { "PrivateKeyFilePath", "CertChainFilePath", "ErrorCode", "Error", });
+        new java.lang.String[] { "PrivateKey", "CertChain", "ErrorCode", "Error", });
     internal_static_org_opendedup_grpc_DeleteExportedCertRequest_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_org_opendedup_grpc_DeleteExportedCertRequest_fieldAccessorTable = new

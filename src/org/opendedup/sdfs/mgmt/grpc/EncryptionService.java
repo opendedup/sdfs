@@ -20,6 +20,8 @@ import java.io.FileOutputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
+import com.google.protobuf.ByteString;
+
 import org.opendedup.grpc.EncryptionServiceGrpc.EncryptionServiceImplBase;
 import org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest;
 import org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse;
@@ -117,20 +119,20 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
         try {
             this.hl.writeLock().lock();
             new File(keydir).mkdirs();
-            FileOutputStream fout = new FileOutputStream(privateKeyFilePath);
+            ByteArrayOutputStream fout = new ByteArrayOutputStream();
             try {
                 writeKey(fout, pvtKey);
+                b.setPrivateKey(ByteString.copyFrom(fout.toByteArray()));
             } catch (Exception e) {
                 SDFSLogger.getLog().error(e);
             }
-            fout = new FileOutputStream(certChainFilePath);
+            fout = new ByteArrayOutputStream();
             try {
                 writeCertificate(fout, serverCertChain);
+                b.setCertChain(ByteString.copyFrom(fout.toByteArray()));
             } catch (Exception e) {
                 SDFSLogger.getLog().error(e);
             }
-            b.setCertChainFilePath(certChainFilePath);
-            b.setPrivateKeyFilePath(privateKeyFilePath);
         } catch (Exception e) {
             SDFSLogger.getLog().error("unable to serialize message", e);
             b.setError("unable to serialize message");
@@ -213,7 +215,7 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
         for (;;) {
             try {
                 Thread.sleep(15 * 1000);
-                if (k == 20) {
+                if (k == 60) {
                     loadTrustManager();
                     k = 0;
                 }

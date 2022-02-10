@@ -20,8 +20,8 @@ message ExportServerCertRequest {
 }
 
 message ExportServerCertResponse {
-  string privateKeyFilePath = 1;
-  string certChainFilePath = 2;
+  bytes privateKey = 1;
+  bytes certChain = 2;
   errorCodes errorCode = 3;
   string error = 4;
 }
