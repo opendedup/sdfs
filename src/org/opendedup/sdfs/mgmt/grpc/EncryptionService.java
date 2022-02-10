@@ -16,7 +16,6 @@ import java.security.cert.X509Certificate;
 import java.util.HashSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.nio.file.Files;
-import java.io.FileOutputStream;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -45,7 +44,6 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
     String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
     String certChainFilePath = keydir + File.separator + "tls_key.pem";
     String privateKeyFilePath = keydir + File.separator + "tls_key.key";
-    private final String certHash;
 
     public EncryptionService(String trustStoreDir, PrivateKey pvtKey, X509Certificate serverCertChain)
             throws Exception {
@@ -53,7 +51,6 @@ public class EncryptionService extends EncryptionServiceImplBase implements Runn
         this.trustStoreDir = trustStoreDir;
         this.pvtKey = pvtKey;
         this.serverCertChain = serverCertChain;
-        this.certHash = this.getThumbprint(serverCertChain);
         this.loadTrustManager();
         Thread th = new Thread(this);
         th.start();
