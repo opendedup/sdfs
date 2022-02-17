@@ -23,7 +23,6 @@ import static java.lang.Math.toIntExact;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -260,7 +259,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (this.standAlone) {
 				HashBlobArchive.close();
 
-				ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
+
 				Map<String, String> md = null;
 				md = this.getUserMetaData(binm);
 
@@ -3147,7 +3146,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		@Override
 		public void run() {
 			try {
-				String hashString = EncyptUtils.encHashArchiveName(k.longValue(), Main.chunkStoreEncryptionEnabled);
+				//String hashString = EncyptUtils.encHashArchiveName(k.longValue(), Main.chunkStoreEncryptionEnabled);
 
 				String name = st.getClaimName(k.longValue());
 				if (st.s3Service.doesObjectExist(st.name, name)) {

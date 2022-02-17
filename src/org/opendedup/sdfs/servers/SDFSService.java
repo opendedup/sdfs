@@ -46,6 +46,7 @@ public class SDFSService {
 	public SDFSService(String configFile, ArrayList<String> volumes) {
 
 		this.configFile = configFile;
+		Main.volumeConfigFile = configFile;
 		this.volumes = volumes;
 		String ts = "";
 		Properties props = new Properties();

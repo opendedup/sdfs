@@ -82,6 +82,7 @@ public class Main {
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
 	public static String sdfsBasePath = "";
+	public static String volumeConfigFile = "";
 
 	public static SDFSEvent mountEvent = null;
 
