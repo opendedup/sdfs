@@ -43,6 +43,7 @@ public class MountSDFS {
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption("e", true, "password to decrypt config");
+		options.addOption("j", true, "environmental variable to decrypt config");
 		options.addOption("d", false, "turn on filesystem debugging");
 		options.addOption("nm", false, "disable drive mount");
 		options.addOption("cfr", false, "Restores files from cloud storage if the backend cloud store supports it");
@@ -98,6 +99,10 @@ public class MountSDFS {
 		}
 		if (cmd.hasOption("e")) {
 			password = cmd.getOptionValue("e");
+		}
+		if (cmd.hasOption("j")) {
+			String jv = cmd.getOptionValue("j");
+			password = System.getenv(jv);
 		}
 		if (cmd.hasOption("cfr")) {
 			Main.syncDL = true;

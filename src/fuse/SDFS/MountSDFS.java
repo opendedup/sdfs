@@ -43,6 +43,7 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("l", false, "Compact Volume on Disk");
 		options.addOption("c", false, "Runs Consistency Check");
 		options.addOption("e", true, "password to decrypt config");
+		options.addOption("j", true, "environmental variable to decrypt config");
 		options.addOption("n", false, "disable drive mount");
 		options.addOption("m", true, "mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
@@ -135,7 +136,12 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 		if (cmd.hasOption("e")) {
 			password = cmd.getOptionValue("e");
+		} 
+		if (cmd.hasOption("j")) {
+			String jv = cmd.getOptionValue("j");
+			password = System.getenv(jv);
 		}
+
 		if (cmd.hasOption("p")) {
 			port = Integer.parseInt(cmd.getOptionValue("p"));
 		}
