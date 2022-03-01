@@ -243,19 +243,19 @@ public class FileReplicationService {
 	}
 	/*
 	 * @Subscribe
-	 * 
+	 *
 	 * @AllowConcurrentEvents public void metaFileRenamed(MFileRenamed evt) {
-	 * 
+	 *
 	 * try { ReentrantLock l = this.getLock(evt.mf.getPath()); l.lock(); int tries =
 	 * 0; boolean done = false; while (!done) { try { if (SDFSLogger.isDebug())
 	 * SDFSLogger.getLog().debug("renm " + evt.mf.getPath());
-	 * 
+	 *
 	 * this.sync.renameFile("files/" + evt.from.substring(pl), evt.to.substring(pl),
 	 * "files"); done = true; } catch (Exception e) { if (tries > maxTries) throw e;
 	 * else tries++; } } } catch (Exception e) {
 	 * SDFSLogger.getLog().error("unable to rename " + evt.mf.getPath(), e); }
 	 * finally { removeLock(evt.mf.getPath()); }
-	 * 
+	 *
 	 * }
 	 */
 
@@ -335,7 +335,7 @@ public class FileReplicationService {
 									evt.mf.writeLock.unlock();
 								}
 								eventUploadBus.post(evt);
-								
+
 							}
 						} else {
 							if (SDFSLogger.isDebug())
@@ -418,7 +418,7 @@ public class FileReplicationService {
 				while (!done) {
 					try {
 						if (evt.sf.isDirty()) {
-							SDFSLogger.getLog().debug("writed " + evt.sf.getDatabasePath().substring(sl));
+							SDFSLogger.getLog().debug("written " + evt.sf.getDatabasePath().substring(sl));
 							this.sync.uploadFile(new File(evt.sf.getDatabasePath()),
 									evt.sf.getDatabasePath().substring(sl), "ddb", new HashMap<String, String>(),
 									false);

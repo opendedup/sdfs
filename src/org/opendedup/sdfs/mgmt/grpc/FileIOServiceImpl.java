@@ -10,8 +10,11 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.mgmt.CloseFile;
 import org.opendedup.sdfs.mgmt.GetCloudFile;
+import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.mgmt.GetCloudMetaFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
+import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.OSValidator;
 
 import fuse.FuseFtypeConstants;
@@ -123,6 +126,10 @@ import org.opendedup.grpc.IOService.UnlinkRequest;
 import org.opendedup.grpc.IOService.UnlinkResponse;
 import org.opendedup.grpc.IOService.UtimeRequest;
 import org.opendedup.grpc.IOService.UtimeResponse;
+import org.opendedup.grpc.IOService.SetRetrievalTierRequest;
+import org.opendedup.grpc.IOService.SetRetrievalTierResponse;
+import org.opendedup.grpc.IOService.GetRetrievalTierRequest;
+import org.opendedup.grpc.IOService.GetRetrievalTierResponse;
 
 public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     AtomicLong nextHandleNo = new AtomicLong(1000);
@@ -589,6 +596,62 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     @Override
+    public StreamObserver<DataWriteRequest> streamWrite(StreamObserver<DataWriteResponse> responseObserver) {
+        return new StreamObserver<DataWriteRequest>() {
+
+            AtomicLong written = new AtomicLong();
+
+            @Override
+            public void onNext(DataWriteRequest request) {
+                if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
+                    SDFSLogger.getLog().error("User is not a member of any group with access");
+                    this.onError(new Exception("User is not a member of any group with access"));
+                } else {
+                    if (Main.volume.isOffLine()) {
+                        SDFSLogger.getLog().error("Volume is Offline");
+                        this.onError(new Exception("Volume is Offline"));
+                    }
+                    if (Main.volume.isFull()) {
+                        SDFSLogger.getLog().error("Volume Full");
+                        this.onError(new Exception("Volume Full"));
+                    }
+                    try {
+                        DedupFileChannel ch = getFileChannel(request.getFileHandle());
+                        ByteBuffer buf = request.getData().asReadOnlyByteBuffer();
+                        if (request.getCompressed()) {
+                            byte[] b = new byte[buf.capacity()];
+                            buf.get(b);
+                            byte[] chunk = CompressionUtils.decompressLz4(b, request.getLen());
+                            buf = ByteBuffer.wrap(chunk);
+                        }
+                        buf.position(0);
+                        ch.writeFile(buf, buf.capacity(), 0, request.getStart(), true);
+                        written.addAndGet(buf.capacity());
+                    } catch (Exception e) {
+                        SDFSLogger.getLog().error("Error while stream writing", e);
+                        this.onError(e);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                SDFSLogger.getLog().error("error while writing", t);
+
+            }
+
+            @Override
+            public void onCompleted() {
+                responseObserver.onNext(DataWriteResponse.newBuilder().setWritten(written.get())
+                        .build());
+                responseObserver.onCompleted();
+
+            }
+
+        };
+    }
+
+    @Override
     public void unlink(UnlinkRequest request, StreamObserver<UnlinkResponse> responseObserver) {
         UnlinkResponse.Builder b = UnlinkResponse.newBuilder();
         if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_DELETE)) {
@@ -619,6 +682,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     // SDFSLogger.getLog().info("deleting symlink " + f.getPath());
                     try {
                         MetaDataDedupFile mf = MetaFileStore.getMF(FileIOServiceImpl.resolvePath(path));
+                        SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + path);
+                        ImmuteLinuxFDFileFile(path, false);
                         eventBus.post(new MFileDeleted(mf));
                         Files.delete(p);
                         responseObserver.onNext(b.build());
@@ -635,6 +700,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 } else {
                     File f = FileIOServiceImpl.resolvePath(path);
                     try {
+                        SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + f.getPath());
+                        ImmuteLinuxFDFileFile(f.getPath(), false);
                         MetaFileStore.getMF(f).clearRetentionLock();
                         if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
                             // SDFSLogger.getLog().info("deleted file " +
@@ -701,12 +768,17 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     return;
                 }
                 DedupFileChannel ch = this.getFileChannel(request.getFileHandle());
-                ByteBuffer buf = ByteBuffer.allocate(request.getLen());
-                request.getData().copyTo(buf);
+                ByteBuffer buf = request.getData().asReadOnlyByteBuffer();
+                if (request.getCompressed()) {
+                    byte[] bf = new byte[buf.capacity()];
+                    buf.get(bf);
+                    byte[] chunk = CompressionUtils.decompressLz4(bf, request.getLen());
+                    buf = ByteBuffer.wrap(chunk);
+                }
                 buf.position(0);
                 try {
                     SDFSLogger.getLog().debug("Writing " + ch.openFile().getPath() + " pos=" + request.getStart()
-                            + " len=" + buf.capacity());
+                            + " len=" + buf.capacity() + " compressed=" + request.getCompressed());
                     /*
                      * byte[] k = new byte[buf.capacity()]; buf.get(k); buf.position(0);
                      * Files.write(Paths.get("c:/temp/" + ch.openFile().getName()), new
@@ -761,8 +833,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 if (!Main.safeClose)
                     return;
                 if (ch != null) {
+                    ImmuteLinuxFDFileFile(ch.getPath(), false);
                     ch.getDedupFile().unRegisterChannel(ch, -2);
                     CloseFile.close(ch.getFile(), ch.isWrittenTo());
+                    ImmuteLinuxFDFileFile(ch.getPath(), true);
                     ch = null;
                     responseObserver.onNext(b.build());
                     responseObserver.onCompleted();
@@ -778,6 +852,25 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
+            }
+        }
+    }
+
+    public void ImmuteLinuxFDFileFile(String filePath, Boolean isImmutable) {
+        if (OSValidator.isUnix()) {
+            String strCommand = "";
+            if (filePath != null && !filePath.isEmpty()) {
+
+                if (isImmutable) {
+                    SDFSLogger.getLog().debug("chattr set Immutable, file: " + filePath);
+                    SDFSLogger.getLog().debug("Command::sudo chattr +i -V " + filePath);
+                    strCommand = "sudo chattr +i -V " + filePath;
+                } else {
+                    SDFSLogger.getLog().debug("chattr set non-Immutable, file: " + filePath);
+                    SDFSLogger.getLog().debug("COmmand::sudo chattr -i -V " + filePath);
+                    strCommand = "sudo chattr -i -V " + filePath;
+                }
+                MgmtWebServer.executeLinuxCmd(strCommand);
             }
         }
     }
@@ -903,16 +996,24 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 return;
             }
             try {
-                ByteBuffer buf = ByteBuffer.allocate(request.getLen());
+                ByteBuffer buf = ByteBuffer.wrap(new byte[request.getLen()]);
                 DedupFileChannel ch = this.getFileChannel((Long) request.getFileHandle());
                 int read = ch.read(buf, 0, buf.capacity(), request.getStart());
                 if (read == -1)
                     read = 0;
-                buf.position(0);
+
                 b.setRead(read);
+                if (request.getCompress() && read > 1) {
+                    byte[] chunk = CompressionUtils.compressLz4(buf.array());
+                    if (read < chunk.length) {
+                        buf = ByteBuffer.wrap(chunk);
+                    }
+                }
+                buf.position(0);
                 b.setData(ByteString.copyFrom(buf, read));
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
+                HCServiceProxy.set_move_blob(false);
                 return;
             } catch (FileIOError e) {
                 b.setError(e.message);
@@ -921,7 +1022,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             } catch (DataArchivedException e) {
-                SDFSLogger.getLog().info("Readin 4");
+                SDFSLogger.getLog().debug("Readin 4");
                 SDFSLogger.getLog().warn("Data is archived");
                 b.setError("Data is archived");
                 b.setErrorCode(errorCodes.ENODATA);
@@ -950,7 +1051,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             File f = new File(internalPath);
             SDFSLogger.getLog().debug("looking for " + f.getPath());
             if (!f.exists()) {
-                SDFSLogger.getLog().info("File not found " + req.getFileName());
+                SDFSLogger.getLog().debug("File not found " + req.getFileName());
                 b.setError("File not found " + req.getFileName());
                 b.setErrorCode(errorCodes.ENOENT);
                 responseObserver.onNext(b.build());
@@ -989,7 +1090,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             String path = req.getPath();
             int mode = req.getMode();
             if (!f.exists()) {
-                SDFSLogger.getLog().info("File not found " + req.getPath());
+                SDFSLogger.getLog().debug("File not found " + req.getPath());
                 b.setError("File not found " + req.getPath());
                 b.setErrorCode(errorCodes.ENOENT);
                 responseObserver.onNext(b.build());
@@ -1075,7 +1176,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 if (ftype == FuseFtypeConstants.TYPE_SYMLINK || ftype == FuseFtypeConstants.TYPE_DIR) {
                     Path p = Paths.get(f.getCanonicalPath());
                     try {
-                        SDFSLogger.getLog().info("setting uid " + uid + "and gid " + gid);
+                        SDFSLogger.getLog().debug("setting uid " + uid + "and gid " + gid);
                         if (!OSValidator.isWindows()) {
                             Files.setAttribute(p, "unix:uid", Integer.valueOf(uid), LinkOption.NOFOLLOW_LINKS);
                             Files.setAttribute(p, "unix:gid", Integer.valueOf(gid), LinkOption.NOFOLLOW_LINKS);
@@ -2159,6 +2260,79 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
+    public void setRetrievalTier(SetRetrievalTierRequest req,
+            StreamObserver<SetRetrievalTierResponse> responseObserver) {
+        SetRetrievalTierResponse.Builder b = SetRetrievalTierResponse.newBuilder();
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            synchronized (this) {
+                try {
+                    String tierType = req.getTierType();
+                    if (!tierType.isEmpty()) {
+                        SDFSLogger.getLog().info("Tier type: " + tierType);
+                        if (tierType.equalsIgnoreCase("expedited") || tierType.equalsIgnoreCase("standard")
+                                || tierType.equalsIgnoreCase("bulk") || tierType.equalsIgnoreCase("high")) {
+                            Main.retrievalTier = tierType;
+                            SDFSLogger.getLog().info("Retrieval tier is set to: " + Main.retrievalTier);
+                        } else {
+                            b.setError("SetRetrievalTier error, not a proper retrieval tier: " + req.getTierType());
+                            b.setErrorCode(errorCodes.EIO);
+                        }
+                    } else {
+                        b.setError("SetRetrievalTier error, retrieval tier is empty " + req.getTierType());
+                        b.setErrorCode(errorCodes.EIO);
+                    }
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                } catch (Exception e) {
+                    b.setError("SetRetrievalTier error " + req.getTierType());
+                    b.setErrorCode(errorCodes.EIO);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+            }
+        }
+    }
+
+    public void getRetrievalTier(GetRetrievalTierRequest req,
+            StreamObserver<GetRetrievalTierResponse> responseObserver) {
+        GetRetrievalTierResponse.Builder b = GetRetrievalTierResponse.newBuilder();
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            synchronized (this) {
+                try {
+                    String tierType = Main.retrievalTier;
+                    if (tierType.equals("")) {
+                        b.setError("GetRetrievalTier error, retrieval tier is not set explicitly");
+                        b.setErrorCode(errorCodes.EIO);
+                    } else {
+                        b.setTierType("Tier type: " + tierType);
+                    }
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                } catch (Exception e) {
+                    b.setTierType("");
+                    b.setError("GetRetrievalTier error");
+                    b.setErrorCode(errorCodes.EIO);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+            }
+        }
+    }
+
     protected static class FileIOError extends Exception {
         /**
          *
@@ -2270,7 +2444,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 try {
                     responseObserver.onNext(b.build());
 
-                    SDFSLogger.getLog().info("Sent message");
+                    SDFSLogger.getLog().debug("Sent message");
                 } catch (Exception e) {
                     SDFSLogger.getLog().error("Unable to send message", e);
                     this.close();
@@ -2295,7 +2469,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 try {
                     responseObserver.onNext(b.build());
 
-                    SDFSLogger.getLog().info("Sent message");
+                    SDFSLogger.getLog().debug("Sent message");
                 } catch (Exception e) {
                     SDFSLogger.getLog().error("Unable to send message", e);
                     this.close();
@@ -2319,7 +2493,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 try {
                     responseObserver.onNext(b.build());
 
-                    SDFSLogger.getLog().info("Sent message");
+                    SDFSLogger.getLog().debug("Sent message");
                 } catch (Exception e) {
                     SDFSLogger.getLog().error("Unable to send message", e);
                     this.close();
@@ -2343,7 +2517,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 try {
                     responseObserver.onNext(b.build());
 
-                    SDFSLogger.getLog().info("Sent message");
+                    SDFSLogger.getLog().debug("Sent message");
                 } catch (Exception e) {
                     SDFSLogger.getLog().error("Unable to send message", e);
                     this.close();

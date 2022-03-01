@@ -96,15 +96,16 @@ public class Config {
 		Main.sdfsCliRequireAuth = Boolean.parseBoolean(cli.getAttribute("enable-auth"));
 		Main.sdfsCliRequireMutualTLSAuth = Boolean.parseBoolean(cli.getAttribute("enable-mutual-tls-auth"));
 		Main.sdfsCliListenAddr = cli.getAttribute("listen-address");
-		if (cli.hasAttribute("auth-utility-jar-file-path")) {
-			Main.jarFilePath = cli.getAttribute("auth-utility-jar-file-path");
-		}
-		if (cli.hasAttribute("auth-class-info")) {
-			Main.classInfo = cli.getAttribute("auth-class-info");
-		}
-		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
-
-		Main.version = version;
+		Main.authJarFilePath = cli.getAttribute("auth-utility-jar-file-path");
+		Main.authClassInfo = cli.getAttribute("auth-class-info");
+		Main.prodConfigFilePath = cli.getAttribute("prod-config-file-path");
+		Main.prodConfigVariable = cli.getAttribute("prod-config-variable");
+ 		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
+		SDFSLogger.getLog().debug("auth-utility-jar-file-path=" + Main.authJarFilePath);
+		SDFSLogger.getLog().debug("auth-class-info=" + Main.authClassInfo);
+		SDFSLogger.getLog().debug("prod-config-file-path=" + Main.prodConfigFilePath);
+		SDFSLogger.getLog().debug("prod-config-variable=" + Main.prodConfigVariable);
+	Main.version = version;
 		SDFSLogger.getLog().info("Parsing volume " + doc.getDocumentElement().getNodeName() + " version " + version);
 		Element locations = (Element) doc.getElementsByTagName("locations").item(0);
 		SDFSLogger.getLog().info("parsing folder locations");
@@ -188,7 +189,7 @@ public class Config {
 		if (localChunkStore.hasAttribute("fpp")) {
 			Main.fpp = Double.parseDouble(localChunkStore.getAttribute("fpp"));
 		}
-		
+
 		if (localChunkStore.hasAttribute("average-chunk-size")) {
 			HashFunctionPool.avg_page_size = Integer.parseInt(localChunkStore.getAttribute("average-chunk-size"));
 		}
@@ -202,7 +203,7 @@ public class Config {
 			Main.HT_RM_THRESH = Long.parseLong(localChunkStore.getAttribute("hashtable-rm-threshold"));
 			SDFSLogger.getLog().info("HT_RM_THRESH = " + Main.HT_RM_THRESH);
 		}
-		
+
 		if (localChunkStore.hasAttribute("max-chunk-age")) {
 			Main.maxAge = Long.parseLong(localChunkStore.getAttribute("max-chunk-age"));
 		}
@@ -215,7 +216,7 @@ public class Config {
 		if(localChunkStore.hasAttribute("enable-batch-gc")) {
 			Main.DDB_TRASH_ENABLED = Boolean.parseBoolean(localChunkStore.getAttribute("enable-batch-gc"));
 		}
-		
+
 		if (localChunkStore.hasAttribute("gc-class"))
 			Main.gcClass = localChunkStore.getAttribute("gc-class");
 		Element volume = (Element) doc.getElementsByTagName("volume").item(0);
@@ -300,7 +301,7 @@ public class Config {
 			Main.cloudBucket = azure.getAttribute("azure-bucket-name");
 			Main.cloudChunkStore = Boolean.parseBoolean(azure.getAttribute("enabled"));
 		}
-		
+
 
 		if (password != null) {
 			if (Main.cloudSecretKey != null) {
@@ -326,6 +327,12 @@ public class Config {
 				}
 
 			}
+
+		}
+		if(Main.usePortRedirector) {
+			Main.sdfsCliRequireMutualTLSAuth = false;
+			Main.sdfsCliSSL = false;
+			Main.sdfsCliListenAddr = "localhost";
 		}
 		if (Main.chunkStoreEncryptionEnabled)
 			SDFSLogger.getLog().info("################## Encryption is enabled ##################");
@@ -387,8 +394,11 @@ public class Config {
 		cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
 		cli.setAttribute("enable-auth", Boolean.toString(Main.sdfsCliRequireAuth));
 		cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
-		cli.setAttribute("auth-utility-jar-file-path", Main.jarFilePath);
-		cli.setAttribute("auth-class-info", Main.classInfo);
+		cli.setAttribute("auth-utility-jar-file-path", Main.authJarFilePath);
+		cli.setAttribute("auth-class-info", Main.authClassInfo);
+		cli.setAttribute("prod-config-file-path", Main.prodConfigFilePath);
+		cli.setAttribute("prod-config-variable", Main.prodConfigVariable);
+		cli.setAttribute("use-ssl", Boolean.toString(Main.sdfsCliSSL));
 
 		Element localChunkStore = (Element) doc.getElementsByTagName("local-chunkstore").item(0);
 		if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {

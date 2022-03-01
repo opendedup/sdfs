@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -22,423 +22,98 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.prefs.Preferences;
+
+import org.opendedup.logging.SDFSLogger;
 
 public class WinRegistry {
-	public static final int HKEY_CURRENT_USER = 0x80000001;
-	public static final int HKEY_LOCAL_MACHINE = 0x80000002;
-	public static final int REG_SUCCESS = 0;
-	public static final int REG_NOTFOUND = 2;
-	public static final int REG_ACCESSDENIED = 5;
 
-	private static final int KEY_ALL_ACCESS = 0xf003f;
-	private static final int KEY_READ = 0x20019;
-	private static Preferences userRoot = Preferences.userRoot();
-	private static Preferences systemRoot = Preferences.systemRoot();
-	private static Class<? extends Preferences> userClass = userRoot.getClass();
-	private static Method regOpenKey = null;
-	private static Method regCloseKey = null;
-	private static Method regQueryValueEx = null;
-	private static Method regEnumValue = null;
-	private static Method regQueryInfoKey = null;
-	private static Method regEnumKeyEx = null;
-	private static Method regCreateKeyEx = null;
-	private static Method regSetValueEx = null;
-	private static Method regDeleteKey = null;
-	private static Method regDeleteValue = null;
+    public static final int KEY_SZ = 0;
+    public static final int KEY_DWORD = 1;
+    private static final String REG_QUERY = "reg query ";
+    private static final String REG_STR = "REG_SZ";
+    private static final String REG_DWORD = "REG_DWORD";
 
-	static {
-		try {
-			regOpenKey = userClass.getDeclaredMethod("WindowsRegOpenKey",
-					new Class[] { long.class, byte[].class, int.class });
-			regOpenKey.setAccessible(true);
-			regCloseKey = userClass.getDeclaredMethod("WindowsRegCloseKey",
-					new Class[] { long.class });
-			regCloseKey.setAccessible(true);
-			regQueryValueEx = userClass.getDeclaredMethod(
-					"WindowsRegQueryValueEx", new Class[] { long.class,
-							byte[].class });
-			regQueryValueEx.setAccessible(true);
-			regEnumValue = userClass.getDeclaredMethod("WindowsRegEnumValue",
-					new Class[] { long.class, int.class, int.class });
-			regEnumValue.setAccessible(true);
-			regQueryInfoKey = userClass.getDeclaredMethod(
-					"WindowsRegQueryInfoKey1", new Class[] { long.class });
-			regQueryInfoKey.setAccessible(true);
-			regEnumKeyEx = userClass.getDeclaredMethod("WindowsRegEnumKeyEx",
-					new Class[] { long.class, int.class, int.class });
-			regEnumKeyEx.setAccessible(true);
-			regCreateKeyEx = userClass.getDeclaredMethod(
-					"WindowsRegCreateKeyEx", new Class[] { long.class,
-							byte[].class });
-			regCreateKeyEx.setAccessible(true);
-			regSetValueEx = userClass.getDeclaredMethod("WindowsRegSetValueEx",
-					new Class[] { long.class, byte[].class, byte[].class });
-			regSetValueEx.setAccessible(true);
-			regDeleteValue = userClass.getDeclaredMethod(
-					"WindowsRegDeleteValue", new Class[] { long.class,
-							byte[].class });
-			regDeleteValue.setAccessible(true);
-			regDeleteKey = userClass.getDeclaredMethod("WindowsRegDeleteKey",
-					new Class[] { long.class, byte[].class });
-			regDeleteKey.setAccessible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    static String readRegistryRegQuery(String key) throws IOException {
+        String useKey = REG_QUERY + key;
+        int keyType = -1;
+        // Run reg query, then read output with StreamReader (internal class)
+        Process process = Runtime.getRuntime().exec(useKey);
+        StreamReader reader = new StreamReader(process.getInputStream());
 
-	private WinRegistry() {
-	}
-
-	/**
-	 * Read a value from key and value name
-	 * 
-	 * @param hkey
-	 *            HKEY_CURRENT_USER/HKEY_LOCAL_MACHINE
-	 * @param key
-	 * @param valueName
-	 * @return the value
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	public static String readString(int hkey, String key, String valueName)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		if (hkey == HKEY_LOCAL_MACHINE) {
-			return readString(systemRoot, hkey, key, valueName);
-		} else if (hkey == HKEY_CURRENT_USER) {
-			return readString(userRoot, hkey, key, valueName);
-		} else {
-			throw new IllegalArgumentException("hkey=" + hkey);
-		}
-	}
-
-	/**
-	 * Read value(s) and value name(s) form given key
-	 * 
-	 * @param hkey
-	 *            HKEY_CURRENT_USER/HKEY_LOCAL_MACHINE
-	 * @param key
-	 * @return the value name(s) plus the value(s)
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	public static Map<String, String> readStringValues(int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		if (hkey == HKEY_LOCAL_MACHINE) {
-			return readStringValues(systemRoot, hkey, key);
-		} else if (hkey == HKEY_CURRENT_USER) {
-			return readStringValues(userRoot, hkey, key);
-		} else {
-			throw new IllegalArgumentException("hkey=" + hkey);
-		}
-	}
-
-	/**
-	 * Read the value name(s) from a given key
-	 * 
-	 * @param hkey
-	 *            HKEY_CURRENT_USER/HKEY_LOCAL_MACHINE
-	 * @param key
-	 * @return the value name(s)
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	public static List<String> readStringSubKeys(int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		if (hkey == HKEY_LOCAL_MACHINE) {
-			return readStringSubKeys(systemRoot, hkey, key);
-		} else if (hkey == HKEY_CURRENT_USER) {
-			return readStringSubKeys(userRoot, hkey, key);
-		} else {
-			throw new IllegalArgumentException("hkey=" + hkey);
-		}
-	}
-
-	/**
-	 * Create a key
-	 * 
-	 * @param hkey
-	 *            HKEY_CURRENT_USER/HKEY_LOCAL_MACHINE
-	 * @param key
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	public static void createKey(int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		int[] ret;
-		if (hkey == HKEY_LOCAL_MACHINE) {
-			ret = createKey(systemRoot, hkey, key);
-			regCloseKey
-					.invoke(systemRoot, new Object[] { Long.valueOf(ret[0]) });
-		} else if (hkey == HKEY_CURRENT_USER) {
-			ret = createKey(userRoot, hkey, key);
-			regCloseKey.invoke(userRoot, new Object[] { Long.valueOf(ret[0]) });
-		} else {
-			throw new IllegalArgumentException("hkey=" + hkey);
-		}
-		if (ret[1] != REG_SUCCESS) {
-			throw new IllegalArgumentException("rc=" + ret[1] + "  key=" + key);
-		}
-	}
-
-	/**
-	 * Write a value in a given key/value name
-	 * 
-	 * @param hkey
-	 * @param key
-	 * @param valueName
-	 * @param value
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	public static void writeStringValue(int hkey, String key, String valueName,
-			String value) throws IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
-		if (hkey == HKEY_LOCAL_MACHINE) {
-			writeStringValue(systemRoot, hkey, key, valueName, value);
-		} else if (hkey == HKEY_CURRENT_USER) {
-			writeStringValue(userRoot, hkey, key, valueName, value);
-		} else {
-			throw new IllegalArgumentException("hkey=" + hkey);
-		}
-	}
-
-	/**
-	 * Delete a given key
-	 * 
-	 * @param hkey
-	 * @param key
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	public static void deleteKey(int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		int rc = -1;
-		if (hkey == HKEY_LOCAL_MACHINE) {
-			rc = deleteKey(systemRoot, hkey, key);
-		} else if (hkey == HKEY_CURRENT_USER) {
-			rc = deleteKey(userRoot, hkey, key);
-		}
-		if (rc != REG_SUCCESS) {
-			throw new IllegalArgumentException("rc=" + rc + "  key=" + key);
-		}
-	}
-
-	/**
-	 * delete a value from a given key/value name
-	 * 
-	 * @param hkey
-	 * @param key
-	 * @param value
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	public static void deleteValue(int hkey, String key, String value)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		int rc = -1;
-		if (hkey == HKEY_LOCAL_MACHINE) {
-			rc = deleteValue(systemRoot, hkey, key, value);
-		} else if (hkey == HKEY_CURRENT_USER) {
-			rc = deleteValue(userRoot, hkey, key, value);
-		}
-		if (rc != REG_SUCCESS) {
-			throw new IllegalArgumentException("rc=" + rc + "  key=" + key
-					+ "  value=" + value);
-		}
-	}
-
-	// =====================
-
-	private static int deleteValue(Preferences root, int hkey, String key,
-			String value) throws IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
-		int[] handles = (int[]) regOpenKey.invoke(root, new Object[] {
-				Long.valueOf(hkey), toCstr(key), KEY_ALL_ACCESS });
-		if (handles[1] != REG_SUCCESS) {
-			return handles[1]; // can be REG_NOTFOUND, REG_ACCESSDENIED
-		}
-		int rc = ((Integer) regDeleteValue.invoke(root, new Object[] {
-				Long.valueOf(handles[0]), toCstr(value) })).intValue();
-		regCloseKey.invoke(root, new Object[] { Long.valueOf(handles[0]) });
-		return rc;
-	}
-
-	private static int deleteKey(Preferences root, int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		int rc = ((Integer) regDeleteKey.invoke(root, new Object[] {
-				Long.valueOf(hkey), toCstr(key) })).intValue();
-		return rc; // can REG_NOTFOUND, REG_ACCESSDENIED, REG_SUCCESS
-	}
-
-	public static final String readRegistry(String location, String key){
+        reader.start();
         try {
-            // Run reg query, then read output with StreamReader (internal class)
-            Process process = Runtime.getRuntime().exec("reg query " + 
-                    '"'+ location + "\" /v " + key);
-
-            StreamReader reader = new StreamReader(process.getInputStream());
-            reader.start();
             process.waitFor();
             reader.join();
-            String output = reader.getResult();
-
-            // Output has the following format:
-            // \n<Version information>\n\n<key>\t<registry type>\t<value>
-            if( ! output.contains("\t")){
-                    return null;
-            }
-
-            // Parse out the value
-            String[] parsed = output.split("\t");
-            return parsed[parsed.length-1];
+        } catch (InterruptedException e) {
+            SDFSLogger.getLog().error(e.getMessage());
+            Thread.currentThread().interrupt();
         }
-        catch (Exception e) {
+
+        // Parse out the value
+
+        String result = reader.getResult();
+        int p = -1;
+        if (result.contains(REG_STR)) {
+            p = result.indexOf(REG_STR);
+            keyType = KEY_SZ;
+        } else if (result.contains(REG_DWORD)) {
+            p = result.indexOf(REG_DWORD);
+            keyType = KEY_DWORD;
+        }
+        if (p == -1) {
             return null;
+        }
+
+        switch (keyType) {
+            case KEY_SZ:
+                return result.substring(p + REG_STR.length()).trim();
+            case KEY_DWORD:
+                String temp = result.substring(p + REG_DWORD.length()).trim();
+                return Integer.toString((Integer.parseInt(temp.substring("0x".length()), 16)));
+            default:
+                return "";
         }
 
     }
 
     static class StreamReader extends Thread {
-        private InputStream is;
-        private StringWriter sw= new StringWriter();
+
+        private final InputStream mIs;
+        private final StringWriter mSw;
 
         public StreamReader(InputStream is) {
-            this.is = is;
+            this.mIs = is;
+            mSw = new StringWriter();
         }
 
         public void run() {
             try {
                 int c;
-                while ((c = is.read()) != -1)
-                    sw.write(c);
+                while ((c = mIs.read()) != -1)
+                    mSw.write(c);
+            } catch (IOException e) {
+                SDFSLogger.getLog().error(e.getMessage());
             }
-            catch (IOException e) { 
-        }
         }
 
         public String getResult() {
-            return sw.toString();
+            return mSw.toString();
         }
     }
 
-	private static String readString(Preferences root, long hkey, String key,
-			String value) throws IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
-		Object ohandles = regOpenKey.invoke(root, new Object[] {
-				hkey, toCstr(key),KEY_READ });
-		long[] handles = (long[])ohandles;
-		if (handles[1] != REG_SUCCESS) {
-			return null;
-		}
-		byte[] valb = (byte[]) regQueryValueEx.invoke(root, new Object[] {
-				handles[0], toCstr(value) });
-		regCloseKey.invoke(root, new Object[] {Long.valueOf( handles[0]) });
-		return (valb != null ? new String(valb).trim() : null);
-	}
+    public static String readRegistry(String location, String key) throws IOException {
+        String pathkey = "\"" +
+                location +
+                "\" /v " +
+                key;
+        return readRegistryRegQuery(pathkey);
+    }
 
-	private static Map<String, String> readStringValues(Preferences root,
-			int hkey, String key) throws IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
-		HashMap<String, String> results = new HashMap<String, String>();
-		int[] handles = (int[]) regOpenKey.invoke(root, new Object[] {
-				Long.valueOf(hkey), toCstr(key), KEY_READ });
-		if (handles[1] != REG_SUCCESS) {
-			return null;
-		}
-		int[] info = (int[]) regQueryInfoKey.invoke(root,
-				new Object[] { Long.valueOf(handles[0]) });
+    public static void main(String[] args) throws IllegalArgumentException,
+            IllegalAccessException, InvocationTargetException {
+        // System.out.println(WinRegistry.readString(HKEY_LOCAL_MACHINE,
+        // "SOFTWARE\\Wow6432Node\\SDFS", "path"));
+        System.out.println("Running Winregistry class");
+    }
 
-		int count = info[0]; // count
-		int maxlen = info[3]; // value length max
-		for (int index = 0; index < count; index++) {
-			byte[] name = (byte[]) regEnumValue.invoke(root, new Object[] {
-				Long.valueOf(handles[0]), index,
-					maxlen + 1 });
-			String value = readString(hkey, key, new String(name));
-			results.put(new String(name).trim(), value);
-		}
-		regCloseKey.invoke(root, new Object[] {Long.valueOf(handles[0]) });
-		return results;
-	}
-
-	private static List<String> readStringSubKeys(Preferences root, int hkey,
-			String key) throws IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
-		List<String> results = new ArrayList<String>();
-		int[] handles = (int[]) regOpenKey.invoke(root, new Object[] {
-			Long.valueOf(hkey), toCstr(key), KEY_READ });
-		if (handles[1] != REG_SUCCESS) {
-			return null;
-		}
-		int[] info = (int[]) regQueryInfoKey.invoke(root,
-				new Object[] { Long.valueOf(handles[0]) });
-
-		int count = info[0]; // Fix: info[2] was being used here with wrong
-								// results. Suggested by davenpcj, confirmed by
-								// Petrucio
-		int maxlen = info[3]; // value length max
-		for (int index = 0; index < count; index++) {
-			byte[] name = (byte[]) regEnumKeyEx.invoke(root, new Object[] {
-				Long.valueOf(handles[0]), index,
-					maxlen + 1 });
-			results.add(new String(name).trim());
-		}
-		regCloseKey.invoke(root, new Object[] {Long.valueOf(handles[0]) });
-		return results;
-	}
-
-	private static int[] createKey(Preferences root, int hkey, String key)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		return (int[]) regCreateKeyEx.invoke(root, new Object[] {
-			Long.valueOf(hkey), toCstr(key) });
-	}
-
-	private static void writeStringValue(Preferences root, int hkey,
-			String key, String valueName, String value)
-			throws IllegalArgumentException, IllegalAccessException,
-			InvocationTargetException {
-		int[] handles = (int[]) regOpenKey.invoke(root, new Object[] {
-			Long.valueOf(hkey), toCstr(key), KEY_ALL_ACCESS });
-
-		regSetValueEx.invoke(root, new Object[] { Long.valueOf(handles[0]),
-				toCstr(valueName), toCstr(value) });
-		regCloseKey.invoke(root, new Object[] { Long.valueOf(handles[0]) });
-	}
-
-	// utility
-	private static byte[] toCstr(String str) {
-		byte[] result = new byte[str.length() + 1];
-
-		for (int i = 0; i < str.length(); i++) {
-			result[i] = (byte) str.charAt(i);
-		}
-		result[str.length()] = 0;
-		return result;
-	}
-
-	public static void main(String[] args) throws IllegalArgumentException,
-			IllegalAccessException, InvocationTargetException {
-		System.out.println(WinRegistry.readString(HKEY_LOCAL_MACHINE,
-				"SOFTWARE\\Wow6432Node\\SDFS", "path"));
-	}
 }

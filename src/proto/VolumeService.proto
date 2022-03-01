@@ -11,12 +11,7 @@ message VolumeInfoRequest {
   int64 pvolumeID =1;
 }
 
-message ProxyVolumeInfoRequest {
-}
 
-message ProxyVolumeInfoResponse {
-  repeated VolumeInfoResponse volumeInfoResponse = 1;
-}
 
 message VolumeInfoResponse {
   string path = 1;
@@ -287,5 +282,4 @@ service VolumeService {
   rpc SyncFromCloudVolume(SyncFromVolRequest) returns (SyncFromVolResponse);
   rpc SyncCloudVolume(SyncVolRequest) returns (SyncVolResponse);
   rpc SetMaxAge(SetMaxAgeRequest) returns (SetMaxAgeResponse);
-  rpc GetProxyVolumes(ProxyVolumeInfoRequest) returns (ProxyVolumeInfoResponse);
 }

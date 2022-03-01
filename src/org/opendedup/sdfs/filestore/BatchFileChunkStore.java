@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
+import java.io.EOFException;
 import java.io.File;
 
 import java.io.FileInputStream;
@@ -31,13 +32,13 @@ import com.google.common.io.BaseEncoding;
 import org.opendedup.collections.HashExistsException;
 
 /**
- * 
+ *
  * @author Sam Silverberg The S3 chunk store implements the AbstractChunkStore
  *         and is used to store deduped chunks to AWS S3 data storage. It is
  *         used if the aws tag is used within the chunk store config file. It is
  *         important to make the chunk size very large on the client when using
  *         this chunk store since S3 charges per http request.
- * 
+ *
  */
 public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable {
 	private String name;
@@ -246,37 +247,46 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		if (config.hasAttribute("map-version")) {
 			this.mdVersion = Integer.parseInt(config.getAttribute("map-version"));
 		}
-
-		try {
-			File f = new File(this.container_location, "BucketInfo");
-			if (f.exists()) {
-				FileInputStream fin = new FileInputStream(f);
-				ObjectInputStream oon = new ObjectInputStream(fin);
-				@SuppressWarnings("unchecked")
-				HashMap<String, String> md = (HashMap<String, String>) oon.readObject();
-				oon.close();
-				long sz = 0;
-				long cl = 0;
-				if (md.containsKey("currentlength")) {
-					sz = Long.parseLong(md.get("currentlength"));
-					if (sz < 0)
-						sz = 0;
+		for (int i = 0; i < 2; i++) {
+			try {
+				FileInputStream fin = null;
+				ObjectInputStream oon = null;
+				File f = new File(this.container_location, "BucketInfo");
+				if (f.exists()) {
+					fin = new FileInputStream(f);
+					oon = new ObjectInputStream(fin);
+					@SuppressWarnings("unchecked")
+					HashMap<String, String> md = (HashMap<String, String>) oon.readObject();
+					oon.close();
+					long sz = 0;
+					long cl = 0;
+					if (md.containsKey("currentlength")) {
+						sz = Long.parseLong(md.get("currentlength"));
+						if (sz < 0)
+							sz = 0;
+					}
+					if (md.containsKey("compressedlength")) {
+						cl = Long.parseLong(md.get("compressedlength"));
+						if (cl < 0)
+							cl = 0;
+					}
+					HashBlobArchive.setLength(sz);
+					HashBlobArchive.setCompressedLength(cl);
 				}
-				if (md.containsKey("compressedlength")) {
-					cl = Long.parseLong(md.get("compressedlength"));
-					if (cl < 0)
-						cl = 0;
-				}
-				HashBlobArchive.setLength(sz);
-				HashBlobArchive.setCompressedLength(cl);
+				this.compress = Main.compress;
+				this.encrypt = Main.chunkStoreEncryptionEnabled;
+				break;
+			} catch (EOFException e) {
+				File f = new File(this.container_location, "BucketInfo");
+				File nf = new File(this.container_location, "BucketInfo." + System.currentTimeMillis());
+				SDFSLogger.getLog().warn("BucketInfo is corrupt at " + f.getPath() + " renaming to " + nf.toPath());
+				f.renameTo(nf);
+			} catch (Exception e) {
+				throw new IOException(e);
+			} finally {
+				// if (pool != null)
+				// pool.returnObject(container);
 			}
-			this.compress = Main.compress;
-			this.encrypt = Main.chunkStoreEncryptionEnabled;
-		} catch (Exception e) {
-			throw new IOException(e);
-		} finally {
-			// if (pool != null)
-			// pool.returnObject(container);
 		}
 		Thread thread = new Thread(this);
 		thread.start();
@@ -739,5 +749,14 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	public long getAllObjSummary(String pp, long id) throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public boolean get_move_blob() {
+		return false;
+	}
+
+	@Override
+	public void set_move_blob(boolean status) {
 	}
 }

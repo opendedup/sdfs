@@ -10,8 +10,6 @@ message CheckHashesRequest {
   int64 pvolumeID =2;
 }
 
-
-
 message CheckHashesResponse {
   repeated int64 locations = 1;
   string error = 2;
@@ -38,10 +36,11 @@ message ChunkResponse {
 message ChunkEntry {
   bytes hash = 1;
   bytes data = 2;
+  bool compressed = 3;
+  int32 compressedLength = 4;
 }
 
 message WriteChunksRequest {
- 
   repeated ChunkEntry chunks= 1;
   int64 fileHandle =2;
   int64 pvolumeID =3;
@@ -101,6 +100,9 @@ message SparseDedupeChunkWriteRequest {
   int64 fileHandle = 2;
   int64 fileLocation = 3;
   int64 pvolumeID =4;
+  bool compressed =5;
+  bytes compressedChunk = 6;
+  int32 uncompressedLen =7;
 }
 
 message SparseDedupeChunkWriteResponse {

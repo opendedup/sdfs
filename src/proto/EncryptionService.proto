@@ -1,0 +1,41 @@
+syntax = "proto3";
+option go_package = "github.com/opendedup/sdfs-client-go/sdfs/;sdfs";
+package org.opendedup.grpc;
+//option java_multiple_files = true;
+import "FileInfo.proto";
+
+
+// Request payload
+message EncryptionKeyVerifyRequest {
+  string hash = 1;
+}
+
+message EncryptionKeyVerifyResponse {
+  bool accept =1;
+  errorCodes errorCode = 2;
+  string error = 3;
+}
+
+message ExportServerCertRequest {
+}
+
+message ExportServerCertResponse {
+  bytes privateKey = 1;
+  bytes certChain = 2;
+  errorCodes errorCode = 3;
+  string error = 4;
+}
+
+message DeleteExportedCertRequest {
+}
+
+message DeleteExportedCertResponse {
+  errorCodes errorCode = 1;
+  string error = 2;
+}
+
+service EncryptionService {
+  rpc ValidateCertificate(EncryptionKeyVerifyRequest) returns (EncryptionKeyVerifyResponse);
+  rpc ExportServerCertificate(ExportServerCertRequest) returns (ExportServerCertResponse);
+  rpc DeleteExportedCert(DeleteExportedCertRequest) returns (DeleteExportedCertResponse);
+}
