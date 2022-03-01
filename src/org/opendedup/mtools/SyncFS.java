@@ -75,7 +75,7 @@ public class SyncFS {
 	}
 
 	public void init() throws IOException {
-		if (Main.runConsistancyCheckPeriodically && Main.runConsistancyCheck) {
+		if (Main.runConsistancyCheckPeriodically || Main.runConsistancyCheck) {
 			try {
 				SDFSLogger.getLog().info(
 						"Initializing HCServiceProxy");

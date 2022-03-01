@@ -674,6 +674,7 @@ public class SparseDedupFile implements DedupFile {
 			mf.getIOMonitor().addDulicateData(chunk.getDoop(), true);
 			chunk.setVersion(this.bdb.getVersion());
 			bdb.put(filePosition, chunk);
+			this.dirty=true;
 			eventBus.post(new SFileWritten(this, filePosition));
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write " + filePosition + " updating map " + mf.getPath(),
