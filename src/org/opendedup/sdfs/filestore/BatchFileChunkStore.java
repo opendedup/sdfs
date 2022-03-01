@@ -1,5 +1,6 @@
 package org.opendedup.sdfs.filestore;
 
+import java.io.EOFException;
 import java.io.File;
 
 import java.io.FileInputStream;
@@ -246,37 +247,46 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 		if (config.hasAttribute("map-version")) {
 			this.mdVersion = Integer.parseInt(config.getAttribute("map-version"));
 		}
-
-		try {
-			File f = new File(this.container_location, "BucketInfo");
-			if (f.exists()) {
-				FileInputStream fin = new FileInputStream(f);
-				ObjectInputStream oon = new ObjectInputStream(fin);
-				@SuppressWarnings("unchecked")
-				HashMap<String, String> md = (HashMap<String, String>) oon.readObject();
-				oon.close();
-				long sz = 0;
-				long cl = 0;
-				if (md.containsKey("currentlength")) {
-					sz = Long.parseLong(md.get("currentlength"));
-					if (sz < 0)
-						sz = 0;
+		for (int i = 0; i < 2; i++) {
+			try {
+				FileInputStream fin = null;
+				ObjectInputStream oon = null;
+				File f = new File(this.container_location, "BucketInfo");
+				if (f.exists()) {
+					fin = new FileInputStream(f);
+					oon = new ObjectInputStream(fin);
+					@SuppressWarnings("unchecked")
+					HashMap<String, String> md = (HashMap<String, String>) oon.readObject();
+					oon.close();
+					long sz = 0;
+					long cl = 0;
+					if (md.containsKey("currentlength")) {
+						sz = Long.parseLong(md.get("currentlength"));
+						if (sz < 0)
+							sz = 0;
+					}
+					if (md.containsKey("compressedlength")) {
+						cl = Long.parseLong(md.get("compressedlength"));
+						if (cl < 0)
+							cl = 0;
+					}
+					HashBlobArchive.setLength(sz);
+					HashBlobArchive.setCompressedLength(cl);
 				}
-				if (md.containsKey("compressedlength")) {
-					cl = Long.parseLong(md.get("compressedlength"));
-					if (cl < 0)
-						cl = 0;
-				}
-				HashBlobArchive.setLength(sz);
-				HashBlobArchive.setCompressedLength(cl);
+				this.compress = Main.compress;
+				this.encrypt = Main.chunkStoreEncryptionEnabled;
+				break;
+			} catch (EOFException e) {
+				File f = new File(this.container_location, "BucketInfo");
+				File nf = new File(this.container_location, "BucketInfo." + System.currentTimeMillis());
+				SDFSLogger.getLog().warn("BucketInfo is corrupt at " + f.getPath() + " renaming to " + nf.toPath());
+				f.renameTo(nf);
+			} catch (Exception e) {
+				throw new IOException(e);
+			} finally {
+				// if (pool != null)
+				// pool.returnObject(container);
 			}
-			this.compress = Main.compress;
-			this.encrypt = Main.chunkStoreEncryptionEnabled;
-		} catch (Exception e) {
-			throw new IOException(e);
-		} finally {
-			// if (pool != null)
-			// pool.returnObject(container);
 		}
 		Thread thread = new Thread(this);
 		thread.start();
