@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -19,6 +19,7 @@
 package org.opendedup.util;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -66,9 +67,10 @@ public class FindOpenPort {
 		SDFSLogger.getLog().info("Unlock Done");
 	}
 
-	public static int pickFreePort(int start)
+	public static int pickFreePort(int start, int maxRange)
 
 	{
+		int range = 0;
 		int port = -1;
 		while (port == -1) {
 			ServerSocket socket = null;
@@ -77,9 +79,13 @@ public class FindOpenPort {
 
 			{
 
-				socket = new ServerSocket(start);
+				socket = new ServerSocket(start, 50, InetAddress.getByAddress(new byte[] { 0x00, 0x00, 0x00, 0x00 }));
 
 				port = socket.getLocalPort();
+				if (maxRange > 0 && range == maxRange) {
+					SDFSLogger.getLog().info("PickFreePort - Out of Range Specified");
+					return 0;
+				}
 
 			}
 
@@ -115,13 +121,18 @@ public class FindOpenPort {
 
 			}
 			start++;
+			if (maxRange > 0) {
+				range++;
+			}
 		}
+		SDFSLogger.getLog().info("Free Port Identified: - " + port);
+
 		return port;
 
 	}
 
 	public static void main(String[] args) {
-		System.out.println(pickFreePort(6442));
+		System.out.println(pickFreePort(6442, -1));
 	}
 
 }

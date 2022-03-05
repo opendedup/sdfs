@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.google.protobuf.ByteString;
 
 import org.opendedup.collections.InsertRecord;
+import org.opendedup.util.CompressionUtils;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.grpc.FileInfo.errorCodes;
@@ -21,6 +24,7 @@ import org.opendedup.grpc.Storage.ChunkResponse;
 import org.opendedup.grpc.Storage.HashingInfoRequest;
 import org.opendedup.grpc.Storage.HashingInfoResponse;
 import org.opendedup.grpc.Storage.MetaDataDedupeFileRequest;
+import org.opendedup.grpc.Storage.SparseDataChunkP;
 import org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest;
 import org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse;
 import org.opendedup.grpc.Storage.SparseDedupeFileRequest;
@@ -32,9 +36,14 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl.FileIOError;
 import org.opendedup.sdfs.servers.HCServiceProxy;
+
+import com.google.common.io.BaseEncoding;
+import com.google.common.primitives.Longs;
 
 import io.grpc.stub.StreamObserver;
 
@@ -163,12 +172,14 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             responseObserver.onCompleted();
         } else {
             try {
-
                 List<ByteString> hashes = request.getHashesList();
                 List<Long> responses = new ArrayList<Long>(hashes.size());
                 for (ByteString bs : hashes) {
-                    responses.add(HCServiceProxy.getHashesMap().get(bs.toByteArray()));
+                    long archive = HCServiceProxy.getHashesMap().get(bs.toByteArray());
+                    responses.add(archive);
+                    SDFSLogger.getLog().debug("dedupe archive is " + archive);
                 }
+
                 b.addAllLocations(responses);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
@@ -189,6 +200,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         WriteChunksResponse.Builder b = WriteChunksResponse.newBuilder();
         if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
             b.setError("User is not a member of any group with access");
+
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
@@ -206,17 +218,21 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
                 List<org.opendedup.grpc.Storage.InsertRecord> responses = new ArrayList<org.opendedup.grpc.Storage.InsertRecord>(
                         request.getChunksCount());
+                int compressed = 0;
                 for (ChunkEntry ent : request.getChunksList()) {
                     byte[] chunk = ent.getData().toByteArray();
                     if (chunk.length > 0) {
-                        /*
-                         * byte [] hash = ent.getHash().toByteArray(); byte [] ek =
-                         * SparseDedupFile.eng.getHash(chunk); if(!Arrays.equals(hash, ek)) {
-                         * SDFSLogger.getLog().info("failed"); }
-                         */
+                        if (ent.getCompressed()) {
+                            compressed++;
+                            chunk = CompressionUtils.decompressLz4(chunk, ent.getCompressedLength());
+                        }
+                        if (compressed > 0) {
+                            SDFSLogger.getLog().debug("wrote " + compressed + " blocks");
+                        }
                         ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
                                 ch.getDedupFile().getGUID());
                         InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
+                        SDFSLogger.getLog().debug("write archive is " + Longs.fromByteArray(ir.getHashLocs()));
                         responses.add(ir.toProtoBuf());
                     } else {
                         responses.add(new InsertRecord(false, -1).toProtoBuf());
@@ -258,7 +274,43 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     responseObserver.onCompleted();
                     return;
                 }
-                SparseDataChunk sp = new SparseDataChunk(request.getChunk());
+                SparseDataChunk sp = null;
+                if (request.getCompressed()) {
+                    byte[] chunk = CompressionUtils.decompressLz4(request.getCompressedChunk().toByteArray(),
+                            request.getUncompressedLen());
+
+                    sp = new SparseDataChunk(SparseDataChunkP.parseFrom(chunk));
+                } else {
+                    sp = new SparseDataChunk(request.getChunk());
+                }
+                HashMap<String, kv> hs = new HashMap<String, kv>();
+                for (Entry<Integer, HashLocPair> e : sp.getFingers().entrySet()) {
+                    if (!e.getValue().inserted) {
+                        String key = BaseEncoding.base64().encode(e.getValue().hash);
+                        if (!hs.containsKey(key)) {
+                            kv _kv = new kv();
+                            _kv.ct = 0;
+                            _kv.key=e.getValue().hash;
+                            _kv.pos = Longs.fromByteArray(e.getValue().hashloc);
+                            hs.put(key, _kv);
+                        }
+                        kv _kv = hs.get(key);
+                        _kv.ct += 1 ;
+                    }
+                }
+                for (Entry<String, kv> e : hs.entrySet()) {
+                    long pos = DedupFileStore.addRef(e.getValue().key,
+                            e.getValue().pos, e.getValue().ct);
+                    if (e.getValue().ct <= 0) {
+                        throw new IOException("Count must be positive ct=" +
+                                e.getValue().ct);
+                    }
+
+                    if (pos != e.getValue().pos) {
+                        throw new IOException("Inserted Archive does not match current current=" +
+                                pos + " interted=" + e.getValue().pos);
+                    }
+                }
                 ch.getDedupFile().updateMap(sp, request.getFileLocation());
                 long ep = sp.getFpos() + sp.len;
                 if (ep > ch.getFile().length()) {
@@ -320,6 +372,12 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
             }
         }
+    }
+
+    private static class kv {
+        long pos;
+        int ct = 0;
+        byte [] key;
     }
 
 }

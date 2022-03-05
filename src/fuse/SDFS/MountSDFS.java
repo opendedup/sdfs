@@ -43,6 +43,7 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("l", false, "Compact Volume on Disk");
 		options.addOption("c", false, "Runs Consistency Check");
 		options.addOption("e", true, "password to decrypt config");
+		options.addOption("j", true, "environmental variable to decrypt config");
 		options.addOption("n", false, "disable drive mount");
 		options.addOption("m", true, "mount point for SDFS file system \n e.g. /media/dedup");
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
@@ -54,6 +55,8 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("b", true,
 				"Folder basepath for sdfs to be used in linux os, same as sdfs-base-path in mkfs.sdfs. \n e.g. /opt/test");
 		options.addOption("t", true, "Temporary directory for sdfs to be used in linux os. \n e.g. /tmp");
+		options.addOption("a", false, "Runs Consistency Check Periodically");
+		options.addOption("u", false, "Disables TLS and forces localhost");
 		return options;
 	}
 
@@ -121,6 +124,9 @@ public class MountSDFS implements Daemon, Runnable {
 		if (cmd.hasOption("c")) {
 			Main.runConsistancyCheck = true;
 		}
+		if (cmd.hasOption("a")) {
+			Main.runConsistancyCheckPeriodically = true;
+		}
 		if (cmd.hasOption("q")) {
 			SDFSLogger.useConsoleLogger();
 		}
@@ -130,7 +136,12 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 		if (cmd.hasOption("e")) {
 			password = cmd.getOptionValue("e");
+		} 
+		if (cmd.hasOption("j")) {
+			String jv = cmd.getOptionValue("j");
+			password = System.getenv(jv);
 		}
+
 		if (cmd.hasOption("p")) {
 			port = Integer.parseInt(cmd.getOptionValue("p"));
 		}
@@ -196,6 +207,9 @@ public class MountSDFS implements Daemon, Runnable {
 				Main.logPath = OSValidator.getProgramBasePath() + "/var/log/sdfs/" + volname + ".log";
 			}
 		}
+		if(cmd.hasOption("u")) {
+			Main.usePortRedirector = true;
+		}
 		Main.logPath = "/var/log/sdfs/" + volname + ".log";
 		if (OSValidator.isWindows()) {
 			File cf = new File(volumeConfigFile);
@@ -214,7 +228,12 @@ public class MountSDFS implements Daemon, Runnable {
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());
-			System.exit(-1);
+			if(e1.toString().contains("No port Available in range Specified"))
+			{
+				System.exit(-2);
+			}
+			else
+				System.exit(-1);
 		}
 		shutdownHook = new ShutdownHook(sdfsService, cmd.getOptionValue("m"));
 		mountOptions = cmd.getOptionValue("m");

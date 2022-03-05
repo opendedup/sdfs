@@ -11,11 +11,13 @@ message DataWriteRequest {
     int32 len = 3;
     bytes data = 4;
     int64 pvolumeID =5;
+    bool compressed =6;
 }
 
 message DataWriteResponse {
     string error = 1;
     errorCodes errorCode = 2;
+    int64 written = 3;
 }
 
 message MkDirRequest {
@@ -54,6 +56,7 @@ message DataReadRequest {
     int64 start =2;
     int32 len = 3;
     int64 pvolumeID =4;
+    bool compress =5;
 }
 
 message DataReadResponse {
@@ -61,6 +64,7 @@ message DataReadResponse {
     int32 read = 2;
     string error = 3;
     errorCodes errorCode = 4;
+    bool compressed = 5;
 }
 
 message FileCloseRequest {
@@ -161,7 +165,7 @@ message SetUserMetaDataRequest {
 message SetUserMetaDataResponse {
     string error = 1;
     errorCodes errorCode = 2;
-    
+
 }
 
 message GetCloudFileRequest {
@@ -257,7 +261,7 @@ message StatFS {
     int64 bavail = 4;/* Free blocks available to unprivileged user */
     int64 files = 5; /* Total inodes in filesystem */
     int64 ffree = 6; /* Free inodes in filesystem */
-    int64 fsid = 7; /* Filesystem ID */ 
+    int64 fsid = 7; /* Filesystem ID */
     int32 namelen = 8; /* Maximum length of filenames */
     int32 frsize = 9; /* Fragment size (since Linux 2.6) */
     int32 flags = 10;  /* Mount flags of filesystem */
@@ -378,6 +382,26 @@ message SyncNotificationSubscription {
     int64 pvolumeID =2;
 }
 
+message SetRetrievalTierRequest {
+    string tierType = 1;
+    int64 pvolumeID = 2;
+}
+
+message SetRetrievalTierResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message GetRetrievalTierRequest {
+     int64 pvolumeID = 1;
+}
+
+message GetRetrievalTierResponse {
+    string tierType = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
+}
+
 
 service FileIOService {
     // Define a RPC operation
@@ -398,6 +422,7 @@ service FileIOService {
     rpc RmDir(RmDirRequest) returns (RmDirResponse);
     rpc Unlink(UnlinkRequest) returns (UnlinkResponse);
     rpc Write(DataWriteRequest) returns (DataWriteResponse);
+    rpc StreamWrite(stream DataWriteRequest) returns (DataWriteResponse) {}
     rpc Read(DataReadRequest) returns (DataReadResponse);
     rpc Release(FileCloseRequest) returns (FileCloseResponse);
     rpc Mknod(MkNodRequest) returns (MkNodResponse);
@@ -414,5 +439,7 @@ service FileIOService {
     rpc GetCloudMetaFile(GetCloudFileRequest) returns (GetCloudFileResponse);
     rpc StatFS(StatFSRequest) returns (StatFSResponse);
     rpc fileNotification (SyncNotificationSubscription) returns (stream FileMessageResponse) {};
+    rpc SetRetrievalTier(SetRetrievalTierRequest) returns (SetRetrievalTierResponse);
+	rpc GetRetrievalTier(GetRetrievalTierRequest) returns (GetRetrievalTierResponse);
   }
 

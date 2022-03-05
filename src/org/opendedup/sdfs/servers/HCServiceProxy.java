@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -27,7 +27,6 @@ import org.opendedup.collections.AbstractHashesMap;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.grpc.FileInfo.syncaction;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.FDiskException;
 import org.opendedup.sdfs.Main;
@@ -45,19 +44,15 @@ public class HCServiceProxy {
 	public static HashChunkServiceInterface hcService = null;
 	private static EventBus eventBus = new EventBus();
 
-	
-
 	// private static boolean initialized = false;
-	
-
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
 
-	public static synchronized long processHashClaims(SDFSEvent evt,boolean compact) throws IOException {
-			return hcService.processHashClaims(evt,compact);
-		
+	public static synchronized long processHashClaims(SDFSEvent evt, boolean compact) throws IOException {
+		return hcService.processHashClaims(evt, compact);
+
 	}
 
 	public static synchronized void compactDB() throws IOException {
@@ -70,8 +65,7 @@ public class HCServiceProxy {
 	}
 
 	public static synchronized boolean hashExists(byte[] hash, String guid) throws IOException, HashtableFullException {
-		
-		
+
 		long pos = hcService.hashExists(hash);
 		if (pos != -1)
 			return true;
@@ -84,32 +78,32 @@ public class HCServiceProxy {
 	}
 
 	public static synchronized long getCacheSize() {
-			return hcService.getCacheSize();
+		return hcService.getCacheSize();
 	}
 
 	public static synchronized long getMaxCacheSize() {
-			return hcService.getMaxCacheSize();
-		
+		return hcService.getMaxCacheSize();
+
 	}
 
 	public static synchronized int getReadSpeed() {
-			return hcService.getReadSpeed();
+		return hcService.getReadSpeed();
 	}
 
 	public static synchronized int getWriteSpeed() {
-			return hcService.getWriteSpeed();
+		return hcService.getWriteSpeed();
 	}
 
 	public static synchronized void setReadSpeed(int speed) {
-			hcService.setReadSpeed(speed);
+		hcService.setReadSpeed(speed);
 	}
 
 	public static synchronized void setWriteSpeed(int speed) {
-			hcService.setWriteSpeed(speed);
+		hcService.setWriteSpeed(speed);
 	}
 
 	public static synchronized void setCacheSize(long sz) throws IOException {
-			hcService.setCacheSize(sz);
+		hcService.setCacheSize(sz);
 	}
 
 	public static synchronized void setDseSize(long sz) throws IOException {
@@ -117,123 +111,125 @@ public class HCServiceProxy {
 	}
 
 	public static long claimKey(byte[] key, long val, long ct) throws IOException {
-			
-				return hcService.claimKey(key, val, ct);
+
+		return hcService.claimKey(key, val, ct);
 	}
 
 	public static long getChunksFetched() {
 		return -1;
 	}
 
-	public static synchronized void init(ArrayList<String> volumes) {
+	public static synchronized void init(ArrayList<String> volumes) throws InterruptedException {
 		try {
-				/*
-				File file = new File(Main.hashDBStore + File.separator + ".lock");
-				if(file.exists()) {
-					SDFSLogger.getLog().fatal("lock file exists " + file.getPath());
-					SDFSLogger.getLog().fatal("Please remove lock file to proceed");
-					System.out.println("lock file exists " + file.getPath());
-					System.out.println("Please remove lock file to proceed");
-					System.exit(2);
-				}
-				*/
-				SDFSLogger.getLog().info("Starting local chunkstore");
-				
+			/*
+			 * File file = new File(Main.hashDBStore + File.separator + ".lock");
+			 * if(file.exists()) {
+			 * SDFSLogger.getLog().fatal("lock file exists " + file.getPath());
+			 * SDFSLogger.getLog().fatal("Please remove lock file to proceed");
+			 * System.out.println("lock file exists " + file.getPath());
+			 * System.out.println("Please remove lock file to proceed");
+			 * System.exit(2);
+			 * }
+			 */
+			SDFSLogger.getLog().info("Starting local chunkstore");
+			try {
 				hcService = new HashChunkService();
 				hcService.init();
-				
-				if (Main.runConsistancyCheck) {
-					hcService.runConsistancyCheck();
-				}
+			} catch (InterruptedException e) {
+				SDFSLogger.getLog().info(e.getMessage());
+			}
 
-				if (Main.syncDL) {
-					long vol = Main.DSEID;
-					if(Main.syncDLAll) {
-						vol = -1;
-					}
-					SDFSEvent evt = SDFSEvent.syncVolEvent("Syncing from [" + vol + "]");
-					eventBus.post(new CloudSyncDLRequest(vol, true, false,evt));
+			if (Main.runConsistancyCheck) {
+				hcService.runConsistancyCheck();
+			}
+
+			if (Main.syncDL) {
+				long vol = Main.DSEID;
+				if (Main.syncDLAll) {
+					vol = -1;
 				}
-				touchRunFile();
-			
+				SDFSEvent evt = SDFSEvent.syncVolEvent("Syncing from [" + vol + "]");
+				eventBus.post(new CloudSyncDLRequest(vol, true, false, evt));
+			}
+			touchRunFile();
+
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("Unable to initialize HashChunkService ", e);
 			System.err.println("Unable to initialize HashChunkService ");
 			e.printStackTrace();
-			System.exit(-1);
+			if (Main.sdfsSyncEnabled) {
+				throw new InterruptedException("Exception occured while syncSDFS is enabled. " + e);
+			} else {
+				System.exit(-1);
+			}
 		}
 	}
 
-	public static void syncVolume(long volumeID, boolean syncMap,SDFSEvent evt) {
-			eventBus.post(new CloudSyncDLRequest(volumeID, syncMap, true,evt));
+	public static void syncVolume(long volumeID, boolean syncMap, SDFSEvent evt) {
+		eventBus.post(new CloudSyncDLRequest(volumeID, syncMap, true, evt));
 	}
 
 	public static byte getDseCount() {
 		return 1;
-		
+
 	}
 
-	public static boolean mightContainKey(byte[] key, String guid,long id) {
-		return hcService.mightContainKey(key,id);
+	public static boolean mightContainKey(byte[] key, String guid, long id) {
+		return hcService.mightContainKey(key, id);
 	}
 
 	public static AbstractHashesMap getHashesMap() {
-			return hcService.getHashesMap();
+		return hcService.getHashesMap();
 	}
 
 	public static long getSize() {
-			return hcService.getSize();
-		
+		return hcService.getSize();
+
 	}
 
 	public static long getDSESize() {
-			return HCServiceProxy.getChunkStore().size();
-		
+		return HCServiceProxy.getChunkStore().size();
+
 	}
 
 	public static long getDSECompressedSize() {
-			return HCServiceProxy.getChunkStore().compressedSize();
-		
+		return HCServiceProxy.getChunkStore().compressedSize();
+
 	}
 
 	public static long getDSEMaxSize() {
-			return HCServiceProxy.getChunkStore().maxSize();
-		
+		return HCServiceProxy.getChunkStore().maxSize();
+
 	}
 
 	public static long getMaxSize() {
-			return HCServiceProxy.hcService.getMaxSize();
-		
+		return HCServiceProxy.hcService.getMaxSize();
+
 	}
 
 	public static long getFreeBlocks() {
-			return HCServiceProxy.getChunkStore().getFreeBlocks();
-		
+		return HCServiceProxy.getChunkStore().getFreeBlocks();
+
 	}
 
 	public static AbstractChunkStore getChunkStore() {
-			return hcService.getChuckStore();
-		
+		return hcService.getChuckStore();
+
 	}
 
 	public static int getPageSize() {
-			return HCServiceProxy.hcService.getPageSize();
+		return HCServiceProxy.hcService.getPageSize();
 	}
 
 	public static void sync() throws IOException {
-			hcService.sync();
+		hcService.sync();
 	}
-
-	
-
-	
 
 	public static InsertRecord writeChunk(byte[] hash, byte[] aContents, int ct, String uuid)
 			throws IOException, HashtableFullException {
-			// doop = HCServiceProxy.hcService.hashExists(hash);
-			
-				return HCServiceProxy.hcService.writeChunk(hash, aContents, false, ct,uuid);
-		
+		// doop = HCServiceProxy.hcService.hashExists(hash);
+
+		return HCServiceProxy.hcService.writeChunk(hash, aContents, false, ct, uuid);
 
 	}
 
@@ -242,7 +238,7 @@ public class HCServiceProxy {
 	 * ignoredHosts) throws IOException, HashtableFullException { if
 	 * (Main.chunkStoreLocal) { // doop = HCServiceProxy.hcService.hashExists(hash);
 	 * return HCServiceProxy.hcService.writeChunk(hash, aContents, false); } else {
-	 * 
+	 *
 	 * try { if (ignoredHosts != null) { WriteHashCmd cmd = new WriteHashCmd(hash,
 	 * aContents, false, Main.volume.getClusterCopies(), ignoredHosts);
 	 * cmd.executeCmd(socket); return new InsertRecord(true,cmd.reponse()); } else {
@@ -251,7 +247,7 @@ public class HCServiceProxy {
 	 * InsertRecord(true,cmd.reponse()); } } catch (Exception e1) { //
 	 * SDFSLogger.getLog().fatal("Unable to write chunk " + hash, // e1); throw new
 	 * IOException("Unable to write chunk " + hash); } finally {
-	 * 
+	 *
 	 * } } }
 	 */
 
@@ -271,29 +267,27 @@ public class HCServiceProxy {
 	public static long hashExists(byte[] hash)
 			throws IOException, HashtableFullException {
 
-			return HCServiceProxy.hcService.hashExists(hash);
+		return HCServiceProxy.hcService.hashExists(hash);
 
-		
 	}
-
 
 	public static byte[] fetchChunk(byte[] hash, byte[] hashloc, boolean direct)
 			throws IOException, DataArchivedException {
 
-			byte[] data = null;
-			long pos = -1;
-			if (direct) {
-				pos = Longs.fromByteArray(hashloc);
-			}
+		byte[] data = null;
+		long pos = -1;
+		if (direct) {
+			pos = Longs.fromByteArray(hashloc);
+		}
 
-			data = HCServiceProxy.hcService.fetchChunk(hash, pos).getData();
+		data = HCServiceProxy.hcService.fetchChunk(hash, pos).getData();
 
-			return data;
-		
+		return data;
+
 	}
 
 	public static void cacheData(long pos) throws IOException, DataArchivedException {
-			HCServiceProxy.hcService.cacheChunk(pos);
+		HCServiceProxy.hcService.cacheChunk(pos);
 	}
 
 	public static long getChunksRead() {
@@ -336,12 +330,20 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static String restoreBlock(byte[] hash,long id) throws IOException {
-		return hcService.restoreBlock(hash,id);
+	public static String restoreBlock(byte[] hash, long id) throws IOException {
+		return hcService.restoreBlock(hash, id);
 	}
 
 	public static boolean blockRestored(String id) throws IOException {
 		return hcService.blockRestored(id);
+	}
+
+	public static boolean get_move_blob() {
+		return hcService.get_move_blob();
+	}
+
+	public static void set_move_blob(boolean status) {
+		hcService.set_move_blob(status);
 	}
 
 }

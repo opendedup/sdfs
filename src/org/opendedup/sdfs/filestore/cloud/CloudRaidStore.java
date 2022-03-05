@@ -1640,4 +1640,12 @@ public class CloudRaidStore implements AbstractChunkStore, AbstractBatchStore, R
 		return null;
 	}
 
+	@Override
+	public boolean get_move_blob() {
+		return false;
+	}
+
+	@Override
+	public void set_move_blob(boolean status) {
+	}
 }

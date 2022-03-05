@@ -28,8 +28,6 @@ public class Main {
 	public static boolean checkArchiveOnRead = true;
 	public static int hashSeed=6442;
 	public static double fpp = .01;
-	public static String jarFilePath="";
-	public static String classInfo="";
 	public static String logSize="10MB";
 	public static int logFiles=10;
 	public static boolean ignoreDSEHTSize = true;
@@ -37,6 +35,10 @@ public class Main {
 	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
 	public static boolean useLegacy = false;
+	public static String authJarFilePath="";
+	public static String authClassInfo="";
+	public static String prodConfigFilePath = "";
+	public static String prodConfigVariable = "";
 
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout
@@ -78,6 +80,7 @@ public class Main {
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
 	public static String sdfsBasePath = "";
+	public static String volumeConfigFile = "";
 
 	public static SDFSEvent mountEvent = null;
 
@@ -105,6 +108,8 @@ public class Main {
 	 * located. This is used for the chunk stores.
 	 */
 	public static String chunkStore = "";
+
+	public static boolean usePortRedirector;
 
 	/**
 	 * Future implementation for pluggable chunkstores
@@ -149,6 +154,10 @@ public class Main {
 	public static String lookupfilterStore = null;
 	public static String dedupDBTrashStore = null;
 	public static boolean DDB_TRASH_ENABLED = false;
+	public static boolean sdfsSyncEnabled = false;
+	public static boolean runConsistancyCheckPeriodically = false;
+	public static String sdfsVolName = "";
+	public static String retrievalTier = "";
 	/**
 	 * The location where the model of the virtual file structure will be held.
 	 * The virtual file structure maps what will be presented as the filesystem
@@ -309,7 +318,7 @@ public class Main {
 	public static boolean useAim;
 
 	/** Azure login info **/
-	
+
 	public static boolean AZUREChunkStore = false;
 	public static String AZURE_ACCOUNT_NAME = "MyAccountName";
 	public static String AZURE_ACCOUNT_KEY = "MyAccountKey";

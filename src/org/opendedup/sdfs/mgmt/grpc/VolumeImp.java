@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import com.google.common.io.BaseEncoding;
 import com.sun.management.UnixOperatingSystemMXBean;
 
+import org.apache.kerby.config.ConfigImpl;
 import org.json.JSONObject;
 import org.opendedup.grpc.Shutdown.ShutdownRequest;
 import org.opendedup.grpc.Shutdown.ShutdownResponse;
@@ -51,7 +52,10 @@ import org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.DedupFileStore;
+import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
 import org.opendedup.sdfs.filestore.gc.ManualGC;
@@ -60,6 +64,7 @@ import org.opendedup.sdfs.mgmt.SetReadSpeed;
 import org.opendedup.sdfs.mgmt.SetWriteSpeed;
 import org.opendedup.sdfs.mgmt.SyncFSCmd;
 import org.opendedup.sdfs.mgmt.SyncFromConnectedVolume;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.EncryptUtils;
 import org.opendedup.util.OSValidator;
@@ -68,7 +73,6 @@ import io.grpc.stub.StreamObserver;
 
 class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
   private static final int EXPIRY_DAYS = 90;
-
 
   @Override
   public void getVolumeInfo(VolumeInfoRequest req, StreamObserver<VolumeInfoResponse> responseObserver) {
@@ -158,7 +162,9 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
     try {
       SDFSLogger.getLog().info("shutting down volume");
       System.out.println("shutting down volume");
-      System.exit(0);
+      ShutdownVol sh = new ShutdownVol();
+      Thread th = new Thread(sh);
+      th.start();
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();
     } catch (Exception e) {
@@ -514,10 +520,10 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       info.setCacheSize(HCServiceProxy.getCacheSize());
       info.setMaxCacheSize(HCServiceProxy.getMaxCacheSize());
       info.setListenEncrypted(Main.sdfsCliSSL);
-      if(Main.eChunkStoreEncryptionKey != null) {
+      if (Main.eChunkStoreEncryptionKey != null) {
         info.setEncryptionKey(Main.eChunkStoreEncryptionKey);
       } else {
-      info.setEncryptionKey(Main.chunkStoreEncryptionKey);
+        info.setEncryptionKey(Main.chunkStoreEncryptionKey);
       }
       info.setEncryptionIV(Main.chunkStoreEncryptionIV);
       info.setBucketName(HCServiceProxy.getChunkStore().getName());
@@ -650,6 +656,59 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       }
 
     }
+  }
+
+  private static class ShutdownVol implements Runnable {
+
+    @Override
+    public void run() {
+      SDFSEvent evt = SDFSEvent.umountEvent("Shutting down Volume");
+      SDFSLogger.getLog().info("Shutting Down SDFS");
+      SDFSLogger.getLog().info("Stopping FDISK scheduler");
+      SDFSLogger.getLog().info("Flushing and Closing Write Caches");
+      try {
+        DedupFileStore.close();
+      } catch (Exception e) {
+        System.out.println("Dedupe File store did not close correctly");
+        SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
+      }
+      SDFSLogger.getLog().info("Write Caches Flushed and Closed");
+      SDFSLogger.getLog().info("Committing open Files");
+      try {
+        MetaFileStore.close();
+      } catch (Exception e) {
+        System.out.println("Meta File store did not close correctly");
+        SDFSLogger.getLog().error("Meta File store did not close correctly", e);
+      }
+      SDFSLogger.getLog().info("Open File Committed");
+      SDFSLogger.getLog().info("Writing Config File");
+
+      SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
+      try {
+        HCServiceProxy.close();
+      } catch (Exception e) {
+        System.out.println("HashStore did not close correctly");
+        SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
+      }
+      SDFSLogger.getLog().info("######### HashStore Closed ###################");
+      Main.volume.setClosedGracefully(true);
+      try {
+        Config.writeSDFSConfigFile(Main.volumeConfigFile);
+      } catch (Exception e) {
+
+      }
+      try {
+        Main.volume.setClosedGracefully(true);
+        Config.writeSDFSConfigFile(Main.volumeConfigFile);
+      } catch (Throwable e) {
+        SDFSLogger.getLog().error("Unable to write volume config.", e);
+      }
+      evt.endEvent("Volume Unmounted");
+      SDFSLogger.getLog().info("SDFS is Shut Down");
+      System.exit(0);
+
+    }
+
   }
 
 }

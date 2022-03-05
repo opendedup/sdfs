@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -21,7 +21,6 @@ package org.opendedup.sdfs.windows.fs;
 import net.decasdev.dokan.Dokan;
 
 import org.opendedup.sdfs.servers.SDFSService;
-import org.opendedup.sdfs.windows.utils.DriveIcon;
 
 class ShutdownHook extends Thread {
 	private SDFSService service;
@@ -46,7 +45,7 @@ class ShutdownHook extends Thread {
 			e.printStackTrace();
 		} finally {
 			try {
-				DriveIcon.deleteIcon(driveLetter);
+				//DriveIcon.deleteIcon(driveLetter);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
