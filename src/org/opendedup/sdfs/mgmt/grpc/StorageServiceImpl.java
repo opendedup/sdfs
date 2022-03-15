@@ -21,6 +21,7 @@ import org.opendedup.grpc.Storage.CheckHashesRequest;
 import org.opendedup.grpc.Storage.CheckHashesResponse;
 import org.opendedup.grpc.Storage.ChunkEntry;
 import org.opendedup.grpc.Storage.ChunkResponse;
+import org.opendedup.grpc.Storage.HashLocPairP;
 import org.opendedup.grpc.Storage.HashingInfoRequest;
 import org.opendedup.grpc.Storage.HashingInfoResponse;
 import org.opendedup.grpc.Storage.MetaDataDedupeFileRequest;
@@ -284,6 +285,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     sp = new SparseDataChunk(request.getChunk());
                 }
                 HashMap<String, kv> hs = new HashMap<String, kv>();
+                ArrayList<HashLocPairP> misses = new ArrayList<HashLocPairP>();
                 for (Entry<Integer, HashLocPair> e : sp.getFingers().entrySet()) {
                     if (!e.getValue().inserted) {
                         String key = BaseEncoding.base64().encode(e.getValue().hash);
@@ -298,6 +300,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                         _kv.ct += 1 ;
                     }
                 }
+                //TODO: add rollback
                 for (Entry<String, kv> e : hs.entrySet()) {
                     long pos = DedupFileStore.addRef(e.getValue().key,
                             e.getValue().pos, e.getValue().ct);
@@ -307,9 +310,13 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     }
 
                     if (pos != e.getValue().pos) {
-                        throw new IOException("Inserted Archive does not match current current=" +
-                                pos + " interted=" + e.getValue().pos);
+                        HashLocPairP.Builder pr = HashLocPairP.newBuilder();
+                        pr.setHashloc(e.getValue().pos).setHash(ByteString.copyFrom(ByteBuffer.wrap(e.getValue().key))).setInserted(false);
+                        misses.add(pr.build());
                     }
+                }
+                if(misses.size()>0) {
+                    throw new HashWriteException(misses);
                 }
                 ch.getDedupFile().updateMap(sp, request.getFileLocation());
                 long ep = sp.getFpos() + sp.len;
@@ -323,7 +330,18 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
-            } catch (Exception e) {
+            } catch(HashWriteException e){
+                SDFSLogger.getLog().error("unable to write sparse data chunk. Missed " + e.misses.size() + " hashes");
+                b.setError("unable to write sparse data chunk");
+                for(int i =0;i<e.misses.size();i++) {
+                    b.setMissedAr(i, e.misses.get(i));
+                }
+                b.setErrorCode(errorCodes.ENOENT);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            catch (Exception e) {
                 SDFSLogger.getLog().error("unable to write sparse data chunk", e);
                 b.setError("unable to write sparse data chunk");
                 b.setErrorCode(errorCodes.EACCES);
@@ -378,6 +396,14 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         long pos;
         int ct = 0;
         byte [] key;
+    }
+
+    private static class HashWriteException extends Exception {
+        ArrayList<HashLocPairP> misses;
+        public HashWriteException(ArrayList<HashLocPairP> misses) {
+            this.misses = misses;
+
+        }
     }
 
 }
