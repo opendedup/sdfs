@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -68,7 +68,7 @@ public class EncryptUtils {
 	public static byte[] encryptCBC(byte[] chunk) throws IOException {
 		return encryptCBC(chunk,false);
 	}
-	
+
 	public static byte[] encryptCBC(byte[] chunk,boolean useOldKey) throws IOException {
 
 		try {
@@ -85,7 +85,7 @@ public class EncryptUtils {
 		}
 
 	}
-	
+
 
 	public static byte[] decryptCBC(byte[] encChunk) throws IOException {
 
@@ -256,7 +256,7 @@ public class EncryptUtils {
 		fos.close();
 		cis.close();
 		}catch (Exception e) {
-			
+
 
 			Cipher encrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
 			encrypt.init(Cipher.DECRYPT_MODE, oldKey, ivspec);

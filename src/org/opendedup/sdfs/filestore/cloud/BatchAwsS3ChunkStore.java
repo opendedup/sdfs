@@ -141,6 +141,7 @@ import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.FileHashing;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
 import org.opendedup.util.RandomGUID;
@@ -2033,7 +2034,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					try {
 						md.setContentType("binary/octet-stream");
 						in = new BufferedInputStream(new FileInputStream(p), 32768);
-						byte[] md5Hash = Hashing.md5().hashBytes(in.readAllBytes()).asBytes();
+						byte[] md5Hash = FileHashing.checksuMD5(p.getPath());
 						in.close();
 						String mds = BaseEncoding.base64().encode(md5Hash);
 						md.setContentMD5(mds);
