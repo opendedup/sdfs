@@ -10595,6 +10595,78 @@ public final class VolumeServiceOuterClass {
      * @return The maxAge.
      */
     long getMaxAge();
+
+    /**
+     * <code>double averageLoadPenalty = 21;</code>
+     * @return The averageLoadPenalty.
+     */
+    double getAverageLoadPenalty();
+
+    /**
+     * <code>int64 evictionCount = 22;</code>
+     * @return The evictionCount.
+     */
+    long getEvictionCount();
+
+    /**
+     * <code>int64 hitCount = 23;</code>
+     * @return The hitCount.
+     */
+    long getHitCount();
+
+    /**
+     * <code>double hitRate = 24;</code>
+     * @return The hitRate.
+     */
+    double getHitRate();
+
+    /**
+     * <code>int64 loadCount = 25;</code>
+     * @return The loadCount.
+     */
+    long getLoadCount();
+
+    /**
+     * <code>int64 loadExceptionCount = 26;</code>
+     * @return The loadExceptionCount.
+     */
+    long getLoadExceptionCount();
+
+    /**
+     * <code>double loadExceptionRate = 27;</code>
+     * @return The loadExceptionRate.
+     */
+    double getLoadExceptionRate();
+
+    /**
+     * <code>int64 loadSuccessCount = 28;</code>
+     * @return The loadSuccessCount.
+     */
+    long getLoadSuccessCount();
+
+    /**
+     * <code>int64 missCount = 29;</code>
+     * @return The missCount.
+     */
+    long getMissCount();
+
+    /**
+     * <code>double missRate = 30;</code>
+     * @return The missRate.
+     */
+    double getMissRate();
+
+    /**
+     * <code>int64 requestCount = 31;</code>
+     * @return The requestCount.
+     */
+    long getRequestCount();
+
+    /**
+     * <code>int64 totalLoadTime = 32;</code>
+     * @return The totalLoadTime.
+     */
+    long getTotalLoadTime();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DSEInfo}
@@ -10753,6 +10825,66 @@ public final class VolumeServiceOuterClass {
             case 160: {
 
               maxAge_ = input.readInt64();
+              break;
+            }
+            case 169: {
+
+              averageLoadPenalty_ = input.readDouble();
+              break;
+            }
+            case 176: {
+
+              evictionCount_ = input.readInt64();
+              break;
+            }
+            case 184: {
+
+              hitCount_ = input.readInt64();
+              break;
+            }
+            case 193: {
+
+              hitRate_ = input.readDouble();
+              break;
+            }
+            case 200: {
+
+              loadCount_ = input.readInt64();
+              break;
+            }
+            case 208: {
+
+              loadExceptionCount_ = input.readInt64();
+              break;
+            }
+            case 217: {
+
+              loadExceptionRate_ = input.readDouble();
+              break;
+            }
+            case 224: {
+
+              loadSuccessCount_ = input.readInt64();
+              break;
+            }
+            case 232: {
+
+              missCount_ = input.readInt64();
+              break;
+            }
+            case 241: {
+
+              missRate_ = input.readDouble();
+              break;
+            }
+            case 248: {
+
+              requestCount_ = input.readInt64();
+              break;
+            }
+            case 256: {
+
+              totalLoadTime_ = input.readInt64();
               break;
             }
             default: {
@@ -11196,6 +11328,138 @@ public final class VolumeServiceOuterClass {
       return maxAge_;
     }
 
+    public static final int AVERAGELOADPENALTY_FIELD_NUMBER = 21;
+    private double averageLoadPenalty_;
+    /**
+     * <code>double averageLoadPenalty = 21;</code>
+     * @return The averageLoadPenalty.
+     */
+    @java.lang.Override
+    public double getAverageLoadPenalty() {
+      return averageLoadPenalty_;
+    }
+
+    public static final int EVICTIONCOUNT_FIELD_NUMBER = 22;
+    private long evictionCount_;
+    /**
+     * <code>int64 evictionCount = 22;</code>
+     * @return The evictionCount.
+     */
+    @java.lang.Override
+    public long getEvictionCount() {
+      return evictionCount_;
+    }
+
+    public static final int HITCOUNT_FIELD_NUMBER = 23;
+    private long hitCount_;
+    /**
+     * <code>int64 hitCount = 23;</code>
+     * @return The hitCount.
+     */
+    @java.lang.Override
+    public long getHitCount() {
+      return hitCount_;
+    }
+
+    public static final int HITRATE_FIELD_NUMBER = 24;
+    private double hitRate_;
+    /**
+     * <code>double hitRate = 24;</code>
+     * @return The hitRate.
+     */
+    @java.lang.Override
+    public double getHitRate() {
+      return hitRate_;
+    }
+
+    public static final int LOADCOUNT_FIELD_NUMBER = 25;
+    private long loadCount_;
+    /**
+     * <code>int64 loadCount = 25;</code>
+     * @return The loadCount.
+     */
+    @java.lang.Override
+    public long getLoadCount() {
+      return loadCount_;
+    }
+
+    public static final int LOADEXCEPTIONCOUNT_FIELD_NUMBER = 26;
+    private long loadExceptionCount_;
+    /**
+     * <code>int64 loadExceptionCount = 26;</code>
+     * @return The loadExceptionCount.
+     */
+    @java.lang.Override
+    public long getLoadExceptionCount() {
+      return loadExceptionCount_;
+    }
+
+    public static final int LOADEXCEPTIONRATE_FIELD_NUMBER = 27;
+    private double loadExceptionRate_;
+    /**
+     * <code>double loadExceptionRate = 27;</code>
+     * @return The loadExceptionRate.
+     */
+    @java.lang.Override
+    public double getLoadExceptionRate() {
+      return loadExceptionRate_;
+    }
+
+    public static final int LOADSUCCESSCOUNT_FIELD_NUMBER = 28;
+    private long loadSuccessCount_;
+    /**
+     * <code>int64 loadSuccessCount = 28;</code>
+     * @return The loadSuccessCount.
+     */
+    @java.lang.Override
+    public long getLoadSuccessCount() {
+      return loadSuccessCount_;
+    }
+
+    public static final int MISSCOUNT_FIELD_NUMBER = 29;
+    private long missCount_;
+    /**
+     * <code>int64 missCount = 29;</code>
+     * @return The missCount.
+     */
+    @java.lang.Override
+    public long getMissCount() {
+      return missCount_;
+    }
+
+    public static final int MISSRATE_FIELD_NUMBER = 30;
+    private double missRate_;
+    /**
+     * <code>double missRate = 30;</code>
+     * @return The missRate.
+     */
+    @java.lang.Override
+    public double getMissRate() {
+      return missRate_;
+    }
+
+    public static final int REQUESTCOUNT_FIELD_NUMBER = 31;
+    private long requestCount_;
+    /**
+     * <code>int64 requestCount = 31;</code>
+     * @return The requestCount.
+     */
+    @java.lang.Override
+    public long getRequestCount() {
+      return requestCount_;
+    }
+
+    public static final int TOTALLOADTIME_FIELD_NUMBER = 32;
+    private long totalLoadTime_;
+    /**
+     * <code>int64 totalLoadTime = 32;</code>
+     * @return The totalLoadTime.
+     */
+    @java.lang.Override
+    public long getTotalLoadTime() {
+      return totalLoadTime_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -11269,6 +11533,42 @@ public final class VolumeServiceOuterClass {
       }
       if (maxAge_ != 0L) {
         output.writeInt64(20, maxAge_);
+      }
+      if (averageLoadPenalty_ != 0D) {
+        output.writeDouble(21, averageLoadPenalty_);
+      }
+      if (evictionCount_ != 0L) {
+        output.writeInt64(22, evictionCount_);
+      }
+      if (hitCount_ != 0L) {
+        output.writeInt64(23, hitCount_);
+      }
+      if (hitRate_ != 0D) {
+        output.writeDouble(24, hitRate_);
+      }
+      if (loadCount_ != 0L) {
+        output.writeInt64(25, loadCount_);
+      }
+      if (loadExceptionCount_ != 0L) {
+        output.writeInt64(26, loadExceptionCount_);
+      }
+      if (loadExceptionRate_ != 0D) {
+        output.writeDouble(27, loadExceptionRate_);
+      }
+      if (loadSuccessCount_ != 0L) {
+        output.writeInt64(28, loadSuccessCount_);
+      }
+      if (missCount_ != 0L) {
+        output.writeInt64(29, missCount_);
+      }
+      if (missRate_ != 0D) {
+        output.writeDouble(30, missRate_);
+      }
+      if (requestCount_ != 0L) {
+        output.writeInt64(31, requestCount_);
+      }
+      if (totalLoadTime_ != 0L) {
+        output.writeInt64(32, totalLoadTime_);
       }
       unknownFields.writeTo(output);
     }
@@ -11352,6 +11652,54 @@ public final class VolumeServiceOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(20, maxAge_);
       }
+      if (averageLoadPenalty_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(21, averageLoadPenalty_);
+      }
+      if (evictionCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(22, evictionCount_);
+      }
+      if (hitCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(23, hitCount_);
+      }
+      if (hitRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(24, hitRate_);
+      }
+      if (loadCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(25, loadCount_);
+      }
+      if (loadExceptionCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(26, loadExceptionCount_);
+      }
+      if (loadExceptionRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(27, loadExceptionRate_);
+      }
+      if (loadSuccessCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(28, loadSuccessCount_);
+      }
+      if (missCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(29, missCount_);
+      }
+      if (missRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(30, missRate_);
+      }
+      if (requestCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(31, requestCount_);
+      }
+      if (totalLoadTime_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(32, totalLoadTime_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -11407,6 +11755,34 @@ public final class VolumeServiceOuterClass {
           .equals(other.getBucketName())) return false;
       if (getMaxAge()
           != other.getMaxAge()) return false;
+      if (java.lang.Double.doubleToLongBits(getAverageLoadPenalty())
+          != java.lang.Double.doubleToLongBits(
+              other.getAverageLoadPenalty())) return false;
+      if (getEvictionCount()
+          != other.getEvictionCount()) return false;
+      if (getHitCount()
+          != other.getHitCount()) return false;
+      if (java.lang.Double.doubleToLongBits(getHitRate())
+          != java.lang.Double.doubleToLongBits(
+              other.getHitRate())) return false;
+      if (getLoadCount()
+          != other.getLoadCount()) return false;
+      if (getLoadExceptionCount()
+          != other.getLoadExceptionCount()) return false;
+      if (java.lang.Double.doubleToLongBits(getLoadExceptionRate())
+          != java.lang.Double.doubleToLongBits(
+              other.getLoadExceptionRate())) return false;
+      if (getLoadSuccessCount()
+          != other.getLoadSuccessCount()) return false;
+      if (getMissCount()
+          != other.getMissCount()) return false;
+      if (java.lang.Double.doubleToLongBits(getMissRate())
+          != java.lang.Double.doubleToLongBits(
+              other.getMissRate())) return false;
+      if (getRequestCount()
+          != other.getRequestCount()) return false;
+      if (getTotalLoadTime()
+          != other.getTotalLoadTime()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -11468,6 +11844,42 @@ public final class VolumeServiceOuterClass {
       hash = (37 * hash) + MAXAGE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getMaxAge());
+      hash = (37 * hash) + AVERAGELOADPENALTY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getAverageLoadPenalty()));
+      hash = (37 * hash) + EVICTIONCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getEvictionCount());
+      hash = (37 * hash) + HITCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getHitCount());
+      hash = (37 * hash) + HITRATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getHitRate()));
+      hash = (37 * hash) + LOADCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLoadCount());
+      hash = (37 * hash) + LOADEXCEPTIONCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLoadExceptionCount());
+      hash = (37 * hash) + LOADEXCEPTIONRATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getLoadExceptionRate()));
+      hash = (37 * hash) + LOADSUCCESSCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLoadSuccessCount());
+      hash = (37 * hash) + MISSCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMissCount());
+      hash = (37 * hash) + MISSRATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMissRate()));
+      hash = (37 * hash) + REQUESTCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getRequestCount());
+      hash = (37 * hash) + TOTALLOADTIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTotalLoadTime());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -11641,6 +12053,30 @@ public final class VolumeServiceOuterClass {
 
         maxAge_ = 0L;
 
+        averageLoadPenalty_ = 0D;
+
+        evictionCount_ = 0L;
+
+        hitCount_ = 0L;
+
+        hitRate_ = 0D;
+
+        loadCount_ = 0L;
+
+        loadExceptionCount_ = 0L;
+
+        loadExceptionRate_ = 0D;
+
+        loadSuccessCount_ = 0L;
+
+        missCount_ = 0L;
+
+        missRate_ = 0D;
+
+        requestCount_ = 0L;
+
+        totalLoadTime_ = 0L;
+
         return this;
       }
 
@@ -11687,6 +12123,18 @@ public final class VolumeServiceOuterClass {
         result.cloudSecretKey_ = cloudSecretKey_;
         result.bucketName_ = bucketName_;
         result.maxAge_ = maxAge_;
+        result.averageLoadPenalty_ = averageLoadPenalty_;
+        result.evictionCount_ = evictionCount_;
+        result.hitCount_ = hitCount_;
+        result.hitRate_ = hitRate_;
+        result.loadCount_ = loadCount_;
+        result.loadExceptionCount_ = loadExceptionCount_;
+        result.loadExceptionRate_ = loadExceptionRate_;
+        result.loadSuccessCount_ = loadSuccessCount_;
+        result.missCount_ = missCount_;
+        result.missRate_ = missRate_;
+        result.requestCount_ = requestCount_;
+        result.totalLoadTime_ = totalLoadTime_;
         onBuilt();
         return result;
       }
@@ -11801,6 +12249,42 @@ public final class VolumeServiceOuterClass {
         }
         if (other.getMaxAge() != 0L) {
           setMaxAge(other.getMaxAge());
+        }
+        if (other.getAverageLoadPenalty() != 0D) {
+          setAverageLoadPenalty(other.getAverageLoadPenalty());
+        }
+        if (other.getEvictionCount() != 0L) {
+          setEvictionCount(other.getEvictionCount());
+        }
+        if (other.getHitCount() != 0L) {
+          setHitCount(other.getHitCount());
+        }
+        if (other.getHitRate() != 0D) {
+          setHitRate(other.getHitRate());
+        }
+        if (other.getLoadCount() != 0L) {
+          setLoadCount(other.getLoadCount());
+        }
+        if (other.getLoadExceptionCount() != 0L) {
+          setLoadExceptionCount(other.getLoadExceptionCount());
+        }
+        if (other.getLoadExceptionRate() != 0D) {
+          setLoadExceptionRate(other.getLoadExceptionRate());
+        }
+        if (other.getLoadSuccessCount() != 0L) {
+          setLoadSuccessCount(other.getLoadSuccessCount());
+        }
+        if (other.getMissCount() != 0L) {
+          setMissCount(other.getMissCount());
+        }
+        if (other.getMissRate() != 0D) {
+          setMissRate(other.getMissRate());
+        }
+        if (other.getRequestCount() != 0L) {
+          setRequestCount(other.getRequestCount());
+        }
+        if (other.getTotalLoadTime() != 0L) {
+          setTotalLoadTime(other.getTotalLoadTime());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -12762,6 +13246,378 @@ public final class VolumeServiceOuterClass {
       public Builder clearMaxAge() {
         
         maxAge_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private double averageLoadPenalty_ ;
+      /**
+       * <code>double averageLoadPenalty = 21;</code>
+       * @return The averageLoadPenalty.
+       */
+      @java.lang.Override
+      public double getAverageLoadPenalty() {
+        return averageLoadPenalty_;
+      }
+      /**
+       * <code>double averageLoadPenalty = 21;</code>
+       * @param value The averageLoadPenalty to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAverageLoadPenalty(double value) {
+        
+        averageLoadPenalty_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double averageLoadPenalty = 21;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAverageLoadPenalty() {
+        
+        averageLoadPenalty_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private long evictionCount_ ;
+      /**
+       * <code>int64 evictionCount = 22;</code>
+       * @return The evictionCount.
+       */
+      @java.lang.Override
+      public long getEvictionCount() {
+        return evictionCount_;
+      }
+      /**
+       * <code>int64 evictionCount = 22;</code>
+       * @param value The evictionCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEvictionCount(long value) {
+        
+        evictionCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 evictionCount = 22;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEvictionCount() {
+        
+        evictionCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long hitCount_ ;
+      /**
+       * <code>int64 hitCount = 23;</code>
+       * @return The hitCount.
+       */
+      @java.lang.Override
+      public long getHitCount() {
+        return hitCount_;
+      }
+      /**
+       * <code>int64 hitCount = 23;</code>
+       * @param value The hitCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHitCount(long value) {
+        
+        hitCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 hitCount = 23;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHitCount() {
+        
+        hitCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private double hitRate_ ;
+      /**
+       * <code>double hitRate = 24;</code>
+       * @return The hitRate.
+       */
+      @java.lang.Override
+      public double getHitRate() {
+        return hitRate_;
+      }
+      /**
+       * <code>double hitRate = 24;</code>
+       * @param value The hitRate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHitRate(double value) {
+        
+        hitRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double hitRate = 24;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHitRate() {
+        
+        hitRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private long loadCount_ ;
+      /**
+       * <code>int64 loadCount = 25;</code>
+       * @return The loadCount.
+       */
+      @java.lang.Override
+      public long getLoadCount() {
+        return loadCount_;
+      }
+      /**
+       * <code>int64 loadCount = 25;</code>
+       * @param value The loadCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLoadCount(long value) {
+        
+        loadCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 loadCount = 25;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLoadCount() {
+        
+        loadCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long loadExceptionCount_ ;
+      /**
+       * <code>int64 loadExceptionCount = 26;</code>
+       * @return The loadExceptionCount.
+       */
+      @java.lang.Override
+      public long getLoadExceptionCount() {
+        return loadExceptionCount_;
+      }
+      /**
+       * <code>int64 loadExceptionCount = 26;</code>
+       * @param value The loadExceptionCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLoadExceptionCount(long value) {
+        
+        loadExceptionCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 loadExceptionCount = 26;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLoadExceptionCount() {
+        
+        loadExceptionCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private double loadExceptionRate_ ;
+      /**
+       * <code>double loadExceptionRate = 27;</code>
+       * @return The loadExceptionRate.
+       */
+      @java.lang.Override
+      public double getLoadExceptionRate() {
+        return loadExceptionRate_;
+      }
+      /**
+       * <code>double loadExceptionRate = 27;</code>
+       * @param value The loadExceptionRate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLoadExceptionRate(double value) {
+        
+        loadExceptionRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double loadExceptionRate = 27;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLoadExceptionRate() {
+        
+        loadExceptionRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private long loadSuccessCount_ ;
+      /**
+       * <code>int64 loadSuccessCount = 28;</code>
+       * @return The loadSuccessCount.
+       */
+      @java.lang.Override
+      public long getLoadSuccessCount() {
+        return loadSuccessCount_;
+      }
+      /**
+       * <code>int64 loadSuccessCount = 28;</code>
+       * @param value The loadSuccessCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLoadSuccessCount(long value) {
+        
+        loadSuccessCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 loadSuccessCount = 28;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLoadSuccessCount() {
+        
+        loadSuccessCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long missCount_ ;
+      /**
+       * <code>int64 missCount = 29;</code>
+       * @return The missCount.
+       */
+      @java.lang.Override
+      public long getMissCount() {
+        return missCount_;
+      }
+      /**
+       * <code>int64 missCount = 29;</code>
+       * @param value The missCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMissCount(long value) {
+        
+        missCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 missCount = 29;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMissCount() {
+        
+        missCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private double missRate_ ;
+      /**
+       * <code>double missRate = 30;</code>
+       * @return The missRate.
+       */
+      @java.lang.Override
+      public double getMissRate() {
+        return missRate_;
+      }
+      /**
+       * <code>double missRate = 30;</code>
+       * @param value The missRate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMissRate(double value) {
+        
+        missRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double missRate = 30;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMissRate() {
+        
+        missRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private long requestCount_ ;
+      /**
+       * <code>int64 requestCount = 31;</code>
+       * @return The requestCount.
+       */
+      @java.lang.Override
+      public long getRequestCount() {
+        return requestCount_;
+      }
+      /**
+       * <code>int64 requestCount = 31;</code>
+       * @param value The requestCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRequestCount(long value) {
+        
+        requestCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 requestCount = 31;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRequestCount() {
+        
+        requestCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long totalLoadTime_ ;
+      /**
+       * <code>int64 totalLoadTime = 32;</code>
+       * @return The totalLoadTime.
+       */
+      @java.lang.Override
+      public long getTotalLoadTime() {
+        return totalLoadTime_;
+      }
+      /**
+       * <code>int64 totalLoadTime = 32;</code>
+       * @param value The totalLoadTime to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTotalLoadTime(long value) {
+        
+        totalLoadTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 totalLoadTime = 32;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTotalLoadTime() {
+        
+        totalLoadTime_ = 0L;
         onChanged();
         return this;
       }
@@ -29497,7 +30353,7 @@ public final class VolumeServiceOuterClass {
       "Codes\"\204\001\n\022SystemInfoResponse\022,\n\004info\030\001 \001" +
       "(\0132\036.org.opendedup.grpc.SystemInfo\022\r\n\005er" +
       "ror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\"\245\003\n\007DSEInfo\022\017\n\007maxS" +
+      "edup.grpc.errorCodes\"\261\005\n\007DSEInfo\022\017\n\007maxS" +
       "ize\030\001 \001(\003\022\023\n\013currentSize\030\002 \001(\003\022\017\n\007entrie" +
       "s\030\003 \001(\003\022\026\n\016compressedSize\030\004 \001(\003\022\022\n\nfreeB" +
       "locks\030\005 \001(\003\022\020\n\010pageSize\030\006 \001(\003\022\023\n\013storage" +
@@ -29508,99 +30364,106 @@ public final class VolumeServiceOuterClass {
       "ncryptionKey\030\017 \001(\t\022\024\n\014encryptionIV\030\020 \001(\t" +
       "\022\026\n\016cloudAccessKey\030\021 \001(\t\022\026\n\016cloudSecretK" +
       "ey\030\022 \001(\t\022\022\n\nbucketName\030\023 \001(\t\022\016\n\006maxAge\030\024" +
-      " \001(\003\"\037\n\nDSERequest\022\021\n\tpvolumeID\030\001 \001(\003\"z\n" +
-      "\013DSEResponse\022)\n\004info\030\001 \001(\0132\033.org.opended" +
-      "up.grpc.DSEInfo\022\r\n\005error\030\002 \001(\t\0221\n\terrorC" +
-      "ode\030\003 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\"N\n\025AuthenticationRequest\022\020\n\010username\030\001" +
-      " \001(\t\022\020\n\010password\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(" +
-      "\003\"i\n\026AuthenticationResponse\022\r\n\005token\030\001 \001" +
-      "(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.o" +
-      "rg.opendedup.grpc.errorCodes\"\353\001\n\030Message" +
-      "QueueInfoResponse\022\020\n\010hostName\030\001 \001(\t\022C\n\006m" +
-      "qType\030\002 \001(\01623.org.opendedup.grpc.Message" +
-      "QueueInfoResponse.MQType\022\014\n\004port\030\003 \001(\005\022\r" +
-      "\n\005topic\030\004 \001(\t\022\020\n\010authInfo\030\005 \001(\t\022\024\n\014subSc" +
-      "ription\030\006 \001(\t\022\017\n\007project\030\007 \001(\t\"\"\n\006MQType" +
-      "\022\014\n\010RabbitMQ\020\000\022\n\n\006PubSub\020\001\"7\n\021CleanStore" +
-      "Request\022\017\n\007compact\030\001 \001(\010\022\021\n\tpvolumeID\030\002 " +
-      "\001(\003\"g\n\022CleanStoreResponse\022\017\n\007eventID\030\001 \001" +
-      "(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.o" +
-      "rg.opendedup.grpc.errorCodes\";\n\023SetCache" +
-      "SizeRequest\022\021\n\tcacheSize\030\001 \001(\003\022\021\n\tpvolum" +
-      "eID\030\002 \001(\003\"i\n\024SetCacheSizeResponse\022\017\n\007eve" +
-      "ntID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003" +
-      " \001(\0162\036.org.opendedup.grpc.errorCodes\"?\n\030" +
-      "DeleteCloudVolumeRequest\022\020\n\010rmvolume\030\001 \001" +
-      "(\003\022\021\n\tpvolumeID\030\002 \001(\003\"n\n\031DeleteCloudVolu" +
-      "meResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001" +
-      "(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.gr" +
-      "pc.errorCodes\";\n\030SetVolumeCapacityReques" +
-      "t\022\014\n\004size\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"]\n\031Se" +
-      "tVolumeCapacityResponse\022\r\n\005error\030\001 \001(\t\0221" +
-      "\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc.e" +
-      "rrorCodes\"9\n\022SetPasswordRequest\022\020\n\010passw" +
-      "ord\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"W\n\023SetPassw" +
-      "ordResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
-      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"9\n" +
-      "\014SpeedRequest\022\026\n\016requestedSpeed\030\001 \001(\005\022\021\n" +
-      "\tpvolumeID\030\002 \001(\003\"b\n\rSpeedResponse\022\017\n\007eve" +
-      "ntID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003" +
-      " \001(\0162\036.org.opendedup.grpc.errorCodes\"9\n\022" +
-      "SyncFromVolRequest\022\020\n\010volumeid\030\001 \001(\003\022\021\n\t" +
-      "pvolumeID\030\002 \001(\003\"h\n\023SyncFromVolResponse\022\017" +
+      " \001(\003\022\032\n\022averageLoadPenalty\030\025 \001(\001\022\025\n\revic" +
+      "tionCount\030\026 \001(\003\022\020\n\010hitCount\030\027 \001(\003\022\017\n\007hit" +
+      "Rate\030\030 \001(\001\022\021\n\tloadCount\030\031 \001(\003\022\032\n\022loadExc" +
+      "eptionCount\030\032 \001(\003\022\031\n\021loadExceptionRate\030\033" +
+      " \001(\001\022\030\n\020loadSuccessCount\030\034 \001(\003\022\021\n\tmissCo" +
+      "unt\030\035 \001(\003\022\020\n\010missRate\030\036 \001(\001\022\024\n\014requestCo" +
+      "unt\030\037 \001(\003\022\025\n\rtotalLoadTime\030  \001(\003\"\037\n\nDSER" +
+      "equest\022\021\n\tpvolumeID\030\001 \001(\003\"z\n\013DSEResponse" +
+      "\022)\n\004info\030\001 \001(\0132\033.org.opendedup.grpc.DSEI" +
+      "nfo\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\"N\n\025Authent" +
+      "icationRequest\022\020\n\010username\030\001 \001(\t\022\020\n\010pass" +
+      "word\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\"i\n\026Authent" +
+      "icationResponse\022\r\n\005token\030\001 \001(\t\022\r\n\005error\030" +
+      "\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup" +
+      ".grpc.errorCodes\"\353\001\n\030MessageQueueInfoRes" +
+      "ponse\022\020\n\010hostName\030\001 \001(\t\022C\n\006mqType\030\002 \001(\0162" +
+      "3.org.opendedup.grpc.MessageQueueInfoRes" +
+      "ponse.MQType\022\014\n\004port\030\003 \001(\005\022\r\n\005topic\030\004 \001(" +
+      "\t\022\020\n\010authInfo\030\005 \001(\t\022\024\n\014subScription\030\006 \001(" +
+      "\t\022\017\n\007project\030\007 \001(\t\"\"\n\006MQType\022\014\n\010RabbitMQ" +
+      "\020\000\022\n\n\006PubSub\020\001\"7\n\021CleanStoreRequest\022\017\n\007c" +
+      "ompact\030\001 \001(\010\022\021\n\tpvolumeID\030\002 \001(\003\"g\n\022Clean" +
+      "StoreResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030" +
+      "\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup" +
+      ".grpc.errorCodes\";\n\023SetCacheSizeRequest\022" +
+      "\021\n\tcacheSize\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"i\n" +
+      "\024SetCacheSizeResponse\022\017\n\007eventID\030\001 \001(\t\022\r" +
+      "\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.o" +
+      "pendedup.grpc.errorCodes\"?\n\030DeleteCloudV" +
+      "olumeRequest\022\020\n\010rmvolume\030\001 \001(\003\022\021\n\tpvolum" +
+      "eID\030\002 \001(\003\"n\n\031DeleteCloudVolumeResponse\022\017" +
       "\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorC" +
       "ode\030\003 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\"#\n\016SyncVolRequest\022\021\n\tpvolumeID\030\001 \001(\003\"d" +
-      "\n\017SyncVolResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005er" +
-      "ror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\"5\n\020SetMaxAgeRequest" +
-      "\022\016\n\006maxAge\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"U\n\021S" +
-      "etMaxAgeResponse\022\r\n\005error\030\001 \001(\t\0221\n\terror" +
-      "Code\030\002 \001(\0162\036.org.opendedup.grpc.errorCod" +
-      "es2\367\014\n\rVolumeService\022i\n\020AuthenticateUser" +
-      "\022).org.opendedup.grpc.AuthenticationRequ" +
-      "est\032*.org.opendedup.grpc.AuthenticationR" +
-      "esponse\022^\n\rGetVolumeInfo\022%.org.opendedup" +
-      ".grpc.VolumeInfoRequest\032&.org.opendedup." +
-      "grpc.VolumeInfoResponse\022[\n\016ShutdownVolum" +
-      "e\022#.org.opendedup.grpc.ShutdownRequest\032$" +
-      ".org.opendedup.grpc.ShutdownResponse\022[\n\n" +
-      "CleanStore\022%.org.opendedup.grpc.CleanSto" +
-      "reRequest\032&.org.opendedup.grpc.CleanStor" +
-      "eResponse\022p\n\021DeleteCloudVolume\022,.org.ope" +
-      "ndedup.grpc.DeleteCloudVolumeRequest\032-.o" +
-      "rg.opendedup.grpc.DeleteCloudVolumeRespo" +
-      "nse\022J\n\007DSEInfo\022\036.org.opendedup.grpc.DSER" +
-      "equest\032\037.org.opendedup.grpc.DSEResponse\022" +
-      "[\n\nSystemInfo\022%.org.opendedup.grpc.Syste" +
-      "mInfoRequest\032&.org.opendedup.grpc.System" +
-      "InfoResponse\022p\n\021SetVolumeCapacity\022,.org." +
-      "opendedup.grpc.SetVolumeCapacityRequest\032" +
-      "-.org.opendedup.grpc.SetVolumeCapacityRe" +
-      "sponse\022h\n\023GetConnectedVolumes\022\'.org.open" +
-      "dedup.grpc.CloudVolumesRequest\032(.org.ope" +
-      "ndedup.grpc.CloudVolumesResponse\022^\n\rGetG" +
-      "CSchedule\022%.org.opendedup.grpc.GCSchedul" +
-      "eRequest\032&.org.opendedup.grpc.GCSchedule" +
-      "Response\022a\n\014SetCacheSize\022\'.org.opendedup" +
-      ".grpc.SetCacheSizeRequest\032(.org.opendedu" +
-      "p.grpc.SetCacheSizeResponse\022^\n\013SetPasswo" +
-      "rd\022&.org.opendedup.grpc.SetPasswordReque" +
-      "st\032\'.org.opendedup.grpc.SetPasswordRespo" +
-      "nse\022S\n\014SetReadSpeed\022 .org.opendedup.grpc" +
-      ".SpeedRequest\032!.org.opendedup.grpc.Speed" +
-      "Response\022T\n\rSetWriteSpeed\022 .org.opendedu" +
-      "p.grpc.SpeedRequest\032!.org.opendedup.grpc" +
-      ".SpeedResponse\022f\n\023SyncFromCloudVolume\022&." +
-      "org.opendedup.grpc.SyncFromVolRequest\032\'." +
-      "org.opendedup.grpc.SyncFromVolResponse\022Z" +
-      "\n\017SyncCloudVolume\022\".org.opendedup.grpc.S" +
-      "yncVolRequest\032#.org.opendedup.grpc.SyncV" +
-      "olResponse\022X\n\tSetMaxAge\022$.org.opendedup." +
-      "grpc.SetMaxAgeRequest\032%.org.opendedup.gr" +
-      "pc.SetMaxAgeResponseB0Z.github.com/opend" +
-      "edup/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "s\";\n\030SetVolumeCapacityRequest\022\014\n\004size\030\001 " +
+      "\001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"]\n\031SetVolumeCapac" +
+      "ityResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
+      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"9\n" +
+      "\022SetPasswordRequest\022\020\n\010password\030\001 \001(\t\022\021\n" +
+      "\tpvolumeID\030\002 \001(\003\"W\n\023SetPasswordResponse\022" +
+      "\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org." +
+      "opendedup.grpc.errorCodes\"9\n\014SpeedReques" +
+      "t\022\026\n\016requestedSpeed\030\001 \001(\005\022\021\n\tpvolumeID\030\002" +
+      " \001(\003\"b\n\rSpeedResponse\022\017\n\007eventID\030\001 \001(\t\022\r" +
+      "\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.o" +
+      "pendedup.grpc.errorCodes\"9\n\022SyncFromVolR" +
+      "equest\022\020\n\010volumeid\030\001 \001(\003\022\021\n\tpvolumeID\030\002 " +
+      "\001(\003\"h\n\023SyncFromVolResponse\022\017\n\007eventID\030\001 " +
+      "\001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\"#\n\016SyncVol" +
+      "Request\022\021\n\tpvolumeID\030\001 \001(\003\"d\n\017SyncVolRes" +
+      "ponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n" +
+      "\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc.er" +
+      "rorCodes\"5\n\020SetMaxAgeRequest\022\016\n\006maxAge\030\001" +
+      " \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"U\n\021SetMaxAgeResp" +
+      "onse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036" +
+      ".org.opendedup.grpc.errorCodes2\367\014\n\rVolum" +
+      "eService\022i\n\020AuthenticateUser\022).org.opend" +
+      "edup.grpc.AuthenticationRequest\032*.org.op" +
+      "endedup.grpc.AuthenticationResponse\022^\n\rG" +
+      "etVolumeInfo\022%.org.opendedup.grpc.Volume" +
+      "InfoRequest\032&.org.opendedup.grpc.VolumeI" +
+      "nfoResponse\022[\n\016ShutdownVolume\022#.org.open" +
+      "dedup.grpc.ShutdownRequest\032$.org.opended" +
+      "up.grpc.ShutdownResponse\022[\n\nCleanStore\022%" +
+      ".org.opendedup.grpc.CleanStoreRequest\032&." +
+      "org.opendedup.grpc.CleanStoreResponse\022p\n" +
+      "\021DeleteCloudVolume\022,.org.opendedup.grpc." +
+      "DeleteCloudVolumeRequest\032-.org.opendedup" +
+      ".grpc.DeleteCloudVolumeResponse\022J\n\007DSEIn" +
+      "fo\022\036.org.opendedup.grpc.DSERequest\032\037.org" +
+      ".opendedup.grpc.DSEResponse\022[\n\nSystemInf" +
+      "o\022%.org.opendedup.grpc.SystemInfoRequest" +
+      "\032&.org.opendedup.grpc.SystemInfoResponse" +
+      "\022p\n\021SetVolumeCapacity\022,.org.opendedup.gr" +
+      "pc.SetVolumeCapacityRequest\032-.org.opende" +
+      "dup.grpc.SetVolumeCapacityResponse\022h\n\023Ge" +
+      "tConnectedVolumes\022\'.org.opendedup.grpc.C" +
+      "loudVolumesRequest\032(.org.opendedup.grpc." +
+      "CloudVolumesResponse\022^\n\rGetGCSchedule\022%." +
+      "org.opendedup.grpc.GCScheduleRequest\032&.o" +
+      "rg.opendedup.grpc.GCScheduleResponse\022a\n\014" +
+      "SetCacheSize\022\'.org.opendedup.grpc.SetCac" +
+      "heSizeRequest\032(.org.opendedup.grpc.SetCa" +
+      "cheSizeResponse\022^\n\013SetPassword\022&.org.ope" +
+      "ndedup.grpc.SetPasswordRequest\032\'.org.ope" +
+      "ndedup.grpc.SetPasswordResponse\022S\n\014SetRe" +
+      "adSpeed\022 .org.opendedup.grpc.SpeedReques" +
+      "t\032!.org.opendedup.grpc.SpeedResponse\022T\n\r" +
+      "SetWriteSpeed\022 .org.opendedup.grpc.Speed" +
+      "Request\032!.org.opendedup.grpc.SpeedRespon" +
+      "se\022f\n\023SyncFromCloudVolume\022&.org.opendedu" +
+      "p.grpc.SyncFromVolRequest\032\'.org.opendedu" +
+      "p.grpc.SyncFromVolResponse\022Z\n\017SyncCloudV" +
+      "olume\022\".org.opendedup.grpc.SyncVolReques" +
+      "t\032#.org.opendedup.grpc.SyncVolResponse\022X" +
+      "\n\tSetMaxAge\022$.org.opendedup.grpc.SetMaxA" +
+      "geRequest\032%.org.opendedup.grpc.SetMaxAge" +
+      "ResponseB0Z.github.com/opendedup/sdfs-cl" +
+      "ient-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -29673,7 +30536,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_DSEInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSEInfo_descriptor,
-        new java.lang.String[] { "MaxSize", "CurrentSize", "Entries", "CompressedSize", "FreeBlocks", "PageSize", "StorageType", "ListenPort", "ListenHost", "ReadSpeed", "WriteSpeed", "CacheSize", "MaxCacheSize", "ListenEncrypted", "EncryptionKey", "EncryptionIV", "CloudAccessKey", "CloudSecretKey", "BucketName", "MaxAge", });
+        new java.lang.String[] { "MaxSize", "CurrentSize", "Entries", "CompressedSize", "FreeBlocks", "PageSize", "StorageType", "ListenPort", "ListenHost", "ReadSpeed", "WriteSpeed", "CacheSize", "MaxCacheSize", "ListenEncrypted", "EncryptionKey", "EncryptionIV", "CloudAccessKey", "CloudSecretKey", "BucketName", "MaxAge", "AverageLoadPenalty", "EvictionCount", "HitCount", "HitRate", "LoadCount", "LoadExceptionCount", "LoadExceptionRate", "LoadSuccessCount", "MissCount", "MissRate", "RequestCount", "TotalLoadTime", });
     internal_static_org_opendedup_grpc_DSERequest_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_org_opendedup_grpc_DSERequest_fieldAccessorTable = new

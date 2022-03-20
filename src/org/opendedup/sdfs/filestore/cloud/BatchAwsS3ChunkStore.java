@@ -1323,6 +1323,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			try {
 				if (sobj != null) {
+					sobj.getObjectContent().abort();
 					sobj.close();
 				}
 			} catch (Exception e) {
@@ -1376,7 +1377,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (this.simpleS3) {
 
 				FileOutputStream out = null;
-				InputStream in = null;
+				S3ObjectInputStream in = null;
 				try {
 
 					out = new FileOutputStream(f);
@@ -1389,6 +1390,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					f.delete();
 					throw new IOException(e);
 				} finally {
+					in.abort();
 					IOUtils.closeQuietly(out);
 					IOUtils.closeQuietly(in);
 				}
@@ -1487,6 +1489,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			try {
 				if (sobj != null) {
+					sobj.getObjectContent().abort();
 					sobj.close();
 				}
 			} catch (Exception e) {
@@ -1871,6 +1874,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			if (sobj != null)
 				try {
+					sobj.getObjectContent().close();
 					sobj.close();
 				} catch (Exception e) {
 				}
@@ -2139,11 +2143,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			throws AmazonServiceException, AmazonClientException, InterruptedException, IOException {
 		if (this.gcsSigner) {
 			S3Object obj = s3Service.getObject(this.name, keyName);
+			S3ObjectInputStream is =obj.getObjectContent();
 			BufferedInputStream in = new BufferedInputStream(obj.getObjectContent());
 			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
 			IOUtils.copy(in, out);
 			out.flush();
 			out.close();
+			is.abort();
 			in.close();
 			obj.close();
 		} else {
@@ -2191,6 +2197,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				IOUtils.copy(in, out);
 				out.flush();
 				out.close();
+				obj.getObjectContent().abort();
 				in.close();
 				mp = this.getUserMetaData(pp + "/" + haName);
 				SDFSLogger.getLog().debug("mp sz=" + mp.size());
@@ -2491,6 +2498,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			// this.s3clientLock.readLock().unlock();
 			try {
+				kobj.getObjectContent().abort();
 				kobj.close();
 			} catch (Exception e) {
 			}

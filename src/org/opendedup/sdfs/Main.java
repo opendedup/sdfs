@@ -160,6 +160,8 @@ public class Main {
 	public static boolean runConsistancyCheckPeriodically = false;
 	public static String sdfsVolName = "";
 	public static String retrievalTier = "";
+	public static long CLEANUP_THREAD_INTERVAL=30*1000;
+	public static boolean PRINT_CACHESTATS=true;
 	/**
 	 * The location where the model of the virtual file structure will be held.
 	 * The virtual file structure maps what will be presented as the filesystem

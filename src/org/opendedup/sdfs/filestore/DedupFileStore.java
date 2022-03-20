@@ -7,6 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.google.common.cache.CacheStats;
+
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
@@ -16,13 +18,13 @@ import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
 /**
- * 
+ *
  * @author Sam Silverberg
- * 
+ *
  *         DedupFileStore is a static class used to store, return, and clone
  *         dedup file maps. All dedup files should be accessed through this
  *         class exclusively.
- * 
+ *
  */
 public class DedupFileStore {
 
@@ -34,28 +36,34 @@ public class DedupFileStore {
 	 * maxOpenFiles parameter
 	 */
 	private static ConcurrentHashMap<String, SparseDedupFile> openFile = new ConcurrentHashMap<String, SparseDedupFile>();
-	
+	private static CleanupThread th = null;
+
 	/*
-	private static LoadingCache<ByteLongArrayWrapper, AtomicLong> keyLookup = CacheBuilder.newBuilder()
-			.maximumSize(100).concurrencyLevel(64)
-			.removalListener(new RemovalListener<ByteLongArrayWrapper, AtomicLong>() {
-				public void onRemoval(RemovalNotification<ByteLongArrayWrapper, AtomicLong> removal) {
-					ByteLongArrayWrapper bk = removal.getKey();
-					try {
-						if(!HCServiceProxy.claimKey(bk.getData(), bk.getVal(),removal.getValue().get())) {
-							SDFSLogger.getLog().debug("Unable to insert " +" hash=" + StringUtils.getHexString(bk.getData()) + " lh=" + bk.getVal());
-						}
-					} catch (Exception e) {
-						SDFSLogger.getLog().error("unable to add reference",e);
-					}
-					
-				}
-			}).build(new CacheLoader<ByteLongArrayWrapper, AtomicLong>() {
-				public AtomicLong load(ByteLongArrayWrapper key) throws KeyNotFoundException {
-					return new AtomicLong(0);
-				}
-			});
-*/
+	 * private static LoadingCache<ByteLongArrayWrapper, AtomicLong> keyLookup =
+	 * CacheBuilder.newBuilder()
+	 * .maximumSize(100).concurrencyLevel(64)
+	 * .removalListener(new RemovalListener<ByteLongArrayWrapper, AtomicLong>() {
+	 * public void onRemoval(RemovalNotification<ByteLongArrayWrapper, AtomicLong>
+	 * removal) {
+	 * ByteLongArrayWrapper bk = removal.getKey();
+	 * try {
+	 * if(!HCServiceProxy.claimKey(bk.getData(),
+	 * bk.getVal(),removal.getValue().get())) {
+	 * SDFSLogger.getLog().debug("Unable to insert " +" hash=" +
+	 * StringUtils.getHexString(bk.getData()) + " lh=" + bk.getVal());
+	 * }
+	 * } catch (Exception e) {
+	 * SDFSLogger.getLog().error("unable to add reference",e);
+	 * }
+	 *
+	 * }
+	 * }).build(new CacheLoader<ByteLongArrayWrapper, AtomicLong>() {
+	 * public AtomicLong load(ByteLongArrayWrapper key) throws KeyNotFoundException
+	 * {
+	 * return new AtomicLong(0);
+	 * }
+	 * });
+	 */
 	/*
 	 * Spawns to open file monitor. The openFile monitor is used to evict open
 	 * files from the openFile hashmap.
@@ -63,40 +71,44 @@ public class DedupFileStore {
 	static {
 		if (Main.maxInactiveFileTime > 0 && !Main.blockDev) {
 			openFileMonitor = new OpenFileMonitor(10000, Main.maxInactiveFileTime);
-		} 
+		}
+		if (Main.CLEANUP_THREAD_INTERVAL > 0) {
+			th = new CleanupThread();
+		}
 
 	}
 
 	public static void init() {
 
 	}
-	
-	//private static boolean gcRunning;
+
+	// private static boolean gcRunning;
 	static ReentrantReadWriteLock gcLock = new ReentrantReadWriteLock();
+
 	public static void gcRunning(boolean running) {
 		/*
-		gcLock.writeLock().lock();
-		try{
-			
-		if(running) {
-			gcRunning = true;
-			keyLookup.invalidateAll();
-		}
-		
-		else
-			gcRunning = false;
-		}finally {
-			gcLock.writeLock().unlock();
-		}
-		*/
-		
+		 * gcLock.writeLock().lock();
+		 * try{
+		 *
+		 * if(running) {
+		 * gcRunning = true;
+		 * keyLookup.invalidateAll();
+		 * }
+		 *
+		 * else
+		 * gcRunning = false;
+		 * }finally {
+		 * gcLock.writeLock().unlock();
+		 * }
+		 */
+
 	}
 
 	/**
-	 * 
+	 *
 	 * @param mf
-	 *            the metadata dedup file to get the DedupFile for. If no dedup
-	 *            file map exists, one is created.
+	 *           the metadata dedup file to get the DedupFile for. If no dedup
+	 *           file map exists, one is created.
 	 * @return the dedup file map associated with the MetaDataDedupFile
 	 * @throws IOException
 	 */
@@ -113,28 +125,29 @@ public class DedupFileStore {
 		}
 	}
 
-	public static long addRef(byte[] entry, long val,int ct) throws IOException {
+	public static long addRef(byte[] entry, long val, int ct) throws IOException {
 		if (val == 1 || val == 0)
 			return 1;
-		
+
 		try {
-			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
+			if (!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
 				return 1;
 			else {
 				gcLock.readLock().lock();
 				try {
-				//if(gcRunning)
-					return HCServiceProxy.claimKey(entry, val,ct);
-				/*
-				ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
-				try {
-					keyLookup.get(bl).incrementAndGet();
-					return true;
-				} catch (ExecutionException e) {
-					SDFSLogger.getLog().error("unable to increment", e);;
-					return false;
-				}*/
-				}finally {
+					// if(gcRunning)
+					return HCServiceProxy.claimKey(entry, val, ct);
+					/*
+					 * ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
+					 * try {
+					 * keyLookup.get(bl).incrementAndGet();
+					 * return true;
+					 * } catch (ExecutionException e) {
+					 * SDFSLogger.getLog().error("unable to increment", e);;
+					 * return false;
+					 * }
+					 */
+				} finally {
 					gcLock.readLock().unlock();
 				}
 			}
@@ -142,28 +155,28 @@ public class DedupFileStore {
 		} finally {
 		}
 	}
-	
-	public static long removeRef(byte[] entry, long val,int ct) throws IOException {
-		if (val == 1|| val == 0)
+
+	public static long removeRef(byte[] entry, long val, int ct) throws IOException {
+		if (val == 1 || val == 0)
 			return 1;
-		
+
 		try {
-			if(!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
+			if (!Main.refCount || Arrays.equals(entry, WritableCacheBuffer.bk))
 				return 1;
 			else {
 				gcLock.readLock().lock();
 				try {
-				//if(gcRunning)
-					return HCServiceProxy.claimKey(entry, val,-1*ct);
-				//ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
-				//try {
-					//keyLookup.get(bl).decrementAndGet();
-					//return true;
-				//} catch (ExecutionException e) {
-					//SDFSLogger.getLog().error("unable to increment", e);;
-					//return false;
-				//}
-				}finally {
+					// if(gcRunning)
+					return HCServiceProxy.claimKey(entry, val, -1 * ct);
+					// ByteLongArrayWrapper bl = new ByteLongArrayWrapper(entry,val);
+					// try {
+					// keyLookup.get(bl).decrementAndGet();
+					// return true;
+					// } catch (ExecutionException e) {
+					// SDFSLogger.getLog().error("unable to increment", e);;
+					// return false;
+					// }
+				} finally {
 					gcLock.readLock().unlock();
 				}
 			}
@@ -171,8 +184,6 @@ public class DedupFileStore {
 		} finally {
 		}
 	}
-
-	
 
 	public static DedupFile getDedupFile(MetaDataDedupFile mf) throws IOException {
 		getDFLock.lock();
@@ -213,20 +224,21 @@ public class DedupFileStore {
 
 	/**
 	 * Adds a dedup file to the openFile hashmap.
-	 * 
+	 *
 	 * @param df
-	 *            the dedup file to add to the openfile hashmap
+	 *           the dedup file to add to the openfile hashmap
 	 * @throws IOException
 	 */
 	public static void addOpenDedupFiles(SparseDedupFile df) throws IOException {
 		if (!closing) {
 			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("adding dedupfile " + df.getMetaFile().getPath());
-			//SDFSLogger.getLog().info("adding " + df.getGUID() + "pth=" + df.getMetaFile().getPath());
+			// SDFSLogger.getLog().info("adding " + df.getGUID() + "pth=" +
+			// df.getMetaFile().getPath());
 			if (openFile.size() >= Main.maxOpenFiles) {
 				SDFSLogger.getLog().warn("open files reached " + openFile.size());
-				for(Entry<String, SparseDedupFile> en : openFile.entrySet()) {
-					SDFSLogger.getLog().warn("path=" + en.getValue().mf.getPath() + " guid="+en.getKey());
+				for (Entry<String, SparseDedupFile> en : openFile.entrySet()) {
+					SDFSLogger.getLog().warn("path=" + en.getValue().mf.getPath() + " guid=" + en.getKey());
 				}
 				throw new IOException(
 						"maximum number of files reached [" + Main.maxOpenFiles + "]. Too many open files");
@@ -238,17 +250,18 @@ public class DedupFileStore {
 			throw new IOException("DedupFileStore is closed");
 		}
 	}
+
 	public static SparseDedupFile get(String guid) {
 		return openFile.get(guid);
 	}
 
 	/**
 	 * Clones a dedupFile
-	 * 
+	 *
 	 * @param oldmf
-	 *            the file to clone
+	 *              the file to clone
 	 * @param newmf
-	 *            the location of the, new, cloned dedup file map.
+	 *              the location of the, new, cloned dedup file map.
 	 * @return the new cloned Dedup file map
 	 * @throws IOException
 	 */
@@ -275,22 +288,22 @@ public class DedupFileStore {
 
 	/**
 	 * removes an open dedup file map from the openFile hashmap.
-	 * 
+	 *
 	 * @param mf
 	 */
 	public static void removeOpenDedupFile(String guid) {
-		//SDFSLogger.getLog().info("removing " + guid);
-		if(guid != null) {
+		// SDFSLogger.getLog().info("removing " + guid);
+		if (guid != null) {
 			openFile.remove(guid);
 		}
-		
+
 	}
 
 	/**
 	 * Checks if a file is open
-	 * 
+	 *
 	 * @param mf
-	 *            the meta file to check if its open.
+	 *           the meta file to check if its open.
 	 * @return true if open
 	 */
 	public static boolean fileOpen(MetaDataDedupFile mf) {
@@ -302,7 +315,7 @@ public class DedupFileStore {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the open files at an array.
 	 */
 	public static DedupFile[] getArray() {
@@ -318,6 +331,9 @@ public class DedupFileStore {
 		closing = true;
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("Open Files = " + openFile.size());
+		if (th != null) {
+			th.close();
+		}
 		if (openFileMonitor != null)
 			openFileMonitor.close();
 		if (openFile.size() > 0) {
@@ -336,12 +352,12 @@ public class DedupFileStore {
 						SDFSLogger.getLog().debug("Closed " + df.getMetaFile().getPath());
 				}
 			}
-		} 
-		/*
-		if(Main.refCount) {
-			keyLookup.invalidateAll();
 		}
-		*/
+		/*
+		 * if(Main.refCount) {
+		 * keyLookup.invalidateAll();
+		 * }
+		 */
 
 	}
 
@@ -363,9 +379,59 @@ public class DedupFileStore {
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("write caches flushed");
 		/*
-		if(Main.refCount) {
-			keyLookup.invalidateAll();
+		 * if(Main.refCount) {
+		 * keyLookup.invalidateAll();
+		 * }
+		 */
+	}
+
+	private static class CleanupThread implements Runnable {
+
+		boolean closed = true;
+		final Thread th;
+
+		public CleanupThread() {
+			closed = false;
+			th = new Thread(this);
+			th.start();
 		}
-		*/
+
+		@Override
+		public void run() {
+			while (!closed) {
+				try {
+					Thread.sleep(Main.CLEANUP_THREAD_INTERVAL);
+					DedupFile[] df = DedupFileStore.getArray();
+					for (DedupFile dd : df) {
+						SparseDedupFile sd = (SparseDedupFile) dd;
+						try {
+							sd.CacheCleanup();
+							if (Main.PRINT_CACHESTATS) {
+								CacheStats st = sd.getCacheStats();
+								String msg = String.format("cache stats for [%s] avg-load-penalty=%f hit-rate=%f " +
+										"load-exception-rate=%f load-count=%d miss-rate=%f",
+										sd.mf.getPath(), st.averageLoadPenalty(), st.hitRate(), st.loadExceptionRate(),
+										st.loadCount(), st.missRate());
+								SDFSLogger.getLog().info(msg);
+							}
+						} catch (Exception e) {
+							SDFSLogger.getLog().warn("Unable to get stats from sparsededupfile", e);
+						}
+					}
+				} catch (InterruptedException e) {
+					this.closed = true;
+					break;
+				}
+
+			}
+
+		}
+
+		public void close() {
+			closed = true;
+			th.interrupt();
+
+		}
+
 	}
 }

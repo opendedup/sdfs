@@ -31,6 +31,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -44,9 +45,9 @@ public class EncryptUtils {
 	private static final IvParameterSpec spec = new IvParameterSpec(iv);
 	static {
 		try {
+			Security.addProvider(new BouncyCastleProvider());
 			keyBytes = HashFunctions.getSHAHashBytes(Main.chunkStoreEncryptionKey.getBytes());
 			oldKeyBytes = HashFunctions.getSHAHashBytes("Password".getBytes());
-			Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 			key = new SecretKeySpec(keyBytes, "AES");
 			oldKey = new SecretKeySpec(oldKeyBytes, "AES");
 		} catch (Exception e) {
@@ -129,7 +130,7 @@ public class EncryptUtils {
 
 	public static byte[] decryptCBC(byte[] encChunk, IvParameterSpec cspec) throws IOException {
 		try {
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
 			cipher.init(Cipher.DECRYPT_MODE, key, cspec);
 			byte[] decrypted = cipher.doFinal(encChunk);
 			return decrypted;
@@ -149,7 +150,7 @@ public class EncryptUtils {
 
 	public static byte[] encryptCBC(byte[] chunk, IvParameterSpec cspec) throws IOException {
 		try {
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
 			cipher.init(Cipher.ENCRYPT_MODE, key, cspec);
 			byte[] encrypted = cipher.doFinal(chunk);
 			return encrypted;

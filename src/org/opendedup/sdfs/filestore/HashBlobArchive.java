@@ -63,6 +63,7 @@ import org.opendedup.util.StringUtils;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
@@ -74,7 +75,7 @@ import com.google.common.util.concurrent.RateLimiter;
 
 public class HashBlobArchive implements Runnable, Serializable {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private long id;
@@ -793,10 +794,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	private boolean reloading = false;
 
+	public static CacheStats getCacheStats() {
+		return archives.stats();
+	}
+
 	private static void buildCache() throws IOException {
 		long mscsz = LOCAL_CACHE_SIZE / MAX_LEN;
 		SDFSLogger.getLog().info("Maximum Cache Size is [" + mscsz + "]");
-		archives = CacheBuilder.newBuilder().maximumSize(mscsz)
+		archives = CacheBuilder.newBuilder().maximumSize(mscsz).recordStats()
 				.removalListener(new RemovalListener<Long, HashBlobArchive>() {
 					public void onRemoval(RemovalNotification<Long, HashBlobArchive> removal) {
 						if (!SMART_CACHE || (SMART_CACHE && !removal.getValue().reloading)) {
@@ -1028,7 +1033,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 			}
 
 		}
-
 	}
 
 	private HashBlobArchive(byte[] hash, byte[] chunk)
@@ -2572,7 +2576,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		/**
 		 * Puts the Runnable to the blocking queue, effectively blocking the delegating
 		 * thread until space is available.
-		 * 
+		 *
 		 * @param r the runnable task requested to be executed
 		 * @param e the executor attempting to execute this task
 		 */
