@@ -258,7 +258,6 @@ public class StorageServiceImpl extends StorageServiceImplBase {
     public void writeSparseDataChunk(SparseDedupeChunkWriteRequest request,
             StreamObserver<SparseDedupeChunkWriteResponse> responseObserver) {
         SparseDedupeChunkWriteResponse.Builder b = SparseDedupeChunkWriteResponse.newBuilder();
-        HashMap<String, kv> ths = new HashMap<String, kv>();
         if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
             b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
@@ -311,7 +310,6 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                         throw new IOException("Inserted Archive does not match current current=" +
                                 pos + " interted=" + e.getValue().pos);
                     }
-                    ths.put(e.getKey(), e.getValue());
                 }
                 ch.getDedupFile().updateMap(sp, request.getFileLocation());
                 long ep = sp.getFpos() + sp.len;
@@ -326,15 +324,6 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             } catch (Exception er) {
-                for (Entry<String, kv> e : ths.entrySet()) {
-                    try {
-                        DedupFileStore.addRef(e.getValue().key,
-                                e.getValue().pos, -1 * e.getValue().ct);
-
-                    } catch (Exception er1) {
-
-                    }
-                }
                 SDFSLogger.getLog().error("unable to write sparse data chunk", er);
                 b.setError("unable to write sparse data chunk");
                 b.setErrorCode(errorCodes.ENOENT);
