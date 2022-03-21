@@ -72,7 +72,7 @@ public class DedupFileStore {
 		if (Main.maxInactiveFileTime > 0 && !Main.blockDev) {
 			openFileMonitor = new OpenFileMonitor(10000, Main.maxInactiveFileTime);
 		}
-		if (Main.CLEANUP_THREAD_INTERVAL > 0) {
+		if (Main.CLEANUP_THREAD_INTERVAL > 0 && Main.chunkStoreEncryptionEnabled) {
 			th = new CleanupThread();
 		}
 
