@@ -130,7 +130,7 @@ public class EncryptUtils {
 
 	public static byte[] decryptCBC(byte[] encChunk, IvParameterSpec cspec) throws IOException {
 		try {
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 			cipher.init(Cipher.DECRYPT_MODE, key, cspec);
 			byte[] decrypted = cipher.doFinal(encChunk);
 			return decrypted;
@@ -150,7 +150,7 @@ public class EncryptUtils {
 
 	public static byte[] encryptCBC(byte[] chunk, IvParameterSpec cspec) throws IOException {
 		try {
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding", "BC");
+			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 			cipher.init(Cipher.ENCRYPT_MODE, key, cspec);
 			byte[] encrypted = cipher.doFinal(chunk);
 			return encrypted;
