@@ -65,6 +65,7 @@ import org.opendedup.util.OSValidator;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
@@ -99,7 +100,7 @@ public class SparseDedupFile implements DedupFile {
 	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 	private ConcurrentHashMap<Long, WritableCacheBuffer> openBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
 			256, .75f);
-	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers = CacheBuilder.newBuilder()
+	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers = CacheBuilder.newBuilder().recordStats()
 			.maximumSize(maxWriteBuffers).expireAfterAccess(60, TimeUnit.SECONDS).concurrencyLevel(Main.writeThreads)
 			.removalListener(new RemovalListener<Long, WritableCacheBuffer>() {
 				public void onRemoval(RemovalNotification<Long, WritableCacheBuffer> removal) {
@@ -190,6 +191,15 @@ public class SparseDedupFile implements DedupFile {
 	@Override
 	public DedupFile snapshot(MetaDataDedupFile snapmf) throws IOException, HashtableFullException {
 		return this.snapshot(snapmf, true);
+	}
+
+	public void CacheCleanup() {
+		this.writeBuffers.cleanUp();
+	}
+
+
+	public CacheStats getCacheStats() {
+		return this.writeBuffers.stats();
 	}
 
 	@Override

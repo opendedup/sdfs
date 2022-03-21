@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -19,7 +19,6 @@
 package org.opendedup.util;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -35,23 +34,19 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
-import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.X509Extensions;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.X509Principal;
@@ -59,9 +54,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
-import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -128,7 +120,7 @@ public class KeyGenerator {
 				// Sign the new KeyPair with the root cert Private Key
 				ContentSigner csrContentSigner = csrBuilder.build(pKey.getPrivateKey());
 				PKCS10CertificationRequest csr = p10Builder.build(csrContentSigner);
-				
+
 				Date startDate = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
 
 				Date endDate = new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 365 * 10));
@@ -145,7 +137,7 @@ public class KeyGenerator {
 				//issuedCertBuilder.addExtension(Extension.basicConstraints, true, new BasicConstraints(false));
 
 				// Add Issuer cert identifier as Extension
-				
+
 				issuedCertBuilder.addExtension(Extension.authorityKeyIdentifier, false,
 						issuedCertExtUtils.createAuthorityKeyIdentifier(rootCert));
 				issuedCertBuilder.addExtension(Extension.subjectKeyIdentifier, false,

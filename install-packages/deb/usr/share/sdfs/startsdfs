@@ -1,6 +1,6 @@
 #!/bin/bash
 #modprobe fuse > /dev/null
-BASEMEMORY="3000"
+BASEMEMORY="10000"
 CACHEMEMORY=512
 MPTG=3
 LMPTG=2
@@ -21,7 +21,7 @@ while getopts "v:z:f:p:e:b:t:anmqzcdshcrlw" opt; do
     n) ;;
     w) ;;
     t) TMPDIR="-Djava.io.tmpdir=$OPTARG";;
-    b) 
+    b)
         SDFSBASEPATH=$OPTARG
 	BASEPATH="$OPTARG/$BASEPATH"
 	EXEC="$OPTARG/$EXEC";;

@@ -124,6 +124,7 @@ int _tmain(int argc, TCHAR *argv[])
 	
 	TCHAR configFile[512];
 	__int64 mem = 256;
+
 	__int64 basemem = 6000;
 	for (int i = 1; i < argc; i++) {
 		if (!_tcsncmp(argv[i], _T("-z"), 4)) {

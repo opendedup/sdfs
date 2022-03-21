@@ -292,12 +292,12 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                         if (!hs.containsKey(key)) {
                             kv _kv = new kv();
                             _kv.ct = 0;
-                            _kv.key=e.getValue().hash;
+                            _kv.key = e.getValue().hash;
                             _kv.pos = Longs.fromByteArray(e.getValue().hashloc);
                             hs.put(key, _kv);
                         }
                         kv _kv = hs.get(key);
-                        _kv.ct += 1 ;
+                        _kv.ct += 1;
                     }
                 }
                 //TODO: add rollback
@@ -344,7 +344,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             catch (Exception e) {
                 SDFSLogger.getLog().error("unable to write sparse data chunk", e);
                 b.setError("unable to write sparse data chunk");
-                b.setErrorCode(errorCodes.EACCES);
+                b.setErrorCode(errorCodes.ENOENT);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
@@ -395,7 +395,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
     private static class kv {
         long pos;
         int ct = 0;
-        byte [] key;
+        byte[] key;
     }
 
     private static class HashWriteException extends Exception {
