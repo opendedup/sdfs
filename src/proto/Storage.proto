@@ -108,6 +108,7 @@ message SparseDedupeChunkWriteRequest {
 message SparseDedupeChunkWriteResponse {
   string error = 1;
   errorCodes errorCode = 2;
+  repeated HashLocPairP missedAr =3;
 }
 
 message SparseDedupeChunkReadRequest {
@@ -132,7 +133,6 @@ message HashingInfoResponse {
   int32 mapVersion = 7;
   string error = 8;
   errorCodes errorCode = 9;
-
 }
 
 message InsertRecord {
