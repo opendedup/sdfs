@@ -801,7 +801,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static void buildCache() throws IOException {
 		long mscsz = LOCAL_CACHE_SIZE / MAX_LEN;
 		SDFSLogger.getLog().info("Maximum Cache Size is [" + mscsz + "]");
-		archives = CacheBuilder.newBuilder().maximumSize(mscsz).recordStats()
+		archives = CacheBuilder.newBuilder().maximumSize(mscsz)
 				.removalListener(new RemovalListener<Long, HashBlobArchive>() {
 					public void onRemoval(RemovalNotification<Long, HashBlobArchive> removal) {
 						if (!SMART_CACHE || (SMART_CACHE && !removal.getValue().reloading)) {

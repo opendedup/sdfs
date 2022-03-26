@@ -100,7 +100,7 @@ public class SparseDedupFile implements DedupFile {
 	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
 	private ConcurrentHashMap<Long, WritableCacheBuffer> openBuffers = new ConcurrentHashMap<Long, WritableCacheBuffer>(
 			256, .75f);
-	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers = CacheBuilder.newBuilder().recordStats()
+	protected LoadingCache<Long, WritableCacheBuffer> writeBuffers = CacheBuilder.newBuilder()
 			.maximumSize(maxWriteBuffers).expireAfterAccess(60, TimeUnit.SECONDS).concurrencyLevel(Main.writeThreads)
 			.removalListener(new RemovalListener<Long, WritableCacheBuffer>() {
 				public void onRemoval(RemovalNotification<Long, WritableCacheBuffer> removal) {

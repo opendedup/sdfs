@@ -534,6 +534,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
         info.setCloudAccessKey(Main.cloudAccessKey);
       if (Main.cloudSecretKey != null)
         info.setCloudSecretKey(Main.cloudSecretKey);
+        /*
       CacheStats ct = HashBlobArchive.getCacheStats();
       info.setAverageLoadPenalty(ct.averageLoadPenalty());
       info.setEvictionCount(ct.evictionCount());
@@ -545,6 +546,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       info.setMissRate(ct.missRate());
       info.setRequestCount(ct.requestCount());
       info.setTotalLoadTime(ct.totalLoadTime());
+      */
       info.build();
       b.setInfo(info);
       responseObserver.onNext(b.build());
