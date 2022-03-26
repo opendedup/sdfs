@@ -36,7 +36,7 @@ public class DedupFileStore {
 	 * maxOpenFiles parameter
 	 */
 	private static ConcurrentHashMap<String, SparseDedupFile> openFile = new ConcurrentHashMap<String, SparseDedupFile>();
-	private static CleanupThread th = null;
+	//private static CleanupThread th = null;
 
 	/*
 	 * private static LoadingCache<ByteLongArrayWrapper, AtomicLong> keyLookup =
@@ -72,9 +72,11 @@ public class DedupFileStore {
 		if (Main.maxInactiveFileTime > 0 && !Main.blockDev) {
 			openFileMonitor = new OpenFileMonitor(10000, Main.maxInactiveFileTime);
 		}
+		/*
 		if (Main.CLEANUP_THREAD_INTERVAL > 0 && Main.chunkStoreEncryptionEnabled) {
 			th = new CleanupThread();
 		}
+		*/
 
 	}
 
@@ -331,9 +333,11 @@ public class DedupFileStore {
 		closing = true;
 		if (SDFSLogger.isDebug())
 			SDFSLogger.getLog().debug("Open Files = " + openFile.size());
+		/*
 		if (th != null) {
 			th.close();
 		}
+		*/
 		if (openFileMonitor != null)
 			openFileMonitor.close();
 		if (openFile.size() > 0) {
