@@ -172,10 +172,8 @@ public class SparseDedupFile implements DedupFile {
 		} else {
 			this.GUID = mf.getDfGuid();
 		}
-		if (SDFSLogger.isDebug()) {
-			SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath() + " df=" + this.GUID);
-			SDFSLogger.getLog().debug("LRU Size is " + (maxWriteBuffers + 1));
-		}
+		SDFSLogger.getLog().debug("dedup file opened for " + mf.getPath() + " df=" + this.GUID);
+		SDFSLogger.getLog().debug("LRU Size is " + (maxWriteBuffers + 1));
 	}
 
 	public void setReconstructed(boolean reconstructed) {
@@ -197,7 +195,6 @@ public class SparseDedupFile implements DedupFile {
 		this.writeBuffers.cleanUp();
 	}
 
-
 	public CacheStats getCacheStats() {
 		return this.writeBuffers.stats();
 	}
@@ -215,11 +212,9 @@ public class SparseDedupFile implements DedupFile {
 					Main.dedupDBStore + File.separator + _df.GUID.substring(0, 2) + File.separator + _df.GUID);
 			File _dbf = new File(_directory.getPath() + File.separator + _df.GUID + ".map");
 			File _dbc = new File(_directory.getPath() + File.separator + _df.GUID + ".chk");
-			if (SDFSLogger.isDebug()) {
-				SDFSLogger.getLog().debug("Snap folder is " + _directory);
-				SDFSLogger.getLog().debug("Snap map is " + _dbf);
-				SDFSLogger.getLog().debug("Snap chunk is " + _dbc);
-			}
+			SDFSLogger.getLog().debug("Snap folder is " + _directory);
+			SDFSLogger.getLog().debug("Snap map is " + _dbf);
+			SDFSLogger.getLog().debug("Snap chunk is " + _dbc);
 			bdb.copy(_dbf.getPath(), true);
 
 			snapmf.setDedupFile(_df);
@@ -345,7 +340,6 @@ public class SparseDedupFile implements DedupFile {
 
 	public int writeCache() throws IOException, HashtableFullException {
 		try {
-			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog()
 						.debug("Flushing Cache of for " + mf.getPath() + " of size " + this.writeBuffers.size());
 			this.writeBuffers.invalidateAll();
@@ -659,7 +653,8 @@ public class SparseDedupFile implements DedupFile {
 			bdb.put(filePosition, chunk);
 			eventBus.post(new SFileWritten(this, filePosition));
 		} catch (Exception e) {
-			SDFSLogger.getLog().fatal("unable to write " + writeBuffer.getFilePosition() + " updating map " + mf.getPath(),
+			SDFSLogger.getLog().fatal(
+					"unable to write " + writeBuffer.getFilePosition() + " updating map " + mf.getPath(),
 					e);
 			throw new IOException(e);
 		} finally {
@@ -672,9 +667,11 @@ public class SparseDedupFile implements DedupFile {
 		if (this.closed) {
 			throw new FileClosedException("file already closed");
 		}
-		if(filePosition % Main.CHUNK_LENGTH != 0) {
-			SDFSLogger.getLog().error("file position requested " + filePosition + " is not divisible by " + Main.CHUNK_LENGTH);
-			throw new IOException("file position requested " + filePosition + " is not divisible by " + Main.CHUNK_LENGTH);
+		if (filePosition % Main.CHUNK_LENGTH != 0) {
+			SDFSLogger.getLog()
+					.error("file position requested " + filePosition + " is not divisible by " + Main.CHUNK_LENGTH);
+			throw new IOException(
+					"file position requested " + filePosition + " is not divisible by " + Main.CHUNK_LENGTH);
 		}
 		try {
 
@@ -684,7 +681,7 @@ public class SparseDedupFile implements DedupFile {
 			mf.getIOMonitor().addDulicateData(chunk.getDoop(), true);
 			chunk.setVersion(this.bdb.getVersion());
 			bdb.put(filePosition, chunk);
-			this.dirty=true;
+			this.dirty = true;
 			eventBus.post(new SFileWritten(this, filePosition));
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to write " + filePosition + " updating map " + mf.getPath(),
@@ -831,32 +828,28 @@ public class SparseDedupFile implements DedupFile {
 			}
 
 			if (Main.safeSync) {
-				if (SDFSLogger.isDebug())
 					SDFSLogger.getLog().debug("sync " + mf.getPath());
-				long tm = 0;
-				long wt = 0;
-				long st = 0;
-				if (SDFSLogger.isDebug())
-					tm = System.currentTimeMillis();
-				long wsz = this.writeBuffers.size();
-				int fsz = 0;
-				synchronized (flushingBuffers) {
-					fsz = this.flushingBuffers.size();
-				}
+				//long tm = 0;
+				//long wt = 0;
+				//long st = 0;
+				//tm = System.currentTimeMillis();
+				//long wsz = this.writeBuffers.size();
+				//int fsz = 0;
+				//synchronized (flushingBuffers) {
+				//	fsz = this.flushingBuffers.size();
+				//}
 				this.writeCache();
-				if (SDFSLogger.isDebug())
-					wt = System.currentTimeMillis() - tm;
+				//wt = System.currentTimeMillis() - tm;
 				HCServiceProxy.sync();
 				try {
 					this.bdb.sync();
 				} catch (Exception e) {
 
 				}
-				if (SDFSLogger.isDebug())
-					st = System.currentTimeMillis() - tm - wt;
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug(
-							"Sync wb=[" + wsz + "] fb=[" + fsz + "] write fush [" + wt + "] bd sync [" + st + "]");
+				//st = System.currentTimeMillis() - tm - wt;
+				/* 				SDFSLogger.getLog().debug(
+						"Sync wb=[" + wsz + "] fb=[" + fsz + "] write fush [" + wt + "] bd sync [" + st + "]");
+						*/
 
 			} /*
 				 * else { this.writeCache(); }
@@ -926,18 +919,20 @@ public class SparseDedupFile implements DedupFile {
 			synchronized (channels) {
 				try {
 
-					//if (channel.getFlags() == flags) {
-						this.channels.remove(channel);
-						channel.close(flags);
-						SDFSLogger.getLog().debug("Channel size is " + this.channels.size());
-						if (this.channels.size() == 0) {
-							SDFSLogger.getLog().debug("Closinging " + this.mf.getPath());
-							this.forceClose();
-						}
-					//} else {
-					//	SDFSLogger.getLog().warn("unregister of filechannel for [" + this.mf.getPath()
-					//			+ "] failed because flags mismatch flags [" + flags + "!=" + channel.getFlags() + "]");
-					//}
+					// if (channel.getFlags() == flags) {
+					this.channels.remove(channel);
+					channel.close(flags);
+					SDFSLogger.getLog().debug("Channel size is " + this.channels.size());
+					if (this.channels.size() == 0) {
+						SDFSLogger.getLog().debug("Closinging " + this.mf.getPath());
+						this.forceClose();
+					}
+					// } else {
+					// SDFSLogger.getLog().warn("unregister of filechannel for [" +
+					// this.mf.getPath()
+					// + "] failed because flags mismatch flags [" + flags + "!=" +
+					// channel.getFlags() + "]");
+					// }
 					try {
 						MetaFileStore.getMF(mf.getPath()).sync();
 						eventBus.post(new SFileWritten(this));
@@ -1052,10 +1047,8 @@ public class SparseDedupFile implements DedupFile {
 					while (nwb > 0) {
 						twb += nwb;
 						nwb = this.writeCache();
-						if (SDFSLogger.isDebug())
 							SDFSLogger.getLog().debug("Flushing " + nwb + " buffers");
 					}
-					if (SDFSLogger.isDebug())
 						SDFSLogger.getLog().debug("Flushed " + twb + " buffers");
 
 				} catch (Exception e) {
@@ -1106,8 +1099,7 @@ public class SparseDedupFile implements DedupFile {
 			}
 			if (!Volume.getStorageConnected())
 				throw new IOException("storage offline");
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("Closed [" + mf.getPath() + "]");
+			SDFSLogger.getLog().debug("Closed [" + mf.getPath() + "]");
 		} finally {
 			try {
 				DedupFileStore.removeOpenDedupFile(this.GUID);

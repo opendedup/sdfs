@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -33,7 +33,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.google.common.eventbus.EventBus;
 
-import org.opendedup.logging.SDFSEventLogger;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -45,7 +44,7 @@ import org.w3c.dom.Element;
 
 public class SDFSEvent implements java.io.Serializable {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -7418485011806466368L;
 	public Type type = null;
@@ -129,7 +128,6 @@ public class SDFSEvent implements java.io.Serializable {
 			tasks.put(uid, this);
 		}
 		this.level = level;
-		SDFSEventLogger.log(this);
 	}
 
 	public void registerListener(Object obj) {
@@ -169,7 +167,6 @@ public class SDFSEvent implements java.io.Serializable {
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
 			this.endTime = System.currentTimeMillis();
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -203,7 +200,6 @@ public class SDFSEvent implements java.io.Serializable {
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
 			this.success = false;
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -218,7 +214,6 @@ public class SDFSEvent implements java.io.Serializable {
 			this.endTime = System.currentTimeMillis();
 			this.level = SDFSEvent.INFO;
 			this.curCt = this.maxCt;
-			SDFSEventLogger.log(this);
 
 			eventBus.post(this);
 		}
@@ -235,7 +230,6 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -251,7 +245,6 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -267,7 +260,6 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -685,7 +677,7 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public static class Level implements java.io.Serializable {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = -2246117933197717794L;
 		private String type = "";
@@ -702,7 +694,7 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public static class Type implements java.io.Serializable {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 1L;
 		private String type = "";

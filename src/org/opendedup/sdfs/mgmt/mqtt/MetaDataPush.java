@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -67,7 +67,7 @@ public class MetaDataPush {
 		channel = connection.createChannel();
 		channel.exchangeDeclare(this.topic, "fanout");
 		FileReplicationService.registerEvents(this);
-		
+
 		new MetaDataSubscriber(this.channel, this.topic);
 		SDFSLogger.getLog().info(String.format("Connected to MQTT %s:%d", host, port));
 	}
@@ -100,7 +100,6 @@ public class MetaDataPush {
 					l.unlock();
 			}
 		} finally {
-			if (SDFSLogger.isDebug())
 				SDFSLogger.getLog().debug("hmpa size=" + this.activeTasks.size());
 			iLock.unlock();
 		}
@@ -330,7 +329,7 @@ public class MetaDataPush {
 												SDFSLogger.getLog().info("unable to update ddb " + file + " on ", e);
 											}
 										} else {
-											
+
 											Delivery d = s.updateMap.remove(file);
 											s.channel.basicAck(d.getEnvelope().getDeliveryTag(), false);
 										}

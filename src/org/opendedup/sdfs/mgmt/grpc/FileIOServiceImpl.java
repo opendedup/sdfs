@@ -206,8 +206,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             throw e;
         }
         if (!_f.exists()) {
-            if (SDFSLogger.isDebug())
-                SDFSLogger.getLog().debug("No such node");
+            SDFSLogger.getLog().debug("No such node");
 
             _f = null;
             throw new FileIOError("path does not exist [" + path + "]", errorCodes.ENOENT);
@@ -662,8 +661,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         } else {
             try {
                 String path = request.getPath();
-                if (SDFSLogger.isDebug())
-                    SDFSLogger.getLog().debug("removing " + path);
+                SDFSLogger.getLog().debug("removing " + path);
                 if (!Main.safeClose) {
                     try {
                         this.getFileChannel(path, -1, true).getDedupFile().forceClose();

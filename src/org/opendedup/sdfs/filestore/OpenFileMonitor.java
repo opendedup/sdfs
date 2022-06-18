@@ -8,14 +8,14 @@ import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.DedupFile;
 
 /**
- * 
+ *
  * @author Sam Silverberg
- * 
+ *
  *         This class initiates a thread that is used to monitor open files
  *         within the DedupFileStore. It will close them if left open and
  *         untouched for longer than the @see
  *         com.annesam.sdfs.Main#maxInactiveFileTime .
- * 
+ *
  */
 public class OpenFileMonitor implements Runnable {
 
@@ -27,12 +27,13 @@ public class OpenFileMonitor implements Runnable {
 
 	/**
 	 * Instantiates the OpenFileMonitor
-	 * 
+	 *
 	 * @param interval
-	 *            the interval to check for inactive files
+	 *                    the interval to check for inactive files
 	 * @param maxInactive
-	 *            the maximum time allowed for a file to be inactive. Inactivity
-	 *            is determined by last accessed time.
+	 *                    the maximum time allowed for a file to be inactive.
+	 *                    Inactivity
+	 *                    is determined by last accessed time.
 	 */
 	public OpenFileMonitor(int interval, int maxInactive) {
 		this.interval = interval;
@@ -63,19 +64,20 @@ public class OpenFileMonitor implements Runnable {
 									if (df != null) {
 										DedupFileStore.getDedupFile(
 												df.getMetaFile()).forceClose();
-										if (SDFSLogger.isDebug())
-											SDFSLogger
-													.getLog()
-													.debug("Closing ["
-															+ df.getMetaFile()
-																	.getPath()
-															+ "] because its stale");
+
+										SDFSLogger
+												.getLog()
+												.debug("Closing ["
+														+ df.getMetaFile()
+																.getPath()
+														+ "] because its stale");
 									}
 								} catch (Exception e) {
 									SDFSLogger.getLog().warn(
 											"Unable close file for "
 													+ df.getMetaFile()
-															.getPath(), e);
+															.getPath(),
+											e);
 								}
 							} else if (!Main.safeSync) {
 								df.sync(true);
@@ -104,9 +106,9 @@ public class OpenFileMonitor implements Runnable {
 
 	/**
 	 * Checks if a file should be closed
-	 * 
+	 *
 	 * @param df
-	 *            the DedupFile to check
+	 *           the DedupFile to check
 	 * @return true if stale.
 	 * @throws IOException
 	 */
@@ -117,11 +119,11 @@ public class OpenFileMonitor implements Runnable {
 			long currentTime = System.currentTimeMillis();
 			long staleTime = 0;
 			try {
-				if(df.getMetaFile() == null)
+				if (df.getMetaFile() == null)
 					return true;
 				else
 					staleTime = df.getMetaFile().getLastAccessed()
-						+ this.maxInactive;
+							+ this.maxInactive;
 			} catch (Exception e) {
 				SDFSLogger.getLog().error("error checking last accessed", e);
 			}
@@ -131,7 +133,7 @@ public class OpenFileMonitor implements Runnable {
 
 	/**
 	 * Closes the OpenFileMonitor thread.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 */
 	public void close() {

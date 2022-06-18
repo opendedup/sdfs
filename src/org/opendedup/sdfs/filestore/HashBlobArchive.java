@@ -996,8 +996,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			pid = store.getNewArchiveID();
 		}
 		this.id = pid;
-		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug("waiting to write " + id + " rchunks sz=" + rchunks.size());
+
+		SDFSLogger.getLog().debug("waiting to write " + id + " rchunks sz=" + rchunks.size());
 		this.writeable = true;
 		this.compactStaged = compact;
 		f = new File(staged_chunk_location, Long.toString(id));
@@ -1065,8 +1065,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 				wOpenFiles.put(id, ch);
 
 				rchunks.put(this.id, this);
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("waiting to write " + id + " rchunks sz=" + rchunks.size());
+
+				SDFSLogger.getLog().debug("waiting to write " + id + " rchunks sz=" + rchunks.size());
 				if (wMaps.containsKey(id)) {
 					SDFSLogger.getLog().warn("Key already Exists [" + id + "]");
 				} else {
@@ -1191,8 +1191,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 		f = getPath(id);
 		if (cacheReads || VERSION == 0)
 			this.loadData();
-		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug("Hit Rate = " + archives.stats().hitRate());
+
+		SDFSLogger.getLog().debug("Hit Rate = " + archives.stats().hitRate());
 		if (VERSION > 0 && cacheReads) {
 			RandomAccessFile zraf = new RandomAccessFile(f, "rw");
 			FileChannel zfc = zraf.getChannel();
@@ -1242,8 +1242,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			this.ivspec = new IvParameterSpec(b);
 
 		}
-		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug("Hit Rate = " + archives.stats().hitRate());
+
+		SDFSLogger.getLog().debug("Hit Rate = " + archives.stats().hitRate());
 	}
 
 	public long getID() {
@@ -2330,13 +2330,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 				return true;
 			}
 			if (f.exists() && (f.length() - offset) > 0) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("writing " + id);
+
+				SDFSLogger.getLog().debug("writing " + id);
 				if (!this.uploadFile(nid)) {
 					return false;
 				}
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("wrote " + id);
+
+				SDFSLogger.getLog().debug("wrote " + id);
 
 			} else if (f.exists() && !this.cached) {
 				this.delete();
