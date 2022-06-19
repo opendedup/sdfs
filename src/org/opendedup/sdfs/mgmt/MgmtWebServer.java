@@ -30,8 +30,9 @@ public class MgmtWebServer {
 				}
 			}
 			FindOpenPort port = new FindOpenPort();
+
+			port.lock();
 			try {
-				port.lock();
 
 				int[] portRangeInfo = readPortRange();
 				if (portRangeInfo != null && portRangeInfo.length == 2) {
@@ -52,6 +53,7 @@ public class MgmtWebServer {
 				grpcServer = new IOServer();
 				grpcServer.start(useSSL, Main.sdfsCliRequireMutualTLSAuth, Main.sdfsCliListenAddr, Main.sdfsCliPort);
 			} catch (InterruptedException | IOException e) {
+				SDFSLogger.getLog().error("unable to lock port",e);
 				throw new Exception(e);
 			} finally {
 				port.unlock();

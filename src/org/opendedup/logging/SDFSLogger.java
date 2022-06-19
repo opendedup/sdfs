@@ -36,7 +36,6 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.opendedup.sdfs.Main;
 
-
 public class SDFSLogger {
 	private static Logger log = LogManager.getLogger("sdfs");
 	private static String msgPattern = "%d [%p] [%c] [%C] [%L] [%t] %x - %m%n";
@@ -55,12 +54,13 @@ public class SDFSLogger {
 
 	public static void useConsoleLogger() {
 		LoggerContext context = LoggerContext.getContext(false);
-		Configuration configuration = context.getConfiguration();
-		LoggerConfig loggerConfig = configuration.getLoggerConfig("sdfs");
-		removeAllAppenders((org.apache.logging.log4j.core.Logger) log);
+		org.apache.logging.log4j.core.Logger clog = (org.apache.logging.log4j.core.Logger) log;
+		removeAllAppenders(clog);
 		PatternLayout layout = PatternLayout.newBuilder().withPattern(msgPattern).build();
 		Appender appender = ConsoleAppender.newBuilder().setLayout(layout).setName("consoleappender").build();
-		loggerConfig.addAppender(appender, null, null);
+		appender.start();
+		removeAllAppenders(clog);
+		clog.addAppender(appender);
 		context.updateLoggers();
 
 	}
@@ -71,7 +71,7 @@ public class SDFSLogger {
 		LoggerConfig loggerConfig = config.getLoggerConfig("sdfs");
 		if (level == 0) {
 			loggerConfig.setLevel(Level.DEBUG);
-		}else {
+		} else {
 			loggerConfig.setLevel(Level.INFO);
 		}
 		ctx.updateLoggers();
@@ -86,17 +86,20 @@ public class SDFSLogger {
 		LoggerContext context = (LoggerContext) LogManager.getContext();
 		Configuration config = context.getConfiguration();
 
-		PatternLayout layout = PatternLayout.newBuilder().withPattern(msgPattern).build();
+		PatternLayout layout = PatternLayout.newBuilder().withPattern(msgPattern)
+		.withConfiguration(config).withAlwaysWriteExceptions(true)
+		.withNoConsoleNoAnsi(false).build();
 		TriggeringPolicy tp = SizeBasedTriggeringPolicy.createPolicy(Main.logSize);
 		RolloverStrategy st = DefaultRolloverStrategy.newBuilder()
 				.withMax(Integer.toString(Main.logFiles))
 				.withMin("1")
-				.withCompressionLevelStr(String.valueOf("false"))
-				.withStopCustomActionsOnError(true)
 				.withConfig(config)
 				.build();
 		Appender appender = RollingFileAppender.newBuilder().setLayout(layout).setName("rollingfileappender")
+		.withFileName(Main.logPath).withFilePattern(".%d{yyyy-MM-dd}").withAppend(true)
 				.withStrategy(st).withPolicy(tp).build();
+		System.out.println(appender);
+		appender.start();
 		org.apache.logging.log4j.core.Logger clog = (org.apache.logging.log4j.core.Logger) log;
 		removeAllAppenders(clog);
 		clog.addAppender(appender);
