@@ -59,6 +59,8 @@ public class Main {
 	public static StandAloneGCScheduler pFullSched = null;
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
+	public static String logSize="10MB";
+	public static int logFiles=10;
 	public static byte MAPVERSION = 0;
 	public static int MAX_OPEN_SST_FILES=-1;
 	public static String eSdfsPassword =null;
