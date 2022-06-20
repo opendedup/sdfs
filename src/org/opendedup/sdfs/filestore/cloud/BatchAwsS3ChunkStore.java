@@ -704,7 +704,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					builder = builder.withRegion(bl);
 				} else if (s3Target != null) {
 					String[] tokens = s3Target.split("\\.");
-					String region = tokens[1];
+					String region = "us-west-2";
+					if(tokens.length > 1){
+						region = tokens[1];
+					}
 					SDFSLogger.getLog().info("region=" + region);
 					EndpointConfiguration ep = new EndpointConfiguration(s3Target, region);
 					builder = builder.withEndpointConfiguration(ep);
