@@ -81,13 +81,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
 /**
- * 
+ *
  * @author Sam Silverberg The S3 chunk store implements the AbstractChunkStore
  *         and is used to store deduped chunks to AWS S3 data storage. It is
  *         used if the aws tag is used within the chunk store config file. It is
  *         important to make the chunk size very large on the client when using
  *         this chunk store since S3 charges per http request.
- * 
+ *
  */
 
 public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
@@ -357,7 +357,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		if (this.standAlone && config.hasAttribute("upload-thread-sleep-time")) {
 			int tm = Integer.parseInt(config.getAttribute("upload-thread-sleep-time"));
 			HashBlobArchive.THREAD_SLEEP_TIME = tm;
-		}else {
+		} else {
 			HashBlobArchive.THREAD_SLEEP_TIME = 1000 * 60 * 10;
 		}
 		if (config.hasAttribute("single-writer")) {
@@ -432,16 +432,16 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			serviceClient = account.createCloudBlobClient();
 
 			String proxy = System.getenv("HTTP_PROXY");
-			SDFSLogger.getLog().info("PROXY= "+proxy);
-			if(proxy != null)
-			{
+			SDFSLogger.getLog().info("PROXY= " + proxy);
+			if (proxy != null) {
 				String[] tokens = proxy.split(":");
-				String hostname = tokens[1].substring(2);//proxy env variable will be in the form http://proxy_server:proxt_port
+				String hostname = tokens[1].substring(2);// proxy env variable will be in the form
+															// http://proxy_server:proxt_port
 				String port = tokens[2];
 				int Port = Integer.parseInt(port);
 				SDFSLogger.getLog().info("proxyhostname=" + hostname);
 				SDFSLogger.getLog().info("proxyport=" + Port);
-				OperationContext.setDefaultProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hostname,Port)));
+				OperationContext.setDefaultProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hostname, Port)));
 			}
 
 			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads * 2);
@@ -450,8 +450,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 			/*
 			 * serviceClient.getDefaultRequestOptions().setTimeoutIntervalInMs( 10 * 1000);
-			 * 
-			 * 
+			 *
+			 *
 			 * serviceClient.getDefaultRequestOptions().setRetryPolicyFactory( new
 			 * RetryExponentialRetry(500, 5));
 			 */
@@ -532,7 +532,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				if (config.hasAttribute("allow-sync")) {
 					HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
-					if (config.hasAttribute("sync-check-schedule") && !config.getAttribute("sync-check-schedule").equalsIgnoreCase("none")) {
+					if (config.hasAttribute("sync-check-schedule")
+							&& !config.getAttribute("sync-check-schedule").equalsIgnoreCase("none")) {
 						try {
 							new SyncFSScheduler(config.getAttribute("sync-check-schedule"));
 						} catch (Exception e) {
@@ -1009,11 +1010,24 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 					}
 					if (!container.listBlobs("claims/keys/" + haName).iterator().hasNext()) {
-						kblob.delete();
+						try {
+							kblob.delete();
+						} catch (Exception e) {
+							SDFSLogger.getLog().warn("unable to delete " + kblob.getName(), e);
+						}
 						kblob = container.getBlockBlobReference("blocks/" + haName);
-						kblob.delete();
+
+						try {
+							kblob.delete();
+						} catch (Exception e) {
+							SDFSLogger.getLog().warn("unable to delete " + kblob.getName(), e);
+						}
 						kblob = container.getBlockBlobReference("keys/" + haName);
-						kblob.delete();
+						try {
+							kblob.delete();
+						} catch (Exception e) {
+							SDFSLogger.getLog().warn("unable to delete " + kblob.getName(), e);
+						}
 						SDFSLogger.getLog().info("deleted block " + id + " name=blocks/" + haName);
 					}
 				} else {
@@ -1646,21 +1660,16 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
 			blob.downloadAttributes();
 			if (blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.ARCHIVE)) {
-				if(!Main.retrievalTier.equals("")) {
+				if (!Main.retrievalTier.equals("")) {
 					String ts = Main.retrievalTier;
-					if (ts.equalsIgnoreCase("high"))
-					{
+					if (ts.equalsIgnoreCase("high")) {
 						SDFSLogger.getLog().info("restoring block using rehydration priority: " + ts);
 						blob.uploadStandardBlobTier(StandardBlobTier.HOT, RehydratePriority.HIGH, null, null);
-					}
-					else
-					{
+					} else {
 						SDFSLogger.getLog().info("restoring block using rehydration priority: standard");
 						blob.uploadStandardBlobTier(StandardBlobTier.HOT);
 					}
-				}
-				else
-				{
+				} else {
 					SDFSLogger.getLog().info("restoring block using standard rehydration priority");
 					blob.uploadStandardBlobTier(StandardBlobTier.HOT);
 				}
@@ -1692,21 +1701,18 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (blob.getProperties().getRehydrationStatus() == null
 						|| blob.getProperties().getRehydrationStatus().equals(RehydrationStatus.UNKNOWN)) {
 					SDFSLogger.getLog().warn("rehydration status unknow for " + id + " will attempt to rehydrate");
-					if(!Main.retrievalTier.equals("")) {
+					if (!Main.retrievalTier.equals("")) {
 						String ts = Main.retrievalTier;
-						if (ts.equalsIgnoreCase("high"))
-						{
-							SDFSLogger.getLog().info("blockRestored: restoring block using rehydration priority: " + ts);
+						if (ts.equalsIgnoreCase("high")) {
+							SDFSLogger.getLog()
+									.info("blockRestored: restoring block using rehydration priority: " + ts);
 							blob.uploadStandardBlobTier(StandardBlobTier.HOT, RehydratePriority.HIGH, null, null);
-						}
-						else
-						{
-							SDFSLogger.getLog().info("blockRestored: restoring block using rehydration priority: standard");
+						} else {
+							SDFSLogger.getLog()
+									.info("blockRestored: restoring block using rehydration priority: standard");
 							blob.uploadStandardBlobTier(StandardBlobTier.HOT);
 						}
-					}
-					else
-					{
+					} else {
 						SDFSLogger.getLog().info("blockRestored: restoring block using standard rehydration priority");
 						blob.uploadStandardBlobTier(StandardBlobTier.HOT);
 					}
@@ -1720,12 +1726,12 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	@Override
-	public boolean get_move_blob(){
+	public boolean get_move_blob() {
 		return this.move_blob;
 	}
 
 	@Override
-	public void set_move_blob(boolean status){
+	public void set_move_blob(boolean status) {
 		this.move_blob = status;
 	}
 
@@ -2058,7 +2064,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			return ninfo;
 		}
 	}
-	
 
 	@Override
 	public byte[] getBytes(long id, int from, int to) throws IOException, DataArchivedException {
