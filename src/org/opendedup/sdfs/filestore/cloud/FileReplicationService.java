@@ -640,7 +640,7 @@ public class FileReplicationService {
 				SDFSLogger.getLog().info("Metadata Files downloaded : " + MetaFileDownloader.fdl.get());
 				SDFSLogger.getLog().info("Metadata File download errors: " + MetaFileDownloader.fer.get());
 				this.sync.clearIter();
-				Main.syncDL = false;
+				//Main.syncDL = false;
 				Main.syncDLAll = false;
 
 				if (MetaFileDownloader.downloadSyncException != null) {
