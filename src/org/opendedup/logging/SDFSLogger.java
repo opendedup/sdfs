@@ -97,7 +97,7 @@ public class SDFSLogger {
 				.withCompressionLevelStr("0")
 				.build();
 		Appender appender = RollingFileAppender.newBuilder().setLayout(layout).setName("rollingfileappender")
-		.withFileName(Main.logPath).withAppend(true)
+		.withFileName(Main.logPath).withFilePattern(".%d{yyyy-MM-dd}").withAppend(true)
 				.withStrategy(st).withPolicy(tp).build();
 		System.out.println(appender);
 		appender.start();
