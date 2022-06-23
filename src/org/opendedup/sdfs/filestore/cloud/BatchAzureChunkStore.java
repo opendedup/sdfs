@@ -1013,20 +1013,20 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						try {
 							kblob.delete();
 						} catch (Exception e) {
-							SDFSLogger.getLog().warn("unable to delete " + kblob.getName(), e);
+							SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
 						}
 						kblob = container.getBlockBlobReference("blocks/" + haName);
 
 						try {
 							kblob.delete();
 						} catch (Exception e) {
-							SDFSLogger.getLog().warn("unable to delete " + kblob.getName(), e);
+							SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
 						}
 						kblob = container.getBlockBlobReference("keys/" + haName);
 						try {
 							kblob.delete();
 						} catch (Exception e) {
-							SDFSLogger.getLog().warn("unable to delete " + kblob.getName(), e);
+							SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
 						}
 						SDFSLogger.getLog().info("deleted block " + id + " name=blocks/" + haName);
 					}
@@ -1175,6 +1175,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 										else
 											HashBlobArchive.setLength(-1 * size);
 									}
+
 									HashBlobArchive.removeLocalArchive(k.longValue());
 									if (this.deleteUnclaimed) {
 										SDFSLogger.getLog().debug("checking to delete " + k.longValue());

@@ -680,7 +680,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     // SDFSLogger.getLog().info("deleting symlink " + f.getPath());
                     try {
                         MetaDataDedupFile mf = MetaFileStore.getMF(FileIOServiceImpl.resolvePath(path));
-                        SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + path);
+                        SDFSLogger.getLog().debug("Unlink::chattr set non-Immutable file: " + path);
                         ImmuteLinuxFDFileFile(path, false);
                         eventBus.post(new MFileDeleted(mf));
                         Files.delete(p);
@@ -698,7 +698,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 } else {
                     File f = FileIOServiceImpl.resolvePath(path);
                     try {
-                        SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + f.getPath());
+                        SDFSLogger.getLog().debug("Unlink::chattr set non-Immutable file: " + f.getPath());
                         ImmuteLinuxFDFileFile(f.getPath(), false);
                         MetaFileStore.getMF(f).clearRetentionLock();
                         if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
