@@ -1018,7 +1018,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					this.unmarshal();
 
 				} else {
-					SDFSLogger.getLog().warn("unable to move file");
+					SDFSLogger.getLog().warn("unable to move file " + f.getPath() +" to " + new File(dest).getPath());
 
 				}
 				return rename;

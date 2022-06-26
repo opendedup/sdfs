@@ -913,7 +913,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     MetaDataDedupFile mf = MetaFileStore.getMF(f);
                     mf.unmarshal();
                     try {
-                        mf.setMode(request.getMode());
+                        if (request.getMode() == 0) {
+                            mf.setMode(511);
+                        } else {
+                            mf.setMode(request.getMode());
+                        }
                     } finally {
                         f = null;
                     }
@@ -1985,7 +1989,12 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     responseObserver.onCompleted();
                     return;
                 }
-                MetaFileStore.rename(f.getCanonicalPath(), nf.getCanonicalPath());
+                boolean rn = MetaFileStore.rename(f.getCanonicalPath(), nf.getCanonicalPath());
+                if (!rn) {
+                    SDFSLogger.getLog().error("unable to rename " + req.getSrc() + " to " + req.getDest());
+                    b.setError("unable to rename " + req.getSrc() + " to " + req.getDest());
+                    b.setErrorCode(errorCodes.EACCES);
+                }
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;

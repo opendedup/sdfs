@@ -5,7 +5,6 @@ import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-import com.google.common.cache.CacheStats;
 import com.google.common.io.BaseEncoding;
 import com.sun.management.UnixOperatingSystemMXBean;
 
