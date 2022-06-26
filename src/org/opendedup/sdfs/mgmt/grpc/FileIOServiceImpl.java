@@ -1989,6 +1989,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     responseObserver.onCompleted();
                     return;
                 }
+                ImmuteLinuxFDFileFile(f.getPath(), false);
                 boolean rn = MetaFileStore.rename(f.getCanonicalPath(), nf.getCanonicalPath());
                 if (!rn) {
                     SDFSLogger.getLog().error("unable to rename " + req.getSrc() + " to " + req.getDest());
