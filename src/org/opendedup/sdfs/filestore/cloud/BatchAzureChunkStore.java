@@ -1006,7 +1006,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 							}
 						}
 					} catch (Exception e) {
-						SDFSLogger.getLog().warn("unable to remove " + id + " from tablelob", e);
+						SDFSLogger.getLog().debug("unable to remove " + id + " from tablelob", e);
 
 					}
 					if (!container.listBlobs("claims/keys/" + haName).iterator().hasNext()) {
