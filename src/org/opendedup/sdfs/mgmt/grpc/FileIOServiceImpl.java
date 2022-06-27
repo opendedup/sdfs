@@ -10,7 +10,6 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.mgmt.CloseFile;
 import org.opendedup.sdfs.mgmt.GetCloudFile;
-import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.mgmt.GetCloudMetaFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -855,6 +854,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
     }
 
     public void ImmuteLinuxFDFileFile(String filePath, Boolean isImmutable) {
+        /*
         if (OSValidator.isUnix()) {
             String strCommand = "";
             if (filePath != null && !filePath.isEmpty()) {
@@ -871,6 +871,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 MgmtWebServer.executeLinuxCmd(strCommand);
             }
         }
+        */
     }
 
     @Override
