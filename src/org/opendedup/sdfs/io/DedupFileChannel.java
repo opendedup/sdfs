@@ -252,6 +252,10 @@ public class DedupFileChannel {
 
 	}
 
+	public void setWrittenTo(boolean written) {
+		this.writtenTo = written;
+	}
+
 	/**
 	 * writes data to the DedupFile
 	 *

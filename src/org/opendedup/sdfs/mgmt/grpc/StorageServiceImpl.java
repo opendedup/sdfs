@@ -233,6 +233,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                                 ch.getDedupFile().getGUID());
                         InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
                         SDFSLogger.getLog().debug("write archive is " + Longs.fromByteArray(ir.getHashLocs()));
+                        ch.setWrittenTo(true);
                         responses.add(ir.toProtoBuf());
                     } else {
                         responses.add(new InsertRecord(false, -1).toProtoBuf());
@@ -311,11 +312,12 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                                 pos + " interted=" + e.getValue().pos);
                     }
                 }
+                ch.setWrittenTo(true);
                 ch.getDedupFile().updateMap(sp, request.getFileLocation());
                 long ep = sp.getFpos() + sp.len;
                 if (ep > ch.getFile().length()) {
                     ch.getFile().setLength(ep, false);
-                    SDFSLogger.getLog().debug("Set length to " + ep + " " + sp.len + " ");
+                    SDFSLogger.getLog().debug("Set length to " + ep + " " + sp.len + " " + ch.getFile().length());
                 } else {
                     SDFSLogger.getLog()
                             .debug("no length to " + sp.getFpos() + " " + request.getChunk().getLen() + " " + sp.len);
