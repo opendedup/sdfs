@@ -209,18 +209,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public long size() {
-		// TODO Auto-generated method stub
-		try {
-			RemoteVolumeInfo[] rv = this.getConnectedVolumes();
-			long sz = 0;
-			for (RemoteVolumeInfo r : rv) {
-				sz += r.data;
-			}
-			return sz;
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
-		}
-		// return HashBlobArchive.getCompressedLength();
 		return HashBlobArchive.getLength();
 	}
 
@@ -676,16 +664,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public long compressedSize() {
-		try {
-			RemoteVolumeInfo[] rv = this.getConnectedVolumes();
-			long sz = 0;
-			for (RemoteVolumeInfo r : rv) {
-				sz += r.compressed;
-			}
-			return sz;
-		} catch (Exception e) {
-			SDFSLogger.getLog().warn("unable to get clustered compressed size", e);
-		}
 		return HashBlobArchive.getCompressedLength();
 	}
 
@@ -1028,7 +1006,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						} catch (Exception e) {
 							SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
 						}
-						SDFSLogger.getLog().info("deleted block " + id + " name=blocks/" + haName);
+						SDFSLogger.getLog().debug("deleted block " + id + " name=blocks/" + haName);
 					}
 				} else {
 					kblob.delete();
@@ -1165,15 +1143,16 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 									if (this.standAlone) {
 										if (HashBlobArchive.getCompressedLength() > 0) {
 											HashBlobArchive.addToCompressedLength((-1 * compressedSize));
-										} else if (HashBlobArchive.getCompressedLength() < 0)
+										} else {
 											HashBlobArchive.setCompressedLength(0);
+										}
 
 										if (HashBlobArchive.getLength() > 0) {
 											HashBlobArchive.addToLength(-1 * size);
-										} else if (HashBlobArchive.getLength() < 0)
+										} else {
 											HashBlobArchive.setLength(0);
-										else
-											HashBlobArchive.setLength(-1 * size);
+										}
+
 									}
 
 									HashBlobArchive.removeLocalArchive(k.longValue());

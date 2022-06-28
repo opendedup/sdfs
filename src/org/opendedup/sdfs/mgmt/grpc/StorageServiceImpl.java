@@ -300,12 +300,13 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     }
                 }
                 for (Entry<String, kv> e : hs.entrySet()) {
-                    long pos = DedupFileStore.addRef(e.getValue().key,
-                            e.getValue().pos, e.getValue().ct);
+
                     if (e.getValue().ct <= 0) {
                         throw new IOException("Count must be positive ct=" +
                                 e.getValue().ct);
                     }
+                    long pos = DedupFileStore.addRef(e.getValue().key,
+                            e.getValue().pos, e.getValue().ct);
 
                     if (pos != e.getValue().pos) {
                         throw new IOException("Inserted Archive does not match current current=" +
@@ -314,13 +315,18 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 }
                 ch.setWrittenTo(true);
                 ch.getDedupFile().updateMap(sp, request.getFileLocation());
-                long ep = sp.getFpos() + sp.len;
-                if (ep > ch.getFile().length()) {
-                    ch.getFile().setLength(ep, false);
-                    SDFSLogger.getLog().debug("Set length to " + ep + " " + sp.len + " " + ch.getFile().length());
-                } else {
-                    SDFSLogger.getLog()
-                            .debug("no length to " + sp.getFpos() + " " + request.getChunk().getLen() + " " + sp.len);
+                synchronized (ch) {
+                    long ep = sp.getFpos() + sp.len;
+                    if (ep > ch.getFile().length()) {
+                        ch.getFile().setLength(ep, false);
+                        SDFSLogger.getLog().debug("Set length to " + ep + " " + sp.len +
+                                " " + ch.getFile().length() + " for " + ch.getFile().getPath());
+                    } else {
+                        SDFSLogger.getLog()
+                                .debug("no length to " + sp.getFpos() + " " + request.getChunk().getLen() + " " + sp.len
+                                        +
+                                        " " + ch.getFile().length() + " for " + ch.getFile().getPath());
+                    }
                 }
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();

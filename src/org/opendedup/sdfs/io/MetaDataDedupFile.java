@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.opendedup.sdfs.io;
 
-
 import java.io.File;
 
 import java.io.FileInputStream;
@@ -133,8 +132,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public int getMode() throws IOException {
 		if (mode == -1) {
 			Path p = Paths.get(this.path);
-			if(!OSValidator.isWindows()) {
-			this.mode = (Integer) Files.getAttribute(p, "unix:mode",LinkOption.NOFOLLOW_LINKS);
+			if (!OSValidator.isWindows()) {
+				this.mode = (Integer) Files.getAttribute(p, "unix:mode", LinkOption.NOFOLLOW_LINKS);
 			} else {
 				this.mode = 0;
 			}
@@ -149,9 +148,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setMode(int mode, boolean propigateEvent) throws IOException {
 		this.mode = mode;
 		this.dirty = true;
-		if(!OSValidator.isWindows()) {
-		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
+		if (!OSValidator.isWindows()) {
+			Path p = Paths.get(this.path);
+			Files.setAttribute(p, "unix:mode", Integer.valueOf(mode), LinkOption.NOFOLLOW_LINKS);
 		}
 	}
 
@@ -284,9 +283,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public int getOwner_id() throws IOException {
 		if (owner_id == -1) {
-			if(!OSValidator.isWindows()) {
-			Path p = Paths.get(this.path);
-			this.owner_id = (Integer) Files.getAttribute(p, "unix:uid",LinkOption.NOFOLLOW_LINKS);
+			if (!OSValidator.isWindows()) {
+				Path p = Paths.get(this.path);
+				this.owner_id = (Integer) Files.getAttribute(p, "unix:uid", LinkOption.NOFOLLOW_LINKS);
 			} else {
 				this.owner_id = 0;
 			}
@@ -311,9 +310,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void setOwner_id(int owner_id, boolean propigateEvent) throws IOException {
 		this.owner_id = owner_id;
-		if(!OSValidator.isWindows()) {
-		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id), LinkOption.NOFOLLOW_LINKS);
+		if (!OSValidator.isWindows()) {
+			Path p = Paths.get(this.path);
+			Files.setAttribute(p, "unix:uid", Integer.valueOf(owner_id), LinkOption.NOFOLLOW_LINKS);
 		}
 	}
 
@@ -324,10 +323,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public int getGroup_id() throws IOException {
 		if (group_id == -1) {
-			if(!OSValidator.isWindows()) {
-			Path p = Paths.get(this.path);
-			this.group_id = (Integer) Files.getAttribute(p, "unix:gid", LinkOption.NOFOLLOW_LINKS);
-			}else {
+			if (!OSValidator.isWindows()) {
+				Path p = Paths.get(this.path);
+				this.group_id = (Integer) Files.getAttribute(p, "unix:gid", LinkOption.NOFOLLOW_LINKS);
+			} else {
 				this.group_id = 0;
 			}
 		}
@@ -351,9 +350,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 */
 	public void setGroup_id(int group_id, boolean propigateEvent) throws IOException {
 		this.group_id = group_id;
-		if(!OSValidator.isWindows()) {
-		Path p = Paths.get(this.path);
-		Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id), LinkOption.NOFOLLOW_LINKS);
+		if (!OSValidator.isWindows()) {
+			Path p = Paths.get(this.path);
+			Files.setAttribute(p, "unix:gid", Integer.valueOf(group_id), LinkOption.NOFOLLOW_LINKS);
 		}
 	}
 
@@ -491,8 +490,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (this.dfGuid == null) {
 				SparseDedupFile df = new SparseDedupFile(this);
 				this.dfGuid = df.getGUID();
-					SDFSLogger.getLog()
-							.debug("No DF EXISTS .... Set dedup file for " + this.getPath() + " to " + this.dfGuid);
+				SDFSLogger.getLog()
+						.debug("No DF EXISTS .... Set dedup file for " + this.getPath() + " to " + this.dfGuid);
 				if (addtoopen)
 					DedupFileStore.addOpenDedupFiles(df);
 				// this.sync();
@@ -568,7 +567,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			}
 			return getFile(snaptoPath);
 		} else if (!this.isDirectory()) {
-				SDFSLogger.getLog().debug("is snapshot file");
+			SDFSLogger.getLog().debug("is snapshot file");
 			File f = new File(snaptoPath);
 			if (f.exists() && !overwrite)
 				throw new IOException("path exists [" + snaptoPath + "]Cannot overwrite existing data ");
@@ -584,7 +583,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			try {
 				DedupFileStore.cloneDedupFile(this, _mf);
 			} catch (java.lang.NullPointerException e) {
-					SDFSLogger.getLog().debug("no dedupfile for " + this.path, e);
+				SDFSLogger.getLog().debug("no dedupfile for " + this.path, e);
 			}
 			_mf.getIOMonitor().setVirtualBytesWritten(this.getIOMonitor().getVirtualBytesWritten(), true);
 			_mf.getIOMonitor().setDuplicateBlocks(
@@ -601,7 +600,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			evt.addCount(1);
 			return _mf;
 		} else {
-				SDFSLogger.getLog().debug("is snapshot dir");
+			SDFSLogger.getLog().debug("is snapshot dir");
 
 			File f = new File(snaptoPath);
 
@@ -677,8 +676,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (file.isDirectory())
 					file.copyDir(npath);
 				else {
-						SDFSLogger.getLog()
-								.debug("copy dedup file for : " + file.getPath() + " guid :" + file.getDfGuid());
+					SDFSLogger.getLog()
+							.debug("copy dedup file for : " + file.getPath() + " guid :" + file.getDfGuid());
 					if (file.dfGuid != null) {
 						if (DedupFileStore.fileOpen(file))
 							file.getDedupFile(false).copyTo(npath, true);
@@ -717,7 +716,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		this.path = path;
 		File f = new File(path);
 		if (!f.exists()) {
-				SDFSLogger.getLog().debug("Creating new MetaFile for " + this.path);
+			SDFSLogger.getLog().debug("Creating new MetaFile for " + this.path);
 
 			this.guid = UUID.randomUUID().toString();
 			monitor = new IOMonitor(this);
@@ -1012,13 +1011,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					eventBus.post(new MFileRenamed(this, oldPath, newPath));
 					this.dirty = true;
 					eventBus.post(new MFileDeleted(this));
-						SDFSLogger.getLog().debug("FileSystem rename succesful");
+					SDFSLogger.getLog().debug("FileSystem rename succesful");
 
 					this.path = dest;
 					this.unmarshal();
 
 				} else {
-					SDFSLogger.getLog().warn("unable to move file " + f.getPath() +" to " + new File(dest).getPath());
+					SDFSLogger.getLog().warn("unable to move file " + f.getPath() + " to " + new File(dest).getPath());
 
 				}
 				return rename;
@@ -1185,7 +1184,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	 * @return the length
 	 */
 	public long length() {
-			SDFSLogger.getLog().debug("len=" + this.length);
 		return length;
 	}
 
@@ -1427,13 +1425,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (this.symlink) {
 				b.setSymlinkPath(this.getSymlinkPath());
 			}
-		} else if(!compact && this.isSymlink()) {
-				Path p = Paths.get(this.getPath());
-				b.setSymlinkPath(this.getSymlinkPath());
-				b.setSymlink(this.symlink);
-				File f = new File(this.getPath());
-				BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-				b.setAtime(attrs.lastAccessTime().toMillis()).setMtime(attrs.lastModifiedTime().toMillis())
+		} else if (!compact && this.isSymlink()) {
+			Path p = Paths.get(this.getPath());
+			b.setSymlinkPath(this.getSymlinkPath());
+			b.setSymlink(this.symlink);
+			File f = new File(this.getPath());
+			BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+			b.setAtime(attrs.lastAccessTime().toMillis()).setMtime(attrs.lastModifiedTime().toMillis())
 					.setCtime(attrs.creationTime().toMillis()).setHidden(f.isHidden()).setSize(f.length())
 					.setSymlink(this.symlink).setMode(this.getMode());
 		}
@@ -1606,7 +1604,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setSymlink(boolean symlink, boolean propigateEvent) {
-			this.symlink = symlink;
+		this.symlink = symlink;
 	}
 
 	public String getSymlinkPath() {
@@ -1614,7 +1612,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setSymlinkPath(String symlinkPath) {
-			setSymlinkPath(symlinkPath, true);
+		setSymlinkPath(symlinkPath, true);
 	}
 
 	public void setSymlinkPath(String symlinkPath, boolean propigateEvent) {
@@ -1626,7 +1624,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	public void setAttributes(long attributes) {
-			this.attributes = attributes;
+		this.attributes = attributes;
 	}
 
 	public boolean isImporting() {
@@ -1710,7 +1708,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					this.importing = in.readBoolean();
 				}
 				if (in.available() > 0) {
-					this.permissions =  in.readInt();
+					this.permissions = in.readInt();
 				}
 
 				/*

@@ -1055,6 +1055,7 @@ public class SparseDedupFile implements DedupFile {
 					SDFSLogger.getLog().error("unable to flush " + this.databasePath, e);
 				}
 				try {
+					SDFSLogger.getLog().debug("Flushing " + this.GUID);
 					HashBlobArchive.sync(this.GUID);
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("unable to sync " + this.GUID, e);

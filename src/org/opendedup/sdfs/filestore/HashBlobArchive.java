@@ -2466,9 +2466,12 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 			HashBlobArchive ar = writableArchives.get(uuid);
 			if (ar != null) {
+				SDFSLogger.getLog().debug("archive for " + uuid + " found");
 				synchronized (ar.LOCK) {
 					ar.LOCK.notify();
 				}
+			} else {
+				SDFSLogger.getLog().debug("archive for " + uuid + " not found");
 			}
 		}
 	}

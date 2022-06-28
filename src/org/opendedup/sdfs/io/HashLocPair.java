@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -163,7 +163,7 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 	public void setDup(boolean dup) {
 		this.dup = dup;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		HashLocPair p = (HashLocPair)obj;
@@ -173,7 +173,7 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 			return false;
 	}
 
-	
+
 	@Override
 	public int hashCode() {
 		return ByteBuffer.wrap(this.hash).getInt();
@@ -200,6 +200,7 @@ public class HashLocPair implements Comparable<HashLocPair>, Externalizable {
 		hlp.pos = p.getPos();
 		hlp.offset = p.getOffset();
 		hlp.nlen = p.getNlen();
+		hlp.inserted = p.getInserted();
 		hlp.checkCorrupt();
 		return hlp;
 	}

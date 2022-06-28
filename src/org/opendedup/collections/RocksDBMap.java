@@ -392,6 +392,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					&& this.tempHt.get(new ByteArrayWrapper(hash)).position(0).getLong() == val) {
 				ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(hash));
 				bk.position(8);
+				long oct = ct;
 				ct += bk.getLong();
 				ByteBuffer keyb = ByteBuffer.wrap(new byte[hash.length + 8]);
 				keyb.put(hash);
@@ -407,11 +408,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					if (rmdb.get(this.rmdbHsAr, key) != null) {
 
 						rmdb.delete(this.rmdbHsAr, key);
+						rmct.decrementAndGet();
+						trmct.decrementAndGet();
 					}
 					bk.putLong(8, ct);
 					bk.position(0);
 					this.tempHt.put(new ByteArrayWrapper(hash), bk);
-					tnrmct.incrementAndGet();
 				}
 				return val;
 			} else {
@@ -437,6 +439,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					} else {
 						if (rmdb.get(this.rmdbHsAr, key) != null) {
 							rmdb.delete(this.rmdbHsAr, key);
+							rmct.decrementAndGet();
 						}
 						if (v.length >= 24) {
 							bk.putLong(v.length - 16, ct);
@@ -476,6 +479,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							} else {
 								if (rmdb.get(this.rmdbHsAr, key) != null) {
 									rmdb.delete(this.rmdbHsAr, key);
+									rmct.decrementAndGet();
 								}
 								this.setArRefs(bk, val, ct);
 								this.armdb.put(this.armdbHsAr, hash, bk.array());
