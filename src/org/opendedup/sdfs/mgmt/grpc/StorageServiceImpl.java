@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.google.protobuf.ByteString;
 
@@ -44,6 +46,9 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Longs;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import io.grpc.stub.StreamObserver;
 
@@ -55,6 +60,9 @@ public class StorageServiceImpl extends StorageServiceImplBase {
     public static final String VARIABLE_HWY_128 = "VARIABLE_HWY_128";
     public static final String VARIABLE_HWY_256 = "VARIABLE_HWY_256";
     public static final String VARIABLE_MD5 = "VARIABLE_MD5";
+
+    ExecutorService threadpool = Executors.newFixedThreadPool(Main.writeThreads * 4);
+    ListeningExecutorService service = MoreExecutors.listeningDecorator(threadpool);
 
     public StorageServiceImpl() {
 
@@ -173,11 +181,17 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         } else {
             try {
                 List<ByteString> hashes = request.getHashesList();
-                List<Long> responses = new ArrayList<Long>(hashes.size());
+                List<Long> responses = new ArrayList<Long>();
+                List<ListenableFuture<Long>> futures = new ArrayList<ListenableFuture<Long>>();
+
                 for (ByteString bs : hashes) {
-                    long archive = HCServiceProxy.getHashesMap().get(bs.toByteArray());
-                    responses.add(archive);
-                    SDFSLogger.getLog().debug("dedupe archive is " + archive);
+                    ListenableFuture<Long> lf = service.submit(() -> {
+                        return HCServiceProxy.getHashesMap().get(bs.toByteArray());
+                    });
+                    futures.add(lf);
+                }
+                for (ListenableFuture<Long> future : futures) {
+                    responses.add(future.get());
                 }
 
                 b.addAllLocations(responses);
@@ -215,29 +229,30 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     responseObserver.onCompleted();
                     return;
                 }
-
-                List<org.opendedup.grpc.Storage.InsertRecord> responses = new ArrayList<org.opendedup.grpc.Storage.InsertRecord>(
-                        request.getChunksCount());
-                int compressed = 0;
+                List<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>> futures = new ArrayList<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>>();
+                List<org.opendedup.grpc.Storage.InsertRecord> responses = new ArrayList<org.opendedup.grpc.Storage.InsertRecord>();
                 for (ChunkEntry ent : request.getChunksList()) {
-                    byte[] chunk = ent.getData().toByteArray();
-                    if (chunk.length > 0) {
-                        if (ent.getCompressed()) {
-                            compressed++;
-                            chunk = CompressionUtils.decompressLz4(chunk, ent.getCompressedLength());
+                    ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf = service.submit(() -> {
+                        byte[] chunk = ent.getData().toByteArray();
+                        if (chunk.length > 0) {
+                            if (ent.getCompressed()) {
+                                chunk = CompressionUtils.decompressLz4(chunk, ent.getCompressedLength());
+                            }
+
+                            ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
+                                    ch.getDedupFile().getGUID());
+                            InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
+                            SDFSLogger.getLog().debug("write archive is " + Longs.fromByteArray(ir.getHashLocs()));
+                            ch.setWrittenTo(true);
+                            return ir.toProtoBuf();
+                        } else {
+                            return new InsertRecord(false, -1).toProtoBuf();
                         }
-                        if (compressed > 0) {
-                            SDFSLogger.getLog().debug("wrote " + compressed + " blocks");
-                        }
-                        ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
-                                ch.getDedupFile().getGUID());
-                        InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
-                        SDFSLogger.getLog().debug("write archive is " + Longs.fromByteArray(ir.getHashLocs()));
-                        ch.setWrittenTo(true);
-                        responses.add(ir.toProtoBuf());
-                    } else {
-                        responses.add(new InsertRecord(false, -1).toProtoBuf());
-                    }
+                    });
+                    futures.add(lf);
+                }
+                for (ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf : futures) {
+                    responses.add(lf.get());
                 }
                 b.addAllInsertRecords(responses);
                 responseObserver.onNext(b.build());
@@ -299,20 +314,28 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                         _kv.ct += 1;
                     }
                 }
+                List<ListenableFuture<Long>> futures = new ArrayList<ListenableFuture<Long>>();
                 for (Entry<String, kv> e : hs.entrySet()) {
-
                     if (e.getValue().ct <= 0) {
                         throw new IOException("Count must be positive ct=" +
                                 e.getValue().ct);
                     }
-                    long pos = DedupFileStore.addRef(e.getValue().key,
-                            e.getValue().pos, e.getValue().ct);
+                    ListenableFuture<Long> lf = service.submit(() -> {
+                        long pos = DedupFileStore.addRef(e.getValue().key,
+                                e.getValue().pos, e.getValue().ct);
+                        if (pos != e.getValue().pos) {
+                            throw new IOException("Inserted Archive does not match current current=" +
+                                    pos + " interted=" + e.getValue().pos);
+                        }
+                        return pos;
+                    });
+                    futures.add(lf);
 
-                    if (pos != e.getValue().pos) {
-                        throw new IOException("Inserted Archive does not match current current=" +
-                                pos + " interted=" + e.getValue().pos);
-                    }
                 }
+                for (ListenableFuture<Long> future : futures) {
+                    future.get();
+                }
+
                 ch.setWrittenTo(true);
                 ch.getDedupFile().updateMap(sp, request.getFileLocation());
                 synchronized (ch) {
@@ -341,6 +364,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
             }
         }
+
     }
 
     @Override
