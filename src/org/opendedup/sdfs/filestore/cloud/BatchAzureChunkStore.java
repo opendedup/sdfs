@@ -1106,6 +1106,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				if (this.deletes.size() > 0) {
 					this.delLock.lock();
+					long rcsz = 0;
+					long rsz = 0;
+					long ct = 0;
 					HashMap<Long, Integer> odel = null;
 					try {
 						odel = this.deletes;
@@ -1140,6 +1143,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 								if (objs <= delobj) {
 									int size = Integer.parseInt((String) metaData.get("size"));
 									int compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
+									
 									if (this.standAlone) {
 										if (HashBlobArchive.getCompressedLength() > 0) {
 											HashBlobArchive.addToCompressedLength((-1 * compressedSize));
@@ -1159,6 +1163,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 									if (this.deleteUnclaimed) {
 										SDFSLogger.getLog().debug("checking to delete " + k.longValue());
 										this.verifyDelete(k.longValue());
+										rcsz += compressedSize;
+										rsz += size;
+										ct ++;
 									} else {
 										// SDFSLogger.getLog().info("deleting " +
 										// hashString);
@@ -1188,6 +1195,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 										HashBlobArchive.removeLocalArchive(k.longValue());
 								}
 							}
+							SDFSLogger.getLog().info("Removed size=" + rsz + " of remove data compressed size " + 
+							rcsz + "removed blocks " + ct);
 						} catch (Exception e) {
 							delLock.lock();
 							try {
