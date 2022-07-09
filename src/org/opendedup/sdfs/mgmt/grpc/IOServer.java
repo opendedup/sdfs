@@ -252,7 +252,7 @@ public class IOServer {
       maxMessageSize=Main.CHUNK_LENGTH * 3;
     }
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
-        .addService(new StorageServiceImpl()).executor(getExecutor(Main.writeThreads))
+        .addService(new StorageServiceImpl()).directExecutor()
         .maxInboundMessageSize(maxMessageSize).maxInboundMetadataSize(maxMessageSize)
         .addService(new FileIOServiceImpl())
         .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())

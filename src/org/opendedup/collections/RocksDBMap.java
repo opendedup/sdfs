@@ -98,7 +98,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	private AtomicLong nrmct = new AtomicLong();
 	private AtomicLong trmct = new AtomicLong();
 	private AtomicLong tnrmct = new AtomicLong();
-	private AtomicLong szct = new AtomicLong();
+	//private AtomicLong szct = new AtomicLong();
 
 	static {
 		RocksDB.loadLibrary();
@@ -435,7 +435,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						rmdb.put(this.rmdbHsAr, key, _rbk.array());
 						getDB(hash).delete(hash);
 						rmct.incrementAndGet();
-						this.szct.decrementAndGet();
+						//this.szct.decrementAndGet();
 					} else {
 						if (rmdb.get(this.rmdbHsAr, key) != null) {
 							rmdb.delete(this.rmdbHsAr, key);
@@ -448,7 +448,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						}
 						nrmct.incrementAndGet();
 						getDB(hash).put(wo, hash, v);
-						this.szct.incrementAndGet();
+						//this.szct.incrementAndGet();
 					}
 					return oval;
 				} else {
@@ -477,7 +477,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 								} else {
 									this.armdb.put(this.armdbHsAr, hash, _val);
 								}
-								this.abdt.decrementAndGet();
+								//this.abdt.decrementAndGet();
 
 							} else {
 								if (rmdb.get(this.rmdbHsAr, key) != null) {
@@ -590,38 +590,35 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public long getSize() {
-		/*
-		 * try {
-		 * long sz = 0;
-		 * for (RocksDB db : dbs) {
-		 * sz += db.getLongProperty("rocksdb.estimate-num-keys");
-		 * }
-		 * return sz;
-		 * } catch (RocksDBException e) {
-		 * SDFSLogger.getLog().error("unable to get lenght for rocksdb", e);
-		 * return 0;
-		 * }
-		 */
-		SDFSLogger.getLog().debug("szct=" + this.szct.get() + " tempsize=" + this.tempHt.size() + " adbt="+this.abdt.get());
-
-		return this.szct.get() + this.tempHt.size() + this.abdt.get();
+		
+		  try {
+		  long sz = 0;
+		  for (RocksDB db : dbs) {
+		  sz += db.getLongProperty("rocksdb.estimate-num-keys");
+		  }
+		  sz +=this.tempHt.size();
+		  return sz;
+		  } catch (RocksDBException e) {
+		  SDFSLogger.getLog().error("unable to get lenght for rocksdb", e);
+		  return 0;
+		  }
 	}
 
 	@Override
 	public long getUsedSize() {
-		return this.szct.get();
-		/*
-		 * try {
-		 * long sz = 0;
-		 * for (RocksDB db : dbs) {
-		 * sz += db.getLongProperty("rocksdb.estimate-num-keys");
-		 * }
-		 * return sz * Main.CHUNK_LENGTH;
-		 * } catch (RocksDBException e) {
-		 * SDFSLogger.getLog().error("unable to get lenght for rocksdb", e);
-		 * return 0;
-		 * }
-		 */
+		//return this.szct.get();
+		
+		 try {
+		 long sz = 0;
+		 for (RocksDB db : dbs) {
+		 sz += db.getLongProperty("rocksdb.estimate-num-keys");
+		 }
+		 return sz + tempHt.size();
+		 } catch (RocksDBException e) {
+		 SDFSLogger.getLog().error("unable to get lenght for rocksdb", e);
+		 return 0;
+		 }
+		 
 	}
 
 	@Override
@@ -696,7 +693,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 			}
 			SDFSLogger.getLog()
-					.info("Checked [" + hct + "] removed [" + dct + "] reclaimed [" + ndct + "] [" + abdt.get() + "]");
+					.info("Checked [" + hct + "] removed [" + dct + "] reclaimed [" + ndct + "]");
 			if (compact) {
 				SDFSLogger.getLog().info("compacting archives");
 				int i = 0;
@@ -885,10 +882,10 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							ByteBuffer _nbf = this.addArRef(ByteBuffer.wrap(arVal), v);
 							armdb.put(this.armdbHsAr, cm.getHash(), _nbf.array());
 						}
-						abdt.incrementAndGet();
+						//abdt.incrementAndGet();
 
 						this.getDB(cm.getHash()).delete(cm.getHash());
-						this.szct.decrementAndGet();
+						//this.szct.decrementAndGet();
 						return this.put(cm, persist);
 					}
 				}
@@ -948,7 +945,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		throw new IOException("not implemented");
 	}
 
-	AtomicLong abdt = new AtomicLong();
+	//AtomicLong abdt = new AtomicLong();
 
 	@Override
 	public long get(byte[] key) throws IOException {
@@ -981,9 +978,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 								ByteBuffer _nbf = this.addArRef(ByteBuffer.wrap(arVal), v);
 								armdb.put(this.armdbHsAr, key, _nbf.array());
 							}
-							abdt.incrementAndGet();
+							//abdt.incrementAndGet();
 							this.getDB(key).delete(key);
-							this.szct.decrementAndGet();
+							//this.szct.decrementAndGet();
 
 							return this.get(key);
 						}
@@ -1261,7 +1258,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 									valb.put(bf.array());
 									valb.putLong(System.currentTimeMillis());
 									db.put(m.owo, b, valb.array());
-									m.szct.incrementAndGet();
+									//m.szct.incrementAndGet();
 								}
 								m.tempHt.remove(new ByteArrayWrapper(b));
 							} catch (Exception e) {

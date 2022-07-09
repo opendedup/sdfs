@@ -178,7 +178,7 @@ public class HashStore {
 				+ this.getName());
 		long entries = ((Main.chunkStoreAllocationSize / Main.chunkStorePageSize)) + 8000;
 		if (HashFunctionPool.max_hash_cluster > 1) {
-			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.avg_page_size) + 8000;
+			entries = (Main.chunkStoreAllocationSize / HashFunctionPool.minLen) + 8000;
 		}
 		try {
 			SDFSLogger.getLog().info(
