@@ -45,7 +45,7 @@ public class EncryptUtils {
 	private static final IvParameterSpec spec = new IvParameterSpec(iv);
 	static {
 		try {
-			Security.addProvider(new BouncyCastleProvider());
+			//Security.addProvider(new BouncyCastleProvider());
 			keyBytes = HashFunctions.getSHAHashBytes(Main.chunkStoreEncryptionKey.getBytes());
 			oldKeyBytes = HashFunctions.getSHAHashBytes("Password".getBytes());
 			key = new SecretKeySpec(keyBytes, "AES");
