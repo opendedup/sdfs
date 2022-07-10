@@ -15,16 +15,16 @@ RUN wget https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip && \
 RUN wget https://nsis.sourceforge.io/mediawiki/images/4/4a/AccessControl.zip && \
     unzip AccessControl.zip -d /usr/share/nsis/ && \
     cp /usr/share/nsis/Plugins/i386-unicode/AccessControl.dll /usr/share/nsis/Plugins/x86-unicode/
-RUN wget https://cdn.azul.com/zulu/bin/zulu11.48.21-ca-jre11.0.11-win_x64.zip && \
+RUN wget https://cdn.azul.com/zulu/bin/zulu18.30.11-ca-jdk18.0.1-win_x64.zip && \
     rm -rf install-packages/windows/bin/jre && \
-    unzip zulu11.48.21-ca-jre11.0.11-win_x64.zip -d /tmp/ && \
-    mv /tmp/zulu11.48.21-ca-jre11.0.11-win_x64  install-packages/windows/bin/jre
+    unzip zulu18.30.11-ca-jdk18.0.1-win_x64.zip -d /tmp/ && \
+    mv /tmp/zulu18.30.11-ca-jdk18.0.1-win_x64  install-packages/windows/bin/jre
 
-RUN wget https://cdn.azul.com/zulu/bin/zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz && \
+RUN wget https://cdn.azul.com/zulu/bin/zulu18.30.11-ca-jdk18.0.1-linux_x64.tar.gz && \
     rm -rf install-packages/deb/usr/share/sdfs/bin/jre && \
-    tar -xzvf zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz && \
+    tar -xzvf zulu18.30.11-ca-jdk18.0.1-linux_x64.tar.gz && \
     mkdir -p install-packages/deb/usr/share/sdfs/bin/ && \
-    cp -rf zulu11.35.13-ca-jdk11.0.5-linux_x64 install-packages/deb/usr/share/sdfs/bin/jre
+    cp -rf zulu18.30.11-ca-jdk18.0.1-linux_x64 install-packages/deb/usr/share/sdfs/bin/jre
 RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
         git
 ENV VERSION=master

@@ -97,7 +97,7 @@ public class SDFSLogger {
 				.withCompressionLevelStr("0")
 				.build();
 		Appender appender = RollingFileAppender.newBuilder().setLayout(layout).setName("rollingfileappender")
-		.withFileName(Main.logPath).withFilePattern(".%d{yyyy-MM-dd}").withAppend(true)
+		.withFileName(Main.logPath).withFilePattern(Main.logPath.split(".", 2)[0] +"-%i.log").withAppend(true)
 				.withStrategy(st).withPolicy(tp).build();
 		System.out.println(appender);
 		appender.start();
@@ -123,6 +123,20 @@ public class SDFSLogger {
 
 	public static Logger getBasicLog() {
 		return log;
+	}
+
+	public static void main(String [] args) {
+		
+		Main.logPath = "test.log";
+		Main.logFiles = 10;
+		Main.logSize = "10K";
+		Main.logFiles = 10;
+		createSdfsLogger();
+		for(int i = 0; i < 1000000;i++) {
+			SDFSLogger.getLog().error("wow " + i);
+		}
+		System.out.println("1111");
+
 	}
 
 }
