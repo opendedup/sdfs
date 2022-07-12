@@ -3,6 +3,7 @@ package org.opendedup.sdfs.filestore;
 import java.io.IOException;
 
 import org.opendedup.collections.DataArchivedException;
+import org.opendedup.collections.InsertRecord;
 import org.w3c.dom.Element;
 
 /**
@@ -131,7 +132,7 @@ public interface AbstractChunkStore {
 	 *              stored at
 	 * @throws IOException
 	 */
-	public abstract long writeChunk(byte[] hash, byte[] chunk, int len, String uuid)
+	public abstract InsertRecord writeChunk(byte[] hash, byte[] chunk, int len, String uuid)
 			throws IOException;
 
 	/**

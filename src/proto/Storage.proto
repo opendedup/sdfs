@@ -93,6 +93,7 @@ message SparseDataChunkP {
   map<int32,HashLocPairP> ar =5;
   int32 doop = 6;
   int32 prevdoop = 7;
+  int32 compressedLength = 8;
 }
 
 message SparseDedupeChunkWriteRequest {
@@ -138,6 +139,7 @@ message HashingInfoResponse {
 message InsertRecord {
   int64 hashloc = 1;
   bool inserted =2;
+  int32 compressedLength=3;
 }
 
 enum hashtype {

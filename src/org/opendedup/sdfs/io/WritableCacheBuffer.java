@@ -746,7 +746,7 @@ public class WritableCacheBuffer implements DedupChunkInterface, Runnable {
 						dups = f.len;
 					df.mf.getIOMonitor().addVirtualBytesWritten(f.len, true);
 					if (dups > 0)
-						df.mf.getIOMonitor().addActualBytesWritten(f.len, true);
+						df.mf.getIOMonitor().addActualBytesWritten(f.hl.getCompressedLength(), true);
 					else
 						df.mf.getIOMonitor().addDulicateData(dups, true);
 					this.prevDoop += dups;

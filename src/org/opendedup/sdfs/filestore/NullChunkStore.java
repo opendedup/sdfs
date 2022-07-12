@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendedup.collections.DataArchivedException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.sdfs.Main;
 import org.w3c.dom.Element;
 
@@ -91,10 +92,11 @@ public class NullChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
+	public InsertRecord writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
 			throws IOException {
 		this.sz.addAndGet(chunk.length);
-		return 0;
+
+		return new InsertRecord(true, 0,0);
 	}
 
 	@Override

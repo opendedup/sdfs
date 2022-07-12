@@ -1,4 +1,4 @@
-FROM ubuntu:20.04 as base
+FROM ubuntu:22.04 as base
 ARG DEBIAN_FRONTEND=noninteractive
 LABEL email=sam.silverberg@gmail.com
 LABEL author="Sam Silverberg"

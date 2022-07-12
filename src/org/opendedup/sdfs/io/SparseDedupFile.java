@@ -424,6 +424,7 @@ public class SparseDedupFile implements DedupFile {
 					boolean allInserted = false;
 					int dups = 0;
 					int retries = 0;
+					int cl = 0;
 					while (!allInserted) {
 
 						try {
@@ -530,6 +531,7 @@ public class SparseDedupFile implements DedupFile {
 							}
 							// SDFSLogger.getLog().info("broke data up into " +
 							// fs.size() + " chunks");
+							
 							for (Finger f : fs) {
 								HashLocPair p = new HashLocPair();
 								try {
@@ -541,13 +543,16 @@ public class SparseDedupFile implements DedupFile {
 									p.offset = 0;
 									p.nlen = f.len;
 									p.pos = f.start;
-									if (f.hl != null)
+									if (f.hl != null) {
 										p.setDup(!f.hl.getInserted());
+										cl += f.hl.getCompressedLength();
+									}
 									else
 										p.setDup(true);
 									if (p.isDup()) {
 										dups += f.len;
 									}
+									
 									ar.put(p.pos, p);
 								} catch (Exception e) {
 									SDFSLogger.getLog().warn("unable to write object finger", e);
@@ -583,7 +588,7 @@ public class SparseDedupFile implements DedupFile {
 					 */
 					mf.getIOMonitor().addVirtualBytesWritten(writeBuffer.capacity(), true);
 					if (writeBuffer.isNewChunk()) {
-						mf.getIOMonitor().addActualBytesWritten(writeBuffer.capacity() - writeBuffer.getDoop(), true);
+						mf.getIOMonitor().addActualBytesWritten(cl, true);
 					} else {
 						int prev = (writeBuffer.capacity() - writeBuffer.getPrevDoop());
 						int nw = writeBuffer.capacity() - writeBuffer.getDoop();
@@ -677,7 +682,7 @@ public class SparseDedupFile implements DedupFile {
 
 			this.writeBuffers.invalidate(filePosition);
 			mf.getIOMonitor().addVirtualBytesWritten(chunk.len, true);
-			mf.getIOMonitor().addActualBytesWritten(chunk.len - chunk.getDoop(), true);
+			mf.getIOMonitor().addActualBytesWritten(chunk.getCompressedLength(), true);
 			mf.getIOMonitor().addDulicateData(chunk.getDoop(), true);
 			chunk.setVersion(this.bdb.getVersion());
 			bdb.put(filePosition, chunk);

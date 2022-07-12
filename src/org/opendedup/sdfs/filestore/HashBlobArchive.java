@@ -45,6 +45,7 @@ import javax.crypto.spec.IvParameterSpec;
 import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.MapClosedException;
 import org.opendedup.collections.SimpleByteArrayLongMap;
 import org.opendedup.collections.SimpleByteArrayLongMap.KeyValuePair;
@@ -137,6 +138,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 	public static int maxQueueSize = 0;
 	public AtomicInteger uncompressedLength = new AtomicInteger(0);
 	public static AbstractHashEngine eng = HashFunctionPool.getHashEngine();
+	private int firstCLLent=0;
 
 	public static void registerEventBus(Object obj) {
 		eventUploadBus.register(obj);
@@ -721,7 +723,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 		}
 	}
 
-	public static long writeBlock(byte[] hash, byte[] chunk, String uuid)
+	public static InsertRecord writeBlock(byte[] hash, byte[] chunk, String uuid)
 			throws IOException, ArchiveFullException, ReadOnlyArchiveException {
 
 		Lock l = slock.readLock();
@@ -737,8 +739,8 @@ public class HashBlobArchive implements Runnable, Serializable {
 			for (;;) {
 				try {
 					HashBlobArchive ar = writableArchives.get(uuid);
-					ar.putChunk(hash, chunk);
-					return ar.id;
+					int cl = ar.putChunk(hash, chunk);
+					return new InsertRecord(cl,ar.id);
 				} catch (HashExistsException e) {
 					throw e;
 				} catch (ArchiveFullException | NullPointerException | ReadOnlyArchiveException e) {
@@ -749,14 +751,16 @@ public class HashBlobArchive implements Runnable, Serializable {
 					l.lock();
 					try {
 						HashBlobArchive ar = writableArchives.get(uuid);
+						int cl =0;
 						if (ar != null && ar.writeable)
-							ar.putChunk(hash, chunk);
+							cl = ar.putChunk(hash, chunk);
 						else {
 							ar = new HashBlobArchive(hash, chunk);
 							ar.uuid = uuid;
 							writableArchives.put(uuid, ar);
+							cl = ar.firstCLLent;
 						}
-						return ar.id;
+						return new InsertRecord(cl,ar.id);
 					} catch (HashExistsException e1) {
 						l.unlock();
 						l = null;
@@ -1091,7 +1095,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 					this.ivspec = new IvParameterSpec(biv);
 				}
-				this.putChunk(hash, chunk);
+				this.firstCLLent=this.putChunk(hash, chunk);
 				executor.execute(this);
 				break;
 			} catch (ArchiveFullException | ReadOnlyArchiveException e) {
@@ -1259,7 +1263,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 	AtomicLong np = new AtomicLong(offset);
 
-	private void putChunk(byte[] hash, byte[] chunk)
+	private int putChunk(byte[] hash, byte[] chunk)
 			throws IOException, ArchiveFullException, ReadOnlyArchiveException {
 
 		if (VERIFY_WRITES) {
@@ -1349,12 +1353,14 @@ public class HashBlobArchive implements Runnable, Serializable {
 								this.writeable = false;
 								throw new ArchiveFullException("archive full");
 							}
+							
 							// SDFSLogger.getLog().info("put " + zd + " len " +
 							// chunk.length + " into " +this.id);
 						}
 						if (!ins) {
 							throw new HashExistsException(this.id, hash);
 						}
+						
 					} catch (ArchiveFullException e1) {
 						np.set(cp);
 						this.writeable = false;
@@ -1399,11 +1405,13 @@ public class HashBlobArchive implements Runnable, Serializable {
 
 				// SDFSLogger.getLog().info("writing at " +f.length() + " bl=" +
 				// buf.remaining() + "cs=" +chunk.length );
+				
 				try {
 					ch.write(buf, cp);
 				} catch (Exception e) {
 					throw new IOException(e);
 				}
+				return chunk.length;
 			} finally {
 				ul.unlock();
 			}

@@ -806,7 +806,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					bk.putLong(8, ct);
 					this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bk);
 					cm.setcPos(pos);
-					return new InsertRecord(false, pos);
+					return new InsertRecord(false, pos,0);
 				}
 			} finally {
 				l.unlock();
@@ -824,8 +824,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 			v = db.get(cm.getHash());
 			if (v == null) {
+				int writtenLen = 0;
 				try {
-					cm.persistData(true);
+					writtenLen = cm.persistData(true).getCompressedLength();
 				} catch (org.opendedup.collections.HashExistsException e) {
 					cm.setcPos(e.getPos());
 				}
@@ -845,7 +846,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							bk.putLong(8, ct);
 							cm.setcPos(pos);
 							this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bk);
-							return new InsertRecord(false, pos);
+							return new InsertRecord(false, pos,0);
 						} else if (db.get(cm.getHash()) != null) {
 							return this.put(cm, true);
 						} else {
@@ -858,7 +859,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 								bf.putLong(cm.references);
 							this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bf);
 							// this.rmdb.delete(cm.getHash());
-							return new InsertRecord(true, cm.getcPos());
+							return new InsertRecord(true, cm.getcPos(),writtenLen);
 						}
 					}
 				} finally {
@@ -897,7 +898,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				cm.setcPos(pos);
 				bk.putLong(8, ct);
 				db.put(wo, cm.getHash(), v);
-				return new InsertRecord(false, pos);
+				return new InsertRecord(false, pos,0);
 			} finally {
 				l.unlock();
 			}

@@ -246,7 +246,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                             ch.setWrittenTo(true);
                             return ir.toProtoBuf();
                         } else {
-                            return new InsertRecord(false, -1).toProtoBuf();
+                            return new InsertRecord(false, -1,0).toProtoBuf();
                         }
                     });
                     futures.add(lf);

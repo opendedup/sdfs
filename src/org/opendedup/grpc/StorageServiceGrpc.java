@@ -1,19 +1,6 @@
 package org.opendedup.grpc;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * <pre>
@@ -21,8 +8,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.30.2)",
+    value = "by gRPC proto compiler (version 1.46.0)",
     comments = "Source: Storage.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class StorageServiceGrpc {
 
   private StorageServiceGrpc() {}
@@ -333,112 +321,112 @@ public final class StorageServiceGrpc {
      */
     public void hashingInfo(org.opendedup.grpc.Storage.HashingInfoRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.HashingInfoResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getHashingInfoMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getHashingInfoMethod(), responseObserver);
     }
 
     /**
      */
     public void checkHashes(org.opendedup.grpc.Storage.CheckHashesRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.CheckHashesResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCheckHashesMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCheckHashesMethod(), responseObserver);
     }
 
     /**
      */
     public void writeChunks(org.opendedup.grpc.Storage.WriteChunksRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.WriteChunksResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getWriteChunksMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getWriteChunksMethod(), responseObserver);
     }
 
     /**
      */
     public void readChunks(org.opendedup.grpc.Storage.ReadChunksRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ReadChunksResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getReadChunksMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getReadChunksMethod(), responseObserver);
     }
 
     /**
      */
     public void writeSparseDataChunk(org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getWriteSparseDataChunkMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getWriteSparseDataChunkMethod(), responseObserver);
     }
 
     /**
      */
     public void readSparseDataChunk(org.opendedup.grpc.Storage.SparseDedupeChunkReadRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.SparseDedupeChunkReadResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getReadSparseDataChunkMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getReadSparseDataChunkMethod(), responseObserver);
     }
 
     /**
      */
     public void getMetaDataDedupeFile(org.opendedup.grpc.Storage.MetaDataDedupeFileRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetMetaDataDedupeFileMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetMetaDataDedupeFileMethod(), responseObserver);
     }
 
     /**
      */
     public void getSparseDedupeFile(org.opendedup.grpc.Storage.SparseDedupeFileRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetSparseDedupeFileMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetSparseDedupeFileMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getHashingInfoMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.HashingInfoRequest,
                 org.opendedup.grpc.Storage.HashingInfoResponse>(
                   this, METHODID_HASHING_INFO)))
           .addMethod(
             getCheckHashesMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.CheckHashesRequest,
                 org.opendedup.grpc.Storage.CheckHashesResponse>(
                   this, METHODID_CHECK_HASHES)))
           .addMethod(
             getWriteChunksMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.WriteChunksRequest,
                 org.opendedup.grpc.Storage.WriteChunksResponse>(
                   this, METHODID_WRITE_CHUNKS)))
           .addMethod(
             getReadChunksMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.ReadChunksRequest,
                 org.opendedup.grpc.Storage.ReadChunksResponse>(
                   this, METHODID_READ_CHUNKS)))
           .addMethod(
             getWriteSparseDataChunkMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest,
                 org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse>(
                   this, METHODID_WRITE_SPARSE_DATA_CHUNK)))
           .addMethod(
             getReadSparseDataChunkMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.SparseDedupeChunkReadRequest,
                 org.opendedup.grpc.Storage.SparseDedupeChunkReadResponse>(
                   this, METHODID_READ_SPARSE_DATA_CHUNK)))
           .addMethod(
             getGetMetaDataDedupeFileMethod(),
-            asyncServerStreamingCall(
+            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.MetaDataDedupeFileRequest,
                 org.opendedup.grpc.Storage.ChunkResponse>(
                   this, METHODID_GET_META_DATA_DEDUPE_FILE)))
           .addMethod(
             getGetSparseDedupeFileMethod(),
-            asyncServerStreamingCall(
+            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.SparseDedupeFileRequest,
                 org.opendedup.grpc.Storage.ChunkResponse>(
@@ -468,7 +456,7 @@ public final class StorageServiceGrpc {
      */
     public void hashingInfo(org.opendedup.grpc.Storage.HashingInfoRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.HashingInfoResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getHashingInfoMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -476,7 +464,7 @@ public final class StorageServiceGrpc {
      */
     public void checkHashes(org.opendedup.grpc.Storage.CheckHashesRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.CheckHashesResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getCheckHashesMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -484,7 +472,7 @@ public final class StorageServiceGrpc {
      */
     public void writeChunks(org.opendedup.grpc.Storage.WriteChunksRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.WriteChunksResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getWriteChunksMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -492,7 +480,7 @@ public final class StorageServiceGrpc {
      */
     public void readChunks(org.opendedup.grpc.Storage.ReadChunksRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ReadChunksResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getReadChunksMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -500,7 +488,7 @@ public final class StorageServiceGrpc {
      */
     public void writeSparseDataChunk(org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getWriteSparseDataChunkMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -508,7 +496,7 @@ public final class StorageServiceGrpc {
      */
     public void readSparseDataChunk(org.opendedup.grpc.Storage.SparseDedupeChunkReadRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.SparseDedupeChunkReadResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getReadSparseDataChunkMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -516,7 +504,7 @@ public final class StorageServiceGrpc {
      */
     public void getMetaDataDedupeFile(org.opendedup.grpc.Storage.MetaDataDedupeFileRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse> responseObserver) {
-      asyncServerStreamingCall(
+      io.grpc.stub.ClientCalls.asyncServerStreamingCall(
           getChannel().newCall(getGetMetaDataDedupeFileMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -524,7 +512,7 @@ public final class StorageServiceGrpc {
      */
     public void getSparseDedupeFile(org.opendedup.grpc.Storage.SparseDedupeFileRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse> responseObserver) {
-      asyncServerStreamingCall(
+      io.grpc.stub.ClientCalls.asyncServerStreamingCall(
           getChannel().newCall(getGetSparseDedupeFileMethod(), getCallOptions()), request, responseObserver);
     }
   }
@@ -549,42 +537,42 @@ public final class StorageServiceGrpc {
     /**
      */
     public org.opendedup.grpc.Storage.HashingInfoResponse hashingInfo(org.opendedup.grpc.Storage.HashingInfoRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getHashingInfoMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.Storage.CheckHashesResponse checkHashes(org.opendedup.grpc.Storage.CheckHashesRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getCheckHashesMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.Storage.WriteChunksResponse writeChunks(org.opendedup.grpc.Storage.WriteChunksRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getWriteChunksMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.Storage.ReadChunksResponse readChunks(org.opendedup.grpc.Storage.ReadChunksRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getReadChunksMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse writeSparseDataChunk(org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getWriteSparseDataChunkMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.Storage.SparseDedupeChunkReadResponse readSparseDataChunk(org.opendedup.grpc.Storage.SparseDedupeChunkReadRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getReadSparseDataChunkMethod(), getCallOptions(), request);
     }
 
@@ -592,7 +580,7 @@ public final class StorageServiceGrpc {
      */
     public java.util.Iterator<org.opendedup.grpc.Storage.ChunkResponse> getMetaDataDedupeFile(
         org.opendedup.grpc.Storage.MetaDataDedupeFileRequest request) {
-      return blockingServerStreamingCall(
+      return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
           getChannel(), getGetMetaDataDedupeFileMethod(), getCallOptions(), request);
     }
 
@@ -600,7 +588,7 @@ public final class StorageServiceGrpc {
      */
     public java.util.Iterator<org.opendedup.grpc.Storage.ChunkResponse> getSparseDedupeFile(
         org.opendedup.grpc.Storage.SparseDedupeFileRequest request) {
-      return blockingServerStreamingCall(
+      return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
           getChannel(), getGetSparseDedupeFileMethod(), getCallOptions(), request);
     }
   }
@@ -626,7 +614,7 @@ public final class StorageServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.HashingInfoResponse> hashingInfo(
         org.opendedup.grpc.Storage.HashingInfoRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getHashingInfoMethod(), getCallOptions()), request);
     }
 
@@ -634,7 +622,7 @@ public final class StorageServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.CheckHashesResponse> checkHashes(
         org.opendedup.grpc.Storage.CheckHashesRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getCheckHashesMethod(), getCallOptions()), request);
     }
 
@@ -642,7 +630,7 @@ public final class StorageServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.WriteChunksResponse> writeChunks(
         org.opendedup.grpc.Storage.WriteChunksRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getWriteChunksMethod(), getCallOptions()), request);
     }
 
@@ -650,7 +638,7 @@ public final class StorageServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.ReadChunksResponse> readChunks(
         org.opendedup.grpc.Storage.ReadChunksRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getReadChunksMethod(), getCallOptions()), request);
     }
 
@@ -658,7 +646,7 @@ public final class StorageServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse> writeSparseDataChunk(
         org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getWriteSparseDataChunkMethod(), getCallOptions()), request);
     }
 
@@ -666,7 +654,7 @@ public final class StorageServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.SparseDedupeChunkReadResponse> readSparseDataChunk(
         org.opendedup.grpc.Storage.SparseDedupeChunkReadRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getReadSparseDataChunkMethod(), getCallOptions()), request);
     }
   }

@@ -44,6 +44,7 @@ public class SparseDataChunk {
 	public static final int RECONSTRUCTED = 1; // 0001
 	private byte version = 0;
 	private TreeMap<Integer, HashLocPair> ar = new TreeMap<Integer, HashLocPair>();
+	private int compressedLength =0;
 
 	public SparseDataChunk() {
 
@@ -69,6 +70,7 @@ public class SparseDataChunk {
 		this.fpos = pb.getFpos();
 		this.len = pb.getLen();
 		this.prevdoop = pb.getPrevdoop();
+		this.compressedLength = pb.getCompressedLength();
 		for(SparseDataFlags f : pb.getFlagsList()) {
 			if(f == SparseDataFlags.RECONSTRUCTED) {
 				this.flags = RECONSTRUCTED;
@@ -87,10 +89,18 @@ public class SparseDataChunk {
 		return this.version;
 	}
 
+	public void setCompressedLength(int compressedLength) {
+		this.compressedLength = compressedLength;
+	}
+
+	public int getCompressedLength() {
+		return this.compressedLength;
+	}
+
 	public SparseDataChunkP toProtoBuf() {
 		SparseDataChunkP.Builder b = SparseDataChunkP.newBuilder();
 		b.setDoop(this.doop).setFpos(this.fpos).setLen(this.len).setPrevdoop(this.prevdoop)
-		.setVersion(this.version);
+		.setVersion(this.version).setCompressedLength(this.compressedLength);
 		if(this.isRecontructed()) {
 			b.setFlags(0, SparseDataFlags.RECONSTRUCTED);
 		}

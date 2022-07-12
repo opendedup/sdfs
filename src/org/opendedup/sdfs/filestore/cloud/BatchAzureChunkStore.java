@@ -58,6 +58,7 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.fsync.SyncFSScheduler;
 import org.opendedup.grpc.FileInfo.FileInfoResponse;
 import org.opendedup.logging.SDFSLogger;
@@ -213,7 +214,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
+	public InsertRecord writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
 		try {
 			return HashBlobArchive.writeBlock(hash, chunk, uuid);
 		} catch (HashExistsException e) {

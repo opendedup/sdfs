@@ -49,7 +49,7 @@ public class Finger implements Runnable {
 	public void run() {
 		try {
 			if (Arrays.equals(this.hash, k))
-				this.hl = new InsertRecord(false, 1);
+				this.hl = new InsertRecord(false, 1,0);
 			this.hl = HCServiceProxy.writeChunk(this.hash, this.chunk, claims, this.uuid);
 
 			l.commandResponse(this);
@@ -81,7 +81,7 @@ public class Finger implements Runnable {
 		public void persist() throws IOException, HashtableFullException {
 			for (Finger f : fingers) {
 				if (Arrays.equals(f.hash, WritableCacheBuffer.bk))
-					f.hl = new InsertRecord(false, 1);
+					f.hl = new InsertRecord(false, 1,0);
 				f.hl = HCServiceProxy.writeChunk(f.hash, f.chunk, f.claims, f.uuid);
 
 			}
