@@ -15,10 +15,13 @@ RUN wget https://nsis.sourceforge.io/mediawiki/images/7/7f/EnVar_plugin.zip && \
 RUN wget https://nsis.sourceforge.io/mediawiki/images/4/4a/AccessControl.zip && \
     unzip AccessControl.zip -d /usr/share/nsis/ && \
     cp /usr/share/nsis/Plugins/i386-unicode/AccessControl.dll /usr/share/nsis/Plugins/x86-unicode/
-RUN wget https://cdn.azul.com/zulu/bin/zulu18.30.11-ca-jdk18.0.1-win_x64.zip && \
-    rm -rf install-packages/windows/bin/jre && \
-    unzip zulu18.30.11-ca-jdk18.0.1-win_x64.zip -d /tmp/ && \
-    mv /tmp/zulu18.30.11-ca-jdk18.0.1-win_x64  install-packages/windows/bin/jre
+
+RUN rm -rf install-packages/windows/bin/jre
+
+#RUN wget https://cdn.azul.com/zulu/bin/zulu18.30.11-ca-jdk18.0.1-win_x64.zip && \
+#    rm -rf install-packages/windows/bin/jre && \
+#    unzip zulu18.30.11-ca-jdk18.0.1-win_x64.zip -d /tmp/ && \
+#    mv /tmp/zulu18.30.11-ca-jdk18.0.1-win_x64  install-packages/windows/bin/jre
 
 RUN wget https://cdn.azul.com/zulu/bin/zulu18.30.11-ca-jdk18.0.1-linux_x64.tar.gz && \
     rm -rf install-packages/deb/usr/share/sdfs/bin/jre && \
