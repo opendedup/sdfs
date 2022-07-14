@@ -5,10 +5,10 @@ import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
+import com.google.common.cache.CacheStats;
 import com.google.common.io.BaseEncoding;
 import com.sun.management.UnixOperatingSystemMXBean;
 
-import org.apache.kerby.config.ConfigImpl;
 import org.json.JSONObject;
 import org.opendedup.grpc.Shutdown.ShutdownRequest;
 import org.opendedup.grpc.Shutdown.ShutdownResponse;
@@ -55,6 +55,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.filestore.cloud.RemoteVolumeInfo;
@@ -532,6 +533,19 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
         info.setCloudAccessKey(Main.cloudAccessKey);
       if (Main.cloudSecretKey != null)
         info.setCloudSecretKey(Main.cloudSecretKey);
+        /*
+      CacheStats ct = HashBlobArchive.getCacheStats();
+      info.setAverageLoadPenalty(ct.averageLoadPenalty());
+      info.setEvictionCount(ct.evictionCount());
+      info.setHitCount(ct.hitCount());
+      info.setHitRate(ct.hitRate());
+      info.setLoadExceptionCount(ct.loadExceptionCount());
+      info.setLoadExceptionRate(ct.loadExceptionRate());
+      info.setMissCount(ct.missCount());
+      info.setMissRate(ct.missRate());
+      info.setRequestCount(ct.requestCount());
+      info.setTotalLoadTime(ct.totalLoadTime());
+      */
       info.build();
       b.setInfo(info);
       responseObserver.onNext(b.build());

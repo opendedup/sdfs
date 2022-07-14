@@ -206,8 +206,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             throw e;
         }
         if (!_f.exists()) {
-            if (SDFSLogger.isDebug())
-                SDFSLogger.getLog().debug("No such node");
+            SDFSLogger.getLog().debug("No such node");
 
             _f = null;
             throw new FileIOError("path does not exist [" + path + "]", errorCodes.ENOENT);
@@ -662,8 +661,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         } else {
             try {
                 String path = request.getPath();
-                if (SDFSLogger.isDebug())
-                    SDFSLogger.getLog().debug("removing " + path);
+                SDFSLogger.getLog().debug("removing " + path);
                 if (!Main.safeClose) {
                     try {
                         this.getFileChannel(path, -1, true).getDedupFile().forceClose();
@@ -682,7 +680,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     // SDFSLogger.getLog().info("deleting symlink " + f.getPath());
                     try {
                         MetaDataDedupFile mf = MetaFileStore.getMF(FileIOServiceImpl.resolvePath(path));
-                        SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + path);
+                        SDFSLogger.getLog().debug("Unlink::chattr set non-Immutable file: " + path);
                         ImmuteLinuxFDFileFile(path, false);
                         eventBus.post(new MFileDeleted(mf));
                         Files.delete(p);
@@ -700,7 +698,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 } else {
                     File f = FileIOServiceImpl.resolvePath(path);
                     try {
-                        SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + f.getPath());
+                        SDFSLogger.getLog().debug("Unlink::chattr set non-Immutable file: " + f.getPath());
                         ImmuteLinuxFDFileFile(f.getPath(), false);
                         MetaFileStore.getMF(f).clearRetentionLock();
                         if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {

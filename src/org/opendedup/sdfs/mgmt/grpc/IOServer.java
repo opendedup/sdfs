@@ -2,7 +2,6 @@ package org.opendedup.sdfs.mgmt.grpc;
 
 import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFactory;
 
-import org.apache.log4j.Logger;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.mgmt.grpc.tls.DynamicTrustManager;
@@ -46,6 +45,7 @@ import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import jakarta.xml.bind.DatatypeConverter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -57,11 +57,9 @@ import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.xml.bind.DatatypeConverter;
 
 public class IOServer {
   private Server server;
-  private Logger logger = SDFSLogger.getLog();
   private static final String DELIMITER = ";;";
   public static String trustStoreDir;
 
@@ -246,7 +244,7 @@ public class IOServer {
     }
 
     /* The port on which the server should run */
-    logger.info(
+    SDFSLogger.getLog().info(
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads);
     SocketAddress address = new InetSocketAddress(host, port);
     int maxMessageSize = 40*1024*1024;
@@ -285,7 +283,7 @@ public class IOServer {
     }
 
     server = b.build().start();
-    logger.info("Server started, listening on " + host + ":" + port + " tls = " + useSSL + " mtls = " + useClientTLS);
+    SDFSLogger.getLog().info("Server started, listening on " + host + ":" + port + " tls = " + useSSL + " mtls = " + useClientTLS);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {

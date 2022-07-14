@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -33,7 +33,6 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.google.common.eventbus.EventBus;
 
-import org.opendedup.logging.SDFSEventLogger;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -45,7 +44,7 @@ import org.w3c.dom.Element;
 
 public class SDFSEvent implements java.io.Serializable {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -7418485011806466368L;
 	public Type type = null;
@@ -129,7 +128,6 @@ public class SDFSEvent implements java.io.Serializable {
 			tasks.put(uid, this);
 		}
 		this.level = level;
-		SDFSEventLogger.log(this);
 	}
 
 	public void registerListener(Object obj) {
@@ -137,7 +135,11 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public void unregisterListener(Object obj) {
-		eventBus.unregister(obj);
+		try {
+			eventBus.unregister(obj);
+		} catch (Exception e) {
+			SDFSLogger.getLog().debug("unable to unregister listener", e);
+		}
 
 	}
 
@@ -169,7 +171,6 @@ public class SDFSEvent implements java.io.Serializable {
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
 			this.endTime = System.currentTimeMillis();
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -203,7 +204,6 @@ public class SDFSEvent implements java.io.Serializable {
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
 			this.success = false;
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -218,7 +218,6 @@ public class SDFSEvent implements java.io.Serializable {
 			this.endTime = System.currentTimeMillis();
 			this.level = SDFSEvent.INFO;
 			this.curCt = this.maxCt;
-			SDFSEventLogger.log(this);
 
 			eventBus.post(this);
 		}
@@ -235,7 +234,6 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -251,7 +249,6 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -267,7 +264,6 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
-			SDFSEventLogger.log(this);
 			eventBus.post(this);
 		}
 	}
@@ -339,7 +335,8 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static SDFSEvent deleteCloudVolumeEvent(long volumeid) {
-		SDFSEvent event = new DeleteCloudVolumeEvent(getTarget(), "Deleting Cloud Volume " +volumeid, RUNNING,volumeid);
+		SDFSEvent event = new DeleteCloudVolumeEvent(getTarget(), "Deleting Cloud Volume " + volumeid, RUNNING,
+				volumeid);
 		return event;
 	}
 
@@ -586,28 +583,29 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent toProtoBuf() throws IOException {
 		try {
-		org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder b = org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.newBuilder();
+			org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder b = org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent
+					.newBuilder();
 
-		if(this.puid != null) {
-			b.setParentUuid(this.puid);
-		}
-		b.setUuid(this.uid).setExtendedInfo(this.extendedInfo).setSuccess(this.success)
-				.setStartTime(this.startTime).setEndTime(this.endTime).setLevel(this.level.toString())
-				.setType(this.type.toString()).setShortMsg(this.shortMsg).setLongMsg(this.longMsg);
-		try {
-			b.setPercentComplete(this.curCt.get() / this.maxCt.get());
+			if (this.puid != null) {
+				b.setParentUuid(this.puid);
+			}
+			b.setUuid(this.uid).setExtendedInfo(this.extendedInfo).setSuccess(this.success)
+					.setStartTime(this.startTime).setEndTime(this.endTime).setLevel(this.level.toString())
+					.setType(this.type.toString()).setShortMsg(this.shortMsg).setLongMsg(this.longMsg);
+			try {
+				b.setPercentComplete(this.curCt.get() / this.maxCt.get());
+			} catch (Exception e) {
+				b.setPercentComplete(0);
+			}
+			b.setMaxCount(this.maxCt.get()).setCurrentCount(this.curCt.get());
+			for (int i = 0; i < this.children.size(); i++) {
+				b.setChildrenUUid(i, this.children.get(i).uid);
+			}
+			return b.build();
 		} catch (Exception e) {
-			b.setPercentComplete(0);
+			SDFSLogger.getLog().error("Unable to run", e);
+			throw new IOException(e);
 		}
-		b.setMaxCount(this.maxCt.get()).setCurrentCount(this.curCt.get());
-		for (int i = 0; i < this.children.size(); i++) {
-			b.setChildrenUUid(i, this.children.get(i).uid);
-		}
-		return b.build();
-	}catch(Exception e) {
-		SDFSLogger.getLog().error("Unable to run",e);
-		throw new IOException(e);
-	}
 	}
 
 	public static List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> getProtoBufEvents() {
@@ -616,8 +614,8 @@ public class SDFSEvent implements java.io.Serializable {
 		while (iter.hasNext()) {
 			try {
 				al.add(iter.next().toProtoBuf());
-			}catch(Exception e) {
-				SDFSLogger.getLog().warn("unable to list events",e);
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("unable to list events", e);
 				throw new NullPointerException("unable to list events");
 			}
 		}
@@ -641,22 +639,21 @@ public class SDFSEvent implements java.io.Serializable {
 			if (tasks.containsKey(uuid))
 				return tasks.get(uuid).toXML();
 			else
-				throw new NullPointerException("["+uuid + "] could not be found");
+				throw new NullPointerException("[" + uuid + "] could not be found");
 		}
 	}
 
 	public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getPotoBufEvent(String uuid) {
 		synchronized (tasks) {
 			if (tasks.containsKey(uuid)) {
-				try{
-				return tasks.get(uuid).toProtoBuf();
-				}catch(Exception e) {
-					SDFSLogger.getLog().warn("["+uuid + "] could not be found",e);
-					throw new NullPointerException("["+uuid + "] could not be found");
+				try {
+					return tasks.get(uuid).toProtoBuf();
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("[" + uuid + "] could not be found", e);
+					throw new NullPointerException("[" + uuid + "] could not be found");
 				}
-			}
-			else
-				throw new NullPointerException("["+uuid + "] could not be found");
+			} else
+				throw new NullPointerException("[" + uuid + "] could not be found");
 		}
 	}
 
@@ -665,7 +662,7 @@ public class SDFSEvent implements java.io.Serializable {
 			if (tasks.containsKey(uuid))
 				return tasks.get(uuid);
 			else
-				throw new NullPointerException("["+uuid + "] could not be found");
+				throw new NullPointerException("[" + uuid + "] could not be found");
 		}
 	}
 
@@ -685,7 +682,7 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public static class Level implements java.io.Serializable {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = -2246117933197717794L;
 		private String type = "";
@@ -702,7 +699,7 @@ public class SDFSEvent implements java.io.Serializable {
 
 	public static class Type implements java.io.Serializable {
 		/**
-		 * 
+		 *
 		 */
 		private static final long serialVersionUID = 1L;
 		private String type = "";

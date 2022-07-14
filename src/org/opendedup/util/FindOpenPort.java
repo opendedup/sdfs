@@ -51,6 +51,9 @@ public class FindOpenPort {
 
 		SDFSLogger.getLog().info("Lock FindOpenPort");
 		File file = new File(portfilepath);
+		if(!file.getParentFile().exists()) {
+			file.getParentFile().mkdirs();
+		}
 		fileChannel = new FileOutputStream(file, true).getChannel();
 
 		while (fileChannel.lock() == null) { // the process checks if the channel is free to write to the file

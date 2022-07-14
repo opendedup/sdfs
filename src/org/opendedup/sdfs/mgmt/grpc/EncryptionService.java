@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.nio.file.Files;
 
-import javax.xml.bind.DatatypeConverter;
 
 import com.google.protobuf.ByteString;
 
@@ -33,6 +32,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 
 import io.grpc.stub.StreamObserver;
+import jakarta.xml.bind.DatatypeConverter;
 
 public class EncryptionService extends EncryptionServiceImplBase implements Runnable {
     CertificateFactory certFactory = null;

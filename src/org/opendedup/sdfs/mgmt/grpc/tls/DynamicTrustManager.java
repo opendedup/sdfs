@@ -17,14 +17,12 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
 import org.opendedup.logging.SDFSLogger;
 
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 
 public class DynamicTrustManager implements X509TrustManager {
     private static final Log LOG = LogFactory.getLog(DynamicTrustManager.class);
-    private Logger logger = SDFSLogger.getLog();
     private X509TrustManager standardTrustManager = null;
     protected File trustedCertificatesDir ;
 
@@ -55,15 +53,15 @@ public class DynamicTrustManager implements X509TrustManager {
     public void checkClientTrusted(X509Certificate[] certificates, String authType) throws CertificateException {
         SDFSLogger.getLog().error("testing 123");
         try {
-            logger.info("EASYX509 checkClientTrusted");
+            SDFSLogger.getLog().info("EASYX509 checkClientTrusted");
             standardTrustManager.checkClientTrusted(certificates, authType);
         } catch (Exception e) {
-            logger.info("EASYX509 checkClientTrusted caught exception, try to reload trust mananager.");
+            SDFSLogger.getLog().info("EASYX509 checkClientTrusted caught exception, try to reload trust mananager.");
             try {
                 loadTrustManager(ClientAuth.REQUIRE);
                 standardTrustManager.checkClientTrusted(certificates, authType);
             } catch (Exception e1) {
-                logger.info("EASYX509 checkClientTrusted caught exception");
+                SDFSLogger.getLog().info("EASYX509 checkClientTrusted caught exception");
                 throw new CertificateException("Error occurred while setting up trust manager." + e1.getCause(), e1);
             }
         }

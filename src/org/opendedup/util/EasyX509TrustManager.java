@@ -44,7 +44,6 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.mgmt.grpc.IOServer;
 
@@ -77,7 +76,6 @@ public class EasyX509TrustManager implements X509TrustManager {
 	/** Log object for this class. */
 	private static final Log LOG = LogFactory
 			.getLog(EasyX509TrustManager.class);
-	private Logger logger = SDFSLogger.getLog();
 
 	/**
 	 * Constructor for EasyX509TrustManager.
@@ -101,12 +99,12 @@ public class EasyX509TrustManager implements X509TrustManager {
 	public void checkClientTrusted(X509Certificate[] certificates,
 			String authType) throws CertificateException {
 		try {
-			logger.info("EASYX509 checkClientTrusted authtype="+authType);
+			SDFSLogger.getLog().info("EASYX509 checkClientTrusted authtype="+authType);
 			File trustedCertificatesDir=new File(IOServer.trustStoreDir);
 			loadTrustManager(trustedCertificatesDir,ClientAuth.REQUIRE);
 			standardTrustManager.checkClientTrusted(certificates, authType);
         } catch (Exception e) {
-        	logger.error("EASYX509 checkClientTrusted caught exception",e);
+        	SDFSLogger.getLog().error("EASYX509 checkClientTrusted caught exception",e);
 			throw new CertificateException("Error occurred while setting up trust manager." + e.getCause(), e);
         }
 	}

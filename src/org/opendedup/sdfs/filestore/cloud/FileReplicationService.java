@@ -223,8 +223,8 @@ public class FileReplicationService {
 					l.unlock();
 			}
 		} finally {
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("hmpa size=" + this.activeTasks.size());
+
+			SDFSLogger.getLog().debug("hmpa size=" + this.activeTasks.size());
 			iLock.unlock();
 		}
 	}
@@ -247,7 +247,7 @@ public class FileReplicationService {
 	 * @AllowConcurrentEvents public void metaFileRenamed(MFileRenamed evt) {
 	 *
 	 * try { ReentrantLock l = this.getLock(evt.mf.getPath()); l.lock(); int tries =
-	 * 0; boolean done = false; while (!done) { try { if (SDFSLogger.isDebug())
+	 * 0; boolean done = false; while (!done) { try {
 	 * SDFSLogger.getLog().debug("renm " + evt.mf.getPath());
 	 *
 	 * this.sync.renameFile("files/" + evt.from.substring(pl), evt.to.substring(pl),
@@ -286,8 +286,8 @@ public class FileReplicationService {
 			boolean done = false;
 			while (!done) {
 				try {
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("delm " + f.getPath());
+
+					SDFSLogger.getLog().debug("delm " + f.getPath());
 					String fn = f.getPath().substring(pl);
 					if (!isSymlink && f.isDirectory())
 						fn = fn + DM;
@@ -338,8 +338,8 @@ public class FileReplicationService {
 
 							}
 						} else {
-							if (SDFSLogger.isDebug())
-								SDFSLogger.getLog().debug("nowritem " + evt.mf.getPath());
+
+							SDFSLogger.getLog().debug("nowritem " + evt.mf.getPath());
 						}
 						done = true;
 					} catch (Exception e) {
@@ -468,8 +468,8 @@ public class FileReplicationService {
 					boolean done = false;
 					while (!done) {
 						try {
-							if (SDFSLogger.isDebug())
-								SDFSLogger.getLog().debug("writed " + evt.sf.getPath());
+
+							SDFSLogger.getLog().debug("writed " + evt.sf.getPath());
 							this.sync.uploadFile(evt.sf, evt.sf.getPath().substring(sl), "ddb",
 									new HashMap<String, String>(), false);
 
@@ -506,8 +506,8 @@ public class FileReplicationService {
 				boolean done = false;
 				while (!done) {
 					try {
-						if (SDFSLogger.isDebug())
-							SDFSLogger.getLog().debug("writem " + evt.mf.getPath());
+
+						SDFSLogger.getLog().debug("writem " + evt.mf.getPath());
 						this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl), "files",
 								new HashMap<String, String>(), false);
 						done = true;
@@ -540,8 +540,8 @@ public class FileReplicationService {
 			boolean done = false;
 			while (!done) {
 				try {
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("dels " + evt.sfp);
+
+					SDFSLogger.getLog().debug("dels " + evt.sfp);
 					SDFSLogger.getLog().debug("dels " + evt.sfp);
 					this.sync.deleteFile(evt.sfp.substring(sl), "ddb");
 					done = true;
@@ -573,8 +573,8 @@ public class FileReplicationService {
 			boolean done = false;
 			while (!done) {
 				try {
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("writev " + evt.vol.getConfigPath());
+
+					SDFSLogger.getLog().debug("writev " + evt.vol.getConfigPath());
 					this.sync.uploadFile(new File(evt.vol.getConfigPath()), new File(evt.vol.getConfigPath()).getName(),
 							"volume", new HashMap<String, String>(), false);
 					done = true;
@@ -640,7 +640,7 @@ public class FileReplicationService {
 				SDFSLogger.getLog().info("Metadata Files downloaded : " + MetaFileDownloader.fdl.get());
 				SDFSLogger.getLog().info("Metadata File download errors: " + MetaFileDownloader.fer.get());
 				this.sync.clearIter();
-				Main.syncDL = false;
+				//Main.syncDL = false;
 				Main.syncDLAll = false;
 
 				if (MetaFileDownloader.downloadSyncException != null) {
@@ -651,7 +651,7 @@ public class FileReplicationService {
 
 			} catch (Exception e) {
 				req.getEvent().endEvent("Error Occured During Sync Please Check Logs",
-							org.opendedup.sdfs.notification.SDFSEvent.ERROR);
+						org.opendedup.sdfs.notification.SDFSEvent.ERROR);
 				SDFSLogger.getLog().error("unable to sync", e);
 
 			}

@@ -127,6 +127,18 @@ message DSEInfo {
   string cloudSecretKey = 18;
   string bucketName = 19;
   int64 maxAge = 20;
+  double 	averageLoadPenalty = 21;
+  int64 	evictionCount = 22;
+  int64 hitCount = 23;
+  double  	hitRate = 24;
+  int64 loadCount = 25;
+  int64 loadExceptionCount = 26;
+  double 	loadExceptionRate = 27;
+  int64 	loadSuccessCount = 28;
+  int64 missCount =29;
+  double missRate = 30;
+  int64 requestCount = 31;
+  int64 totalLoadTime =32;
 }
 
 message DSERequest {
