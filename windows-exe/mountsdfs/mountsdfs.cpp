@@ -123,7 +123,7 @@ int _tmain(int argc, TCHAR* argv[])
 
 	TCHAR configFile[512];
 	__int64 mem = 256;
-	__int64 basemem = 10000;
+	__int64 basemem = 15000;
 	for (int i = 1; i < argc; i++) {
 		if (!_tcsncmp(argv[i], _T("-mem"), 4)) {
 			mem = _ttoi(argv[i + 1]);

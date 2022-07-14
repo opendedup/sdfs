@@ -1650,6 +1650,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + haName);
 			blob.downloadAttributes();
 			if (blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.ARCHIVE)) {
+				Main.rehydrateBlobs = true;
 				if (!Main.retrievalTier.equals("")) {
 					String ts = Main.retrievalTier;
 					if (ts.equalsIgnoreCase("high")) {

@@ -26,6 +26,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Random;
 import java.util.regex.Pattern;
 
+import org.opendedup.logging.SDFSLogger;
+
 public class StringUtils {
 	final static long pbc = 1125899906842624L;
 	final static long tbc = 1099511627776L;
@@ -99,9 +101,17 @@ public class StringUtils {
 
 	public static long parseSize(String capString) throws IOException {
 		String units = capString.substring(capString.length() - 2);
-		float sz = Float.parseFloat(capString.substring(0,
+		String str = (capString.substring(0,
 				capString.length() - 2));
 		long fSize = 0;
+		SDFSLogger.getLog().debug("str = " + str);
+		SDFSLogger.getLog().debug("units = " + units);
+		int index =  str.indexOf(",");
+        if(index>0)
+        {
+            str = str.substring(0, index) + "." + str.substring(index + 1);
+        }
+		float sz = Float.parseFloat(str);
 		if (units.equalsIgnoreCase("PB"))
 			fSize = (long) (sz * pbc);
 		else if (units.equalsIgnoreCase("TB"))

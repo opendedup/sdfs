@@ -207,7 +207,7 @@ public class MountSDFS implements Daemon, Runnable {
 		if(cmd.hasOption("u")) {
 			Main.usePortRedirector = true;
 		}
-		Main.logPath = "/var/log/sdfs/" + volname + ".log";
+		//Main.logPath = "/var/log/sdfs/" + volname + ".log";
 		if (OSValidator.isWindows()) {
 			File cf = new File(volumeConfigFile);
 			String fn = cf.getName().substring(0, cf.getName().lastIndexOf(".")) + ".log";

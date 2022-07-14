@@ -2,7 +2,6 @@ package org.opendedup.sdfs;
 
 import java.io.File;
 
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Result;
@@ -22,7 +21,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.google.common.io.BaseEncoding;
-
 
 public class Config {
 	public static boolean encrypted = false;
@@ -79,13 +77,16 @@ public class Config {
 		Main.sdfsPassword = cli.getAttribute("password");
 		Main.sdfsPasswordSalt = cli.getAttribute("salt");
 		Main.sdfsCliPort = Integer.parseInt(cli.getAttribute("port"));
+		if (cli.hasAttribute("immutabilityPeriod")) {
+			Main.immutabilityPeriod = Integer.parseInt(cli.getAttribute("immutabilityPeriod"));
+		}
 		if (cli.hasAttribute("use-ssl")) {
 			Main.sdfsCliSSL = Boolean.parseBoolean(cli.getAttribute("use-ssl"));
 		}
 		if (cli.hasAttribute("permissions-file")) {
 			Main.permissionsFile = cli.getAttribute("permissions-file");
-			File f  = new File(Main.permissionsFile);
-			if(!f.exists()){
+			File f = new File(Main.permissionsFile);
+			if (!f.exists()) {
 				f.getParentFile().mkdirs();
 
 			}
@@ -98,12 +99,12 @@ public class Config {
 		Main.authClassInfo = cli.getAttribute("auth-class-info");
 		Main.prodConfigFilePath = cli.getAttribute("prod-config-file-path");
 		Main.prodConfigVariable = cli.getAttribute("prod-config-variable");
- 		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
+		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
 		SDFSLogger.getLog().debug("auth-utility-jar-file-path=" + Main.authJarFilePath);
 		SDFSLogger.getLog().debug("auth-class-info=" + Main.authClassInfo);
 		SDFSLogger.getLog().debug("prod-config-file-path=" + Main.prodConfigFilePath);
 		SDFSLogger.getLog().debug("prod-config-variable=" + Main.prodConfigVariable);
-	Main.version = version;
+		Main.version = version;
 		SDFSLogger.getLog().info("Parsing volume " + doc.getDocumentElement().getNodeName() + " version " + version);
 		Element locations = (Element) doc.getElementsByTagName("locations").item(0);
 		SDFSLogger.getLog().info("parsing folder locations");
@@ -138,7 +139,7 @@ public class Config {
 		Main.safeSync = Boolean.parseBoolean(cache.getAttribute("safe-sync"));
 		Main.writeThreads = Integer.parseInt(cache.getAttribute("write-threads"));
 		if (cache.hasAttribute("max-open-sst-files")) {
-			Main.MAX_OPEN_SST_FILES = Integer.parseInt(cache.getAttribute("max-open-sst-files")) ;
+			Main.MAX_OPEN_SST_FILES = Integer.parseInt(cache.getAttribute("max-open-sst-files"));
 		}
 		if (cache.hasAttribute("min-variable-segment-size")) {
 
@@ -195,10 +196,10 @@ public class Config {
 		if (localChunkStore.hasAttribute("disable-auto-gc")) {
 			Main.disableAutoGC = Boolean.parseBoolean(localChunkStore.getAttribute("disable-auto-gc"));
 		}
-		if(localChunkStore.hasAttribute("compact-on-mount")) {
+		if (localChunkStore.hasAttribute("compact-on-mount")) {
 			Main.runCompact = Boolean.parseBoolean(localChunkStore.getAttribute("compact-on-mount"));
 		}
-		if(localChunkStore.hasAttribute("hashtable-rm-threshold")) {
+		if (localChunkStore.hasAttribute("hashtable-rm-threshold")) {
 			Main.HT_RM_THRESH = Long.parseLong(localChunkStore.getAttribute("hashtable-rm-threshold"));
 			SDFSLogger.getLog().info("HT_RM_THRESH = " + Main.HT_RM_THRESH);
 		}
@@ -212,7 +213,7 @@ public class Config {
 		if (localChunkStore.hasAttribute("enable-lookup-filter")) {
 			Main.enableLookupFilter = Boolean.parseBoolean(localChunkStore.getAttribute("enable-lookup-filter"));
 		}
-		if(localChunkStore.hasAttribute("enable-batch-gc")) {
+		if (localChunkStore.hasAttribute("enable-batch-gc")) {
 			Main.DDB_TRASH_ENABLED = Boolean.parseBoolean(localChunkStore.getAttribute("enable-batch-gc"));
 		}
 
@@ -288,6 +289,10 @@ public class Config {
 				Main.cloudSecretKey = aws.getAttribute("aws-secret-key");
 			}
 			Main.cloudBucket = aws.getAttribute("aws-bucket-name");
+			Main.s3ApiCompatible = Boolean.parseBoolean(aws.getAttribute("s3-compatible-target"));
+			if (aws.hasAttribute("encrypt-bucket")) {
+				Main.encryptBucket = Boolean.parseBoolean(aws.getAttribute("encrypt-bucket"));
+			}
 		}
 		int azureSz = doc.getElementsByTagName("azure-store").getLength();
 		if (azureSz > 0) {
@@ -301,21 +306,20 @@ public class Config {
 			Main.cloudChunkStore = Boolean.parseBoolean(azure.getAttribute("enabled"));
 		}
 
-
 		if (password != null) {
 			Main.eSdfsPassword = Main.sdfsPassword;
 			Main.eSdfsPasswordSalt = Main.sdfsPasswordSalt;
 			try {
 				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.eSdfsPassword),
-							password, Main.chunkStoreEncryptionIV);
-					Main.sdfsPassword = new String(dc);
+						password, Main.chunkStoreEncryptionIV);
+				Main.sdfsPassword = new String(dc);
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to decrypt sdfscli password ", e);
 			}
 			try {
 				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.eSdfsPasswordSalt),
-							password, Main.chunkStoreEncryptionIV);
-					Main.sdfsPasswordSalt = new String(dc);
+						password, Main.chunkStoreEncryptionIV);
+				Main.sdfsPasswordSalt = new String(dc);
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to decrypt sdfscli password ", e);
 			}
@@ -345,7 +349,7 @@ public class Config {
 			}
 
 		}
-		if(Main.usePortRedirector) {
+		if (Main.usePortRedirector) {
 			Main.sdfsCliRequireMutualTLSAuth = false;
 			Main.sdfsCliSSL = false;
 			Main.sdfsCliListenAddr = "localhost";
@@ -405,18 +409,19 @@ public class Config {
 
 		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
 		cli.setAttribute("enable", Boolean.toString(Main.sdfsCliEnabled));
-		if(Main.eSdfsPassword != null) {
+		if (Main.eSdfsPassword != null) {
 			cli.setAttribute("password", Main.eSdfsPassword);
 		} else {
 			cli.setAttribute("password", Main.sdfsPassword);
 		}
-		if(Main.eSdfsPasswordSalt != null) {
+		if (Main.eSdfsPasswordSalt != null) {
 			cli.setAttribute("salt", Main.eSdfsPasswordSalt);
 		} else {
 			cli.setAttribute("salt", Main.sdfsPasswordSalt);
 		}
 
 		cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
+		cli.setAttribute("immutabilityPeriod", Integer.toString(Main.immutabilityPeriod));
 		cli.setAttribute("enable-auth", Boolean.toString(Main.sdfsCliRequireAuth));
 		cli.setAttribute("listen-address", Main.sdfsCliListenAddr);
 		cli.setAttribute("auth-utility-jar-file-path", Main.authJarFilePath);
@@ -455,6 +460,7 @@ public class Config {
 			if (awsSz > 0) {
 				Element aws = (Element) localChunkStore.getElementsByTagName("aws").item(0);
 				aws.setAttribute("aws-secret-key", Main.eCloudSecretKey);
+				aws.setAttribute("s3-compatible-target", Boolean.toString(Main.s3ApiCompatible));
 			}
 			if (azureSz > 0) {
 				Element azure = (Element) doc.getElementsByTagName("azure-store").item(0);

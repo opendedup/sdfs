@@ -697,32 +697,50 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     }
                 } else {
                     File f = FileIOServiceImpl.resolvePath(path);
-                    try {
-                        SDFSLogger.getLog().debug("Unlink::chattr set non-Immutable file: " + f.getPath());
-                        ImmuteLinuxFDFileFile(f.getPath(), false);
-                        MetaFileStore.getMF(f).clearRetentionLock();
-                        if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
-                            // SDFSLogger.getLog().info("deleted file " +
-                            // f.getPath());
-                            responseObserver.onNext(b.build());
-                            responseObserver.onCompleted();
-                            return;
-                        } else {
-                            SDFSLogger.getLog().warn("unable to delete file " + f.getPath());
-                            b.setError("unable to delete symlink " + f.getPath());
+                    Path f_p = Paths.get(f.getPath());
+                    BasicFileAttributes attr = Files.readAttributes(f_p, BasicFileAttributes.class);
+                    long creationTime = attr.creationTime().toMillis();
+                    long currentTime = System.currentTimeMillis();
+                    int main_period = Main.immutabilityPeriod;
+                    int diff_period = (int) (currentTime - creationTime) / 86400000;// 1000milli * 60s * 60min * 24h ==>
+                                                                                    // days
+
+                    if (diff_period >= main_period || diff_period < 1) {
+                        try {
+                            SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + f.getPath());
+                            ImmuteLinuxFDFileFile(f.getPath(), false);
+                            MetaFileStore.getMF(f).clearRetentionLock();
+                            if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
+                                // SDFSLogger.getLog().info("deleted file " +
+                                // f.getPath());
+                                responseObserver.onNext(b.build());
+                                responseObserver.onCompleted();
+                                return;
+                            } else {
+                                SDFSLogger.getLog().warn("unable to delete file " + f.getPath());
+                                b.setError("unable to delete symlink " + f.getPath());
+                                b.setErrorCode(errorCodes.EACCES);
+                                responseObserver.onNext(b.build());
+                                responseObserver.onCompleted();
+                                return;
+                            }
+                        } catch (Exception e) {
+                            SDFSLogger.getLog().error("unable to delete file " + path, e);
+                            b.setError("unable to delete " + f.getPath());
                             b.setErrorCode(errorCodes.EACCES);
                             responseObserver.onNext(b.build());
                             responseObserver.onCompleted();
                             return;
                         }
-                    } catch (Exception e) {
-                        SDFSLogger.getLog().error("unable to delete file " + path, e);
-                        b.setError("unable to delete " + f.getPath());
-                        b.setErrorCode(errorCodes.EACCES);
+                    } else {
+                        SDFSLogger.getLog().error("Immutability period not completed.");
+                        b.setError("Immutability period is set to " + main_period + " days.");
+                        b.setErrorCode(errorCodes.ETIME);
                         responseObserver.onNext(b.build());
                         responseObserver.onCompleted();
                         return;
                     }
+
                 }
             } catch (FileIOError e) {
                 b.setError(e.message);
@@ -1010,6 +1028,9 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     if (read < chunk.length) {
                         buf = ByteBuffer.wrap(chunk);
                     }
+                }
+                while (Main.rehydrateBlobs) {
+                    Thread.sleep(10000);
                 }
                 buf.position(0);
                 b.setData(ByteString.copyFrom(buf, read));
