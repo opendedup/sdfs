@@ -100,6 +100,11 @@ import com.amazonaws.services.s3.model.RestoreObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.SSEAlgorithm;
+import com.amazonaws.services.s3.model.ServerSideEncryptionByDefault;
+import com.amazonaws.services.s3.model.ServerSideEncryptionConfiguration;
+import com.amazonaws.services.s3.model.ServerSideEncryptionRule;
+import com.amazonaws.services.s3.model.SetBucketEncryptionRequest;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.amazonaws.services.s3.model.Tier;
 import com.amazonaws.services.s3.model.UploadPartRequest;
@@ -170,6 +175,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	boolean deleteUnclaimed = true;
 	boolean md5sum = true;
 	boolean simpleS3 = false;
+	boolean encryptBucket = false;
 	private int glacierDays = 0;
 	private boolean useGlacier = false;
 	private int infrequentAccess = 0;
@@ -706,7 +712,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				} else if (s3Target != null) {
 					String[] tokens = s3Target.split("\\.");
 					String region = "us-west-2";
-					if(tokens.length > 1){
+					if (tokens.length > 1) {
 						region = tokens[1];
 					}
 					SDFSLogger.getLog().info("region=" + region);
@@ -753,8 +759,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				throw new IOException("Failed to connect to storage bucket. Exiting");
 			}
 			if (!s3Service.doesBucketExist(this.name)) {
+				this.encryptBucket = Main.encryptBucket;
 				s3Service.createBucket(this.name);
 				SDFSLogger.getLog().info("created new store " + name);
+				if (Main.encryptBucket) {
+					SDFSLogger.getLog().info("Setting server-side encryption on the store " + name);
+					s3Service.setBucketEncryption(new SetBucketEncryptionRequest()
+							.withBucketName(this.name)
+							.withServerSideEncryptionConfiguration(new ServerSideEncryptionConfiguration()
+									.withRules(new ServerSideEncryptionRule()
+											.withApplyServerSideEncryptionByDefault(new ServerSideEncryptionByDefault()
+													.withSSEAlgorithm(SSEAlgorithm.AES256)))));
+				}
 				if (this.standAlone) {
 					ObjectMetadata md = new ObjectMetadata();
 					md.addUserMetadata("currentsize", "0");
@@ -2147,7 +2163,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			throws AmazonServiceException, AmazonClientException, InterruptedException, IOException {
 		if (this.gcsSigner) {
 			S3Object obj = s3Service.getObject(this.name, keyName);
-			S3ObjectInputStream is =obj.getObjectContent();
+			S3ObjectInputStream is = obj.getObjectContent();
 			BufferedInputStream in = new BufferedInputStream(obj.getObjectContent());
 			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
 			IOUtils.copy(in, out);

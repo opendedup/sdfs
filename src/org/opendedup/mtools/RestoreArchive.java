@@ -30,6 +30,7 @@ import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -170,6 +171,7 @@ public class RestoreArchive implements Runnable {
 				if (this.restoreRequests.size() > 0)
 					Thread.sleep(2 * 60 * 1000);
 			}
+			Main.rehydrateBlobs = false;
 			SDFSLogger.getLog().info("took [" + (System.currentTimeMillis() - start) / (1000 * 60)
 					+ "] Minutes to import [" + totalArchives.get() + "]");
 			fEvt.endEvent("Archive Restore Succeeded for " + f.getPath());

@@ -70,7 +70,10 @@ RUN cp target/lib/*.jar install-packages/deb/usr/share/sdfs/lib/ && \
     cp target/sdfs-${VERSION}.jar install-packages/deb/usr/share/sdfs/lib/sdfs.jar && \
     cp target/sdfs-${VERSION}.jar install-packages
 WORKDIR "/sdfs-build/install-packages/windows"
-RUN makensis -V4 -DVERSION=${PKG_VERSION} -DJARVERSION=${VERSION} sdfs_win.nsi
+RUN rm -rf  bin/jre/* ../deb/usr/share/sdfs/lib/* && \
+    makensis -V4 -DVERSION=${PKG_VERSION} -DJARVERSION=${VERSION} sdfs_win.nsi && \
+    makensis -V4 -DVERSION=${PKG_VERSION} -DJARVERSION=${VERSION} sample.nsi && \
+    ls -lah && ls -lah ../
 WORKDIR "/sdfs-build/install-packages/"
 RUN rm -rf *.deb *.rpm && \
     cp ../src/readme.txt deb/usr/share/sdfs/ && \
@@ -79,9 +82,11 @@ RUN rm -rf *.deb *.rpm && \
 WORKDIR "/sdfs-build/install-packages/"
 RUN echo "tar cvf - sdfs-${VERSION}-jar-with-dependencies.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm SDFS-${PKG_VERSION}-Setup.exe" > export_data.sh && \
     chmod 700 export_data.sh
-ENTRYPOINT tar cvf - sdfs-${VERSION}.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm
+ENTRYPOINT bash
+#ENTRYPOINT tar cvf - sdfs-${VERSION}.jar sdfs_${PKG_VERSION}_amd64.deb sdfs-${PKG_VERSION}-1.x86_64.rpm
 FROM ubuntu:20.04
 ENV VERSION=master
+ENV PKG_VERSION=0.0.1
 LABEL email=samsilverberg@google.com
 LABEL author="Sam Silverberg"
 RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
@@ -97,9 +102,9 @@ RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteracti
         libxml2-utils \
         fuse
 WORKDIR "/tmp"
-COPY --from=builder /sdfs-build/install-packages/sdfs_${VERSION}_amd64.deb .
-RUN dpkg -i sdfs_${VERSION}_amd64.deb && \
-    rm sdfs_${VERSION}_amd64.deb
+COPY --from=builder /sdfs-build/install-packages/sdfs_${PKG_VERSION}_amd64.deb .
+RUN dpkg -i sdfs_${PKG_VERSION}_amd64.deb && \
+    rm sdfs_${PKG_VERSION}_amd64.deb
 RUN echo "* hard nofile 65535" >> /etc/security/limits.conf
 RUN	echo "* soft nofile 65535" >> /etc/security/limits.conf
 COPY --from=builder /sdfs-build/install-packages/docker_run.sh /usr/share/sdfs/docker_run.sh

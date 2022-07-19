@@ -485,7 +485,7 @@ public class Volume {
 		root.setAttribute("path", path);
 		root.setAttribute("name", this.name);
 		root.setAttribute("current-size", Long.toString(this.currentSize.get()));
-		root.setAttribute("capacity", StorageUnit.of(this.capacity).format(this.capacity));
+		root.setAttribute("capacity", StorageUnit.of(this.capacity).number_format(this.capacity));
 		root.setAttribute("maximum-percentage-full", Double.toString(this.fullPercentage));
 
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes.get()));

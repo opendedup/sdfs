@@ -18,9 +18,14 @@
  *******************************************************************************/
 package org.opendedup.util;
 
+import java.util.Locale;
+
+import org.opendedup.logging.SDFSLogger;
+
 public enum StorageUnit {
 	BYTE("B", 1L), KILOBYTE("KB", 1L << 10), MEGABYTE("MB", 1L << 20), GIGABYTE(
-			"GB", 1L << 30), TERABYTE("TB", 1L << 40), PETABYTE("PB", 1L << 50), EXABYTE(
+			"GB", 1L << 30),
+	TERABYTE("TB", 1L << 40), PETABYTE("PB", 1L << 50), EXABYTE(
 			"EB", 1L << 60);
 
 	public static final StorageUnit BASE = BYTE;
@@ -77,6 +82,26 @@ public enum StorageUnit {
 
 	public String format(long number) {
 		return nf.format(number / (double) divider) + " " + symbol;
+	}
+
+	public String number_format(double number) {
+		SDFSLogger.getLog().debug("number_format called");
+		java.text.NumberFormat nf2 = java.text.NumberFormat
+				.getInstance(Locale.US);
+		nf2.setGroupingUsed(false);
+		nf2.setMinimumFractionDigits(0);
+		nf2.setMaximumFractionDigits(2);
+		return nf2.format(number / (double) divider) + " " + symbol;
+	}
+
+	public String number_format(long number) {
+		SDFSLogger.getLog().debug("number_format called");
+		java.text.NumberFormat nf2 = java.text.NumberFormat
+				.getInstance(Locale.US);
+		nf2.setGroupingUsed(false);
+		nf2.setMinimumFractionDigits(0);
+		nf2.setMaximumFractionDigits(2);
+		return nf2.format(number / (double) divider) + " " + symbol;
 	}
 
 	private static java.text.NumberFormat nf = java.text.NumberFormat

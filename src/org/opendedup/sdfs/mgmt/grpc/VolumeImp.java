@@ -530,7 +530,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       if (Main.cloudAccessKey != null)
         info.setCloudAccessKey(Main.cloudAccessKey);
       if (Main.cloudSecretKey != null)
-        info.setCloudSecretKey(Main.cloudSecretKey);
+        info.setCloudSecretKey(Main.eCloudSecretKey);
         /*
       CacheStats ct = HashBlobArchive.getCacheStats();
       info.setAverageLoadPenalty(ct.averageLoadPenalty());

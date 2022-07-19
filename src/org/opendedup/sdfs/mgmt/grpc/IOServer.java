@@ -66,7 +66,7 @@ public class IOServer {
   private X509Certificate getX509Certificate(String certPath) throws Exception {
     FileInputStream is = null;
     try {
-      SDFSLogger.getLog().info("Cert Path  = " + certPath);
+      //SDFSLogger.getLog().info("Cert Path  = " + certPath);
       CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
       is = new FileInputStream(certPath);
       X509Certificate cer = (X509Certificate) certFactory.generateCertificate(is);
