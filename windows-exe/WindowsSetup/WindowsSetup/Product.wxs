@@ -36,7 +36,7 @@
         <Directory Id="INSTALLFOLDER" Name="sdfs">
           <Component Id ="setEnviroment"
                            Guid="a1f647dd-44f0-47c0-8936-74ab34d27262">
-            <CreateFolder />
+            <CreateFolder/>
             <Environment Id="SET_ENV"
                                       Action="set"
                                         Name="PATH"
