@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Product Id="*" Name="sdfs" Language="1033" Version="3.14.0.0" 
-           Manufacturer="Datish Systems LLC" 
+           Manufacturer="Micro Focus" 
            UpgradeCode="e76736f0-b031-42c0-95d7-fa99308ed1ab"
            
            >
@@ -32,7 +32,6 @@
 
 	<Fragment>
 		<Directory Id="TARGETDIR" Name="SourceDir">
-      
 			<Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLFOLDER" Name="sdfs">
           <Component Id ="setEnviroment"
@@ -50,8 +49,15 @@
           <Component Id="RegistryEntries" Guid="*">
             <RegistryKey Root="HKLM"
                          Key="Software\SDFS">
+              
               <RegistryValue Type="string" Name="path" Value="[INSTALLFOLDER]"/>
             </RegistryKey>
+            <RegistryKey Root="HKLM"
+                         Key="Software\WOW6432Node\SDFS">
+
+              <RegistryValue Type="string" Name="path" Value="[INSTALLFOLDER]"/>
+            </RegistryKey>
+            
           </Component>
           <Directory Id="LIBFOLDER" Name="lib">
             <Component Id="SDFSJarComponent">
