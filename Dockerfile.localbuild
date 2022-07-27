@@ -38,7 +38,7 @@ COPY src /sdfs-build/src/
 COPY .git /sdfs-build/.git
 COPY install-packages /sdfs-build/install-packages/
 WORKDIR "/sdfs-build"
-RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive"apt install -y \
+RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
         git
 RUN wget https://cdn.azul.com/zulu/bin/zulu11.35.13-ca-jdk11.0.5-linux_x64.tar.gz && \
     rm -rf install-packages/deb/usr/share/sdfs/bin/jre && \

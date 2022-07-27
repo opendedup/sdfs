@@ -529,7 +529,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       info.setMaxAge(Main.maxAge);
       if (Main.cloudAccessKey != null)
         info.setCloudAccessKey(Main.cloudAccessKey);
-      if (Main.cloudSecretKey != null)
+      if (Main.eCloudSecretKey != null)
         info.setCloudSecretKey(Main.eCloudSecretKey);
         /*
       CacheStats ct = HashBlobArchive.getCacheStats();
