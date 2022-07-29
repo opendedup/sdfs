@@ -40,7 +40,7 @@ public class SDFSLogger {
 	private static Logger log = LogManager.getLogger("sdfs");
 	private static String msgPattern = "%d [%p] [%c] [%C] [%L] [%t] %x - %m%n";
 	static {
-		createSdfsLogger();
+		//createSdfsLogger();
 	}
 
 	protected static void removeAllAppenders(org.apache.logging.log4j.core.Logger logger) {
@@ -97,9 +97,8 @@ public class SDFSLogger {
 				.withCompressionLevelStr("0")
 				.build();
 		Appender appender = RollingFileAppender.newBuilder().setLayout(layout).setName("rollingfileappender")
-		.withFileName(Main.logPath).withFilePattern(Main.logPath.split(".", 2)[0] +"-%i.log").withAppend(true)
+		.withFileName(Main.logPath).withFilePattern(Main.logPath +".%i").withAppend(true)
 				.withStrategy(st).withPolicy(tp).build();
-		System.out.println(appender);
 		appender.start();
 		org.apache.logging.log4j.core.Logger clog = (org.apache.logging.log4j.core.Logger) log;
 		removeAllAppenders(clog);

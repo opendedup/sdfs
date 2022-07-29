@@ -216,8 +216,6 @@ public class MountSDFS implements Daemon, Runnable {
 			lf.getParentFile().mkdirs();
 		}
 		sdfsService = new SDFSService(volumeConfigFile, volumes);
-
-
 		try {
 			sdfsService.start(port, password, cmd.hasOption("s"));
 		} catch (Throwable e1) {

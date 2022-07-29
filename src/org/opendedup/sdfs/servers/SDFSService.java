@@ -75,6 +75,7 @@ public class SDFSService {
 			System.err.println("Exiting");
 			System.exit(-1);
 		}
+		SDFSLogger.createSdfsLogger();
 		SDFSLogger.getLog().debug("############# SDFSService Starting ##################");
 
 		Main.mountEvent = SDFSEvent
