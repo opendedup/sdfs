@@ -261,7 +261,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void close() {
-		this.closed = true;
+		
 		try {
 			SDFSLogger.getLog().info("############ Closing Bucket##################");
 			if (this.standAlone) {
@@ -305,6 +305,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error while closing bucket " + this.name, e);
 		} finally {
+			this.closed = true;
 			try {
 				tx.shutdownNow(false);
 				s3Service.shutdown();
