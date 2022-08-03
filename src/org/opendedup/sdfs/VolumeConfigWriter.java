@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -171,6 +172,31 @@ public class VolumeConfigWriter {
 			printHelp(options);
 			System.exit(1);
 		}
+		if (cmd.hasOption("update-cloud-creds")) {
+			System.out.println("Updating cloud credentials...");
+			if (!cmd.hasOption("volume-name") || !cmd.hasOption("cloud-access-key") ||
+					!cmd.hasOption("cloud-secret-key")) {
+				System.out.println("--volume-name, --cloud-access-key and --cloud-secret-key are required");
+				printHelp(options);
+				System.exit(-1);
+			}
+
+			Main.sdfsVolName = cmd.getOptionValue("volume-name");
+			Main.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
+			Main.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+
+			if (cmd.hasOption("encrypt-config"))
+				Main.sdfsPassword = cmd.getOptionValue("encrypt-config");
+
+			if (cmd.hasOption("chunk-store-encryption-key"))
+				Main.chunkStoreEncryptionKey = cmd.getOptionValue("chunk-store-encryption-key");
+			else
+				Main.chunkStoreEncryptionKey = this.chunk_store_encryption_key;
+
+			int returnCode = Config.updateCloudCreds();
+			System.exit(returnCode);
+		}
+		
 		if (cmd.hasOption("encrypt-config")) {
 			if (cmd.getOptionValue("encrypt-config").length() < 6) {
 				System.out.println("--encrypt-config must be greater than 6 characters");
@@ -595,6 +621,10 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 		}
+
+		byte[] b = new byte[16];
+		b = Arrays.copyOf(this.cloudBucketName.getBytes(), 16);
+		this.chunk_store_iv = StringUtils.getHexString(b);
 		if (cmd.hasOption("chunk-store-io-threads")) {
 			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("chunk-store-io-threads"));
 		}
@@ -1129,6 +1159,8 @@ public class VolumeConfigWriter {
 				.withDescription("Set it to specify the immutability period of the files to x number of days.")
 				.hasArg(true)
 				.withArgName("number of days e.g. 10").create());
+		options.addOption(OptionBuilder.withLongOpt("update-cloud-creds")
+				.withDescription("If set, the volumes cloud credentials will be updated.").create());
 		options.addOption(OptionBuilder.withLongOpt("hashtable-rm-threshold").withDescription(
 				"The threashold in milliseconds to wait for unclaimed chucks to be available for garbage collection"
 						+ "The default is 15 minutes or 900000 ms,")
@@ -1298,8 +1330,8 @@ public class VolumeConfigWriter {
 				.withDescription("Encrypt security sensitive encryption parameters with the password provided")
 				.hasArg(true).withArgName("a password").create());
 		options.addOption(OptionBuilder.withLongOpt("encrypt-bucket").withDescription(
-						"Set to enable server-side encryption by deafult(AES256 SSE Algorithm) on the bucket in Amazon S3 Cloud Storage. ")
-						.hasArg(false).create());
+				"Set to enable server-side encryption by deafult(AES256 SSE Algorithm) on the bucket in Amazon S3 Cloud Storage. ")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("aws-enabled").withDescription(
 				"Set to true to enable this volume to store to Amazon S3 Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());

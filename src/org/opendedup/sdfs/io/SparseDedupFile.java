@@ -924,7 +924,6 @@ public class SparseDedupFile implements DedupFile {
 			synchronized (channels) {
 				try {
 
-					// if (channel.getFlags() == flags) {
 					this.channels.remove(channel);
 					channel.close(flags);
 					SDFSLogger.getLog().debug("Channel size is " + this.channels.size());
@@ -932,12 +931,6 @@ public class SparseDedupFile implements DedupFile {
 						SDFSLogger.getLog().debug("Closinging " + this.mf.getPath());
 						this.forceClose();
 					}
-					// } else {
-					// SDFSLogger.getLog().warn("unregister of filechannel for [" +
-					// this.mf.getPath()
-					// + "] failed because flags mismatch flags [" + flags + "!=" +
-					// channel.getFlags() + "]");
-					// }
 					try {
 						MetaFileStore.getMF(mf.getPath()).sync();
 						eventBus.post(new SFileWritten(this));

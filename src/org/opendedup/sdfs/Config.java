@@ -16,6 +16,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.OSValidator;
 import org.opendedup.util.StorageUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -469,5 +470,84 @@ public class Config {
 		}
 		return doc;
 	}
+
+
+/**
+ * updates the config with new credentials
+ *
+ * @param fileName
+ * @throws Exception
+ */
+public synchronized static int updateCloudCreds() throws Exception {
+
+	File file = new File(OSValidator.getConfigPath() + Main.sdfsVolName.trim() + "-volume-cfg.xml");
+	if (!file.exists()) {
+		System.out.println("Volume doesn't exist, please provide a valid volume.");
+		return -1;
+	}
+	
+	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	DocumentBuilder db = dbf.newDocumentBuilder();
+	Document doc = db.parse(file);
+
+	Element localChunkStore = (Element) doc.getElementsByTagName("local-chunkstore").item(0);
+	
+	Element sdfsCli = (Element) doc.getElementsByTagName("sdfscli").item(0);
+	if((sdfsCli.getAttribute("encrypt-config")).equals("true"))
+	{
+		if(Main.sdfsPassword.isEmpty())
+		{
+			System.out.println("--encrypt-config is required"
+								+ " as the volume's cloud keys were encrypted during original volume creation.");
+			return -1;
+		}
+
+		String password = Main.sdfsPassword;
+		String iv = localChunkStore.getAttribute("encryption-iv");
+		Main.chunkStoreEncryptionIV = iv;
+		byte[] ec = EncryptUtils.encryptCBC(Main.cloudSecretKey.getBytes(), password, iv);
+		Main.cloudSecretKey = BaseEncoding.base64Url().encode(ec);
+	}
+
+	int awsSz = localChunkStore.getElementsByTagName("aws").getLength();
+	int googleSz = localChunkStore.getElementsByTagName("google-store").getLength();
+	int azureSz = doc.getElementsByTagName("azure-store").getLength();
+
+	if (awsSz > 0) {
+		Element aws = (Element) doc.getElementsByTagName("aws").item(0);
+		aws.setAttribute("aws-secret-key", Main.cloudSecretKey);
+		aws.setAttribute("aws-access-key", Main.cloudAccessKey);
+	}
+	else if (azureSz > 0) {
+		Element azure = (Element) doc.getElementsByTagName("azure-store").item(0);
+		azure.setAttribute("azure-secret-key", Main.cloudSecretKey);
+		azure.setAttribute("azure-access-key", Main.cloudAccessKey);
+	}
+	else if (googleSz > 0) {
+		Element google = (Element) doc.getElementsByTagName("google-store").item(0);
+		google.setAttribute("gs-secret-key", Main.cloudSecretKey);
+		google.setAttribute("gs-access-key", Main.cloudAccessKey);
+	}
+	else {
+		System.out.println("Not a valid cloud target");
+		return -1;
+	}
+
+	try {
+		// Prepare the DOM document for writing
+		Source source = new DOMSource(doc);
+
+		Result result = new StreamResult(file);
+
+		// Write the DOM document to the file
+		Transformer xformer = TransformerFactory.newInstance().newTransformer();
+		xformer.transform(source, result);
+	} catch (Exception e) {
+		SDFSLogger.getLog().error("Unable to update the cloud credentials ", e);
+		return -1;
+	}
+	
+	return 1;
+}
 
 }

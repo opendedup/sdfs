@@ -39,8 +39,9 @@ import org.opendedup.sdfs.Main;
 public class SDFSLogger {
 	private static Logger log = LogManager.getLogger("sdfs");
 	private static String msgPattern = "%d [%p] [%c] [%C] [%L] [%t] %x - %m%n";
+	private static boolean cl = false;
 	static {
-		//createSdfsLogger();
+		// createSdfsLogger();
 	}
 
 	protected static void removeAllAppenders(org.apache.logging.log4j.core.Logger logger) {
@@ -62,6 +63,7 @@ public class SDFSLogger {
 		removeAllAppenders(clog);
 		clog.addAppender(appender);
 		context.updateLoggers();
+		cl = true;
 
 	}
 
@@ -83,27 +85,29 @@ public class SDFSLogger {
 	}
 
 	public static void createSdfsLogger() {
-		LoggerContext context = (LoggerContext) LogManager.getContext();
-		Configuration config = context.getConfiguration();
+		if (!cl) {
+			LoggerContext context = (LoggerContext) LogManager.getContext();
+			Configuration config = context.getConfiguration();
 
-		PatternLayout layout = PatternLayout.newBuilder().withPattern(msgPattern)
-		.withConfiguration(config).withAlwaysWriteExceptions(true)
-		.withNoConsoleNoAnsi(false).build();
-		TriggeringPolicy tp = SizeBasedTriggeringPolicy.createPolicy(Main.logSize);
-		RolloverStrategy st = DefaultRolloverStrategy.newBuilder()
-				.withMax(Integer.toString(Main.logFiles))
-				.withMin("1")
-				.withConfig(config)
-				.withCompressionLevelStr("0")
-				.build();
-		Appender appender = RollingFileAppender.newBuilder().setLayout(layout).setName("rollingfileappender")
-		.withFileName(Main.logPath).withFilePattern(Main.logPath +".%i").withAppend(true)
-				.withStrategy(st).withPolicy(tp).build();
-		appender.start();
-		org.apache.logging.log4j.core.Logger clog = (org.apache.logging.log4j.core.Logger) log;
-		removeAllAppenders(clog);
-		clog.addAppender(appender);
-		context.updateLoggers();
+			PatternLayout layout = PatternLayout.newBuilder().withPattern(msgPattern)
+					.withConfiguration(config).withAlwaysWriteExceptions(true)
+					.withNoConsoleNoAnsi(false).build();
+			TriggeringPolicy tp = SizeBasedTriggeringPolicy.createPolicy(Main.logSize);
+			RolloverStrategy st = DefaultRolloverStrategy.newBuilder()
+					.withMax(Integer.toString(Main.logFiles))
+					.withMin("1")
+					.withConfig(config)
+					.withCompressionLevelStr("0")
+					.build();
+			Appender appender = RollingFileAppender.newBuilder().setLayout(layout).setName("rollingfileappender")
+					.withFileName(Main.logPath).withFilePattern(Main.logPath + ".%i").withAppend(true)
+					.withStrategy(st).withPolicy(tp).build();
+			appender.start();
+			org.apache.logging.log4j.core.Logger clog = (org.apache.logging.log4j.core.Logger) log;
+			removeAllAppenders(clog);
+			clog.addAppender(appender);
+			context.updateLoggers();
+		}
 	}
 
 	public static Logger getLog() {
@@ -124,14 +128,14 @@ public class SDFSLogger {
 		return log;
 	}
 
-	public static void main(String [] args) {
-		
+	public static void main(String[] args) {
+
 		Main.logPath = "test.log";
 		Main.logFiles = 10;
 		Main.logSize = "10K";
 		Main.logFiles = 10;
 		createSdfsLogger();
-		for(int i = 0; i < 1000000;i++) {
+		for (int i = 0; i < 1000000; i++) {
 			SDFSLogger.getLog().error("wow " + i);
 		}
 		System.out.println("1111");

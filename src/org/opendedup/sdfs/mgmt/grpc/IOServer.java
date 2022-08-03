@@ -1,6 +1,5 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
-import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFactory;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -36,7 +35,6 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSession;
@@ -52,10 +50,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
-import java.util.concurrent.ForkJoinWorkerThread;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class IOServer {
@@ -255,7 +249,7 @@ public class IOServer {
         .addService(new StorageServiceImpl()).directExecutor()
         .maxInboundMessageSize(maxMessageSize).maxInboundMetadataSize(maxMessageSize)
         .addService(new FileIOServiceImpl())
-        .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())
+        .addService(new SDFSEventImpl())
         .addService(new SdfsUserServiceImpl());
     if (!Main.authJarFilePath.equals("") && !Main.authClassInfo.equals("")) {
       try {
@@ -368,32 +362,6 @@ public class IOServer {
     }
   }
 
-  ExecutorService getExecutor(int asyncThreads) {
-    // TODO(carl-mastrangelo): This should not be necessary. I don't know where this
-    // should be
-    // put. Move it somewhere else, or remove it if no longer necessary.
-    // See: https://github.com/grpc/grpc-java/issues/2119
-    return new ForkJoinPool(asyncThreads,
-        new ForkJoinWorkerThreadFactory() {
-          final AtomicInteger num = new AtomicInteger();
 
-          @Override
-          public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
-            ForkJoinWorkerThread thread = defaultForkJoinWorkerThreadFactory.newThread(pool);
-            thread.setDaemon(true);
-            thread.setName("server-worker-" + "-" + num.getAndIncrement());
-            return thread;
-          }
-        }, new EHanderler(), true /* async */);
-  }
-
-  private static class EHanderler implements Thread.UncaughtExceptionHandler {
-
-    @Override
-    public void uncaughtException(Thread arg0, Throwable arg1) {
-      SDFSLogger.getLog().warn("in thread " + arg0.toString(), arg1);
-
-    }
-
-  }
+  
 }
