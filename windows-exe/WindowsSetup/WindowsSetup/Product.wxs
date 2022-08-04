@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="sdfs" Language="1033" Version="3.14.0.0" 
+           Manufacturer="Micro Focus" 
+           UpgradeCode="e76736f0-b031-42c0-95d7-fa99308ed1ab"
+           
+           >
+   
+		<Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine"
+             InstallPrivileges="elevated" Platform="x64" Description="A Cloud Deduplication FileSystem"/>
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate EmbedCab="yes"/>
+
+    <DirectoryRef Id="TARGETDIR">
+      <Merge Id="VCRedist" SourceFile="Microsoft_VC141_CRT_x64.msm" DiskId="1" Language="0"/>
+      
+    </DirectoryRef>
+
+		<Feature Id="ProductFeature" Title="sdfs" Level="1" >
+			<ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="BaseFiles" />
+      <ComponentGroupRef Id="LibFiles" />
+      <ComponentRef Id="RegistryEntries" />
+      <ComponentRef Id="setEnviroment"/>
+      <ComponentRef Id="SDFSJarComponent" />
+		</Feature>
+    <Feature Id="VCRedist" Title="Visual C++ 8.0 Runtime" AllowAdvertise="no" Display="hidden" Level="1">
+      <MergeRef Id="VCRedist"/>
+    </Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLFOLDER" Name="sdfs">
+          <Component Id ="setEnviroment"
+                           Guid="a1f647dd-44f0-47c0-8936-74ab34d27262">
+            <CreateFolder/>
+            <Environment Id="SET_ENV"
+                                      Action="set"
+                                        Name="PATH"
+                                       Part="last"
+                                      Permanent="no"
+                                       System="yes"
+                        Value="[INSTALLFOLDER]" />
+          </Component>
+          
+          <Component Id="RegistryEntries" Guid="*">
+            <RegistryKey Root="HKLM"
+                         Key="Software\SDFS">
+              
+              <RegistryValue Type="string" Name="path" Value="[INSTALLFOLDER]"/>
+            </RegistryKey>
+            <RegistryKey Root="HKLM"
+                         Key="Software\WOW6432Node\SDFS">
+
+              <RegistryValue Type="string" Name="path" Value="[INSTALLFOLDER]"/>
+            </RegistryKey>
+            
+          </Component>
+          <Directory Id="LIBFOLDER" Name="lib">
+            <Component Id="SDFSJarComponent">
+              <File Id="sdfsJar" Name="sdfs.jar" Source="..\..\..\target\sdfs-master.jar" />
+            </Component>
+            </Directory>
+          
+        </Directory>
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+			<!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+			<!-- <Component Id="ProductComponent"> -->
+				<!-- TODO: Insert files, registry keys, and other resources here. -->
+			<!-- </Component> -->
+		</ComponentGroup>
+	</Fragment>
+</Wix>

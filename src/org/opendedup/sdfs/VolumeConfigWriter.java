@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -34,6 +35,9 @@ import org.opendedup.util.StringUtils;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3Client;
 
 import com.google.common.io.BaseEncoding;
 
@@ -67,6 +71,7 @@ public class VolumeConfigWriter {
 	String owner = "0";
 	String group = "0";
 	boolean simpleS3 = false;
+	boolean encryptBucket = false;
 	String volume_capacity = null;
 	int avgPgSz = 8192;
 	boolean mdCompresstion = false;
@@ -91,6 +96,7 @@ public class VolumeConfigWriter {
 	int maxSegSize = 32;
 	int windowSize = 48;
 	int cloudThreads = 8;
+	int immutabilityPeriod = 10;
 	private int glacierInDays = 0;
 	private int aruzreArchiveInDays = 0;
 	private String azurestorageTier = null;
@@ -111,6 +117,7 @@ public class VolumeConfigWriter {
 	String authClassInfo = "";
 	String prodConfigFilePath = "";
 	String prodConfigVariable = "";
+	boolean s3ApiCompatible = false;
 	boolean sdfsCliSSL = true;
 	boolean sdfsCliRequireAuth = false;
 	boolean sdfsCliRequireMutualTLSAuth = false;
@@ -165,6 +172,31 @@ public class VolumeConfigWriter {
 			printHelp(options);
 			System.exit(1);
 		}
+		if (cmd.hasOption("update-cloud-creds")) {
+			System.out.println("Updating cloud credentials...");
+			if (!cmd.hasOption("volume-name") || !cmd.hasOption("cloud-access-key") ||
+					!cmd.hasOption("cloud-secret-key")) {
+				System.out.println("--volume-name, --cloud-access-key and --cloud-secret-key are required");
+				printHelp(options);
+				System.exit(-1);
+			}
+
+			Main.sdfsVolName = cmd.getOptionValue("volume-name");
+			Main.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
+			Main.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+
+			if (cmd.hasOption("encrypt-config"))
+				Main.sdfsPassword = cmd.getOptionValue("encrypt-config");
+
+			if (cmd.hasOption("chunk-store-encryption-key"))
+				Main.chunkStoreEncryptionKey = cmd.getOptionValue("chunk-store-encryption-key");
+			else
+				Main.chunkStoreEncryptionKey = this.chunk_store_encryption_key;
+
+			int returnCode = Config.updateCloudCreds();
+			System.exit(returnCode);
+		}
+		
 		if (cmd.hasOption("encrypt-config")) {
 			if (cmd.getOptionValue("encrypt-config").length() < 6) {
 				System.out.println("--encrypt-config must be greater than 6 characters");
@@ -209,6 +241,10 @@ public class VolumeConfigWriter {
 			this.prodConfigFilePath = cmd.getOptionValue("prod-config-file-path");
 		if (cmd.hasOption("prod-config-variable"))
 			this.prodConfigVariable = cmd.getOptionValue("prod-config-variable");
+		if (cmd.hasOption("s3-compatible-target"))
+			this.s3ApiCompatible = Boolean.parseBoolean(cmd.getOptionValue("s3-compatible-target"));
+		if (cmd.hasOption("immutabilityPeriod"))
+			this.immutabilityPeriod = Integer.parseInt(cmd.getOptionValue("immutabilityPeriod"));
 		if (cmd.hasOption("sdfs-base-path"))
 			this.sdfsBasePath = cmd.getOptionValue("sdfs-base-path");
 		Main.sdfsBasePath = this.sdfsBasePath;
@@ -510,6 +546,33 @@ public class VolumeConfigWriter {
 					this.simpleS3 = true;
 					this.usebasicsigner = true;
 				}
+
+				if (cmd.hasOption("encrypt-bucket") && this.awsEnabled && !this.s3ApiCompatible) {
+					BasicAWSCredentials creds = null;
+					try {
+						creds = new BasicAWSCredentials(this.cloudAccessKey, this.cloudSecretKey);
+						AmazonS3Client s3Service = new AmazonS3Client(creds);
+						if (!s3Service.doesBucketExist(this.cloudBucketName))
+							this.encryptBucket = true;
+						else {
+							String result = s3Service.getBucketEncryption(this.cloudBucketName).toString();
+							if (result.contains("AES256"))
+								this.encryptBucket = true;
+							else
+								System.out.println(
+										"Warn : Unable to set AES256 encryption as bucket already exists without ServerSideEncryption enabled.");
+							this.encryptBucket = false;
+						}
+					} catch (Exception e) {
+						if (e.toString().contains("ServerSideEncryptionConfigurationNotFound"))
+							this.encryptBucket = false;
+						else {
+							System.err.println("Unable to authenticate to AWS " + e.toString());
+							e.printStackTrace();
+							System.exit(-1);
+						}
+					}
+				}
 				/*
 				 * if (!this.aliEnabled && !minIOEnabled && !awsAim &&
 				 * !cmd.hasOption("cloud-disable-test") &&
@@ -558,6 +621,10 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 		}
+
+		byte[] b = new byte[16];
+		b = Arrays.copyOf(this.cloudBucketName.getBytes(), 16);
+		this.chunk_store_iv = StringUtils.getHexString(b);
 		if (cmd.hasOption("chunk-store-io-threads")) {
 			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("chunk-store-io-threads"));
 		}
@@ -807,6 +874,7 @@ public class VolumeConfigWriter {
 		}
 		sdfscli.setAttribute("salt", this.sdfsCliSalt);
 		sdfscli.setAttribute("port", Integer.toString(this.sdfsCliPort));
+		sdfscli.setAttribute("immutabilityPeriod", Integer.toString(this.immutabilityPeriod));
 		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
 
 		root.appendChild(sdfscli);
@@ -849,6 +917,7 @@ public class VolumeConfigWriter {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-aim", Boolean.toString(this.awsAim));
+			aws.setAttribute("s3-compatible-target", Boolean.toString(this.s3ApiCompatible));
 			if (!awsAim) {
 				aws.setAttribute("aws-access-key", this.cloudAccessKey);
 				aws.setAttribute("aws-secret-key", this.cloudSecretKey);
@@ -889,9 +958,13 @@ public class VolumeConfigWriter {
 
 					extended.appendChild(cp);
 				}
-				if (this.simpleS3)
+				if (this.simpleS3) {
 					extended.setAttribute("simple-s3", "true");
-				else
+					if (this.encryptBucket)
+						aws.setAttribute("encrypt-bucket", "true");
+					else
+						aws.setAttribute("encrypt-bucket", "false");
+				} else
 					extended.setAttribute("simple-s3", "false");
 				if (this.basicS3Signer)
 					extended.setAttribute("use-basic-signer", "true");
@@ -1078,6 +1151,16 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"Product configuration variable.")
 				.hasArg(true).withArgName("CONF-VARIABLE").create());
+		options.addOption(OptionBuilder.withLongOpt("s3-compatible-target")
+				.withDescription(
+						"Set it to true to specify volume is S3 compatible cloud target (Defaults to false for Amazon S3).")
+				.hasArg(true).withArgName("true|false").create());
+		options.addOption(OptionBuilder.withLongOpt("immutabilityPeriod")
+				.withDescription("Set it to specify the immutability period of the files to x number of days.")
+				.hasArg(true)
+				.withArgName("number of days e.g. 10").create());
+		options.addOption(OptionBuilder.withLongOpt("update-cloud-creds")
+				.withDescription("If set, the volumes cloud credentials will be updated.").create());
 		options.addOption(OptionBuilder.withLongOpt("hashtable-rm-threshold").withDescription(
 				"The threashold in milliseconds to wait for unclaimed chucks to be available for garbage collection"
 						+ "The default is 15 minutes or 900000 ms,")
@@ -1246,6 +1329,9 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("encrypt-config")
 				.withDescription("Encrypt security sensitive encryption parameters with the password provided")
 				.hasArg(true).withArgName("a password").create());
+		options.addOption(OptionBuilder.withLongOpt("encrypt-bucket").withDescription(
+				"Set to enable server-side encryption by deafult(AES256 SSE Algorithm) on the bucket in Amazon S3 Cloud Storage. ")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("aws-enabled").withDescription(
 				"Set to true to enable this volume to store to Amazon S3 Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());

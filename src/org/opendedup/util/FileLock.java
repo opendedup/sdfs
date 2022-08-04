@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -26,6 +26,7 @@ import org.opendedup.logging.SDFSLogger;
 public class FileLock {
 	private ConcurrentHashMap<String, ReentrantLock> activeTasks = new ConcurrentHashMap<String, ReentrantLock>();
 	private static ReentrantLock iLock = new ReentrantLock(true);
+
 	public ReentrantLock getLock(String st) {
 		iLock.lock();
 		try {
@@ -54,9 +55,8 @@ public class FileLock {
 					l.unlock();
 			}
 		} finally {
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug(
-						"hmpa size=" + this.activeTasks.size());
+			SDFSLogger.getLog().debug(
+					"hmpa size=" + this.activeTasks.size());
 			iLock.unlock();
 		}
 	}

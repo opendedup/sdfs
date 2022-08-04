@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import com.google.common.io.BaseEncoding;
 
 import org.opendedup.collections.HashExistsException;
+import org.opendedup.collections.InsertRecord;
 
 /**
  *
@@ -141,7 +142,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
+	public InsertRecord writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
 		try {
 			return HashBlobArchive.writeBlock(hash, chunk, uuid);
 		} catch (HashExistsException e) {

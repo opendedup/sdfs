@@ -83,7 +83,7 @@ int _tmain(int argc, TCHAR *argv[])
 
 	// Create the child process. 
 	TCHAR cmd[4096];
-	TCHAR *val = ReadRegValue(HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\SDFS", "path");
+	TCHAR *val = ReadRegValue(HKEY_LOCAL_MACHINE, "SOFTWARE\\SDFS", "path");
 	TCHAR path[1024];
 	_tcscpy_s(path, val);
 	_tcscpy_s(cmd, val);

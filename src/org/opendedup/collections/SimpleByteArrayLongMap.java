@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -72,7 +72,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#getVersion()
 	 */
 	@Override
@@ -82,7 +82,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#getPath()
 	 */
 	@Override
@@ -95,7 +95,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#iterInit()
 	 */
 	@Override
@@ -113,7 +113,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#getCurrentSize()
 	 */
 	@Override
@@ -129,7 +129,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#next()
 	 */
 	@Override
@@ -176,7 +176,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#getMaxSz()
 	 */
 	@Override
@@ -190,7 +190,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/**
 	 * initializes the Object set of this hash table.
-	 * 
+	 *
 	 * @param initialCapacity an <code>int</code> value
 	 * @return an <code>int</code> value
 	 * @throws IOException
@@ -207,6 +207,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 					mapped = new BitSet(size);
 				}
 				this.ct = counter.incrementAndGet();
+				/*
 				if (SDFSLogger.isDebug()) {
 					try {
 						throw new IOException("debug");
@@ -214,6 +215,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 						SDFSLogger.getLog().debug("Opening [" + this.path + "] ct=[" + this.ct + "]", e);
 					}
 				}
+				*/
 				rf = new RandomAccessFile(path, "rw");
 				this.kFC = FileChannel.open(new File(path).toPath(), StandardOpenOption.CREATE,
 						StandardOpenOption.WRITE, StandardOpenOption.SPARSE, StandardOpenOption.READ);
@@ -293,7 +295,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#containsKey(byte[])
 	 */
 	@Override
@@ -330,7 +332,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/**
 	 * Locates the index of <tt>obj</tt>.
-	 * 
+	 *
 	 * @param obj an <code>Object</code> value
 	 * @return the index of <tt>obj</tt> or -1 if it isn't in the set.
 	 * @throws IOException
@@ -359,7 +361,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/**
 	 * Locates the index of non-null <tt>obj</tt>.
-	 * 
+	 *
 	 * @param obj   target key, know to be non-null
 	 * @param index we start from
 	 * @param hash
@@ -401,7 +403,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#vanish()
 	 */
 	@Override
@@ -446,7 +448,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 	/**
 	 * Looks for a slot using double hashing for a non-null key values and inserts
 	 * the value in the slot
-	 * 
+	 *
 	 * @param key   non-null key value
 	 * @param index natural index
 	 * @param hash
@@ -500,7 +502,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#put(byte[], long)
 	 */
 	@Override
@@ -553,7 +555,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#get(byte[])
 	 */
 	@Override
@@ -598,7 +600,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#close()
 	 */
 	@Override
@@ -608,13 +610,13 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 		try {
 			if (!this.closed) {
 				this.ct = counter.decrementAndGet();
-				if (SDFSLogger.isDebug()) {
+				/*
 					try {
 						throw new IOException("debug");
 					} catch (Exception e) {
 						SDFSLogger.getLog().debug("Closing [" + this.path + "] ct=[" + this.ct + "]", e);
 					}
-				}
+				*/
 				this.closed = true;
 				try {
 					this.kFC.close();
@@ -693,7 +695,7 @@ public class SimpleByteArrayLongMap implements SimpleMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.SimpleMapInterface#sync()
 	 */
 	@Override

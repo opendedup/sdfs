@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -54,9 +54,8 @@ public class VolumeConfigWriterThread implements Runnable {
 				writeConfig();
 				Thread.sleep(duration);
 			} catch (Exception e) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("Unable to write volume config.",
-							e);
+				SDFSLogger.getLog().debug("Unable to write volume config.",
+						e);
 				this.closed = true;
 			}
 		}

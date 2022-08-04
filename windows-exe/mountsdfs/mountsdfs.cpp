@@ -114,7 +114,7 @@ int _tmain(int argc, TCHAR* argv[])
 	if (!SetHandleInformation(g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0))
 		ErrorExit(TEXT("Stdin SetHandleInformation"));
 	TCHAR cmd[2048];
-	TCHAR* val = ReadRegValue(HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\SDFS", "path");
+	TCHAR* val = ReadRegValue(HKEY_LOCAL_MACHINE, "SOFTWARE\\SDFS", "path");
 
 	TCHAR path[512];
 	_tcscpy_s(path, val);

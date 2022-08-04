@@ -28,8 +28,6 @@ public class Main {
 	public static boolean checkArchiveOnRead = true;
 	public static int hashSeed=6442;
 	public static double fpp = .01;
-	public static String logSize="10MB";
-	public static int logFiles=10;
 	public static boolean ignoreDSEHTSize = true;
 	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;
@@ -39,6 +37,10 @@ public class Main {
 	public static String authClassInfo="";
 	public static String prodConfigFilePath = "";
 	public static String prodConfigVariable = "";
+	public static boolean s3ApiCompatible = false;
+	public static int immutabilityPeriod=10;//by default set to 10 days
+	public static boolean encryptBucket = false;
+	public static boolean rehydrateBlobs = false;
 
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout
@@ -61,6 +63,8 @@ public class Main {
 	public static StandAloneGCScheduler pFullSched = null;
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
+	public static String logSize="10MB";
+	public static int logFiles=10;
 	public static byte MAPVERSION = 0;
 	public static int MAX_OPEN_SST_FILES=-1;
 	public static String sdfsPassword = "";

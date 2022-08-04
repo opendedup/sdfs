@@ -132,7 +132,7 @@ public class SyncFS {
 
 		} finally {
 			Main.sdfsSyncEnabled = false;
-			Main.syncDL = false;
+			//Main.syncDL = false;
 		}
 	}
 

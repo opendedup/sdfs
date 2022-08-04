@@ -16,7 +16,6 @@ import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonInitException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.BasicConfigurator;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
@@ -38,7 +37,6 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("o", true,
 				"fuse mount options.\nWill default to: \ndirect_io,big_writes,allow_other,fsname=SDFS");
 		options.addOption("r", false, "Restores files from cloud storage if the backend cloud store supports it");
-		options.addOption("d", false, "debug output");
 		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption("l", false, "Compact Volume on Disk");
 		options.addOption("c", false, "Runs Consistency Check");
@@ -61,7 +59,6 @@ public class MountSDFS implements Daemon, Runnable {
 	}
 
 	public static void main(String[] args) throws ParseException {
-		BasicConfigurator.configure();
 		setup(args);
 		try {
 			if (!OSValidator.isWindows()) {
@@ -136,7 +133,7 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 		if (cmd.hasOption("e")) {
 			password = cmd.getOptionValue("e");
-		} 
+		}
 		if (cmd.hasOption("j")) {
 			String jv = cmd.getOptionValue("j");
 			password = System.getenv(jv);
@@ -210,7 +207,7 @@ public class MountSDFS implements Daemon, Runnable {
 		if(cmd.hasOption("u")) {
 			Main.usePortRedirector = true;
 		}
-		Main.logPath = "/var/log/sdfs/" + volname + ".log";
+		//Main.logPath = "/var/log/sdfs/" + volname + ".log";
 		if (OSValidator.isWindows()) {
 			File cf = new File(volumeConfigFile);
 			String fn = cf.getName().substring(0, cf.getName().lastIndexOf(".")) + ".log";
@@ -219,10 +216,6 @@ public class MountSDFS implements Daemon, Runnable {
 			lf.getParentFile().mkdirs();
 		}
 		sdfsService = new SDFSService(volumeConfigFile, volumes);
-		if (cmd.hasOption("d")) {
-			SDFSLogger.setLevel(0);
-		}
-
 		try {
 			sdfsService.start(port, password, cmd.hasOption("s"));
 		} catch (Throwable e1) {

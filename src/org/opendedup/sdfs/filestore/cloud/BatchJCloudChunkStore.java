@@ -64,6 +64,7 @@ import org.jclouds.domain.Location;
 import org.jclouds.googlecloud.GoogleCredentialsFromJson;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.grpc.CloudFileInfo.CloudMetaData;
 import org.opendedup.grpc.FileInfo.FileInfoResponse;
 import org.opendedup.logging.SDFSLogger;
@@ -298,7 +299,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
+	public InsertRecord writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
 		try {
 			return HashBlobArchive.writeBlock(hash, chunk, uuid);
 		} catch (HashExistsException e) {

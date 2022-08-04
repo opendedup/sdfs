@@ -1,8 +1,6 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
-import static java.util.concurrent.ForkJoinPool.defaultForkJoinWorkerThreadFactory;
 
-import org.apache.log4j.Logger;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.mgmt.grpc.tls.DynamicTrustManager;
@@ -37,7 +35,6 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSession;
@@ -46,29 +43,24 @@ import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import jakarta.xml.bind.DatatypeConverter;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
-import java.util.concurrent.ForkJoinWorkerThread;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.xml.bind.DatatypeConverter;
 
 public class IOServer {
   private Server server;
-  private Logger logger = SDFSLogger.getLog();
   private static final String DELIMITER = ";;";
   public static String trustStoreDir;
 
   private X509Certificate getX509Certificate(String certPath) throws Exception {
     FileInputStream is = null;
     try {
-      SDFSLogger.getLog().info("Cert Path  = " + certPath);
+      //SDFSLogger.getLog().info("Cert Path  = " + certPath);
       CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
       is = new FileInputStream(certPath);
       X509Certificate cer = (X509Certificate) certFactory.generateCertificate(is);
@@ -246,7 +238,7 @@ public class IOServer {
     }
 
     /* The port on which the server should run */
-    logger.info(
+    SDFSLogger.getLog().info(
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads);
     SocketAddress address = new InetSocketAddress(host, port);
     int maxMessageSize = 40*1024*1024;
@@ -254,10 +246,10 @@ public class IOServer {
       maxMessageSize=Main.CHUNK_LENGTH * 3;
     }
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
-        .addService(new StorageServiceImpl()).executor(getExecutor(Main.writeThreads))
+        .addService(new StorageServiceImpl()).directExecutor()
         .maxInboundMessageSize(maxMessageSize).maxInboundMetadataSize(maxMessageSize)
         .addService(new FileIOServiceImpl())
-        .intercept(new AuthorizationInterceptor()).addService(new SDFSEventImpl())
+        .addService(new SDFSEventImpl())
         .addService(new SdfsUserServiceImpl());
     if (!Main.authJarFilePath.equals("") && !Main.authClassInfo.equals("")) {
       try {
@@ -285,7 +277,7 @@ public class IOServer {
     }
 
     server = b.build().start();
-    logger.info("Server started, listening on " + host + ":" + port + " tls = " + useSSL + " mtls = " + useClientTLS);
+    SDFSLogger.getLog().info("Server started, listening on " + host + ":" + port + " tls = " + useSSL + " mtls = " + useClientTLS);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
@@ -370,32 +362,6 @@ public class IOServer {
     }
   }
 
-  ExecutorService getExecutor(int asyncThreads) {
-    // TODO(carl-mastrangelo): This should not be necessary. I don't know where this
-    // should be
-    // put. Move it somewhere else, or remove it if no longer necessary.
-    // See: https://github.com/grpc/grpc-java/issues/2119
-    return new ForkJoinPool(asyncThreads,
-        new ForkJoinWorkerThreadFactory() {
-          final AtomicInteger num = new AtomicInteger();
 
-          @Override
-          public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
-            ForkJoinWorkerThread thread = defaultForkJoinWorkerThreadFactory.newThread(pool);
-            thread.setDaemon(true);
-            thread.setName("server-worker-" + "-" + num.getAndIncrement());
-            return thread;
-          }
-        }, new EHanderler(), true /* async */);
-  }
-
-  private static class EHanderler implements Thread.UncaughtExceptionHandler {
-
-    @Override
-    public void uncaughtException(Thread arg0, Throwable arg1) {
-      SDFSLogger.getLog().warn("in thread " + arg0.toString(), arg1);
-
-    }
-
-  }
+  
 }

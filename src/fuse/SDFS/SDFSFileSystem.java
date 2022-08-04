@@ -217,8 +217,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			DedupFileChannel ch = this.getFileChannel(path, (Long) fh, -1);
 
 			if (Main.safeSync) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("sync " + path + " df=" + ch.getDedupFile().getGUID());
+				SDFSLogger.getLog().debug("sync " + path + " df=" + ch.getDedupFile().getGUID());
 				ch.force(true);
 			}
 
@@ -445,7 +444,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				 * } else { try { Thread.sleep(1); } catch (InterruptedException e) { throw new
 				 * FuseException( "file creation interrupted for " + path)
 				 * .initErrno(Errno.EACCES); } }
-				 * 
+				 *
 				 * }
 				 */
 				try {
@@ -506,7 +505,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 			 * buf.position()]; buf.put(k); // SDFSLogger.getLog().info("zzz=" //
 			 * +(buf.capacity()-buf.position())); } byte[] b = new byte[buf.capacity()];
 			 * buf.position(0); buf.get(b); buf.position(0);
-			 * 
+			 *
 			 * SDFSLogger.getLog().info("read " + path + " len" + buf.capacity() + "offset "
 			 * + offset + "read" + read + "==" + new String(b) + "==\n\n");
 			 */
@@ -566,8 +565,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		File f = null;
 
 		try {
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("renaming [" + from + "] to [" + to + "]");
+			SDFSLogger.getLog().debug("renaming [" + from + "] to [" + to + "]");
 			f = resolvePath(from);
 			File nf = new File(this.mountedVolume + to);
 			try {
@@ -613,8 +611,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 							return 0;
 						else {
 
-							if (SDFSLogger.isDebug())
-								SDFSLogger.getLog().debug("unable to delete folder " + f.getCanonicalPath());
+							SDFSLogger.getLog().debug("unable to delete folder " + f.getCanonicalPath());
 							throw new FuseException().initErrno(Errno.ENOTEMPTY);
 						}
 
@@ -721,8 +718,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 		// Thread.currentThread().setName("19
 		// "+Long.toString(System.currentTimeMillis()));
 		try {
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("removing " + path);
+			SDFSLogger.getLog().debug("removing " + path);
 
 			if (!Main.safeClose) {
 				try {
@@ -742,9 +738,9 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				// SDFSLogger.getLog().info("deleting symlink " + f.getCanonicalPath());
 				try {
 					MetaDataDedupFile mf = MetaFileStore.getMF(this.resolvePath(path));
-					try{
+					try {
 						eventBus.post(new MFileDeleted(mf));
-					}catch(Exception e) {
+					} catch (Exception e) {
 						SDFSLogger.getLog().error("unable to post delete event " + path, e);
 					}
 					Files.delete(p);
@@ -1081,8 +1077,7 @@ public class SDFSFileSystem implements Filesystem3, XattrSupport {
 				File f = this.resolvePath(path);
 				MetaDataDedupFile mf = MetaFileStore.getMF(f);
 				mf.addXAttribute(name, valStr);
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("set " + name + " to " + valStr);
+				SDFSLogger.getLog().debug("set " + name + " to " + valStr);
 				if (mf.isFile())
 					mf.setDirty(true);
 

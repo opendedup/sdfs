@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -22,10 +22,7 @@ import java.io.IOException;
 
 import java.lang.management.ManagementFactory;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.RollingFileAppender;
-import org.opendedup.logging.JSONVolPerfLayout;
+
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -41,25 +38,12 @@ public class VolumeIOMeter implements Runnable {
 			RIOPS = 0, WIOPS = 0, duplicateBytes = 0, dseSz = 0, dseCompSz = 0;
 	private double pbytesRead = 0, pbytesWritten = 0, pvirtualBytesWritten = 0,
 			pRIOPS = 0, pWIOPS = 0, pduplicateBytes = 0;
-	private Logger log = Logger.getLogger("volperflog");
 	private boolean closed = false;
 	Thread th = null;
 	UnixOperatingSystemMXBean perf = (UnixOperatingSystemMXBean) ManagementFactory
 			.getOperatingSystemMXBean();
 
 	public VolumeIOMeter(Volume vol) {
-		RollingFileAppender app = null;
-		try {
-			app = new RollingFileAppender(new JSONVolPerfLayout(),
-					vol.getPerfMonFile(), true);
-			app.setMaxBackupIndex(2);
-			app.setMaxFileSize("10MB");
-		} catch (IOException e) {
-			log.debug("unable to change appender", e);
-		}
-		this.vol = vol;
-		log.addAppender(app);
-		log.setLevel(Level.INFO);
 		th = new Thread(this);
 		th.start();
 	}
