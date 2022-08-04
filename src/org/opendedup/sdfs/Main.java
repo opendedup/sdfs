@@ -67,11 +67,9 @@ public class Main {
 	public static int logFiles=10;
 	public static byte MAPVERSION = 0;
 	public static int MAX_OPEN_SST_FILES=-1;
-	public static String eSdfsPassword =null;
 	public static String sdfsPassword = "";
 	public static boolean readAheadMap = true;
 	public static String sdfsPasswordSalt = "";
-	public static String eSdfsPasswordSalt = null;
 	public static boolean allowExternalSymlinks = true;
 
 	public static boolean sdfsCliSSL = true;

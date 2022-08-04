@@ -12876,6 +12876,30 @@ public final class Storage {
      * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    java.util.List<org.opendedup.grpc.Storage.HashLocPairP> 
+        getMissedArList();
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    org.opendedup.grpc.Storage.HashLocPairP getMissedAr(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    int getMissedArCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.Storage.HashLocPairPOrBuilder> 
+        getMissedArOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    org.opendedup.grpc.Storage.HashLocPairPOrBuilder getMissedArOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeChunkWriteResponse}
@@ -12892,6 +12916,7 @@ public final class Storage {
     private SparseDedupeChunkWriteResponse() {
       error_ = "";
       errorCode_ = 0;
+      missedAr_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -12914,6 +12939,7 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -12936,6 +12962,15 @@ public final class Storage {
               errorCode_ = rawValue;
               break;
             }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                missedAr_ = new java.util.ArrayList<org.opendedup.grpc.Storage.HashLocPairP>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              missedAr_.add(
+                  input.readMessage(org.opendedup.grpc.Storage.HashLocPairP.parser(), extensionRegistry));
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -12951,6 +12986,9 @@ public final class Storage {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          missedAr_ = java.util.Collections.unmodifiableList(missedAr_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -13025,6 +13063,46 @@ public final class Storage {
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
     }
 
+    public static final int MISSEDAR_FIELD_NUMBER = 3;
+    private java.util.List<org.opendedup.grpc.Storage.HashLocPairP> missedAr_;
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<org.opendedup.grpc.Storage.HashLocPairP> getMissedArList() {
+      return missedAr_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends org.opendedup.grpc.Storage.HashLocPairPOrBuilder> 
+        getMissedArOrBuilderList() {
+      return missedAr_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public int getMissedArCount() {
+      return missedAr_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.Storage.HashLocPairP getMissedAr(int index) {
+      return missedAr_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.Storage.HashLocPairPOrBuilder getMissedArOrBuilder(
+        int index) {
+      return missedAr_.get(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -13045,6 +13123,9 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(2, errorCode_);
       }
+      for (int i = 0; i < missedAr_.size(); i++) {
+        output.writeMessage(3, missedAr_.get(i));
+      }
       unknownFields.writeTo(output);
     }
 
@@ -13060,6 +13141,10 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, errorCode_);
+      }
+      for (int i = 0; i < missedAr_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, missedAr_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -13079,6 +13164,8 @@ public final class Storage {
       if (!getError()
           .equals(other.getError())) return false;
       if (errorCode_ != other.errorCode_) return false;
+      if (!getMissedArList()
+          .equals(other.getMissedArList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -13094,6 +13181,10 @@ public final class Storage {
       hash = (53 * hash) + getError().hashCode();
       hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
       hash = (53 * hash) + errorCode_;
+      if (getMissedArCount() > 0) {
+        hash = (37 * hash) + MISSEDAR_FIELD_NUMBER;
+        hash = (53 * hash) + getMissedArList().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -13222,6 +13313,7 @@ public final class Storage {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
+          getMissedArFieldBuilder();
         }
       }
       @java.lang.Override
@@ -13231,6 +13323,12 @@ public final class Storage {
 
         errorCode_ = 0;
 
+        if (missedArBuilder_ == null) {
+          missedAr_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          missedArBuilder_.clear();
+        }
         return this;
       }
 
@@ -13257,8 +13355,18 @@ public final class Storage {
       @java.lang.Override
       public org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse buildPartial() {
         org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse result = new org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse(this);
+        int from_bitField0_ = bitField0_;
         result.error_ = error_;
         result.errorCode_ = errorCode_;
+        if (missedArBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            missedAr_ = java.util.Collections.unmodifiableList(missedAr_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.missedAr_ = missedAr_;
+        } else {
+          result.missedAr_ = missedArBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -13314,6 +13422,32 @@ public final class Storage {
         if (other.errorCode_ != 0) {
           setErrorCodeValue(other.getErrorCodeValue());
         }
+        if (missedArBuilder_ == null) {
+          if (!other.missedAr_.isEmpty()) {
+            if (missedAr_.isEmpty()) {
+              missedAr_ = other.missedAr_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureMissedArIsMutable();
+              missedAr_.addAll(other.missedAr_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.missedAr_.isEmpty()) {
+            if (missedArBuilder_.isEmpty()) {
+              missedArBuilder_.dispose();
+              missedArBuilder_ = null;
+              missedAr_ = other.missedAr_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              missedArBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getMissedArFieldBuilder() : null;
+            } else {
+              missedArBuilder_.addAllMessages(other.missedAr_);
+            }
+          }
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -13342,6 +13476,7 @@ public final class Storage {
         }
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object error_ = "";
       /**
@@ -13471,6 +13606,246 @@ public final class Storage {
         errorCode_ = 0;
         onChanged();
         return this;
+      }
+
+      private java.util.List<org.opendedup.grpc.Storage.HashLocPairP> missedAr_ =
+        java.util.Collections.emptyList();
+      private void ensureMissedArIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          missedAr_ = new java.util.ArrayList<org.opendedup.grpc.Storage.HashLocPairP>(missedAr_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.Storage.HashLocPairP, org.opendedup.grpc.Storage.HashLocPairP.Builder, org.opendedup.grpc.Storage.HashLocPairPOrBuilder> missedArBuilder_;
+
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public java.util.List<org.opendedup.grpc.Storage.HashLocPairP> getMissedArList() {
+        if (missedArBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(missedAr_);
+        } else {
+          return missedArBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public int getMissedArCount() {
+        if (missedArBuilder_ == null) {
+          return missedAr_.size();
+        } else {
+          return missedArBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairP getMissedAr(int index) {
+        if (missedArBuilder_ == null) {
+          return missedAr_.get(index);
+        } else {
+          return missedArBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder setMissedAr(
+          int index, org.opendedup.grpc.Storage.HashLocPairP value) {
+        if (missedArBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMissedArIsMutable();
+          missedAr_.set(index, value);
+          onChanged();
+        } else {
+          missedArBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder setMissedAr(
+          int index, org.opendedup.grpc.Storage.HashLocPairP.Builder builderForValue) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          missedAr_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          missedArBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addMissedAr(org.opendedup.grpc.Storage.HashLocPairP value) {
+        if (missedArBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMissedArIsMutable();
+          missedAr_.add(value);
+          onChanged();
+        } else {
+          missedArBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addMissedAr(
+          int index, org.opendedup.grpc.Storage.HashLocPairP value) {
+        if (missedArBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMissedArIsMutable();
+          missedAr_.add(index, value);
+          onChanged();
+        } else {
+          missedArBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addMissedAr(
+          org.opendedup.grpc.Storage.HashLocPairP.Builder builderForValue) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          missedAr_.add(builderForValue.build());
+          onChanged();
+        } else {
+          missedArBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addMissedAr(
+          int index, org.opendedup.grpc.Storage.HashLocPairP.Builder builderForValue) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          missedAr_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          missedArBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addAllMissedAr(
+          java.lang.Iterable<? extends org.opendedup.grpc.Storage.HashLocPairP> values) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, missedAr_);
+          onChanged();
+        } else {
+          missedArBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder clearMissedAr() {
+        if (missedArBuilder_ == null) {
+          missedAr_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          missedArBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder removeMissedAr(int index) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          missedAr_.remove(index);
+          onChanged();
+        } else {
+          missedArBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairP.Builder getMissedArBuilder(
+          int index) {
+        return getMissedArFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairPOrBuilder getMissedArOrBuilder(
+          int index) {
+        if (missedArBuilder_ == null) {
+          return missedAr_.get(index);  } else {
+          return missedArBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.Storage.HashLocPairPOrBuilder> 
+           getMissedArOrBuilderList() {
+        if (missedArBuilder_ != null) {
+          return missedArBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(missedAr_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairP.Builder addMissedArBuilder() {
+        return getMissedArFieldBuilder().addBuilder(
+            org.opendedup.grpc.Storage.HashLocPairP.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairP.Builder addMissedArBuilder(
+          int index) {
+        return getMissedArFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.Storage.HashLocPairP.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public java.util.List<org.opendedup.grpc.Storage.HashLocPairP.Builder> 
+           getMissedArBuilderList() {
+        return getMissedArFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.Storage.HashLocPairP, org.opendedup.grpc.Storage.HashLocPairP.Builder, org.opendedup.grpc.Storage.HashLocPairPOrBuilder> 
+          getMissedArFieldBuilder() {
+        if (missedArBuilder_ == null) {
+          missedArBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.Storage.HashLocPairP, org.opendedup.grpc.Storage.HashLocPairP.Builder, org.opendedup.grpc.Storage.HashLocPairPOrBuilder>(
+                  missedAr_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          missedAr_ = null;
+        }
+        return missedArBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -17067,6 +17442,7 @@ public final class Storage {
       "FileRequest\032!.org.opendedup.grpc.ChunkRe" +
       "sponse0\001B0Z.github.com/opendedup/sdfs-cl" +
       "ient-go/sdfs/;sdfsb\006proto3"
+
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -17168,7 +17544,7 @@ public final class Storage {
     internal_static_org_opendedup_grpc_SparseDedupeChunkWriteResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeChunkWriteResponse_descriptor,
-        new java.lang.String[] { "Error", "ErrorCode", });
+        new java.lang.String[] { "Error", "ErrorCode", "MissedAr", });
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadRequest_descriptor =
       getDescriptor().getMessageTypes().get(15);
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadRequest_fieldAccessorTable = new

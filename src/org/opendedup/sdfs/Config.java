@@ -308,23 +308,6 @@ public class Config {
 		}
 
 		if (password != null) {
-			Main.eSdfsPassword = Main.sdfsPassword;
-			Main.eSdfsPasswordSalt = Main.sdfsPasswordSalt;
-			try {
-				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.eSdfsPassword),
-						password, Main.chunkStoreEncryptionIV);
-				Main.sdfsPassword = new String(dc);
-			} catch (Exception e) {
-				SDFSLogger.getLog().warn("unable to decrypt sdfscli password ", e);
-			}
-			try {
-				byte[] dc = EncryptUtils.decryptCBC(BaseEncoding.base64Url().decode(Main.eSdfsPasswordSalt),
-						password, Main.chunkStoreEncryptionIV);
-				Main.sdfsPasswordSalt = new String(dc);
-			} catch (Exception e) {
-				SDFSLogger.getLog().warn("unable to decrypt sdfscli password ", e);
-			}
-
 			if (Main.cloudSecretKey != null) {
 				Main.eCloudSecretKey = Main.cloudSecretKey;
 
@@ -410,17 +393,9 @@ public class Config {
 
 		Element cli = (Element) doc.getElementsByTagName("sdfscli").item(0);
 		cli.setAttribute("enable", Boolean.toString(Main.sdfsCliEnabled));
-		if (Main.eSdfsPassword != null) {
-			cli.setAttribute("password", Main.eSdfsPassword);
-		} else {
-			cli.setAttribute("password", Main.sdfsPassword);
-		}
-		if (Main.eSdfsPasswordSalt != null) {
-			cli.setAttribute("salt", Main.eSdfsPasswordSalt);
-		} else {
-			cli.setAttribute("salt", Main.sdfsPasswordSalt);
-		}
 
+		cli.setAttribute("password", Main.sdfsPassword);
+		cli.setAttribute("salt", Main.sdfsPasswordSalt);
 		cli.setAttribute("port", Integer.toString(Main.sdfsCliPort));
 		cli.setAttribute("immutabilityPeriod", Integer.toString(Main.immutabilityPeriod));
 		cli.setAttribute("enable-auth", Boolean.toString(Main.sdfsCliRequireAuth));
