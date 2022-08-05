@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -29,6 +30,8 @@ import org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest;
 import org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeResponse;
 import org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest;
 import org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleResponse;
+import org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest;
+import org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse;
 import org.opendedup.grpc.VolumeServiceOuterClass.SetCacheSizeRequest;
 import org.opendedup.grpc.VolumeServiceOuterClass.SetCacheSizeResponse;
 import org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest;
@@ -51,6 +54,7 @@ import org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.mtools.SyncFS;
 import org.opendedup.sdfs.Config;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
@@ -531,19 +535,19 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
         info.setCloudAccessKey(Main.cloudAccessKey);
       if (Main.eCloudSecretKey != null)
         info.setCloudSecretKey(Main.eCloudSecretKey);
-        /*
-      CacheStats ct = HashBlobArchive.getCacheStats();
-      info.setAverageLoadPenalty(ct.averageLoadPenalty());
-      info.setEvictionCount(ct.evictionCount());
-      info.setHitCount(ct.hitCount());
-      info.setHitRate(ct.hitRate());
-      info.setLoadExceptionCount(ct.loadExceptionCount());
-      info.setLoadExceptionRate(ct.loadExceptionRate());
-      info.setMissCount(ct.missCount());
-      info.setMissRate(ct.missRate());
-      info.setRequestCount(ct.requestCount());
-      info.setTotalLoadTime(ct.totalLoadTime());
-      */
+      /*
+       * CacheStats ct = HashBlobArchive.getCacheStats();
+       * info.setAverageLoadPenalty(ct.averageLoadPenalty());
+       * info.setEvictionCount(ct.evictionCount());
+       * info.setHitCount(ct.hitCount());
+       * info.setHitRate(ct.hitRate());
+       * info.setLoadExceptionCount(ct.loadExceptionCount());
+       * info.setLoadExceptionRate(ct.loadExceptionRate());
+       * info.setMissCount(ct.missCount());
+       * info.setMissRate(ct.missRate());
+       * info.setRequestCount(ct.requestCount());
+       * info.setTotalLoadTime(ct.totalLoadTime());
+       */
       info.build();
       b.setInfo(info);
       responseObserver.onNext(b.build());
@@ -556,6 +560,36 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
       responseObserver.onNext(b.build());
       responseObserver.onCompleted();
     }
+  }
+
+  @Override
+  public void reconcileCloudMetadata(ReconcileCloudMetadataRequest request,
+      StreamObserver<ReconcileCloudMetadataResponse> responseObserver) {
+    ReconcileCloudMetadataResponse.Builder b = ReconcileCloudMetadataResponse.newBuilder();
+    if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+      b.setError("User is not a member of any group with access");
+      b.setErrorCode(errorCodes.EACCES);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+      return;
+    }
+    Thread th;
+    try {
+      SyncFS sfs = new SyncFS("now");
+      th = new Thread(sfs);
+      th.start();
+      b.setEventID(sfs.getEvt().uid);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    } catch (IOException e) {
+      SDFSLogger.getLog().error("unable to fulfill request", e);
+      b.setError("unable to fulfill request");
+      b.setErrorCode(errorCodes.EIO);
+      responseObserver.onNext(b.build());
+      responseObserver.onCompleted();
+    }
+    
+
   }
 
   @Override

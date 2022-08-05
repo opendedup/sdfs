@@ -1,25 +1,13 @@
 package org.opendedup.grpc;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.30.2)",
+    value = "by gRPC proto compiler (version 1.46.0)",
     comments = "Source: PortRedirector.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class PortRedirectorServiceGrpc {
 
   private PortRedirectorServiceGrpc() {}
@@ -141,28 +129,28 @@ public final class PortRedirectorServiceGrpc {
      */
     public void getProxyVolumes(org.opendedup.grpc.PortRedirector.ProxyVolumeInfoRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetProxyVolumesMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetProxyVolumesMethod(), responseObserver);
     }
 
     /**
      */
     public void reloadConfig(org.opendedup.grpc.PortRedirector.ReloadConfigRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.PortRedirector.ReloadConfigResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getReloadConfigMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getReloadConfigMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getGetProxyVolumesMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.PortRedirector.ProxyVolumeInfoRequest,
                 org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse>(
                   this, METHODID_GET_PROXY_VOLUMES)))
           .addMethod(
             getReloadConfigMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.PortRedirector.ReloadConfigRequest,
                 org.opendedup.grpc.PortRedirector.ReloadConfigResponse>(
@@ -189,7 +177,7 @@ public final class PortRedirectorServiceGrpc {
      */
     public void getProxyVolumes(org.opendedup.grpc.PortRedirector.ProxyVolumeInfoRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetProxyVolumesMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -197,7 +185,7 @@ public final class PortRedirectorServiceGrpc {
      */
     public void reloadConfig(org.opendedup.grpc.PortRedirector.ReloadConfigRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.PortRedirector.ReloadConfigResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getReloadConfigMethod(), getCallOptions()), request, responseObserver);
     }
   }
@@ -219,14 +207,14 @@ public final class PortRedirectorServiceGrpc {
     /**
      */
     public org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse getProxyVolumes(org.opendedup.grpc.PortRedirector.ProxyVolumeInfoRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetProxyVolumesMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.PortRedirector.ReloadConfigResponse reloadConfig(org.opendedup.grpc.PortRedirector.ReloadConfigRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getReloadConfigMethod(), getCallOptions(), request);
     }
   }
@@ -249,7 +237,7 @@ public final class PortRedirectorServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse> getProxyVolumes(
         org.opendedup.grpc.PortRedirector.ProxyVolumeInfoRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetProxyVolumesMethod(), getCallOptions()), request);
     }
 
@@ -257,7 +245,7 @@ public final class PortRedirectorServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.PortRedirector.ReloadConfigResponse> reloadConfig(
         org.opendedup.grpc.PortRedirector.ReloadConfigRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getReloadConfigMethod(), getCallOptions()), request);
     }
   }

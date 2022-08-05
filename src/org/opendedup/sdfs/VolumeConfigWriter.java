@@ -83,7 +83,7 @@ public class VolumeConfigWriter {
 	// String fdisk_schedule = "0 59 23 * * ?";
 	String fdisk_schedule = "0 0 12 ? * SUN";
 	String ltrfdisk_schedule = "0 15 10 L * ?";
-	String syncfs_schedule = null;
+	String syncfs_schedule = "0 0 12 ? * SAT";
 	private String dExt = null;
 	boolean azureEnabled = false;
 	boolean tcpKeepAlive = true;

@@ -1,25 +1,13 @@
 package org.opendedup.grpc;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.30.2)",
+    value = "by gRPC proto compiler (version 1.46.0)",
     comments = "Source: EncryptionService.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class EncryptionServiceGrpc {
 
   private EncryptionServiceGrpc() {}
@@ -172,42 +160,42 @@ public final class EncryptionServiceGrpc {
      */
     public void validateCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getValidateCertificateMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getValidateCertificateMethod(), responseObserver);
     }
 
     /**
      */
     public void exportServerCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getExportServerCertificateMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getExportServerCertificateMethod(), responseObserver);
     }
 
     /**
      */
     public void deleteExportedCert(org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteExportedCertMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteExportedCertMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getValidateCertificateMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest,
                 org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse>(
                   this, METHODID_VALIDATE_CERTIFICATE)))
           .addMethod(
             getExportServerCertificateMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest,
                 org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse>(
                   this, METHODID_EXPORT_SERVER_CERTIFICATE)))
           .addMethod(
             getDeleteExportedCertMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest,
                 org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse>(
@@ -234,7 +222,7 @@ public final class EncryptionServiceGrpc {
      */
     public void validateCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getValidateCertificateMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -242,7 +230,7 @@ public final class EncryptionServiceGrpc {
      */
     public void exportServerCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getExportServerCertificateMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -250,7 +238,7 @@ public final class EncryptionServiceGrpc {
      */
     public void deleteExportedCert(org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getDeleteExportedCertMethod(), getCallOptions()), request, responseObserver);
     }
   }
@@ -272,21 +260,21 @@ public final class EncryptionServiceGrpc {
     /**
      */
     public org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse validateCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getValidateCertificateMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse exportServerCertificate(org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getExportServerCertificateMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse deleteExportedCert(org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getDeleteExportedCertMethod(), getCallOptions(), request);
     }
   }
@@ -309,7 +297,7 @@ public final class EncryptionServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse> validateCertificate(
         org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getValidateCertificateMethod(), getCallOptions()), request);
     }
 
@@ -317,7 +305,7 @@ public final class EncryptionServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse> exportServerCertificate(
         org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getExportServerCertificateMethod(), getCallOptions()), request);
     }
 
@@ -325,7 +313,7 @@ public final class EncryptionServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse> deleteExportedCert(
         org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getDeleteExportedCertMethod(), getCallOptions()), request);
     }
   }

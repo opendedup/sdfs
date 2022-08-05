@@ -545,6 +545,37 @@ public final class VolumeServiceGrpc {
     return getSetMaxAgeMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest,
+      org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse> getReconcileCloudMetadataMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ReconcileCloudMetadata",
+      requestType = org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest.class,
+      responseType = org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest,
+      org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse> getReconcileCloudMetadataMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest, org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse> getReconcileCloudMetadataMethod;
+    if ((getReconcileCloudMetadataMethod = VolumeServiceGrpc.getReconcileCloudMetadataMethod) == null) {
+      synchronized (VolumeServiceGrpc.class) {
+        if ((getReconcileCloudMetadataMethod = VolumeServiceGrpc.getReconcileCloudMetadataMethod) == null) {
+          VolumeServiceGrpc.getReconcileCloudMetadataMethod = getReconcileCloudMetadataMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest, org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ReconcileCloudMetadata"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new VolumeServiceMethodDescriptorSupplier("ReconcileCloudMetadata"))
+              .build();
+        }
+      }
+    }
+    return getReconcileCloudMetadataMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -715,6 +746,13 @@ public final class VolumeServiceGrpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetMaxAgeMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void reconcileCloudMetadata(org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getReconcileCloudMetadataMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -836,6 +874,13 @@ public final class VolumeServiceGrpc {
                 org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest,
                 org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse>(
                   this, METHODID_SET_MAX_AGE)))
+          .addMethod(
+            getReconcileCloudMetadataMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest,
+                org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse>(
+                  this, METHODID_RECONCILE_CLOUD_METADATA)))
           .build();
     }
   }
@@ -992,6 +1037,14 @@ public final class VolumeServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getSetMaxAgeMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void reconcileCloudMetadata(org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getReconcileCloudMetadataMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -1128,6 +1181,13 @@ public final class VolumeServiceGrpc {
     public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse setMaxAge(org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getSetMaxAgeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse reconcileCloudMetadata(org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getReconcileCloudMetadataMethod(), getCallOptions(), request);
     }
   }
 
@@ -1283,6 +1343,14 @@ public final class VolumeServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getSetMaxAgeMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse> reconcileCloudMetadata(
+        org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getReconcileCloudMetadataMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_AUTHENTICATE_USER = 0;
@@ -1302,6 +1370,7 @@ public final class VolumeServiceGrpc {
   private static final int METHODID_SYNC_FROM_CLOUD_VOLUME = 14;
   private static final int METHODID_SYNC_CLOUD_VOLUME = 15;
   private static final int METHODID_SET_MAX_AGE = 16;
+  private static final int METHODID_RECONCILE_CLOUD_METADATA = 17;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1388,6 +1457,10 @@ public final class VolumeServiceGrpc {
           serviceImpl.setMaxAge((org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeResponse>) responseObserver);
           break;
+        case METHODID_RECONCILE_CLOUD_METADATA:
+          serviceImpl.reconcileCloudMetadata((org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -1466,6 +1539,7 @@ public final class VolumeServiceGrpc {
               .addMethod(getSyncFromCloudVolumeMethod())
               .addMethod(getSyncCloudVolumeMethod())
               .addMethod(getSetMaxAgeMethod())
+              .addMethod(getReconcileCloudMetadataMethod())
               .build();
         }
       }

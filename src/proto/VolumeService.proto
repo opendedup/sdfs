@@ -274,6 +274,17 @@ message SetMaxAgeResponse {
   errorCodes errorCode = 2;
 }
 
+message ReconcileCloudMetadataRequest {
+  
+  int64 pvolumeID =3;
+}
+
+message ReconcileCloudMetadataResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+  string eventID = 3;
+}
+
 
 // Defining a Service, a Service can have multiple RPC operations
 service VolumeService {
@@ -294,4 +305,5 @@ service VolumeService {
   rpc SyncFromCloudVolume(SyncFromVolRequest) returns (SyncFromVolResponse);
   rpc SyncCloudVolume(SyncVolRequest) returns (SyncVolResponse);
   rpc SetMaxAge(SetMaxAgeRequest) returns (SetMaxAgeResponse);
+  rpc ReconcileCloudMetadata(ReconcileCloudMetadataRequest) returns (ReconcileCloudMetadataResponse);
 }

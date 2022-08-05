@@ -30130,6 +30130,1320 @@ public final class VolumeServiceOuterClass {
 
   }
 
+  public interface ReconcileCloudMetadataRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.ReconcileCloudMetadataRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.ReconcileCloudMetadataRequest}
+   */
+  public static final class ReconcileCloudMetadataRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ReconcileCloudMetadataRequest)
+      ReconcileCloudMetadataRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ReconcileCloudMetadataRequest.newBuilder() to construct.
+    private ReconcileCloudMetadataRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ReconcileCloudMetadataRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ReconcileCloudMetadataRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ReconcileCloudMetadataRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 24: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest.Builder.class);
+    }
+
+    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(3, pvolumeID_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, pvolumeID_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest) obj;
+
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.ReconcileCloudMetadataRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.ReconcileCloudMetadataRequest)
+        org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        pvolumeID_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest build() {
+        org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest buildPartial() {
+        org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest(this);
+        result.pvolumeID_ = pvolumeID_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest) {
+          return mergeFrom((org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest other) {
+        if (other == org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.ReconcileCloudMetadataRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.ReconcileCloudMetadataRequest)
+    private static final org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest();
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ReconcileCloudMetadataRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ReconcileCloudMetadataRequest>() {
+      @java.lang.Override
+      public ReconcileCloudMetadataRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ReconcileCloudMetadataRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ReconcileCloudMetadataRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ReconcileCloudMetadataRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ReconcileCloudMetadataResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.ReconcileCloudMetadataResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+
+    /**
+     * <code>string eventID = 3;</code>
+     * @return The eventID.
+     */
+    java.lang.String getEventID();
+    /**
+     * <code>string eventID = 3;</code>
+     * @return The bytes for eventID.
+     */
+    com.google.protobuf.ByteString
+        getEventIDBytes();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.ReconcileCloudMetadataResponse}
+   */
+  public static final class ReconcileCloudMetadataResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ReconcileCloudMetadataResponse)
+      ReconcileCloudMetadataResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ReconcileCloudMetadataResponse.newBuilder() to construct.
+    private ReconcileCloudMetadataResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ReconcileCloudMetadataResponse() {
+      error_ = "";
+      errorCode_ = 0;
+      eventID_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ReconcileCloudMetadataResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ReconcileCloudMetadataResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              eventID_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse.class, org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse.Builder.class);
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 1;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 1;</code>
+     * @return The error.
+     */
+    @java.lang.Override
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 1;</code>
+     * @return The bytes for error.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 2;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
+     */
+    @java.lang.Override public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
+     */
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
+    public static final int EVENTID_FIELD_NUMBER = 3;
+    private volatile java.lang.Object eventID_;
+    /**
+     * <code>string eventID = 3;</code>
+     * @return The eventID.
+     */
+    @java.lang.Override
+    public java.lang.String getEventID() {
+      java.lang.Object ref = eventID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        eventID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string eventID = 3;</code>
+     * @return The bytes for eventID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEventIDBytes() {
+      java.lang.Object ref = eventID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        eventID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(2, errorCode_);
+      }
+      if (!getEventIDBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, eventID_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, errorCode_);
+      }
+      if (!getEventIDBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, eventID_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse other = (org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse) obj;
+
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!getEventID()
+          .equals(other.getEventID())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
+      hash = (37 * hash) + EVENTID_FIELD_NUMBER;
+      hash = (53 * hash) + getEventID().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.ReconcileCloudMetadataResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.ReconcileCloudMetadataResponse)
+        org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse.class, org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        error_ = "";
+
+        errorCode_ = 0;
+
+        eventID_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse build() {
+        org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse buildPartial() {
+        org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse result = new org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse(this);
+        result.error_ = error_;
+        result.errorCode_ = errorCode_;
+        result.eventID_ = eventID_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse) {
+          return mergeFrom((org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse other) {
+        if (other == org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse.getDefaultInstance()) return this;
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
+        }
+        if (!other.getEventID().isEmpty()) {
+          eventID_ = other.eventID_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 1;</code>
+       * @return The error.
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return The bytes for error.
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
+       */
+      @java.lang.Override public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCodeValue(int value) {
+        
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
+       */
+      @java.lang.Override
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object eventID_ = "";
+      /**
+       * <code>string eventID = 3;</code>
+       * @return The eventID.
+       */
+      public java.lang.String getEventID() {
+        java.lang.Object ref = eventID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          eventID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string eventID = 3;</code>
+       * @return The bytes for eventID.
+       */
+      public com.google.protobuf.ByteString
+          getEventIDBytes() {
+        java.lang.Object ref = eventID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          eventID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string eventID = 3;</code>
+       * @param value The eventID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEventID(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        eventID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string eventID = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEventID() {
+        
+        eventID_ = getDefaultInstance().getEventID();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string eventID = 3;</code>
+       * @param value The bytes for eventID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEventIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        eventID_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.ReconcileCloudMetadataResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.ReconcileCloudMetadataResponse)
+    private static final org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse();
+    }
+
+    public static org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ReconcileCloudMetadataResponse>
+        PARSER = new com.google.protobuf.AbstractParser<ReconcileCloudMetadataResponse>() {
+      @java.lang.Override
+      public ReconcileCloudMetadataResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ReconcileCloudMetadataResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ReconcileCloudMetadataResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ReconcileCloudMetadataResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.VolumeServiceOuterClass.ReconcileCloudMetadataResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_VolumeInfoRequest_descriptor;
   private static final 
@@ -30300,6 +31614,16 @@ public final class VolumeServiceOuterClass {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_SetMaxAgeResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -30420,50 +31744,58 @@ public final class VolumeServiceOuterClass {
       "rorCodes\"5\n\020SetMaxAgeRequest\022\016\n\006maxAge\030\001" +
       " \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"U\n\021SetMaxAgeResp" +
       "onse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036" +
-      ".org.opendedup.grpc.errorCodes2\367\014\n\rVolum" +
-      "eService\022i\n\020AuthenticateUser\022).org.opend" +
-      "edup.grpc.AuthenticationRequest\032*.org.op" +
-      "endedup.grpc.AuthenticationResponse\022^\n\rG" +
-      "etVolumeInfo\022%.org.opendedup.grpc.Volume" +
-      "InfoRequest\032&.org.opendedup.grpc.VolumeI" +
-      "nfoResponse\022[\n\016ShutdownVolume\022#.org.open" +
-      "dedup.grpc.ShutdownRequest\032$.org.opended" +
-      "up.grpc.ShutdownResponse\022[\n\nCleanStore\022%" +
-      ".org.opendedup.grpc.CleanStoreRequest\032&." +
-      "org.opendedup.grpc.CleanStoreResponse\022p\n" +
-      "\021DeleteCloudVolume\022,.org.opendedup.grpc." +
-      "DeleteCloudVolumeRequest\032-.org.opendedup" +
-      ".grpc.DeleteCloudVolumeResponse\022J\n\007DSEIn" +
-      "fo\022\036.org.opendedup.grpc.DSERequest\032\037.org" +
-      ".opendedup.grpc.DSEResponse\022[\n\nSystemInf" +
-      "o\022%.org.opendedup.grpc.SystemInfoRequest" +
-      "\032&.org.opendedup.grpc.SystemInfoResponse" +
-      "\022p\n\021SetVolumeCapacity\022,.org.opendedup.gr" +
-      "pc.SetVolumeCapacityRequest\032-.org.opende" +
-      "dup.grpc.SetVolumeCapacityResponse\022h\n\023Ge" +
-      "tConnectedVolumes\022\'.org.opendedup.grpc.C" +
-      "loudVolumesRequest\032(.org.opendedup.grpc." +
-      "CloudVolumesResponse\022^\n\rGetGCSchedule\022%." +
-      "org.opendedup.grpc.GCScheduleRequest\032&.o" +
-      "rg.opendedup.grpc.GCScheduleResponse\022a\n\014" +
-      "SetCacheSize\022\'.org.opendedup.grpc.SetCac" +
-      "heSizeRequest\032(.org.opendedup.grpc.SetCa" +
-      "cheSizeResponse\022^\n\013SetPassword\022&.org.ope" +
-      "ndedup.grpc.SetPasswordRequest\032\'.org.ope" +
-      "ndedup.grpc.SetPasswordResponse\022S\n\014SetRe" +
-      "adSpeed\022 .org.opendedup.grpc.SpeedReques" +
-      "t\032!.org.opendedup.grpc.SpeedResponse\022T\n\r" +
-      "SetWriteSpeed\022 .org.opendedup.grpc.Speed" +
-      "Request\032!.org.opendedup.grpc.SpeedRespon" +
-      "se\022f\n\023SyncFromCloudVolume\022&.org.opendedu" +
-      "p.grpc.SyncFromVolRequest\032\'.org.opendedu" +
-      "p.grpc.SyncFromVolResponse\022Z\n\017SyncCloudV" +
-      "olume\022\".org.opendedup.grpc.SyncVolReques" +
-      "t\032#.org.opendedup.grpc.SyncVolResponse\022X" +
-      "\n\tSetMaxAge\022$.org.opendedup.grpc.SetMaxA" +
-      "geRequest\032%.org.opendedup.grpc.SetMaxAge" +
-      "ResponseB0Z.github.com/opendedup/sdfs-cl" +
-      "ient-go/sdfs/;sdfsb\006proto3"
+      ".org.opendedup.grpc.errorCodes\"2\n\035Reconc" +
+      "ileCloudMetadataRequest\022\021\n\tpvolumeID\030\003 \001" +
+      "(\003\"s\n\036ReconcileCloudMetadataResponse\022\r\n\005" +
+      "error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.ope" +
+      "ndedup.grpc.errorCodes\022\017\n\007eventID\030\003 \001(\t2" +
+      "\370\r\n\rVolumeService\022i\n\020AuthenticateUser\022)." +
+      "org.opendedup.grpc.AuthenticationRequest" +
+      "\032*.org.opendedup.grpc.AuthenticationResp" +
+      "onse\022^\n\rGetVolumeInfo\022%.org.opendedup.gr" +
+      "pc.VolumeInfoRequest\032&.org.opendedup.grp" +
+      "c.VolumeInfoResponse\022[\n\016ShutdownVolume\022#" +
+      ".org.opendedup.grpc.ShutdownRequest\032$.or" +
+      "g.opendedup.grpc.ShutdownResponse\022[\n\nCle" +
+      "anStore\022%.org.opendedup.grpc.CleanStoreR" +
+      "equest\032&.org.opendedup.grpc.CleanStoreRe" +
+      "sponse\022p\n\021DeleteCloudVolume\022,.org.opende" +
+      "dup.grpc.DeleteCloudVolumeRequest\032-.org." +
+      "opendedup.grpc.DeleteCloudVolumeResponse" +
+      "\022J\n\007DSEInfo\022\036.org.opendedup.grpc.DSERequ" +
+      "est\032\037.org.opendedup.grpc.DSEResponse\022[\n\n" +
+      "SystemInfo\022%.org.opendedup.grpc.SystemIn" +
+      "foRequest\032&.org.opendedup.grpc.SystemInf" +
+      "oResponse\022p\n\021SetVolumeCapacity\022,.org.ope" +
+      "ndedup.grpc.SetVolumeCapacityRequest\032-.o" +
+      "rg.opendedup.grpc.SetVolumeCapacityRespo" +
+      "nse\022h\n\023GetConnectedVolumes\022\'.org.opended" +
+      "up.grpc.CloudVolumesRequest\032(.org.opende" +
+      "dup.grpc.CloudVolumesResponse\022^\n\rGetGCSc" +
+      "hedule\022%.org.opendedup.grpc.GCScheduleRe" +
+      "quest\032&.org.opendedup.grpc.GCScheduleRes" +
+      "ponse\022a\n\014SetCacheSize\022\'.org.opendedup.gr" +
+      "pc.SetCacheSizeRequest\032(.org.opendedup.g" +
+      "rpc.SetCacheSizeResponse\022^\n\013SetPassword\022" +
+      "&.org.opendedup.grpc.SetPasswordRequest\032" +
+      "\'.org.opendedup.grpc.SetPasswordResponse" +
+      "\022S\n\014SetReadSpeed\022 .org.opendedup.grpc.Sp" +
+      "eedRequest\032!.org.opendedup.grpc.SpeedRes" +
+      "ponse\022T\n\rSetWriteSpeed\022 .org.opendedup.g" +
+      "rpc.SpeedRequest\032!.org.opendedup.grpc.Sp" +
+      "eedResponse\022f\n\023SyncFromCloudVolume\022&.org" +
+      ".opendedup.grpc.SyncFromVolRequest\032\'.org" +
+      ".opendedup.grpc.SyncFromVolResponse\022Z\n\017S" +
+      "yncCloudVolume\022\".org.opendedup.grpc.Sync" +
+      "VolRequest\032#.org.opendedup.grpc.SyncVolR" +
+      "esponse\022X\n\tSetMaxAge\022$.org.opendedup.grp" +
+      "c.SetMaxAgeRequest\032%.org.opendedup.grpc." +
+      "SetMaxAgeResponse\022\177\n\026ReconcileCloudMetad" +
+      "ata\0221.org.opendedup.grpc.ReconcileCloudM" +
+      "etadataRequest\0322.org.opendedup.grpc.Reco" +
+      "ncileCloudMetadataResponseB0Z.github.com" +
+      "/opendedup/sdfs-client-go/sdfs/;sdfsb\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -30675,6 +32007,18 @@ public final class VolumeServiceOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_descriptor =
+      getDescriptor().getMessageTypes().get(34);
+    internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_ReconcileCloudMetadataRequest_descriptor,
+        new java.lang.String[] { "PvolumeID", });
+    internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_descriptor =
+      getDescriptor().getMessageTypes().get(35);
+    internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_ReconcileCloudMetadataResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", "EventID", });
     org.opendedup.grpc.Shutdown.getDescriptor();
     org.opendedup.grpc.FileInfo.getDescriptor();
   }

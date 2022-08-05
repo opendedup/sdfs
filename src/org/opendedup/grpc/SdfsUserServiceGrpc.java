@@ -1,25 +1,13 @@
 package org.opendedup.grpc;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.30.2)",
+    value = "by gRPC proto compiler (version 1.46.0)",
     comments = "Source: SDFSCli.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class SdfsUserServiceGrpc {
 
   private SdfsUserServiceGrpc() {}
@@ -234,70 +222,70 @@ public final class SdfsUserServiceGrpc {
      */
     public void addUser(org.opendedup.grpc.SDFSCli.AddUserRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.AddUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAddUserMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAddUserMethod(), responseObserver);
     }
 
     /**
      */
     public void deleteUser(org.opendedup.grpc.SDFSCli.DeleteUserRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.DeleteUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteUserMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteUserMethod(), responseObserver);
     }
 
     /**
      */
     public void setSdfsPermissions(org.opendedup.grpc.SDFSCli.SetPermissionsRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.SetPermissionsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetSdfsPermissionsMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetSdfsPermissionsMethod(), responseObserver);
     }
 
     /**
      */
     public void setSdfsPassword(org.opendedup.grpc.SDFSCli.SetUserPasswordRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.SetUserPasswordResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetSdfsPasswordMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetSdfsPasswordMethod(), responseObserver);
     }
 
     /**
      */
     public void listUsers(org.opendedup.grpc.SDFSCli.ListUsersRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.ListUsersResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListUsersMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListUsersMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getAddUserMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.SDFSCli.AddUserRequest,
                 org.opendedup.grpc.SDFSCli.AddUserResponse>(
                   this, METHODID_ADD_USER)))
           .addMethod(
             getDeleteUserMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.SDFSCli.DeleteUserRequest,
                 org.opendedup.grpc.SDFSCli.DeleteUserResponse>(
                   this, METHODID_DELETE_USER)))
           .addMethod(
             getSetSdfsPermissionsMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.SDFSCli.SetPermissionsRequest,
                 org.opendedup.grpc.SDFSCli.SetPermissionsResponse>(
                   this, METHODID_SET_SDFS_PERMISSIONS)))
           .addMethod(
             getSetSdfsPasswordMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.SDFSCli.SetUserPasswordRequest,
                 org.opendedup.grpc.SDFSCli.SetUserPasswordResponse>(
                   this, METHODID_SET_SDFS_PASSWORD)))
           .addMethod(
             getListUsersMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.SDFSCli.ListUsersRequest,
                 org.opendedup.grpc.SDFSCli.ListUsersResponse>(
@@ -324,7 +312,7 @@ public final class SdfsUserServiceGrpc {
      */
     public void addUser(org.opendedup.grpc.SDFSCli.AddUserRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.AddUserResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getAddUserMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -332,7 +320,7 @@ public final class SdfsUserServiceGrpc {
      */
     public void deleteUser(org.opendedup.grpc.SDFSCli.DeleteUserRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.DeleteUserResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getDeleteUserMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -340,7 +328,7 @@ public final class SdfsUserServiceGrpc {
      */
     public void setSdfsPermissions(org.opendedup.grpc.SDFSCli.SetPermissionsRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.SetPermissionsResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getSetSdfsPermissionsMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -348,7 +336,7 @@ public final class SdfsUserServiceGrpc {
      */
     public void setSdfsPassword(org.opendedup.grpc.SDFSCli.SetUserPasswordRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.SetUserPasswordResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getSetSdfsPasswordMethod(), getCallOptions()), request, responseObserver);
     }
 
@@ -356,7 +344,7 @@ public final class SdfsUserServiceGrpc {
      */
     public void listUsers(org.opendedup.grpc.SDFSCli.ListUsersRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSCli.ListUsersResponse> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getListUsersMethod(), getCallOptions()), request, responseObserver);
     }
   }
@@ -378,35 +366,35 @@ public final class SdfsUserServiceGrpc {
     /**
      */
     public org.opendedup.grpc.SDFSCli.AddUserResponse addUser(org.opendedup.grpc.SDFSCli.AddUserRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getAddUserMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.SDFSCli.DeleteUserResponse deleteUser(org.opendedup.grpc.SDFSCli.DeleteUserRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getDeleteUserMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.SDFSCli.SetPermissionsResponse setSdfsPermissions(org.opendedup.grpc.SDFSCli.SetPermissionsRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getSetSdfsPermissionsMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.SDFSCli.SetUserPasswordResponse setSdfsPassword(org.opendedup.grpc.SDFSCli.SetUserPasswordRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getSetSdfsPasswordMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public org.opendedup.grpc.SDFSCli.ListUsersResponse listUsers(org.opendedup.grpc.SDFSCli.ListUsersRequest request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getListUsersMethod(), getCallOptions(), request);
     }
   }
@@ -429,7 +417,7 @@ public final class SdfsUserServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SDFSCli.AddUserResponse> addUser(
         org.opendedup.grpc.SDFSCli.AddUserRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getAddUserMethod(), getCallOptions()), request);
     }
 
@@ -437,7 +425,7 @@ public final class SdfsUserServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SDFSCli.DeleteUserResponse> deleteUser(
         org.opendedup.grpc.SDFSCli.DeleteUserRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getDeleteUserMethod(), getCallOptions()), request);
     }
 
@@ -445,7 +433,7 @@ public final class SdfsUserServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SDFSCli.SetPermissionsResponse> setSdfsPermissions(
         org.opendedup.grpc.SDFSCli.SetPermissionsRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getSetSdfsPermissionsMethod(), getCallOptions()), request);
     }
 
@@ -453,7 +441,7 @@ public final class SdfsUserServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SDFSCli.SetUserPasswordResponse> setSdfsPassword(
         org.opendedup.grpc.SDFSCli.SetUserPasswordRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getSetSdfsPasswordMethod(), getCallOptions()), request);
     }
 
@@ -461,7 +449,7 @@ public final class SdfsUserServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SDFSCli.ListUsersResponse> listUsers(
         org.opendedup.grpc.SDFSCli.ListUsersRequest request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getListUsersMethod(), getCallOptions()), request);
     }
   }

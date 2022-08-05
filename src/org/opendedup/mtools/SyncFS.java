@@ -21,7 +21,6 @@ package org.opendedup.mtools;
 import java.io.File;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -33,18 +32,19 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.SparseDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.io.events.MFileSync;
 import org.opendedup.sdfs.io.events.SFileSync;
 import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
 
 import com.google.common.eventbus.EventBus;
 
-public class SyncFS {
+public class SyncFS implements Runnable{
 	private AtomicLong files = new AtomicLong(0);
 	private AtomicLong errorfiles = new AtomicLong(0);
 	private FDiskEvent fEvt = null;
@@ -75,20 +75,6 @@ public class SyncFS {
 	}
 
 	public void init() throws IOException {
-		if (Main.runConsistancyCheckPeriodically || Main.runConsistancyCheck) {
-			try {
-				SDFSLogger.getLog().info(
-						"Initializing HCServiceProxy");
-				Main.sdfsSyncEnabled = true;
-				Main.syncDL = true;
-				ArrayList<String> volumes = new ArrayList<String>();
-				HCServiceProxy.init(volumes);
-			} catch (Exception e) {
-				SDFSLogger.getLog().fatal(
-						"Caught exception while Initializing HCServiceProxy", e);
-				e.printStackTrace();
-			}
-		}
 		File f = new File(Main.volume.getPath());
 		long entries = FileCounts.getCount(f, false);
 		try {
@@ -132,7 +118,7 @@ public class SyncFS {
 
 		} finally {
 			Main.sdfsSyncEnabled = false;
-			//Main.syncDL = false;
+			// Main.syncDL = false;
 		}
 	}
 
@@ -155,14 +141,19 @@ public class SyncFS {
 
 	private void checkDedupFile(MetaDataDedupFile mf) {
 		try {
-			eventBus.post(new MFileSync(mf));
-			if (mf.getDedupFile(false) != null) {
-				File directory = new File(Main.dedupDBStore + File.separator
-						+ mf.getDfGuid().substring(0, 2) + File.separator
-						+ mf.getDfGuid());
-				File dbf = new File(directory.getPath() + File.separator
-						+ mf.getDfGuid() + ".map");
-				eventBus.post(new SFileSync(dbf));
+			SparseDedupFile df = mf.getDedupFile(false);
+			if (df != null && DedupFileStore.get(df.getGUID()) == null) {
+				if (DedupFileStore.get(df.getGUID()) == null) {
+					eventBus.post(new MFileSync(mf));
+					File directory = new File(Main.dedupDBStore + File.separator
+							+ mf.getDfGuid().substring(0, 2) + File.separator
+							+ mf.getDfGuid());
+					File dbf = new File(directory.getPath() + File.separator
+							+ mf.getDfGuid() + ".map");
+					eventBus.post(new SFileSync(dbf));
+				}
+			} else if (df == null) {
+				eventBus.post(new MFileSync(mf));
 			}
 
 			l.lock();
@@ -211,6 +202,16 @@ public class SyncFS {
 			return thread;
 		}
 
+	}
+
+	@Override
+	public void run() {
+		try {
+			this.init();
+		} catch(Exception e) {
+			SDFSLogger.getLog().warn("Unable to Sync Filesystem");
+		}
+		
 	}
 
 }
