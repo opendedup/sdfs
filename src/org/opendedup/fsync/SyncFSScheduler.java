@@ -50,8 +50,7 @@ public class SyncFSScheduler {
 			sched.start();
 			JobBuilder jobBuilder = JobBuilder.newJob(GCJob.class);
 
-			JobDetail ccjobDetail = jobBuilder.withIdentity("syncgc").build();
-
+			JobDetail ccjobDetail = jobBuilder.withIdentity("syncfromcloud").build();
 			CronTrigger cctrigger = TriggerBuilder.newTrigger().withIdentity("gcTrigger2")
 					.withSchedule(CronScheduleBuilder.cronSchedule(schedule)).build();
 			sched.scheduleJob(ccjobDetail, cctrigger);
@@ -72,8 +71,8 @@ public class SyncFSScheduler {
 
 	public void stopSchedules() {
 		try {
-			sched.unscheduleJob(new TriggerKey("syncgc"));
-			sched.deleteJob(new JobKey("syncgc"));
+			sched.unscheduleJob(new TriggerKey("syncfromcloud"));
+			sched.deleteJob(new JobKey("syncfromcloud"));
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to stop schedule", e);
 		}

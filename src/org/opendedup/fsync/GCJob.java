@@ -19,7 +19,9 @@
 package org.opendedup.fsync;
 
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.mtools.SyncFS;
+import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -29,7 +31,8 @@ public class GCJob implements Job {
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
 		try {
 			try {
-				new SyncFS();
+				SDFSEvent evt = SDFSEvent.syncVolEvent("Syncing from [" + Main.DSEID + "]");
+				HCServiceProxy.syncVolume(Main.DSEID,true,false,evt);
 			} catch (Exception e) {
 				SDFSLogger.getLog().info("SyncFS Job Failed", e);
 			}

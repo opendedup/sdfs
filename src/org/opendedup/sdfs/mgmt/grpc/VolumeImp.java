@@ -377,6 +377,7 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
     SyncFromVolResponse.Builder b = SyncFromVolResponse.newBuilder();
     try {
       SyncFromConnectedVolume v = new SyncFromConnectedVolume();
+      v.overwrite = request.getOverwrite();
       v.syncVolume(request.getVolumeid());
       b.setEventID(v.evt.uid);
       responseObserver.onNext(b.build());

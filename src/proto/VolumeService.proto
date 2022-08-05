@@ -245,6 +245,7 @@ message SpeedResponse {
 message SyncFromVolRequest {
   int64 volumeid = 1;
   int64 pvolumeID =2;
+  bool overwrite =3;
 }
 
 message SyncFromVolResponse {

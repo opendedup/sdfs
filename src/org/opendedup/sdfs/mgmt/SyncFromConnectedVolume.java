@@ -11,6 +11,7 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 public class SyncFromConnectedVolume implements Runnable {
 	public SDFSEvent evt;
 	public long volumeid;
+	public boolean overwrite;
 
 	public void getResult(long id) throws IOException {
 			RemoteVolumeInfo[] l = FileReplicationService.getConnectedVolumes();
@@ -18,7 +19,7 @@ public class SyncFromConnectedVolume implements Runnable {
 				if (lv.id == id) {
 					if(evt == null)
 						evt = SDFSEvent.syncVolEvent("Syncing from [" + id + "]");
-					HCServiceProxy.syncVolume(id,true,evt);
+					HCServiceProxy.syncVolume(id,true,overwrite,evt);
 					return;
 				}
 			}

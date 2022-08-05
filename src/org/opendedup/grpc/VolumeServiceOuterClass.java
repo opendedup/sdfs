@@ -26211,6 +26211,12 @@ public final class VolumeServiceOuterClass {
      * @return The pvolumeID.
      */
     long getPvolumeID();
+
+    /**
+     * <code>bool overwrite = 3;</code>
+     * @return The overwrite.
+     */
+    boolean getOverwrite();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SyncFromVolRequest}
@@ -26267,6 +26273,11 @@ public final class VolumeServiceOuterClass {
               pvolumeID_ = input.readInt64();
               break;
             }
+            case 24: {
+
+              overwrite_ = input.readBool();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -26321,6 +26332,17 @@ public final class VolumeServiceOuterClass {
       return pvolumeID_;
     }
 
+    public static final int OVERWRITE_FIELD_NUMBER = 3;
+    private boolean overwrite_;
+    /**
+     * <code>bool overwrite = 3;</code>
+     * @return The overwrite.
+     */
+    @java.lang.Override
+    public boolean getOverwrite() {
+      return overwrite_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -26341,6 +26363,9 @@ public final class VolumeServiceOuterClass {
       if (pvolumeID_ != 0L) {
         output.writeInt64(2, pvolumeID_);
       }
+      if (overwrite_ != false) {
+        output.writeBool(3, overwrite_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -26357,6 +26382,10 @@ public final class VolumeServiceOuterClass {
       if (pvolumeID_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, pvolumeID_);
+      }
+      if (overwrite_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, overwrite_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -26377,6 +26406,8 @@ public final class VolumeServiceOuterClass {
           != other.getVolumeid()) return false;
       if (getPvolumeID()
           != other.getPvolumeID()) return false;
+      if (getOverwrite()
+          != other.getOverwrite()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -26394,6 +26425,9 @@ public final class VolumeServiceOuterClass {
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getPvolumeID());
+      hash = (37 * hash) + OVERWRITE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getOverwrite());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -26531,6 +26565,8 @@ public final class VolumeServiceOuterClass {
 
         pvolumeID_ = 0L;
 
+        overwrite_ = false;
+
         return this;
       }
 
@@ -26559,6 +26595,7 @@ public final class VolumeServiceOuterClass {
         org.opendedup.grpc.VolumeServiceOuterClass.SyncFromVolRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SyncFromVolRequest(this);
         result.volumeid_ = volumeid_;
         result.pvolumeID_ = pvolumeID_;
+        result.overwrite_ = overwrite_;
         onBuilt();
         return result;
       }
@@ -26612,6 +26649,9 @@ public final class VolumeServiceOuterClass {
         }
         if (other.getPvolumeID() != 0L) {
           setPvolumeID(other.getPvolumeID());
+        }
+        if (other.getOverwrite() != false) {
+          setOverwrite(other.getOverwrite());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -26700,6 +26740,37 @@ public final class VolumeServiceOuterClass {
       public Builder clearPvolumeID() {
         
         pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private boolean overwrite_ ;
+      /**
+       * <code>bool overwrite = 3;</code>
+       * @return The overwrite.
+       */
+      @java.lang.Override
+      public boolean getOverwrite() {
+        return overwrite_;
+      }
+      /**
+       * <code>bool overwrite = 3;</code>
+       * @param value The overwrite to set.
+       * @return This builder for chaining.
+       */
+      public Builder setOverwrite(boolean value) {
+        
+        overwrite_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool overwrite = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearOverwrite() {
+        
+        overwrite_ = false;
         onChanged();
         return this;
       }
@@ -31733,69 +31804,69 @@ public final class VolumeServiceOuterClass {
       "t\022\026\n\016requestedSpeed\030\001 \001(\005\022\021\n\tpvolumeID\030\002" +
       " \001(\003\"b\n\rSpeedResponse\022\017\n\007eventID\030\001 \001(\t\022\r" +
       "\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.o" +
-      "pendedup.grpc.errorCodes\"9\n\022SyncFromVolR" +
+      "pendedup.grpc.errorCodes\"L\n\022SyncFromVolR" +
       "equest\022\020\n\010volumeid\030\001 \001(\003\022\021\n\tpvolumeID\030\002 " +
-      "\001(\003\"h\n\023SyncFromVolResponse\022\017\n\007eventID\030\001 " +
-      "\001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036." +
-      "org.opendedup.grpc.errorCodes\"#\n\016SyncVol" +
-      "Request\022\021\n\tpvolumeID\030\001 \001(\003\"d\n\017SyncVolRes" +
+      "\001(\003\022\021\n\toverwrite\030\003 \001(\010\"h\n\023SyncFromVolRes" +
       "ponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n" +
       "\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc.er" +
-      "rorCodes\"5\n\020SetMaxAgeRequest\022\016\n\006maxAge\030\001" +
-      " \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"U\n\021SetMaxAgeResp" +
-      "onse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036" +
-      ".org.opendedup.grpc.errorCodes\"2\n\035Reconc" +
-      "ileCloudMetadataRequest\022\021\n\tpvolumeID\030\003 \001" +
-      "(\003\"s\n\036ReconcileCloudMetadataResponse\022\r\n\005" +
-      "error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.ope" +
-      "ndedup.grpc.errorCodes\022\017\n\007eventID\030\003 \001(\t2" +
-      "\370\r\n\rVolumeService\022i\n\020AuthenticateUser\022)." +
-      "org.opendedup.grpc.AuthenticationRequest" +
-      "\032*.org.opendedup.grpc.AuthenticationResp" +
-      "onse\022^\n\rGetVolumeInfo\022%.org.opendedup.gr" +
-      "pc.VolumeInfoRequest\032&.org.opendedup.grp" +
-      "c.VolumeInfoResponse\022[\n\016ShutdownVolume\022#" +
-      ".org.opendedup.grpc.ShutdownRequest\032$.or" +
-      "g.opendedup.grpc.ShutdownResponse\022[\n\nCle" +
-      "anStore\022%.org.opendedup.grpc.CleanStoreR" +
-      "equest\032&.org.opendedup.grpc.CleanStoreRe" +
-      "sponse\022p\n\021DeleteCloudVolume\022,.org.opende" +
-      "dup.grpc.DeleteCloudVolumeRequest\032-.org." +
-      "opendedup.grpc.DeleteCloudVolumeResponse" +
-      "\022J\n\007DSEInfo\022\036.org.opendedup.grpc.DSERequ" +
-      "est\032\037.org.opendedup.grpc.DSEResponse\022[\n\n" +
-      "SystemInfo\022%.org.opendedup.grpc.SystemIn" +
-      "foRequest\032&.org.opendedup.grpc.SystemInf" +
-      "oResponse\022p\n\021SetVolumeCapacity\022,.org.ope" +
-      "ndedup.grpc.SetVolumeCapacityRequest\032-.o" +
-      "rg.opendedup.grpc.SetVolumeCapacityRespo" +
-      "nse\022h\n\023GetConnectedVolumes\022\'.org.opended" +
-      "up.grpc.CloudVolumesRequest\032(.org.opende" +
-      "dup.grpc.CloudVolumesResponse\022^\n\rGetGCSc" +
-      "hedule\022%.org.opendedup.grpc.GCScheduleRe" +
-      "quest\032&.org.opendedup.grpc.GCScheduleRes" +
-      "ponse\022a\n\014SetCacheSize\022\'.org.opendedup.gr" +
-      "pc.SetCacheSizeRequest\032(.org.opendedup.g" +
-      "rpc.SetCacheSizeResponse\022^\n\013SetPassword\022" +
-      "&.org.opendedup.grpc.SetPasswordRequest\032" +
-      "\'.org.opendedup.grpc.SetPasswordResponse" +
-      "\022S\n\014SetReadSpeed\022 .org.opendedup.grpc.Sp" +
-      "eedRequest\032!.org.opendedup.grpc.SpeedRes" +
-      "ponse\022T\n\rSetWriteSpeed\022 .org.opendedup.g" +
-      "rpc.SpeedRequest\032!.org.opendedup.grpc.Sp" +
-      "eedResponse\022f\n\023SyncFromCloudVolume\022&.org" +
-      ".opendedup.grpc.SyncFromVolRequest\032\'.org" +
-      ".opendedup.grpc.SyncFromVolResponse\022Z\n\017S" +
-      "yncCloudVolume\022\".org.opendedup.grpc.Sync" +
-      "VolRequest\032#.org.opendedup.grpc.SyncVolR" +
-      "esponse\022X\n\tSetMaxAge\022$.org.opendedup.grp" +
-      "c.SetMaxAgeRequest\032%.org.opendedup.grpc." +
-      "SetMaxAgeResponse\022\177\n\026ReconcileCloudMetad" +
-      "ata\0221.org.opendedup.grpc.ReconcileCloudM" +
-      "etadataRequest\0322.org.opendedup.grpc.Reco" +
-      "ncileCloudMetadataResponseB0Z.github.com" +
-      "/opendedup/sdfs-client-go/sdfs/;sdfsb\006pr" +
-      "oto3"
+      "rorCodes\"#\n\016SyncVolRequest\022\021\n\tpvolumeID\030" +
+      "\001 \001(\003\"d\n\017SyncVolResponse\022\017\n\007eventID\030\001 \001(" +
+      "\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.or" +
+      "g.opendedup.grpc.errorCodes\"5\n\020SetMaxAge" +
+      "Request\022\016\n\006maxAge\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001" +
+      "(\003\"U\n\021SetMaxAgeResponse\022\r\n\005error\030\001 \001(\t\0221" +
+      "\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grpc.e" +
+      "rrorCodes\"2\n\035ReconcileCloudMetadataReque" +
+      "st\022\021\n\tpvolumeID\030\003 \001(\003\"s\n\036ReconcileCloudM" +
+      "etadataResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorC" +
+      "ode\030\002 \001(\0162\036.org.opendedup.grpc.errorCode" +
+      "s\022\017\n\007eventID\030\003 \001(\t2\370\r\n\rVolumeService\022i\n\020" +
+      "AuthenticateUser\022).org.opendedup.grpc.Au" +
+      "thenticationRequest\032*.org.opendedup.grpc" +
+      ".AuthenticationResponse\022^\n\rGetVolumeInfo" +
+      "\022%.org.opendedup.grpc.VolumeInfoRequest\032" +
+      "&.org.opendedup.grpc.VolumeInfoResponse\022" +
+      "[\n\016ShutdownVolume\022#.org.opendedup.grpc.S" +
+      "hutdownRequest\032$.org.opendedup.grpc.Shut" +
+      "downResponse\022[\n\nCleanStore\022%.org.opended" +
+      "up.grpc.CleanStoreRequest\032&.org.opendedu" +
+      "p.grpc.CleanStoreResponse\022p\n\021DeleteCloud" +
+      "Volume\022,.org.opendedup.grpc.DeleteCloudV" +
+      "olumeRequest\032-.org.opendedup.grpc.Delete" +
+      "CloudVolumeResponse\022J\n\007DSEInfo\022\036.org.ope" +
+      "ndedup.grpc.DSERequest\032\037.org.opendedup.g" +
+      "rpc.DSEResponse\022[\n\nSystemInfo\022%.org.open" +
+      "dedup.grpc.SystemInfoRequest\032&.org.opend" +
+      "edup.grpc.SystemInfoResponse\022p\n\021SetVolum" +
+      "eCapacity\022,.org.opendedup.grpc.SetVolume" +
+      "CapacityRequest\032-.org.opendedup.grpc.Set" +
+      "VolumeCapacityResponse\022h\n\023GetConnectedVo" +
+      "lumes\022\'.org.opendedup.grpc.CloudVolumesR" +
+      "equest\032(.org.opendedup.grpc.CloudVolumes" +
+      "Response\022^\n\rGetGCSchedule\022%.org.opendedu" +
+      "p.grpc.GCScheduleRequest\032&.org.opendedup" +
+      ".grpc.GCScheduleResponse\022a\n\014SetCacheSize" +
+      "\022\'.org.opendedup.grpc.SetCacheSizeReques" +
+      "t\032(.org.opendedup.grpc.SetCacheSizeRespo" +
+      "nse\022^\n\013SetPassword\022&.org.opendedup.grpc." +
+      "SetPasswordRequest\032\'.org.opendedup.grpc." +
+      "SetPasswordResponse\022S\n\014SetReadSpeed\022 .or" +
+      "g.opendedup.grpc.SpeedRequest\032!.org.open" +
+      "dedup.grpc.SpeedResponse\022T\n\rSetWriteSpee" +
+      "d\022 .org.opendedup.grpc.SpeedRequest\032!.or" +
+      "g.opendedup.grpc.SpeedResponse\022f\n\023SyncFr" +
+      "omCloudVolume\022&.org.opendedup.grpc.SyncF" +
+      "romVolRequest\032\'.org.opendedup.grpc.SyncF" +
+      "romVolResponse\022Z\n\017SyncCloudVolume\022\".org." +
+      "opendedup.grpc.SyncVolRequest\032#.org.open" +
+      "dedup.grpc.SyncVolResponse\022X\n\tSetMaxAge\022" +
+      "$.org.opendedup.grpc.SetMaxAgeRequest\032%." +
+      "org.opendedup.grpc.SetMaxAgeResponse\022\177\n\026" +
+      "ReconcileCloudMetadata\0221.org.opendedup.g" +
+      "rpc.ReconcileCloudMetadataRequest\0322.org." +
+      "opendedup.grpc.ReconcileCloudMetadataRes" +
+      "ponseB0Z.github.com/opendedup/sdfs-clien" +
+      "t-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -31976,7 +32047,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_SyncFromVolRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncFromVolRequest_descriptor,
-        new java.lang.String[] { "Volumeid", "PvolumeID", });
+        new java.lang.String[] { "Volumeid", "PvolumeID", "Overwrite", });
     internal_static_org_opendedup_grpc_SyncFromVolResponse_descriptor =
       getDescriptor().getMessageTypes().get(29);
     internal_static_org_opendedup_grpc_SyncFromVolResponse_fieldAccessorTable = new

@@ -29,6 +29,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.mtools.SyncFS;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
@@ -623,14 +624,19 @@ public class FileReplicationService {
 						if (fname.endsWith(DM)) {
 							f = f.getParentFile();
 							f.mkdirs();
-						} else {
-							executor.execute(new MetaFileDownloader(fname, f, sync, req.getEvent()));
+						} else if (req.isOverwrite() || !f.exists()) {
+							MetaDataDedupFile mf = MetaDataDedupFile.getFile(f.getPath());
+							SparseDedupFile df = mf.getDedupFile(false);
+							if (df != null && DedupFileStore.get(df.getGUID()) == null) {
+								executor.execute(new MetaFileDownloader(fname, f, sync, req.getEvent()));
+							}
 						}
 					} else {
 						SDFSLogger.getLog().info("not checked out " + fname);
 					}
-					fname = this.sync.getNextName("files", req.getVolumeID());
 				}
+				fname = this.sync.getNextName("files", req.getVolumeID());
+
 				executor.shutdown();
 				// Wait for everything to finish.
 				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
@@ -640,7 +646,7 @@ public class FileReplicationService {
 				SDFSLogger.getLog().info("Metadata Files downloaded : " + MetaFileDownloader.fdl.get());
 				SDFSLogger.getLog().info("Metadata File download errors: " + MetaFileDownloader.fer.get());
 				this.sync.clearIter();
-				//Main.syncDL = false;
+				// Main.syncDL = false;
 				Main.syncDLAll = false;
 
 				if (MetaFileDownloader.downloadSyncException != null) {
@@ -655,7 +661,9 @@ public class FileReplicationService {
 				SDFSLogger.getLog().error("unable to sync", e);
 
 			}
-		} finally {
+		} finally
+
+		{
 			synclock.unlock();
 		}
 

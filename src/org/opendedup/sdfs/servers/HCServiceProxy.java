@@ -149,7 +149,7 @@ public class HCServiceProxy {
 					vol = -1;
 				}
 				SDFSEvent evt = SDFSEvent.syncVolEvent("Syncing from [" + vol + "]");
-				eventBus.post(new CloudSyncDLRequest(vol, true, false, evt));
+				eventBus.post(new CloudSyncDLRequest(vol, true, false,false, evt));
 			}
 			touchRunFile();
 
@@ -165,8 +165,8 @@ public class HCServiceProxy {
 		}
 	}
 
-	public static void syncVolume(long volumeID, boolean syncMap, SDFSEvent evt) {
-		eventBus.post(new CloudSyncDLRequest(volumeID, syncMap, true, evt));
+	public static void syncVolume(long volumeID, boolean syncMap, boolean overwrite,SDFSEvent evt) {
+		eventBus.post(new CloudSyncDLRequest(volumeID, syncMap, true,overwrite, evt));
 	}
 
 	public static byte getDseCount() {

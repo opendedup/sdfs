@@ -24,13 +24,19 @@ public class CloudSyncDLRequest {
 	long volumeID;
 	boolean updateHashMap;
 	boolean updateRef;
+	boolean overwrite;
 	SDFSEvent evt;
 
-	public CloudSyncDLRequest(long volumeID,boolean updateHashMap,boolean updateRef,SDFSEvent evt) {
+	public CloudSyncDLRequest(long volumeID,boolean updateHashMap,boolean updateRef,boolean overwrite,SDFSEvent evt) {
 		this.volumeID = volumeID;
 		this.updateHashMap = updateHashMap;
 		this.updateRef = updateRef;
 		this.evt = evt;
+		this.overwrite = overwrite;
+	}
+
+	public boolean isOverwrite() {
+		return this.overwrite;
 	}
 	
 	public long getVolumeID() {
