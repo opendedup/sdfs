@@ -238,13 +238,15 @@ public class IOServer {
     }
 
     /* The port on which the server should run */
-    SDFSLogger.getLog().info(
-        "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads);
     SocketAddress address = new InetSocketAddress(host, port);
-    int maxMessageSize = 40*1024*1024;
-    if((Main.CHUNK_LENGTH * 3) > maxMessageSize) {
-      maxMessageSize=Main.CHUNK_LENGTH * 3;
+    int minMessageSize = 8 * 1024 *1024;
+    int maxMessageSize = Main.CHUNK_LENGTH *3;
+
+    if(minMessageSize > maxMessageSize) {
+      maxMessageSize=minMessageSize;
     }
+    SDFSLogger.getLog().info(
+        "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads +" maxMessageSize=" + maxMessageSize);
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
         .addService(new StorageServiceImpl()).directExecutor()
         .maxInboundMessageSize(maxMessageSize).maxInboundMetadataSize(maxMessageSize)
@@ -260,7 +262,6 @@ public class IOServer {
         throw new IOException(e);
       }
     }
-    SDFSLogger.getLog().info("Set Max Message Size to " + (Main.CHUNK_LENGTH * 2));
     if (useSSL) {
       if (useClientTLS) {
         try {

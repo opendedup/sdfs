@@ -143,6 +143,10 @@ public class FileReplicationService {
 		return sync.exists(dlf, "ddb");
 	}
 
+	private boolean metaFileExists(String fname) throws Exception {
+		return sync.exists(fname, "files");
+	}
+
 	public static MetaDataDedupFile getMF(String fname) throws Exception {
 		File f = new File(Main.volume.getPath() + File.separator + fname);
 		fname = fname.replaceAll(Matcher.quoteReplacement("\\"), "/");
@@ -179,7 +183,18 @@ public class FileReplicationService {
 		} else {
 			return false;
 		}
+	}
 
+	public static boolean MetaFileExists(String fname) throws IOException {
+		if (service != null) {
+			try {
+				return service.metaFileExists(fname);
+			} catch (Exception e) {
+				throw new IOException(e);
+			}
+		} else {
+			return false;
+		}
 	}
 
 	public static RemoteVolumeInfo[] getConnectedVolumes() throws IOException {
@@ -669,7 +684,7 @@ public class FileReplicationService {
 
 	}
 
-	private static class MetaFileDownloader implements Runnable {
+	public static class MetaFileDownloader implements Runnable {
 		private static Exception downloadSyncException;
 		AbstractCloudFileSync sync;
 		String fname;
@@ -692,8 +707,7 @@ public class FileReplicationService {
 			this.evt = evt;
 		}
 
-		@Override
-		public void run() {
+		public void download() {
 			int tries = 0;
 			boolean done = false;
 			while (!done) {
@@ -725,10 +739,15 @@ public class FileReplicationService {
 			}
 		}
 
+		@Override
+		public void run() {
+			download();
+		}
+
 	}
 
-	private static class DDBDownloader {
-		MetaDataDedupFile mf;
+	public static class DDBDownloader {
+		private String guid;
 		private static AtomicInteger der = new AtomicInteger();
 		private static AtomicInteger ddl = new AtomicInteger();
 
@@ -738,7 +757,11 @@ public class FileReplicationService {
 		}
 
 		DDBDownloader(MetaDataDedupFile mf) {
-			this.mf = mf;
+			this.guid = mf.getDfGuid();
+		}
+
+		public DDBDownloader(String guid) {
+			this.guid = guid;
 		}
 
 		public void download() {
@@ -747,10 +770,10 @@ public class FileReplicationService {
 				boolean done = false;
 				while (!done) {
 					try {
-						FileReplicationService.getDDB(mf.getDfGuid());
-						SDFSLogger.getLog().info("downloaded " + mf.getDfGuid());
+						FileReplicationService.getDDB(this.guid);
+						SDFSLogger.getLog().info("downloaded " + this.guid);
 
-						LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid());
+						LongByteArrayMap ddb = LongByteArrayMap.getMap(this.guid);
 
 						Set<Long> blks = new HashSet<Long>();
 						if (ddb.getVersion() < 2)
@@ -814,7 +837,7 @@ public class FileReplicationService {
 						ddl.incrementAndGet();
 					} catch (Exception e) {
 						if (tries > maxTries) {
-							SDFSLogger.getLog().error("unable to sync ddb " + mf.getPath() + " to " + mf.getDfGuid(),
+							SDFSLogger.getLog().error("unable to sync ddb " + this.guid ,
 									e);
 							der.incrementAndGet();
 							done = true;
@@ -824,7 +847,7 @@ public class FileReplicationService {
 				}
 
 			} catch (Exception e) {
-				SDFSLogger.getLog().warn("unable to recover " + mf.getPath(), e);
+				SDFSLogger.getLog().warn("unable to recover " + this.guid, e);
 				der.incrementAndGet();
 			}
 

@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -340,8 +341,8 @@ public class SparseDedupFile implements DedupFile {
 
 	public int writeCache() throws IOException, HashtableFullException {
 		try {
-				SDFSLogger.getLog()
-						.debug("Flushing Cache of for " + mf.getPath() + " of size " + this.writeBuffers.size());
+			SDFSLogger.getLog()
+					.debug("Flushing Cache of for " + mf.getPath() + " of size " + this.writeBuffers.size());
 			this.writeBuffers.invalidateAll();
 			int z = 0;
 			synchronized (flushingBuffers) {
@@ -531,7 +532,7 @@ public class SparseDedupFile implements DedupFile {
 							}
 							// SDFSLogger.getLog().info("broke data up into " +
 							// fs.size() + " chunks");
-							
+
 							for (Finger f : fs) {
 								HashLocPair p = new HashLocPair();
 								try {
@@ -546,13 +547,12 @@ public class SparseDedupFile implements DedupFile {
 									if (f.hl != null) {
 										p.setDup(!f.hl.getInserted());
 										cl += f.hl.getCompressedLength();
-									}
-									else
+									} else
 										p.setDup(true);
 									if (p.isDup()) {
 										dups += f.len;
 									}
-									
+
 									ar.put(p.pos, p);
 								} catch (Exception e) {
 									SDFSLogger.getLog().warn("unable to write object finger", e);
@@ -748,6 +748,7 @@ public class SparseDedupFile implements DedupFile {
 			try {
 				WritableCacheBuffer wb = null;
 				wb = writeBuffers.get(chunkPos);
+				
 				/*
 				 * SDFSLogger.getLog() .info("active buffers=" + this.activeBuffers.size() +
 				 * " flushingBuffers=" + this.flushingBuffers.size() + " open buffers=" +
@@ -833,28 +834,30 @@ public class SparseDedupFile implements DedupFile {
 			}
 
 			if (Main.safeSync) {
-					SDFSLogger.getLog().debug("sync " + mf.getPath());
-				//long tm = 0;
-				//long wt = 0;
-				//long st = 0;
-				//tm = System.currentTimeMillis();
-				//long wsz = this.writeBuffers.size();
-				//int fsz = 0;
-				//synchronized (flushingBuffers) {
-				//	fsz = this.flushingBuffers.size();
-				//}
+				SDFSLogger.getLog().debug("sync " + mf.getPath());
+				// long tm = 0;
+				// long wt = 0;
+				// long st = 0;
+				// tm = System.currentTimeMillis();
+				// long wsz = this.writeBuffers.size();
+				// int fsz = 0;
+				// synchronized (flushingBuffers) {
+				// fsz = this.flushingBuffers.size();
+				// }
 				this.writeCache();
-				//wt = System.currentTimeMillis() - tm;
+				// wt = System.currentTimeMillis() - tm;
 				HCServiceProxy.sync();
 				try {
 					this.bdb.sync();
 				} catch (Exception e) {
 
 				}
-				//st = System.currentTimeMillis() - tm - wt;
-				/* 				SDFSLogger.getLog().debug(
-						"Sync wb=[" + wsz + "] fb=[" + fsz + "] write fush [" + wt + "] bd sync [" + st + "]");
-						*/
+				// st = System.currentTimeMillis() - tm - wt;
+				/*
+				 * SDFSLogger.getLog().debug(
+				 * "Sync wb=[" + wsz + "] fb=[" + fsz + "] write fush [" + wt + "] bd sync [" +
+				 * st + "]");
+				 */
 
 			} /*
 				 * else { this.writeCache(); }
@@ -1045,9 +1048,9 @@ public class SparseDedupFile implements DedupFile {
 					while (nwb > 0) {
 						twb += nwb;
 						nwb = this.writeCache();
-							SDFSLogger.getLog().debug("Flushing " + nwb + " buffers");
+						SDFSLogger.getLog().debug("Flushing " + nwb + " buffers");
 					}
-						SDFSLogger.getLog().debug("Flushed " + twb + " buffers");
+					SDFSLogger.getLog().debug("Flushed " + twb + " buffers");
 
 				} catch (Exception e) {
 					SDFSLogger.getLog().error("unable to flush " + this.databasePath, e);

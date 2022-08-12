@@ -21,6 +21,8 @@ package org.opendedup.sdfs.io;
 import java.io.File;
 
 import java.io.FileInputStream;
+
+import org.opendedup.sdfs.mgmt.GetCloudFile;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -58,10 +60,12 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.MMetaUpdated;
+import org.opendedup.sdfs.mgmt.GetCloudFile;
 import org.opendedup.sdfs.monitor.IOMonitor;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.ByteUtils;
@@ -120,6 +124,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean dirty = false;
 	private long attributes = 0;
 	private long retentionLock = -1;
+	private static final int pl = Main.volume.getPath().length();
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -400,7 +405,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			} catch (IOException e) {
 				SDFSLogger.getLog().warn(e);
 			}
-		} else if (!f.exists() || f.isDirectory()) {
+		} else if(!f.exists() && FileReplicationService.MetaFileExists(f.getPath().substring(pl))) {
+			GetCloudFile cf = new GetCloudFile();
+			cf.getResult(f.getPath().substring(pl),f.getPath().substring(pl),true,null);
+			cf.downloadAll();
+		}else if (!f.exists() || f.isDirectory()) {
 			mf = new MetaDataDedupFile(path);
 			MetaFileStore.addToCache(mf);
 		} else {

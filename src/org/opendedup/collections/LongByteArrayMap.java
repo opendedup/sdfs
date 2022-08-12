@@ -44,6 +44,7 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
+import org.opendedup.sdfs.filestore.cloud.FileReplicationService.DDBDownloader;
 import org.opendedup.sdfs.io.FileClosedException;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.util.CompressionUtils;
@@ -144,7 +145,8 @@ public class LongByteArrayMap implements DataMapInterface {
 			mapFile = new File(Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator + GUID
 					+ File.separator + GUID + ".map.lz4");
 		if (!mapFile.exists() && FileReplicationService.DDBExists(GUID)) {
-			FileReplicationService.getDDB(GUID).close();
+			DDBDownloader dl = new DDBDownloader(GUID);
+			dl.download();
 			mapFile = new File(Main.dedupDBStore + File.separator + GUID.substring(0, 2) + File.separator + GUID
 					+ File.separator + GUID + ".map");
 			if (!mapFile.exists())
