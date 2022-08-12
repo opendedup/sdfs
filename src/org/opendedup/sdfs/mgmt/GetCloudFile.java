@@ -15,7 +15,6 @@ import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.rabin.utils.StringUtils;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
@@ -246,6 +245,32 @@ public class GetCloudFile implements Runnable {
 		}
 		SDFSLogger.getLog().info("Done Importing " + mf.getDfGuid());
 		fevt.addCount(1);
+	}
+
+	public void downloadAll() {
+		try {
+			synchronized (obj) {
+				this.downloadFile();
+				this.checkDedupFile(fevt);
+				this.snapshotFile(fevt);
+				fevt.endEvent("imported [" + mf.getPath() + "]");
+			}
+		} catch (Exception e) {
+			String pth = "";
+			if (mf != null)
+				pth = mf.getPath();
+			try {
+				File f = new File(Main.volume.getPath() + File.separator + sfile);
+				if (f.exists()) {
+
+					f.delete();
+				}
+			} catch (Exception e1) {
+
+			}
+			SDFSLogger.getLog().error("unable to process file " + pth, e);
+			fevt.endEvent("unable to process file " + pth, SDFSEvent.ERROR);
+		}
 	}
 
 	@Override
