@@ -407,8 +407,12 @@ public class MetaFileStore {
 							return false;
 						}
 						if (mf.isRetentionLock()) {
-							SDFSLogger.getLog().warn("not deleting because of retentionlock");
-							return false;
+							try{
+							throw new Exception();
+							}catch(Exception e) {
+								SDFSLogger.getLog().warn("not deleting because of retentionlock",e);
+								return false;
+							}
 						}
 
 						pathMap.invalidate(mf.getPath());

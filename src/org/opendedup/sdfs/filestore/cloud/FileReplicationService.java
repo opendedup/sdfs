@@ -343,7 +343,7 @@ public class FileReplicationService {
 						if (evt.dirty || evt.mf.isSymlink()) {
 							if (evt.mf.writeLock.tryLock(5, TimeUnit.SECONDS)) {
 								try {
-									SDFSLogger.getLog().debug("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
+									SDFSLogger.getLog().info("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
 									this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl),
 											"files", new HashMap<String, String>(), false);
 									eventUploadBus.post(new MFileUploaded(evt.mf));
@@ -402,6 +402,7 @@ public class FileReplicationService {
 					String fn = f.getPath().substring(pl);
 					if (!isSymlink && f.isDirectory())
 						fn = fn + DM;
+					SDFSLogger.getLog().info("1111");
 					this.sync.uploadFile(f, fn, "files", new HashMap<String, String>(), false);
 					done = true;
 				} catch (Exception e) {
@@ -485,7 +486,7 @@ public class FileReplicationService {
 					while (!done) {
 						try {
 
-							SDFSLogger.getLog().debug("writed " + evt.sf.getPath());
+							SDFSLogger.getLog().info("writed " + evt.sf.getPath());
 							this.sync.uploadFile(evt.sf, evt.sf.getPath().substring(sl), "ddb",
 									new HashMap<String, String>(), false);
 
@@ -523,7 +524,7 @@ public class FileReplicationService {
 				while (!done) {
 					try {
 
-						SDFSLogger.getLog().debug("writem " + evt.mf.getPath());
+						SDFSLogger.getLog().info("writem " + evt.mf.getPath());
 						this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl), "files",
 								new HashMap<String, String>(), false);
 						done = true;
@@ -590,7 +591,7 @@ public class FileReplicationService {
 			while (!done) {
 				try {
 
-					SDFSLogger.getLog().debug("writev " + evt.vol.getConfigPath());
+					SDFSLogger.getLog().info("writev " + evt.vol.getConfigPath());
 					this.sync.uploadFile(new File(evt.vol.getConfigPath()), new File(evt.vol.getConfigPath()).getName(),
 							"volume", new HashMap<String, String>(), false);
 					done = true;

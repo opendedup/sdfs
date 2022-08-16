@@ -81,6 +81,22 @@ public class GetCloudFile implements Runnable {
 
 	}
 
+	public Element getResult(String file, String dstfile) throws IOException {
+		fevt = SDFSEvent.cfEvent(file);
+		
+		this.sfile = file;
+		this.dstfile = dstfile;
+		this.overwrite = true;
+		obj = fevt;
+
+		try {
+			return fevt.toXML();
+		} catch (ParserConfigurationException e) {
+			throw new IOException(e);
+		}
+		
+	}
+
 	private void downloadFile() throws IOException {
 		if (dstfile != null && sfile.contentEquals(dstfile) && !overwrite)
 			throw new IOException("local filename in the same as source name");
@@ -252,7 +268,6 @@ public class GetCloudFile implements Runnable {
 			synchronized (obj) {
 				this.downloadFile();
 				this.checkDedupFile(fevt);
-				this.snapshotFile(fevt);
 				fevt.endEvent("imported [" + mf.getPath() + "]");
 			}
 		} catch (Exception e) {

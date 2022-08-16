@@ -2294,6 +2294,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 		} catch (Exception e1) {
+			SDFSLogger.getLog().error("unable to download " + nm +" from " + haName );
 			throw new IOException(e1);
 		} finally {
 
