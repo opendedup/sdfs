@@ -76,7 +76,7 @@ public class OSValidator {
 		} else {
 			try {
 				return WinRegistry.readRegistry(
-						"HKEY_LOCAL_MACHINE\\SOFTWARE\\SDFS", "path") + File.separator;
+						"HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\SDFS", "path") + File.separator;
 			} catch (Exception e) {
 				return System.getenv("programfiles") + File.separator + "sdfs"
 						+ File.separator;
@@ -90,7 +90,7 @@ public class OSValidator {
 		} else
 			try {
 				return WinRegistry.readRegistry(
-						"HKEY_LOCAL_MACHINE\\SOFTWARE\\SDFS", "path")
+						"HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\SDFS", "path")
 						+ File.separator
 						+ "etc" + File.separator;
 			} catch (Exception e) {
