@@ -918,7 +918,13 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onCompleted();
         } else {
             try {
+
                 String path = request.getPath();
+                try {
+                    this.getFtype(path);
+                } catch (FileIOError e) {
+                    
+                }
                 File f = new File(FileIOServiceImpl.mountedVolume + path);
 
                 if (Main.volume.isOffLine()) {
@@ -1087,7 +1093,17 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
         } else {
+            try {
+                this.getFtype(req.getFileName());
+            } catch (FileIOError e) {
+                b.setErrorCode(e.code);
+                b.setError(e.message);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
             String internalPath = Main.volume.getPath() + File.separator + req.getFileName();
+
             File f = new File(internalPath);
             SDFSLogger.getLog().debug("looking for " + f.getPath());
             if (!f.exists()) {
@@ -1125,6 +1141,15 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
         } else {
+            try {
+                this.getFtype(req.getPath());
+            } catch (FileIOError e) {
+                b.setErrorCode(e.code);
+                b.setError(e.message);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
             String internalPath = Main.volume.getPath() + File.separator + req.getPath();
             File f = new File(internalPath);
             String path = req.getPath();
@@ -1207,6 +1232,15 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             int uid = req.getUid();
             int gid = req.getGid();
             try {
+                try {
+                    this.getFtype(req.getPath());
+                } catch (FileIOError e) {
+                    b.setErrorCode(e.code);
+                    b.setError(e.message);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
                 String pt = mountedVolume + path.trim();
                 File f = new File(pt);
                 if (!Files.isSymbolicLink(f.toPath())) {
