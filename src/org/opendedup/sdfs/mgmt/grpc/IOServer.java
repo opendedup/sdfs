@@ -35,6 +35,7 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLSession;
@@ -248,7 +249,7 @@ public class IOServer {
     SDFSLogger.getLog().info(
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads +" maxMessageSize=" + maxMessageSize);
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
-        .addService(new StorageServiceImpl()).directExecutor()
+        .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
         .maxInboundMessageSize(maxMessageSize).maxInboundMetadataSize(maxMessageSize)
         .addService(new FileIOServiceImpl())
         .addService(new SDFSEventImpl())

@@ -20,6 +20,12 @@ message DataWriteResponse {
     int64 written = 3;
 }
 
+message RawDataWriteRequest {
+    bytes data = 1;
+}
+
+
+
 message MkDirRequest {
     string path = 1;
     int32 mode = 2;
@@ -422,6 +428,7 @@ service FileIOService {
     rpc RmDir(RmDirRequest) returns (RmDirResponse);
     rpc Unlink(UnlinkRequest) returns (UnlinkResponse);
     rpc Write(DataWriteRequest) returns (DataWriteResponse);
+    rpc RawWrite(RawDataWriteRequest) returns (DataWriteResponse);
     rpc StreamWrite(stream DataWriteRequest) returns (DataWriteResponse) {}
     rpc Read(DataReadRequest) returns (DataReadResponse);
     rpc Release(FileCloseRequest) returns (FileCloseResponse);

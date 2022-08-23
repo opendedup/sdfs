@@ -103,6 +103,7 @@ import org.opendedup.grpc.IOService.MkDirRequest;
 import org.opendedup.grpc.IOService.MkDirResponse;
 import org.opendedup.grpc.IOService.MkNodRequest;
 import org.opendedup.grpc.IOService.MkNodResponse;
+import org.opendedup.grpc.IOService.RawDataWriteRequest;
 import org.opendedup.grpc.IOService.RemoveXAttrRequest;
 import org.opendedup.grpc.IOService.RemoveXAttrResponse;
 import org.opendedup.grpc.IOService.RmDirRequest;
@@ -769,6 +770,86 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 SDFSLogger.getLog().error(request.getPath(), e);
                 b.setError("unable to delete " + request.getPath());
                 b.setErrorCode(errorCodes.EACCES);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void rawWrite(RawDataWriteRequest request, StreamObserver<DataWriteResponse> responseObserver) {
+        DataWriteResponse.Builder b = DataWriteResponse.newBuilder();
+        long fh = 0;
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            if (Main.volume.isOffLine()) {
+                b.setError("Volume Offline");
+                b.setErrorCode(errorCodes.ENODEV);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            try {
+                if (Main.volume.isFull()) {
+                    b.setError("Volume Full");
+                    b.setErrorCode(errorCodes.ENOSPC);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+                ByteBuffer buf = request.getData().asReadOnlyByteBuffer();
+                fh = buf.getLong();
+                DedupFileChannel ch = this.getFileChannel(fh);
+                byte compressed =buf.get();
+                int len = buf.getInt();
+                long start = buf.getLong();
+                buf.getLong(); //volumeid
+                byte[] bf = new byte[buf.capacity()-buf.position()];
+                buf.get(bf);
+                if (compressed == 1) {
+                    byte[] chunk = CompressionUtils.decompressLz4(bf, len);
+                    buf = ByteBuffer.wrap(chunk);
+                } else {
+                    buf = ByteBuffer.wrap(bf);
+                }
+                buf.position(0);
+                try {
+                    SDFSLogger.getLog().debug("Writing " + ch.openFile().getPath() + " pos=" + start
+                            + " len=" + buf.capacity() + " compressed=" + compressed);
+                    /*
+                     * byte[] k = new byte[buf.capacity()]; buf.get(k); buf.position(0);
+                     * Files.write(Paths.get("c:/temp/" + ch.openFile().getName()), new
+                     * String(offset + "," + buf.capacity() + "," +
+                     * StringUtils.byteToHexString(eng.getHash(k)) + "\n") .getBytes(),
+                     * StandardOpenOption.APPEND,StandardOpenOption.CREATE);
+                     */
+                    ch.writeFile(buf, buf.capacity(), 0, start, true);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("unable to write to file" + fh, e);
+                    b.setError("unable to write to file" + fh);
+                    b.setErrorCode(errorCodes.EIO);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
+            } catch (FileIOError e) {
+                b.setError(e.message);
+                b.setErrorCode(e.code);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            } catch (Exception e) {
+                SDFSLogger.getLog().error("unable to write to file" + fh, e);
+                b.setError("unable to write to file" + fh);
+                b.setErrorCode(errorCodes.EIO);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
@@ -1945,6 +2026,15 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             } else {
+                try {
+                    this.getFtype(req.getFileName());
+                } catch (FileIOError e) {
+                    b.setErrorCode(e.code);
+                    b.setError(e.message);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
 
                 String internalPath = Main.volume.getPath() + File.separator + req.getFileName();
                 File f = new File(internalPath);
