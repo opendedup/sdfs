@@ -220,6 +220,13 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             responseObserver.onCompleted();
         } else {
             try {
+                if (Main.volume.isFull()) {
+                    b.setError("Volume Full");
+                    b.setErrorCode(errorCodes.ENOSPC);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
                 DedupFileChannel ch = FileIOServiceImpl.dedupChannels.get(request.getFileHandle());
                 if (ch == null) {
                     SDFSLogger.getLog().error("file handle " + request.getFileHandle() + " does not exist");
@@ -246,7 +253,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                             ch.setWrittenTo(true);
                             return ir.toProtoBuf();
                         } else {
-                            return new InsertRecord(false, -1,0).toProtoBuf();
+                            return new InsertRecord(false, -1, 0).toProtoBuf();
                         }
                     });
                     futures.add(lf);
@@ -281,6 +288,13 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             responseObserver.onCompleted();
         } else {
             try {
+                if (Main.volume.isFull()) {
+                    b.setError("Volume Full");
+                    b.setErrorCode(errorCodes.ENOSPC);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
                 DedupFileChannel ch = FileIOServiceImpl.dedupChannels.get(request.getFileHandle());
                 if (ch == null) {
                     SDFSLogger.getLog().error("file handle " + request.getFileHandle() + " does not exist");

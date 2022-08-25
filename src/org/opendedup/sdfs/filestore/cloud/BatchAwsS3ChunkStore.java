@@ -2691,15 +2691,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (omd.getOngoingRestore() || momd.getOngoingRestore()) {
 				SDFSLogger.getLog().warn("Object with id " + id + " is still restoring");
 				return false;
-			} else if (omd.getStorageClass() == null && omd.getStorageClass() == null) {
-				SDFSLogger.getLog().warn("Block Object and md with id " + id + " is restored sc = null");
-				return true;
-			} else if (omd.getStorageClass() != null && omd.getStorageClass().equalsIgnoreCase("GLACIER")) {
-				SDFSLogger.getLog().warn("Block Object with id " + id + " is still glacier");
-				return false;
-			} else if (momd.getStorageClass() != null && !momd.getStorageClass().equalsIgnoreCase("GLACIER")) {
-				SDFSLogger.getLog().warn("Metadata Object with id " + id + " is still glacier");
-				return false;
 			} else {
 				SDFSLogger.getLog().warn("Object with id " + id + " preconditions met for glacier restore");
 				return true;

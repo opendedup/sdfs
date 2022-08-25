@@ -646,13 +646,15 @@ public class FileReplicationService {
 							if (df != null && DedupFileStore.get(df.getGUID()) == null) {
 								executor.execute(new MetaFileDownloader(fname, f, sync, req.getEvent()));
 							}
+						} else {
+							fname = null;
 						}
 					} else {
 						SDFSLogger.getLog().info("not checked out " + fname);
 					}
+					fname = this.sync.getNextName("files", req.getVolumeID());
 				}
-				fname = this.sync.getNextName("files", req.getVolumeID());
-
+				
 				executor.shutdown();
 				// Wait for everything to finish.
 				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
