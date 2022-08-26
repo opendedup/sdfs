@@ -55,7 +55,7 @@ ENV PKG_VERSION=0.0.1
 LABEL email=samsilverberg@google.com
 LABEL author="Sam Silverberg"
 RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
-		openjdk-11-jdk \
+		openjdk-17-jdk \
         maven \
         libfuse2 \
         ssh \

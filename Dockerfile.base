@@ -3,7 +3,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 LABEL email=sam.silverberg@gmail.com
 LABEL author="Sam Silverberg"
 RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
-		openjdk-11-jdk \
+		openjdk-17-jdk \
         maven \
         libfuse2 \
         ssh \
