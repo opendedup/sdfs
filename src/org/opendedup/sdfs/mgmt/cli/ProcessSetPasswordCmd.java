@@ -22,7 +22,6 @@ public class ProcessSetPasswordCmd {
 					msg);
 			formatter.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

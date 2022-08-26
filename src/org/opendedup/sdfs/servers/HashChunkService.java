@@ -61,7 +61,7 @@ public class HashChunkService implements HashChunkServiceInterface {
 	public HashChunkService() throws InterruptedException {
 		try {
 			fileStore = (AbstractChunkStore) Class
-					.forName(Main.chunkStoreClass).newInstance();
+					.forName(Main.chunkStoreClass).getDeclaredConstructor().newInstance();
 			fileStore.init(Main.chunkStoreConfig);
 		} catch (Throwable e) {
 			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);

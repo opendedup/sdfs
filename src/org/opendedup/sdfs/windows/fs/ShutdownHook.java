@@ -43,14 +43,7 @@ class ShutdownHook extends Thread {
 			Dokan.removeMountPoint(driveLetter);
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				//DriveIcon.deleteIcon(driveLetter);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		} 
 		System.out.println("SDFS Shut Down Cleanly");
 
 	}

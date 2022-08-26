@@ -36,9 +36,10 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3Client;
-
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.google.common.io.BaseEncoding;
 
 public class VolumeConfigWriter {
@@ -552,8 +553,11 @@ public class VolumeConfigWriter {
 					BasicAWSCredentials creds = null;
 					try {
 						creds = new BasicAWSCredentials(this.cloudAccessKey, this.cloudSecretKey);
-						AmazonS3Client s3Service = new AmazonS3Client(creds);
-						if (!s3Service.doesBucketExist(this.cloudBucketName))
+						AmazonS3 s3Service = AmazonS3ClientBuilder
+						.standard()
+						.withCredentials(new AWSStaticCredentialsProvider(creds))
+						.build();
+						if (!s3Service.doesBucketExistV2(this.cloudBucketName))
 							this.encryptBucket = true;
 						else {
 							String result = s3Service.getBucketEncryption(this.cloudBucketName).toString();

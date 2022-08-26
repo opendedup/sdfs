@@ -22,7 +22,6 @@ public class ProcessXpandVolumeCmd {
 			formatter.close();
 			System.out.printf("Expand [%s] returned [%s]\n", status, msg);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

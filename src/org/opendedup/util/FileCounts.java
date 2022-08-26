@@ -28,7 +28,6 @@ import java.nio.file.attribute.PosixFileAttributes;
 
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
 import de.schlichtherle.truezip.file.TFile;

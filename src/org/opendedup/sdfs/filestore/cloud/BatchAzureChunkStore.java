@@ -1769,7 +1769,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				if (vn.equalsIgnoreCase(na + "-volume-cfg.xml")) {
 					String rnd = RandomGUID.getGuid();
-					File tmpdir = com.google.common.io.Files.createTempDir();
+					Path tempDirWithPrefix = Files.createTempDirectory("sdfs-temp-"+na);
+					File tmpdir = tempDirWithPrefix.toFile();
 					File p = new File(tmpdir, rnd);
 					File z = new File(tmpdir, rnd + ".uz");
 					File e = new File(tmpdir, rnd + ".de");

@@ -191,42 +191,18 @@ public class HashStore {
 				Main.hashesDBClass = "org.opendedup.collections.ShardedProgressiveFileBasedCSMap2";
 			}
 
-			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass)
-					.newInstance();
+			bdb = (AbstractHashesMap) Class.forName(Main.hashesDBClass).getDeclaredConstructor().newInstance();
 			bdb.init(entries, dbf.getPath(), Main.fpp);
-		} catch (InstantiationException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			e.printStackTrace();
-			if (Main.sdfsSyncEnabled) {
-				throw new InterruptedException("Exception occured while syncSDFS is enabled. " + e);
-			} else {
-				System.exit(-1);
-			}
-		} catch (IllegalAccessException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			e.printStackTrace();
-			if (Main.sdfsSyncEnabled) {
-				throw new InterruptedException("Exception occured while syncSDFS is enabled. " + e);
-			} else {
-				System.exit(-1);
-			}
-		} catch (ClassNotFoundException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			e.printStackTrace();
-			if (Main.sdfsSyncEnabled) {
-				throw new InterruptedException("Exception occured while syncSDFS is enabled. " + e);
-			} else {
-				System.exit(-1);
-			}
-		} catch (IOException e) {
-			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
-			if (Main.sdfsSyncEnabled) {
-				throw new InterruptedException("Exception occured while syncSDFS is enabled. " + e);
-			} else {
-				System.exit(0);
-			}
 
-		}
+		} catch (Exception e) {
+			SDFSLogger.getLog().fatal("Unable to initiate ChunkStore", e);
+			e.printStackTrace();
+			if (Main.sdfsSyncEnabled) {
+				throw new InterruptedException("Exception occured while syncSDFS is enabled. " + e);
+			} else {
+				System.exit(-1);
+			}
+		} 
 
 	}
 

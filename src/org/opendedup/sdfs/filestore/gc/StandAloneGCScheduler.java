@@ -18,6 +18,8 @@
  *******************************************************************************/
 package org.opendedup.sdfs.filestore.gc;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.opendedup.logging.SDFSLogger;
 
 import org.opendedup.sdfs.Main;
@@ -33,9 +35,9 @@ public class StandAloneGCScheduler implements Runnable {
 	}
 
 	public StandAloneGCScheduler() throws InstantiationException,
-			IllegalAccessException, ClassNotFoundException {
+			IllegalAccessException, ClassNotFoundException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		gcController = (GCControllerImpl) Class.forName(Main.gcClass)
-				.newInstance();
+		.getDeclaredConstructor().newInstance();
 		SDFSLogger.getLog().info(
 				"Using " + Main.gcClass + " for DSE Garbage Collection");
 		th = new Thread(this);

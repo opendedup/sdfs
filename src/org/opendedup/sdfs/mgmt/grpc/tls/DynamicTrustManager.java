@@ -36,7 +36,6 @@ public class DynamicTrustManager implements X509TrustManager {
         try {
             loadTrustManager(ClientAuth.REQUIRE);
         } catch (Exception e1) {
-            // TODO Auto-generated catch block
             throw new KeyStoreException("Error occurred while setting up trust manager." + e1.getCause(), e1);
         }
     }

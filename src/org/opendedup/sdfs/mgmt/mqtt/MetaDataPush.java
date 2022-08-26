@@ -201,14 +201,13 @@ public class MetaDataPush {
 		long updateTime = 20000;
 		long checkTime = 5000;
 		private ConcurrentHashMap<String, ReentrantLock> activeTasks = new ConcurrentHashMap<String, ReentrantLock>();
-		UpdateProcessor up = null;
 
 		private MetaDataSubscriber(Channel channel, String topic) throws IOException {
 			this.channel = channel;
 			String queueName = this.channel
 					.queueDeclare(Long.toString(Main.volume.getSerialNumber()), true, false, false, null).getQueue();
 			this.channel.queueBind(queueName, topic, "");
-			up = new UpdateProcessor(this);
+			new UpdateProcessor(this);
 			DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 				String message = new String(delivery.getBody(), "UTF-8");
 				SDFSLogger.getLog()

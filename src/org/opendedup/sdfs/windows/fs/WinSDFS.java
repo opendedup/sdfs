@@ -51,8 +51,7 @@ import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 
 public class WinSDFS implements DokanOperations {
-	/** fileName -> MemFileInfo */
-	// TODO FIX THIS
+
 	public static final int FILE_CASE_PRESERVED_NAMES = 0x00000002;
 	public static final int FILE_SUPPORTS_SPARSE_FILES = 0x00000040;
 	public static final int FILE_UNICODE_ON_DISK = 0x00000004;

@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.google.common.cache.CacheStats;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -387,55 +386,5 @@ public class DedupFileStore {
 		 * keyLookup.invalidateAll();
 		 * }
 		 */
-	}
-
-	private static class CleanupThread implements Runnable {
-
-		boolean closed = true;
-		final Thread th;
-
-		public CleanupThread() {
-			closed = false;
-			th = new Thread(this);
-			th.start();
-		}
-
-		@Override
-		public void run() {
-			while (!closed) {
-				try {
-					Thread.sleep(Main.CLEANUP_THREAD_INTERVAL);
-					DedupFile[] df = DedupFileStore.getArray();
-					for (DedupFile dd : df) {
-						SparseDedupFile sd = (SparseDedupFile) dd;
-						try {
-							sd.CacheCleanup();
-							if (Main.PRINT_CACHESTATS) {
-								CacheStats st = sd.getCacheStats();
-								String msg = String.format("cache stats for [%s] avg-load-penalty=%f hit-rate=%f " +
-										"load-exception-rate=%f load-count=%d miss-rate=%f",
-										sd.mf.getPath(), st.averageLoadPenalty(), st.hitRate(), st.loadExceptionRate(),
-										st.loadCount(), st.missRate());
-								SDFSLogger.getLog().info(msg);
-							}
-						} catch (Exception e) {
-							SDFSLogger.getLog().warn("Unable to get stats from sparsededupfile", e);
-						}
-					}
-				} catch (InterruptedException e) {
-					this.closed = true;
-					break;
-				}
-
-			}
-
-		}
-
-		public void close() {
-			closed = true;
-			th.interrupt();
-
-		}
-
 	}
 }

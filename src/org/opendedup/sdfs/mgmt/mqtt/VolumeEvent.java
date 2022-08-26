@@ -23,8 +23,7 @@ public class VolumeEvent implements Serializable {
 	private static transient final String DBD = "sfileDeleted";
 
 	public VolumeEvent(String jsonStr) {
-		JsonParser parser = new JsonParser();
-		obj = parser.parse(jsonStr).getAsJsonObject();
+		obj = JsonParser.parseString(jsonStr).getAsJsonObject();
 		this.volumeID = obj.get("volumeid").getAsLong();
 		this.volumeTS = obj.get("timestamp").getAsLong();
 		if(!obj.has("internalts")) {
@@ -54,8 +53,7 @@ public class VolumeEvent implements Serializable {
 
 	public void setActionType(String actionType) {
 		this.actionType = actionType;
-		JsonParser parser = new JsonParser();
-		obj = parser.parse(jsonStr).getAsJsonObject();
+		obj = JsonParser.parseString(jsonStr).getAsJsonObject();
 		obj.addProperty("actionType", this.target);
 		this.jsonStr = obj.toString();
 	}

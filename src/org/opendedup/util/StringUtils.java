@@ -84,8 +84,7 @@ public class StringUtils {
 		try {
 			hexStr = new String(hex, "ASCII");
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			SDFSLogger.getLog().warn(e);
 		}
 		return hexStr;
 	}

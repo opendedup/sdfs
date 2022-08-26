@@ -11,11 +11,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.util.Date;
 import java.util.zip.Adler32;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one

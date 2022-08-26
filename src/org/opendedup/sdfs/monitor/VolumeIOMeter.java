@@ -18,7 +18,6 @@
  *******************************************************************************/
 package org.opendedup.sdfs.monitor;
 
-import java.io.IOException;
 
 import java.lang.management.ManagementFactory;
 
@@ -30,7 +29,6 @@ import org.slf4j.MDC;
 
 import com.sun.management.UnixOperatingSystemMXBean;
 
-@SuppressWarnings("restriction")
 public class VolumeIOMeter implements Runnable {
 
 	private Volume vol;
@@ -87,11 +85,11 @@ public class VolumeIOMeter implements Runnable {
 		MDC.put("WIOPS", Long.toString(this.WIOPS));
 		MDC.put("sdfsCpuLoad", Double.toString(perf.getProcessCpuLoad()));
 		MDC.put("sdfsCpuTime", Double.toString(perf.getProcessCpuTime()));
-		MDC.put("systemCpuLoad", Double.toString(perf.getSystemCpuLoad()));
+		MDC.put("systemCpuLoad", Double.toString(perf.getCpuLoad()));
 		MDC.put("systemCpuAverage",
 				Double.toString(perf.getSystemLoadAverage()));
-		MDC.put("freeMemory", Long.toString(perf.getFreePhysicalMemorySize()));
-		MDC.put("totalMemory", Long.toString(perf.getTotalPhysicalMemorySize()));
+		MDC.put("freeMemory", Long.toString(perf.getFreeMemorySize()));
+		MDC.put("totalMemory", Long.toString(perf.getTotalMemorySize()));
 		MDC.put("freeSwap", Long.toString(perf.getFreeSwapSpaceSize()));
 		MDC.put("totalSwap", Long.toString(perf.getTotalSwapSpaceSize()));
 		MDC.clear();

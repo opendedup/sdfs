@@ -36,7 +36,6 @@ import java.util.Set;
 
 import org.opendedup.util.OSValidator;
 
-import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 
 public class FileUtils {
 	// private static final String STATTR="DSHSTR";

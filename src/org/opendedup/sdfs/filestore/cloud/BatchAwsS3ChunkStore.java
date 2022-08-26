@@ -580,12 +580,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (v4s) {
 					clientConfig.setSignerOverride("AWSS3V4SignerType");
 				}
-			} else if (config.hasAttribute("use-basic-signer")) {
+			} /*else if (config.hasAttribute("use-basic-signer")) {
 				boolean v4s = Boolean.parseBoolean(config.getAttribute("use-basic-signer"));
 				// if (v4s) {
 				// clientConfig.setSignerOverride("S3SignerType");
 				// }
-			} else if (gcsSigner) {
+			} */else if (gcsSigner) {
 				System.out.println("Target is GCS Storage");
 				Map<String, String> env = System.getenv();
 				if (config.hasAttribute("auth-file") || env.containsKey("GOOGLE_APPLICATION_CREDENTIALS")) {
@@ -2730,12 +2730,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					clientConfig.setSignerOverride("AWSS3V4SignerType");
 				}
 			}
+			/*
 			if (props.containsKey("use-basic-signer")) {
 				boolean v4s = Boolean.parseBoolean(props.getProperty("use-basic-signer"));
 				// if (v4s) {
 				// clientConfig.setSignerOverride("S3SignerType");
 				// }
 			}
+			*/
 			if (props.containsKey("protocol")) {
 				String pr = props.getProperty("protocol");
 				if (pr.equalsIgnoreCase("http"))
