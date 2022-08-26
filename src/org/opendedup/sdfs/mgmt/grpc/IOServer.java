@@ -249,9 +249,9 @@ public class IOServer {
     SDFSLogger.getLog().info(
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads +" maxMessageSize=" + maxMessageSize);
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
-        .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(32))
+        .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
         .maxInboundMessageSize(maxMessageSize).maxInboundMetadataSize(maxMessageSize)
-        .maxConcurrentCallsPerConnection(32)
+        .maxConcurrentCallsPerConnection(64).flowControlWindow(2048*2048).initialFlowControlWindow(2048*2048)
         .addService(new FileIOServiceImpl())
         .addService(new SDFSEventImpl())
         .addService(new SdfsUserServiceImpl());

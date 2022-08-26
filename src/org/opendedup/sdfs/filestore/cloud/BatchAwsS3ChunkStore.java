@@ -261,7 +261,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void close() {
-		
+
 		try {
 			SDFSLogger.getLog().info("############ Closing Bucket##################");
 			if (this.standAlone) {
@@ -2294,7 +2294,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 		} catch (Exception e1) {
-			SDFSLogger.getLog().error("unable to download " + nm +" from " + haName );
+			SDFSLogger.getLog().error("unable to download " + nm + " from " + haName);
 			throw new IOException(e1);
 		} finally {
 
@@ -2498,18 +2498,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		S3Object kobj = null;
 		// this.s3clientLock.readLock().lock();
 		try {
-			try {
-				kobj = s3Service.getObject(this.name, "keys/" + haName);
-				kobj.getObjectMetadata();
-				s3Service.getObjectMetadata(this.name, "keys/" + haName);
-				kobj.getObjectMetadata();
-			} catch (AmazonS3Exception e) {
-				if (e.getErrorCode().equalsIgnoreCase("NoSuchKey") && Main.chunkStoreEncryptionEnabled) {
-					haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled, true);
-					// kobj = s3Service.getObject(this.name, "keys/" + haName);
-					// kobj.getObjectMetadata();
-				}
-			}
+			kobj = s3Service.getObject(this.name, "keys/" + haName);
+			kobj.getObjectMetadata();
+			s3Service.getObjectMetadata(this.name, "keys/" + haName);
+			kobj.getObjectMetadata();
 			String[] ks = this.getStrings(kobj);
 			HashMap<String, Long> m = new HashMap<String, Long>(ks.length + 1);
 			for (String k : ks) {

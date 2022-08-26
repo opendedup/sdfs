@@ -412,7 +412,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		}else if (!f.exists() || f.isDirectory()) {
 			mf = new MetaDataDedupFile(path);
 			MetaFileStore.addToCache(mf);
-		} else {
+		}
+		else {
 
 			ObjectInputStream in = null;
 			try {

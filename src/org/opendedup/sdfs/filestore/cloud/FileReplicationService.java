@@ -641,20 +641,15 @@ public class FileReplicationService {
 							f = f.getParentFile();
 							f.mkdirs();
 						} else if (req.isOverwrite() || !f.exists()) {
-							MetaDataDedupFile mf = MetaDataDedupFile.getFile(f.getPath());
-							SparseDedupFile df = mf.getDedupFile(false);
-							if (df != null && DedupFileStore.get(df.getGUID()) == null) {
-								executor.execute(new MetaFileDownloader(fname, f, sync, req.getEvent()));
-							}
-						} else {
+							executor.execute(new MetaFileDownloader(fname, f, sync, req.getEvent()));
+						}  else {
 							fname = null;
 						}
 					} else {
 						SDFSLogger.getLog().info("not checked out " + fname);
 					}
-					fname = this.sync.getNextName("files", req.getVolumeID());
+					fname = this.sync.getNextName("files", req.getVolumeID());	
 				}
-				
 				executor.shutdown();
 				// Wait for everything to finish.
 				while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
@@ -840,7 +835,7 @@ public class FileReplicationService {
 						ddl.incrementAndGet();
 					} catch (Exception e) {
 						if (tries > maxTries) {
-							SDFSLogger.getLog().error("unable to sync ddb " + this.guid ,
+							SDFSLogger.getLog().error("unable to sync ddb " + this.guid,
 									e);
 							der.incrementAndGet();
 							done = true;
