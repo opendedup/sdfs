@@ -1,4 +1,4 @@
-FROM gcr.io/hybrics/hybrics-base:master AS builder
+FROM gcr.io/hybrics/hybrics-base:dp3 AS builder
 ARG DEBIAN_FRONTEND=noninteractive
 LABEL email=sam.silverberg@gmail.com
 LABEL author="Sam Silverberg"
