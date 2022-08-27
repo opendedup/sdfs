@@ -24,7 +24,7 @@ RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteracti
         git
 ENV VERSION=master
 ENV PKG_VERSION=0.0.1
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/
 ENV DEBFILE="sdfs_${VERSION}_amd64.deb"
 RUN echo $DEBFILE
 WORKDIR "/sdfs-build/install-packages/"
