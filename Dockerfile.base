@@ -17,10 +17,10 @@ RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteracti
         git
 
 WORKDIR "/tmp"
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz && \
-    tar xvf apache-maven-3.8.5-bin.tar.gz
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.6/binaries/apache-maven-3.8.6-bin.tar.gz && \
+    tar xvf apache-maven-3.8.6-bin.tar.gz
 WORKDIR "/usr/share/maven"
-RUN cp /tmp/apache-maven-3.8.5/* .
+RUN cp /tmp/apache-maven-3.8.6/* .
 
 RUN gem install fpm
 COPY .git /sdfs-build/

@@ -30,7 +30,7 @@ RUN echo $DEBFILE
 WORKDIR "/sdfs-build/install-packages/"
 RUN rm -rf deb/usr/share/sdfs/lib/*
 WORKDIR "/sdfs-build/"
-RUN /usr/share/maven/mvn package
+RUN /usr/share/maven/bin/mvn package
 
 
 RUN cp target/lib/*.jar install-packages/deb/usr/share/sdfs/lib/ && \
