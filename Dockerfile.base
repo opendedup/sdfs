@@ -27,7 +27,7 @@ COPY .git /sdfs-build/
 COPY pom.xml /sdfs-build/
 WORKDIR "/sdfs-build"
 ENV VERSION=master
-ENV JAVA_HOME=/usr/lib/jvm/java-18-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/
 WORKDIR "/sdfs-build/"
 RUN mvn dependency:copy-dependencies
 ENTRYPOINT ls -lah
