@@ -29,5 +29,5 @@ WORKDIR "/sdfs-build"
 ENV VERSION=master
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/
 WORKDIR "/sdfs-build/"
-RUN mvn dependency:copy-dependencies
+RUN /usr/share/maven/bin/mvn dependency:copy-dependencies
 ENTRYPOINT ls -lah
