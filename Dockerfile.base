@@ -4,7 +4,6 @@ LABEL email=sam.silverberg@gmail.com
 LABEL author="Sam Silverberg"
 RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteractive" apt upgrade -y && DEBIAN_FRONTEND="noninteractive" apt install -y \
 		openjdk-17-jdk \
-        maven \
         libfuse2 \
         ssh \
         openssh-server \
@@ -17,12 +16,18 @@ RUN DEBIAN_FRONTEND="noninteractive" apt update && DEBIAN_FRONTEND="noninteracti
         alien \
         git
 
+WORKDIR "/tmp"
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz && \
+    tar xvf apache-maven-3.8.5-bin.tar.gz
+WORKDIR "/usr/share/maven"
+RUN cp /tmp/apache-maven-3.8.5/* .
+
 RUN gem install fpm
 COPY .git /sdfs-build/
 COPY pom.xml /sdfs-build/
 WORKDIR "/sdfs-build"
 ENV VERSION=master
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/java-18-openjdk-amd64/
 WORKDIR "/sdfs-build/"
 RUN mvn dependency:copy-dependencies
 ENTRYPOINT ls -lah
