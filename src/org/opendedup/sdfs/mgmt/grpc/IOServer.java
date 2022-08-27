@@ -246,12 +246,13 @@ public class IOServer {
     if(minMessageSize > maxMessageSize) {
       maxMessageSize=minMessageSize;
     }
+    int maxMsgSize = 240 * 1024 * 1024;
     SDFSLogger.getLog().info(
         "Server started, listening on " + host + ":" + port + " tls = " + useSSL + " threads=" + Main.writeThreads +" maxMessageSize=" + maxMessageSize);
     NettyServerBuilder b = NettyServerBuilder.forAddress(address).addService(new VolumeImpl())
         .addService(new StorageServiceImpl()).executor(Executors.newFixedThreadPool(Main.writeThreads))
         .maxInboundMessageSize(maxMessageSize).maxInboundMetadataSize(maxMessageSize)
-        .maxConcurrentCallsPerConnection(64).flowControlWindow(2048*2048).initialFlowControlWindow(2048*2048)
+        .maxConcurrentCallsPerConnection(64).flowControlWindow(maxMsgSize).initialFlowControlWindow(maxMsgSize)
         .addService(new FileIOServiceImpl())
         .addService(new SDFSEventImpl())
         .addService(new SdfsUserServiceImpl());
