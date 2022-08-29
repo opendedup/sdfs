@@ -595,24 +595,28 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public void iterationInit(boolean deep) throws IOException {
 		this.hid = 0;
 		this.ht = null;
-		try {
-			String lbi = "bucketinfo/" + EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
-			CloudBlockBlob blob = container.getBlockBlobReference(lbi);
-			blob.downloadAttributes();
-			HashMap<String, String> md = blob.getMetadata();
-			md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
-			md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
-			md.put("clustered", Boolean.toString(this.clustered));
-			md.put("hostname", InetAddress.getLocalHost().getHostName());
-			md.put("lastupdated", Long.toString(System.currentTimeMillis()));
-			md.put("bucketversion", Integer.toString(version));
-			md.put("sdfsversion", Main.version);
-			md.put("port", Integer.toString(Main.sdfsCliPort));
-			blob = container.getBlockBlobReference(lbi + "-" + System.currentTimeMillis());
-			blob.setMetadata(md);
-			blob.uploadMetadata(null, null, opContext);
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to create backup of current volume info", e);
+		if (this.standAlone) {
+			try {
+				String lbi = "bucketinfo/"
+						+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
+				CloudBlockBlob blob = container.getBlockBlobReference(lbi);
+				blob.downloadAttributes();
+				HashMap<String, String> md = blob.getMetadata();
+				md.put("currentlength", Long.toString(HashBlobArchive.getLength()));
+				md.put("compressedlength", Long.toString(HashBlobArchive.getCompressedLength()));
+				md.put("clustered", Boolean.toString(this.clustered));
+				md.put("hostname", InetAddress.getLocalHost().getHostName());
+				md.put("lastupdated", Long.toString(System.currentTimeMillis()));
+				md.put("bucketversion", Integer.toString(version));
+				md.put("sdfsversion", Main.version);
+				md.put("port", Integer.toString(Main.sdfsCliPort));
+				blob = container.getBlockBlobReference(lbi + "-" + System.currentTimeMillis());
+				blob.setMetadata(md);
+				blob.uploadText(Long.toString(System.currentTimeMillis()));
+				blob.uploadMetadata(null, null, opContext);
+			} catch (Exception e) {
+				SDFSLogger.getLog().error("unable to create backup of current volume info", e);
+			}
 		}
 		iter = container.listBlobs("keys/").iterator();
 		if (this.standAlone) {
@@ -1075,8 +1079,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						this.refresh.clear();
 					}
 					long currentTime = System.currentTimeMillis();
-					if(get_move_blob())
-						this.closed=true;
+					if (get_move_blob())
+						this.closed = true;
 					if (currentTime > startTime) {
 						Iterable<BlobDataTracker> tri = null;
 						if (this.tierImmedately) {
@@ -1144,7 +1148,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 								if (objs <= delobj) {
 									int size = Integer.parseInt((String) metaData.get("size"));
 									int compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-									
+
 									if (this.standAlone) {
 										if (HashBlobArchive.getCompressedLength() > 0) {
 											HashBlobArchive.addToCompressedLength((-1 * compressedSize));
@@ -1166,7 +1170,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 										this.verifyDelete(k.longValue());
 										rcsz += compressedSize;
 										rsz += size;
-										ct ++;
+										ct++;
 									} else {
 										// SDFSLogger.getLog().info("deleting " +
 										// hashString);
@@ -1196,8 +1200,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 										HashBlobArchive.removeLocalArchive(k.longValue());
 								}
 							}
-							SDFSLogger.getLog().info("Removed size=" + rsz + " of remove data compressed size " + 
-							rcsz + "removed blocks " + ct);
+							SDFSLogger.getLog().info("Removed size=" + rsz + " of remove data compressed size " +
+									rcsz + "removed blocks " + ct);
 						} catch (Exception e) {
 							delLock.lock();
 							try {
@@ -1769,7 +1773,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 				if (vn.equalsIgnoreCase(na + "-volume-cfg.xml")) {
 					String rnd = RandomGUID.getGuid();
-					Path tempDirWithPrefix = Files.createTempDirectory("sdfs-temp-"+na);
+					Path tempDirWithPrefix = Files.createTempDirectory("sdfs-temp-" + na);
 					File tmpdir = tempDirWithPrefix.toFile();
 					File p = new File(tmpdir, rnd);
 					File z = new File(tmpdir, rnd + ".uz");

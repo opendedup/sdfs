@@ -139,9 +139,7 @@ public class HCServiceProxy {
 				SDFSLogger.getLog().info(e.getMessage());
 			}
 
-			if (Main.runConsistancyCheck) {
-				hcService.runConsistancyCheck();
-			}
+			
 
 			if (Main.syncDL) {
 				long vol = Main.DSEID;
@@ -150,6 +148,9 @@ public class HCServiceProxy {
 				}
 				SDFSEvent evt = SDFSEvent.syncVolEvent("Syncing from [" + vol + "]");
 				eventBus.post(new CloudSyncDLRequest(vol, true, false,false, evt));
+			}
+			if (Main.runConsistancyCheck) {
+				hcService.runConsistancyCheck();
 			}
 			touchRunFile();
 

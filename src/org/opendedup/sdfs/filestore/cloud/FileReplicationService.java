@@ -342,7 +342,7 @@ public class FileReplicationService {
 						if (evt.dirty || evt.mf.isSymlink()) {
 							if (evt.mf.writeLock.tryLock(5, TimeUnit.SECONDS)) {
 								try {
-									SDFSLogger.getLog().info("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
+									SDFSLogger.getLog().debug("writem=" + evt.mf.getPath() + " len=" + evt.mf.length());
 									this.sync.uploadFile(new File(evt.mf.getPath()), evt.mf.getPath().substring(pl),
 											"files", new HashMap<String, String>(), false);
 									eventUploadBus.post(new MFileUploaded(evt.mf));
@@ -590,7 +590,7 @@ public class FileReplicationService {
 			while (!done) {
 				try {
 
-					SDFSLogger.getLog().info("writev " + evt.vol.getConfigPath());
+					SDFSLogger.getLog().debug("writev " + evt.vol.getConfigPath());
 					this.sync.uploadFile(new File(evt.vol.getConfigPath()), new File(evt.vol.getConfigPath()).getName(),
 							"volume", new HashMap<String, String>(), false);
 					done = true;
@@ -777,6 +777,7 @@ public class FileReplicationService {
 							throw new IOException("only files version 2 or later can be imported");
 						try {
 							ddb.iterInit();
+							SDFSLogger.getLog().info("1 " + this.guid);
 							for (;;) {
 								LongKeyValue kv = ddb.nextKeyValue(false);
 								if (kv == null)
@@ -805,6 +806,7 @@ public class FileReplicationService {
 								if (dirty)
 									ddb.put(kv.getKey(), ck);
 							}
+							SDFSLogger.getLog().info("2 " + this.guid);
 							for (Long l : blks) {
 								boolean inserted = false;
 								int trs = 0;
@@ -823,6 +825,7 @@ public class FileReplicationService {
 									}
 								}
 							}
+							SDFSLogger.getLog().info("3 " + this.guid);
 						} catch (Throwable e) {
 							SDFSLogger.getLog().warn("error while checking file [" + ddb + "]", e);
 							throw new IOException(e);
@@ -832,6 +835,7 @@ public class FileReplicationService {
 						}
 						done = true;
 						ddl.incrementAndGet();
+						SDFSLogger.getLog().info("recovered " + this.guid);
 					} catch (Exception e) {
 						if (tries > maxTries) {
 							SDFSLogger.getLog().error("unable to sync ddb " + this.guid,
