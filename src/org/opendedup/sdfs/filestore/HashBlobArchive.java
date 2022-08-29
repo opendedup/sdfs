@@ -102,7 +102,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 	private static int VERSION = 0;
 	private boolean cached = false;
 	private boolean flushing = false;
-	private boolean flushed = false;
 	public static boolean allowSync = false;
 	private boolean compactStaged = false;
 	public static boolean cacheWrites = true;
@@ -2458,8 +2457,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 							if (flushingArchives.get(this.uuid).size() == 0) {
 								flushingArchives.remove(this.uuid);
 							}
-							this.flushed = true;
-							this.flushing = false;
+
 						}
 					} finally {
 						flock.unlock();
@@ -2517,7 +2515,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					ar.LOCK.notify();
 				}
 				int i = 0;
-				while (!ar.flushing || !ar.flushed) {
+				while (!ar.flushing) {
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
@@ -2525,7 +2523,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 					i++;
 					if (i > 1000) {
-						SDFSLogger.getLog().warn("Archive " + uuid + "never entered flush");
+						SDFSLogger.getLog().warn("Archive " + uuid + " never entered flush");
 						break;
 					}
 				}
