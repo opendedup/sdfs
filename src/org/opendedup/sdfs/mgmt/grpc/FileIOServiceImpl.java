@@ -460,21 +460,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         String pt = mountedVolume + path;
         File _f = new File(pt);
 
-        try {
-            if (!Files.exists(Paths.get(_f.getPath()), LinkOption.NOFOLLOW_LINKS)
-                    && !FileReplicationService.MetaFileExists(path.trim())) {
-                throw new FileIOError("path not found " + path, errorCodes.ENOENT);
-            }
-            if (!Files.exists(Paths.get(_f.getPath()), LinkOption.NOFOLLOW_LINKS)
-                    && FileReplicationService.MetaFileExists(path.trim())) {
-                GetCloudFile cf = new GetCloudFile();
-                cf.getResult(path.trim(), path.trim());
-                cf.downloadAll();
-            }
-        } catch (IOException e1) {
-            SDFSLogger.getLog().error("unable to check file", e1);
-            throw new FileIOError("path not found " + path, errorCodes.EIO);
+        if (!Files.exists(Paths.get(_f.getPath()), LinkOption.NOFOLLOW_LINKS)) {
+            throw new FileIOError("path not found " + path, errorCodes.ENOENT);
         }
+
         Path p = Paths.get(_f.getPath());
         try {
             boolean isSymbolicLink = Files.isSymbolicLink(p);
@@ -776,8 +765,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
-    
-
     @Override
     public void write(DataWriteRequest request, StreamObserver<DataWriteResponse> responseObserver) {
         DataWriteResponse.Builder b = DataWriteResponse.newBuilder();
@@ -925,7 +912,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 try {
                     this.getFtype(path);
                 } catch (FileIOError e) {
-                    
+
                 }
                 File f = new File(FileIOServiceImpl.mountedVolume + path);
 
