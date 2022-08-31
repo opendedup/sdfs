@@ -409,7 +409,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			MetaFileStore.addToCache(mf);
 		}
 		else {
-
 			ObjectInputStream in = null;
 			try {
 				in = new ObjectInputStream(new FileInputStream(path));
