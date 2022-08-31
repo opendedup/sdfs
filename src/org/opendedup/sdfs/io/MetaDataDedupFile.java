@@ -404,6 +404,10 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			} catch (IOException e) {
 				SDFSLogger.getLog().warn(e);
 			}
+		} else if(!f.exists() && FileReplicationService.MetaFileExists(f.getPath().substring(pl))) {
+			GetCloudFile cf = new GetCloudFile();
+			cf.getResult(f.getPath().substring(pl),f.getPath().substring(pl));
+			cf.downloadAll();
 		} else if (!f.exists() || f.isDirectory()) {
 			mf = new MetaDataDedupFile(path);
 			MetaFileStore.addToCache(mf);

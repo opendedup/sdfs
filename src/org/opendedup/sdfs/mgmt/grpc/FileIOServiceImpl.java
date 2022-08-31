@@ -460,8 +460,20 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         String pt = mountedVolume + path;
         File _f = new File(pt);
 
-        if (!Files.exists(Paths.get(_f.getPath()), LinkOption.NOFOLLOW_LINKS)) {
-            throw new FileIOError("path not found " + path, errorCodes.ENOENT);
+        try {
+            if (!Files.exists(Paths.get(_f.getPath()), LinkOption.NOFOLLOW_LINKS)
+                    && !FileReplicationService.MetaFileExists(path.trim())) {
+                throw new FileIOError("path not found " + path, errorCodes.ENOENT);
+            }
+            if (!Files.exists(Paths.get(_f.getPath()), LinkOption.NOFOLLOW_LINKS)
+                    && FileReplicationService.MetaFileExists(path.trim())) {
+                GetCloudFile cf = new GetCloudFile();
+                cf.getResult(path.trim(), path.trim());
+                cf.downloadAll();
+            }
+        } catch (IOException e1) {
+            SDFSLogger.getLog().error("unable to check file", e1);
+            throw new FileIOError("path not found " + path, errorCodes.EIO);
         }
         Path p = Paths.get(_f.getPath());
         try {
