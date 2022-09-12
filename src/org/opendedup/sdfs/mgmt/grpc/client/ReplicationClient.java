@@ -8,7 +8,6 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -56,11 +55,8 @@ import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongKeyValue;
 
 import org.opendedup.sdfs.filestore.ChunkData;
-import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.ByteString;
 
@@ -101,16 +97,17 @@ public class ReplicationClient {
         }
         String host = target.split(":")[0];
         int port = Integer.parseInt(target.split(":")[1]);
+        int maxMsgSize = 240 * 1024 * 1024;
         if (mtls || tls) {
+            
             channel = NettyChannelBuilder.forAddress(host, port)
-                    .negotiationType(NegotiationType.TLS)
+                    .negotiationType(NegotiationType.TLS).maxInboundMessageSize(maxMsgSize)
                     .sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath)
                             .build())
                     .build();
         } else {
-            channel = NettyChannelBuilder.forAddress(host, port)
+            channel = NettyChannelBuilder.forAddress(host, port).maxInboundMessageSize(maxMsgSize)
                     .negotiationType(NegotiationType.PLAINTEXT)
-
                     .build();
         }
 
@@ -378,7 +375,7 @@ public class ReplicationClient {
                     }
                     Iterator<ChunkEntry> rces = this.client.storageBlockingStub.getChunks(sreq);
 
-                    HashFunction hf = Hashing.sha256();
+
                     while (rces.hasNext()) {
                         ChunkEntry ce = rces.next();
                         if (ce.getErrorCode() == errorCodes.EARCHIVEIO) {
@@ -391,12 +388,10 @@ public class ReplicationClient {
                         }
                         byte[] dt = ce.getData().toByteArray();
                         //SDFSLogger.getLog().info("dt len " + dt.length + " dt = " + new String(dt));
-                        String hs = StringUtils.getHexString(hf.hashBytes(dt).asBytes());
-                            SDFSLogger.getLog().info(
-                                    "hash = " + hs + " = " + StringUtils.getHexString(ce.getHash().toByteArray()));
+                       
                         ChunkData cd = new ChunkData(ce.getHash().toByteArray(), dt.length, dt, mf.getDfGuid());
                         cd.references = claims.get(ce.getHash()).ct;
-                        InsertRecord ir = cd.persistData(true);
+                        InsertRecord ir = HCServiceProxy.getHashesMap().put(cd, true);
                         claims.get(ce.getHash()).loc = Longs.fromByteArray(ir.getHashLocs());
                         if (claims.get(ce.getHash()).loc == -1) {
                             throw new IOException(

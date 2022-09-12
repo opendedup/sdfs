@@ -7,8 +7,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +23,6 @@ import com.google.protobuf.ByteString;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.util.CompressionUtils;
-import org.opendedup.util.StringUtils;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
@@ -64,13 +68,12 @@ import org.opendedup.sdfs.notification.ReplicationImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.util.concurrent.TimeoutException;
 
 import io.grpc.stub.StreamObserver;
 
@@ -255,81 +258,25 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     entry.getHash().copyTo(b, 0);
                     Shard sh = new Shard(b);
                     sh.hashloc = Longs.toByteArray(-1);
-                    sh.responseObserver = responseObserver;
                     cks.add(sh);
                 }
-                int sz = cks.size();
-                AsyncChunkReadGrpcListener l = new AsyncChunkReadGrpcListener() {
-                    @Override
-                    public void commandException(Exception e) {
-                        SDFSLogger.getLog().error("error getting block", e);
-                        this.incrementAndGetDNEX();
-                        synchronized (this) {
-                            this.notifyAll();
-                        }
+                List<Future<ChunkEntry>> futures = new ArrayList<Future<ChunkEntry>>();
 
-                    }
-
-                    @Override
-                    public void commandResponse(Shard result) {
-                        cks.get(result.apos).ck = result.ck;
-                        if (this.incrementandGetDN() >= sz) {
-
-                            synchronized (this) {
-                                this.notifyAll();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void commandArchiveException(DataArchivedException e) {
-                        this.incrementAndGetDNEX();
-                        this.setDAR(e);
-
-                        synchronized (this) {
-                            this.notifyAll();
-                        }
-
-                    }
-
-                };
+                CompletionService<ChunkEntry> executorCompletionService = new ExecutorCompletionService<>(threadpool);
                 for (Shard sh : cks) {
-                    sh.l = l;
-                    executor.execute(sh);
+                    futures.add(executorCompletionService.submit(sh));
                 }
-                int wl = 0;
-                int tm = 1000;
-                int al = 0;
-
-                while (l.getDN() < sz && l.getDNEX() == 0) {
-                    if (al == 30) {
-                        int nt = wl / 1000;
-                        SDFSLogger.getLog()
-                                .debug("Slow io, waited [" + nt + "] seconds for all reads to complete.");
-                        al = 0;
+                try {
+                    for (int i = 0; i < futures.size(); i++) {
+                        responseObserver.onNext(executorCompletionService.take().get(5, TimeUnit.MINUTES));
                     }
-                    if (Main.readTimeoutSeconds > 0 && wl > (Main.readTimeoutSeconds * tm)) {
-                        int nt = (tm * wl) / 1000;
-                        ChunkEntry.Builder b = ChunkEntry.newBuilder();
-
-                        b.setError("read Timed Out after [" + nt + "] seconds. Expected [" + sz
-                                + "] block read but only [" + l.getDN() + "] were completed");
-                        b.setErrorCode(errorCodes.EIO);
-                        SDFSLogger.getLog().warn("read Timed Out after [" + nt + "] seconds. Expected [" + sz
-                                + "] block read but only [" + l.getDN() + "] were completed");
-                        responseObserver.onNext(b.build());
-                        responseObserver.onCompleted();
-                        return;
-
-                    }
-                    synchronized (l) {
-                        l.wait(1000);
-                    }
-                    wl += 1000;
-                    al++;
-                }
-                if (l.getDN() < sz) {
-                    throw new IOException("thread timed out before read was complete ");
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    SDFSLogger.getLog().warn("Exception restoring shards too more than 5 minutes", e);
+                    ChunkEntry.Builder b = ChunkEntry.newBuilder();
+                    b.setError("Exception restoring shards too more than 5 minutes");
+                    b.setErrorCode(errorCodes.EIO);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
                 }
                 responseObserver.onCompleted();
             } catch (Exception e) {
@@ -340,7 +287,6 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
             }
-
         }
     }
 
@@ -675,48 +621,40 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         byte[] key;
     }
 
-    public static class Shard implements Runnable {
+    public static class Shard implements Callable<ChunkEntry> {
         public final byte[] hash;
         public byte[] hashloc;
         public byte[] ck;
         public int apos;
-        AsyncChunkReadGrpcListener l;
-        StreamObserver<ChunkEntry> responseObserver;
 
         public Shard(byte[] hash) {
             this.hash = hash;
         }
 
         @Override
-        public void run() {
+        public ChunkEntry call() {
             try {
-                byte[] hj = Arrays.copyOf(hash, hash.length);
-                
-                this.ck = HCServiceProxy.fetchChunk(hash, hashloc, true);
-                HashFunction hf = Hashing.sha256();
-                String hs = StringUtils.getHexString(hf.hashBytes(this.ck).asBytes());
-                SDFSLogger.getLog().info("hash = " + hs + " = " + StringUtils.getHexString(this.hash));
-                synchronized (responseObserver) {
-                    ChunkEntry ce = ChunkEntry.newBuilder().setData(ByteString.copyFrom(this.ck))
-                            .setHash(ByteString.copyFrom(this.hash)).build();
-                    responseObserver.onNext(ce);
+                if (Arrays.equals(hash, WritableCacheBuffer.bk)) {
+                    this.ck = WritableCacheBuffer.blankBlock;
+                } else {
+                    this.ck = HCServiceProxy.fetchChunk(hash, hashloc, true);
                 }
-                l.commandResponse(this);
+                ChunkEntry ce = ChunkEntry.newBuilder().setData(ByteString.copyFrom(this.ck))
+                        .setHash(ByteString.copyFrom(this.hash)).build();
+                return ce;
 
             } catch (DataArchivedException e) {
                 ChunkEntry.Builder b = ChunkEntry.newBuilder();
                 SDFSLogger.getLog().warn("Data Archive error", e);
                 b.setError("Data Archived");
                 b.setErrorCode(errorCodes.EARCHIVEIO);
-                responseObserver.onNext(b.build());
-                l.commandArchiveException(e);
+                return b.build();
             } catch (Throwable e) {
                 ChunkEntry.Builder b = ChunkEntry.newBuilder();
                 SDFSLogger.getLog().warn("error while getting blocks ", e);
                 b.setError("error while getting blocks ");
                 b.setErrorCode(errorCodes.EIO);
-                responseObserver.onNext(b.build());
-                l.commandException(new Exception(e));
+                return b.build();
             }
 
         }

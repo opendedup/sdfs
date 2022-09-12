@@ -391,6 +391,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		try {
 			if (this.tempHt.containsKey(new ByteArrayWrapper(hash))
 					&& this.tempHt.get(new ByteArrayWrapper(hash)).position(0).getLong() == val) {
+				
 				ByteBuffer bk = this.tempHt.get(new ByteArrayWrapper(hash));
 				bk.position(8);
 				ct += bk.getLong();
