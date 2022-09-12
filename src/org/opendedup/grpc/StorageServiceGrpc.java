@@ -111,35 +111,35 @@ public final class StorageServiceGrpc {
     return getWriteChunksMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.ReadChunksRequest,
-      org.opendedup.grpc.Storage.ReadChunksResponse> getReadChunksMethod;
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.GetChunksRequest,
+      org.opendedup.grpc.Storage.ChunkEntry> getGetChunksMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
-      fullMethodName = SERVICE_NAME + '/' + "ReadChunks",
-      requestType = org.opendedup.grpc.Storage.ReadChunksRequest.class,
-      responseType = org.opendedup.grpc.Storage.ReadChunksResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.ReadChunksRequest,
-      org.opendedup.grpc.Storage.ReadChunksResponse> getReadChunksMethod() {
-    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.ReadChunksRequest, org.opendedup.grpc.Storage.ReadChunksResponse> getReadChunksMethod;
-    if ((getReadChunksMethod = StorageServiceGrpc.getReadChunksMethod) == null) {
+      fullMethodName = SERVICE_NAME + '/' + "GetChunks",
+      requestType = org.opendedup.grpc.Storage.GetChunksRequest.class,
+      responseType = org.opendedup.grpc.Storage.ChunkEntry.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.GetChunksRequest,
+      org.opendedup.grpc.Storage.ChunkEntry> getGetChunksMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.GetChunksRequest, org.opendedup.grpc.Storage.ChunkEntry> getGetChunksMethod;
+    if ((getGetChunksMethod = StorageServiceGrpc.getGetChunksMethod) == null) {
       synchronized (StorageServiceGrpc.class) {
-        if ((getReadChunksMethod = StorageServiceGrpc.getReadChunksMethod) == null) {
-          StorageServiceGrpc.getReadChunksMethod = getReadChunksMethod =
-              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.ReadChunksRequest, org.opendedup.grpc.Storage.ReadChunksResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ReadChunks"))
+        if ((getGetChunksMethod = StorageServiceGrpc.getGetChunksMethod) == null) {
+          StorageServiceGrpc.getGetChunksMethod = getGetChunksMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.GetChunksRequest, org.opendedup.grpc.Storage.ChunkEntry>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetChunks"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.Storage.ReadChunksRequest.getDefaultInstance()))
+                  org.opendedup.grpc.Storage.GetChunksRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.Storage.ReadChunksResponse.getDefaultInstance()))
-              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("ReadChunks"))
+                  org.opendedup.grpc.Storage.ChunkEntry.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("GetChunks"))
               .build();
         }
       }
     }
-    return getReadChunksMethod;
+    return getGetChunksMethod;
   }
 
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest,
@@ -205,28 +205,28 @@ public final class StorageServiceGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.MetaDataDedupeFileRequest,
-      org.opendedup.grpc.Storage.ChunkResponse> getGetMetaDataDedupeFileMethod;
+      org.opendedup.grpc.Storage.MetaDataDedupeFileResponse> getGetMetaDataDedupeFileMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "GetMetaDataDedupeFile",
       requestType = org.opendedup.grpc.Storage.MetaDataDedupeFileRequest.class,
-      responseType = org.opendedup.grpc.Storage.ChunkResponse.class,
-      methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+      responseType = org.opendedup.grpc.Storage.MetaDataDedupeFileResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.MetaDataDedupeFileRequest,
-      org.opendedup.grpc.Storage.ChunkResponse> getGetMetaDataDedupeFileMethod() {
-    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.MetaDataDedupeFileRequest, org.opendedup.grpc.Storage.ChunkResponse> getGetMetaDataDedupeFileMethod;
+      org.opendedup.grpc.Storage.MetaDataDedupeFileResponse> getGetMetaDataDedupeFileMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.MetaDataDedupeFileRequest, org.opendedup.grpc.Storage.MetaDataDedupeFileResponse> getGetMetaDataDedupeFileMethod;
     if ((getGetMetaDataDedupeFileMethod = StorageServiceGrpc.getGetMetaDataDedupeFileMethod) == null) {
       synchronized (StorageServiceGrpc.class) {
         if ((getGetMetaDataDedupeFileMethod = StorageServiceGrpc.getGetMetaDataDedupeFileMethod) == null) {
           StorageServiceGrpc.getGetMetaDataDedupeFileMethod = getGetMetaDataDedupeFileMethod =
-              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.MetaDataDedupeFileRequest, org.opendedup.grpc.Storage.ChunkResponse>newBuilder()
-              .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.MetaDataDedupeFileRequest, org.opendedup.grpc.Storage.MetaDataDedupeFileResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetMetaDataDedupeFile"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.opendedup.grpc.Storage.MetaDataDedupeFileRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.Storage.ChunkResponse.getDefaultInstance()))
+                  org.opendedup.grpc.Storage.MetaDataDedupeFileResponse.getDefaultInstance()))
               .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("GetMetaDataDedupeFile"))
               .build();
         }
@@ -236,34 +236,158 @@ public final class StorageServiceGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.SparseDedupeFileRequest,
-      org.opendedup.grpc.Storage.ChunkResponse> getGetSparseDedupeFileMethod;
+      org.opendedup.grpc.Storage.SparseDataChunkP> getGetSparseDedupeFileMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "GetSparseDedupeFile",
       requestType = org.opendedup.grpc.Storage.SparseDedupeFileRequest.class,
-      responseType = org.opendedup.grpc.Storage.ChunkResponse.class,
+      responseType = org.opendedup.grpc.Storage.SparseDataChunkP.class,
       methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
   public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.SparseDedupeFileRequest,
-      org.opendedup.grpc.Storage.ChunkResponse> getGetSparseDedupeFileMethod() {
-    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.SparseDedupeFileRequest, org.opendedup.grpc.Storage.ChunkResponse> getGetSparseDedupeFileMethod;
+      org.opendedup.grpc.Storage.SparseDataChunkP> getGetSparseDedupeFileMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.SparseDedupeFileRequest, org.opendedup.grpc.Storage.SparseDataChunkP> getGetSparseDedupeFileMethod;
     if ((getGetSparseDedupeFileMethod = StorageServiceGrpc.getGetSparseDedupeFileMethod) == null) {
       synchronized (StorageServiceGrpc.class) {
         if ((getGetSparseDedupeFileMethod = StorageServiceGrpc.getGetSparseDedupeFileMethod) == null) {
           StorageServiceGrpc.getGetSparseDedupeFileMethod = getGetSparseDedupeFileMethod =
-              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.SparseDedupeFileRequest, org.opendedup.grpc.Storage.ChunkResponse>newBuilder()
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.SparseDedupeFileRequest, org.opendedup.grpc.Storage.SparseDataChunkP>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetSparseDedupeFile"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   org.opendedup.grpc.Storage.SparseDedupeFileRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  org.opendedup.grpc.Storage.ChunkResponse.getDefaultInstance()))
+                  org.opendedup.grpc.Storage.SparseDataChunkP.getDefaultInstance()))
               .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("GetSparseDedupeFile"))
               .build();
         }
       }
     }
     return getGetSparseDedupeFileMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.FileReplicationRequest,
+      org.opendedup.grpc.Storage.FileReplicationResponse> getReplicateRemoteFileMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ReplicateRemoteFile",
+      requestType = org.opendedup.grpc.Storage.FileReplicationRequest.class,
+      responseType = org.opendedup.grpc.Storage.FileReplicationResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.FileReplicationRequest,
+      org.opendedup.grpc.Storage.FileReplicationResponse> getReplicateRemoteFileMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.FileReplicationRequest, org.opendedup.grpc.Storage.FileReplicationResponse> getReplicateRemoteFileMethod;
+    if ((getReplicateRemoteFileMethod = StorageServiceGrpc.getReplicateRemoteFileMethod) == null) {
+      synchronized (StorageServiceGrpc.class) {
+        if ((getReplicateRemoteFileMethod = StorageServiceGrpc.getReplicateRemoteFileMethod) == null) {
+          StorageServiceGrpc.getReplicateRemoteFileMethod = getReplicateRemoteFileMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.FileReplicationRequest, org.opendedup.grpc.Storage.FileReplicationResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ReplicateRemoteFile"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.FileReplicationRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.FileReplicationResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("ReplicateRemoteFile"))
+              .build();
+        }
+      }
+    }
+    return getReplicateRemoteFileMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.RestoreArchivesRequest,
+      org.opendedup.grpc.Storage.RestoreArchivesResponse> getRestoreArchivesMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "RestoreArchives",
+      requestType = org.opendedup.grpc.Storage.RestoreArchivesRequest.class,
+      responseType = org.opendedup.grpc.Storage.RestoreArchivesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.RestoreArchivesRequest,
+      org.opendedup.grpc.Storage.RestoreArchivesResponse> getRestoreArchivesMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.RestoreArchivesRequest, org.opendedup.grpc.Storage.RestoreArchivesResponse> getRestoreArchivesMethod;
+    if ((getRestoreArchivesMethod = StorageServiceGrpc.getRestoreArchivesMethod) == null) {
+      synchronized (StorageServiceGrpc.class) {
+        if ((getRestoreArchivesMethod = StorageServiceGrpc.getRestoreArchivesMethod) == null) {
+          StorageServiceGrpc.getRestoreArchivesMethod = getRestoreArchivesMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.RestoreArchivesRequest, org.opendedup.grpc.Storage.RestoreArchivesResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RestoreArchives"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.RestoreArchivesRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.RestoreArchivesResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("RestoreArchives"))
+              .build();
+        }
+      }
+    }
+    return getRestoreArchivesMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.CancelReplicationRequest,
+      org.opendedup.grpc.Storage.CancelReplicationResponse> getCancelReplicationMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CancelReplication",
+      requestType = org.opendedup.grpc.Storage.CancelReplicationRequest.class,
+      responseType = org.opendedup.grpc.Storage.CancelReplicationResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.CancelReplicationRequest,
+      org.opendedup.grpc.Storage.CancelReplicationResponse> getCancelReplicationMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.CancelReplicationRequest, org.opendedup.grpc.Storage.CancelReplicationResponse> getCancelReplicationMethod;
+    if ((getCancelReplicationMethod = StorageServiceGrpc.getCancelReplicationMethod) == null) {
+      synchronized (StorageServiceGrpc.class) {
+        if ((getCancelReplicationMethod = StorageServiceGrpc.getCancelReplicationMethod) == null) {
+          StorageServiceGrpc.getCancelReplicationMethod = getCancelReplicationMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.CancelReplicationRequest, org.opendedup.grpc.Storage.CancelReplicationResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CancelReplication"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.CancelReplicationRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.CancelReplicationResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("CancelReplication"))
+              .build();
+        }
+      }
+    }
+    return getCancelReplicationMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.PauseReplicationRequest,
+      org.opendedup.grpc.Storage.PauseReplicationResponse> getPauseReplicationMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "PauseReplication",
+      requestType = org.opendedup.grpc.Storage.PauseReplicationRequest.class,
+      responseType = org.opendedup.grpc.Storage.PauseReplicationResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.PauseReplicationRequest,
+      org.opendedup.grpc.Storage.PauseReplicationResponse> getPauseReplicationMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.PauseReplicationRequest, org.opendedup.grpc.Storage.PauseReplicationResponse> getPauseReplicationMethod;
+    if ((getPauseReplicationMethod = StorageServiceGrpc.getPauseReplicationMethod) == null) {
+      synchronized (StorageServiceGrpc.class) {
+        if ((getPauseReplicationMethod = StorageServiceGrpc.getPauseReplicationMethod) == null) {
+          StorageServiceGrpc.getPauseReplicationMethod = getPauseReplicationMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.PauseReplicationRequest, org.opendedup.grpc.Storage.PauseReplicationResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "PauseReplication"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.PauseReplicationRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.PauseReplicationResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("PauseReplication"))
+              .build();
+        }
+      }
+    }
+    return getPauseReplicationMethod;
   }
 
   /**
@@ -340,9 +464,9 @@ public final class StorageServiceGrpc {
 
     /**
      */
-    public void readChunks(org.opendedup.grpc.Storage.ReadChunksRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ReadChunksResponse> responseObserver) {
-      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getReadChunksMethod(), responseObserver);
+    public void getChunks(org.opendedup.grpc.Storage.GetChunksRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkEntry> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetChunksMethod(), responseObserver);
     }
 
     /**
@@ -362,15 +486,43 @@ public final class StorageServiceGrpc {
     /**
      */
     public void getMetaDataDedupeFile(org.opendedup.grpc.Storage.MetaDataDedupeFileRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse> responseObserver) {
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.MetaDataDedupeFileResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetMetaDataDedupeFileMethod(), responseObserver);
     }
 
     /**
      */
     public void getSparseDedupeFile(org.opendedup.grpc.Storage.SparseDedupeFileRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse> responseObserver) {
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.SparseDataChunkP> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetSparseDedupeFileMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void replicateRemoteFile(org.opendedup.grpc.Storage.FileReplicationRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.FileReplicationResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getReplicateRemoteFileMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void restoreArchives(org.opendedup.grpc.Storage.RestoreArchivesRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.RestoreArchivesResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRestoreArchivesMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void cancelReplication(org.opendedup.grpc.Storage.CancelReplicationRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.CancelReplicationResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCancelReplicationMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void pauseReplication(org.opendedup.grpc.Storage.PauseReplicationRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.PauseReplicationResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPauseReplicationMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -397,12 +549,12 @@ public final class StorageServiceGrpc {
                 org.opendedup.grpc.Storage.WriteChunksResponse>(
                   this, METHODID_WRITE_CHUNKS)))
           .addMethod(
-            getReadChunksMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
+            getGetChunksMethod(),
+            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
               new MethodHandlers<
-                org.opendedup.grpc.Storage.ReadChunksRequest,
-                org.opendedup.grpc.Storage.ReadChunksResponse>(
-                  this, METHODID_READ_CHUNKS)))
+                org.opendedup.grpc.Storage.GetChunksRequest,
+                org.opendedup.grpc.Storage.ChunkEntry>(
+                  this, METHODID_GET_CHUNKS)))
           .addMethod(
             getWriteSparseDataChunkMethod(),
             io.grpc.stub.ServerCalls.asyncUnaryCall(
@@ -419,18 +571,46 @@ public final class StorageServiceGrpc {
                   this, METHODID_READ_SPARSE_DATA_CHUNK)))
           .addMethod(
             getGetMetaDataDedupeFileMethod(),
-            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.MetaDataDedupeFileRequest,
-                org.opendedup.grpc.Storage.ChunkResponse>(
+                org.opendedup.grpc.Storage.MetaDataDedupeFileResponse>(
                   this, METHODID_GET_META_DATA_DEDUPE_FILE)))
           .addMethod(
             getGetSparseDedupeFileMethod(),
             io.grpc.stub.ServerCalls.asyncServerStreamingCall(
               new MethodHandlers<
                 org.opendedup.grpc.Storage.SparseDedupeFileRequest,
-                org.opendedup.grpc.Storage.ChunkResponse>(
+                org.opendedup.grpc.Storage.SparseDataChunkP>(
                   this, METHODID_GET_SPARSE_DEDUPE_FILE)))
+          .addMethod(
+            getReplicateRemoteFileMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.Storage.FileReplicationRequest,
+                org.opendedup.grpc.Storage.FileReplicationResponse>(
+                  this, METHODID_REPLICATE_REMOTE_FILE)))
+          .addMethod(
+            getRestoreArchivesMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.Storage.RestoreArchivesRequest,
+                org.opendedup.grpc.Storage.RestoreArchivesResponse>(
+                  this, METHODID_RESTORE_ARCHIVES)))
+          .addMethod(
+            getCancelReplicationMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.Storage.CancelReplicationRequest,
+                org.opendedup.grpc.Storage.CancelReplicationResponse>(
+                  this, METHODID_CANCEL_REPLICATION)))
+          .addMethod(
+            getPauseReplicationMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.Storage.PauseReplicationRequest,
+                org.opendedup.grpc.Storage.PauseReplicationResponse>(
+                  this, METHODID_PAUSE_REPLICATION)))
           .build();
     }
   }
@@ -478,10 +658,10 @@ public final class StorageServiceGrpc {
 
     /**
      */
-    public void readChunks(org.opendedup.grpc.Storage.ReadChunksRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ReadChunksResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncUnaryCall(
-          getChannel().newCall(getReadChunksMethod(), getCallOptions()), request, responseObserver);
+    public void getChunks(org.opendedup.grpc.Storage.GetChunksRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkEntry> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncServerStreamingCall(
+          getChannel().newCall(getGetChunksMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -503,17 +683,49 @@ public final class StorageServiceGrpc {
     /**
      */
     public void getMetaDataDedupeFile(org.opendedup.grpc.Storage.MetaDataDedupeFileRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse> responseObserver) {
-      io.grpc.stub.ClientCalls.asyncServerStreamingCall(
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.MetaDataDedupeFileResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetMetaDataDedupeFileMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
      */
     public void getSparseDedupeFile(org.opendedup.grpc.Storage.SparseDedupeFileRequest request,
-        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse> responseObserver) {
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.SparseDataChunkP> responseObserver) {
       io.grpc.stub.ClientCalls.asyncServerStreamingCall(
           getChannel().newCall(getGetSparseDedupeFileMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void replicateRemoteFile(org.opendedup.grpc.Storage.FileReplicationRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.FileReplicationResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getReplicateRemoteFileMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void restoreArchives(org.opendedup.grpc.Storage.RestoreArchivesRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.RestoreArchivesResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getRestoreArchivesMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void cancelReplication(org.opendedup.grpc.Storage.CancelReplicationRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.CancelReplicationResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCancelReplicationMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void pauseReplication(org.opendedup.grpc.Storage.PauseReplicationRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.PauseReplicationResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getPauseReplicationMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -557,9 +769,10 @@ public final class StorageServiceGrpc {
 
     /**
      */
-    public org.opendedup.grpc.Storage.ReadChunksResponse readChunks(org.opendedup.grpc.Storage.ReadChunksRequest request) {
-      return io.grpc.stub.ClientCalls.blockingUnaryCall(
-          getChannel(), getReadChunksMethod(), getCallOptions(), request);
+    public java.util.Iterator<org.opendedup.grpc.Storage.ChunkEntry> getChunks(
+        org.opendedup.grpc.Storage.GetChunksRequest request) {
+      return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
+          getChannel(), getGetChunksMethod(), getCallOptions(), request);
     }
 
     /**
@@ -578,18 +791,45 @@ public final class StorageServiceGrpc {
 
     /**
      */
-    public java.util.Iterator<org.opendedup.grpc.Storage.ChunkResponse> getMetaDataDedupeFile(
-        org.opendedup.grpc.Storage.MetaDataDedupeFileRequest request) {
-      return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
+    public org.opendedup.grpc.Storage.MetaDataDedupeFileResponse getMetaDataDedupeFile(org.opendedup.grpc.Storage.MetaDataDedupeFileRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetMetaDataDedupeFileMethod(), getCallOptions(), request);
     }
 
     /**
      */
-    public java.util.Iterator<org.opendedup.grpc.Storage.ChunkResponse> getSparseDedupeFile(
+    public java.util.Iterator<org.opendedup.grpc.Storage.SparseDataChunkP> getSparseDedupeFile(
         org.opendedup.grpc.Storage.SparseDedupeFileRequest request) {
       return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
           getChannel(), getGetSparseDedupeFileMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.Storage.FileReplicationResponse replicateRemoteFile(org.opendedup.grpc.Storage.FileReplicationRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getReplicateRemoteFileMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.Storage.RestoreArchivesResponse restoreArchives(org.opendedup.grpc.Storage.RestoreArchivesRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getRestoreArchivesMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.Storage.CancelReplicationResponse cancelReplication(org.opendedup.grpc.Storage.CancelReplicationRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCancelReplicationMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.Storage.PauseReplicationResponse pauseReplication(org.opendedup.grpc.Storage.PauseReplicationRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getPauseReplicationMethod(), getCallOptions(), request);
     }
   }
 
@@ -636,14 +876,6 @@ public final class StorageServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.ReadChunksResponse> readChunks(
-        org.opendedup.grpc.Storage.ReadChunksRequest request) {
-      return io.grpc.stub.ClientCalls.futureUnaryCall(
-          getChannel().newCall(getReadChunksMethod(), getCallOptions()), request);
-    }
-
-    /**
-     */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse> writeSparseDataChunk(
         org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
@@ -657,16 +889,60 @@ public final class StorageServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getReadSparseDataChunkMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.MetaDataDedupeFileResponse> getMetaDataDedupeFile(
+        org.opendedup.grpc.Storage.MetaDataDedupeFileRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetMetaDataDedupeFileMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.FileReplicationResponse> replicateRemoteFile(
+        org.opendedup.grpc.Storage.FileReplicationRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getReplicateRemoteFileMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.RestoreArchivesResponse> restoreArchives(
+        org.opendedup.grpc.Storage.RestoreArchivesRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getRestoreArchivesMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.CancelReplicationResponse> cancelReplication(
+        org.opendedup.grpc.Storage.CancelReplicationRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCancelReplicationMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.PauseReplicationResponse> pauseReplication(
+        org.opendedup.grpc.Storage.PauseReplicationRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getPauseReplicationMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_HASHING_INFO = 0;
   private static final int METHODID_CHECK_HASHES = 1;
   private static final int METHODID_WRITE_CHUNKS = 2;
-  private static final int METHODID_READ_CHUNKS = 3;
+  private static final int METHODID_GET_CHUNKS = 3;
   private static final int METHODID_WRITE_SPARSE_DATA_CHUNK = 4;
   private static final int METHODID_READ_SPARSE_DATA_CHUNK = 5;
   private static final int METHODID_GET_META_DATA_DEDUPE_FILE = 6;
   private static final int METHODID_GET_SPARSE_DEDUPE_FILE = 7;
+  private static final int METHODID_REPLICATE_REMOTE_FILE = 8;
+  private static final int METHODID_RESTORE_ARCHIVES = 9;
+  private static final int METHODID_CANCEL_REPLICATION = 10;
+  private static final int METHODID_PAUSE_REPLICATION = 11;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -697,9 +973,9 @@ public final class StorageServiceGrpc {
           serviceImpl.writeChunks((org.opendedup.grpc.Storage.WriteChunksRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.WriteChunksResponse>) responseObserver);
           break;
-        case METHODID_READ_CHUNKS:
-          serviceImpl.readChunks((org.opendedup.grpc.Storage.ReadChunksRequest) request,
-              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ReadChunksResponse>) responseObserver);
+        case METHODID_GET_CHUNKS:
+          serviceImpl.getChunks((org.opendedup.grpc.Storage.GetChunksRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkEntry>) responseObserver);
           break;
         case METHODID_WRITE_SPARSE_DATA_CHUNK:
           serviceImpl.writeSparseDataChunk((org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest) request,
@@ -711,11 +987,27 @@ public final class StorageServiceGrpc {
           break;
         case METHODID_GET_META_DATA_DEDUPE_FILE:
           serviceImpl.getMetaDataDedupeFile((org.opendedup.grpc.Storage.MetaDataDedupeFileRequest) request,
-              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse>) responseObserver);
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.MetaDataDedupeFileResponse>) responseObserver);
           break;
         case METHODID_GET_SPARSE_DEDUPE_FILE:
           serviceImpl.getSparseDedupeFile((org.opendedup.grpc.Storage.SparseDedupeFileRequest) request,
-              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkResponse>) responseObserver);
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.SparseDataChunkP>) responseObserver);
+          break;
+        case METHODID_REPLICATE_REMOTE_FILE:
+          serviceImpl.replicateRemoteFile((org.opendedup.grpc.Storage.FileReplicationRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.FileReplicationResponse>) responseObserver);
+          break;
+        case METHODID_RESTORE_ARCHIVES:
+          serviceImpl.restoreArchives((org.opendedup.grpc.Storage.RestoreArchivesRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.RestoreArchivesResponse>) responseObserver);
+          break;
+        case METHODID_CANCEL_REPLICATION:
+          serviceImpl.cancelReplication((org.opendedup.grpc.Storage.CancelReplicationRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.CancelReplicationResponse>) responseObserver);
+          break;
+        case METHODID_PAUSE_REPLICATION:
+          serviceImpl.pauseReplication((org.opendedup.grpc.Storage.PauseReplicationRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.PauseReplicationResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -781,11 +1073,15 @@ public final class StorageServiceGrpc {
               .addMethod(getHashingInfoMethod())
               .addMethod(getCheckHashesMethod())
               .addMethod(getWriteChunksMethod())
-              .addMethod(getReadChunksMethod())
+              .addMethod(getGetChunksMethod())
               .addMethod(getWriteSparseDataChunkMethod())
               .addMethod(getReadSparseDataChunkMethod())
               .addMethod(getGetMetaDataDedupeFileMethod())
               .addMethod(getGetSparseDedupeFileMethod())
+              .addMethod(getReplicateRemoteFileMethod())
+              .addMethod(getRestoreArchivesMethod())
+              .addMethod(getCancelReplicationMethod())
+              .addMethod(getPauseReplicationMethod())
               .build();
         }
       }

@@ -339,11 +339,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	/**
 	 *
-	 * @param group_id sets the group owner id
+	 * @param l sets the group owner id
 	 * @throws IOException
 	 */
-	public void setGroup_id(int group_id) throws IOException {
-		setGroup_id(group_id, true);
+	public void setGroup_id(int l) throws IOException {
+		setGroup_id(l, true);
 	}
 
 	/**
@@ -1370,6 +1370,27 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	}
 
 	private static final XXHash64 HASHER = CC.HASH_FACTORY.hash64();
+
+	public static MetaDataDedupFile fromProtoBuf(FileInfoResponse resp, String path) throws IOException {
+		MetaDataDedupFile mf = new MetaDataDedupFile(path);
+		mf.setGroup_id((int)resp.getGroupId(),false);
+		mf.setOwner_id((int)resp.getUserId(),false);
+		mf.setPermissions(resp.getPermissions(),false);
+		mf.setLastAccessed(resp.getAtime(),false);
+		mf.setDfGuid(resp.getMapGuid(),false);
+		mf.setExecutable(resp.getExecute(), false);
+		mf.setHidden(resp.getHidden(), false);
+		mf.setImporting(resp.getImporting());
+		mf.setLastModified(resp.getMtime(),false);
+		mf.setLength(resp.getSize(), false);
+		mf.setMode(resp.getMode(), false);
+		mf.setReadable(resp.getRead(), false);
+		mf.setSymlink(false);
+		mf.setWritable(resp.getWrite(), false);
+		mf.unmarshal();
+		return mf;
+
+	}
 
 	public FileInfoResponse toGRPC(boolean compact) throws IOException {
 		FileInfoResponse.Builder b = FileInfoResponse.newBuilder();

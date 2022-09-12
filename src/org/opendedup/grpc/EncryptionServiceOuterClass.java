@@ -20,12 +20,10 @@ public final class EncryptionServiceOuterClass {
 
     /**
      * <code>string hash = 1;</code>
-     * @return The hash.
      */
     java.lang.String getHash();
     /**
      * <code>string hash = 1;</code>
-     * @return The bytes for hash.
      */
     com.google.protobuf.ByteString
         getHashBytes();
@@ -37,7 +35,7 @@ public final class EncryptionServiceOuterClass {
    *
    * Protobuf type {@code org.opendedup.grpc.EncryptionKeyVerifyRequest}
    */
-  public static final class EncryptionKeyVerifyRequest extends
+  public  static final class EncryptionKeyVerifyRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.EncryptionKeyVerifyRequest)
       EncryptionKeyVerifyRequestOrBuilder {
@@ -48,13 +46,6 @@ public final class EncryptionServiceOuterClass {
     }
     private EncryptionKeyVerifyRequest() {
       hash_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new EncryptionKeyVerifyRequest();
     }
 
     @java.lang.Override
@@ -70,6 +61,7 @@ public final class EncryptionServiceOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -87,7 +79,7 @@ public final class EncryptionServiceOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -122,9 +114,7 @@ public final class EncryptionServiceOuterClass {
     private volatile java.lang.Object hash_;
     /**
      * <code>string hash = 1;</code>
-     * @return The hash.
      */
-    @java.lang.Override
     public java.lang.String getHash() {
       java.lang.Object ref = hash_;
       if (ref instanceof java.lang.String) {
@@ -139,9 +129,7 @@ public final class EncryptionServiceOuterClass {
     }
     /**
      * <code>string hash = 1;</code>
-     * @return The bytes for hash.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getHashBytes() {
       java.lang.Object ref = hash_;
@@ -200,10 +188,11 @@ public final class EncryptionServiceOuterClass {
       }
       org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest other = (org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyRequest) obj;
 
-      if (!getHash()
-          .equals(other.getHash())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && getHash()
+          .equals(other.getHash());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -387,35 +376,35 @@ public final class EncryptionServiceOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -465,7 +454,6 @@ public final class EncryptionServiceOuterClass {
       private java.lang.Object hash_ = "";
       /**
        * <code>string hash = 1;</code>
-       * @return The hash.
        */
       public java.lang.String getHash() {
         java.lang.Object ref = hash_;
@@ -481,7 +469,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string hash = 1;</code>
-       * @return The bytes for hash.
        */
       public com.google.protobuf.ByteString
           getHashBytes() {
@@ -498,8 +485,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string hash = 1;</code>
-       * @param value The hash to set.
-       * @return This builder for chaining.
        */
       public Builder setHash(
           java.lang.String value) {
@@ -513,7 +498,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string hash = 1;</code>
-       * @return This builder for chaining.
        */
       public Builder clearHash() {
         
@@ -523,8 +507,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string hash = 1;</code>
-       * @param value The bytes for hash to set.
-       * @return This builder for chaining.
        */
       public Builder setHashBytes(
           com.google.protobuf.ByteString value) {
@@ -540,7 +522,7 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -596,29 +578,24 @@ public final class EncryptionServiceOuterClass {
 
     /**
      * <code>bool accept = 1;</code>
-     * @return The accept.
      */
     boolean getAccept();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>string error = 3;</code>
-     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 3;</code>
-     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
@@ -626,7 +603,7 @@ public final class EncryptionServiceOuterClass {
   /**
    * Protobuf type {@code org.opendedup.grpc.EncryptionKeyVerifyResponse}
    */
-  public static final class EncryptionKeyVerifyResponse extends
+  public  static final class EncryptionKeyVerifyResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.EncryptionKeyVerifyResponse)
       EncryptionKeyVerifyResponseOrBuilder {
@@ -636,15 +613,9 @@ public final class EncryptionServiceOuterClass {
       super(builder);
     }
     private EncryptionKeyVerifyResponse() {
+      accept_ = false;
       errorCode_ = 0;
       error_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new EncryptionKeyVerifyResponse();
     }
 
     @java.lang.Override
@@ -660,6 +631,7 @@ public final class EncryptionServiceOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -688,7 +660,7 @@ public final class EncryptionServiceOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -723,9 +695,7 @@ public final class EncryptionServiceOuterClass {
     private boolean accept_;
     /**
      * <code>bool accept = 1;</code>
-     * @return The accept.
      */
-    @java.lang.Override
     public boolean getAccept() {
       return accept_;
     }
@@ -734,16 +704,14 @@ public final class EncryptionServiceOuterClass {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
-    @java.lang.Override public int getErrorCodeValue() {
+    public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The errorCode.
      */
-    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -753,9 +721,7 @@ public final class EncryptionServiceOuterClass {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 3;</code>
-     * @return The error.
      */
-    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -770,9 +736,7 @@ public final class EncryptionServiceOuterClass {
     }
     /**
      * <code>string error = 3;</code>
-     * @return The bytes for error.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -845,13 +809,14 @@ public final class EncryptionServiceOuterClass {
       }
       org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse other = (org.opendedup.grpc.EncryptionServiceOuterClass.EncryptionKeyVerifyResponse) obj;
 
-      if (getAccept()
-          != other.getAccept()) return false;
-      if (errorCode_ != other.errorCode_) return false;
-      if (!getError()
-          .equals(other.getError())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && (getAccept()
+          == other.getAccept());
+      result = result && errorCode_ == other.errorCode_;
+      result = result && getError()
+          .equals(other.getError());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -1042,35 +1007,35 @@ public final class EncryptionServiceOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1126,16 +1091,12 @@ public final class EncryptionServiceOuterClass {
       private boolean accept_ ;
       /**
        * <code>bool accept = 1;</code>
-       * @return The accept.
        */
-      @java.lang.Override
       public boolean getAccept() {
         return accept_;
       }
       /**
        * <code>bool accept = 1;</code>
-       * @param value The accept to set.
-       * @return This builder for chaining.
        */
       public Builder setAccept(boolean value) {
         
@@ -1145,7 +1106,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>bool accept = 1;</code>
-       * @return This builder for chaining.
        */
       public Builder clearAccept() {
         
@@ -1157,27 +1117,21 @@ public final class EncryptionServiceOuterClass {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @return The enum numeric value on the wire for errorCode.
        */
-      @java.lang.Override public int getErrorCodeValue() {
+      public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @param value The enum numeric value on the wire for errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
-        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @return The errorCode.
        */
-      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -1185,8 +1139,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @param value The errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -1199,7 +1151,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -1211,7 +1162,6 @@ public final class EncryptionServiceOuterClass {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 3;</code>
-       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -1227,7 +1177,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 3;</code>
-       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -1244,8 +1193,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 3;</code>
-       * @param value The error to set.
-       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -1259,7 +1206,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 3;</code>
-       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -1269,8 +1215,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 3;</code>
-       * @param value The bytes for error to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -1286,7 +1230,7 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -1343,7 +1287,7 @@ public final class EncryptionServiceOuterClass {
   /**
    * Protobuf type {@code org.opendedup.grpc.ExportServerCertRequest}
    */
-  public static final class ExportServerCertRequest extends
+  public  static final class ExportServerCertRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ExportServerCertRequest)
       ExportServerCertRequestOrBuilder {
@@ -1353,13 +1297,6 @@ public final class EncryptionServiceOuterClass {
       super(builder);
     }
     private ExportServerCertRequest() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new ExportServerCertRequest();
     }
 
     @java.lang.Override
@@ -1386,7 +1323,7 @@ public final class EncryptionServiceOuterClass {
               done = true;
               break;
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1455,8 +1392,9 @@ public final class EncryptionServiceOuterClass {
       }
       org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest other = (org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertRequest) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -1631,35 +1569,35 @@ public final class EncryptionServiceOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1704,7 +1642,7 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -1760,35 +1698,29 @@ public final class EncryptionServiceOuterClass {
 
     /**
      * <code>bytes privateKey = 1;</code>
-     * @return The privateKey.
      */
     com.google.protobuf.ByteString getPrivateKey();
 
     /**
      * <code>bytes certChain = 2;</code>
-     * @return The certChain.
      */
     com.google.protobuf.ByteString getCertChain();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
-     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>string error = 4;</code>
-     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 4;</code>
-     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
@@ -1796,7 +1728,7 @@ public final class EncryptionServiceOuterClass {
   /**
    * Protobuf type {@code org.opendedup.grpc.ExportServerCertResponse}
    */
-  public static final class ExportServerCertResponse extends
+  public  static final class ExportServerCertResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ExportServerCertResponse)
       ExportServerCertResponseOrBuilder {
@@ -1813,13 +1745,6 @@ public final class EncryptionServiceOuterClass {
     }
 
     @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new ExportServerCertResponse();
-    }
-
-    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -1832,6 +1757,7 @@ public final class EncryptionServiceOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1865,7 +1791,7 @@ public final class EncryptionServiceOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1900,9 +1826,7 @@ public final class EncryptionServiceOuterClass {
     private com.google.protobuf.ByteString privateKey_;
     /**
      * <code>bytes privateKey = 1;</code>
-     * @return The privateKey.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString getPrivateKey() {
       return privateKey_;
     }
@@ -1911,9 +1835,7 @@ public final class EncryptionServiceOuterClass {
     private com.google.protobuf.ByteString certChain_;
     /**
      * <code>bytes certChain = 2;</code>
-     * @return The certChain.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString getCertChain() {
       return certChain_;
     }
@@ -1922,16 +1844,14 @@ public final class EncryptionServiceOuterClass {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
-    @java.lang.Override public int getErrorCodeValue() {
+    public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
-     * @return The errorCode.
      */
-    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -1941,9 +1861,7 @@ public final class EncryptionServiceOuterClass {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 4;</code>
-     * @return The error.
      */
-    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -1958,9 +1876,7 @@ public final class EncryptionServiceOuterClass {
     }
     /**
      * <code>string error = 4;</code>
-     * @return The bytes for error.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -2040,15 +1956,16 @@ public final class EncryptionServiceOuterClass {
       }
       org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse other = (org.opendedup.grpc.EncryptionServiceOuterClass.ExportServerCertResponse) obj;
 
-      if (!getPrivateKey()
-          .equals(other.getPrivateKey())) return false;
-      if (!getCertChain()
-          .equals(other.getCertChain())) return false;
-      if (errorCode_ != other.errorCode_) return false;
-      if (!getError()
-          .equals(other.getError())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && getPrivateKey()
+          .equals(other.getPrivateKey());
+      result = result && getCertChain()
+          .equals(other.getCertChain());
+      result = result && errorCode_ == other.errorCode_;
+      result = result && getError()
+          .equals(other.getError());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -2243,35 +2160,35 @@ public final class EncryptionServiceOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2330,16 +2247,12 @@ public final class EncryptionServiceOuterClass {
       private com.google.protobuf.ByteString privateKey_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>bytes privateKey = 1;</code>
-       * @return The privateKey.
        */
-      @java.lang.Override
       public com.google.protobuf.ByteString getPrivateKey() {
         return privateKey_;
       }
       /**
        * <code>bytes privateKey = 1;</code>
-       * @param value The privateKey to set.
-       * @return This builder for chaining.
        */
       public Builder setPrivateKey(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -2352,7 +2265,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>bytes privateKey = 1;</code>
-       * @return This builder for chaining.
        */
       public Builder clearPrivateKey() {
         
@@ -2364,16 +2276,12 @@ public final class EncryptionServiceOuterClass {
       private com.google.protobuf.ByteString certChain_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>bytes certChain = 2;</code>
-       * @return The certChain.
        */
-      @java.lang.Override
       public com.google.protobuf.ByteString getCertChain() {
         return certChain_;
       }
       /**
        * <code>bytes certChain = 2;</code>
-       * @param value The certChain to set.
-       * @return This builder for chaining.
        */
       public Builder setCertChain(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -2386,7 +2294,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>bytes certChain = 2;</code>
-       * @return This builder for chaining.
        */
       public Builder clearCertChain() {
         
@@ -2398,27 +2305,21 @@ public final class EncryptionServiceOuterClass {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
-       * @return The enum numeric value on the wire for errorCode.
        */
-      @java.lang.Override public int getErrorCodeValue() {
+      public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
-       * @param value The enum numeric value on the wire for errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
-        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
-       * @return The errorCode.
        */
-      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -2426,8 +2327,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
-       * @param value The errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -2440,7 +2339,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
-       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -2452,7 +2350,6 @@ public final class EncryptionServiceOuterClass {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 4;</code>
-       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -2468,7 +2365,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 4;</code>
-       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -2485,8 +2381,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 4;</code>
-       * @param value The error to set.
-       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -2500,7 +2394,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 4;</code>
-       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -2510,8 +2403,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 4;</code>
-       * @param value The bytes for error to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -2527,7 +2418,7 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -2584,7 +2475,7 @@ public final class EncryptionServiceOuterClass {
   /**
    * Protobuf type {@code org.opendedup.grpc.DeleteExportedCertRequest}
    */
-  public static final class DeleteExportedCertRequest extends
+  public  static final class DeleteExportedCertRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DeleteExportedCertRequest)
       DeleteExportedCertRequestOrBuilder {
@@ -2594,13 +2485,6 @@ public final class EncryptionServiceOuterClass {
       super(builder);
     }
     private DeleteExportedCertRequest() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new DeleteExportedCertRequest();
     }
 
     @java.lang.Override
@@ -2627,7 +2511,7 @@ public final class EncryptionServiceOuterClass {
               done = true;
               break;
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2696,8 +2580,9 @@ public final class EncryptionServiceOuterClass {
       }
       org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest other = (org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertRequest) obj;
 
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -2872,35 +2757,35 @@ public final class EncryptionServiceOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2945,7 +2830,7 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -3001,23 +2886,19 @@ public final class EncryptionServiceOuterClass {
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 1;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 1;</code>
-     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>string error = 2;</code>
-     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 2;</code>
-     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
@@ -3025,7 +2906,7 @@ public final class EncryptionServiceOuterClass {
   /**
    * Protobuf type {@code org.opendedup.grpc.DeleteExportedCertResponse}
    */
-  public static final class DeleteExportedCertResponse extends
+  public  static final class DeleteExportedCertResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DeleteExportedCertResponse)
       DeleteExportedCertResponseOrBuilder {
@@ -3037,13 +2918,6 @@ public final class EncryptionServiceOuterClass {
     private DeleteExportedCertResponse() {
       errorCode_ = 0;
       error_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new DeleteExportedCertResponse();
     }
 
     @java.lang.Override
@@ -3059,6 +2933,7 @@ public final class EncryptionServiceOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3082,7 +2957,7 @@ public final class EncryptionServiceOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3117,16 +2992,14 @@ public final class EncryptionServiceOuterClass {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 1;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
-    @java.lang.Override public int getErrorCodeValue() {
+    public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 1;</code>
-     * @return The errorCode.
      */
-    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -3136,9 +3009,7 @@ public final class EncryptionServiceOuterClass {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 2;</code>
-     * @return The error.
      */
-    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -3153,9 +3024,7 @@ public final class EncryptionServiceOuterClass {
     }
     /**
      * <code>string error = 2;</code>
-     * @return The bytes for error.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -3221,11 +3090,12 @@ public final class EncryptionServiceOuterClass {
       }
       org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse other = (org.opendedup.grpc.EncryptionServiceOuterClass.DeleteExportedCertResponse) obj;
 
-      if (errorCode_ != other.errorCode_) return false;
-      if (!getError()
-          .equals(other.getError())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && errorCode_ == other.errorCode_;
+      result = result && getError()
+          .equals(other.getError());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -3410,35 +3280,35 @@ public final class EncryptionServiceOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3491,27 +3361,21 @@ public final class EncryptionServiceOuterClass {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 1;</code>
-       * @return The enum numeric value on the wire for errorCode.
        */
-      @java.lang.Override public int getErrorCodeValue() {
+      public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 1;</code>
-       * @param value The enum numeric value on the wire for errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
-        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 1;</code>
-       * @return The errorCode.
        */
-      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -3519,8 +3383,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 1;</code>
-       * @param value The errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -3533,7 +3395,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 1;</code>
-       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -3545,7 +3406,6 @@ public final class EncryptionServiceOuterClass {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 2;</code>
-       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -3561,7 +3421,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 2;</code>
-       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -3578,8 +3437,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 2;</code>
-       * @param value The error to set.
-       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -3593,7 +3450,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 2;</code>
-       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -3603,8 +3459,6 @@ public final class EncryptionServiceOuterClass {
       }
       /**
        * <code>string error = 2;</code>
-       * @param value The bytes for error to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -3620,7 +3474,7 @@ public final class EncryptionServiceOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -3734,11 +3588,19 @@ public final class EncryptionServiceOuterClass {
       "eB0Z.github.com/opendedup/sdfs-client-go" +
       "/sdfs/;sdfsb\006proto3"
     };
-    descriptor = com.google.protobuf.Descriptors.FileDescriptor
+    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
+    com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.opendedup.grpc.FileInfo.getDescriptor(),
-        });
+        }, assigner);
     internal_static_org_opendedup_grpc_EncryptionKeyVerifyRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_org_opendedup_grpc_EncryptionKeyVerifyRequest_fieldAccessorTable = new

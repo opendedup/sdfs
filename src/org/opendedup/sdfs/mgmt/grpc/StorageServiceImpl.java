@@ -1,31 +1,44 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.google.protobuf.ByteString;
 
+import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.util.CompressionUtils;
+import org.opendedup.util.StringUtils;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.grpc.FileInfo.errorCodes;
+import org.opendedup.grpc.Storage.CancelReplicationRequest;
+import org.opendedup.grpc.Storage.CancelReplicationResponse;
 import org.opendedup.grpc.Storage.CheckHashesRequest;
 import org.opendedup.grpc.Storage.CheckHashesResponse;
 import org.opendedup.grpc.Storage.ChunkEntry;
-import org.opendedup.grpc.Storage.ChunkResponse;
+import org.opendedup.grpc.Storage.FileReplicationRequest;
+import org.opendedup.grpc.Storage.FileReplicationResponse;
+import org.opendedup.grpc.Storage.GetChunksRequest;
 import org.opendedup.grpc.Storage.HashingInfoRequest;
 import org.opendedup.grpc.Storage.HashingInfoResponse;
 import org.opendedup.grpc.Storage.MetaDataDedupeFileRequest;
+import org.opendedup.grpc.Storage.MetaDataDedupeFileResponse;
+import org.opendedup.grpc.Storage.PauseReplicationRequest;
+import org.opendedup.grpc.Storage.PauseReplicationResponse;
+import org.opendedup.grpc.Storage.RestoreArchivesRequest;
+import org.opendedup.grpc.Storage.RestoreArchivesResponse;
 import org.opendedup.grpc.Storage.SparseDataChunkP;
 import org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest;
 import org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse;
@@ -36,14 +49,23 @@ import org.opendedup.grpc.Storage.hashtype;
 import org.opendedup.grpc.StorageServiceGrpc.StorageServiceImplBase;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.mtools.RestoreArchive;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.DedupFileStore;
+import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl.FileIOError;
+import org.opendedup.sdfs.mgmt.grpc.client.ReplicationClient;
+import org.opendedup.sdfs.notification.ReplicationImportEvent;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -60,21 +82,165 @@ public class StorageServiceImpl extends StorageServiceImplBase {
     public static final String VARIABLE_HWY_128 = "VARIABLE_HWY_128";
     public static final String VARIABLE_HWY_256 = "VARIABLE_HWY_256";
     public static final String VARIABLE_MD5 = "VARIABLE_MD5";
+    public static final ThreadPoolExecutor executor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads, 0L,
+            TimeUnit.SECONDS, new SynchronousQueue<Runnable>(),
+            new ThreadPoolExecutor.CallerRunsPolicy());
 
     ExecutorService threadpool = Executors.newFixedThreadPool(Main.writeThreads * 4);
     ListeningExecutorService service = MoreExecutors.listeningDecorator(threadpool);
 
     public StorageServiceImpl() {
-
     }
 
     @Override
-    public void getMetaDataDedupeFile(MetaDataDedupeFileRequest request,
-            StreamObserver<ChunkResponse> responseObserver) {
-
-        InputStream is = null;
+    public void replicateRemoteFile(FileReplicationRequest request,
+            StreamObserver<FileReplicationResponse> responseObserver) {
         if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
-            ChunkResponse.Builder b = ChunkResponse.newBuilder();
+            FileReplicationResponse.Builder b = FileReplicationResponse.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            FileReplicationResponse.Builder b = FileReplicationResponse.newBuilder();
+
+            try {
+                ReplicationClient client = new ReplicationClient(request.getUrl(),
+                        request.getRvolumeID(), request.getMtls());
+                SDFSEvent evt = client.replicate(request.getSrcFilePath(), request.getDstFilePath());
+                b.setEventID(evt.uid);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                String msg = "Unable to replicate " + request.getSrcFilePath() + " to " + request.getDstFilePath() +
+                        " with url " + request.getUrl() + " volumeid " + request.getPvolumeID();
+                SDFSLogger.getLog().error(msg, e);
+                b.setError(msg + " because " + e.getMessage());
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
+        }
+    }
+
+    @Override
+    public void restoreArchives(RestoreArchivesRequest request,
+            StreamObserver<RestoreArchivesResponse> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+            RestoreArchivesResponse.Builder b = RestoreArchivesResponse.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            RestoreArchivesResponse.Builder b = RestoreArchivesResponse.newBuilder();
+            File f = new File(Main.volume.getPath() + File.separator + request.getFilePath());
+            if (!f.exists()) {
+                b.setError("Path not found [" + request.getFilePath() + "]");
+                b.setErrorCode(errorCodes.ENOENT);
+            }
+            MetaDataDedupFile mf = MetaFileStore.getMF(f);
+            try {
+                RestoreArchive ar = new RestoreArchive(mf, -1);
+                Thread th = new Thread(ar);
+                th.start();
+                b.setEventID(ar.fEvt.uid);
+            } catch (Exception e) {
+                SDFSLogger.getLog().error("unable to restore " + request.getFilePath(), e);
+                b.setError("unable to restore " + request.getFilePath());
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
+        }
+    }
+
+    @Override
+    public void pauseReplication(PauseReplicationRequest request,
+            StreamObserver<PauseReplicationResponse> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+            PauseReplicationResponse.Builder b = PauseReplicationResponse.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            PauseReplicationResponse.Builder b = PauseReplicationResponse.newBuilder();
+            try {
+                if (SDFSEvent.getEvent(request.getEventID()) != null) {
+                    ReplicationImportEvent evt = (ReplicationImportEvent) SDFSEvent.getEvent(request.getEventID());
+                    if (evt.endTime > 0) {
+                        b.setError("UUID " + request.getEventID() + " alread done");
+                        b.setErrorCode(errorCodes.EALREADY);
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                    } else {
+                        evt.pause(request.getPause());
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                    }
+                } else {
+                    b.setError("UUID " + request.getEventID() + " not found");
+                    b.setErrorCode(errorCodes.ENOENT);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                }
+            } catch (Exception e) {
+                SDFSLogger.getLog().error("unable to pause " + request.getEventID(), e);
+                b.setError("unable to pause " + request.getEventID());
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
+        }
+    }
+
+    @Override
+    public void cancelReplication(CancelReplicationRequest request,
+            StreamObserver<CancelReplicationResponse> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+            CancelReplicationResponse.Builder b = CancelReplicationResponse.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            CancelReplicationResponse.Builder b = CancelReplicationResponse.newBuilder();
+            try {
+
+                if (SDFSEvent.getEvent(request.getEventID()) != null) {
+                    ReplicationImportEvent evt = (ReplicationImportEvent) SDFSEvent.getEvent(request.getEventID());
+                    if (evt.endTime > 0) {
+                        b.setError("UUID " + request.getEventID() + " alread done");
+                        b.setErrorCode(errorCodes.EALREADY);
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                    } else {
+                        evt.cancel();
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                    }
+                } else {
+                    b.setError("UUID " + request.getEventID() + " not found");
+                    b.setErrorCode(errorCodes.ENOENT);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                }
+            } catch (Exception e) {
+                SDFSLogger.getLog().error("unable to cancel " + request.getEventID(), e);
+                b.setError("unable to cancel " + request.getEventID());
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
+
+        }
+    }
+
+    @Override
+    public void getChunks(GetChunksRequest request, StreamObserver<ChunkEntry> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+            ChunkEntry.Builder b = ChunkEntry.newBuilder();
             b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
@@ -82,77 +248,164 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         } else {
 
             try {
-                File f = FileIOServiceImpl.resolvePath(request.getFilePath());
 
-                is = new FileInputStream(f);
-                byte[] buffer = new byte[32 * 1024];
-                int length;
-                while ((length = is.read(buffer)) > 0) {
-                    ChunkResponse.Builder b = ChunkResponse.newBuilder();
-                    b.setData(ByteString.copyFrom(ByteBuffer.wrap(buffer), length));
-                    b.setLen(length);
-                    responseObserver.onNext(b.build());
+                final ArrayList<Shard> cks = new ArrayList<Shard>();
+                for (ChunkEntry entry : request.getChunksList()) {
+                    byte[] b = new byte[entry.getHash().toByteArray().length];
+                    entry.getHash().copyTo(b, 0);
+                    Shard sh = new Shard(b);
+                    sh.hashloc = Longs.toByteArray(-1);
+                    sh.responseObserver = responseObserver;
+                    cks.add(sh);
+                }
+                int sz = cks.size();
+                AsyncChunkReadGrpcListener l = new AsyncChunkReadGrpcListener() {
+                    @Override
+                    public void commandException(Exception e) {
+                        SDFSLogger.getLog().error("error getting block", e);
+                        this.incrementAndGetDNEX();
+                        synchronized (this) {
+                            this.notifyAll();
+                        }
+
+                    }
+
+                    @Override
+                    public void commandResponse(Shard result) {
+                        cks.get(result.apos).ck = result.ck;
+                        if (this.incrementandGetDN() >= sz) {
+
+                            synchronized (this) {
+                                this.notifyAll();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void commandArchiveException(DataArchivedException e) {
+                        this.incrementAndGetDNEX();
+                        this.setDAR(e);
+
+                        synchronized (this) {
+                            this.notifyAll();
+                        }
+
+                    }
+
+                };
+                for (Shard sh : cks) {
+                    sh.l = l;
+                    executor.execute(sh);
+                }
+                int wl = 0;
+                int tm = 1000;
+                int al = 0;
+
+                while (l.getDN() < sz && l.getDNEX() == 0) {
+                    if (al == 30) {
+                        int nt = wl / 1000;
+                        SDFSLogger.getLog()
+                                .debug("Slow io, waited [" + nt + "] seconds for all reads to complete.");
+                        al = 0;
+                    }
+                    if (Main.readTimeoutSeconds > 0 && wl > (Main.readTimeoutSeconds * tm)) {
+                        int nt = (tm * wl) / 1000;
+                        ChunkEntry.Builder b = ChunkEntry.newBuilder();
+
+                        b.setError("read Timed Out after [" + nt + "] seconds. Expected [" + sz
+                                + "] block read but only [" + l.getDN() + "] were completed");
+                        b.setErrorCode(errorCodes.EIO);
+                        SDFSLogger.getLog().warn("read Timed Out after [" + nt + "] seconds. Expected [" + sz
+                                + "] block read but only [" + l.getDN() + "] were completed");
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                        return;
+
+                    }
+                    synchronized (l) {
+                        l.wait(1000);
+                    }
+                    wl += 1000;
+                    al++;
+                }
+                if (l.getDN() < sz) {
+                    throw new IOException("thread timed out before read was complete ");
                 }
                 responseObserver.onCompleted();
+            } catch (Exception e) {
+                SDFSLogger.getLog().warn("Exception restoring shards", e);
+                ChunkEntry.Builder b = ChunkEntry.newBuilder();
+                b.setError("An error occured while reading chunks");
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
+
+        }
+    }
+
+    @Override
+    public void getMetaDataDedupeFile(MetaDataDedupeFileRequest request,
+            StreamObserver<MetaDataDedupeFileResponse> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
+            MetaDataDedupeFileResponse.Builder b = MetaDataDedupeFileResponse.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            MetaDataDedupeFileResponse.Builder b = MetaDataDedupeFileResponse.newBuilder();
+            try {
+
+                File f = FileIOServiceImpl.resolvePath(request.getFilePath());
+                MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+                b.setFile(mf.toGRPC(false));
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
             } catch (FileIOError e) {
-                ChunkResponse.Builder b = ChunkResponse.newBuilder();
                 b.setError(e.message);
                 b.setErrorCode(e.code);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
             } catch (Exception e) {
-                ChunkResponse.Builder b = ChunkResponse.newBuilder();
-                SDFSLogger.getLog().error("unable to get chunk for " + request.getFilePath(), e);
-                b.setError("unable to get chunk for " + request.getFilePath());
+                SDFSLogger.getLog().error("unable to get read file for " + request.getFilePath(), e);
+                b.setError("unable to read file for " + request.getFilePath());
                 b.setErrorCode(errorCodes.EACCES);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
 
-            } finally {
-                try {
-                    is.close();
-                } catch (IOException e) {
-
-                }
             }
         }
     }
 
     @Override
-    public void getSparseDedupeFile(SparseDedupeFileRequest request, StreamObserver<ChunkResponse> responseObserver) {
+    public void getSparseDedupeFile(SparseDedupeFileRequest request,
+            StreamObserver<SparseDataChunkP> responseObserver) {
         if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_READ)) {
-            ChunkResponse.Builder b = ChunkResponse.newBuilder();
+            SparseDataChunkP.Builder b = SparseDataChunkP.newBuilder();
             b.setError("User is not a member of any group with access");
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
         } else {
-            InputStream is = null;
             try {
-
-                File f = LongByteArrayMap.getFile(request.getGuid());
-                if (!f.exists()) {
-                    ChunkResponse.Builder b = ChunkResponse.newBuilder();
-                    b.setError("Guild " + request.getGuid() + " does not exists");
-                    b.setErrorCode(errorCodes.ENOENT);
-                    responseObserver.onNext(b.build());
-                    responseObserver.onCompleted();
-                }
-
-                is = new FileInputStream(f);
-                byte[] buffer = new byte[32 * 1024];
-                int length;
-                while ((length = is.read(buffer)) > 0) {
-                    ChunkResponse.Builder b = ChunkResponse.newBuilder();
-                    b.setData(ByteString.copyFrom(ByteBuffer.wrap(buffer), length));
-                    b.setLen(length);
-                    responseObserver.onNext(b.build());
+                LongByteArrayMap ddb = LongByteArrayMap.getMap(request.getGuid());
+                ddb.forceClose();
+                ddb = LongByteArrayMap.getMap(request.getGuid());
+                ddb.setIndexed(true);
+                ddb.iterInit();
+                for (;;) {
+                    LongKeyValue kv = ddb.nextKeyValue(false);
+                    if (kv == null)
+                        break;
+                    SparseDataChunk ck = kv.getValue();
+                    responseObserver.onNext(ck.toProtoBuf());
                 }
                 responseObserver.onCompleted();
             } catch (Exception e) {
-                ChunkResponse.Builder b = ChunkResponse.newBuilder();
+                SparseDataChunkP.Builder b = SparseDataChunkP.newBuilder();
                 SDFSLogger.getLog().error("unable to get chunk for " + request.getGuid(), e);
                 b.setError("unable to get chunk for " + request.getGuid());
                 b.setErrorCode(errorCodes.EACCES);
@@ -161,11 +414,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 return;
 
             } finally {
-                try {
-                    is.close();
-                } catch (IOException e) {
 
-                }
             }
         }
     }
@@ -424,6 +673,54 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         long pos;
         int ct = 0;
         byte[] key;
+    }
+
+    public static class Shard implements Runnable {
+        public final byte[] hash;
+        public byte[] hashloc;
+        public byte[] ck;
+        public int apos;
+        AsyncChunkReadGrpcListener l;
+        StreamObserver<ChunkEntry> responseObserver;
+
+        public Shard(byte[] hash) {
+            this.hash = hash;
+        }
+
+        @Override
+        public void run() {
+            try {
+                byte[] hj = Arrays.copyOf(hash, hash.length);
+                
+                this.ck = HCServiceProxy.fetchChunk(hash, hashloc, true);
+                HashFunction hf = Hashing.sha256();
+                String hs = StringUtils.getHexString(hf.hashBytes(this.ck).asBytes());
+                SDFSLogger.getLog().info("hash = " + hs + " = " + StringUtils.getHexString(this.hash));
+                synchronized (responseObserver) {
+                    ChunkEntry ce = ChunkEntry.newBuilder().setData(ByteString.copyFrom(this.ck))
+                            .setHash(ByteString.copyFrom(this.hash)).build();
+                    responseObserver.onNext(ce);
+                }
+                l.commandResponse(this);
+
+            } catch (DataArchivedException e) {
+                ChunkEntry.Builder b = ChunkEntry.newBuilder();
+                SDFSLogger.getLog().warn("Data Archive error", e);
+                b.setError("Data Archived");
+                b.setErrorCode(errorCodes.EARCHIVEIO);
+                responseObserver.onNext(b.build());
+                l.commandArchiveException(e);
+            } catch (Throwable e) {
+                ChunkEntry.Builder b = ChunkEntry.newBuilder();
+                SDFSLogger.getLog().warn("error while getting blocks ", e);
+                b.setError("error while getting blocks ");
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                l.commandException(new Exception(e));
+            }
+
+        }
+
     }
 
 }

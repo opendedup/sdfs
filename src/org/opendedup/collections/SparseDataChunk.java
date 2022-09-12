@@ -71,6 +71,7 @@ public class SparseDataChunk {
 		this.len = pb.getLen();
 		this.prevdoop = pb.getPrevdoop();
 		this.compressedLength = pb.getCompressedLength();
+		this.version = (byte)pb.getVersion();
 		for(SparseDataFlags f : pb.getFlagsList()) {
 			if(f == SparseDataFlags.RECONSTRUCTED) {
 				this.flags = RECONSTRUCTED;

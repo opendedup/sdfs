@@ -267,6 +267,7 @@ public class IOServer {
     }
     if (useSSL) {
       if (useClientTLS) {
+        
         try {
           b.sslContext(
               getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath).build());

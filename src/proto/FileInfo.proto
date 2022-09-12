@@ -153,6 +153,7 @@ enum errorCodes {
 	ENAVAIL=119;	/* No XENIX semaphores available */
 	EISNAM=120;	/* Is a named type file */
     EREMOTEIO=121;	/* Remote I/O error */
+	EARCHIVEIO=122;	/* Block Archived */
 }
 
 message FileInfoResponse {

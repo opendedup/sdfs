@@ -20,158 +20,130 @@ public final class SDFSEventOuterClass {
 
     /**
      * <code>int64 startTime = 1;</code>
-     * @return The startTime.
      */
     long getStartTime();
 
     /**
      * <code>int64 endTime = 2;</code>
-     * @return The endTime.
      */
     long getEndTime();
 
     /**
      * <code>string level = 3;</code>
-     * @return The level.
      */
     java.lang.String getLevel();
     /**
      * <code>string level = 3;</code>
-     * @return The bytes for level.
      */
     com.google.protobuf.ByteString
         getLevelBytes();
 
     /**
      * <code>string type = 4;</code>
-     * @return The type.
      */
     java.lang.String getType();
     /**
      * <code>string type = 4;</code>
-     * @return The bytes for type.
      */
     com.google.protobuf.ByteString
         getTypeBytes();
 
     /**
      * <code>string target = 5;</code>
-     * @return The target.
      */
     java.lang.String getTarget();
     /**
      * <code>string target = 5;</code>
-     * @return The bytes for target.
      */
     com.google.protobuf.ByteString
         getTargetBytes();
 
     /**
      * <code>string shortMsg = 6;</code>
-     * @return The shortMsg.
      */
     java.lang.String getShortMsg();
     /**
      * <code>string shortMsg = 6;</code>
-     * @return The bytes for shortMsg.
      */
     com.google.protobuf.ByteString
         getShortMsgBytes();
 
     /**
      * <code>string longMsg = 7;</code>
-     * @return The longMsg.
      */
     java.lang.String getLongMsg();
     /**
      * <code>string longMsg = 7;</code>
-     * @return The bytes for longMsg.
      */
     com.google.protobuf.ByteString
         getLongMsgBytes();
 
     /**
      * <code>double percentComplete = 8;</code>
-     * @return The percentComplete.
      */
     double getPercentComplete();
 
     /**
      * <code>int64 maxCount = 9;</code>
-     * @return The maxCount.
      */
     long getMaxCount();
 
     /**
      * <code>int64 currentCount = 10;</code>
-     * @return The currentCount.
      */
     long getCurrentCount();
 
     /**
      * <code>string uuid = 11;</code>
-     * @return The uuid.
      */
     java.lang.String getUuid();
     /**
      * <code>string uuid = 11;</code>
-     * @return The bytes for uuid.
      */
     com.google.protobuf.ByteString
         getUuidBytes();
 
     /**
      * <code>string parentUuid = 12;</code>
-     * @return The parentUuid.
      */
     java.lang.String getParentUuid();
     /**
      * <code>string parentUuid = 12;</code>
-     * @return The bytes for parentUuid.
      */
     com.google.protobuf.ByteString
         getParentUuidBytes();
 
     /**
      * <code>string extendedInfo = 13;</code>
-     * @return The extendedInfo.
      */
     java.lang.String getExtendedInfo();
     /**
      * <code>string extendedInfo = 13;</code>
-     * @return The bytes for extendedInfo.
      */
     com.google.protobuf.ByteString
         getExtendedInfoBytes();
 
     /**
      * <code>repeated string childrenUUid = 14;</code>
-     * @return A list containing the childrenUUid.
      */
     java.util.List<java.lang.String>
         getChildrenUUidList();
     /**
      * <code>repeated string childrenUUid = 14;</code>
-     * @return The count of childrenUUid.
      */
     int getChildrenUUidCount();
     /**
      * <code>repeated string childrenUUid = 14;</code>
-     * @param index The index of the element to return.
-     * @return The childrenUUid at the given index.
      */
     java.lang.String getChildrenUUid(int index);
     /**
      * <code>repeated string childrenUUid = 14;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the childrenUUid at the given index.
      */
     com.google.protobuf.ByteString
         getChildrenUUidBytes(int index);
 
     /**
      * <code>bool success = 15;</code>
-     * @return The success.
      */
     boolean getSuccess();
 
@@ -212,7 +184,7 @@ public final class SDFSEventOuterClass {
   /**
    * Protobuf type {@code org.opendedup.grpc.SDFSEvent}
    */
-  public static final class SDFSEvent extends
+  public  static final class SDFSEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SDFSEvent)
       SDFSEventOrBuilder {
@@ -222,22 +194,21 @@ public final class SDFSEventOuterClass {
       super(builder);
     }
     private SDFSEvent() {
+      startTime_ = 0L;
+      endTime_ = 0L;
       level_ = "";
       type_ = "";
       target_ = "";
       shortMsg_ = "";
       longMsg_ = "";
+      percentComplete_ = 0D;
+      maxCount_ = 0L;
+      currentCount_ = 0L;
       uuid_ = "";
       parentUuid_ = "";
       extendedInfo_ = "";
       childrenUUid_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new SDFSEvent();
+      success_ = false;
     }
 
     @java.lang.Override
@@ -339,9 +310,9 @@ public final class SDFSEventOuterClass {
             }
             case 114: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              if (!((mutable_bitField0_ & 0x00002000) == 0x00002000)) {
                 childrenUUid_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000001;
+                mutable_bitField0_ |= 0x00002000;
               }
               childrenUUid_.add(s);
               break;
@@ -352,10 +323,10 @@ public final class SDFSEventOuterClass {
               break;
             }
             case 130: {
-              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
+              if (!((mutable_bitField0_ & 0x00008000) == 0x00008000)) {
                 attributes_ = com.google.protobuf.MapField.newMapField(
                     AttributesDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00008000;
               }
               com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
               attributes__ = input.readMessage(
@@ -365,7 +336,7 @@ public final class SDFSEventOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -379,7 +350,7 @@ public final class SDFSEventOuterClass {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        if (((mutable_bitField0_ & 0x00002000) == 0x00002000)) {
           childrenUUid_ = childrenUUid_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -411,13 +382,12 @@ public final class SDFSEventOuterClass {
               org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.class, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder.class);
     }
 
+    private int bitField0_;
     public static final int STARTTIME_FIELD_NUMBER = 1;
     private long startTime_;
     /**
      * <code>int64 startTime = 1;</code>
-     * @return The startTime.
      */
-    @java.lang.Override
     public long getStartTime() {
       return startTime_;
     }
@@ -426,9 +396,7 @@ public final class SDFSEventOuterClass {
     private long endTime_;
     /**
      * <code>int64 endTime = 2;</code>
-     * @return The endTime.
      */
-    @java.lang.Override
     public long getEndTime() {
       return endTime_;
     }
@@ -437,9 +405,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object level_;
     /**
      * <code>string level = 3;</code>
-     * @return The level.
      */
-    @java.lang.Override
     public java.lang.String getLevel() {
       java.lang.Object ref = level_;
       if (ref instanceof java.lang.String) {
@@ -454,9 +420,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string level = 3;</code>
-     * @return The bytes for level.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getLevelBytes() {
       java.lang.Object ref = level_;
@@ -475,9 +439,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object type_;
     /**
      * <code>string type = 4;</code>
-     * @return The type.
      */
-    @java.lang.Override
     public java.lang.String getType() {
       java.lang.Object ref = type_;
       if (ref instanceof java.lang.String) {
@@ -492,9 +454,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string type = 4;</code>
-     * @return The bytes for type.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getTypeBytes() {
       java.lang.Object ref = type_;
@@ -513,9 +473,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object target_;
     /**
      * <code>string target = 5;</code>
-     * @return The target.
      */
-    @java.lang.Override
     public java.lang.String getTarget() {
       java.lang.Object ref = target_;
       if (ref instanceof java.lang.String) {
@@ -530,9 +488,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string target = 5;</code>
-     * @return The bytes for target.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getTargetBytes() {
       java.lang.Object ref = target_;
@@ -551,9 +507,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object shortMsg_;
     /**
      * <code>string shortMsg = 6;</code>
-     * @return The shortMsg.
      */
-    @java.lang.Override
     public java.lang.String getShortMsg() {
       java.lang.Object ref = shortMsg_;
       if (ref instanceof java.lang.String) {
@@ -568,9 +522,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string shortMsg = 6;</code>
-     * @return The bytes for shortMsg.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getShortMsgBytes() {
       java.lang.Object ref = shortMsg_;
@@ -589,9 +541,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object longMsg_;
     /**
      * <code>string longMsg = 7;</code>
-     * @return The longMsg.
      */
-    @java.lang.Override
     public java.lang.String getLongMsg() {
       java.lang.Object ref = longMsg_;
       if (ref instanceof java.lang.String) {
@@ -606,9 +556,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string longMsg = 7;</code>
-     * @return The bytes for longMsg.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getLongMsgBytes() {
       java.lang.Object ref = longMsg_;
@@ -627,9 +575,7 @@ public final class SDFSEventOuterClass {
     private double percentComplete_;
     /**
      * <code>double percentComplete = 8;</code>
-     * @return The percentComplete.
      */
-    @java.lang.Override
     public double getPercentComplete() {
       return percentComplete_;
     }
@@ -638,9 +584,7 @@ public final class SDFSEventOuterClass {
     private long maxCount_;
     /**
      * <code>int64 maxCount = 9;</code>
-     * @return The maxCount.
      */
-    @java.lang.Override
     public long getMaxCount() {
       return maxCount_;
     }
@@ -649,9 +593,7 @@ public final class SDFSEventOuterClass {
     private long currentCount_;
     /**
      * <code>int64 currentCount = 10;</code>
-     * @return The currentCount.
      */
-    @java.lang.Override
     public long getCurrentCount() {
       return currentCount_;
     }
@@ -660,9 +602,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object uuid_;
     /**
      * <code>string uuid = 11;</code>
-     * @return The uuid.
      */
-    @java.lang.Override
     public java.lang.String getUuid() {
       java.lang.Object ref = uuid_;
       if (ref instanceof java.lang.String) {
@@ -677,9 +617,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string uuid = 11;</code>
-     * @return The bytes for uuid.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getUuidBytes() {
       java.lang.Object ref = uuid_;
@@ -698,9 +636,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object parentUuid_;
     /**
      * <code>string parentUuid = 12;</code>
-     * @return The parentUuid.
      */
-    @java.lang.Override
     public java.lang.String getParentUuid() {
       java.lang.Object ref = parentUuid_;
       if (ref instanceof java.lang.String) {
@@ -715,9 +651,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string parentUuid = 12;</code>
-     * @return The bytes for parentUuid.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getParentUuidBytes() {
       java.lang.Object ref = parentUuid_;
@@ -736,9 +670,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object extendedInfo_;
     /**
      * <code>string extendedInfo = 13;</code>
-     * @return The extendedInfo.
      */
-    @java.lang.Override
     public java.lang.String getExtendedInfo() {
       java.lang.Object ref = extendedInfo_;
       if (ref instanceof java.lang.String) {
@@ -753,9 +685,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string extendedInfo = 13;</code>
-     * @return The bytes for extendedInfo.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getExtendedInfoBytes() {
       java.lang.Object ref = extendedInfo_;
@@ -774,7 +704,6 @@ public final class SDFSEventOuterClass {
     private com.google.protobuf.LazyStringList childrenUUid_;
     /**
      * <code>repeated string childrenUUid = 14;</code>
-     * @return A list containing the childrenUUid.
      */
     public com.google.protobuf.ProtocolStringList
         getChildrenUUidList() {
@@ -782,23 +711,18 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>repeated string childrenUUid = 14;</code>
-     * @return The count of childrenUUid.
      */
     public int getChildrenUUidCount() {
       return childrenUUid_.size();
     }
     /**
      * <code>repeated string childrenUUid = 14;</code>
-     * @param index The index of the element to return.
-     * @return The childrenUUid at the given index.
      */
     public java.lang.String getChildrenUUid(int index) {
       return childrenUUid_.get(index);
     }
     /**
      * <code>repeated string childrenUUid = 14;</code>
-     * @param index The index of the value to return.
-     * @return The bytes of the childrenUUid at the given index.
      */
     public com.google.protobuf.ByteString
         getChildrenUUidBytes(int index) {
@@ -809,9 +733,7 @@ public final class SDFSEventOuterClass {
     private boolean success_;
     /**
      * <code>bool success = 15;</code>
-     * @return The success.
      */
-    @java.lang.Override
     public boolean getSuccess() {
       return success_;
     }
@@ -846,7 +768,6 @@ public final class SDFSEventOuterClass {
      * <code>map&lt;string, string&gt; attributes = 16;</code>
      */
 
-    @java.lang.Override
     public boolean containsAttributes(
         java.lang.String key) {
       if (key == null) { throw new java.lang.NullPointerException(); }
@@ -855,7 +776,6 @@ public final class SDFSEventOuterClass {
     /**
      * Use {@link #getAttributesMap()} instead.
      */
-    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getAttributes() {
       return getAttributesMap();
@@ -863,7 +783,6 @@ public final class SDFSEventOuterClass {
     /**
      * <code>map&lt;string, string&gt; attributes = 16;</code>
      */
-    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
       return internalGetAttributes().getMap();
@@ -871,7 +790,6 @@ public final class SDFSEventOuterClass {
     /**
      * <code>map&lt;string, string&gt; attributes = 16;</code>
      */
-    @java.lang.Override
 
     public java.lang.String getAttributesOrDefault(
         java.lang.String key,
@@ -884,7 +802,6 @@ public final class SDFSEventOuterClass {
     /**
      * <code>map&lt;string, string&gt; attributes = 16;</code>
      */
-    @java.lang.Override
 
     public java.lang.String getAttributesOrThrow(
         java.lang.String key) {
@@ -1052,41 +969,43 @@ public final class SDFSEventOuterClass {
       }
       org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent other = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent) obj;
 
-      if (getStartTime()
-          != other.getStartTime()) return false;
-      if (getEndTime()
-          != other.getEndTime()) return false;
-      if (!getLevel()
-          .equals(other.getLevel())) return false;
-      if (!getType()
-          .equals(other.getType())) return false;
-      if (!getTarget()
-          .equals(other.getTarget())) return false;
-      if (!getShortMsg()
-          .equals(other.getShortMsg())) return false;
-      if (!getLongMsg()
-          .equals(other.getLongMsg())) return false;
-      if (java.lang.Double.doubleToLongBits(getPercentComplete())
-          != java.lang.Double.doubleToLongBits(
-              other.getPercentComplete())) return false;
-      if (getMaxCount()
-          != other.getMaxCount()) return false;
-      if (getCurrentCount()
-          != other.getCurrentCount()) return false;
-      if (!getUuid()
-          .equals(other.getUuid())) return false;
-      if (!getParentUuid()
-          .equals(other.getParentUuid())) return false;
-      if (!getExtendedInfo()
-          .equals(other.getExtendedInfo())) return false;
-      if (!getChildrenUUidList()
-          .equals(other.getChildrenUUidList())) return false;
-      if (getSuccess()
-          != other.getSuccess()) return false;
-      if (!internalGetAttributes().equals(
-          other.internalGetAttributes())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && (getStartTime()
+          == other.getStartTime());
+      result = result && (getEndTime()
+          == other.getEndTime());
+      result = result && getLevel()
+          .equals(other.getLevel());
+      result = result && getType()
+          .equals(other.getType());
+      result = result && getTarget()
+          .equals(other.getTarget());
+      result = result && getShortMsg()
+          .equals(other.getShortMsg());
+      result = result && getLongMsg()
+          .equals(other.getLongMsg());
+      result = result && (
+          java.lang.Double.doubleToLongBits(getPercentComplete())
+          == java.lang.Double.doubleToLongBits(
+              other.getPercentComplete()));
+      result = result && (getMaxCount()
+          == other.getMaxCount());
+      result = result && (getCurrentCount()
+          == other.getCurrentCount());
+      result = result && getUuid()
+          .equals(other.getUuid());
+      result = result && getParentUuid()
+          .equals(other.getParentUuid());
+      result = result && getExtendedInfo()
+          .equals(other.getExtendedInfo());
+      result = result && getChildrenUUidList()
+          .equals(other.getChildrenUUidList());
+      result = result && (getSuccess()
+          == other.getSuccess());
+      result = result && internalGetAttributes().equals(
+          other.internalGetAttributes());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -1320,7 +1239,7 @@ public final class SDFSEventOuterClass {
         extendedInfo_ = "";
 
         childrenUUid_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00002000);
         success_ = false;
 
         internalGetMutableAttributes().clear();
@@ -1351,6 +1270,7 @@ public final class SDFSEventOuterClass {
       public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent buildPartial() {
         org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent result = new org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent(this);
         int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
         result.startTime_ = startTime_;
         result.endTime_ = endTime_;
         result.level_ = level_;
@@ -1364,49 +1284,50 @@ public final class SDFSEventOuterClass {
         result.uuid_ = uuid_;
         result.parentUuid_ = parentUuid_;
         result.extendedInfo_ = extendedInfo_;
-        if (((bitField0_ & 0x00000001) != 0)) {
+        if (((bitField0_ & 0x00002000) == 0x00002000)) {
           childrenUUid_ = childrenUUid_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00002000);
         }
         result.childrenUUid_ = childrenUUid_;
         result.success_ = success_;
         result.attributes_ = internalGetAttributes();
         result.attributes_.makeImmutable();
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1470,7 +1391,7 @@ public final class SDFSEventOuterClass {
         if (!other.childrenUUid_.isEmpty()) {
           if (childrenUUid_.isEmpty()) {
             childrenUUid_ = other.childrenUUid_;
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00002000);
           } else {
             ensureChildrenUUidIsMutable();
             childrenUUid_.addAll(other.childrenUUid_);
@@ -1515,16 +1436,12 @@ public final class SDFSEventOuterClass {
       private long startTime_ ;
       /**
        * <code>int64 startTime = 1;</code>
-       * @return The startTime.
        */
-      @java.lang.Override
       public long getStartTime() {
         return startTime_;
       }
       /**
        * <code>int64 startTime = 1;</code>
-       * @param value The startTime to set.
-       * @return This builder for chaining.
        */
       public Builder setStartTime(long value) {
         
@@ -1534,7 +1451,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>int64 startTime = 1;</code>
-       * @return This builder for chaining.
        */
       public Builder clearStartTime() {
         
@@ -1546,16 +1462,12 @@ public final class SDFSEventOuterClass {
       private long endTime_ ;
       /**
        * <code>int64 endTime = 2;</code>
-       * @return The endTime.
        */
-      @java.lang.Override
       public long getEndTime() {
         return endTime_;
       }
       /**
        * <code>int64 endTime = 2;</code>
-       * @param value The endTime to set.
-       * @return This builder for chaining.
        */
       public Builder setEndTime(long value) {
         
@@ -1565,7 +1477,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>int64 endTime = 2;</code>
-       * @return This builder for chaining.
        */
       public Builder clearEndTime() {
         
@@ -1577,7 +1488,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object level_ = "";
       /**
        * <code>string level = 3;</code>
-       * @return The level.
        */
       public java.lang.String getLevel() {
         java.lang.Object ref = level_;
@@ -1593,7 +1503,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string level = 3;</code>
-       * @return The bytes for level.
        */
       public com.google.protobuf.ByteString
           getLevelBytes() {
@@ -1610,8 +1519,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string level = 3;</code>
-       * @param value The level to set.
-       * @return This builder for chaining.
        */
       public Builder setLevel(
           java.lang.String value) {
@@ -1625,7 +1532,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string level = 3;</code>
-       * @return This builder for chaining.
        */
       public Builder clearLevel() {
         
@@ -1635,8 +1541,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string level = 3;</code>
-       * @param value The bytes for level to set.
-       * @return This builder for chaining.
        */
       public Builder setLevelBytes(
           com.google.protobuf.ByteString value) {
@@ -1653,7 +1557,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object type_ = "";
       /**
        * <code>string type = 4;</code>
-       * @return The type.
        */
       public java.lang.String getType() {
         java.lang.Object ref = type_;
@@ -1669,7 +1572,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string type = 4;</code>
-       * @return The bytes for type.
        */
       public com.google.protobuf.ByteString
           getTypeBytes() {
@@ -1686,8 +1588,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string type = 4;</code>
-       * @param value The type to set.
-       * @return This builder for chaining.
        */
       public Builder setType(
           java.lang.String value) {
@@ -1701,7 +1601,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string type = 4;</code>
-       * @return This builder for chaining.
        */
       public Builder clearType() {
         
@@ -1711,8 +1610,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string type = 4;</code>
-       * @param value The bytes for type to set.
-       * @return This builder for chaining.
        */
       public Builder setTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -1729,7 +1626,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object target_ = "";
       /**
        * <code>string target = 5;</code>
-       * @return The target.
        */
       public java.lang.String getTarget() {
         java.lang.Object ref = target_;
@@ -1745,7 +1641,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string target = 5;</code>
-       * @return The bytes for target.
        */
       public com.google.protobuf.ByteString
           getTargetBytes() {
@@ -1762,8 +1657,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string target = 5;</code>
-       * @param value The target to set.
-       * @return This builder for chaining.
        */
       public Builder setTarget(
           java.lang.String value) {
@@ -1777,7 +1670,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string target = 5;</code>
-       * @return This builder for chaining.
        */
       public Builder clearTarget() {
         
@@ -1787,8 +1679,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string target = 5;</code>
-       * @param value The bytes for target to set.
-       * @return This builder for chaining.
        */
       public Builder setTargetBytes(
           com.google.protobuf.ByteString value) {
@@ -1805,7 +1695,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object shortMsg_ = "";
       /**
        * <code>string shortMsg = 6;</code>
-       * @return The shortMsg.
        */
       public java.lang.String getShortMsg() {
         java.lang.Object ref = shortMsg_;
@@ -1821,7 +1710,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string shortMsg = 6;</code>
-       * @return The bytes for shortMsg.
        */
       public com.google.protobuf.ByteString
           getShortMsgBytes() {
@@ -1838,8 +1726,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string shortMsg = 6;</code>
-       * @param value The shortMsg to set.
-       * @return This builder for chaining.
        */
       public Builder setShortMsg(
           java.lang.String value) {
@@ -1853,7 +1739,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string shortMsg = 6;</code>
-       * @return This builder for chaining.
        */
       public Builder clearShortMsg() {
         
@@ -1863,8 +1748,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string shortMsg = 6;</code>
-       * @param value The bytes for shortMsg to set.
-       * @return This builder for chaining.
        */
       public Builder setShortMsgBytes(
           com.google.protobuf.ByteString value) {
@@ -1881,7 +1764,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object longMsg_ = "";
       /**
        * <code>string longMsg = 7;</code>
-       * @return The longMsg.
        */
       public java.lang.String getLongMsg() {
         java.lang.Object ref = longMsg_;
@@ -1897,7 +1779,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string longMsg = 7;</code>
-       * @return The bytes for longMsg.
        */
       public com.google.protobuf.ByteString
           getLongMsgBytes() {
@@ -1914,8 +1795,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string longMsg = 7;</code>
-       * @param value The longMsg to set.
-       * @return This builder for chaining.
        */
       public Builder setLongMsg(
           java.lang.String value) {
@@ -1929,7 +1808,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string longMsg = 7;</code>
-       * @return This builder for chaining.
        */
       public Builder clearLongMsg() {
         
@@ -1939,8 +1817,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string longMsg = 7;</code>
-       * @param value The bytes for longMsg to set.
-       * @return This builder for chaining.
        */
       public Builder setLongMsgBytes(
           com.google.protobuf.ByteString value) {
@@ -1957,16 +1833,12 @@ public final class SDFSEventOuterClass {
       private double percentComplete_ ;
       /**
        * <code>double percentComplete = 8;</code>
-       * @return The percentComplete.
        */
-      @java.lang.Override
       public double getPercentComplete() {
         return percentComplete_;
       }
       /**
        * <code>double percentComplete = 8;</code>
-       * @param value The percentComplete to set.
-       * @return This builder for chaining.
        */
       public Builder setPercentComplete(double value) {
         
@@ -1976,7 +1848,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>double percentComplete = 8;</code>
-       * @return This builder for chaining.
        */
       public Builder clearPercentComplete() {
         
@@ -1988,16 +1859,12 @@ public final class SDFSEventOuterClass {
       private long maxCount_ ;
       /**
        * <code>int64 maxCount = 9;</code>
-       * @return The maxCount.
        */
-      @java.lang.Override
       public long getMaxCount() {
         return maxCount_;
       }
       /**
        * <code>int64 maxCount = 9;</code>
-       * @param value The maxCount to set.
-       * @return This builder for chaining.
        */
       public Builder setMaxCount(long value) {
         
@@ -2007,7 +1874,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>int64 maxCount = 9;</code>
-       * @return This builder for chaining.
        */
       public Builder clearMaxCount() {
         
@@ -2019,16 +1885,12 @@ public final class SDFSEventOuterClass {
       private long currentCount_ ;
       /**
        * <code>int64 currentCount = 10;</code>
-       * @return The currentCount.
        */
-      @java.lang.Override
       public long getCurrentCount() {
         return currentCount_;
       }
       /**
        * <code>int64 currentCount = 10;</code>
-       * @param value The currentCount to set.
-       * @return This builder for chaining.
        */
       public Builder setCurrentCount(long value) {
         
@@ -2038,7 +1900,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>int64 currentCount = 10;</code>
-       * @return This builder for chaining.
        */
       public Builder clearCurrentCount() {
         
@@ -2050,7 +1911,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object uuid_ = "";
       /**
        * <code>string uuid = 11;</code>
-       * @return The uuid.
        */
       public java.lang.String getUuid() {
         java.lang.Object ref = uuid_;
@@ -2066,7 +1926,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string uuid = 11;</code>
-       * @return The bytes for uuid.
        */
       public com.google.protobuf.ByteString
           getUuidBytes() {
@@ -2083,8 +1942,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string uuid = 11;</code>
-       * @param value The uuid to set.
-       * @return This builder for chaining.
        */
       public Builder setUuid(
           java.lang.String value) {
@@ -2098,7 +1955,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string uuid = 11;</code>
-       * @return This builder for chaining.
        */
       public Builder clearUuid() {
         
@@ -2108,8 +1964,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string uuid = 11;</code>
-       * @param value The bytes for uuid to set.
-       * @return This builder for chaining.
        */
       public Builder setUuidBytes(
           com.google.protobuf.ByteString value) {
@@ -2126,7 +1980,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object parentUuid_ = "";
       /**
        * <code>string parentUuid = 12;</code>
-       * @return The parentUuid.
        */
       public java.lang.String getParentUuid() {
         java.lang.Object ref = parentUuid_;
@@ -2142,7 +1995,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string parentUuid = 12;</code>
-       * @return The bytes for parentUuid.
        */
       public com.google.protobuf.ByteString
           getParentUuidBytes() {
@@ -2159,8 +2011,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string parentUuid = 12;</code>
-       * @param value The parentUuid to set.
-       * @return This builder for chaining.
        */
       public Builder setParentUuid(
           java.lang.String value) {
@@ -2174,7 +2024,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string parentUuid = 12;</code>
-       * @return This builder for chaining.
        */
       public Builder clearParentUuid() {
         
@@ -2184,8 +2033,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string parentUuid = 12;</code>
-       * @param value The bytes for parentUuid to set.
-       * @return This builder for chaining.
        */
       public Builder setParentUuidBytes(
           com.google.protobuf.ByteString value) {
@@ -2202,7 +2049,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object extendedInfo_ = "";
       /**
        * <code>string extendedInfo = 13;</code>
-       * @return The extendedInfo.
        */
       public java.lang.String getExtendedInfo() {
         java.lang.Object ref = extendedInfo_;
@@ -2218,7 +2064,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string extendedInfo = 13;</code>
-       * @return The bytes for extendedInfo.
        */
       public com.google.protobuf.ByteString
           getExtendedInfoBytes() {
@@ -2235,8 +2080,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string extendedInfo = 13;</code>
-       * @param value The extendedInfo to set.
-       * @return This builder for chaining.
        */
       public Builder setExtendedInfo(
           java.lang.String value) {
@@ -2250,7 +2093,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string extendedInfo = 13;</code>
-       * @return This builder for chaining.
        */
       public Builder clearExtendedInfo() {
         
@@ -2260,8 +2102,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string extendedInfo = 13;</code>
-       * @param value The bytes for extendedInfo to set.
-       * @return This builder for chaining.
        */
       public Builder setExtendedInfoBytes(
           com.google.protobuf.ByteString value) {
@@ -2277,14 +2117,13 @@ public final class SDFSEventOuterClass {
 
       private com.google.protobuf.LazyStringList childrenUUid_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureChildrenUUidIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00002000) == 0x00002000)) {
           childrenUUid_ = new com.google.protobuf.LazyStringArrayList(childrenUUid_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00002000;
          }
       }
       /**
        * <code>repeated string childrenUUid = 14;</code>
-       * @return A list containing the childrenUUid.
        */
       public com.google.protobuf.ProtocolStringList
           getChildrenUUidList() {
@@ -2292,23 +2131,18 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>repeated string childrenUUid = 14;</code>
-       * @return The count of childrenUUid.
        */
       public int getChildrenUUidCount() {
         return childrenUUid_.size();
       }
       /**
        * <code>repeated string childrenUUid = 14;</code>
-       * @param index The index of the element to return.
-       * @return The childrenUUid at the given index.
        */
       public java.lang.String getChildrenUUid(int index) {
         return childrenUUid_.get(index);
       }
       /**
        * <code>repeated string childrenUUid = 14;</code>
-       * @param index The index of the value to return.
-       * @return The bytes of the childrenUUid at the given index.
        */
       public com.google.protobuf.ByteString
           getChildrenUUidBytes(int index) {
@@ -2316,9 +2150,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>repeated string childrenUUid = 14;</code>
-       * @param index The index to set the value at.
-       * @param value The childrenUUid to set.
-       * @return This builder for chaining.
        */
       public Builder setChildrenUUid(
           int index, java.lang.String value) {
@@ -2332,8 +2163,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>repeated string childrenUUid = 14;</code>
-       * @param value The childrenUUid to add.
-       * @return This builder for chaining.
        */
       public Builder addChildrenUUid(
           java.lang.String value) {
@@ -2347,8 +2176,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>repeated string childrenUUid = 14;</code>
-       * @param values The childrenUUid to add.
-       * @return This builder for chaining.
        */
       public Builder addAllChildrenUUid(
           java.lang.Iterable<java.lang.String> values) {
@@ -2360,18 +2187,15 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>repeated string childrenUUid = 14;</code>
-       * @return This builder for chaining.
        */
       public Builder clearChildrenUUid() {
         childrenUUid_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00002000);
         onChanged();
         return this;
       }
       /**
        * <code>repeated string childrenUUid = 14;</code>
-       * @param value The bytes of the childrenUUid to add.
-       * @return This builder for chaining.
        */
       public Builder addChildrenUUidBytes(
           com.google.protobuf.ByteString value) {
@@ -2388,16 +2212,12 @@ public final class SDFSEventOuterClass {
       private boolean success_ ;
       /**
        * <code>bool success = 15;</code>
-       * @return The success.
        */
-      @java.lang.Override
       public boolean getSuccess() {
         return success_;
       }
       /**
        * <code>bool success = 15;</code>
-       * @param value The success to set.
-       * @return This builder for chaining.
        */
       public Builder setSuccess(boolean value) {
         
@@ -2407,7 +2227,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>bool success = 15;</code>
-       * @return This builder for chaining.
        */
       public Builder clearSuccess() {
         
@@ -2446,7 +2265,6 @@ public final class SDFSEventOuterClass {
        * <code>map&lt;string, string&gt; attributes = 16;</code>
        */
 
-      @java.lang.Override
       public boolean containsAttributes(
           java.lang.String key) {
         if (key == null) { throw new java.lang.NullPointerException(); }
@@ -2455,7 +2273,6 @@ public final class SDFSEventOuterClass {
       /**
        * Use {@link #getAttributesMap()} instead.
        */
-      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getAttributes() {
         return getAttributesMap();
@@ -2463,7 +2280,6 @@ public final class SDFSEventOuterClass {
       /**
        * <code>map&lt;string, string&gt; attributes = 16;</code>
        */
-      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
         return internalGetAttributes().getMap();
@@ -2471,7 +2287,6 @@ public final class SDFSEventOuterClass {
       /**
        * <code>map&lt;string, string&gt; attributes = 16;</code>
        */
-      @java.lang.Override
 
       public java.lang.String getAttributesOrDefault(
           java.lang.String key,
@@ -2484,7 +2299,6 @@ public final class SDFSEventOuterClass {
       /**
        * <code>map&lt;string, string&gt; attributes = 16;</code>
        */
-      @java.lang.Override
 
       public java.lang.String getAttributesOrThrow(
           java.lang.String key) {
@@ -2546,7 +2360,7 @@ public final class SDFSEventOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -2602,26 +2416,23 @@ public final class SDFSEventOuterClass {
 
     /**
      * <code>string uuid = 1;</code>
-     * @return The uuid.
      */
     java.lang.String getUuid();
     /**
      * <code>string uuid = 1;</code>
-     * @return The bytes for uuid.
      */
     com.google.protobuf.ByteString
         getUuidBytes();
 
     /**
      * <code>int64 pvolumeID = 2;</code>
-     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SDFSEventRequest}
    */
-  public static final class SDFSEventRequest extends
+  public  static final class SDFSEventRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SDFSEventRequest)
       SDFSEventRequestOrBuilder {
@@ -2632,13 +2443,7 @@ public final class SDFSEventOuterClass {
     }
     private SDFSEventRequest() {
       uuid_ = "";
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new SDFSEventRequest();
+      pvolumeID_ = 0L;
     }
 
     @java.lang.Override
@@ -2654,6 +2459,7 @@ public final class SDFSEventOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -2676,7 +2482,7 @@ public final class SDFSEventOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2711,9 +2517,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object uuid_;
     /**
      * <code>string uuid = 1;</code>
-     * @return The uuid.
      */
-    @java.lang.Override
     public java.lang.String getUuid() {
       java.lang.Object ref = uuid_;
       if (ref instanceof java.lang.String) {
@@ -2728,9 +2532,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string uuid = 1;</code>
-     * @return The bytes for uuid.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getUuidBytes() {
       java.lang.Object ref = uuid_;
@@ -2749,9 +2551,7 @@ public final class SDFSEventOuterClass {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
-     * @return The pvolumeID.
      */
-    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -2807,12 +2607,13 @@ public final class SDFSEventOuterClass {
       }
       org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest other = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest) obj;
 
-      if (!getUuid()
-          .equals(other.getUuid())) return false;
-      if (getPvolumeID()
-          != other.getPvolumeID()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && getUuid()
+          .equals(other.getUuid());
+      result = result && (getPvolumeID()
+          == other.getPvolumeID());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -2998,35 +2799,35 @@ public final class SDFSEventOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3079,7 +2880,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object uuid_ = "";
       /**
        * <code>string uuid = 1;</code>
-       * @return The uuid.
        */
       public java.lang.String getUuid() {
         java.lang.Object ref = uuid_;
@@ -3095,7 +2895,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string uuid = 1;</code>
-       * @return The bytes for uuid.
        */
       public com.google.protobuf.ByteString
           getUuidBytes() {
@@ -3112,8 +2911,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string uuid = 1;</code>
-       * @param value The uuid to set.
-       * @return This builder for chaining.
        */
       public Builder setUuid(
           java.lang.String value) {
@@ -3127,7 +2924,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string uuid = 1;</code>
-       * @return This builder for chaining.
        */
       public Builder clearUuid() {
         
@@ -3137,8 +2933,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string uuid = 1;</code>
-       * @param value The bytes for uuid to set.
-       * @return This builder for chaining.
        */
       public Builder setUuidBytes(
           com.google.protobuf.ByteString value) {
@@ -3155,16 +2949,12 @@ public final class SDFSEventOuterClass {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
-       * @return The pvolumeID.
        */
-      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
-       * @param value The pvolumeID to set.
-       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -3174,7 +2964,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
-       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -3185,7 +2974,7 @@ public final class SDFSEventOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -3241,35 +3030,29 @@ public final class SDFSEventOuterClass {
 
     /**
      * <code>string error = 1;</code>
-     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
-     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>.org.opendedup.grpc.SDFSEvent event = 3;</code>
-     * @return Whether the event field is set.
      */
     boolean hasEvent();
     /**
      * <code>.org.opendedup.grpc.SDFSEvent event = 3;</code>
-     * @return The event.
      */
     org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getEvent();
     /**
@@ -3280,7 +3063,7 @@ public final class SDFSEventOuterClass {
   /**
    * Protobuf type {@code org.opendedup.grpc.SDFSEventResponse}
    */
-  public static final class SDFSEventResponse extends
+  public  static final class SDFSEventResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SDFSEventResponse)
       SDFSEventResponseOrBuilder {
@@ -3292,13 +3075,6 @@ public final class SDFSEventOuterClass {
     private SDFSEventResponse() {
       error_ = "";
       errorCode_ = 0;
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new SDFSEventResponse();
     }
 
     @java.lang.Override
@@ -3314,6 +3090,7 @@ public final class SDFSEventOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3350,7 +3127,7 @@ public final class SDFSEventOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3385,9 +3162,7 @@ public final class SDFSEventOuterClass {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
-     * @return The error.
      */
-    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -3402,9 +3177,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string error = 1;</code>
-     * @return The bytes for error.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -3423,16 +3196,14 @@ public final class SDFSEventOuterClass {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
-    @java.lang.Override public int getErrorCodeValue() {
+    public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The errorCode.
      */
-    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -3442,24 +3213,19 @@ public final class SDFSEventOuterClass {
     private org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent event_;
     /**
      * <code>.org.opendedup.grpc.SDFSEvent event = 3;</code>
-     * @return Whether the event field is set.
      */
-    @java.lang.Override
     public boolean hasEvent() {
       return event_ != null;
     }
     /**
      * <code>.org.opendedup.grpc.SDFSEvent event = 3;</code>
-     * @return The event.
      */
-    @java.lang.Override
     public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getEvent() {
       return event_ == null ? org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.getDefaultInstance() : event_;
     }
     /**
      * <code>.org.opendedup.grpc.SDFSEvent event = 3;</code>
      */
-    @java.lang.Override
     public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder getEventOrBuilder() {
       return getEvent();
     }
@@ -3522,16 +3288,17 @@ public final class SDFSEventOuterClass {
       }
       org.opendedup.grpc.SDFSEventOuterClass.SDFSEventResponse other = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventResponse) obj;
 
-      if (!getError()
-          .equals(other.getError())) return false;
-      if (errorCode_ != other.errorCode_) return false;
-      if (hasEvent() != other.hasEvent()) return false;
+      boolean result = true;
+      result = result && getError()
+          .equals(other.getError());
+      result = result && errorCode_ == other.errorCode_;
+      result = result && (hasEvent() == other.hasEvent());
       if (hasEvent()) {
-        if (!getEvent()
-            .equals(other.getEvent())) return false;
+        result = result && getEvent()
+            .equals(other.getEvent());
       }
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -3731,35 +3498,35 @@ public final class SDFSEventOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3815,7 +3582,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
-       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -3831,7 +3597,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string error = 1;</code>
-       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -3848,8 +3613,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string error = 1;</code>
-       * @param value The error to set.
-       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -3863,7 +3626,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string error = 1;</code>
-       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -3873,8 +3635,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string error = 1;</code>
-       * @param value The bytes for error to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -3891,27 +3651,21 @@ public final class SDFSEventOuterClass {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @return The enum numeric value on the wire for errorCode.
        */
-      @java.lang.Override public int getErrorCodeValue() {
+      public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @param value The enum numeric value on the wire for errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
-        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @return The errorCode.
        */
-      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -3919,8 +3673,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @param value The errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -3933,7 +3685,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -3942,19 +3693,17 @@ public final class SDFSEventOuterClass {
         return this;
       }
 
-      private org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent event_;
+      private org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent event_ = null;
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder> eventBuilder_;
       /**
        * <code>.org.opendedup.grpc.SDFSEvent event = 3;</code>
-       * @return Whether the event field is set.
        */
       public boolean hasEvent() {
         return eventBuilder_ != null || event_ != null;
       }
       /**
        * <code>.org.opendedup.grpc.SDFSEvent event = 3;</code>
-       * @return The event.
        */
       public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getEvent() {
         if (eventBuilder_ == null) {
@@ -4063,7 +3812,7 @@ public final class SDFSEventOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -4119,14 +3868,13 @@ public final class SDFSEventOuterClass {
 
     /**
      * <code>int64 pvolumeID = 1;</code>
-     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SDFSEventListRequest}
    */
-  public static final class SDFSEventListRequest extends
+  public  static final class SDFSEventListRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SDFSEventListRequest)
       SDFSEventListRequestOrBuilder {
@@ -4136,13 +3884,7 @@ public final class SDFSEventOuterClass {
       super(builder);
     }
     private SDFSEventListRequest() {
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new SDFSEventListRequest();
+      pvolumeID_ = 0L;
     }
 
     @java.lang.Override
@@ -4158,6 +3900,7 @@ public final class SDFSEventOuterClass {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4174,7 +3917,7 @@ public final class SDFSEventOuterClass {
               break;
             }
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4209,9 +3952,7 @@ public final class SDFSEventOuterClass {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 1;</code>
-     * @return The pvolumeID.
      */
-    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -4261,10 +4002,11 @@ public final class SDFSEventOuterClass {
       }
       org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest other = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest) obj;
 
-      if (getPvolumeID()
-          != other.getPvolumeID()) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && (getPvolumeID()
+          == other.getPvolumeID());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -4445,35 +4187,35 @@ public final class SDFSEventOuterClass {
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4522,16 +4264,12 @@ public final class SDFSEventOuterClass {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 1;</code>
-       * @return The pvolumeID.
        */
-      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 1;</code>
-       * @param value The pvolumeID to set.
-       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -4541,7 +4279,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>int64 pvolumeID = 1;</code>
-       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -4552,7 +4289,7 @@ public final class SDFSEventOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -4608,24 +4345,20 @@ public final class SDFSEventOuterClass {
 
     /**
      * <code>string error = 1;</code>
-     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
-     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
@@ -4656,7 +4389,7 @@ public final class SDFSEventOuterClass {
   /**
    * Protobuf type {@code org.opendedup.grpc.SDFSEventListResponse}
    */
-  public static final class SDFSEventListResponse extends
+  public  static final class SDFSEventListResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SDFSEventListResponse)
       SDFSEventListResponseOrBuilder {
@@ -4669,13 +4402,6 @@ public final class SDFSEventOuterClass {
       error_ = "";
       errorCode_ = 0;
       events_ = java.util.Collections.emptyList();
-    }
-
-    @java.lang.Override
-    @SuppressWarnings({"unused"})
-    protected java.lang.Object newInstance(
-        UnusedPrivateParameter unused) {
-      return new SDFSEventListResponse();
     }
 
     @java.lang.Override
@@ -4715,16 +4441,16 @@ public final class SDFSEventOuterClass {
               break;
             }
             case 26: {
-              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
                 events_ = new java.util.ArrayList<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent>();
-                mutable_bitField0_ |= 0x00000001;
+                mutable_bitField0_ |= 0x00000004;
               }
               events_.add(
                   input.readMessage(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.parser(), extensionRegistry));
               break;
             }
             default: {
-              if (!parseUnknownField(
+              if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4738,7 +4464,7 @@ public final class SDFSEventOuterClass {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
           events_ = java.util.Collections.unmodifiableList(events_);
         }
         this.unknownFields = unknownFields.build();
@@ -4758,13 +4484,12 @@ public final class SDFSEventOuterClass {
               org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse.class, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse.Builder.class);
     }
 
+    private int bitField0_;
     public static final int ERROR_FIELD_NUMBER = 1;
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
-     * @return The error.
      */
-    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -4779,9 +4504,7 @@ public final class SDFSEventOuterClass {
     }
     /**
      * <code>string error = 1;</code>
-     * @return The bytes for error.
      */
-    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -4800,16 +4523,14 @@ public final class SDFSEventOuterClass {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The enum numeric value on the wire for errorCode.
      */
-    @java.lang.Override public int getErrorCodeValue() {
+    public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-     * @return The errorCode.
      */
-    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -4820,14 +4541,12 @@ public final class SDFSEventOuterClass {
     /**
      * <code>repeated .org.opendedup.grpc.SDFSEvent events = 3;</code>
      */
-    @java.lang.Override
     public java.util.List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> getEventsList() {
       return events_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.SDFSEvent events = 3;</code>
      */
-    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder> 
         getEventsOrBuilderList() {
       return events_;
@@ -4835,21 +4554,18 @@ public final class SDFSEventOuterClass {
     /**
      * <code>repeated .org.opendedup.grpc.SDFSEvent events = 3;</code>
      */
-    @java.lang.Override
     public int getEventsCount() {
       return events_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.SDFSEvent events = 3;</code>
      */
-    @java.lang.Override
     public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getEvents(int index) {
       return events_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.SDFSEvent events = 3;</code>
      */
-    @java.lang.Override
     public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder getEventsOrBuilder(
         int index) {
       return events_.get(index);
@@ -4913,13 +4629,14 @@ public final class SDFSEventOuterClass {
       }
       org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse other = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse) obj;
 
-      if (!getError()
-          .equals(other.getError())) return false;
-      if (errorCode_ != other.errorCode_) return false;
-      if (!getEventsList()
-          .equals(other.getEventsList())) return false;
-      if (!unknownFields.equals(other.unknownFields)) return false;
-      return true;
+      boolean result = true;
+      result = result && getError()
+          .equals(other.getError());
+      result = result && errorCode_ == other.errorCode_;
+      result = result && getEventsList()
+          .equals(other.getEventsList());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
     }
 
     @java.lang.Override
@@ -5077,7 +4794,7 @@ public final class SDFSEventOuterClass {
 
         if (eventsBuilder_ == null) {
           events_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000004);
         } else {
           eventsBuilder_.clear();
         }
@@ -5108,52 +4825,54 @@ public final class SDFSEventOuterClass {
       public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse buildPartial() {
         org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse result = new org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse(this);
         int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
         result.error_ = error_;
         result.errorCode_ = errorCode_;
         if (eventsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) != 0)) {
+          if (((bitField0_ & 0x00000004) == 0x00000004)) {
             events_ = java.util.Collections.unmodifiableList(events_);
-            bitField0_ = (bitField0_ & ~0x00000001);
+            bitField0_ = (bitField0_ & ~0x00000004);
           }
           result.events_ = events_;
         } else {
           result.events_ = eventsBuilder_.build();
         }
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return super.clone();
+        return (Builder) super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.setField(field, value);
+        return (Builder) super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return super.clearField(field);
+        return (Builder) super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return super.clearOneof(oneof);
+        return (Builder) super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return super.setRepeatedField(field, index, value);
+        return (Builder) super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return super.addRepeatedField(field, value);
+        return (Builder) super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5178,7 +4897,7 @@ public final class SDFSEventOuterClass {
           if (!other.events_.isEmpty()) {
             if (events_.isEmpty()) {
               events_ = other.events_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000004);
             } else {
               ensureEventsIsMutable();
               events_.addAll(other.events_);
@@ -5191,7 +4910,7 @@ public final class SDFSEventOuterClass {
               eventsBuilder_.dispose();
               eventsBuilder_ = null;
               events_ = other.events_;
-              bitField0_ = (bitField0_ & ~0x00000001);
+              bitField0_ = (bitField0_ & ~0x00000004);
               eventsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getEventsFieldBuilder() : null;
@@ -5233,7 +4952,6 @@ public final class SDFSEventOuterClass {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
-       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -5249,7 +4967,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string error = 1;</code>
-       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -5266,8 +4983,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string error = 1;</code>
-       * @param value The error to set.
-       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -5281,7 +4996,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string error = 1;</code>
-       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -5291,8 +5005,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>string error = 1;</code>
-       * @param value The bytes for error to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -5309,27 +5021,21 @@ public final class SDFSEventOuterClass {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @return The enum numeric value on the wire for errorCode.
        */
-      @java.lang.Override public int getErrorCodeValue() {
+      public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @param value The enum numeric value on the wire for errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
-        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @return The errorCode.
        */
-      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -5337,8 +5043,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @param value The errorCode to set.
-       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -5351,7 +5055,6 @@ public final class SDFSEventOuterClass {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
-       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -5363,9 +5066,9 @@ public final class SDFSEventOuterClass {
       private java.util.List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> events_ =
         java.util.Collections.emptyList();
       private void ensureEventsIsMutable() {
-        if (!((bitField0_ & 0x00000001) != 0)) {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
           events_ = new java.util.ArrayList<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent>(events_);
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000004;
          }
       }
 
@@ -5515,7 +5218,7 @@ public final class SDFSEventOuterClass {
       public Builder clearEvents() {
         if (eventsBuilder_ == null) {
           events_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000001);
+          bitField0_ = (bitField0_ & ~0x00000004);
           onChanged();
         } else {
           eventsBuilder_.clear();
@@ -5592,7 +5295,7 @@ public final class SDFSEventOuterClass {
           eventsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder>(
                   events_,
-                  ((bitField0_ & 0x00000001) != 0),
+                  ((bitField0_ & 0x00000004) == 0x00000004),
                   getParentForChildren(),
                   isClean());
           events_ = null;
@@ -5602,7 +5305,7 @@ public final class SDFSEventOuterClass {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFields(unknownFields);
+        return super.setUnknownFieldsProto3(unknownFields);
       }
 
       @java.lang.Override
@@ -5722,11 +5425,19 @@ public final class SDFSEventOuterClass {
       "SEventResponse0\001B0Z.github.com/opendedup" +
       "/sdfs-client-go/sdfs/;sdfsb\006proto3"
     };
-    descriptor = com.google.protobuf.Descriptors.FileDescriptor
+    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
+    com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.opendedup.grpc.FileInfo.getDescriptor(),
-        });
+        }, assigner);
     internal_static_org_opendedup_grpc_SDFSEvent_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_org_opendedup_grpc_SDFSEvent_fieldAccessorTable = new

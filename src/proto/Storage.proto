@@ -10,20 +10,61 @@ message CheckHashesRequest {
   int64 pvolumeID =2;
 }
 
+message RestoreArchivesRequest {
+  string filePath =1;
+  int64 pvolumeID =2;
+}
+
+message RestoreArchivesResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+  string eventID = 3;
+}
+
 message CheckHashesResponse {
   repeated int64 locations = 1;
   string error = 2;
   errorCodes errorCode = 3;
 }
 
+message FileReplicationRequest {
+  string srcFilePath =1;
+  string dstFilePath = 2;
+  int64 pvolumeID =3;
+  int64 rvolumeID = 4;
+  string url =5;
+  bool mtls = 6;
+}
+
+message FileReplicationResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+  string eventID = 3;
+}
+
+
 message MetaDataDedupeFileRequest {
   string filePath =1;
   int64 pvolumeID =2;
 }
 
+message MetaDataDedupeFileResponse {
+  FileInfoResponse file =1;
+  errorCodes errorCode = 2;
+  string error = 3;
+  string eventID = 4;
+}
+
+
 message SparseDedupeFileRequest {
   string guid =1;
   int64 pvolumeID =2;
+}
+
+message SparseDedupeFileResponse {
+  repeated SparseDataChunkP chunks = 1;
+  errorCodes errorCode = 2;
+  string error = 3;
 }
 
 message ChunkResponse {
@@ -31,6 +72,7 @@ message ChunkResponse {
   int32 len =2;
   string error = 3;
   errorCodes errorCode = 4;
+  bool compressed = 5;
 }
 
 message ChunkEntry {
@@ -38,6 +80,9 @@ message ChunkEntry {
   bytes data = 2;
   bool compressed = 3;
   int32 compressedLength = 4;
+  int64 location = 5;
+  errorCodes errorCode = 6;
+  string error = 7;
 }
 
 message WriteChunksRequest {
@@ -53,13 +98,9 @@ message WriteChunksResponse {
 }
 
 
-message ReadChunksRequest {
+message GetChunksRequest {
   repeated ChunkEntry chunks= 1;
   int64 pvolumeID =2;
-}
-
-message ReadChunksResponse {
-  repeated ChunkEntry chunks= 1;
 }
 
 
@@ -85,6 +126,29 @@ enum SparseDataFlags {
   RECONSTRUCTED = 0;
 }
 
+message PauseReplicationRequest {
+  string eventID = 1;
+  bool pause =2;
+  int64 pvolumeID =3;
+}
+
+message PauseReplicationResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
+message CancelReplicationRequest {
+  string eventID = 1;
+  int64 pvolumeID =2;
+}
+
+message CancelReplicationResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
+
+
 message SparseDataChunkP {
   int64 fpos = 1;
   int32 len =2;
@@ -94,6 +158,8 @@ message SparseDataChunkP {
   int32 doop = 6;
   int32 prevdoop = 7;
   int32 compressedLength = 8;
+  string error = 9;
+  errorCodes errorCode = 10;
 }
 
 message SparseDedupeChunkWriteRequest {
@@ -133,7 +199,6 @@ message HashingInfoResponse {
   int32 mapVersion = 7;
   string error = 8;
   errorCodes errorCode = 9;
-
 }
 
 message InsertRecord {
@@ -153,9 +218,13 @@ service StorageService {
   rpc HashingInfo(HashingInfoRequest) returns (HashingInfoResponse);
   rpc CheckHashes(CheckHashesRequest) returns (CheckHashesResponse);
   rpc WriteChunks(WriteChunksRequest) returns (WriteChunksResponse);
-  rpc ReadChunks(ReadChunksRequest) returns (ReadChunksResponse);
+  rpc GetChunks(GetChunksRequest) returns (stream ChunkEntry);
   rpc WriteSparseDataChunk(SparseDedupeChunkWriteRequest) returns (SparseDedupeChunkWriteResponse);
   rpc ReadSparseDataChunk(SparseDedupeChunkReadRequest) returns (SparseDedupeChunkReadResponse);
-  rpc GetMetaDataDedupeFile(MetaDataDedupeFileRequest) returns(stream ChunkResponse);
-  rpc GetSparseDedupeFile(SparseDedupeFileRequest) returns(stream ChunkResponse);
+  rpc GetMetaDataDedupeFile(MetaDataDedupeFileRequest) returns(MetaDataDedupeFileResponse);
+  rpc GetSparseDedupeFile(SparseDedupeFileRequest) returns(stream SparseDataChunkP);
+  rpc ReplicateRemoteFile(FileReplicationRequest) returns(FileReplicationResponse);
+  rpc RestoreArchives(RestoreArchivesRequest) returns(RestoreArchivesResponse);
+  rpc CancelReplication(CancelReplicationRequest) returns(CancelReplicationResponse);
+  rpc PauseReplication(PauseReplicationRequest) returns(PauseReplicationResponse);
 }

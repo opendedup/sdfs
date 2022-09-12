@@ -130,6 +130,18 @@ public class SDFSEvent implements java.io.Serializable {
 		this.level = level;
 	}
 
+	protected SDFSEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt) {
+		this.type = new Type(evt.getType());
+		this.target = evt.getTarget();
+		this.startTime = evt.getStartTime();
+		this.shortMsg = evt.getShortMsg();
+		this.uid = evt.getUuid();
+		synchronized (tasks) {
+			tasks.put(uid, this);
+		}
+		this.level = new Level(evt.getLevel());
+	}
+
 	public void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
@@ -695,6 +707,18 @@ public class SDFSEvent implements java.io.Serializable {
 		public String toString() {
 			return this.type;
 		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) {
+				return true;
+			}
+			if (!(obj instanceof Level)) {
+				return false;
+			}
+			Level c = (Level) obj;
+			return c.type.equalsIgnoreCase(this.type);
+		}
 	}
 
 	public static class Type implements java.io.Serializable {
@@ -711,6 +735,18 @@ public class SDFSEvent implements java.io.Serializable {
 		@Override
 		public String toString() {
 			return this.type;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == this) {
+				return true;
+			}
+			if (!(obj instanceof Type)) {
+				return false;
+			}
+			Type c = (Type) obj;
+			return c.type.equalsIgnoreCase(this.type);
 		}
 	}
 
