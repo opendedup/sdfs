@@ -39,6 +39,8 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.mgmt.CloseFile;
+import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl;
 import org.opendedup.sdfs.mgmt.grpc.tls.DynamicTrustManager;
 import org.opendedup.sdfs.mgmt.grpc.tls.WatchForFile;
 import org.opendedup.sdfs.notification.ReplicationImportEvent;
@@ -51,8 +53,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
-import org.opendedup.collections.LongKeyValue;
 
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -99,7 +101,7 @@ public class ReplicationClient {
         int port = Integer.parseInt(target.split(":")[1]);
         int maxMsgSize = 240 * 1024 * 1024;
         if (mtls || tls) {
-            
+
             channel = NettyChannelBuilder.forAddress(host, port)
                     .negotiationType(NegotiationType.TLS).maxInboundMessageSize(maxMsgSize)
                     .sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath)
@@ -207,6 +209,7 @@ public class ReplicationClient {
                     MetaDataDedupFile mf = downloadMetaFile();
                     evt.addCount(1);
                     if (this.evt.canceled) {
+                        mf.deleteStub(false);
                         throw new ReplicationCanceledException("Replication Canceled");
                     }
                     if (this.evt.paused) {
@@ -215,22 +218,24 @@ public class ReplicationClient {
                         }
                     }
                     evt.shortMsg = "Importing map for " + this.dstFile;
-                    String ng = downloadDDB(mf.getDfGuid());
+                    String sguid = mf.getDfGuid();
+                    String ng = UUID.randomUUID().toString();
+                    mf.setLength(0, true);
                     mf.setDfGuid(ng);
                     mf.sync();
+                    try {
+                        downloadDDB(mf,sguid);
+                        FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
+                        CloseFile.close(mf, true);
+                    } catch (ReplicationCanceledException e) {
+                        FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+                        MetaFileStore.getMF(mf.getAbsolutePath()).clearRetentionLock();
+                        MetaFileStore.removeMetaFile(mf.getPath(), false, false, true);
+                        SDFSLogger.getLog().warn(e);
+                        return;
+                    }
                     MetaFileStore.removedCachedMF(mf.getPath());
                     MetaFileStore.addToCache(mf);
-
-                    evt.addCount(1);
-                    if (this.evt.canceled) {
-                        throw new ReplicationCanceledException("Replication Canceled");
-                    }
-                    if (this.evt.paused) {
-                        while (this.evt.paused) {
-                            Thread.sleep(1000);
-                        }
-                    }
-                    this.checkDedupFile(mf);
                     evt.addCount(1);
                     evt.endEvent("Import Successful for " + this.dstFile, SDFSEvent.INFO);
                 } catch (ReplicationCanceledException e) {
@@ -271,7 +276,7 @@ public class ReplicationClient {
 
         }
 
-        private String downloadDDB(String guid) throws Exception {
+        private void downloadDDB(MetaDataDedupFile mf, String guid) throws Exception {
             if (this.evt.canceled) {
                 throw new ReplicationCanceledException("Replication Canceled");
             }
@@ -280,12 +285,12 @@ public class ReplicationClient {
                     Thread.sleep(1000);
                 }
             }
-            SDFSLogger.getLog().info("getting " + guid);
             SparseDedupeFileRequest req = SparseDedupeFileRequest.newBuilder()
                     .setPvolumeID(this.client.volumeid).setGuid(guid).build();
             Iterator<SparseDataChunkP> crs = this.client.storageBlockingStub.getSparseDedupeFile(req);
-            String ng = UUID.randomUUID().toString();
-            LongByteArrayMap mp = LongByteArrayMap.getMap(ng);
+            
+            LongByteArrayMap mp = LongByteArrayMap.getMap(mf.getDfGuid());
+            mf.getIOMonitor().clearFileCounters(false);
             while (crs.hasNext()) {
                 if (this.evt.canceled) {
                     throw new ReplicationCanceledException("Replication Canceled");
@@ -303,135 +308,87 @@ public class ReplicationClient {
                     throw new IOException(msg);
 
                 }
-                mp.put(cr.getFpos(), new SparseDataChunk(cr));
-
+                SparseDataChunk ck = importSparseDataChunk( new SparseDataChunk(cr), mf);
+                mp.put(ck.getFpos(), ck);
+                mf.setLength(ck.getFpos() + ck.len, false);
             }
-            mp.close();
-            return ng;
-
+            mp.forceClose();
         }
 
-        private void checkDedupFile(MetaDataDedupFile mf) throws IOException {
+        private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf) throws IOException, HashtableFullException {
 
-            evt.shortMsg = "Importing hashes for file";
-            SDFSLogger.getLog().info("Importing " + mf.getDfGuid());
-            LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid());
-            ddb.forceClose();
-            ddb = LongByteArrayMap.getMap(mf.getDfGuid());
-            ddb.setIndexed(true);
-            mf.getIOMonitor().clearFileCounters(false);
-            if (ddb.getVersion() < 2)
-                throw new IOException("only files version 2 or later can be imported");
-            try {
-                ddb.iterInit();
-                for (;;) {
-                    if (this.evt.canceled) {
-                        throw new ReplicationCanceledException("Replication Canceled");
-                    }
-                    if (this.evt.paused) {
-                        while (this.evt.paused) {
-                            Thread.sleep(1000);
-                        }
-                    }
-                    LongKeyValue kv = ddb.nextKeyValue(false);
-                    if (kv == null)
-                        break;
-                    SparseDataChunk ck = kv.getValue();
-                    TreeMap<Integer, HashLocPair> al = ck.getFingers();
-                    HashMap<ByteString, ChunkEntry> ces = new HashMap<ByteString, ChunkEntry>();
-                    HashMap<ByteString, CtLoc> claims = new HashMap<ByteString, CtLoc>();
-                    Builder b = GetChunksRequest.newBuilder();
-                    b.setPvolumeID(client.volumeid);
-                    for (HashLocPair p : al.values()) {
-                        long pos = HCServiceProxy.hashExists(p.hash);
-                        ByteString bs = ByteString.copyFrom(p.hash);
-                        if (!claims.containsKey(bs)) {
-                            CtLoc ctl = new CtLoc();
-                            ctl.ct = 0;
-                            ctl.loc = pos;
-                            claims.put(bs, ctl);
-                        }
-                        CtLoc ctl = claims.get(bs);
-                        ctl.ct++;
-                        if (pos == -1) {
-                            claims.get(bs).newdata = true;
-                            ChunkEntry ce = ChunkEntry.newBuilder().setHash(bs).build();
-                            ces.put(bs, ce);
-                            b.addChunks(ce);
-
-                        } else {
-                            mf.getIOMonitor().addDulicateData(p.nlen, false);
-                        }
-
-                    }
-                    GetChunksRequest sreq = b.build();
-                    if (this.evt.canceled) {
-                        throw new ReplicationCanceledException("Replication Canceled");
-                    }
-                    if (this.evt.paused) {
-                        while (this.evt.paused) {
-                            Thread.sleep(1000);
-                        }
-                    }
-                    Iterator<ChunkEntry> rces = this.client.storageBlockingStub.getChunks(sreq);
-
-
-                    while (rces.hasNext()) {
-                        ChunkEntry ce = rces.next();
-                        if (ce.getErrorCode() == errorCodes.EARCHIVEIO) {
-                            this.restoreArchives(mf);
-                        } else if (ce.getErrorCode() != errorCodes.NOERR) {
-                            String msg = "error code returned :" + ce.getErrorCode() +
-                                    " message : " + ce.getError();
-                            SDFSLogger.getLog().warn(msg);
-                            throw new IOException(msg);
-                        }
-                        byte[] dt = ce.getData().toByteArray();
-                        //SDFSLogger.getLog().info("dt len " + dt.length + " dt = " + new String(dt));
-                       
-                        ChunkData cd = new ChunkData(ce.getHash().toByteArray(), dt.length, dt, mf.getDfGuid());
-                        cd.references = claims.get(ce.getHash()).ct;
-                        InsertRecord ir = HCServiceProxy.getHashesMap().put(cd, true);
-                        claims.get(ce.getHash()).loc = Longs.fromByteArray(ir.getHashLocs());
-                        if (claims.get(ce.getHash()).loc == -1) {
-                            throw new IOException(
-                                    "Hash not found for " + StringUtils.getHexString(ce.getHash().toByteArray()));
-                        }
-                        mf.getIOMonitor().addActualBytesWritten(ir.getCompressedLength(), false);
-                    }
-                    for (HashLocPair p : al.values()) {
-                        ByteString bs = ByteString.copyFrom(p.hash);
-                        CtLoc ctl = claims.get(bs);
-                        if (!ctl.newdata) {
-                            ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc), p.hash);
-                            cm.references = ctl.ct;
-                            InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
-                            if (ir.getInserted()) {
-                                throw new IOException(
-                                        "Hash Invalid state found for " + StringUtils.getHexString(p.hash));
-                            }
-                            ctl.loc = Longs.fromByteArray(ir.getHashLocs());
-                        }
-                        p.hashloc = Longs.toByteArray(ctl.loc);
-                        mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
-                    }
-                    ddb.put(kv.getKey(), ck);
+            TreeMap<Integer, HashLocPair> al = ck.getFingers();
+            HashMap<ByteString, ChunkEntry> ces = new HashMap<ByteString, ChunkEntry>();
+            HashMap<ByteString, CtLoc> claims = new HashMap<ByteString, CtLoc>();
+            Builder b = GetChunksRequest.newBuilder();
+            b.setPvolumeID(client.volumeid);
+            for (HashLocPair p : al.values()) {
+                long pos = HCServiceProxy.hashExists(p.hash);
+                ByteString bs = ByteString.copyFrom(p.hash);
+                if (!claims.containsKey(bs)) {
+                    CtLoc ctl = new CtLoc();
+                    ctl.ct = 0;
+                    ctl.loc = pos;
+                    claims.put(bs, ctl);
                 }
+                CtLoc ctl = claims.get(bs);
+                ctl.ct++;
+                if (pos == -1) {
+                    claims.get(bs).newdata = true;
+                    ChunkEntry ce = ChunkEntry.newBuilder().setHash(bs).build();
+                    ces.put(bs, ce);
+                    b.addChunks(ce);
 
-                
-            } catch (Throwable e) {
-                SDFSLogger.getLog().warn("error while checking file [" + ddb + "]", e);
-                throw new IOException(e);
-            } finally {
-                try {
-                    ddb.forceClose();
-                } catch (Exception e) {
-                    SDFSLogger.getLog().warn("error closing file [" + mf.getPath() + "]", e);
+                } else {
+                    mf.getIOMonitor().addDulicateData(p.nlen, false);
                 }
 
             }
-            SDFSLogger.getLog().info("Done Importing " + mf.getDfGuid());
-            evt.addCount(1);
+            GetChunksRequest sreq = b.build();
+            Iterator<ChunkEntry> rces = this.client.storageBlockingStub.getChunks(sreq);
+
+            while (rces.hasNext()) {
+                ChunkEntry ce = rces.next();
+                if (ce.getErrorCode() == errorCodes.EARCHIVEIO) {
+                    this.restoreArchives(mf);
+                } else if (ce.getErrorCode() != errorCodes.NOERR) {
+                    String msg = "error code returned :" + ce.getErrorCode() +
+                            " message : " + ce.getError();
+                    SDFSLogger.getLog().warn(msg);
+                    throw new IOException(msg);
+                }
+                byte[] dt = ce.getData().toByteArray();
+                // SDFSLogger.getLog().info("dt len " + dt.length + " dt = " + new String(dt));
+                //HashFunction hf = Hashing.sha256();
+                //SDFSLogger.getLog().info(StringUtils.getHexString(hf.hashBytes(dt).asBytes()) + 
+                //" = " + StringUtils.getHexString(ce.getHash().toByteArray()));
+                ChunkData cd = new ChunkData(ce.getHash().toByteArray(), dt.length, dt, mf.getDfGuid());
+                cd.references = claims.get(ce.getHash()).ct;
+                InsertRecord ir = HCServiceProxy.getHashesMap().put(cd, true);
+                claims.get(ce.getHash()).loc = Longs.fromByteArray(ir.getHashLocs());
+                if (claims.get(ce.getHash()).loc == -1) {
+                    throw new IOException(
+                            "Hash not found for " + StringUtils.getHexString(ce.getHash().toByteArray()));
+                }
+                mf.getIOMonitor().addActualBytesWritten(ir.getCompressedLength(), false);
+            }
+            for (HashLocPair p : al.values()) {
+                ByteString bs = ByteString.copyFrom(p.hash);
+                CtLoc ctl = claims.get(bs);
+                if (!ctl.newdata) {
+                    ChunkData cm = new ChunkData(Longs.fromByteArray(p.hashloc), p.hash);
+                    cm.references = ctl.ct;
+                    InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
+                    if (ir.getInserted()) {
+                        throw new IOException(
+                                "Hash Invalid state found for " + StringUtils.getHexString(p.hash));
+                    }
+                    ctl.loc = Longs.fromByteArray(ir.getHashLocs());
+                }
+                p.hashloc = Longs.toByteArray(ctl.loc);
+                mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
+            }
+            return ck;
         }
 
         private void restoreArchives(MetaDataDedupFile mf) throws IOException {

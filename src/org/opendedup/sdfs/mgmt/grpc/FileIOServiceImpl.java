@@ -724,7 +724,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
                     if (diff_period >= main_period || diff_period < 1) {
                         try {
-                            SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + f.getPath());
+                            SDFSLogger.getLog().debug("Unlink::chattr set non-Immutable file: " + f.getPath());
                             ImmuteLinuxFDFileFile(f.getPath(), false);
                             MetaFileStore.getMF(f).clearRetentionLock();
                             if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
@@ -889,7 +889,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         }
     }
 
-    public void ImmuteLinuxFDFileFile(String filePath, Boolean isImmutable) {
+    public static void ImmuteLinuxFDFileFile(String filePath, Boolean isImmutable) {
         if (OSValidator.isUnix()) {
             String strCommand = "";
             if (filePath != null && !filePath.isEmpty()) {
