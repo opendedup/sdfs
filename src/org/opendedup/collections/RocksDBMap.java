@@ -98,7 +98,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	private AtomicLong nrmct = new AtomicLong();
 	private AtomicLong trmct = new AtomicLong();
 	private AtomicLong tnrmct = new AtomicLong();
-	//private AtomicLong szct = new AtomicLong();
+	// private AtomicLong szct = new AtomicLong();
 
 	static {
 		RocksDB.loadLibrary();
@@ -435,7 +435,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						rmdb.put(this.rmdbHsAr, key, _rbk.array());
 						getDB(hash).delete(hash);
 						rmct.incrementAndGet();
-						//this.szct.decrementAndGet();
+						// this.szct.decrementAndGet();
 					} else {
 						if (rmdb.get(this.rmdbHsAr, key) != null) {
 							rmdb.delete(this.rmdbHsAr, key);
@@ -448,7 +448,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 						}
 						nrmct.incrementAndGet();
 						getDB(hash).put(wo, hash, v);
-						//this.szct.incrementAndGet();
+						// this.szct.incrementAndGet();
 					}
 					return oval;
 				} else {
@@ -477,7 +477,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 								} else {
 									this.armdb.put(this.armdbHsAr, hash, _val);
 								}
-								//this.abdt.decrementAndGet();
+								// this.abdt.decrementAndGet();
 
 							} else {
 								if (rmdb.get(this.rmdbHsAr, key) != null) {
@@ -590,35 +590,44 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 
 	@Override
 	public long getSize() {
-		
-		  try {
-		  long sz = 0;
-		  for (RocksDB db : dbs) {
-		  sz += db.getLongProperty("rocksdb.estimate-num-keys");
-		  }
-		  sz +=this.tempHt.size();
-		  return sz;
-		  } catch (RocksDBException e) {
-		  SDFSLogger.getLog().error("unable to get lenght for rocksdb", e);
-		  return 0;
-		  }
+		this.syncLock.lock();
+		try {
+			if (!this.closed) {
+
+				try {
+					long sz = 0;
+					for (RocksDB db : dbs) {
+						sz += db.getLongProperty("rocksdb.estimate-num-keys");
+					}
+					sz += this.tempHt.size();
+					return sz;
+				} catch (RocksDBException e) {
+					SDFSLogger.getLog().error("unable to get lenght for rocksdb", e);
+					return 0;
+				}
+			} else {
+				return 0;
+			}
+		} finally {
+			this.syncLock.unlock();
+		}
 	}
 
 	@Override
 	public long getUsedSize() {
-		//return this.szct.get();
-		
-		 try {
-		 long sz = 0;
-		 for (RocksDB db : dbs) {
-		 sz += db.getLongProperty("rocksdb.estimate-num-keys");
-		 }
-		 return sz + tempHt.size();
-		 } catch (RocksDBException e) {
-		 SDFSLogger.getLog().error("unable to get lenght for rocksdb", e);
-		 return 0;
-		 }
-		 
+		// return this.szct.get();
+
+		try {
+			long sz = 0;
+			for (RocksDB db : dbs) {
+				sz += db.getLongProperty("rocksdb.estimate-num-keys");
+			}
+			return sz + tempHt.size();
+		} catch (RocksDBException e) {
+			SDFSLogger.getLog().error("unable to get lenght for rocksdb", e);
+			return 0;
+		}
+
 	}
 
 	@Override
@@ -806,7 +815,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					bk.putLong(8, ct);
 					this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bk);
 					cm.setcPos(pos);
-					return new InsertRecord(false, pos,0);
+					return new InsertRecord(false, pos, 0);
 				}
 			} finally {
 				l.unlock();
@@ -846,7 +855,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							bk.putLong(8, ct);
 							cm.setcPos(pos);
 							this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bk);
-							return new InsertRecord(false, pos,0);
+							return new InsertRecord(false, pos, 0);
 						} else if (db.get(cm.getHash()) != null) {
 							return this.put(cm, true);
 						} else {
@@ -859,7 +868,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 								bf.putLong(cm.references);
 							this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bf);
 							// this.rmdb.delete(cm.getHash());
-							return new InsertRecord(true, cm.getcPos(),writtenLen);
+							return new InsertRecord(true, cm.getcPos(), writtenLen);
 						}
 					}
 				} finally {
@@ -883,10 +892,10 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							ByteBuffer _nbf = this.addArRef(ByteBuffer.wrap(arVal), v);
 							armdb.put(this.armdbHsAr, cm.getHash(), _nbf.array());
 						}
-						//abdt.incrementAndGet();
+						// abdt.incrementAndGet();
 
 						this.getDB(cm.getHash()).delete(cm.getHash());
-						//this.szct.decrementAndGet();
+						// this.szct.decrementAndGet();
 						return this.put(cm, persist);
 					}
 				}
@@ -898,7 +907,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				cm.setcPos(pos);
 				bk.putLong(8, ct);
 				db.put(wo, cm.getHash(), v);
-				return new InsertRecord(false, pos,0);
+				return new InsertRecord(false, pos, 0);
 			} finally {
 				l.unlock();
 			}
@@ -946,7 +955,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		throw new IOException("not implemented");
 	}
 
-	//AtomicLong abdt = new AtomicLong();
+	// AtomicLong abdt = new AtomicLong();
 
 	@Override
 	public long get(byte[] key) throws IOException {
@@ -979,9 +988,9 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 								ByteBuffer _nbf = this.addArRef(ByteBuffer.wrap(arVal), v);
 								armdb.put(this.armdbHsAr, key, _nbf.array());
 							}
-							//abdt.incrementAndGet();
+							// abdt.incrementAndGet();
 							this.getDB(key).delete(key);
-							//this.szct.decrementAndGet();
+							// this.szct.decrementAndGet();
 
 							return this.get(key);
 						}
@@ -1259,7 +1268,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 									valb.put(bf.array());
 									valb.putLong(System.currentTimeMillis());
 									db.put(m.owo, b, valb.array());
-									//m.szct.incrementAndGet();
+									// m.szct.incrementAndGet();
 								}
 								m.tempHt.remove(new ByteArrayWrapper(b));
 							} catch (Exception e) {
