@@ -617,15 +617,23 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 	public long getUsedSize() {
 		// return this.szct.get();
 
+		this.syncLock.lock();
 		try {
-			long sz = 0;
-			for (RocksDB db : dbs) {
-				sz += db.getLongProperty("rocksdb.estimate-num-keys");
+			if (!this.closed) {
+				long sz = 0;
+				for (RocksDB db : dbs) {
+					sz += db.getLongProperty("rocksdb.estimate-num-keys");
+				}
+				return sz + tempHt.size();
+			} else {
+				return 0;
 			}
-			return sz + tempHt.size();
+
 		} catch (RocksDBException e) {
 			SDFSLogger.getLog().error("unable to get lenght for rocksdb", e);
 			return 0;
+		} finally {
+			this.syncLock.unlock();
 		}
 
 	}
