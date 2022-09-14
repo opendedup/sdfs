@@ -1109,6 +1109,10 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			// CommandLineProgressBar bar = new CommandLineProgressBar("Closing Hash
 			// Tables", dbs.length + 2, System.out);
 			// int i = 0;
+			for (Lock l : lockMap) {
+				l.lock();
+			}
+
 			for (RocksDB db : dbs) {
 
 				try {
@@ -1116,14 +1120,18 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 					op.setWaitForFlush(true);
 					db.flush(op);
 					db.close();
+					db = null;
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn("While closing hashtable ", e);
 				}
 				// bar.update(i);
 				// i++;
 			}
+			dbs = null;
 			try {
 				this.rmdb.flush(new FlushOptions());
+				this.rmdb.close();
+				this.rmdb = null;
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("While closing hashtable ", e);
 			}
@@ -1131,8 +1139,12 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			// i++;
 			try {
 				this.armdb.flush(new FlushOptions(), this.armdbHsAr);
+				this.armdb = null;
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("While closing hashtable ", e);
+			}
+			for (Lock l : lockMap) {
+				l.unlock();
 			}
 			// bar.update(i);
 			// i++;
@@ -1262,27 +1274,32 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							SDFSLogger.getLog().debug(
 									"archive id [" + evt.getID() + "] does not equal hashtable id[" + oval + "]");
 						} else {
-							RocksDB db = m.getDB(b);
-							byte[] v = null;
-							try {
-								v = db.get(b);
-								if (v != null) {
+							if (m.closed) {
+								SDFSLogger.getLog().info("Unable to sync " + evt.getID() + " during shutdown ");
+							} else {
+								RocksDB db = m.getDB(b);
+								byte[] v = null;
+								try {
+									v = db.get(b);
+									if (v != null) {
+										m.tempHt.remove(new ByteArrayWrapper(b));
+										throw new Exception(
+												"Persistent Hashtable already has an entry that exists in the temp hashtable");
+									} else {
+										ByteBuffer valb = ByteBuffer.wrap(new byte[bf.array().length + 8]);
+										valb.position(0);
+										valb.put(bf.array());
+										valb.putLong(System.currentTimeMillis());
+										db.put(m.owo, b, valb.array());
+										// m.szct.incrementAndGet();
+									}
 									m.tempHt.remove(new ByteArrayWrapper(b));
-									throw new Exception(
-											"Persistent Hashtable already has an entry that exists in the temp hashtable");
-								} else {
-									ByteBuffer valb = ByteBuffer.wrap(new byte[bf.array().length + 8]);
-									valb.position(0);
-									valb.put(bf.array());
-									valb.putLong(System.currentTimeMillis());
-									db.put(m.owo, b, valb.array());
-									// m.szct.incrementAndGet();
-								}
-								m.tempHt.remove(new ByteArrayWrapper(b));
-							} catch (Exception e) {
-								SDFSLogger.getLog().warn(
-										"unable to commit " + StringUtils.getHexString(b) + " id=" + evt.getID(), e);
+								} catch (Exception e) {
+									SDFSLogger.getLog().warn(
+											"unable to commit " + StringUtils.getHexString(b) + " id=" + evt.getID(),
+											e);
 
+								}
 							}
 						}
 					} else {
