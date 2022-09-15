@@ -33,6 +33,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.google.common.eventbus.EventBus;
 
+
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
@@ -128,6 +129,22 @@ public class SDFSEvent implements java.io.Serializable {
 			tasks.put(uid, this);
 		}
 		this.level = level;
+	}
+
+	public SDFSEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent pevt) {
+		this.type = new Type(pevt.getType());
+		this.target = pevt.getTarget();
+		this.startTime = pevt.getStartTime();
+		this.endTime = pevt.getEndTime();
+		this.shortMsg = pevt.getShortMsg();
+		this.longMsg = pevt.getLongMsg();
+		this.level = new Level(pevt.getLevel());
+		this.maxCt.set(pevt.getMaxCount());
+		this.curCt.set(pevt.getCurrentCount());
+		this.uid = pevt.getUuid();
+		this.extendedInfo = pevt.getExtendedInfo();
+		this.success = pevt.getSuccess();
+		this.puid = pevt.getParentUuid();
 	}
 
 	public void registerListener(Object obj) {

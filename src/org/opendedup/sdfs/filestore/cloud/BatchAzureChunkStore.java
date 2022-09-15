@@ -67,11 +67,13 @@ import org.opendedup.sdfs.filestore.AbstractBatchStore;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
+import org.opendedup.sdfs.filestore.SDFSDeleteEntry;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.azure.BlobDataIO;
 import org.opendedup.sdfs.filestore.cloud.azure.BlobDataTracker;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
@@ -98,7 +100,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private String name;
 
 	OperationContext opContext = new OperationContext();
-	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
+	private HashMap<Long, SDFSDeleteEntry> deletes = new HashMap<Long, SDFSDeleteEntry>();
 	boolean closed = false;
 	boolean move_blob = false;
 	boolean deleteUnclaimed = true;
@@ -228,15 +230,15 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private ReentrantLock delLock = new ReentrantLock();
 
 	@Override
-	public void deleteChunk(byte[] hash, long start, int len) throws IOException {
+	public void deleteChunk(byte[] hash, long start, int len, SDFSEvent evt) throws IOException {
 		delLock.lock();
 		try {
 			// SDFSLogger.getLog().info("deleting " + del);
 			if (this.deletes.containsKey(start)) {
-				int sz = this.deletes.get(start) + 1;
-				this.deletes.put(start, sz);
+				this.deletes.get(start).ct += 1;
+				this.deletes.get(start).evt = evt;
 			} else
-				this.deletes.put(start, 1);
+				this.deletes.put(start, new SDFSDeleteEntry(1, evt));
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error putting data", e);
@@ -1114,10 +1116,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					long rcsz = 0;
 					long rsz = 0;
 					long ct = 0;
-					HashMap<Long, Integer> odel = null;
+					HashMap<Long, SDFSDeleteEntry> odel = null;
 					try {
 						odel = this.deletes;
-						this.deletes = new HashMap<Long, Integer>();
+						this.deletes = new HashMap<Long, SDFSDeleteEntry>();
 						// SDFSLogger.getLog().info("delete hash table size of "
 						// + odel.size());
 					} finally {
@@ -1144,7 +1146,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 									delobj = Integer.parseInt((String) metaData.get("deletedobjects"));
 								// SDFSLogger.getLog().info("remove requests for " +
 								// hashString + "=" + odel.get(k));
-								delobj = delobj + odel.get(k);
+								delobj = delobj + odel.get(k).ct;
 								if (objs <= delobj) {
 									int size = Integer.parseInt((String) metaData.get("size"));
 									int compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
@@ -1207,8 +1209,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 							try {
 								// SDFSLogger.getLog().info("deleting " + del);
 								if (this.deletes.containsKey(k)) {
-									int sz = this.deletes.get(k) + odel.get(k);
-									this.deletes.put(k, sz);
+									int sz = this.deletes.get(k).ct + odel.get(k).ct;
+									this.deletes.get(k).ct = sz;
 								} else
 									this.deletes.put(k, odel.get(k));
 
@@ -1220,6 +1222,13 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 							// pool.returnObject(container);
 						}
 					}
+					for (SDFSDeleteEntry entry : odel.values()) {
+						if (entry.evt.endTime <=0){
+						entry.evt.endEvent();
+						}
+
+					}
+
 
 				}
 			} catch (InterruptedException e) {

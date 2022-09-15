@@ -697,7 +697,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							}
 							if (!recovered) {
 								ChunkData ck = new ChunkData(pos, hash);
-								ck.setmDelete(true);
+								ck.setmDelete(true,evt);
 								rmdb.delete(this.rmdbHsAr, key);
 								dct++;
 							}
