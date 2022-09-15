@@ -120,8 +120,8 @@ public class ManualGC {
 				}
 				Main.firstRun = false;
 			}
-			evt.endEvent("SDFS Volume Cleanup Finished for "
-					+ Main.volume.getName());
+			//evt.endEvent("SDFS Volume Cleanup Finished for "
+			//		+ Main.volume.getName());
 			return rm;
 		} finally {
 			l.unlock();

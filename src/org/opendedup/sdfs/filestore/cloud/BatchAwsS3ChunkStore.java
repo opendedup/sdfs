@@ -140,10 +140,12 @@ import org.opendedup.sdfs.filestore.AbstractBatchStore;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
+import org.opendedup.sdfs.filestore.SDFSDeleteEntry;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.gcp.GCPSessionCredentials;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
@@ -166,7 +168,7 @@ import org.w3c.dom.Element;
 @SuppressWarnings("deprecation")
 public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
 	private BasicAWSCredentials awsCredentials = null;
-	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
+	private HashMap<Long, SDFSDeleteEntry> deletes = new HashMap<Long, SDFSDeleteEntry>();
 	private HashSet<Long> refresh = new HashSet<Long>();
 	private String name;
 	private Region bucketLocation = null;
@@ -367,15 +369,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private ReentrantLock delLock = new ReentrantLock();
 
 	@Override
-	public void deleteChunk(byte[] hash, long start, int len) throws IOException {
-		delLock.lock();
+	public void deleteChunk(byte[] hash, long start, int len, SDFSEvent evt) throws IOException {
 		try {
+			// SDFSLogger.getLog().info("deleting " + del);
 			if (this.deletes.containsKey(start)) {
-				int sz = this.deletes.get(start) + 1;
-				this.deletes.put(start, sz);
+				this.deletes.get(start).ct += 1;
+				this.deletes.get(start).evt = evt;
 			} else
-				this.deletes.put(start, 1);
+				this.deletes.put(start, new SDFSDeleteEntry(1, evt));
 
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("error putting data", e);
+			throw new IOException(e);
 		} finally {
 			delLock.unlock();
 		}
@@ -1698,10 +1703,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						ThreadPoolExecutor executor = new ThreadPoolExecutor(1, Main.dseIOThreads, 10, TimeUnit.SECONDS,
 								worksQueue, new ThreadPoolExecutor.CallerRunsPolicy());
 						this.delLock.lock();
-						HashMap<Long, Integer> odel = null;
+						HashMap<Long, SDFSDeleteEntry> odel = null;
 						try {
 							odel = this.deletes;
-							this.deletes = new HashMap<Long, Integer>();
+							this.deletes = new HashMap<Long, SDFSDeleteEntry>();
 							// SDFSLogger.getLog().info("delete hash table size of "
 							// + odel.size());
 						} finally {
@@ -1718,6 +1723,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						executor.shutdown();
 						while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
 							SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
+						}
+						for (SDFSDeleteEntry entry : odel.values()) {
+							if (entry.evt.endTime <=0){
+							entry.evt.endEvent();
+							}
+	
 						}
 						SDFSLogger.getLog().info("done running garbage collection");
 					}
@@ -3162,7 +3173,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private static class DeleteObject implements Runnable {
 		BatchAwsS3ChunkStore st = null;
 		Long k;
-		HashMap<Long, Integer> odel = null;
+		HashMap<Long, SDFSDeleteEntry> odel = null;
 
 		@Override
 		public void run() {
@@ -3190,7 +3201,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							delobj = Integer.parseInt((String) mp.get("deleted-objects"));
 						// SDFSLogger.getLog().info("remove requests for " +
 						// hashString + "=" + odel.get(k));
-						delobj = delobj + odel.get(k);
+						delobj = delobj + odel.get(k).ct;
 						// SDFSLogger.getLog().info("deleting " +
 						// hashString);
 						mp.put("deleted", "true");

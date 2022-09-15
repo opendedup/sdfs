@@ -22,6 +22,7 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.cloud.MultiDownload;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.DeleteDir;
 import org.opendedup.util.StorageUnit;
 import org.opendedup.util.StringUtils;
@@ -46,7 +47,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	boolean compress = false;
 	boolean encrypt = false;
 
-	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
+	private HashMap<Long, SDFSDeleteEntry> deletes = new HashMap<Long, SDFSDeleteEntry>();
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
 	File staged_sync_location = new File(Main.chunkStore + File.separator + "syncstaged");
@@ -157,16 +158,16 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	int del = 0;
 
 	@Override
-	public void deleteChunk(byte[] hash, long start, int len) throws IOException {
+	public void deleteChunk(byte[] hash, long start, int len, SDFSEvent evt) throws IOException {
 		delLock.lock();
 		try {
 			del++;
 			// SDFSLogger.getLog().info("deleting " + del);
 			if (this.deletes.containsKey(start)) {
-				int sz = this.deletes.get(start) + 1;
-				this.deletes.put(start, sz);
+				this.deletes.get(start).ct += 1;
+				this.deletes.get(start).evt = evt;
 			} else
-				this.deletes.put(start, 1);
+				this.deletes.put(start, new SDFSDeleteEntry(1, evt));
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error putting data", e);
@@ -413,10 +414,10 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 				}
 				if (this.deletes.size() > 0) {
 					this.delLock.lock();
-					HashMap<Long, Integer> odel = null;
+					HashMap<Long, SDFSDeleteEntry> odel = null;
 					try {
 						odel = this.deletes;
-						this.deletes = new HashMap<Long, Integer>();
+						this.deletes = new HashMap<Long, SDFSDeleteEntry>();
 						// SDFSLogger.getLog().info("delete hash table size of "
 						// + odel.size());
 					} finally {
@@ -441,7 +442,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 							int delobj = 0;
 							if (metaData.containsKey("deleted-objects"))
 								delobj = Integer.parseInt((String) metaData.get("deleted-objects"));
-							delobj = delobj + odel.get(k);
+							delobj = delobj + odel.get(k).ct;
 							SDFSLogger.getLog().info("updating " + k + " sz=" + objs);
 							metaData.put("deleted-objects", Integer.toString(delobj));
 							try {
@@ -463,6 +464,13 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 							SDFSLogger.getLog().debug("Unable to delete object " + k, e);
 						} finally {
 							// pool.returnObject(container);
+						}
+
+					}
+					for (SDFSDeleteEntry entry : odel.values()) {
+						if (entry.evt.endTime <= 0) {
+							entry.evt.endEvent("Compacted [" + iter.size() + "] storage objects by ["
+									+ StorageUnit.of(sz).format(sz) + "]");
 						}
 
 					}

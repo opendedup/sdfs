@@ -7,6 +7,7 @@ import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.StringUtils;
 
@@ -132,12 +133,12 @@ public class ChunkData {
 		return mDelete;
 	}
 
-	public boolean setmDelete(boolean mDelete) {
+	public boolean setmDelete(boolean mDelete,SDFSEvent evt) {
 		this.mDelete = mDelete;
 		if (this.mDelete) {
 			try {
 				HCServiceProxy.getChunkStore().deleteChunk(this.hash,
-						this.cPos, 0);
+						this.cPos, 0,evt);
 				return true;
 			} catch (IOException e) {
 				SDFSLogger.getLog().error(

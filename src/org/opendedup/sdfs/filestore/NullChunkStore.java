@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.w3c.dom.Element;
 
 /**
@@ -61,7 +62,7 @@ public class NullChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public void deleteChunk(byte[] hash, long start, int len)
+	public void deleteChunk(byte[] hash, long start, int len,SDFSEvent evt)
 			throws IOException {
 		// TODO Auto-generated method stub
 

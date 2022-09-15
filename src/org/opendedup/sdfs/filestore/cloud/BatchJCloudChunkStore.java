@@ -73,9 +73,11 @@ import org.opendedup.sdfs.filestore.AbstractBatchStore;
 import org.opendedup.sdfs.filestore.AbstractChunkStore;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
+import org.opendedup.sdfs.filestore.SDFSDeleteEntry;
 import org.opendedup.sdfs.filestore.StringResult;
 import org.opendedup.sdfs.filestore.cloud.utils.EncyptUtils;
 import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
+import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
@@ -101,7 +103,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	BlobStore blobStore = null;
 	String bucketLocation = null;
 	private String name;
-	private HashMap<Long, Integer> deletes = new HashMap<Long, Integer>();
+	private HashMap<Long, SDFSDeleteEntry> deletes = new HashMap<Long, SDFSDeleteEntry>();
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
 	boolean clustered = true;
@@ -314,15 +316,15 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	private int mdVersion;
 
 	@Override
-	public void deleteChunk(byte[] hash, long start, int len) throws IOException {
+	public void deleteChunk(byte[] hash, long start, int len, SDFSEvent evt) throws IOException {
 		delLock.lock();
 		try {
 			// SDFSLogger.getLog().info("deleting " + del);
 			if (this.deletes.containsKey(start)) {
-				int sz = this.deletes.get(start) + 1;
-				this.deletes.put(start, sz);
+				this.deletes.get(start).ct += 1;
+				this.deletes.get(start).evt = evt;
 			} else
-				this.deletes.put(start, 1);
+				this.deletes.put(start, new SDFSDeleteEntry(1, evt));
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error putting data", e);
@@ -1222,10 +1224,10 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					SDFSLogger.getLog().debug("running garbage collection for " + this.deletes.size());
 					this.delLock.lock();
 
-					HashMap<Long, Integer> odel = null;
+					HashMap<Long, SDFSDeleteEntry> odel = null;
 					try {
 						odel = this.deletes;
-						this.deletes = new HashMap<Long, Integer>();
+						this.deletes = new HashMap<Long, SDFSDeleteEntry>();
 						// SDFSLogger.getLog().info("delete hash table size of "
 						// + odel.size());
 					} finally {
@@ -1259,7 +1261,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 									// SDFSLogger.getLog().info("remove requests for
 									// " +
 									// hashString + "=" + odel.get(k));
-									delobj = delobj + odel.get(k);
+									delobj = delobj + odel.get(k).ct;
 									// SDFSLogger.getLog().info("deleting " +
 									// hashString);
 									metaData.put("deleted", "true");
@@ -1280,8 +1282,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 							try {
 								// SDFSLogger.getLog().info("deleting " + del);
 								if (this.deletes.containsKey(k)) {
-									int sz = this.deletes.get(k) + odel.get(k);
-									this.deletes.put(k, sz);
+									this.deletes.get(k).ct += odel.get(k).ct;
 								} else
 									this.deletes.put(k, odel.get(k));
 
@@ -1296,6 +1297,12 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					executor.shutdown();
 					while (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
 						SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
+					}
+					for (SDFSDeleteEntry entry : odel.values()) {
+						if (entry.evt.endTime <= 0) {
+							entry.evt.endEvent();
+						}
+
 					}
 					SDFSLogger.getLog().info("done running garbage collection");
 
@@ -2037,7 +2044,8 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 			"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" + "BBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 					+ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
 					+ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-					+ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA").getBytes();
+					+ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+			.getBytes();
 
 	@Override
 	public void checkoutFile(String name) throws IOException {
