@@ -1223,7 +1223,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						}
 					}
 					for (SDFSDeleteEntry entry : odel.values()) {
-						if (entry.evt.endTime <=0){
+						if (entry.evt.endTime <=0 && entry.evt.getCount() > 33){
 						entry.evt.endEvent();
 						}
 

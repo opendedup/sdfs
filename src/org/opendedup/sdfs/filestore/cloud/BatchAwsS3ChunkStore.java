@@ -370,6 +370,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void deleteChunk(byte[] hash, long start, int len, SDFSEvent evt) throws IOException {
+		delLock.lock();
 		try {
 			// SDFSLogger.getLog().info("deleting " + del);
 			if (this.deletes.containsKey(start)) {

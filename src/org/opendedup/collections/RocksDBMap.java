@@ -727,6 +727,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to finish Garbage Collection", e);
 		}
+		evt.addCount(1);
+		SDFSLogger.getLog().info("current count is " + evt.getCount());
 		return dct;
 	}
 
