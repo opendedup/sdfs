@@ -36,7 +36,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 	public long pausets;
 
 	public ReplicationImportEvent(String src, String dst, String url, long volumeid) {
-		super(MIMPORT, dst, "Importing " + src + " from " + url + " with volumeid " +
+		super(IMPORT, dst, "Importing " + src + " from " + url + " with volumeid " +
 				volumeid + " to " + dst, SDFSEvent.INFO);
 		this.src = src;
 		this.dst = dst;

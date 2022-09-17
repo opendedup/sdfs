@@ -45,6 +45,7 @@ message VolumeInfoResponse {
   bool offline = 29;
   string error = 30;
   errorCodes errorCode = 31;
+  string evtPath =32;
 
 }
 

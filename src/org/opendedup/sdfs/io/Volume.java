@@ -59,6 +59,7 @@ public class Volume {
 	String name;
 	AtomicLong currentSize = new AtomicLong(0);
 	String path;
+	String evtPath;
 	File pathF;
 	final int blockSize = 128 * 1024;
 	double fullPercentage = -1;
@@ -190,6 +191,11 @@ public class Volume {
 					LinkOption.NOFOLLOW_LINKS);
 		}
 		this.path = pathF.getPath();
+		if(vol.hasAttribute("event-path")) {
+			this.evtPath = vol.getAttribute("event-path");
+		} else {
+			this.evtPath = pathF.getParentFile().getPath() + File.separator + "evt";
+		}
 		this.connicalPath = pathF.getCanonicalPath();
 		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
 		if (vol.hasAttribute("name")) {
@@ -507,6 +513,7 @@ public class Volume {
 		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
 		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
+		root.setAttribute("event-path", this.evtPath);
 
 		try {
 			root.setAttribute("dse-comp-size", Long.toString(HCServiceProxy.getDSECompressedSize()));
@@ -543,10 +550,14 @@ public class Volume {
 		return root;
 	}
 
+	public String getEvtPath(){
+		return this.evtPath;
+	}
 	public Document toXMLDocument() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("volume");
 		Element root = doc.getDocumentElement();
 		root.setAttribute("path", path);
+		root.setAttribute("event-path", this.evtPath);
 		root.setAttribute("name", this.name);
 		root.setAttribute("current-size", Long.toString(this.currentSize.get()));
 		root.setAttribute("capacity", Long.toString(this.capacity));
@@ -611,7 +622,7 @@ public class Volume {
 				.setCurrentSize(this.currentSize.get()).setCapactity(this.capacity)
 				.setMaxPercentageFull(this.fullPercentage).setDuplicateBytes(this.getDuplicateBytes())
 				.setReadBytes(this.getReadBytes()).setWriteBytes(this.getActualWriteBytes())
-				.setSerialNumber(this.serialNumber)
+				.setSerialNumber(this.serialNumber).setEvtPath(this.evtPath)
 				.setMaxPageSize(HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size)
 				.setDseSize(HCServiceProxy.getDSESize()).setDseCompSize(HCServiceProxy.getDSECompressedSize())
 				.setReadOps(this.readOperations.get()).setWriteOps(this.writeOperations.get())

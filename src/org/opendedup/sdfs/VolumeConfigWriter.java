@@ -816,6 +816,7 @@ public class VolumeConfigWriter {
 		vol.setAttribute("capacity", this.volume_capacity);
 		vol.setAttribute("current-size", "0");
 		vol.setAttribute("path", this.base_path + File.separator + "files");
+		vol.setAttribute("event-path", this.base_path + File.separator + "evt");
 		vol.setAttribute("maximum-percentage-full", Double.toString(this.max_percent_full));
 		vol.setAttribute("closed-gracefully", "true");
 		vol.setAttribute("use-dse-capacity", Boolean.toString(this.useDSECapacity));
