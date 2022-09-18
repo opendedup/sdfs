@@ -468,7 +468,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 
 					}
 					for (SDFSDeleteEntry entry : odel.values()) {
-						if (entry.evt.endTime <= 0) {
+						if (entry.evt.endTime <=0 && entry.evt.getCount() > 33){
 							entry.evt.endEvent("Compacted [" + iter.size() + "] storage objects by ["
 									+ StorageUnit.of(sz).format(sz) + "]");
 						}
