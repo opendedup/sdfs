@@ -60,6 +60,7 @@ public class Volume {
 	AtomicLong currentSize = new AtomicLong(0);
 	String path;
 	String evtPath;
+	String replPath;
 	File pathF;
 	final int blockSize = 128 * 1024;
 	double fullPercentage = -1;
@@ -195,6 +196,11 @@ public class Volume {
 			this.evtPath = vol.getAttribute("event-path");
 		} else {
 			this.evtPath = pathF.getParentFile().getPath() + File.separator + "evt";
+		}
+		if(vol.hasAttribute("repl-path")) {
+			this.replPath = vol.getAttribute("repl-path");
+		} else {
+			this.replPath = pathF.getParentFile().getPath() + File.separator + "repl";
 		}
 		this.connicalPath = pathF.getCanonicalPath();
 		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
@@ -617,12 +623,16 @@ public class Volume {
 		return doc;
 	}
 
+	public String getReplPath() {
+		return this.replPath;
+	}
+
 	public VolumeInfoResponse toProtoc() {
 		VolumeInfoResponse.Builder b = VolumeInfoResponse.newBuilder().setPath(path).setName(this.name)
 				.setCurrentSize(this.currentSize.get()).setCapactity(this.capacity)
 				.setMaxPercentageFull(this.fullPercentage).setDuplicateBytes(this.getDuplicateBytes())
 				.setReadBytes(this.getReadBytes()).setWriteBytes(this.getActualWriteBytes())
-				.setSerialNumber(this.serialNumber).setEvtPath(this.evtPath)
+				.setSerialNumber(this.serialNumber).setEvtPath(this.evtPath).setReplPath(this.replPath)
 				.setMaxPageSize(HCServiceProxy.getMaxSize() * HashFunctionPool.avg_page_size)
 				.setDseSize(HCServiceProxy.getDSESize()).setDseCompSize(HCServiceProxy.getDSECompressedSize())
 				.setReadOps(this.readOperations.get()).setWriteOps(this.writeOperations.get())

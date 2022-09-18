@@ -20,10 +20,8 @@ package org.opendedup.sdfs.notification;
 
 import java.io.IOException;
 
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.w3c.dom.Element;
 
 public class ReadAheadEvent extends SDFSEvent {
 
@@ -44,12 +42,7 @@ public class ReadAheadEvent extends SDFSEvent {
 		this.running = false;
 	}
 
-	@Override
-	public Element toXML() throws ParserConfigurationException {
-		Element el = super.toXML();
-		el.setAttribute("file", mf.getPath());
-		return el;
-	}
+	
 
 	@Override
     public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent toProtoBuf() throws IOException {

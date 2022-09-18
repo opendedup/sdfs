@@ -4,19 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.mtools.RestoreArchive;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.w3c.dom.Element;
+import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class RestoreArchiveCmd {
 
 	String srcPath;
 
-	public Element getResult(String file) throws IOException,
+	public SDFSEvent getResult(String file) throws IOException,
 			ExecutionException {
 		this.srcPath = file;
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
@@ -27,8 +26,8 @@ public class RestoreArchiveCmd {
 		Thread th = new Thread(ar);
 		th.start();
 		try {
-			return ar.getEvent().toXML();
-		} catch (ParserConfigurationException e) {
+			return ar.getEvent();
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}

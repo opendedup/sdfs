@@ -1,4 +1,4 @@
-package org.opendedup.sdfs.mgmt.grpc.client;
+package org.opendedup.sdfs.mgmt.grpc.replication;
 
 public class ReplicationCanceledException extends Exception {
 

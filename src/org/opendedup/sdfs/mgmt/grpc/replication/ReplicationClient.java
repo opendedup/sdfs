@@ -1,4 +1,4 @@
-package org.opendedup.sdfs.mgmt.grpc.client;
+package org.opendedup.sdfs.mgmt.grpc.replication;
 
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
@@ -273,7 +273,6 @@ public class ReplicationClient {
             File _f = new File(pt);
             MetaDataDedupFile.fromProtoBuf(crs.getFile(), _f.getPath());
             return MetaFileStore.getMF(_f);
-
         }
 
         private void downloadDDB(MetaDataDedupFile mf, String guid) throws Exception {

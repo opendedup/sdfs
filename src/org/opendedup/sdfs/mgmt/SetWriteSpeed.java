@@ -7,19 +7,18 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.w3c.dom.Element;
 
 public class SetWriteSpeed implements Runnable {
 	public SDFSEvent evt = null;
 	int csz;
 
-	public Element getResult(String sz) throws IOException,
+	public SDFSEvent getResult(String sz) throws IOException,
 			ParserConfigurationException {
 		evt = SDFSEvent.wspEvent("Setting Write Speed");
 		csz = Integer.parseInt(sz);
 		Thread th = new Thread(this);
 		th.run();
-		return evt.toXML();
+		return evt;
 
 	}
 

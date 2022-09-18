@@ -142,6 +142,37 @@ public final class StorageServiceGrpc {
     return getGetChunksMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.VolumeEventListenRequest,
+      org.opendedup.grpc.Storage.VolumeEvent> getSubscribeToVolumeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SubscribeToVolume",
+      requestType = org.opendedup.grpc.Storage.VolumeEventListenRequest.class,
+      responseType = org.opendedup.grpc.Storage.VolumeEvent.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.VolumeEventListenRequest,
+      org.opendedup.grpc.Storage.VolumeEvent> getSubscribeToVolumeMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.VolumeEventListenRequest, org.opendedup.grpc.Storage.VolumeEvent> getSubscribeToVolumeMethod;
+    if ((getSubscribeToVolumeMethod = StorageServiceGrpc.getSubscribeToVolumeMethod) == null) {
+      synchronized (StorageServiceGrpc.class) {
+        if ((getSubscribeToVolumeMethod = StorageServiceGrpc.getSubscribeToVolumeMethod) == null) {
+          StorageServiceGrpc.getSubscribeToVolumeMethod = getSubscribeToVolumeMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.VolumeEventListenRequest, org.opendedup.grpc.Storage.VolumeEvent>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SubscribeToVolume"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.VolumeEventListenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.VolumeEvent.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("SubscribeToVolume"))
+              .build();
+        }
+      }
+    }
+    return getSubscribeToVolumeMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest,
       org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse> getWriteSparseDataChunkMethod;
 
@@ -471,6 +502,13 @@ public final class StorageServiceGrpc {
 
     /**
      */
+    public void subscribeToVolume(org.opendedup.grpc.Storage.VolumeEventListenRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.VolumeEvent> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSubscribeToVolumeMethod(), responseObserver);
+    }
+
+    /**
+     */
     public void writeSparseDataChunk(org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getWriteSparseDataChunkMethod(), responseObserver);
@@ -555,6 +593,13 @@ public final class StorageServiceGrpc {
                 org.opendedup.grpc.Storage.GetChunksRequest,
                 org.opendedup.grpc.Storage.ChunkEntry>(
                   this, METHODID_GET_CHUNKS)))
+          .addMethod(
+            getSubscribeToVolumeMethod(),
+            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
+              new MethodHandlers<
+                org.opendedup.grpc.Storage.VolumeEventListenRequest,
+                org.opendedup.grpc.Storage.VolumeEvent>(
+                  this, METHODID_SUBSCRIBE_TO_VOLUME)))
           .addMethod(
             getWriteSparseDataChunkMethod(),
             io.grpc.stub.ServerCalls.asyncUnaryCall(
@@ -666,6 +711,14 @@ public final class StorageServiceGrpc {
 
     /**
      */
+    public void subscribeToVolume(org.opendedup.grpc.Storage.VolumeEventListenRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.VolumeEvent> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncServerStreamingCall(
+          getChannel().newCall(getSubscribeToVolumeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
     public void writeSparseDataChunk(org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
@@ -773,6 +826,14 @@ public final class StorageServiceGrpc {
         org.opendedup.grpc.Storage.GetChunksRequest request) {
       return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
           getChannel(), getGetChunksMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public java.util.Iterator<org.opendedup.grpc.Storage.VolumeEvent> subscribeToVolume(
+        org.opendedup.grpc.Storage.VolumeEventListenRequest request) {
+      return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
+          getChannel(), getSubscribeToVolumeMethod(), getCallOptions(), request);
     }
 
     /**
@@ -935,14 +996,15 @@ public final class StorageServiceGrpc {
   private static final int METHODID_CHECK_HASHES = 1;
   private static final int METHODID_WRITE_CHUNKS = 2;
   private static final int METHODID_GET_CHUNKS = 3;
-  private static final int METHODID_WRITE_SPARSE_DATA_CHUNK = 4;
-  private static final int METHODID_READ_SPARSE_DATA_CHUNK = 5;
-  private static final int METHODID_GET_META_DATA_DEDUPE_FILE = 6;
-  private static final int METHODID_GET_SPARSE_DEDUPE_FILE = 7;
-  private static final int METHODID_REPLICATE_REMOTE_FILE = 8;
-  private static final int METHODID_RESTORE_ARCHIVES = 9;
-  private static final int METHODID_CANCEL_REPLICATION = 10;
-  private static final int METHODID_PAUSE_REPLICATION = 11;
+  private static final int METHODID_SUBSCRIBE_TO_VOLUME = 4;
+  private static final int METHODID_WRITE_SPARSE_DATA_CHUNK = 5;
+  private static final int METHODID_READ_SPARSE_DATA_CHUNK = 6;
+  private static final int METHODID_GET_META_DATA_DEDUPE_FILE = 7;
+  private static final int METHODID_GET_SPARSE_DEDUPE_FILE = 8;
+  private static final int METHODID_REPLICATE_REMOTE_FILE = 9;
+  private static final int METHODID_RESTORE_ARCHIVES = 10;
+  private static final int METHODID_CANCEL_REPLICATION = 11;
+  private static final int METHODID_PAUSE_REPLICATION = 12;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -976,6 +1038,10 @@ public final class StorageServiceGrpc {
         case METHODID_GET_CHUNKS:
           serviceImpl.getChunks((org.opendedup.grpc.Storage.GetChunksRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkEntry>) responseObserver);
+          break;
+        case METHODID_SUBSCRIBE_TO_VOLUME:
+          serviceImpl.subscribeToVolume((org.opendedup.grpc.Storage.VolumeEventListenRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.VolumeEvent>) responseObserver);
           break;
         case METHODID_WRITE_SPARSE_DATA_CHUNK:
           serviceImpl.writeSparseDataChunk((org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest) request,
@@ -1074,6 +1140,7 @@ public final class StorageServiceGrpc {
               .addMethod(getCheckHashesMethod())
               .addMethod(getWriteChunksMethod())
               .addMethod(getGetChunksMethod())
+              .addMethod(getSubscribeToVolumeMethod())
               .addMethod(getWriteSparseDataChunkMethod())
               .addMethod(getReadSparseDataChunkMethod())
               .addMethod(getGetMetaDataDedupeFileMethod())

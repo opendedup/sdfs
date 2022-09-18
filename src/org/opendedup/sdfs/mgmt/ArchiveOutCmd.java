@@ -12,7 +12,6 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.DeleteDir;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.RandomGUID;
-import org.w3c.dom.Element;
 
 import de.schlichtherle.truezip.file.TFile;
 import de.schlichtherle.truezip.file.TVFS;
@@ -27,12 +26,12 @@ public class ArchiveOutCmd implements Runnable {
 	private String srcPath = null;
 	private boolean uselz4;
 
-	public Element getResult(String cmd, String file,boolean uselz4) throws IOException {
+	public SDFSEvent getResult(String cmd, String file,boolean uselz4) throws IOException {
 		this.uselz4 = uselz4;
 		return archiveOut(file);
 	}
 
-	private synchronized Element archiveOut(String srcPath) throws IOException {
+	private synchronized SDFSEvent archiveOut(String srcPath) throws IOException {
 		this.srcPath = srcPath;
 		String guid = RandomGUID.getGuid();
 		f = new File(Main.volume.getPath() + File.separator + srcPath);
@@ -53,7 +52,7 @@ public class ArchiveOutCmd implements Runnable {
 		try {
 			Thread th = new Thread(this);
 			th.start();
-			return evt.toXML();
+			return evt;
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {

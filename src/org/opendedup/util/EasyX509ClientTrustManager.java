@@ -75,7 +75,7 @@ public class EasyX509ClientTrustManager implements X509TrustManager {
 
 	/** Log object for this class. */
 	private static final Log LOG = LogFactory
-			.getLog(EasyX509TrustManager.class);
+			.getLog(EasyX509ClientTrustManager.class);
 
 	/**
 	 * Constructor for EasyX509TrustManager.

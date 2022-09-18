@@ -207,6 +207,30 @@ message InsertRecord {
   int32 compressedLength=3;
 }
 
+message VolumeEvent {
+  FileInfoResponse file=1;
+  string uuid = 2;
+  int64 timeStamp=3;
+  int64 seq=4;
+  actionType actionType=5;
+  string error = 6;
+  errorCodes errorCode = 7;
+  string srcfile=8; //Source file for renames
+  string dstfile=9; //Source file for renames
+}
+
+message VolumeEventListenRequest {
+  int64 pvolumeID=1;
+}
+
+enum actionType {
+    MFILEDELETED=0;
+    MFILEWRITTEN=1;
+    MFILERENAMED=2;
+    SFILEWRITTEN=3;
+    SFILEDELETED=4;
+  }
+
 enum hashtype {
   SHA256=0; //Sha256
   MD5=1; //md5
@@ -219,6 +243,7 @@ service StorageService {
   rpc CheckHashes(CheckHashesRequest) returns (CheckHashesResponse);
   rpc WriteChunks(WriteChunksRequest) returns (WriteChunksResponse);
   rpc GetChunks(GetChunksRequest) returns (stream ChunkEntry);
+  rpc SubscribeToVolume(VolumeEventListenRequest) returns (stream VolumeEvent);
   rpc WriteSparseDataChunk(SparseDedupeChunkWriteRequest) returns (SparseDedupeChunkWriteResponse);
   rpc ReadSparseDataChunk(SparseDedupeChunkReadRequest) returns (SparseDedupeChunkReadResponse);
   rpc GetMetaDataDedupeFile(MetaDataDedupeFileRequest) returns(MetaDataDedupeFileResponse);

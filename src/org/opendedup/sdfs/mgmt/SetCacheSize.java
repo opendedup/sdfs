@@ -6,14 +6,13 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.w3c.dom.Element;
 
 public class SetCacheSize implements Runnable {
 	public SDFSEvent evt = null;
 	String sz = null;
 	long csz;
 
-	public Element getResult(String sz) throws IOException,
+	public SDFSEvent getResult(String sz) throws IOException,
 			ParserConfigurationException, Exception {
 		evt = SDFSEvent.cszEvent("Setting Cache Size");
 		this.sz = sz;
@@ -22,7 +21,7 @@ public class SetCacheSize implements Runnable {
 		th.start();
 		
 		
-		return evt.toXML();
+		return evt;
 
 	}
 

@@ -22,38 +22,33 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.xml.parsers.ParserConfigurationException;
-
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.EventBus;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.mgmt.GetEvent;
 import org.opendedup.util.FileCounts;
 import org.opendedup.util.RandomGUID;
-import org.opendedup.util.XMLUtils;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.ColumnFamilyOptions;
 import org.rocksdb.CompactionOptionsFIFO;
 import org.rocksdb.DBOptions;
 import org.rocksdb.Env;
-import org.rocksdb.OptionString;
-import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
-import org.rocksdb.RocksIterator;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 public class SDFSEvent implements java.io.Serializable {
 	/**
@@ -120,6 +115,37 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Level ERROR = new Level("error");
 	private static final long MB = 1024 * 1024;
 
+	protected static LoadingCache<String, SDFSEvent> cachedEvents = CacheBuilder.newBuilder().maximumSize(100)
+			.expireAfterAccess(60, TimeUnit.SECONDS).concurrencyLevel(Main.writeThreads)
+			.removalListener(new RemovalListener<String, SDFSEvent>() {
+				public void onRemoval(RemovalNotification<String, SDFSEvent> removal) {
+					SDFSEvent evt = removal.getValue();
+					try {
+						evtdb.put(evt.uid.getBytes(), evt.toProtoBuf().toByteArray());
+					} catch (Exception e) {
+						SDFSLogger.getLog().warn("unable to flush", e);
+					}
+				}
+			}).build(new CacheLoader<String, SDFSEvent>() {
+				public SDFSEvent load(String uuid) throws IOException {
+					byte[] val = null;
+					try {
+						val = evtdb.get(uuid.getBytes());
+					} catch (Exception e) {
+						SDFSLogger.getLog().error("error getting event " + uuid, e);
+					}
+					if (val != null) {
+						org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder b = org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent
+								.newBuilder();
+						b.mergeFrom(val);
+						return GetEvent(b.build());
+					} else {
+						throw new NullPointerException("[" + uuid + "] could not be found");
+					}
+				}
+
+			});
+
 	public static void init() throws RocksDBException {
 		File directory = new File(Main.volume.getEvtPath() + File.separator);
 		directory.mkdirs();
@@ -128,13 +154,8 @@ public class SDFSEvent implements java.io.Serializable {
 		fifo.setMaxTableFilesSize(500 * MB);
 		DBOptions options = new DBOptions();
 		options.setCreateIfMissing(true);
-
-		// options.setMinWriteBufferNumberToMerge(2);
-		// options.setMaxWriteBufferNumber(6);
-		// options.setLevelZeroFileNumCompactionTrigger(2);
 		Env env = Env.getDefault();
 		options.setEnv(env);
-
 		ColumnFamilyOptions familyOptions = new ColumnFamilyOptions();
 		familyOptions.setCompactionOptionsFIFO(fifo);
 		ColumnFamilyDescriptor evtArD = new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, familyOptions);
@@ -155,15 +176,13 @@ public class SDFSEvent implements java.io.Serializable {
 
 		this.level = level;
 		try {
-			synchronized (evtdb) {
-				evtdb.put(this.uid.getBytes(), this.toProtoBuf().toByteArray());
-			}
+			cachedEvents.put(this.uid, this);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("unable to add message", e);
 		}
 	}
 
-	public static SDFSEvent GetEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt)  {
+	public static SDFSEvent GetEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt) {
 		if (evt.getType().equals(MIMPORT.toString())) {
 			return new ReplicationImportEvent(evt);
 		} else {
@@ -171,7 +190,7 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 	}
 
-	protected SDFSEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt)  {
+	protected SDFSEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt) {
 		this.type = new Type(evt.getType());
 		this.target = evt.getTarget();
 		this.startTime = evt.getStartTime();
@@ -182,13 +201,7 @@ public class SDFSEvent implements java.io.Serializable {
 		this.puid = evt.getParentUuid();
 		this.success = evt.getSuccess();
 		this.level = new Level(evt.getLevel());
-		try {
-			synchronized (evtdb) {
-				evtdb.put(this.uid.getBytes(), this.toProtoBuf().toByteArray());
-			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().error("unable to add message", e);
-		}
+		cachedEvents.put(this.uid, this);
 	}
 
 	public void registerListener(Object obj) {
@@ -607,41 +620,15 @@ public class SDFSEvent implements java.io.Serializable {
 
 	}
 
-	public Element toXML() throws ParserConfigurationException {
-		synchronized (this) {
-			Document doc = XMLUtils.getXMLDoc("event");
-			/*
-			 * if (SDFSLogger.isDebug()) SDFSLogger.getLog().debug(this.toString());
-			 */
-			Element root = doc.getDocumentElement();
-			root.setAttribute("start-date", format.format(new Date(this.startTime)));
-			root.setAttribute("start-timestamp", Long.toString(this.startTime));
-			if (this.endTime > 0) {
-				root.setAttribute("end-date", format.format(new Date(this.endTime)));
+	public static SDFSEvent getEvent(String uuid) throws IOException {
+		try {
+			return cachedEvents.get(uuid);
+		} catch (ExecutionException e) {
+			if (e.getCause() instanceof NullPointerException) {
+				throw (NullPointerException) e.getCause();
+			} else {
+				throw new IOException(e.getCause());
 			}
-			root.setAttribute("end-timestamp", Long.toString(this.endTime));
-			root.setAttribute("level", this.level.toString());
-			root.setAttribute("type", this.type.toString());
-			root.setAttribute("target", this.target);
-			root.setAttribute("short-msg", this.shortMsg);
-			root.setAttribute("long-msg", this.longMsg);
-			try {
-				root.setAttribute("percent-complete", Double.toString((this.curCt.get() / this.maxCt.get())));
-			} catch (Exception e) {
-				root.setAttribute("percent-complete", "0");
-			}
-			root.setAttribute("max-count", Long.toString(this.maxCt.get()));
-			root.setAttribute("current-count", Long.toString(this.curCt.get()));
-			root.setAttribute("uuid", this.uid);
-			root.setAttribute("parent-uid", this.puid);
-			root.setAttribute("extended-info", this.extendedInfo);
-			root.setAttribute("success", Boolean.toString(this.success));
-			for (int i = 0; i < this.children.size(); i++) {
-				Element el = this.children.get(i).toXML();
-				doc.adoptNode(el);
-				root.appendChild(el);
-			}
-			return (Element) root.cloneNode(true);
 		}
 	}
 
@@ -672,21 +659,14 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 	}
 
-	public static List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> getProtoBufEvents(String start,int length) {
+	public static List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> getProtoBufEvents() {
 		ArrayList<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> al = new ArrayList<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent>();
-		RocksIterator iter = evtdb.newIterator();
-		for (iter.seekToFirst(); iter.isValid(); iter.next()) {
+		Iterator<SDFSEvent> iter = cachedEvents.asMap().values().iterator();
+		while (iter.hasNext()) {
 			try {
-				synchronized(evtdb) {
-					byte[] key = iter.key();
-					byte [] val = evtdb.get(key);
-					org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt = getEvent(val);
-					if(evt != null) {
-						al.add(evt);
-					}
-					
-				}
-				
+
+				al.add(iter.next().toProtoBuf());
+
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to list events", e);
 				throw new NullPointerException("unable to list events");
@@ -696,76 +676,22 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static String getEvents() {
-		synchronized (tasks) {
-			Iterator<SDFSEvent> iter = SDFSEvent.tasks.values().iterator();
-			StringBuffer sb = new StringBuffer();
-			while (iter.hasNext()) {
-				sb.append(iter.next());
-				sb.append("/n");
-			}
-			return sb.toString();
+		Iterator<SDFSEvent> iter = cachedEvents.asMap().values().iterator();
+		StringBuffer sb = new StringBuffer();
+		while (iter.hasNext()) {
+			sb.append(iter.next());
+			sb.append("/n");
 		}
-	}
-
-	public static Element getXMLEvent(String uuid) throws ParserConfigurationException {
-		synchronized (tasks) {
-			if (tasks.containsKey(uuid))
-				return tasks.get(uuid).toXML();
-			else
-				throw new NullPointerException("[" + uuid + "] could not be found");
-		}
+		return sb.toString();
 	}
 
 	public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getPotoBufEvent(String uuid) {
-		synchronized (tasks) {
-			if (tasks.containsKey(uuid)) {
-				try {
-					return tasks.get(uuid).toProtoBuf();
-				} catch (Exception e) {
-					SDFSLogger.getLog().warn("[" + uuid + "] could not be found", e);
-					throw new NullPointerException("[" + uuid + "] could not be found");
-				}
-			} else
-				throw new NullPointerException("[" + uuid + "] could not be found");
-		}
-	}
-
-	public static SDFSEvent getEvent(String uuid) {
-		synchronized (evtdb) {
-			byte [] val = evtdb.get(uuid.getBytes());
-			if (val != null) {
-				org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder b = org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.newBuilder();
-				b.mergeFrom(val);
-				return GetEvent(b.build())
-			}
-				
-			else
-				throw new NullPointerException("[" + uuid + "] could not be found");
-		}
-	}
-
-	private static org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getEvent(byte[] evtb) {
 		try {
-		org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder b = org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.newBuilder();
-		return b.mergeFrom(evtb).build();
-		}catch(Exception e) {
-			SDFSLogger.getLog().error("unable to read event",e);
-			return null;
+			return cachedEvents.get(uuid).toProtoBuf();
+		} catch (Exception e) {
+			SDFSLogger.getLog().warn("[" + uuid + "] could not be found", e);
+			throw new NullPointerException("[" + uuid + "] could not be found");
 		}
-	}
-
-	public static Element getXMLEvents() throws ParserConfigurationException {
-		Document doc = XMLUtils.getXMLDoc("events");
-		Element root = doc.getDocumentElement();
-		synchronized (tasks) {
-			Iterator<SDFSEvent> iter = tasks.values().iterator();
-			while (iter.hasNext()) {
-				Element el = iter.next().toXML();
-				doc.adoptNode(el);
-				root.appendChild(el);
-			}
-		}
-		return (Element) root.cloneNode(true);
 	}
 
 	public static class Level implements java.io.Serializable {
@@ -833,6 +759,11 @@ public class SDFSEvent implements java.io.Serializable {
 			return Main.volume.getName();
 		else
 			return "test";
+	}
+
+	public static void close() {
+		cachedEvents.invalidateAll();
+		cachedEvents.cleanUp();
 	}
 
 }

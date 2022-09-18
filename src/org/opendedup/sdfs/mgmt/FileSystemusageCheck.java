@@ -8,17 +8,16 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
-import org.w3c.dom.Element;
 
 public class FileSystemusageCheck implements Runnable {
 	SDFSEvent evt = null;
 
-	public Element getResult() throws IOException,
+	public SDFSEvent getResult() throws IOException,
 			ParserConfigurationException {
 		evt = SDFSEvent.cszEvent("Return FS size");
 		Thread th = new Thread(this);
 		th.start();
-		return evt.toXML();
+		return evt;
 	}
 
 	@Override

@@ -20,9 +20,6 @@ package org.opendedup.sdfs.notification;
 
 import java.io.IOException;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Element;
 
 public class ReplicationImportEvent extends SDFSEvent {
 
@@ -81,21 +78,6 @@ public class ReplicationImportEvent extends SDFSEvent {
 		b.putAttributes("paused", Boolean.toString(this.paused));
 		b.putAttributes("pausets", Long.toString(this.pausets));
 		return b.build();
-	}
-
-	@Override
-	public Element toXML() throws ParserConfigurationException {
-		Element el = super.toXML();
-		el.setAttribute("src", src);
-		el.setAttribute("dst", dst);
-		el.setAttribute("url", url);
-		el.setAttribute("volumeid",
-				Long.toString(this.volumeid));
-		el.setAttribute("pausets",
-				Long.toString(this.pausets));
-		el.setAttribute("paused",
-				Boolean.toString(this.paused));
-		return el;
 	}
 
 }

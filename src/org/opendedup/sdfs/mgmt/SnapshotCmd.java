@@ -3,13 +3,11 @@ package org.opendedup.sdfs.mgmt;
 import java.io.File;
 import java.io.IOException;
 
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.notification.SDFSEvent;
-import org.w3c.dom.Element;
 
 public class SnapshotCmd implements Runnable {
 
@@ -17,7 +15,7 @@ public class SnapshotCmd implements Runnable {
 	String dstPath;
 	SDFSEvent evt;
 
-	public Element getResult(String dstPath, String file) throws IOException {
+	public SDFSEvent getResult(String dstPath, String file) throws IOException {
 		this.srcPath = file;
 		this.dstPath = dstPath;
 		File f = new File(Main.volume.getPath() + File.separator + srcPath);
@@ -27,8 +25,8 @@ public class SnapshotCmd implements Runnable {
 		th.start();
 		try {
 			//SDFSLogger.getLog().info(evt.toXML());
-			return evt.toXML();
-		} catch (ParserConfigurationException e) {
+			return evt;
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 	}

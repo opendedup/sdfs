@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
@@ -42,7 +41,7 @@ public class GetCloudFile implements Runnable {
 	static LRUCache<String, String> ck = new LRUCache<String, String>(500);
 	public static LRUCache<String, Object> fack = new LRUCache<String, Object>(50);
 
-	public Element getResult(String file, String dstfile, boolean overwrite, String changeid) throws IOException {
+	public SDFSEvent getResult(String file, String dstfile, boolean overwrite, String changeid) throws IOException {
 		fevt = SDFSEvent.cfEvent(file);
 		synchronized (ck) {
 			if (changeid != null && ck.containsKey(changeid)) {
@@ -52,7 +51,7 @@ public class GetCloudFile implements Runnable {
 					Element root = doc.getDocumentElement();
 					root.setAttribute("action", "ignored");
 					fevt.endEvent("ignoring file");
-					return (Element) root.cloneNode(true);
+					return fevt;
 
 				} catch (Exception e) {
 					fevt.endEvent("unable to download file " + file, SDFSEvent.ERROR);
@@ -74,14 +73,14 @@ public class GetCloudFile implements Runnable {
 		Thread th = new Thread(this);
 		th.start();
 		try {
-			return fevt.toXML();
-		} catch (ParserConfigurationException e) {
+			return fevt;
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 
 	}
 
-	public Element getResult(String file, String dstfile) throws IOException {
+	public SDFSEvent getResult(String file, String dstfile) throws IOException {
 		fevt = SDFSEvent.cfEvent(file);
 		
 		this.sfile = file;
@@ -90,8 +89,8 @@ public class GetCloudFile implements Runnable {
 		obj = fevt;
 
 		try {
-			return fevt.toXML();
-		} catch (ParserConfigurationException e) {
+			return fevt;
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
 		

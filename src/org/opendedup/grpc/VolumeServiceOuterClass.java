@@ -715,6 +715,16 @@ public final class VolumeServiceOuterClass {
      */
     com.google.protobuf.ByteString
         getEvtPathBytes();
+
+    /**
+     * <code>string replPath = 33;</code>
+     */
+    java.lang.String getReplPath();
+    /**
+     * <code>string replPath = 33;</code>
+     */
+    com.google.protobuf.ByteString
+        getReplPathBytes();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.VolumeInfoResponse}
@@ -761,6 +771,7 @@ public final class VolumeServiceOuterClass {
       error_ = "";
       errorCode_ = 0;
       evtPath_ = "";
+      replPath_ = "";
     }
 
     @java.lang.Override
@@ -777,6 +788,7 @@ public final class VolumeServiceOuterClass {
         throw new java.lang.NullPointerException();
       }
       int mutable_bitField0_ = 0;
+      int mutable_bitField1_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -956,6 +968,12 @@ public final class VolumeServiceOuterClass {
               java.lang.String s = input.readStringRequireUtf8();
 
               evtPath_ = s;
+              break;
+            }
+            case 266: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              replPath_ = s;
               break;
             }
             default: {
@@ -1466,6 +1484,40 @@ public final class VolumeServiceOuterClass {
       }
     }
 
+    public static final int REPLPATH_FIELD_NUMBER = 33;
+    private volatile java.lang.Object replPath_;
+    /**
+     * <code>string replPath = 33;</code>
+     */
+    public java.lang.String getReplPath() {
+      java.lang.Object ref = replPath_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        replPath_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string replPath = 33;</code>
+     */
+    public com.google.protobuf.ByteString
+        getReplPathBytes() {
+      java.lang.Object ref = replPath_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        replPath_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1575,6 +1627,9 @@ public final class VolumeServiceOuterClass {
       }
       if (!getEvtPathBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 32, evtPath_);
+      }
+      if (!getReplPathBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 33, replPath_);
       }
       unknownFields.writeTo(output);
     }
@@ -1707,6 +1762,9 @@ public final class VolumeServiceOuterClass {
       if (!getEvtPathBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, evtPath_);
       }
+      if (!getReplPathBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(33, replPath_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -1794,6 +1852,8 @@ public final class VolumeServiceOuterClass {
       result = result && errorCode_ == other.errorCode_;
       result = result && getEvtPath()
           .equals(other.getEvtPath());
+      result = result && getReplPath()
+          .equals(other.getReplPath());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -1893,6 +1953,8 @@ public final class VolumeServiceOuterClass {
       hash = (53 * hash) + errorCode_;
       hash = (37 * hash) + EVTPATH_FIELD_NUMBER;
       hash = (53 * hash) + getEvtPath().hashCode();
+      hash = (37 * hash) + REPLPATH_FIELD_NUMBER;
+      hash = (53 * hash) + getReplPath().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2095,6 +2157,8 @@ public final class VolumeServiceOuterClass {
 
         evtPath_ = "";
 
+        replPath_ = "";
+
         return this;
       }
 
@@ -2122,6 +2186,7 @@ public final class VolumeServiceOuterClass {
       public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse result = new org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse(this);
         int from_bitField0_ = bitField0_;
+        int from_bitField1_ = bitField1_;
         int to_bitField0_ = 0;
         result.path_ = path_;
         result.name_ = name_;
@@ -2163,6 +2228,7 @@ public final class VolumeServiceOuterClass {
         result.error_ = error_;
         result.errorCode_ = errorCode_;
         result.evtPath_ = evtPath_;
+        result.replPath_ = replPath_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2337,6 +2403,10 @@ public final class VolumeServiceOuterClass {
           evtPath_ = other.evtPath_;
           onChanged();
         }
+        if (!other.getReplPath().isEmpty()) {
+          replPath_ = other.replPath_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -2366,6 +2436,7 @@ public final class VolumeServiceOuterClass {
         return this;
       }
       private int bitField0_;
+      private int bitField1_;
 
       private java.lang.Object path_ = "";
       /**
@@ -3686,6 +3757,75 @@ public final class VolumeServiceOuterClass {
   checkByteStringIsUtf8(value);
         
         evtPath_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object replPath_ = "";
+      /**
+       * <code>string replPath = 33;</code>
+       */
+      public java.lang.String getReplPath() {
+        java.lang.Object ref = replPath_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          replPath_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string replPath = 33;</code>
+       */
+      public com.google.protobuf.ByteString
+          getReplPathBytes() {
+        java.lang.Object ref = replPath_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          replPath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string replPath = 33;</code>
+       */
+      public Builder setReplPath(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        replPath_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string replPath = 33;</code>
+       */
+      public Builder clearReplPath() {
+        
+        replPath_ = getDefaultInstance().getReplPath();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string replPath = 33;</code>
+       */
+      public Builder setReplPathBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        replPath_ = value;
         onChanged();
         return this;
       }
@@ -30186,7 +30326,7 @@ public final class VolumeServiceOuterClass {
     java.lang.String[] descriptorData = {
       "\n\023VolumeService.proto\022\022org.opendedup.grp" +
       "c\032\016Shutdown.proto\032\016FileInfo.proto\"&\n\021Vol" +
-      "umeInfoRequest\022\021\n\tpvolumeID\030\001 \001(\003\"\371\005\n\022Vo" +
+      "umeInfoRequest\022\021\n\tpvolumeID\030\001 \001(\003\"\213\006\n\022Vo" +
       "lumeInfoResponse\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002" +
       " \001(\t\022\023\n\013currentSize\030\003 \001(\003\022\021\n\tcapactity\030\004" +
       " \001(\003\022\031\n\021maxPercentageFull\030\005 \001(\001\022\026\n\016dupli" +
@@ -30205,148 +30345,149 @@ public final class VolumeServiceOuterClass {
       "ndedup.grpc.MessageQueueInfoResponse\022\023\n\013" +
       "perfMonFile\030\034 \001(\t\022\017\n\007offline\030\035 \001(\010\022\r\n\005er" +
       "ror\030\036 \001(\t\0221\n\terrorCode\030\037 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\022\017\n\007evtPath\030  \001(\t\"\337\001" +
-      "\n\nSystemInfo\022\025\n\ractiveThreads\030\001 \001(\005\022\024\n\014b" +
-      "locksStored\030\002 \001(\005\022\027\n\017maxBlocksStored\030\003 \001" +
-      "(\005\022\022\n\ntotalSpace\030\004 \001(\003\022\021\n\tfreeSpace\030\005 \001(" +
-      "\003\022\024\n\014totalCpuLoad\030\006 \001(\001\022\020\n\010cpuCores\030\007 \001(" +
-      "\001\022\023\n\013sdfsCpuLoad\030\010 \001(\001\022\023\n\013totalMemory\030\n " +
-      "\001(\001\022\022\n\nfreeMemory\030\013 \001(\001\"&\n\021SystemInfoReq" +
-      "uest\022\021\n\tpvolumeID\030\001 \001(\003\"\260\001\n\023ConnectedVol" +
-      "umeInfo\022\n\n\002id\030\001 \001(\003\022\r\n\005local\030\002 \001(\010\022\020\n\010ho" +
-      "stname\030\003 \001(\t\022\014\n\004port\030\004 \001(\005\022\014\n\004size\030\005 \001(\003" +
-      "\022\026\n\016compressedSize\030\006 \001(\003\022\023\n\013sdfsVersion\030" +
-      "\007 \001(\t\022\022\n\nlastUpdate\030\010 \001(\003\022\017\n\007version\030\t \001" +
-      "(\005\"&\n\021GCScheduleRequest\022\021\n\tpvolumeID\030\001 \001" +
-      "(\003\"h\n\022GCScheduleResponse\022\020\n\010schedule\030\001 \001" +
-      "(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.o" +
-      "rg.opendedup.grpc.errorCodes\"(\n\023CloudVol" +
-      "umesRequest\022\021\n\tpvolumeID\030\001 \001(\003\"\225\001\n\024Cloud" +
-      "VolumesResponse\022;\n\nvolumeInfo\030\001 \003(\0132\'.or" +
-      "g.opendedup.grpc.ConnectedVolumeInfo\022\r\n\005" +
-      "error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.ope" +
-      "ndedup.grpc.errorCodes\"\204\001\n\022SystemInfoRes" +
-      "ponse\022,\n\004info\030\001 \001(\0132\036.org.opendedup.grpc" +
-      ".SystemInfo\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030" +
-      "\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"\261\005" +
-      "\n\007DSEInfo\022\017\n\007maxSize\030\001 \001(\003\022\023\n\013currentSiz" +
-      "e\030\002 \001(\003\022\017\n\007entries\030\003 \001(\003\022\026\n\016compressedSi" +
-      "ze\030\004 \001(\003\022\022\n\nfreeBlocks\030\005 \001(\003\022\020\n\010pageSize" +
-      "\030\006 \001(\003\022\023\n\013storageType\030\007 \001(\t\022\022\n\nlistenPor" +
-      "t\030\010 \001(\005\022\022\n\nlistenHost\030\t \001(\t\022\021\n\treadSpeed" +
-      "\030\n \001(\005\022\022\n\nwriteSpeed\030\013 \001(\005\022\021\n\tcacheSize\030" +
-      "\014 \001(\003\022\024\n\014maxCacheSize\030\r \001(\003\022\027\n\017listenEnc" +
-      "rypted\030\016 \001(\010\022\025\n\rencryptionKey\030\017 \001(\t\022\024\n\014e" +
-      "ncryptionIV\030\020 \001(\t\022\026\n\016cloudAccessKey\030\021 \001(" +
-      "\t\022\026\n\016cloudSecretKey\030\022 \001(\t\022\022\n\nbucketName\030" +
-      "\023 \001(\t\022\016\n\006maxAge\030\024 \001(\003\022\032\n\022averageLoadPena" +
-      "lty\030\025 \001(\001\022\025\n\revictionCount\030\026 \001(\003\022\020\n\010hitC" +
-      "ount\030\027 \001(\003\022\017\n\007hitRate\030\030 \001(\001\022\021\n\tloadCount" +
-      "\030\031 \001(\003\022\032\n\022loadExceptionCount\030\032 \001(\003\022\031\n\021lo" +
-      "adExceptionRate\030\033 \001(\001\022\030\n\020loadSuccessCoun" +
-      "t\030\034 \001(\003\022\021\n\tmissCount\030\035 \001(\003\022\020\n\010missRate\030\036" +
-      " \001(\001\022\024\n\014requestCount\030\037 \001(\003\022\025\n\rtotalLoadT" +
-      "ime\030  \001(\003\"\037\n\nDSERequest\022\021\n\tpvolumeID\030\001 \001" +
-      "(\003\"z\n\013DSEResponse\022)\n\004info\030\001 \001(\0132\033.org.op" +
-      "endedup.grpc.DSEInfo\022\r\n\005error\030\002 \001(\t\0221\n\te" +
+      "edup.grpc.errorCodes\022\017\n\007evtPath\030  \001(\t\022\020\n" +
+      "\010replPath\030! \001(\t\"\337\001\n\nSystemInfo\022\025\n\ractive" +
+      "Threads\030\001 \001(\005\022\024\n\014blocksStored\030\002 \001(\005\022\027\n\017m" +
+      "axBlocksStored\030\003 \001(\005\022\022\n\ntotalSpace\030\004 \001(\003" +
+      "\022\021\n\tfreeSpace\030\005 \001(\003\022\024\n\014totalCpuLoad\030\006 \001(" +
+      "\001\022\020\n\010cpuCores\030\007 \001(\001\022\023\n\013sdfsCpuLoad\030\010 \001(\001" +
+      "\022\023\n\013totalMemory\030\n \001(\001\022\022\n\nfreeMemory\030\013 \001(" +
+      "\001\"&\n\021SystemInfoRequest\022\021\n\tpvolumeID\030\001 \001(" +
+      "\003\"\260\001\n\023ConnectedVolumeInfo\022\n\n\002id\030\001 \001(\003\022\r\n" +
+      "\005local\030\002 \001(\010\022\020\n\010hostname\030\003 \001(\t\022\014\n\004port\030\004" +
+      " \001(\005\022\014\n\004size\030\005 \001(\003\022\026\n\016compressedSize\030\006 \001" +
+      "(\003\022\023\n\013sdfsVersion\030\007 \001(\t\022\022\n\nlastUpdate\030\010 " +
+      "\001(\003\022\017\n\007version\030\t \001(\005\"&\n\021GCScheduleReques" +
+      "t\022\021\n\tpvolumeID\030\001 \001(\003\"h\n\022GCScheduleRespon" +
+      "se\022\020\n\010schedule\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\te" +
       "rrorCode\030\003 \001(\0162\036.org.opendedup.grpc.erro" +
-      "rCodes\"N\n\025AuthenticationRequest\022\020\n\010usern" +
-      "ame\030\001 \001(\t\022\020\n\010password\030\002 \001(\t\022\021\n\tpvolumeID" +
-      "\030\003 \001(\003\"i\n\026AuthenticationResponse\022\r\n\005toke" +
-      "n\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(" +
-      "\0162\036.org.opendedup.grpc.errorCodes\"\353\001\n\030Me" +
-      "ssageQueueInfoResponse\022\020\n\010hostName\030\001 \001(\t" +
-      "\022C\n\006mqType\030\002 \001(\01623.org.opendedup.grpc.Me" +
-      "ssageQueueInfoResponse.MQType\022\014\n\004port\030\003 " +
-      "\001(\005\022\r\n\005topic\030\004 \001(\t\022\020\n\010authInfo\030\005 \001(\t\022\024\n\014" +
-      "subScription\030\006 \001(\t\022\017\n\007project\030\007 \001(\t\"\"\n\006M" +
-      "QType\022\014\n\010RabbitMQ\020\000\022\n\n\006PubSub\020\001\"7\n\021Clean" +
-      "StoreRequest\022\017\n\007compact\030\001 \001(\010\022\021\n\tpvolume" +
-      "ID\030\002 \001(\003\"g\n\022CleanStoreResponse\022\017\n\007eventI" +
-      "D\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(" +
-      "\0162\036.org.opendedup.grpc.errorCodes\";\n\023Set" +
-      "CacheSizeRequest\022\021\n\tcacheSize\030\001 \001(\003\022\021\n\tp" +
-      "volumeID\030\002 \001(\003\"i\n\024SetCacheSizeResponse\022\017" +
-      "\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorC" +
-      "ode\030\003 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\"?\n\030DeleteCloudVolumeRequest\022\020\n\010rmvolum" +
-      "e\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"n\n\031DeleteClou" +
-      "dVolumeResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005erro" +
-      "r\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opended" +
-      "up.grpc.errorCodes\";\n\030SetVolumeCapacityR" +
-      "equest\022\014\n\004size\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"" +
-      "]\n\031SetVolumeCapacityResponse\022\r\n\005error\030\001 " +
-      "\001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup.g" +
-      "rpc.errorCodes\"9\n\022SetPasswordRequest\022\020\n\010" +
-      "password\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"W\n\023Set" +
-      "PasswordResponse\022\r\n\005error\030\001 \001(\t\0221\n\terror" +
-      "Code\030\002 \001(\0162\036.org.opendedup.grpc.errorCod" +
-      "es\"9\n\014SpeedRequest\022\026\n\016requestedSpeed\030\001 \001" +
-      "(\005\022\021\n\tpvolumeID\030\002 \001(\003\"b\n\rSpeedResponse\022\017" +
-      "\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorC" +
-      "ode\030\003 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\"L\n\022SyncFromVolRequest\022\020\n\010volumeid\030\001 \001(" +
-      "\003\022\021\n\tpvolumeID\030\002 \001(\003\022\021\n\toverwrite\030\003 \001(\010\"" +
-      "h\n\023SyncFromVolResponse\022\017\n\007eventID\030\001 \001(\t\022" +
-      "\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org." +
-      "opendedup.grpc.errorCodes\"#\n\016SyncVolRequ" +
-      "est\022\021\n\tpvolumeID\030\001 \001(\003\"d\n\017SyncVolRespons" +
-      "e\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terr" +
-      "orCode\030\003 \001(\0162\036.org.opendedup.grpc.errorC" +
-      "odes\"5\n\020SetMaxAgeRequest\022\016\n\006maxAge\030\001 \001(\003" +
-      "\022\021\n\tpvolumeID\030\002 \001(\003\"U\n\021SetMaxAgeResponse" +
-      "\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org" +
-      ".opendedup.grpc.errorCodes\"2\n\035ReconcileC" +
-      "loudMetadataRequest\022\021\n\tpvolumeID\030\003 \001(\003\"s" +
-      "\n\036ReconcileCloudMetadataResponse\022\r\n\005erro" +
-      "r\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opended" +
-      "up.grpc.errorCodes\022\017\n\007eventID\030\003 \001(\t2\370\r\n\r" +
-      "VolumeService\022i\n\020AuthenticateUser\022).org." +
-      "opendedup.grpc.AuthenticationRequest\032*.o" +
-      "rg.opendedup.grpc.AuthenticationResponse" +
-      "\022^\n\rGetVolumeInfo\022%.org.opendedup.grpc.V" +
-      "olumeInfoRequest\032&.org.opendedup.grpc.Vo" +
-      "lumeInfoResponse\022[\n\016ShutdownVolume\022#.org" +
-      ".opendedup.grpc.ShutdownRequest\032$.org.op" +
-      "endedup.grpc.ShutdownResponse\022[\n\nCleanSt" +
-      "ore\022%.org.opendedup.grpc.CleanStoreReque" +
-      "st\032&.org.opendedup.grpc.CleanStoreRespon" +
-      "se\022p\n\021DeleteCloudVolume\022,.org.opendedup." +
-      "grpc.DeleteCloudVolumeRequest\032-.org.open" +
-      "dedup.grpc.DeleteCloudVolumeResponse\022J\n\007" +
-      "DSEInfo\022\036.org.opendedup.grpc.DSERequest\032" +
-      "\037.org.opendedup.grpc.DSEResponse\022[\n\nSyst" +
-      "emInfo\022%.org.opendedup.grpc.SystemInfoRe" +
-      "quest\032&.org.opendedup.grpc.SystemInfoRes" +
-      "ponse\022p\n\021SetVolumeCapacity\022,.org.opended" +
-      "up.grpc.SetVolumeCapacityRequest\032-.org.o" +
-      "pendedup.grpc.SetVolumeCapacityResponse\022" +
-      "h\n\023GetConnectedVolumes\022\'.org.opendedup.g" +
-      "rpc.CloudVolumesRequest\032(.org.opendedup." +
-      "grpc.CloudVolumesResponse\022^\n\rGetGCSchedu" +
-      "le\022%.org.opendedup.grpc.GCScheduleReques" +
-      "t\032&.org.opendedup.grpc.GCScheduleRespons" +
-      "e\022a\n\014SetCacheSize\022\'.org.opendedup.grpc.S" +
-      "etCacheSizeRequest\032(.org.opendedup.grpc." +
-      "SetCacheSizeResponse\022^\n\013SetPassword\022&.or" +
-      "g.opendedup.grpc.SetPasswordRequest\032\'.or" +
-      "g.opendedup.grpc.SetPasswordResponse\022S\n\014" +
-      "SetReadSpeed\022 .org.opendedup.grpc.SpeedR" +
-      "equest\032!.org.opendedup.grpc.SpeedRespons" +
-      "e\022T\n\rSetWriteSpeed\022 .org.opendedup.grpc." +
-      "SpeedRequest\032!.org.opendedup.grpc.SpeedR" +
-      "esponse\022f\n\023SyncFromCloudVolume\022&.org.ope" +
-      "ndedup.grpc.SyncFromVolRequest\032\'.org.ope" +
-      "ndedup.grpc.SyncFromVolResponse\022Z\n\017SyncC" +
-      "loudVolume\022\".org.opendedup.grpc.SyncVolR" +
-      "equest\032#.org.opendedup.grpc.SyncVolRespo" +
-      "nse\022X\n\tSetMaxAge\022$.org.opendedup.grpc.Se" +
-      "tMaxAgeRequest\032%.org.opendedup.grpc.SetM" +
-      "axAgeResponse\022\177\n\026ReconcileCloudMetadata\022" +
-      "1.org.opendedup.grpc.ReconcileCloudMetad" +
-      "ataRequest\0322.org.opendedup.grpc.Reconcil" +
-      "eCloudMetadataResponseB0Z.github.com/ope" +
-      "ndedup/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "rCodes\"(\n\023CloudVolumesRequest\022\021\n\tpvolume" +
+      "ID\030\001 \001(\003\"\225\001\n\024CloudVolumesResponse\022;\n\nvol" +
+      "umeInfo\030\001 \003(\0132\'.org.opendedup.grpc.Conne" +
+      "ctedVolumeInfo\022\r\n\005error\030\002 \001(\t\0221\n\terrorCo" +
+      "de\030\003 \001(\0162\036.org.opendedup.grpc.errorCodes" +
+      "\"\204\001\n\022SystemInfoResponse\022,\n\004info\030\001 \001(\0132\036." +
+      "org.opendedup.grpc.SystemInfo\022\r\n\005error\030\002" +
+      " \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup." +
+      "grpc.errorCodes\"\261\005\n\007DSEInfo\022\017\n\007maxSize\030\001" +
+      " \001(\003\022\023\n\013currentSize\030\002 \001(\003\022\017\n\007entries\030\003 \001" +
+      "(\003\022\026\n\016compressedSize\030\004 \001(\003\022\022\n\nfreeBlocks" +
+      "\030\005 \001(\003\022\020\n\010pageSize\030\006 \001(\003\022\023\n\013storageType\030" +
+      "\007 \001(\t\022\022\n\nlistenPort\030\010 \001(\005\022\022\n\nlistenHost\030" +
+      "\t \001(\t\022\021\n\treadSpeed\030\n \001(\005\022\022\n\nwriteSpeed\030\013" +
+      " \001(\005\022\021\n\tcacheSize\030\014 \001(\003\022\024\n\014maxCacheSize\030" +
+      "\r \001(\003\022\027\n\017listenEncrypted\030\016 \001(\010\022\025\n\rencryp" +
+      "tionKey\030\017 \001(\t\022\024\n\014encryptionIV\030\020 \001(\t\022\026\n\016c" +
+      "loudAccessKey\030\021 \001(\t\022\026\n\016cloudSecretKey\030\022 " +
+      "\001(\t\022\022\n\nbucketName\030\023 \001(\t\022\016\n\006maxAge\030\024 \001(\003\022" +
+      "\032\n\022averageLoadPenalty\030\025 \001(\001\022\025\n\revictionC" +
+      "ount\030\026 \001(\003\022\020\n\010hitCount\030\027 \001(\003\022\017\n\007hitRate\030" +
+      "\030 \001(\001\022\021\n\tloadCount\030\031 \001(\003\022\032\n\022loadExceptio" +
+      "nCount\030\032 \001(\003\022\031\n\021loadExceptionRate\030\033 \001(\001\022" +
+      "\030\n\020loadSuccessCount\030\034 \001(\003\022\021\n\tmissCount\030\035" +
+      " \001(\003\022\020\n\010missRate\030\036 \001(\001\022\024\n\014requestCount\030\037" +
+      " \001(\003\022\025\n\rtotalLoadTime\030  \001(\003\"\037\n\nDSEReques" +
+      "t\022\021\n\tpvolumeID\030\001 \001(\003\"z\n\013DSEResponse\022)\n\004i" +
+      "nfo\030\001 \001(\0132\033.org.opendedup.grpc.DSEInfo\022\r" +
+      "\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.o" +
+      "pendedup.grpc.errorCodes\"N\n\025Authenticati" +
+      "onRequest\022\020\n\010username\030\001 \001(\t\022\020\n\010password\030" +
+      "\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\"i\n\026Authenticati" +
+      "onResponse\022\r\n\005token\030\001 \001(\t\022\r\n\005error\030\002 \001(\t" +
+      "\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc" +
+      ".errorCodes\"\353\001\n\030MessageQueueInfoResponse" +
+      "\022\020\n\010hostName\030\001 \001(\t\022C\n\006mqType\030\002 \001(\01623.org" +
+      ".opendedup.grpc.MessageQueueInfoResponse" +
+      ".MQType\022\014\n\004port\030\003 \001(\005\022\r\n\005topic\030\004 \001(\t\022\020\n\010" +
+      "authInfo\030\005 \001(\t\022\024\n\014subScription\030\006 \001(\t\022\017\n\007" +
+      "project\030\007 \001(\t\"\"\n\006MQType\022\014\n\010RabbitMQ\020\000\022\n\n" +
+      "\006PubSub\020\001\"7\n\021CleanStoreRequest\022\017\n\007compac" +
+      "t\030\001 \001(\010\022\021\n\tpvolumeID\030\002 \001(\003\"g\n\022CleanStore" +
+      "Response\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t" +
+      "\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc" +
+      ".errorCodes\";\n\023SetCacheSizeRequest\022\021\n\tca" +
+      "cheSize\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"i\n\024SetC" +
+      "acheSizeResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005err" +
+      "or\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opende" +
+      "dup.grpc.errorCodes\"?\n\030DeleteCloudVolume" +
+      "Request\022\020\n\010rmvolume\030\001 \001(\003\022\021\n\tpvolumeID\030\002" +
+      " \001(\003\"n\n\031DeleteCloudVolumeResponse\022\017\n\007eve" +
+      "ntID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003" +
+      " \001(\0162\036.org.opendedup.grpc.errorCodes\";\n\030" +
+      "SetVolumeCapacityRequest\022\014\n\004size\030\001 \001(\003\022\021" +
+      "\n\tpvolumeID\030\002 \001(\003\"]\n\031SetVolumeCapacityRe" +
+      "sponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\016" +
+      "2\036.org.opendedup.grpc.errorCodes\"9\n\022SetP" +
+      "asswordRequest\022\020\n\010password\030\001 \001(\t\022\021\n\tpvol" +
+      "umeID\030\002 \001(\003\"W\n\023SetPasswordResponse\022\r\n\005er" +
+      "ror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opend" +
+      "edup.grpc.errorCodes\"9\n\014SpeedRequest\022\026\n\016" +
+      "requestedSpeed\030\001 \001(\005\022\021\n\tpvolumeID\030\002 \001(\003\"" +
+      "b\n\rSpeedResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005err" +
+      "or\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opende" +
+      "dup.grpc.errorCodes\"L\n\022SyncFromVolReques" +
+      "t\022\020\n\010volumeid\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\022\021" +
+      "\n\toverwrite\030\003 \001(\010\"h\n\023SyncFromVolResponse" +
+      "\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terro" +
+      "rCode\030\003 \001(\0162\036.org.opendedup.grpc.errorCo" +
+      "des\"#\n\016SyncVolRequest\022\021\n\tpvolumeID\030\001 \001(\003" +
+      "\"d\n\017SyncVolResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005" +
+      "error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.ope" +
+      "ndedup.grpc.errorCodes\"5\n\020SetMaxAgeReque" +
+      "st\022\016\n\006maxAge\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"U\n" +
+      "\021SetMaxAgeResponse\022\r\n\005error\030\001 \001(\t\0221\n\terr" +
+      "orCode\030\002 \001(\0162\036.org.opendedup.grpc.errorC" +
+      "odes\"2\n\035ReconcileCloudMetadataRequest\022\021\n" +
+      "\tpvolumeID\030\003 \001(\003\"s\n\036ReconcileCloudMetada" +
+      "taResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002" +
+      " \001(\0162\036.org.opendedup.grpc.errorCodes\022\017\n\007" +
+      "eventID\030\003 \001(\t2\370\r\n\rVolumeService\022i\n\020Authe" +
+      "nticateUser\022).org.opendedup.grpc.Authent" +
+      "icationRequest\032*.org.opendedup.grpc.Auth" +
+      "enticationResponse\022^\n\rGetVolumeInfo\022%.or" +
+      "g.opendedup.grpc.VolumeInfoRequest\032&.org" +
+      ".opendedup.grpc.VolumeInfoResponse\022[\n\016Sh" +
+      "utdownVolume\022#.org.opendedup.grpc.Shutdo" +
+      "wnRequest\032$.org.opendedup.grpc.ShutdownR" +
+      "esponse\022[\n\nCleanStore\022%.org.opendedup.gr" +
+      "pc.CleanStoreRequest\032&.org.opendedup.grp" +
+      "c.CleanStoreResponse\022p\n\021DeleteCloudVolum" +
+      "e\022,.org.opendedup.grpc.DeleteCloudVolume" +
+      "Request\032-.org.opendedup.grpc.DeleteCloud" +
+      "VolumeResponse\022J\n\007DSEInfo\022\036.org.opendedu" +
+      "p.grpc.DSERequest\032\037.org.opendedup.grpc.D" +
+      "SEResponse\022[\n\nSystemInfo\022%.org.opendedup" +
+      ".grpc.SystemInfoRequest\032&.org.opendedup." +
+      "grpc.SystemInfoResponse\022p\n\021SetVolumeCapa" +
+      "city\022,.org.opendedup.grpc.SetVolumeCapac" +
+      "ityRequest\032-.org.opendedup.grpc.SetVolum" +
+      "eCapacityResponse\022h\n\023GetConnectedVolumes" +
+      "\022\'.org.opendedup.grpc.CloudVolumesReques" +
+      "t\032(.org.opendedup.grpc.CloudVolumesRespo" +
+      "nse\022^\n\rGetGCSchedule\022%.org.opendedup.grp" +
+      "c.GCScheduleRequest\032&.org.opendedup.grpc" +
+      ".GCScheduleResponse\022a\n\014SetCacheSize\022\'.or" +
+      "g.opendedup.grpc.SetCacheSizeRequest\032(.o" +
+      "rg.opendedup.grpc.SetCacheSizeResponse\022^" +
+      "\n\013SetPassword\022&.org.opendedup.grpc.SetPa" +
+      "sswordRequest\032\'.org.opendedup.grpc.SetPa" +
+      "sswordResponse\022S\n\014SetReadSpeed\022 .org.ope" +
+      "ndedup.grpc.SpeedRequest\032!.org.opendedup" +
+      ".grpc.SpeedResponse\022T\n\rSetWriteSpeed\022 .o" +
+      "rg.opendedup.grpc.SpeedRequest\032!.org.ope" +
+      "ndedup.grpc.SpeedResponse\022f\n\023SyncFromClo" +
+      "udVolume\022&.org.opendedup.grpc.SyncFromVo" +
+      "lRequest\032\'.org.opendedup.grpc.SyncFromVo" +
+      "lResponse\022Z\n\017SyncCloudVolume\022\".org.opend" +
+      "edup.grpc.SyncVolRequest\032#.org.opendedup" +
+      ".grpc.SyncVolResponse\022X\n\tSetMaxAge\022$.org" +
+      ".opendedup.grpc.SetMaxAgeRequest\032%.org.o" +
+      "pendedup.grpc.SetMaxAgeResponse\022\177\n\026Recon" +
+      "cileCloudMetadata\0221.org.opendedup.grpc.R" +
+      "econcileCloudMetadataRequest\0322.org.opend" +
+      "edup.grpc.ReconcileCloudMetadataResponse" +
+      "B0Z.github.com/opendedup/sdfs-client-go/" +
+      "sdfs/;sdfsb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -30373,7 +30514,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_VolumeInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_VolumeInfoResponse_descriptor,
-        new java.lang.String[] { "Path", "Name", "CurrentSize", "Capactity", "MaxPercentageFull", "DuplicateBytes", "ReadBytes", "WriteBytes", "SerialNumber", "DseSize", "DseCompSize", "ReadOps", "WriteOps", "ReadErrors", "WriteErrors", "Files", "ClosedGracefully", "AllowExternalLinks", "UsePerfMon", "ClusterId", "VolumeClustered", "ReadTimeoutSeconds", "WriteTimeoutSeconds", "CompressedMetaData", "SyncFiles", "MaxPageSize", "MessageQueue", "PerfMonFile", "Offline", "Error", "ErrorCode", "EvtPath", });
+        new java.lang.String[] { "Path", "Name", "CurrentSize", "Capactity", "MaxPercentageFull", "DuplicateBytes", "ReadBytes", "WriteBytes", "SerialNumber", "DseSize", "DseCompSize", "ReadOps", "WriteOps", "ReadErrors", "WriteErrors", "Files", "ClosedGracefully", "AllowExternalLinks", "UsePerfMon", "ClusterId", "VolumeClustered", "ReadTimeoutSeconds", "WriteTimeoutSeconds", "CompressedMetaData", "SyncFiles", "MaxPageSize", "MessageQueue", "PerfMonFile", "Offline", "Error", "ErrorCode", "EvtPath", "ReplPath", });
     internal_static_org_opendedup_grpc_SystemInfo_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_org_opendedup_grpc_SystemInfo_fieldAccessorTable = new

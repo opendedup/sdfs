@@ -46,6 +46,7 @@ message VolumeInfoResponse {
   string error = 30;
   errorCodes errorCode = 31;
   string evtPath =32;
+  string replPath =33;
 
 }
 

@@ -63,7 +63,7 @@ import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl.FileIOError;
-import org.opendedup.sdfs.mgmt.grpc.client.ReplicationClient;
+import org.opendedup.sdfs.mgmt.grpc.replication.ReplicationClient;
 import org.opendedup.sdfs.notification.ReplicationImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;

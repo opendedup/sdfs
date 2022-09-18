@@ -4,17 +4,17 @@ import java.io.IOException;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.filestore.gc.ManualGC;
-import org.w3c.dom.Element;
+import org.opendedup.sdfs.notification.SDFSEvent;
 
 public class CleanStoreCmd implements Runnable {
 	private boolean compact;
-	public Element getResult(boolean compact) throws IOException {
+	public SDFSEvent getResult(boolean compact) throws IOException {
 		this.compact = compact;
 		Thread th = new Thread(this);
 		th.start();
 		try {
 			Thread.sleep(300);
-			return ManualGC.evt.toXML();
+			return ManualGC.evt;
 		} catch (Exception e) {
 			throw new IOException(e);
 		}

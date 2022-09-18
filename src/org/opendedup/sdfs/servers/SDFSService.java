@@ -78,6 +78,8 @@ public class SDFSService {
 		SDFSLogger.createSdfsLogger();
 		SDFSLogger.getLog().debug("############# SDFSService Starting ##################");
 
+		SDFSEvent.init();
+
 		Main.mountEvent = SDFSEvent
 				.mountEvent("SDFS Version [" + Main.version + "] Mounting Volume from " + this.configFile);
 		if (HashFunctionPool.max_hash_cluster > 1)
@@ -172,6 +174,7 @@ public class SDFSService {
 			SDFSLogger.getLog().error("Unable to write volume config.", e);
 		}
 		evt.endEvent("Volume Unmounted");
+		SDFSEvent.close();
 		SDFSLogger.getLog().info("SDFS is Shut Down");
 	}
 }
