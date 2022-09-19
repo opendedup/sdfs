@@ -484,6 +484,7 @@ public class Volume {
 			rClient.replicationSink();
 			this.replClients.add(rClient);
 		}
+		writer.writeConfig();
 	}
 
 	public void removeReplicationClient(String url, long volumeID) throws Exception {
@@ -503,6 +504,7 @@ public class Volume {
 				throw new ReplicationClientNotExistsException();
 			}
 		}
+		writer.writeConfig();
 	}
 
 	public static class ReplicationClientExistsException extends Exception {

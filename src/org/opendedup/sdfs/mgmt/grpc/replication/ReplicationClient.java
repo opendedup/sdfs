@@ -236,6 +236,7 @@ public class ReplicationClient {
     }
 
     public void replicationSink() throws IOException {
+        SDFSLogger.getLog().info("Sink Started at sequence " + this.sequence);
 
         if (this.sequence == 0) {
             downloadThread = new Thread(new DownloadAll(this));
@@ -301,8 +302,10 @@ public class ReplicationClient {
                                 MetaFileStore.rename(_sf.getPath(), _df.getPath());
                             }
                             seq = rs.getSeq();
+                            SDFSLogger.getLog().info("Sequence = " + seq);
                             if (client.sequence < seq) {
                                 client.sequence = seq;
+                                SDFSLogger.getLog().info("Client Sequence = " + client.sequence);
                             }
 
                         }
@@ -398,6 +401,8 @@ public class ReplicationClient {
                             } else if (rs.getActionType() == actionType.MFILEDELETED) {
                                 String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
                                 File _f = new File(pt);
+                                FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                                 MetaFileStore.getMF(_f).clearRetentionLock();
                                 MetaFileStore.removeMetaFile(_f.getPath());
                             } else if (rs.getActionType() == actionType.MFILERENAMED) {
                                 String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
@@ -418,6 +423,7 @@ public class ReplicationClient {
                         }
                     }
                     seq = rs.getSeq();
+                   
 
                 }
             }
@@ -432,6 +438,7 @@ public class ReplicationClient {
             synchronized (client.activeImports) {
                 if (client.sequence < seq) {
                     client.sequence = seq;
+                    SDFSLogger.getLog().info("Client Sequence = " + client.sequence);
                 }
             }
         }
@@ -585,6 +592,8 @@ public class ReplicationClient {
                 String pt = Main.volume.getPath() + File.separator + this.dstFile;
                 File _f = new File(pt);
                 if (_f.exists()) {
+                    FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                    MetaFileStore.getMF(_f).clearRetentionLock();
                     MetaFileStore.removeMetaFile(_f.getPath());
                 }
                 try {
@@ -615,7 +624,9 @@ public class ReplicationClient {
                     mf.setDfGuid(ng);
                     mf.sync();
                     try {
-                        downloadDDB(mf, sguid);
+                        if(sguid != null && sguid.trim().length() > 0){
+                            downloadDDB(mf, sguid);
+                        }
                         FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
                         CloseFile.close(mf, true);
                     } catch (ReplicationCanceledException e) {
