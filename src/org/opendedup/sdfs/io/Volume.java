@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -30,13 +31,13 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import org.opendedup.grpc.VolumeServiceOuterClass.MessageQueueInfoResponse;
-import org.opendedup.grpc.VolumeServiceOuterClass.MessageQueueInfoResponse.MQType;
 import org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse;
 import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
+import org.opendedup.sdfs.mgmt.grpc.replication.ReplicationClient;
+import org.opendedup.sdfs.mgmt.grpc.replication.ReplicationService;
 import org.opendedup.sdfs.monitor.VolumeIOMeter;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -83,6 +84,7 @@ public class Volume {
 	private transient VolumeIOMeter ioMeter = null;
 	private String configPath = null;
 	private String uuid = null;
+	private ReplicationService rService = null;
 
 	AtomicLong writeErrors = new AtomicLong(0);
 	AtomicLong readErrors = new AtomicLong(0);
@@ -91,15 +93,9 @@ public class Volume {
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
 	public String connicalPath;
-	public String rabbitMQNode = null;
-	public String rabbitMQTopic = "sdfs";
-	public String rabbitMQUser = null;
-	public String rabbitMQPassword = null;
-	public int rabbitMQPort = 5672;
-	public String pubsubTopic = null;
-	public String pubsubSubscription = null;
-	public String gcpProject = null;
-	public String gcpCredsPath = null;
+	private boolean replEnabled = false;
+	public ArrayList<ReplicationClient> replClients = new ArrayList<ReplicationClient>();
+	Thread rChecker = null;
 
 	public boolean isClustered() {
 		return this.clustered;
@@ -192,12 +188,12 @@ public class Volume {
 					LinkOption.NOFOLLOW_LINKS);
 		}
 		this.path = pathF.getPath();
-		if(vol.hasAttribute("event-path")) {
+		if (vol.hasAttribute("event-path")) {
 			this.evtPath = vol.getAttribute("event-path");
 		} else {
 			this.evtPath = pathF.getParentFile().getPath() + File.separator + "evt";
 		}
-		if(vol.hasAttribute("repl-path")) {
+		if (vol.hasAttribute("repl-path")) {
 			this.replPath = vol.getAttribute("repl-path");
 		} else {
 			this.replPath = pathF.getParentFile().getPath() + File.separator + "repl";
@@ -206,10 +202,10 @@ public class Volume {
 		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
 		if (vol.hasAttribute("name")) {
 			this.name = vol.getAttribute("name");
-			Main.sdfsVolName=this.name;
+			Main.sdfsVolName = this.name;
 		} else {
 			this.name = pathF.getParentFile().getName();
-			Main.sdfsVolName=this.name;
+			Main.sdfsVolName = this.name;
 		}
 		if (vol.hasAttribute("read-timeout-seconds"))
 			Main.readTimeoutSeconds = Integer.parseInt(vol.getAttribute("read-timeout-seconds"));
@@ -238,6 +234,10 @@ public class Volume {
 		if (vol.hasAttribute("duplicate-bytes")) {
 			this.duplicateBytes.set(Long.parseLong(vol.getAttribute("duplicate-bytes")));
 		}
+		if (vol.hasAttribute("enable-repl")) {
+			this.replEnabled = Boolean.parseBoolean(vol.getAttribute("enable-repl"));
+		}
+
 		if (vol.hasAttribute("read-bytes")) {
 
 			this.readBytes.set(Double.parseDouble(vol.getAttribute("read-bytes")));
@@ -290,46 +290,43 @@ public class Volume {
 		else
 			SDFSLogger.getLog().info("Setting maximum capacity to infinite");
 		this.startThreads();
-
-		if (vol.getElementsByTagName("rabbitmq-node").getLength() > 0) {
-			Element el = (Element) vol.getElementsByTagName("rabbitmq-node").item(0);
-			this.rabbitMQNode = el.getAttribute("hostname");
-			if (el.hasAttribute("username"))
-				this.rabbitMQUser = el.getAttribute("username");
-			if (el.hasAttribute("password")) {
-				this.rabbitMQPassword = el.getAttribute("password");
-			}
-			if (el.hasAttribute("port")) {
-				this.rabbitMQPort = Integer.parseInt(el.getAttribute("port"));
-			}
-			if (el.hasAttribute("topic")) {
-				this.rabbitMQTopic = el.getAttribute("topic");
-			}
-
-		}
-		if (vol.getElementsByTagName("gcp-pubsub").getLength() > 0) {
-			SDFSLogger.getLog().info("Reading Pubsub Settings");
-			Element el = (Element) vol.getElementsByTagName("gcp-pubsub").item(0);
-			if (el.hasAttribute("topic")) {
-				this.pubsubTopic = el.getAttribute("topic");
-			} else {
-				this.pubsubTopic = "sdfsvolume";
-			}
-			if (el.hasAttribute("subscription")) {
-				this.pubsubSubscription = el.getAttribute("subscription");
-			} else {
-				this.pubsubSubscription = Long.toString(serialNumber);
-			}
-			this.gcpProject = el.getAttribute("project-id");
-			if (el.hasAttribute("auth-file")) {
-				this.gcpCredsPath = el.getAttribute("auth-file");
-			} else {
-				this.gcpCredsPath = null;
+		if (vol.getElementsByTagName("replica-source").getLength() > 0) {
+			for (int i = 0; i < vol.getElementsByTagName("replica-source").getLength(); i++) {
+				Element el = (Element) vol.getElementsByTagName("replica-source").item(i);
+				try {
+					ReplicationClient r = new ReplicationClient(el.getAttribute("url"),
+							Long.parseLong(el.getAttribute("volumeid")), Boolean.parseBoolean(el.getAttribute("mtls")));
+					r.sequence = Long.parseLong(el.getAttribute("sequence"));
+					this.replClients.add(r);
+				} catch (Exception e) {
+					SDFSLogger.getLog().warn("Unable to add replication client", e);
+				}
 			}
 		}
+		
 	}
 
 	public Volume() {
+
+	}
+
+	public void startReplClients() {
+		if (replEnabled) {
+			try {
+				this.rService = new ReplicationService(this);
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("Unable to start Replication Change Listener Server",e);
+			}
+		}
+		for (ReplicationClient rClient : this.replClients) {
+			try {
+				rClient.connect();
+			} catch (Exception e) {
+				SDFSLogger.getLog().warn("Unable to connect to " + rClient.url + " volumeid " + rClient.volumeid);
+			}
+		}
+		this.rChecker = new Thread(new ReplChecker(this));
+		this.rChecker.start();
 
 	}
 
@@ -398,14 +395,13 @@ public class Volume {
 		 */
 	}
 
-	public boolean isPartitionFull()
-	{
+	public boolean isPartitionFull() {
 		long avail = pathF.getUsableSpace();
 
 		if (avail < (1400000000)) {
-			if(!this.volumeFull) {
-			SDFSLogger.getLog().warn(
-					"Volume - Drive is almost full space left is [" + avail + "]");
+			if (!this.volumeFull) {
+				SDFSLogger.getLog().warn(
+						"Volume - Drive is almost full space left is [" + avail + "]");
 
 			}
 			this.volumeFull = true;
@@ -475,6 +471,52 @@ public class Volume {
 		return perfMonFile;
 	}
 
+	public void addReplicationClient(String url, long volumeID, boolean mtls) throws Exception {
+		url = url.toLowerCase();
+		synchronized (this.replClients) {
+			for (ReplicationClient rClient : this.replClients) {
+				if (url.equalsIgnoreCase(url) && volumeID == rClient.volumeid) {
+					throw new ReplicationClientExistsException();
+				}
+			}
+			ReplicationClient rClient = new ReplicationClient(url, volumeID, mtls);
+			rClient.connect();
+			rClient.replicationSink();
+			this.replClients.add(rClient);
+		}
+	}
+
+	public void removeReplicationClient(String url, long volumeID) throws Exception {
+		url = url.toLowerCase();
+		synchronized (this.replClients) {
+			ReplicationClient aClient = null;
+			for (ReplicationClient rClient : this.replClients) {
+				if (url.equalsIgnoreCase(url) && volumeID == rClient.volumeid) {
+					aClient = rClient;
+					break;
+				}
+			}
+			if (aClient != null) {
+				this.replClients.remove(aClient);
+				aClient.shutDown();
+			} else {
+				throw new ReplicationClientNotExistsException();
+			}
+		}
+	}
+
+	public static class ReplicationClientExistsException extends Exception {
+		public ReplicationClientExistsException() {
+			super();
+		}
+	}
+
+	public static class ReplicationClientNotExistsException extends Exception {
+		public ReplicationClientNotExistsException() {
+			super();
+		}
+	}
+
 	public void addWIO(boolean propigateEvent) {
 		long val = this.writeOperations.incrementAndGet();
 		if (this.writeOperations.get() == Long.MAX_VALUE)
@@ -495,6 +537,13 @@ public class Volume {
 	public Element toXMLElement(Document doc) throws ParserConfigurationException {
 		Element root = doc.createElement("volume");
 		root.setAttribute("path", path);
+		root.setAttribute("event-path", this.evtPath);
+		root.setAttribute("repl-path", this.replPath);
+		if (this.rService != null) {
+			root.setAttribute("enable-repl", Boolean.toString(true));
+		} else {
+			root.setAttribute("enable-repl", Boolean.toString(false));
+		}
 		root.setAttribute("name", this.name);
 		root.setAttribute("current-size", Long.toString(this.currentSize.get()));
 		root.setAttribute("capacity", StorageUnit.of(this.capacity).number_format(this.capacity));
@@ -528,42 +577,37 @@ public class Volume {
 			root.setAttribute("dse-comp-size", Long.toString(0));
 			root.setAttribute("dse-size", Long.toString(0));
 		}
-		if (this.rabbitMQNode != null) {
-			Element rmq = doc.createElement("rabbitmq-node");
-			rmq.setAttribute("hostname", this.rabbitMQNode);
-			rmq.setAttribute("port", Integer.toString(this.rabbitMQPort));
-			rmq.setAttribute("topic", this.rabbitMQTopic);
-			if (this.rabbitMQUser != null) {
-				rmq.setAttribute("username", this.rabbitMQUser);
-			}
-			if (this.rabbitMQPassword != null) {
-				rmq.setAttribute("password", this.rabbitMQPassword);
-			}
+		for (ReplicationClient rClient : this.replClients) {
+			Element rmq = doc.createElement("replica-source");
+			rmq.setAttribute("url", rClient.url);
+			rmq.setAttribute("mtls", Boolean.toString(rClient.mtls));
+			rmq.setAttribute("volumeid", Long.toString(rClient.volumeid));
+			rmq.setAttribute("sequence", Long.toString(rClient.sequence));
 			doc.adoptNode(rmq);
 			root.appendChild(rmq);
-		}
-		if (this.gcpProject != null) {
-			Element pbm = doc.createElement("gcp-pubsub");
-			pbm.setAttribute("project-id", this.gcpProject);
-			pbm.setAttribute("topic", this.pubsubTopic);
-			pbm.setAttribute("subscription", this.pubsubSubscription);
-			if (this.gcpCredsPath != null) {
-				pbm.setAttribute("auth-file", this.gcpCredsPath);
-			}
-			doc.adoptNode(pbm);
-			root.appendChild(pbm);
 		}
 		return root;
 	}
 
-	public String getEvtPath(){
+	public String getEvtPath() {
 		return this.evtPath;
 	}
+
+	public ReplicationService getRSerivce() {
+		return this.rService;
+	}
+
 	public Document toXMLDocument() throws ParserConfigurationException {
 		Document doc = XMLUtils.getXMLDoc("volume");
 		Element root = doc.getDocumentElement();
 		root.setAttribute("path", path);
 		root.setAttribute("event-path", this.evtPath);
+		root.setAttribute("repl-path", this.replPath);
+		if (this.rService != null) {
+			root.setAttribute("enable-repl", Boolean.toString(true));
+		} else {
+			root.setAttribute("enable-repl", Boolean.toString(false));
+		}
 		root.setAttribute("name", this.name);
 		root.setAttribute("current-size", Long.toString(this.currentSize.get()));
 		root.setAttribute("capacity", Long.toString(this.capacity));
@@ -594,31 +638,14 @@ public class Volume {
 		root.setAttribute("write-timeout-seconds", Integer.toString(Main.writeTimeoutSeconds));
 		root.setAttribute("compress-metadata", Boolean.toString(Main.COMPRESS_METADATA));
 		root.setAttribute("sync-files", Boolean.toString(Main.syncDL));
-
-		if (this.rabbitMQNode != null) {
-			Element rmq = doc.createElement("rabbitmq-node");
-			rmq.setAttribute("hostname", this.rabbitMQNode);
-			rmq.setAttribute("port", Integer.toString(this.rabbitMQPort));
-			rmq.setAttribute("topic", this.rabbitMQTopic);
-			if (this.rabbitMQUser != null) {
-				rmq.setAttribute("username", this.rabbitMQUser);
-			}
-			if (this.rabbitMQPassword != null) {
-				rmq.setAttribute("password", this.rabbitMQPassword);
-			}
+		for (ReplicationClient rClient : this.replClients) {
+			Element rmq = doc.createElement("replica-source");
+			rmq.setAttribute("url", rClient.url);
+			rmq.setAttribute("mtls", Boolean.toString(rClient.mtls));
+			rmq.setAttribute("volumeid", Long.toString(rClient.volumeid));
+			rmq.setAttribute("sequence", Long.toString(rClient.sequence));
 			doc.adoptNode(rmq);
 			root.appendChild(rmq);
-		}
-		if (this.gcpProject != null) {
-			Element pbm = doc.createElement("gcp-pubsub");
-			pbm.setAttribute("project-id", this.gcpProject);
-			pbm.setAttribute("topic", this.pubsubTopic);
-			pbm.setAttribute("subscription", this.pubsubSubscription);
-			if (this.gcpCredsPath != null) {
-				pbm.setAttribute("auth-file", this.gcpCredsPath);
-			}
-			doc.adoptNode(pbm);
-			root.appendChild(pbm);
 		}
 		return doc;
 	}
@@ -642,16 +669,18 @@ public class Volume {
 				.setPerfMonFile(this.perfMonFile).setReadTimeoutSeconds(Main.readTimeoutSeconds)
 				.setWriteTimeoutSeconds(Main.writeTimeoutSeconds).setCompressedMetaData(Main.COMPRESS_METADATA)
 				.setSyncFiles(Main.syncDL).setOffline(this.isOffLine());
-		if (this.rabbitMQNode != null) {
-			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setHostName(this.rabbitMQNode)
-					.setMqType(MQType.RabbitMQ).setPort(this.rabbitMQPort).setTopic(this.rabbitMQTopic);
-			b.addMessageQueue(mb);
+
+		if (this.rService != null) {
+			b.setReplEnabled(true);
 		}
-		if (this.gcpProject != null) {
-			MessageQueueInfoResponse.Builder mb = MessageQueueInfoResponse.newBuilder().setMqType(MQType.PubSub)
-					.setTopic(this.pubsubTopic).setSubScription(this.pubsubSubscription).setAuthInfo(this.gcpCredsPath)
-					.setProject(this.gcpProject);
-			b.addMessageQueue(mb);
+		for (ReplicationClient rClient : this.replClients) {
+			org.opendedup.grpc.VolumeServiceOuterClass.ReplicationClient.Builder rb = org.opendedup.grpc.VolumeServiceOuterClass.ReplicationClient
+					.newBuilder();
+			rb.setMtls(rClient.mtls);
+			rb.setUrl(rClient.url);
+			rb.setVolumeID(rClient.volumeid);
+			rb.setSequence(rClient.sequence);
+			b.addReplicationClient(rb.build());
 		}
 		return b.build();
 	}
@@ -716,5 +745,31 @@ public class Volume {
 
 	public void setSerialNumber(int serialNumber) {
 		this.serialNumber = serialNumber;
+	}
+
+	public static class ReplChecker implements Runnable {
+		Volume vol;
+
+		public ReplChecker(Volume vol) {
+			this.vol = vol;
+		}
+
+		@Override
+		public void run() {
+			for (;;) {
+				synchronized (vol.replClients) {
+					for (ReplicationClient rClient : vol.replClients) {
+						rClient.checkConnection();
+					}
+				}
+				try {
+					Thread.sleep(30 * 1000);
+				} catch (InterruptedException e) {
+					break;
+				}
+			}
+
+		}
+
 	}
 }

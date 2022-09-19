@@ -421,6 +421,99 @@ public final class StorageServiceGrpc {
     return getPauseReplicationMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.VolumeEventListenRequest,
+      org.opendedup.grpc.Storage.VolumeEvent> getListReplLogsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListReplLogs",
+      requestType = org.opendedup.grpc.Storage.VolumeEventListenRequest.class,
+      responseType = org.opendedup.grpc.Storage.VolumeEvent.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.VolumeEventListenRequest,
+      org.opendedup.grpc.Storage.VolumeEvent> getListReplLogsMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.VolumeEventListenRequest, org.opendedup.grpc.Storage.VolumeEvent> getListReplLogsMethod;
+    if ((getListReplLogsMethod = StorageServiceGrpc.getListReplLogsMethod) == null) {
+      synchronized (StorageServiceGrpc.class) {
+        if ((getListReplLogsMethod = StorageServiceGrpc.getListReplLogsMethod) == null) {
+          StorageServiceGrpc.getListReplLogsMethod = getListReplLogsMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.VolumeEventListenRequest, org.opendedup.grpc.Storage.VolumeEvent>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListReplLogs"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.VolumeEventListenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.VolumeEvent.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("ListReplLogs"))
+              .build();
+        }
+      }
+    }
+    return getListReplLogsMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.AddReplicaSourceRequest,
+      org.opendedup.grpc.Storage.AddReplicaSourceResponse> getAddReplicaSourceMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AddReplicaSource",
+      requestType = org.opendedup.grpc.Storage.AddReplicaSourceRequest.class,
+      responseType = org.opendedup.grpc.Storage.AddReplicaSourceResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.AddReplicaSourceRequest,
+      org.opendedup.grpc.Storage.AddReplicaSourceResponse> getAddReplicaSourceMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.AddReplicaSourceRequest, org.opendedup.grpc.Storage.AddReplicaSourceResponse> getAddReplicaSourceMethod;
+    if ((getAddReplicaSourceMethod = StorageServiceGrpc.getAddReplicaSourceMethod) == null) {
+      synchronized (StorageServiceGrpc.class) {
+        if ((getAddReplicaSourceMethod = StorageServiceGrpc.getAddReplicaSourceMethod) == null) {
+          StorageServiceGrpc.getAddReplicaSourceMethod = getAddReplicaSourceMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.AddReplicaSourceRequest, org.opendedup.grpc.Storage.AddReplicaSourceResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AddReplicaSource"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.AddReplicaSourceRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.AddReplicaSourceResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("AddReplicaSource"))
+              .build();
+        }
+      }
+    }
+    return getAddReplicaSourceMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.RemoveReplicaSourceRequest,
+      org.opendedup.grpc.Storage.RemoveReplicaSourceResponse> getRemoveReplicaSourceMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "RemoveReplicaSource",
+      requestType = org.opendedup.grpc.Storage.RemoveReplicaSourceRequest.class,
+      responseType = org.opendedup.grpc.Storage.RemoveReplicaSourceResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.RemoveReplicaSourceRequest,
+      org.opendedup.grpc.Storage.RemoveReplicaSourceResponse> getRemoveReplicaSourceMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.RemoveReplicaSourceRequest, org.opendedup.grpc.Storage.RemoveReplicaSourceResponse> getRemoveReplicaSourceMethod;
+    if ((getRemoveReplicaSourceMethod = StorageServiceGrpc.getRemoveReplicaSourceMethod) == null) {
+      synchronized (StorageServiceGrpc.class) {
+        if ((getRemoveReplicaSourceMethod = StorageServiceGrpc.getRemoveReplicaSourceMethod) == null) {
+          StorageServiceGrpc.getRemoveReplicaSourceMethod = getRemoveReplicaSourceMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.RemoveReplicaSourceRequest, org.opendedup.grpc.Storage.RemoveReplicaSourceResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RemoveReplicaSource"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.RemoveReplicaSourceRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.RemoveReplicaSourceResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("RemoveReplicaSource"))
+              .build();
+        }
+      }
+    }
+    return getRemoveReplicaSourceMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -563,6 +656,27 @@ public final class StorageServiceGrpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPauseReplicationMethod(), responseObserver);
     }
 
+    /**
+     */
+    public void listReplLogs(org.opendedup.grpc.Storage.VolumeEventListenRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.VolumeEvent> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListReplLogsMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void addReplicaSource(org.opendedup.grpc.Storage.AddReplicaSourceRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.AddReplicaSourceResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAddReplicaSourceMethod(), responseObserver);
+    }
+
+    /**
+     */
+    public void removeReplicaSource(org.opendedup.grpc.Storage.RemoveReplicaSourceRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.RemoveReplicaSourceResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRemoveReplicaSourceMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -656,6 +770,27 @@ public final class StorageServiceGrpc {
                 org.opendedup.grpc.Storage.PauseReplicationRequest,
                 org.opendedup.grpc.Storage.PauseReplicationResponse>(
                   this, METHODID_PAUSE_REPLICATION)))
+          .addMethod(
+            getListReplLogsMethod(),
+            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
+              new MethodHandlers<
+                org.opendedup.grpc.Storage.VolumeEventListenRequest,
+                org.opendedup.grpc.Storage.VolumeEvent>(
+                  this, METHODID_LIST_REPL_LOGS)))
+          .addMethod(
+            getAddReplicaSourceMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.Storage.AddReplicaSourceRequest,
+                org.opendedup.grpc.Storage.AddReplicaSourceResponse>(
+                  this, METHODID_ADD_REPLICA_SOURCE)))
+          .addMethod(
+            getRemoveReplicaSourceMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.Storage.RemoveReplicaSourceRequest,
+                org.opendedup.grpc.Storage.RemoveReplicaSourceResponse>(
+                  this, METHODID_REMOVE_REPLICA_SOURCE)))
           .build();
     }
   }
@@ -780,6 +915,30 @@ public final class StorageServiceGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getPauseReplicationMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     */
+    public void listReplLogs(org.opendedup.grpc.Storage.VolumeEventListenRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.VolumeEvent> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncServerStreamingCall(
+          getChannel().newCall(getListReplLogsMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void addReplicaSource(org.opendedup.grpc.Storage.AddReplicaSourceRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.AddReplicaSourceResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAddReplicaSourceMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public void removeReplicaSource(org.opendedup.grpc.Storage.RemoveReplicaSourceRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.RemoveReplicaSourceResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getRemoveReplicaSourceMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -892,6 +1051,28 @@ public final class StorageServiceGrpc {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getPauseReplicationMethod(), getCallOptions(), request);
     }
+
+    /**
+     */
+    public java.util.Iterator<org.opendedup.grpc.Storage.VolumeEvent> listReplLogs(
+        org.opendedup.grpc.Storage.VolumeEventListenRequest request) {
+      return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
+          getChannel(), getListReplLogsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.Storage.AddReplicaSourceResponse addReplicaSource(org.opendedup.grpc.Storage.AddReplicaSourceRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAddReplicaSourceMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.Storage.RemoveReplicaSourceResponse removeReplicaSource(org.opendedup.grpc.Storage.RemoveReplicaSourceRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getRemoveReplicaSourceMethod(), getCallOptions(), request);
+    }
   }
 
   /**
@@ -990,6 +1171,22 @@ public final class StorageServiceGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getPauseReplicationMethod(), getCallOptions()), request);
     }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.AddReplicaSourceResponse> addReplicaSource(
+        org.opendedup.grpc.Storage.AddReplicaSourceRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAddReplicaSourceMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.Storage.RemoveReplicaSourceResponse> removeReplicaSource(
+        org.opendedup.grpc.Storage.RemoveReplicaSourceRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getRemoveReplicaSourceMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_HASHING_INFO = 0;
@@ -1005,6 +1202,9 @@ public final class StorageServiceGrpc {
   private static final int METHODID_RESTORE_ARCHIVES = 10;
   private static final int METHODID_CANCEL_REPLICATION = 11;
   private static final int METHODID_PAUSE_REPLICATION = 12;
+  private static final int METHODID_LIST_REPL_LOGS = 13;
+  private static final int METHODID_ADD_REPLICA_SOURCE = 14;
+  private static final int METHODID_REMOVE_REPLICA_SOURCE = 15;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1074,6 +1274,18 @@ public final class StorageServiceGrpc {
         case METHODID_PAUSE_REPLICATION:
           serviceImpl.pauseReplication((org.opendedup.grpc.Storage.PauseReplicationRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.PauseReplicationResponse>) responseObserver);
+          break;
+        case METHODID_LIST_REPL_LOGS:
+          serviceImpl.listReplLogs((org.opendedup.grpc.Storage.VolumeEventListenRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.VolumeEvent>) responseObserver);
+          break;
+        case METHODID_ADD_REPLICA_SOURCE:
+          serviceImpl.addReplicaSource((org.opendedup.grpc.Storage.AddReplicaSourceRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.AddReplicaSourceResponse>) responseObserver);
+          break;
+        case METHODID_REMOVE_REPLICA_SOURCE:
+          serviceImpl.removeReplicaSource((org.opendedup.grpc.Storage.RemoveReplicaSourceRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.RemoveReplicaSourceResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -1149,6 +1361,9 @@ public final class StorageServiceGrpc {
               .addMethod(getRestoreArchivesMethod())
               .addMethod(getCancelReplicationMethod())
               .addMethod(getPauseReplicationMethod())
+              .addMethod(getListReplLogsMethod())
+              .addMethod(getAddReplicaSourceMethod())
+              .addMethod(getRemoveReplicaSourceMethod())
               .build();
         }
       }

@@ -5,12 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.concurrent.TimeoutException;
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.mgmt.grpc.IOServer;
-import org.opendedup.sdfs.mgmt.mqtt.MetaDataPush;
 import org.opendedup.util.FindOpenPort;
 import org.opendedup.util.KeyGenerator;
 
@@ -51,28 +49,12 @@ public class MgmtWebServer {
 
 				grpcServer = new IOServer();
 				grpcServer.start(useSSL, Main.sdfsCliRequireMutualTLSAuth, Main.sdfsCliListenAddr, Main.sdfsCliPort);
+				Main.volume.startReplClients();
 			} catch (InterruptedException | IOException e) {
 				SDFSLogger.getLog().error("unable to lock port",e);
 				throw new Exception(e);
 			} finally {
 				port.unlock();
-			}
-			if (Main.volume.rabbitMQNode != null) {
-				try {
-					new MetaDataPush(Main.volume.rabbitMQNode, Main.volume.rabbitMQPort, Main.volume.rabbitMQUser,
-							Main.volume.rabbitMQPassword, Main.volume.rabbitMQTopic);
-
-				} catch (TimeoutException e) {
-					throw new IOException(e);
-				}
-			}
-			if (Main.volume.pubsubTopic != null) {
-				try {
-					new org.opendedup.sdfs.mgmt.pubsub.MetaDataPush(Main.volume.pubsubTopic,
-							Main.volume.pubsubSubscription, Main.volume.gcpProject, Main.volume.gcpCredsPath);
-				} catch (TimeoutException e) {
-					throw new IOException(e);
-				}
 			}
 
 		}

@@ -4227,6 +4227,2714 @@ public final class Storage {
 
   }
 
+  public interface AddReplicaSourceRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.AddReplicaSourceRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     */
+    long getPvolumeID();
+
+    /**
+     * <code>int64 rvolumeID = 4;</code>
+     */
+    long getRvolumeID();
+
+    /**
+     * <code>string url = 5;</code>
+     */
+    java.lang.String getUrl();
+    /**
+     * <code>string url = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getUrlBytes();
+
+    /**
+     * <code>bool mtls = 6;</code>
+     */
+    boolean getMtls();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.AddReplicaSourceRequest}
+   */
+  public  static final class AddReplicaSourceRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.AddReplicaSourceRequest)
+      AddReplicaSourceRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AddReplicaSourceRequest.newBuilder() to construct.
+    private AddReplicaSourceRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AddReplicaSourceRequest() {
+      pvolumeID_ = 0L;
+      rvolumeID_ = 0L;
+      url_ = "";
+      mtls_ = false;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AddReplicaSourceRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 24: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
+            case 32: {
+
+              rvolumeID_ = input.readInt64();
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              url_ = s;
+              break;
+            }
+            case 48: {
+
+              mtls_ = input.readBool();
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.Storage.AddReplicaSourceRequest.class, org.opendedup.grpc.Storage.AddReplicaSourceRequest.Builder.class);
+    }
+
+    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     */
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
+    public static final int RVOLUMEID_FIELD_NUMBER = 4;
+    private long rvolumeID_;
+    /**
+     * <code>int64 rvolumeID = 4;</code>
+     */
+    public long getRvolumeID() {
+      return rvolumeID_;
+    }
+
+    public static final int URL_FIELD_NUMBER = 5;
+    private volatile java.lang.Object url_;
+    /**
+     * <code>string url = 5;</code>
+     */
+    public java.lang.String getUrl() {
+      java.lang.Object ref = url_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        url_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string url = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUrlBytes() {
+      java.lang.Object ref = url_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        url_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MTLS_FIELD_NUMBER = 6;
+    private boolean mtls_;
+    /**
+     * <code>bool mtls = 6;</code>
+     */
+    public boolean getMtls() {
+      return mtls_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(3, pvolumeID_);
+      }
+      if (rvolumeID_ != 0L) {
+        output.writeInt64(4, rvolumeID_);
+      }
+      if (!getUrlBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, url_);
+      }
+      if (mtls_ != false) {
+        output.writeBool(6, mtls_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, pvolumeID_);
+      }
+      if (rvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, rvolumeID_);
+      }
+      if (!getUrlBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, url_);
+      }
+      if (mtls_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(6, mtls_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.Storage.AddReplicaSourceRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.Storage.AddReplicaSourceRequest other = (org.opendedup.grpc.Storage.AddReplicaSourceRequest) obj;
+
+      boolean result = true;
+      result = result && (getPvolumeID()
+          == other.getPvolumeID());
+      result = result && (getRvolumeID()
+          == other.getRvolumeID());
+      result = result && getUrl()
+          .equals(other.getUrl());
+      result = result && (getMtls()
+          == other.getMtls());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
+      hash = (37 * hash) + RVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getRvolumeID());
+      hash = (37 * hash) + URL_FIELD_NUMBER;
+      hash = (53 * hash) + getUrl().hashCode();
+      hash = (37 * hash) + MTLS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getMtls());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.Storage.AddReplicaSourceRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.AddReplicaSourceRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.AddReplicaSourceRequest)
+        org.opendedup.grpc.Storage.AddReplicaSourceRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.Storage.AddReplicaSourceRequest.class, org.opendedup.grpc.Storage.AddReplicaSourceRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.Storage.AddReplicaSourceRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        pvolumeID_ = 0L;
+
+        rvolumeID_ = 0L;
+
+        url_ = "";
+
+        mtls_ = false;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.AddReplicaSourceRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.Storage.AddReplicaSourceRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.AddReplicaSourceRequest build() {
+        org.opendedup.grpc.Storage.AddReplicaSourceRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.AddReplicaSourceRequest buildPartial() {
+        org.opendedup.grpc.Storage.AddReplicaSourceRequest result = new org.opendedup.grpc.Storage.AddReplicaSourceRequest(this);
+        result.pvolumeID_ = pvolumeID_;
+        result.rvolumeID_ = rvolumeID_;
+        result.url_ = url_;
+        result.mtls_ = mtls_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.Storage.AddReplicaSourceRequest) {
+          return mergeFrom((org.opendedup.grpc.Storage.AddReplicaSourceRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.Storage.AddReplicaSourceRequest other) {
+        if (other == org.opendedup.grpc.Storage.AddReplicaSourceRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
+        if (other.getRvolumeID() != 0L) {
+          setRvolumeID(other.getRvolumeID());
+        }
+        if (!other.getUrl().isEmpty()) {
+          url_ = other.url_;
+          onChanged();
+        }
+        if (other.getMtls() != false) {
+          setMtls(other.getMtls());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.Storage.AddReplicaSourceRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.Storage.AddReplicaSourceRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       */
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long rvolumeID_ ;
+      /**
+       * <code>int64 rvolumeID = 4;</code>
+       */
+      public long getRvolumeID() {
+        return rvolumeID_;
+      }
+      /**
+       * <code>int64 rvolumeID = 4;</code>
+       */
+      public Builder setRvolumeID(long value) {
+        
+        rvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 rvolumeID = 4;</code>
+       */
+      public Builder clearRvolumeID() {
+        
+        rvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object url_ = "";
+      /**
+       * <code>string url = 5;</code>
+       */
+      public java.lang.String getUrl() {
+        java.lang.Object ref = url_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          url_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string url = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUrlBytes() {
+        java.lang.Object ref = url_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          url_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string url = 5;</code>
+       */
+      public Builder setUrl(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        url_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string url = 5;</code>
+       */
+      public Builder clearUrl() {
+        
+        url_ = getDefaultInstance().getUrl();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string url = 5;</code>
+       */
+      public Builder setUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        url_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean mtls_ ;
+      /**
+       * <code>bool mtls = 6;</code>
+       */
+      public boolean getMtls() {
+        return mtls_;
+      }
+      /**
+       * <code>bool mtls = 6;</code>
+       */
+      public Builder setMtls(boolean value) {
+        
+        mtls_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool mtls = 6;</code>
+       */
+      public Builder clearMtls() {
+        
+        mtls_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.AddReplicaSourceRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.AddReplicaSourceRequest)
+    private static final org.opendedup.grpc.Storage.AddReplicaSourceRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.Storage.AddReplicaSourceRequest();
+    }
+
+    public static org.opendedup.grpc.Storage.AddReplicaSourceRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AddReplicaSourceRequest>
+        PARSER = new com.google.protobuf.AbstractParser<AddReplicaSourceRequest>() {
+      @java.lang.Override
+      public AddReplicaSourceRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AddReplicaSourceRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AddReplicaSourceRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AddReplicaSourceRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.Storage.AddReplicaSourceRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AddReplicaSourceResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.AddReplicaSourceResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string error = 1;</code>
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.AddReplicaSourceResponse}
+   */
+  public  static final class AddReplicaSourceResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.AddReplicaSourceResponse)
+      AddReplicaSourceResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AddReplicaSourceResponse.newBuilder() to construct.
+    private AddReplicaSourceResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AddReplicaSourceResponse() {
+      error_ = "";
+      errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AddReplicaSourceResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.Storage.AddReplicaSourceResponse.class, org.opendedup.grpc.Storage.AddReplicaSourceResponse.Builder.class);
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 1;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 1;</code>
+     */
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 2;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(2, errorCode_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, errorCode_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.Storage.AddReplicaSourceResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.Storage.AddReplicaSourceResponse other = (org.opendedup.grpc.Storage.AddReplicaSourceResponse) obj;
+
+      boolean result = true;
+      result = result && getError()
+          .equals(other.getError());
+      result = result && errorCode_ == other.errorCode_;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.Storage.AddReplicaSourceResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.AddReplicaSourceResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.AddReplicaSourceResponse)
+        org.opendedup.grpc.Storage.AddReplicaSourceResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.Storage.AddReplicaSourceResponse.class, org.opendedup.grpc.Storage.AddReplicaSourceResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.Storage.AddReplicaSourceResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        error_ = "";
+
+        errorCode_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_AddReplicaSourceResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.AddReplicaSourceResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.Storage.AddReplicaSourceResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.AddReplicaSourceResponse build() {
+        org.opendedup.grpc.Storage.AddReplicaSourceResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.AddReplicaSourceResponse buildPartial() {
+        org.opendedup.grpc.Storage.AddReplicaSourceResponse result = new org.opendedup.grpc.Storage.AddReplicaSourceResponse(this);
+        result.error_ = error_;
+        result.errorCode_ = errorCode_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.Storage.AddReplicaSourceResponse) {
+          return mergeFrom((org.opendedup.grpc.Storage.AddReplicaSourceResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.Storage.AddReplicaSourceResponse other) {
+        if (other == org.opendedup.grpc.Storage.AddReplicaSourceResponse.getDefaultInstance()) return this;
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.Storage.AddReplicaSourceResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.Storage.AddReplicaSourceResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 1;</code>
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public Builder setErrorCodeValue(int value) {
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.AddReplicaSourceResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.AddReplicaSourceResponse)
+    private static final org.opendedup.grpc.Storage.AddReplicaSourceResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.Storage.AddReplicaSourceResponse();
+    }
+
+    public static org.opendedup.grpc.Storage.AddReplicaSourceResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AddReplicaSourceResponse>
+        PARSER = new com.google.protobuf.AbstractParser<AddReplicaSourceResponse>() {
+      @java.lang.Override
+      public AddReplicaSourceResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AddReplicaSourceResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AddReplicaSourceResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AddReplicaSourceResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.Storage.AddReplicaSourceResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RemoveReplicaSourceRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.RemoveReplicaSourceRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     */
+    long getPvolumeID();
+
+    /**
+     * <code>int64 rvolumeID = 4;</code>
+     */
+    long getRvolumeID();
+
+    /**
+     * <code>string url = 5;</code>
+     */
+    java.lang.String getUrl();
+    /**
+     * <code>string url = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getUrlBytes();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.RemoveReplicaSourceRequest}
+   */
+  public  static final class RemoveReplicaSourceRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RemoveReplicaSourceRequest)
+      RemoveReplicaSourceRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RemoveReplicaSourceRequest.newBuilder() to construct.
+    private RemoveReplicaSourceRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RemoveReplicaSourceRequest() {
+      pvolumeID_ = 0L;
+      rvolumeID_ = 0L;
+      url_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RemoveReplicaSourceRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 24: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
+            case 32: {
+
+              rvolumeID_ = input.readInt64();
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              url_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.Storage.RemoveReplicaSourceRequest.class, org.opendedup.grpc.Storage.RemoveReplicaSourceRequest.Builder.class);
+    }
+
+    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     */
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
+    public static final int RVOLUMEID_FIELD_NUMBER = 4;
+    private long rvolumeID_;
+    /**
+     * <code>int64 rvolumeID = 4;</code>
+     */
+    public long getRvolumeID() {
+      return rvolumeID_;
+    }
+
+    public static final int URL_FIELD_NUMBER = 5;
+    private volatile java.lang.Object url_;
+    /**
+     * <code>string url = 5;</code>
+     */
+    public java.lang.String getUrl() {
+      java.lang.Object ref = url_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        url_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string url = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUrlBytes() {
+      java.lang.Object ref = url_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        url_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(3, pvolumeID_);
+      }
+      if (rvolumeID_ != 0L) {
+        output.writeInt64(4, rvolumeID_);
+      }
+      if (!getUrlBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, url_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, pvolumeID_);
+      }
+      if (rvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, rvolumeID_);
+      }
+      if (!getUrlBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, url_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.Storage.RemoveReplicaSourceRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.Storage.RemoveReplicaSourceRequest other = (org.opendedup.grpc.Storage.RemoveReplicaSourceRequest) obj;
+
+      boolean result = true;
+      result = result && (getPvolumeID()
+          == other.getPvolumeID());
+      result = result && (getRvolumeID()
+          == other.getRvolumeID());
+      result = result && getUrl()
+          .equals(other.getUrl());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
+      hash = (37 * hash) + RVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getRvolumeID());
+      hash = (37 * hash) + URL_FIELD_NUMBER;
+      hash = (53 * hash) + getUrl().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.Storage.RemoveReplicaSourceRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.RemoveReplicaSourceRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.RemoveReplicaSourceRequest)
+        org.opendedup.grpc.Storage.RemoveReplicaSourceRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.Storage.RemoveReplicaSourceRequest.class, org.opendedup.grpc.Storage.RemoveReplicaSourceRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.Storage.RemoveReplicaSourceRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        pvolumeID_ = 0L;
+
+        rvolumeID_ = 0L;
+
+        url_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.RemoveReplicaSourceRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.Storage.RemoveReplicaSourceRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.RemoveReplicaSourceRequest build() {
+        org.opendedup.grpc.Storage.RemoveReplicaSourceRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.RemoveReplicaSourceRequest buildPartial() {
+        org.opendedup.grpc.Storage.RemoveReplicaSourceRequest result = new org.opendedup.grpc.Storage.RemoveReplicaSourceRequest(this);
+        result.pvolumeID_ = pvolumeID_;
+        result.rvolumeID_ = rvolumeID_;
+        result.url_ = url_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.Storage.RemoveReplicaSourceRequest) {
+          return mergeFrom((org.opendedup.grpc.Storage.RemoveReplicaSourceRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.Storage.RemoveReplicaSourceRequest other) {
+        if (other == org.opendedup.grpc.Storage.RemoveReplicaSourceRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
+        if (other.getRvolumeID() != 0L) {
+          setRvolumeID(other.getRvolumeID());
+        }
+        if (!other.getUrl().isEmpty()) {
+          url_ = other.url_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.Storage.RemoveReplicaSourceRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.Storage.RemoveReplicaSourceRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       */
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long rvolumeID_ ;
+      /**
+       * <code>int64 rvolumeID = 4;</code>
+       */
+      public long getRvolumeID() {
+        return rvolumeID_;
+      }
+      /**
+       * <code>int64 rvolumeID = 4;</code>
+       */
+      public Builder setRvolumeID(long value) {
+        
+        rvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 rvolumeID = 4;</code>
+       */
+      public Builder clearRvolumeID() {
+        
+        rvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object url_ = "";
+      /**
+       * <code>string url = 5;</code>
+       */
+      public java.lang.String getUrl() {
+        java.lang.Object ref = url_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          url_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string url = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUrlBytes() {
+        java.lang.Object ref = url_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          url_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string url = 5;</code>
+       */
+      public Builder setUrl(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        url_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string url = 5;</code>
+       */
+      public Builder clearUrl() {
+        
+        url_ = getDefaultInstance().getUrl();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string url = 5;</code>
+       */
+      public Builder setUrlBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        url_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.RemoveReplicaSourceRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.RemoveReplicaSourceRequest)
+    private static final org.opendedup.grpc.Storage.RemoveReplicaSourceRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.Storage.RemoveReplicaSourceRequest();
+    }
+
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RemoveReplicaSourceRequest>
+        PARSER = new com.google.protobuf.AbstractParser<RemoveReplicaSourceRequest>() {
+      @java.lang.Override
+      public RemoveReplicaSourceRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RemoveReplicaSourceRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RemoveReplicaSourceRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RemoveReplicaSourceRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.Storage.RemoveReplicaSourceRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RemoveReplicaSourceResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.RemoveReplicaSourceResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string error = 1;</code>
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.RemoveReplicaSourceResponse}
+   */
+  public  static final class RemoveReplicaSourceResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RemoveReplicaSourceResponse)
+      RemoveReplicaSourceResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RemoveReplicaSourceResponse.newBuilder() to construct.
+    private RemoveReplicaSourceResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RemoveReplicaSourceResponse() {
+      error_ = "";
+      errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RemoveReplicaSourceResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.Storage.RemoveReplicaSourceResponse.class, org.opendedup.grpc.Storage.RemoveReplicaSourceResponse.Builder.class);
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 1;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 1;</code>
+     */
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 2;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(2, errorCode_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, errorCode_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.Storage.RemoveReplicaSourceResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.Storage.RemoveReplicaSourceResponse other = (org.opendedup.grpc.Storage.RemoveReplicaSourceResponse) obj;
+
+      boolean result = true;
+      result = result && getError()
+          .equals(other.getError());
+      result = result && errorCode_ == other.errorCode_;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.Storage.RemoveReplicaSourceResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.RemoveReplicaSourceResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.RemoveReplicaSourceResponse)
+        org.opendedup.grpc.Storage.RemoveReplicaSourceResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.Storage.RemoveReplicaSourceResponse.class, org.opendedup.grpc.Storage.RemoveReplicaSourceResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.Storage.RemoveReplicaSourceResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        error_ = "";
+
+        errorCode_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.RemoveReplicaSourceResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.Storage.RemoveReplicaSourceResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.RemoveReplicaSourceResponse build() {
+        org.opendedup.grpc.Storage.RemoveReplicaSourceResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.RemoveReplicaSourceResponse buildPartial() {
+        org.opendedup.grpc.Storage.RemoveReplicaSourceResponse result = new org.opendedup.grpc.Storage.RemoveReplicaSourceResponse(this);
+        result.error_ = error_;
+        result.errorCode_ = errorCode_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.Storage.RemoveReplicaSourceResponse) {
+          return mergeFrom((org.opendedup.grpc.Storage.RemoveReplicaSourceResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.Storage.RemoveReplicaSourceResponse other) {
+        if (other == org.opendedup.grpc.Storage.RemoveReplicaSourceResponse.getDefaultInstance()) return this;
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.Storage.RemoveReplicaSourceResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.Storage.RemoveReplicaSourceResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 1;</code>
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 1;</code>
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 1;</code>
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public Builder setErrorCodeValue(int value) {
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.RemoveReplicaSourceResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.RemoveReplicaSourceResponse)
+    private static final org.opendedup.grpc.Storage.RemoveReplicaSourceResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.Storage.RemoveReplicaSourceResponse();
+    }
+
+    public static org.opendedup.grpc.Storage.RemoveReplicaSourceResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RemoveReplicaSourceResponse>
+        PARSER = new com.google.protobuf.AbstractParser<RemoveReplicaSourceResponse>() {
+      @java.lang.Override
+      public RemoveReplicaSourceResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RemoveReplicaSourceResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RemoveReplicaSourceResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RemoveReplicaSourceResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.Storage.RemoveReplicaSourceResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface FileReplicationResponseOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.FileReplicationResponse)
       com.google.protobuf.MessageOrBuilder {
@@ -25337,6 +28045,11 @@ public final class Storage {
      * <code>int64 pvolumeID = 1;</code>
      */
     long getPvolumeID();
+
+    /**
+     * <code>int64 startSequence = 2;</code>
+     */
+    long getStartSequence();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.VolumeEventListenRequest}
@@ -25352,6 +28065,7 @@ public final class Storage {
     }
     private VolumeEventListenRequest() {
       pvolumeID_ = 0L;
+      startSequence_ = 0L;
     }
 
     @java.lang.Override
@@ -25381,6 +28095,11 @@ public final class Storage {
             case 8: {
 
               pvolumeID_ = input.readInt64();
+              break;
+            }
+            case 16: {
+
+              startSequence_ = input.readInt64();
               break;
             }
             default: {
@@ -25424,6 +28143,15 @@ public final class Storage {
       return pvolumeID_;
     }
 
+    public static final int STARTSEQUENCE_FIELD_NUMBER = 2;
+    private long startSequence_;
+    /**
+     * <code>int64 startSequence = 2;</code>
+     */
+    public long getStartSequence() {
+      return startSequence_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -25441,6 +28169,9 @@ public final class Storage {
       if (pvolumeID_ != 0L) {
         output.writeInt64(1, pvolumeID_);
       }
+      if (startSequence_ != 0L) {
+        output.writeInt64(2, startSequence_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -25453,6 +28184,10 @@ public final class Storage {
       if (pvolumeID_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(1, pvolumeID_);
+      }
+      if (startSequence_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, startSequence_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -25472,6 +28207,8 @@ public final class Storage {
       boolean result = true;
       result = result && (getPvolumeID()
           == other.getPvolumeID());
+      result = result && (getStartSequence()
+          == other.getStartSequence());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -25486,6 +28223,9 @@ public final class Storage {
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getPvolumeID());
+      hash = (37 * hash) + STARTSEQUENCE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getStartSequence());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -25621,6 +28361,8 @@ public final class Storage {
         super.clear();
         pvolumeID_ = 0L;
 
+        startSequence_ = 0L;
+
         return this;
       }
 
@@ -25648,6 +28390,7 @@ public final class Storage {
       public org.opendedup.grpc.Storage.VolumeEventListenRequest buildPartial() {
         org.opendedup.grpc.Storage.VolumeEventListenRequest result = new org.opendedup.grpc.Storage.VolumeEventListenRequest(this);
         result.pvolumeID_ = pvolumeID_;
+        result.startSequence_ = startSequence_;
         onBuilt();
         return result;
       }
@@ -25698,6 +28441,9 @@ public final class Storage {
         if (other == org.opendedup.grpc.Storage.VolumeEventListenRequest.getDefaultInstance()) return this;
         if (other.getPvolumeID() != 0L) {
           setPvolumeID(other.getPvolumeID());
+        }
+        if (other.getStartSequence() != 0L) {
+          setStartSequence(other.getStartSequence());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -25750,6 +28496,32 @@ public final class Storage {
       public Builder clearPvolumeID() {
         
         pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long startSequence_ ;
+      /**
+       * <code>int64 startSequence = 2;</code>
+       */
+      public long getStartSequence() {
+        return startSequence_;
+      }
+      /**
+       * <code>int64 startSequence = 2;</code>
+       */
+      public Builder setStartSequence(long value) {
+        
+        startSequence_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 startSequence = 2;</code>
+       */
+      public Builder clearStartSequence() {
+        
+        startSequence_ = 0L;
         onChanged();
         return this;
       }
@@ -25831,6 +28603,26 @@ public final class Storage {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_FileReplicationRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_AddReplicaSourceRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_AddReplicaSourceRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_AddReplicaSourceResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_AddReplicaSourceResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_FileReplicationResponse_descriptor;
   private static final 
@@ -25983,133 +28775,151 @@ public final class Storage {
       "plicationRequest\022\023\n\013srcFilePath\030\001 \001(\t\022\023\n" +
       "\013dstFilePath\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\022\021\n" +
       "\trvolumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\022\014\n\004mtls\030\006 " +
-      "\001(\010\"l\n\027FileReplicationResponse\022\r\n\005error\030" +
-      "\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup" +
-      ".grpc.errorCodes\022\017\n\007eventID\030\003 \001(\t\"@\n\031Met" +
-      "aDataDedupeFileRequest\022\020\n\010filePath\030\001 \001(\t" +
-      "\022\021\n\tpvolumeID\030\002 \001(\003\"\243\001\n\032MetaDataDedupeFi" +
-      "leResponse\0222\n\004file\030\001 \001(\0132$.org.opendedup" +
-      ".grpc.FileInfoResponse\0221\n\terrorCode\030\002 \001(" +
-      "\0162\036.org.opendedup.grpc.errorCodes\022\r\n\005err" +
-      "or\030\003 \001(\t\022\017\n\007eventID\030\004 \001(\t\":\n\027SparseDedup" +
-      "eFileRequest\022\014\n\004guid\030\001 \001(\t\022\021\n\tpvolumeID\030" +
-      "\002 \001(\003\"\222\001\n\030SparseDedupeFileResponse\0224\n\006ch" +
-      "unks\030\001 \003(\0132$.org.opendedup.grpc.SparseDa" +
-      "taChunkP\0221\n\terrorCode\030\002 \001(\0162\036.org.opende" +
-      "dup.grpc.errorCodes\022\r\n\005error\030\003 \001(\t\"\200\001\n\rC" +
-      "hunkResponse\022\014\n\004data\030\001 \001(\014\022\013\n\003len\030\002 \001(\005\022" +
-      "\r\n\005error\030\003 \001(\t\0221\n\terrorCode\030\004 \001(\0162\036.org." +
-      "opendedup.grpc.errorCodes\022\022\n\ncompressed\030" +
-      "\005 \001(\010\"\252\001\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014\022\014\n\004da" +
-      "ta\030\002 \001(\014\022\022\n\ncompressed\030\003 \001(\010\022\030\n\020compress" +
-      "edLength\030\004 \001(\005\022\020\n\010location\030\005 \001(\003\0221\n\terro" +
-      "rCode\030\006 \001(\0162\036.org.opendedup.grpc.errorCo" +
-      "des\022\r\n\005error\030\007 \001(\t\"k\n\022WriteChunksRequest" +
-      "\022.\n\006chunks\030\001 \003(\0132\036.org.opendedup.grpc.Ch" +
-      "unkEntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolumeI" +
-      "D\030\003 \001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005error" +
-      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
-      "p.grpc.errorCodes\0227\n\rinsertRecords\030\003 \003(\013" +
-      "2 .org.opendedup.grpc.InsertRecord\"U\n\020Ge" +
-      "tChunksRequest\022.\n\006chunks\030\001 \003(\0132\036.org.ope" +
-      "ndedup.grpc.ChunkEntry\022\021\n\tpvolumeID\030\002 \001(" +
-      "\003\"\231\001\n\022HashingInfoRequest\022.\n\006chunks\030\001 \003(\013" +
-      "2\036.org.opendedup.grpc.ChunkEntry\022\r\n\005erro" +
-      "r\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opended" +
-      "up.grpc.errorCodes\022\021\n\tpvolumeID\030\004 \001(\003\"\204\001" +
-      "\n\014HashLocPairP\022\014\n\004hash\030\001 \001(\014\022\017\n\007hashloc\030" +
-      "\002 \001(\003\022\013\n\003len\030\003 \001(\005\022\013\n\003pos\030\004 \001(\005\022\016\n\006offse" +
-      "t\030\005 \001(\005\022\014\n\004nlen\030\006 \001(\005\022\013\n\003dup\030\007 \001(\010\022\020\n\010in" +
-      "serted\030\010 \001(\010\"L\n\027PauseReplicationRequest\022" +
-      "\017\n\007eventID\030\001 \001(\t\022\r\n\005pause\030\002 \001(\010\022\021\n\tpvolu" +
-      "meID\030\003 \001(\003\"\\\n\030PauseReplicationResponse\022\r" +
-      "\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.o" +
-      "pendedup.grpc.errorCodes\">\n\030CancelReplic" +
-      "ationRequest\022\017\n\007eventID\030\001 \001(\t\022\021\n\tpvolume" +
-      "ID\030\002 \001(\003\"]\n\031CancelReplicationResponse\022\r\n" +
-      "\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.op" +
-      "endedup.grpc.errorCodes\"\365\002\n\020SparseDataCh" +
-      "unkP\022\014\n\004fpos\030\001 \001(\003\022\013\n\003len\030\002 \001(\005\0222\n\005flags" +
-      "\030\003 \003(\0162#.org.opendedup.grpc.SparseDataFl" +
-      "ags\022\017\n\007version\030\004 \001(\005\0228\n\002ar\030\005 \003(\0132,.org.o" +
-      "pendedup.grpc.SparseDataChunkP.ArEntry\022\014" +
-      "\n\004doop\030\006 \001(\005\022\020\n\010prevdoop\030\007 \001(\005\022\030\n\020compre" +
-      "ssedLength\030\010 \001(\005\022\r\n\005error\030\t \001(\t\0221\n\terror" +
-      "Code\030\n \001(\0162\036.org.opendedup.grpc.errorCod" +
-      "es\032K\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005value\030\002 \001(" +
-      "\0132 .org.opendedup.grpc.HashLocPairP:\0028\001\"" +
-      "\327\001\n\035SparseDedupeChunkWriteRequest\0223\n\005chu" +
-      "nk\030\001 \001(\0132$.org.opendedup.grpc.SparseData" +
-      "ChunkP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014fileLocati" +
-      "on\030\003 \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\022\022\n\ncompresse" +
-      "d\030\005 \001(\010\022\027\n\017compressedChunk\030\006 \001(\014\022\027\n\017unco" +
-      "mpressedLen\030\007 \001(\005\"b\n\036SparseDedupeChunkWr" +
-      "iteResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
-      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"U\n" +
-      "\034SparseDedupeChunkReadRequest\022\016\n\006offset\030" +
-      "\001 \001(\003\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolumeID\030\003" +
-      " \001(\003\"\226\001\n\035SparseDedupeChunkReadResponse\022\r" +
-      "\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.o" +
-      "pendedup.grpc.errorCodes\0223\n\005chunk\030\003 \001(\0132" +
-      "$.org.opendedup.grpc.SparseDataChunkP\"\206\002" +
-      "\n\023HashingInfoResponse\022\021\n\tchunkSize\030\001 \001(\003" +
-      "\022\026\n\016minSegmentSize\030\002 \001(\003\022\026\n\016maxSegmentSi" +
-      "ze\030\003 \001(\003\022\022\n\npolyNumber\030\004 \001(\003\022\022\n\nwindowSi" +
-      "ze\030\005 \001(\003\022.\n\010hashtype\030\006 \001(\0162\034.org.opended" +
-      "up.grpc.hashtype\022\022\n\nmapVersion\030\007 \001(\005\022\r\n\005" +
-      "error\030\010 \001(\t\0221\n\terrorCode\030\t \001(\0162\036.org.ope" +
-      "ndedup.grpc.errorCodes\"K\n\014InsertRecord\022\017" +
-      "\n\007hashloc\030\001 \001(\003\022\020\n\010inserted\030\002 \001(\010\022\030\n\020com" +
-      "pressedLength\030\003 \001(\005\"\207\002\n\013VolumeEvent\0222\n\004f" +
-      "ile\030\001 \001(\0132$.org.opendedup.grpc.FileInfoR" +
-      "esponse\022\014\n\004uuid\030\002 \001(\t\022\021\n\ttimeStamp\030\003 \001(\003" +
-      "\022\013\n\003seq\030\004 \001(\003\0222\n\nactionType\030\005 \001(\0162\036.org." +
-      "opendedup.grpc.actionType\022\r\n\005error\030\006 \001(\t" +
-      "\0221\n\terrorCode\030\007 \001(\0162\036.org.opendedup.grpc" +
-      ".errorCodes\022\017\n\007srcfile\030\010 \001(\t\022\017\n\007dstfile\030" +
-      "\t \001(\t\"-\n\030VolumeEventListenRequest\022\021\n\tpvo" +
-      "lumeID\030\001 \001(\003*$\n\017SparseDataFlags\022\021\n\rRECON" +
-      "STRUCTED\020\000*f\n\nactionType\022\020\n\014MFILEDELETED" +
-      "\020\000\022\020\n\014MFILEWRITTEN\020\001\022\020\n\014MFILERENAMED\020\002\022\020" +
-      "\n\014SFILEWRITTEN\020\003\022\020\n\014SFILEDELETED\020\004*0\n\010ha" +
-      "shtype\022\n\n\006SHA256\020\000\022\007\n\003MD5\020\001\022\017\n\013UNSUPPORT" +
-      "ED\020\0022\207\013\n\016StorageService\022^\n\013HashingInfo\022&" +
-      ".org.opendedup.grpc.HashingInfoRequest\032\'" +
-      ".org.opendedup.grpc.HashingInfoResponse\022" +
-      "^\n\013CheckHashes\022&.org.opendedup.grpc.Chec" +
-      "kHashesRequest\032\'.org.opendedup.grpc.Chec" +
-      "kHashesResponse\022^\n\013WriteChunks\022&.org.ope" +
-      "ndedup.grpc.WriteChunksRequest\032\'.org.ope" +
-      "ndedup.grpc.WriteChunksResponse\022S\n\tGetCh" +
-      "unks\022$.org.opendedup.grpc.GetChunksReque" +
-      "st\032\036.org.opendedup.grpc.ChunkEntry0\001\022d\n\021" +
-      "SubscribeToVolume\022,.org.opendedup.grpc.V" +
-      "olumeEventListenRequest\032\037.org.opendedup." +
-      "grpc.VolumeEvent0\001\022}\n\024WriteSparseDataChu" +
-      "nk\0221.org.opendedup.grpc.SparseDedupeChun" +
-      "kWriteRequest\0322.org.opendedup.grpc.Spars" +
-      "eDedupeChunkWriteResponse\022z\n\023ReadSparseD" +
-      "ataChunk\0220.org.opendedup.grpc.SparseDedu" +
-      "peChunkReadRequest\0321.org.opendedup.grpc." +
-      "SparseDedupeChunkReadResponse\022v\n\025GetMeta" +
-      "DataDedupeFile\022-.org.opendedup.grpc.Meta" +
-      "DataDedupeFileRequest\032..org.opendedup.gr" +
-      "pc.MetaDataDedupeFileResponse\022j\n\023GetSpar" +
-      "seDedupeFile\022+.org.opendedup.grpc.Sparse" +
-      "DedupeFileRequest\032$.org.opendedup.grpc.S" +
-      "parseDataChunkP0\001\022n\n\023ReplicateRemoteFile" +
-      "\022*.org.opendedup.grpc.FileReplicationReq" +
-      "uest\032+.org.opendedup.grpc.FileReplicatio" +
-      "nResponse\022j\n\017RestoreArchives\022*.org.opend" +
-      "edup.grpc.RestoreArchivesRequest\032+.org.o" +
-      "pendedup.grpc.RestoreArchivesResponse\022p\n" +
-      "\021CancelReplication\022,.org.opendedup.grpc." +
-      "CancelReplicationRequest\032-.org.opendedup" +
-      ".grpc.CancelReplicationResponse\022m\n\020Pause" +
-      "Replication\022+.org.opendedup.grpc.PauseRe" +
-      "plicationRequest\032,.org.opendedup.grpc.Pa" +
-      "useReplicationResponseB0Z.github.com/ope" +
-      "ndedup/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "\001(\010\"Z\n\027AddReplicaSourceRequest\022\021\n\tpvolum" +
+      "eID\030\003 \001(\003\022\021\n\trvolumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(" +
+      "\t\022\014\n\004mtls\030\006 \001(\010\"\\\n\030AddReplicaSourceRespo" +
+      "nse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\"O\n\032RemoveR" +
+      "eplicaSourceRequest\022\021\n\tpvolumeID\030\003 \001(\003\022\021" +
+      "\n\trvolumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\"_\n\033Remove" +
+      "ReplicaSourceResponse\022\r\n\005error\030\001 \001(\t\0221\n\t" +
+      "errorCode\030\002 \001(\0162\036.org.opendedup.grpc.err" +
+      "orCodes\"l\n\027FileReplicationResponse\022\r\n\005er" +
+      "ror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opend" +
+      "edup.grpc.errorCodes\022\017\n\007eventID\030\003 \001(\t\"@\n" +
+      "\031MetaDataDedupeFileRequest\022\020\n\010filePath\030\001" +
+      " \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"\243\001\n\032MetaDataDedu" +
+      "peFileResponse\0222\n\004file\030\001 \001(\0132$.org.opend" +
+      "edup.grpc.FileInfoResponse\0221\n\terrorCode\030" +
+      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes\022\r\n" +
+      "\005error\030\003 \001(\t\022\017\n\007eventID\030\004 \001(\t\":\n\027SparseD" +
+      "edupeFileRequest\022\014\n\004guid\030\001 \001(\t\022\021\n\tpvolum" +
+      "eID\030\002 \001(\003\"\222\001\n\030SparseDedupeFileResponse\0224" +
+      "\n\006chunks\030\001 \003(\0132$.org.opendedup.grpc.Spar" +
+      "seDataChunkP\0221\n\terrorCode\030\002 \001(\0162\036.org.op" +
+      "endedup.grpc.errorCodes\022\r\n\005error\030\003 \001(\t\"\200" +
+      "\001\n\rChunkResponse\022\014\n\004data\030\001 \001(\014\022\013\n\003len\030\002 " +
+      "\001(\005\022\r\n\005error\030\003 \001(\t\0221\n\terrorCode\030\004 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\022\022\n\ncompres" +
+      "sed\030\005 \001(\010\"\252\001\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014\022\014" +
+      "\n\004data\030\002 \001(\014\022\022\n\ncompressed\030\003 \001(\010\022\030\n\020comp" +
+      "ressedLength\030\004 \001(\005\022\020\n\010location\030\005 \001(\003\0221\n\t" +
+      "errorCode\030\006 \001(\0162\036.org.opendedup.grpc.err" +
+      "orCodes\022\r\n\005error\030\007 \001(\t\"k\n\022WriteChunksReq" +
+      "uest\022.\n\006chunks\030\001 \003(\0132\036.org.opendedup.grp" +
+      "c.ChunkEntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvol" +
+      "umeID\030\003 \001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005e" +
+      "rror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.open" +
+      "dedup.grpc.errorCodes\0227\n\rinsertRecords\030\003" +
+      " \003(\0132 .org.opendedup.grpc.InsertRecord\"U" +
+      "\n\020GetChunksRequest\022.\n\006chunks\030\001 \003(\0132\036.org" +
+      ".opendedup.grpc.ChunkEntry\022\021\n\tpvolumeID\030" +
+      "\002 \001(\003\"\231\001\n\022HashingInfoRequest\022.\n\006chunks\030\001" +
+      " \003(\0132\036.org.opendedup.grpc.ChunkEntry\022\r\n\005" +
+      "error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.ope" +
+      "ndedup.grpc.errorCodes\022\021\n\tpvolumeID\030\004 \001(" +
+      "\003\"\204\001\n\014HashLocPairP\022\014\n\004hash\030\001 \001(\014\022\017\n\007hash" +
+      "loc\030\002 \001(\003\022\013\n\003len\030\003 \001(\005\022\013\n\003pos\030\004 \001(\005\022\016\n\006o" +
+      "ffset\030\005 \001(\005\022\014\n\004nlen\030\006 \001(\005\022\013\n\003dup\030\007 \001(\010\022\020" +
+      "\n\010inserted\030\010 \001(\010\"L\n\027PauseReplicationRequ" +
+      "est\022\017\n\007eventID\030\001 \001(\t\022\r\n\005pause\030\002 \001(\010\022\021\n\tp" +
+      "volumeID\030\003 \001(\003\"\\\n\030PauseReplicationRespon" +
+      "se\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.o" +
+      "rg.opendedup.grpc.errorCodes\">\n\030CancelRe" +
+      "plicationRequest\022\017\n\007eventID\030\001 \001(\t\022\021\n\tpvo" +
+      "lumeID\030\002 \001(\003\"]\n\031CancelReplicationRespons" +
+      "e\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.or" +
+      "g.opendedup.grpc.errorCodes\"\365\002\n\020SparseDa" +
+      "taChunkP\022\014\n\004fpos\030\001 \001(\003\022\013\n\003len\030\002 \001(\005\0222\n\005f" +
+      "lags\030\003 \003(\0162#.org.opendedup.grpc.SparseDa" +
+      "taFlags\022\017\n\007version\030\004 \001(\005\0228\n\002ar\030\005 \003(\0132,.o" +
+      "rg.opendedup.grpc.SparseDataChunkP.ArEnt" +
+      "ry\022\014\n\004doop\030\006 \001(\005\022\020\n\010prevdoop\030\007 \001(\005\022\030\n\020co" +
+      "mpressedLength\030\010 \001(\005\022\r\n\005error\030\t \001(\t\0221\n\te" +
+      "rrorCode\030\n \001(\0162\036.org.opendedup.grpc.erro" +
+      "rCodes\032K\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005value\030" +
+      "\002 \001(\0132 .org.opendedup.grpc.HashLocPairP:" +
+      "\0028\001\"\327\001\n\035SparseDedupeChunkWriteRequest\0223\n" +
+      "\005chunk\030\001 \001(\0132$.org.opendedup.grpc.Sparse" +
+      "DataChunkP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014fileLo" +
+      "cation\030\003 \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\022\022\n\ncompr" +
+      "essed\030\005 \001(\010\022\027\n\017compressedChunk\030\006 \001(\014\022\027\n\017" +
+      "uncompressedLen\030\007 \001(\005\"b\n\036SparseDedupeChu" +
+      "nkWriteResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorC" +
+      "ode\030\002 \001(\0162\036.org.opendedup.grpc.errorCode" +
+      "s\"U\n\034SparseDedupeChunkReadRequest\022\016\n\006off" +
+      "set\030\001 \001(\003\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolume" +
+      "ID\030\003 \001(\003\"\226\001\n\035SparseDedupeChunkReadRespon" +
+      "se\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.o" +
+      "rg.opendedup.grpc.errorCodes\0223\n\005chunk\030\003 " +
+      "\001(\0132$.org.opendedup.grpc.SparseDataChunk" +
+      "P\"\206\002\n\023HashingInfoResponse\022\021\n\tchunkSize\030\001" +
+      " \001(\003\022\026\n\016minSegmentSize\030\002 \001(\003\022\026\n\016maxSegme" +
+      "ntSize\030\003 \001(\003\022\022\n\npolyNumber\030\004 \001(\003\022\022\n\nwind" +
+      "owSize\030\005 \001(\003\022.\n\010hashtype\030\006 \001(\0162\034.org.ope" +
+      "ndedup.grpc.hashtype\022\022\n\nmapVersion\030\007 \001(\005" +
+      "\022\r\n\005error\030\010 \001(\t\0221\n\terrorCode\030\t \001(\0162\036.org" +
+      ".opendedup.grpc.errorCodes\"K\n\014InsertReco" +
+      "rd\022\017\n\007hashloc\030\001 \001(\003\022\020\n\010inserted\030\002 \001(\010\022\030\n" +
+      "\020compressedLength\030\003 \001(\005\"\207\002\n\013VolumeEvent\022" +
+      "2\n\004file\030\001 \001(\0132$.org.opendedup.grpc.FileI" +
+      "nfoResponse\022\014\n\004uuid\030\002 \001(\t\022\021\n\ttimeStamp\030\003" +
+      " \001(\003\022\013\n\003seq\030\004 \001(\003\0222\n\nactionType\030\005 \001(\0162\036." +
+      "org.opendedup.grpc.actionType\022\r\n\005error\030\006" +
+      " \001(\t\0221\n\terrorCode\030\007 \001(\0162\036.org.opendedup." +
+      "grpc.errorCodes\022\017\n\007srcfile\030\010 \001(\t\022\017\n\007dstf" +
+      "ile\030\t \001(\t\"D\n\030VolumeEventListenRequest\022\021\n" +
+      "\tpvolumeID\030\001 \001(\003\022\025\n\rstartSequence\030\002 \001(\003*" +
+      "$\n\017SparseDataFlags\022\021\n\rRECONSTRUCTED\020\000*f\n" +
+      "\nactionType\022\020\n\014MFILEDELETED\020\000\022\020\n\014MFILEWR" +
+      "ITTEN\020\001\022\020\n\014MFILERENAMED\020\002\022\020\n\014SFILEWRITTE" +
+      "N\020\003\022\020\n\014SFILEDELETED\020\004*0\n\010hashtype\022\n\n\006SHA" +
+      "256\020\000\022\007\n\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\317\r\n\016Stor" +
+      "ageService\022^\n\013HashingInfo\022&.org.opendedu" +
+      "p.grpc.HashingInfoRequest\032\'.org.opendedu" +
+      "p.grpc.HashingInfoResponse\022^\n\013CheckHashe" +
+      "s\022&.org.opendedup.grpc.CheckHashesReques" +
+      "t\032\'.org.opendedup.grpc.CheckHashesRespon" +
+      "se\022^\n\013WriteChunks\022&.org.opendedup.grpc.W" +
+      "riteChunksRequest\032\'.org.opendedup.grpc.W" +
+      "riteChunksResponse\022S\n\tGetChunks\022$.org.op" +
+      "endedup.grpc.GetChunksRequest\032\036.org.open" +
+      "dedup.grpc.ChunkEntry0\001\022d\n\021SubscribeToVo" +
+      "lume\022,.org.opendedup.grpc.VolumeEventLis" +
+      "tenRequest\032\037.org.opendedup.grpc.VolumeEv" +
+      "ent0\001\022}\n\024WriteSparseDataChunk\0221.org.open" +
+      "dedup.grpc.SparseDedupeChunkWriteRequest" +
+      "\0322.org.opendedup.grpc.SparseDedupeChunkW" +
+      "riteResponse\022z\n\023ReadSparseDataChunk\0220.or" +
+      "g.opendedup.grpc.SparseDedupeChunkReadRe" +
+      "quest\0321.org.opendedup.grpc.SparseDedupeC" +
+      "hunkReadResponse\022v\n\025GetMetaDataDedupeFil" +
+      "e\022-.org.opendedup.grpc.MetaDataDedupeFil" +
+      "eRequest\032..org.opendedup.grpc.MetaDataDe" +
+      "dupeFileResponse\022j\n\023GetSparseDedupeFile\022" +
+      "+.org.opendedup.grpc.SparseDedupeFileReq" +
+      "uest\032$.org.opendedup.grpc.SparseDataChun" +
+      "kP0\001\022n\n\023ReplicateRemoteFile\022*.org.opende" +
+      "dup.grpc.FileReplicationRequest\032+.org.op" +
+      "endedup.grpc.FileReplicationResponse\022j\n\017" +
+      "RestoreArchives\022*.org.opendedup.grpc.Res" +
+      "toreArchivesRequest\032+.org.opendedup.grpc" +
+      ".RestoreArchivesResponse\022p\n\021CancelReplic" +
+      "ation\022,.org.opendedup.grpc.CancelReplica" +
+      "tionRequest\032-.org.opendedup.grpc.CancelR" +
+      "eplicationResponse\022m\n\020PauseReplication\022+" +
+      ".org.opendedup.grpc.PauseReplicationRequ" +
+      "est\032,.org.opendedup.grpc.PauseReplicatio" +
+      "nResponse\022_\n\014ListReplLogs\022,.org.opendedu" +
+      "p.grpc.VolumeEventListenRequest\032\037.org.op" +
+      "endedup.grpc.VolumeEvent0\001\022m\n\020AddReplica" +
+      "Source\022+.org.opendedup.grpc.AddReplicaSo" +
+      "urceRequest\032,.org.opendedup.grpc.AddRepl" +
+      "icaSourceResponse\022v\n\023RemoveReplicaSource" +
+      "\022..org.opendedup.grpc.RemoveReplicaSourc" +
+      "eRequest\032/.org.opendedup.grpc.RemoveRepl" +
+      "icaSourceResponseB0Z.github.com/opendedu" +
+      "p/sdfs-client-go/sdfs/;sdfsb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -26154,104 +28964,128 @@ public final class Storage {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_FileReplicationRequest_descriptor,
         new java.lang.String[] { "SrcFilePath", "DstFilePath", "PvolumeID", "RvolumeID", "Url", "Mtls", });
-    internal_static_org_opendedup_grpc_FileReplicationResponse_descriptor =
+    internal_static_org_opendedup_grpc_AddReplicaSourceRequest_descriptor =
       getDescriptor().getMessageTypes().get(5);
+    internal_static_org_opendedup_grpc_AddReplicaSourceRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_AddReplicaSourceRequest_descriptor,
+        new java.lang.String[] { "PvolumeID", "RvolumeID", "Url", "Mtls", });
+    internal_static_org_opendedup_grpc_AddReplicaSourceResponse_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_org_opendedup_grpc_AddReplicaSourceResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_AddReplicaSourceResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_descriptor =
+      getDescriptor().getMessageTypes().get(7);
+    internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_RemoveReplicaSourceRequest_descriptor,
+        new java.lang.String[] { "PvolumeID", "RvolumeID", "Url", });
+    internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_descriptor =
+      getDescriptor().getMessageTypes().get(8);
+    internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_RemoveReplicaSourceResponse_descriptor,
+        new java.lang.String[] { "Error", "ErrorCode", });
+    internal_static_org_opendedup_grpc_FileReplicationResponse_descriptor =
+      getDescriptor().getMessageTypes().get(9);
     internal_static_org_opendedup_grpc_FileReplicationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_FileReplicationResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", "EventID", });
     internal_static_org_opendedup_grpc_MetaDataDedupeFileRequest_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_org_opendedup_grpc_MetaDataDedupeFileRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_MetaDataDedupeFileRequest_descriptor,
         new java.lang.String[] { "FilePath", "PvolumeID", });
     internal_static_org_opendedup_grpc_MetaDataDedupeFileResponse_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_org_opendedup_grpc_MetaDataDedupeFileResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_MetaDataDedupeFileResponse_descriptor,
         new java.lang.String[] { "File", "ErrorCode", "Error", "EventID", });
     internal_static_org_opendedup_grpc_SparseDedupeFileRequest_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_org_opendedup_grpc_SparseDedupeFileRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeFileRequest_descriptor,
         new java.lang.String[] { "Guid", "PvolumeID", });
     internal_static_org_opendedup_grpc_SparseDedupeFileResponse_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_org_opendedup_grpc_SparseDedupeFileResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeFileResponse_descriptor,
         new java.lang.String[] { "Chunks", "ErrorCode", "Error", });
     internal_static_org_opendedup_grpc_ChunkResponse_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_org_opendedup_grpc_ChunkResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ChunkResponse_descriptor,
         new java.lang.String[] { "Data", "Len", "Error", "ErrorCode", "Compressed", });
     internal_static_org_opendedup_grpc_ChunkEntry_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_org_opendedup_grpc_ChunkEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ChunkEntry_descriptor,
         new java.lang.String[] { "Hash", "Data", "Compressed", "CompressedLength", "Location", "ErrorCode", "Error", });
     internal_static_org_opendedup_grpc_WriteChunksRequest_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_org_opendedup_grpc_WriteChunksRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_WriteChunksRequest_descriptor,
         new java.lang.String[] { "Chunks", "FileHandle", "PvolumeID", });
     internal_static_org_opendedup_grpc_WriteChunksResponse_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_org_opendedup_grpc_WriteChunksResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_WriteChunksResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", "InsertRecords", });
     internal_static_org_opendedup_grpc_GetChunksRequest_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_org_opendedup_grpc_GetChunksRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_GetChunksRequest_descriptor,
         new java.lang.String[] { "Chunks", "PvolumeID", });
     internal_static_org_opendedup_grpc_HashingInfoRequest_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_org_opendedup_grpc_HashingInfoRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_HashingInfoRequest_descriptor,
         new java.lang.String[] { "Chunks", "Error", "ErrorCode", "PvolumeID", });
     internal_static_org_opendedup_grpc_HashLocPairP_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_org_opendedup_grpc_HashLocPairP_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_HashLocPairP_descriptor,
         new java.lang.String[] { "Hash", "Hashloc", "Len", "Pos", "Offset", "Nlen", "Dup", "Inserted", });
     internal_static_org_opendedup_grpc_PauseReplicationRequest_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_org_opendedup_grpc_PauseReplicationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_PauseReplicationRequest_descriptor,
         new java.lang.String[] { "EventID", "Pause", "PvolumeID", });
     internal_static_org_opendedup_grpc_PauseReplicationResponse_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_org_opendedup_grpc_PauseReplicationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_PauseReplicationResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_CancelReplicationRequest_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_org_opendedup_grpc_CancelReplicationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CancelReplicationRequest_descriptor,
         new java.lang.String[] { "EventID", "PvolumeID", });
     internal_static_org_opendedup_grpc_CancelReplicationResponse_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_org_opendedup_grpc_CancelReplicationResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CancelReplicationResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SparseDataChunkP_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_org_opendedup_grpc_SparseDataChunkP_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDataChunkP_descriptor,
@@ -26263,53 +29097,53 @@ public final class Storage {
         internal_static_org_opendedup_grpc_SparseDataChunkP_ArEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_org_opendedup_grpc_SparseDedupeChunkWriteRequest_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_org_opendedup_grpc_SparseDedupeChunkWriteRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeChunkWriteRequest_descriptor,
         new java.lang.String[] { "Chunk", "FileHandle", "FileLocation", "PvolumeID", "Compressed", "CompressedChunk", "UncompressedLen", });
     internal_static_org_opendedup_grpc_SparseDedupeChunkWriteResponse_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_org_opendedup_grpc_SparseDedupeChunkWriteResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeChunkWriteResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadRequest_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeChunkReadRequest_descriptor,
         new java.lang.String[] { "Offset", "FileHandle", "PvolumeID", });
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadResponse_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeChunkReadResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", "Chunk", });
     internal_static_org_opendedup_grpc_HashingInfoResponse_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_org_opendedup_grpc_HashingInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_HashingInfoResponse_descriptor,
         new java.lang.String[] { "ChunkSize", "MinSegmentSize", "MaxSegmentSize", "PolyNumber", "WindowSize", "Hashtype", "MapVersion", "Error", "ErrorCode", });
     internal_static_org_opendedup_grpc_InsertRecord_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_org_opendedup_grpc_InsertRecord_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_InsertRecord_descriptor,
         new java.lang.String[] { "Hashloc", "Inserted", "CompressedLength", });
     internal_static_org_opendedup_grpc_VolumeEvent_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(32);
     internal_static_org_opendedup_grpc_VolumeEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_VolumeEvent_descriptor,
         new java.lang.String[] { "File", "Uuid", "TimeStamp", "Seq", "ActionType", "Error", "ErrorCode", "Srcfile", "Dstfile", });
     internal_static_org_opendedup_grpc_VolumeEventListenRequest_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(33);
     internal_static_org_opendedup_grpc_VolumeEventListenRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_VolumeEventListenRequest_descriptor,
-        new java.lang.String[] { "PvolumeID", });
+        new java.lang.String[] { "PvolumeID", "StartSequence", });
     org.opendedup.grpc.FileInfo.getDescriptor();
   }
 

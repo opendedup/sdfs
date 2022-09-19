@@ -103,6 +103,7 @@ public class VolumeConfigWriter {
 	private int aruzreArchiveInDays = 0;
 	private String azurestorageTier = null;
 	boolean compress = Main.compress;
+	boolean enableReplService = true;
 	// int chunk_store_read_cache = Main.chunkStorePageCache;
 	// int chunk_store_dirty_timeout = Main.chunkStoreDirtyCacheTimeout;
 	String chunk_store_encryption_key = PassPhrase.getNext();
@@ -153,12 +154,12 @@ public class VolumeConfigWriter {
 	private String encryptConfigPassword = null;
 	private String glacierClass = "standard";
 	private long maxAge = -1;
-	private String topic;
-	private String subscription;
-	private String gcpProject;
 	private String permissionsFile;
 	private long rmthreashold = 5 * 60 * 1000;
 	private String sdfsBasePath = "";
+	private boolean replicationMtls;
+	private String replicationUrl;
+	private long replicationVolumeID;
 
 	public VolumeConfigWriter() {
 		sn = new Random().nextLong();
@@ -235,6 +236,8 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("sdfscli-listen-addr"))
 			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
+		if (cmd.hasOption("disable-repl-service"))
+			this.enableReplService = false;
 		if (cmd.hasOption("auth-utility-jar-file-path"))
 			this.authJarFilePath = cmd.getOptionValue("auth-utility-jar-file-path");
 		if (cmd.hasOption("auth-class-info"))
@@ -703,25 +706,14 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 		}
-		if (cmd.hasOption("enable-global-syncronization")) {
-			if (!cmd.hasOption("pubsub-project")) {
-				System.err.println("pubsub-project must be specified");
+		if (cmd.hasOption("enable-repl-sink")) {
+			if (!cmd.hasOption("repl-source-url") || !cmd.hasOption("repl-source-volumeid")) {
+				System.err.println("repl-source-url and repl-source-volumeid must be specified");
 				System.exit(-1);
 			}
-			this.gcpProject = cmd.getOptionValue("pubsub-project");
-			if (cmd.hasOption("pubsub-topic")) {
-				this.topic = cmd.getOptionValue("pubsub-topic");
-			} else {
-				this.topic = "sdfs" + this.cloudBucketName;
-			}
-			if (cmd.hasOption("pubsub-authfile")) {
-				this.gcsCredsFile = cmd.getOptionValue("pubsub-authfile");
-			}
-			if (cmd.hasOption("pubsub-subscription")) {
-				this.subscription = cmd.getOptionValue("pubsub-subscription");
-			} else {
-				this.subscription = "sdfs" + this.sn;
-			}
+			this.replicationUrl = cmd.getOptionValue("repl-source-url").toLowerCase();
+			this.replicationMtls = cmd.hasOption("repl-source-mtls");
+			this.replicationVolumeID = Long.parseLong(cmd.getOptionValue("repl-source-volumeid"));
 		}
 	}
 
@@ -817,6 +809,7 @@ public class VolumeConfigWriter {
 		vol.setAttribute("current-size", "0");
 		vol.setAttribute("path", this.base_path + File.separator + "files");
 		vol.setAttribute("event-path", this.base_path + File.separator + "evt");
+		vol.setAttribute("enable-repl", Boolean.toString(this.enableReplService));
 		vol.setAttribute("repl-path", this.base_path + File.separator + "repl");
 		vol.setAttribute("maximum-percentage-full", Double.toString(this.max_percent_full));
 		vol.setAttribute("closed-gracefully", "true");
@@ -828,14 +821,12 @@ public class VolumeConfigWriter {
 		vol.setAttribute("write-timeout-seconds", Integer.toString(this.write_timeout));
 		vol.setAttribute("serial-number", Long.toString(sn));
 		vol.setAttribute("compress-metadata", Boolean.toString(this.mdCompresstion));
-		if (this.gcpProject != null) {
-			Element pbm = xmldoc.createElement("gcp-pubsub");
-			pbm.setAttribute("project-id", this.gcpProject);
-			pbm.setAttribute("topic", this.topic);
-			pbm.setAttribute("subscription", this.subscription);
-			if (this.gcsCredsFile != null) {
-				pbm.setAttribute("auth-file", this.gcsCredsFile);
-			}
+		if (this.replicationUrl != null) {
+			Element pbm = xmldoc.createElement("replica-source");
+			pbm.setAttribute("url", this.replicationUrl);
+			pbm.setAttribute("mtls", Boolean.toString(this.replicationMtls));
+			pbm.setAttribute("volumeid", Long.toString(this.replicationVolumeID));
+			pbm.setAttribute("sequence","0");
 			vol.appendChild(pbm);
 		}
 		root.appendChild(vol);
@@ -1417,18 +1408,17 @@ public class VolumeConfigWriter {
 				.hasArg().withArgName("Value 0,-1,[TB GB MB]").create());
 		options.addOption(OptionBuilder.withLongOpt("enable-batch-gc").hasArg(false)
 				.withDescription("enable batch removal of ddb files for garbage colleaction").create());
-		options.addOption(OptionBuilder.withLongOpt("enable-global-syncronization").hasArg(false)
-				.withDescription("Enables Global Syncronization of Files and Folders").create());
-		options.addOption(OptionBuilder.withLongOpt("pubsub-topic").hasArg()
-				.withDescription("PubSub Topic for Global Syncronization").create());
-		options.addOption(OptionBuilder.withLongOpt("pubsub-authfile").hasArg()
-				.withDescription("Credentials file used for authenticating user to PubSub").create());
-		options.addOption(OptionBuilder.withLongOpt("pubsub-project").hasArg()
-				.withDescription("The GCP Project ID where the PubSub topic lives/will live").create());
-		options.addOption(OptionBuilder.withLongOpt("pubsub-subscription").hasArg()
-				.withDescription("The PubSub subscription to listen on").create());
+		options.addOption(OptionBuilder.withLongOpt("enable-repl-sink").hasArg(false)
+				.withDescription("Enables Syncronization of Files and Folders").create());
+		options.addOption(OptionBuilder.withLongOpt("repl-source-url").hasArg()
+				.withDescription("The URL for the replication source").create());
+		options.addOption(OptionBuilder.withLongOpt("repl-source-volumeid").hasArg()
+				.withDescription("The volume id for the replication source").create());
+				options.addOption(OptionBuilder.withLongOpt("repl-source-mtls").hasArg(false)
+				.withDescription("Enables mtls for the replication source").create());
 		options.addOption(OptionBuilder.withLongOpt("ext").create());
 		options.addOption(OptionBuilder.withLongOpt("noext").create());
+		options.addOption(OptionBuilder.withLongOpt("disable-repl-service").create());
 		return options;
 	}
 

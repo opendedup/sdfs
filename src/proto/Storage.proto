@@ -36,6 +36,33 @@ message FileReplicationRequest {
   bool mtls = 6;
 }
 
+message AddReplicaSourceRequest {
+  int64 pvolumeID =3;
+  int64 rvolumeID = 4;
+  string url =5;
+  bool mtls = 6;
+}
+
+
+
+message AddReplicaSourceResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
+message RemoveReplicaSourceRequest {
+  int64 pvolumeID =3;
+  int64 rvolumeID = 4;
+  string url =5;
+}
+
+
+
+message RemoveReplicaSourceResponse {
+  string error = 1;
+  errorCodes errorCode = 2;
+}
+
 message FileReplicationResponse {
   string error = 1;
   errorCodes errorCode = 2;
@@ -221,6 +248,7 @@ message VolumeEvent {
 
 message VolumeEventListenRequest {
   int64 pvolumeID=1;
+  int64 startSequence=2;
 }
 
 enum actionType {
@@ -252,4 +280,7 @@ service StorageService {
   rpc RestoreArchives(RestoreArchivesRequest) returns(RestoreArchivesResponse);
   rpc CancelReplication(CancelReplicationRequest) returns(CancelReplicationResponse);
   rpc PauseReplication(PauseReplicationRequest) returns(PauseReplicationResponse);
+  rpc ListReplLogs(VolumeEventListenRequest) returns (stream VolumeEvent);
+  rpc AddReplicaSource(AddReplicaSourceRequest) returns(AddReplicaSourceResponse);
+  rpc RemoveReplicaSource(RemoveReplicaSourceRequest) returns(RemoveReplicaSourceResponse);
 }

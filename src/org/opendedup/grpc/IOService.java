@@ -46420,7 +46420,7 @@ public final class IOService {
       "valTierRequest\022\021\n\tpvolumeID\030\001 \001(\003\"n\n\030Get" +
       "RetrievalTierResponse\022\020\n\010tierType\030\001 \001(\t\022" +
       "\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org." +
-      "opendedup.grpc.errorCodes2\215\031\n\rFileIOServ" +
+      "opendedup.grpc.errorCodes2\360\031\n\rFileIOServ" +
       "ice\022a\n\014GetXAttrSize\022\'.org.opendedup.grpc" +
       ".GetXAttrSizeRequest\032(.org.opendedup.grp" +
       "c.GetXAttrSizeResponse\022L\n\005Fsync\022 .org.op" +
@@ -46469,40 +46469,42 @@ public final class IOService {
       "est\032$.org.opendedup.grpc.FileOpenRespons" +
       "e\022[\n\013GetFileInfo\022#.org.opendedup.grpc.Fi" +
       "leInfoRequest\032\'.org.opendedup.grpc.FileM" +
-      "essageResponse\022_\n\nCreateCopy\022\'.org.opend" +
-      "edup.grpc.FileSnapshotRequest\032(.org.open" +
-      "dedup.grpc.FileSnapshotResponse\022[\n\nFileE" +
-      "xists\022%.org.opendedup.grpc.FileExistsReq" +
-      "uest\032&.org.opendedup.grpc.FileExistsResp" +
-      "onse\022O\n\010MkDirAll\022 .org.opendedup.grpc.Mk" +
-      "DirRequest\032!.org.opendedup.grpc.MkDirRes" +
-      "ponse\022T\n\004Stat\022#.org.opendedup.grpc.FileI" +
-      "nfoRequest\032\'.org.opendedup.grpc.FileMess" +
-      "ageResponse\022W\n\006Rename\022%.org.opendedup.gr" +
-      "pc.FileRenameRequest\032&.org.opendedup.grp" +
-      "c.FileRenameResponse\022[\n\nCopyExtent\022%.org" +
-      ".opendedup.grpc.CopyExtentRequest\032&.org." +
-      "opendedup.grpc.CopyExtentResponse\022j\n\017Set" +
-      "UserMetaData\022*.org.opendedup.grpc.SetUse" +
-      "rMetaDataRequest\032+.org.opendedup.grpc.Se" +
-      "tUserMetaDataResponse\022a\n\014GetCloudFile\022\'." +
-      "org.opendedup.grpc.GetCloudFileRequest\032(" +
-      ".org.opendedup.grpc.GetCloudFileResponse" +
-      "\022e\n\020GetCloudMetaFile\022\'.org.opendedup.grp" +
-      "c.GetCloudFileRequest\032(.org.opendedup.gr" +
-      "pc.GetCloudFileResponse\022O\n\006StatFS\022!.org." +
-      "opendedup.grpc.StatFSRequest\032\".org.opend" +
-      "edup.grpc.StatFSResponse\022q\n\020fileNotifica" +
-      "tion\0220.org.opendedup.grpc.SyncNotificati" +
-      "onSubscription\032\'.org.opendedup.grpc.File" +
-      "MessageResponse\"\0000\001\022m\n\020SetRetrievalTier\022" +
-      "+.org.opendedup.grpc.SetRetrievalTierReq" +
-      "uest\032,.org.opendedup.grpc.SetRetrievalTi" +
-      "erResponse\022m\n\020GetRetrievalTier\022+.org.ope" +
-      "ndedup.grpc.GetRetrievalTierRequest\032,.or" +
-      "g.opendedup.grpc.GetRetrievalTierRespons" +
-      "eB0Z.github.com/opendedup/sdfs-client-go" +
-      "/sdfs/;sdfsb\006proto3"
+      "essageResponse\022a\n\017GetaAllFileInfo\022#.org." +
+      "opendedup.grpc.FileInfoRequest\032\'.org.ope" +
+      "ndedup.grpc.FileMessageResponse0\001\022_\n\nCre" +
+      "ateCopy\022\'.org.opendedup.grpc.FileSnapsho" +
+      "tRequest\032(.org.opendedup.grpc.FileSnapsh" +
+      "otResponse\022[\n\nFileExists\022%.org.opendedup" +
+      ".grpc.FileExistsRequest\032&.org.opendedup." +
+      "grpc.FileExistsResponse\022O\n\010MkDirAll\022 .or" +
+      "g.opendedup.grpc.MkDirRequest\032!.org.open" +
+      "dedup.grpc.MkDirResponse\022T\n\004Stat\022#.org.o" +
+      "pendedup.grpc.FileInfoRequest\032\'.org.open" +
+      "dedup.grpc.FileMessageResponse\022W\n\006Rename" +
+      "\022%.org.opendedup.grpc.FileRenameRequest\032" +
+      "&.org.opendedup.grpc.FileRenameResponse\022" +
+      "[\n\nCopyExtent\022%.org.opendedup.grpc.CopyE" +
+      "xtentRequest\032&.org.opendedup.grpc.CopyEx" +
+      "tentResponse\022j\n\017SetUserMetaData\022*.org.op" +
+      "endedup.grpc.SetUserMetaDataRequest\032+.or" +
+      "g.opendedup.grpc.SetUserMetaDataResponse" +
+      "\022a\n\014GetCloudFile\022\'.org.opendedup.grpc.Ge" +
+      "tCloudFileRequest\032(.org.opendedup.grpc.G" +
+      "etCloudFileResponse\022e\n\020GetCloudMetaFile\022" +
+      "\'.org.opendedup.grpc.GetCloudFileRequest" +
+      "\032(.org.opendedup.grpc.GetCloudFileRespon" +
+      "se\022O\n\006StatFS\022!.org.opendedup.grpc.StatFS" +
+      "Request\032\".org.opendedup.grpc.StatFSRespo" +
+      "nse\022q\n\020fileNotification\0220.org.opendedup." +
+      "grpc.SyncNotificationSubscription\032\'.org." +
+      "opendedup.grpc.FileMessageResponse\"\0000\001\022m" +
+      "\n\020SetRetrievalTier\022+.org.opendedup.grpc." +
+      "SetRetrievalTierRequest\032,.org.opendedup." +
+      "grpc.SetRetrievalTierResponse\022m\n\020GetRetr" +
+      "ievalTier\022+.org.opendedup.grpc.GetRetrie" +
+      "valTierRequest\032,.org.opendedup.grpc.GetR" +
+      "etrievalTierResponseB0Z.github.com/opend" +
+      "edup/sdfs-client-go/sdfs/;sdfsb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

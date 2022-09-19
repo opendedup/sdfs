@@ -724,7 +724,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
                     if (diff_period >= main_period || diff_period < 1) {
                         try {
-                            SDFSLogger.getLog().debug("Unlink::chattr set non-Immutable file: " + f.getPath());
+                           // SDFSLogger.getLog().debug("Unlink::chattr set non-Immutable file: " + f.getPath());
                             ImmuteLinuxFDFileFile(f.getPath(), false);
                             MetaFileStore.getMF(f).clearRetentionLock();
                             if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
@@ -1917,6 +1917,88 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
+            }
+        }
+    }
+
+    private void streamList(File f, StreamObserver<FileMessageResponse> responseObserver) throws Exception {
+        Path dir = FileSystems.getDefault().getPath(f.getPath());
+        Iterator<Path> stream = null;
+        stream = Files.newDirectoryStream(dir).iterator();
+        while (stream.hasNext()) {
+            Path p = stream.next();
+            File _mf = p.toFile();
+            if (_mf.isDirectory()) {
+                streamList(f, responseObserver);
+            } else {
+                MetaDataDedupFile mf = MetaFileStore.getNCMF(_mf);
+                FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                b.addResponse(mf.toGRPC(false));
+                responseObserver.onNext(b.build());
+            }
+        }
+    }
+
+    @Override
+    public void getaAllFileInfo(FileInfoRequest req, StreamObserver<FileMessageResponse> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.METADATA_READ)) {
+            FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+
+            try {
+                this.getFtype(req.getFileName());
+            } catch (FileIOError e) {
+                FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                b.setErrorCode(e.code);
+                b.setError(e.message);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+
+            String internalPath = Main.volume.getPath() + File.separator + req.getFileName();
+            File f = new File(internalPath);
+            if (!f.exists()) {
+                FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                b.setError("File not found " + req.getFileName());
+                b.setErrorCode(errorCodes.ENOENT);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            if (f.isDirectory()) {
+                try {
+                    this.streamList(f, responseObserver);
+                } catch (Exception e) {
+                    SDFSLogger.getLog().warn("Unable to list director " + f.getPath(), e);
+                    FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                    b.setError("Unable to list director " + f.getPath());
+                    b.setErrorCode(errorCodes.EIO);
+                    responseObserver.onNext(b.build());
+
+                }
+                responseObserver.onCompleted();
+
+            } else {
+                FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                try {
+                    MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
+                    b.addResponse(mf.toGRPC(req.getCompact()));
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                } catch (Exception e) {
+                    SDFSLogger.getLog().error("unable to fulfill request on file " + req.getFileName(), e);
+                    b.setError("unable to fulfill request on file " + req.getFileName());
+                    b.setErrorCode(errorCodes.EIO);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
             }
         }
     }

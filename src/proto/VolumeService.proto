@@ -12,6 +12,12 @@ message VolumeInfoRequest {
 }
 
 
+message ReplicationClient {
+  int64 volumeID=1;
+  bool mtls =2;
+  string url = 3; 
+  int64 sequence = 4;
+}
 
 message VolumeInfoResponse {
   string path = 1;
@@ -47,6 +53,8 @@ message VolumeInfoResponse {
   errorCodes errorCode = 31;
   string evtPath =32;
   string replPath =33;
+  bool replEnabled = 34;
+  repeated ReplicationClient replicationClient = 35;
 
 }
 

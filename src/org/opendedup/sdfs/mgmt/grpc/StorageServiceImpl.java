@@ -23,10 +23,13 @@ import com.google.protobuf.ByteString;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.util.CompressionUtils;
+import org.rocksdb.RocksIterator;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.grpc.FileInfo.errorCodes;
+import org.opendedup.grpc.Storage.AddReplicaSourceRequest;
+import org.opendedup.grpc.Storage.AddReplicaSourceResponse;
 import org.opendedup.grpc.Storage.CancelReplicationRequest;
 import org.opendedup.grpc.Storage.CancelReplicationResponse;
 import org.opendedup.grpc.Storage.CheckHashesRequest;
@@ -41,12 +44,16 @@ import org.opendedup.grpc.Storage.MetaDataDedupeFileRequest;
 import org.opendedup.grpc.Storage.MetaDataDedupeFileResponse;
 import org.opendedup.grpc.Storage.PauseReplicationRequest;
 import org.opendedup.grpc.Storage.PauseReplicationResponse;
+import org.opendedup.grpc.Storage.RemoveReplicaSourceRequest;
+import org.opendedup.grpc.Storage.RemoveReplicaSourceResponse;
 import org.opendedup.grpc.Storage.RestoreArchivesRequest;
 import org.opendedup.grpc.Storage.RestoreArchivesResponse;
 import org.opendedup.grpc.Storage.SparseDataChunkP;
 import org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest;
 import org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse;
 import org.opendedup.grpc.Storage.SparseDedupeFileRequest;
+import org.opendedup.grpc.Storage.VolumeEvent;
+import org.opendedup.grpc.Storage.VolumeEventListenRequest;
 import org.opendedup.grpc.Storage.WriteChunksRequest;
 import org.opendedup.grpc.Storage.WriteChunksResponse;
 import org.opendedup.grpc.Storage.hashtype;
@@ -62,12 +69,15 @@ import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer;
+import org.opendedup.sdfs.io.Volume.ReplicationClientExistsException;
+import org.opendedup.sdfs.io.Volume.ReplicationClientNotExistsException;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl.FileIOError;
 import org.opendedup.sdfs.mgmt.grpc.replication.ReplicationClient;
 import org.opendedup.sdfs.notification.ReplicationImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.common.io.BaseEncoding;
 import com.google.common.primitives.Longs;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -110,6 +120,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             try {
                 ReplicationClient client = new ReplicationClient(request.getUrl(),
                         request.getRvolumeID(), request.getMtls());
+                client.connect();
                 SDFSEvent evt = client.replicate(request.getSrcFilePath(), request.getDstFilePath());
                 b.setEventID(evt.uid);
                 responseObserver.onNext(b.build());
@@ -574,6 +585,163 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             }
         }
 
+    }
+
+    @Override
+    public void listReplLogs(VolumeEventListenRequest request, StreamObserver<VolumeEvent> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.METADATA_READ)) {
+            VolumeEvent.Builder b = VolumeEvent.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            try {
+                RocksIterator iter = Main.volume.getRSerivce().getIterator(request.getStartSequence());
+                for (iter.seek(Longs.toByteArray(request.getStartSequence())); iter.isValid(); iter.next()) {
+                    byte[] val = iter.value();
+                    VolumeEvent.Builder b = VolumeEvent.newBuilder();
+                    b.mergeFrom(val);
+                    responseObserver.onNext(b.build());
+                }
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                VolumeEvent.Builder b = VolumeEvent.newBuilder();
+                SDFSLogger.getLog().warn("unable to create repl listener", e);
+                b.setError("unable to create repl listener");
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onCompleted();
+            }
+        }
+    }
+
+    @Override
+    public void addReplicaSource(AddReplicaSourceRequest request,
+            StreamObserver<AddReplicaSourceResponse> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+            AddReplicaSourceResponse.Builder b = AddReplicaSourceResponse.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            try {
+                Main.volume.addReplicationClient(request.getUrl().toLowerCase(), request.getRvolumeID(),
+                        request.getMtls());
+                AddReplicaSourceResponse.Builder b = AddReplicaSourceResponse.newBuilder();
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+
+            } catch (ReplicationClientExistsException e) {
+                SDFSLogger.getLog().warn("Unable to add replication source", e);
+                AddReplicaSourceResponse.Builder b = AddReplicaSourceResponse.newBuilder();
+                b.setError("Unable to add replication source");
+                b.setErrorCode(errorCodes.EEXIST);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                SDFSLogger.getLog().warn("Unable to add replication source", e);
+                AddReplicaSourceResponse.Builder b = AddReplicaSourceResponse.newBuilder();
+                b.setError("Unable to add replication source");
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
+        }
+    }
+
+    @Override
+    public void removeReplicaSource(RemoveReplicaSourceRequest request,
+            StreamObserver<RemoveReplicaSourceResponse> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.CONFIG_WRITE)) {
+            RemoveReplicaSourceResponse.Builder b = RemoveReplicaSourceResponse.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            try {
+                Main.volume.removeReplicationClient(request.getUrl().toLowerCase(), request.getRvolumeID());
+                RemoveReplicaSourceResponse.Builder b = RemoveReplicaSourceResponse.newBuilder();
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+
+            } catch (ReplicationClientNotExistsException e) {
+                SDFSLogger.getLog().warn("Unable to remove replication source", e);
+                RemoveReplicaSourceResponse.Builder b = RemoveReplicaSourceResponse.newBuilder();
+                b.setError("Unable to remove replication source");
+                b.setErrorCode(errorCodes.ENOENT);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                SDFSLogger.getLog().warn("Unable to remove replication source", e);
+                RemoveReplicaSourceResponse.Builder b = RemoveReplicaSourceResponse.newBuilder();
+                b.setError("Unable to remove replication source");
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                responseObserver.onCompleted();
+            }
+        }
+    }
+
+    @Override
+    public void subscribeToVolume(VolumeEventListenRequest request, StreamObserver<VolumeEvent> responseObserver) {
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.METADATA_READ)) {
+            VolumeEvent.Builder b = VolumeEvent.newBuilder();
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+        } else {
+            ReplEventListener l = null;
+            try {
+                l = new ReplEventListener(responseObserver);
+                Main.volume.getRSerivce().registerListener(l);
+                while (!l.exceptionThrown) {
+                    Thread.sleep(1000);
+                }
+                responseObserver.onCompleted();
+            } catch (Exception e) {
+                VolumeEvent.Builder b = VolumeEvent.newBuilder();
+                SDFSLogger.getLog().warn("unable to create repl listener", e);
+                b.setError("unable to create repl listener");
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onCompleted();
+            } finally {
+                if (l != null) {
+                    Main.volume.getRSerivce().unregisterListener(l);
+                }
+            }
+        }
+    }
+
+    public class ReplEventListener {
+
+        StreamObserver<VolumeEvent> responseObserver;
+        boolean evtsent;
+        boolean exceptionThrown;
+
+        public ReplEventListener(
+                StreamObserver<VolumeEvent> responseObserver) {
+            this.responseObserver = responseObserver;
+
+        }
+
+        @Subscribe
+        public void nvent(org.opendedup.sdfs.io.events.ReplEvent evt) {
+
+            try {
+                responseObserver.onNext(evt.getVolumeEvent());
+
+            } catch (Exception e) {
+                VolumeEvent.Builder b = VolumeEvent.newBuilder();
+                SDFSLogger.getLog().info("nSent Event");
+                b.setError("Unable to marshal event");
+                b.setErrorCode(errorCodes.EIO);
+                responseObserver.onNext(b.build());
+                exceptionThrown = true;
+            }
+        }
     }
 
     @Override

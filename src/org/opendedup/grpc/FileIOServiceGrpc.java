@@ -728,6 +728,37 @@ public final class FileIOServiceGrpc {
     return getGetFileInfoMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.FileInfo.FileInfoRequest,
+      org.opendedup.grpc.FileInfo.FileMessageResponse> getGetaAllFileInfoMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetaAllFileInfo",
+      requestType = org.opendedup.grpc.FileInfo.FileInfoRequest.class,
+      responseType = org.opendedup.grpc.FileInfo.FileMessageResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.FileInfo.FileInfoRequest,
+      org.opendedup.grpc.FileInfo.FileMessageResponse> getGetaAllFileInfoMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.FileInfo.FileInfoRequest, org.opendedup.grpc.FileInfo.FileMessageResponse> getGetaAllFileInfoMethod;
+    if ((getGetaAllFileInfoMethod = FileIOServiceGrpc.getGetaAllFileInfoMethod) == null) {
+      synchronized (FileIOServiceGrpc.class) {
+        if ((getGetaAllFileInfoMethod = FileIOServiceGrpc.getGetaAllFileInfoMethod) == null) {
+          FileIOServiceGrpc.getGetaAllFileInfoMethod = getGetaAllFileInfoMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.FileInfo.FileInfoRequest, org.opendedup.grpc.FileInfo.FileMessageResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetaAllFileInfo"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.FileInfo.FileInfoRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.FileInfo.FileMessageResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new FileIOServiceMethodDescriptorSupplier("GetaAllFileInfo"))
+              .build();
+        }
+      }
+    }
+    return getGetaAllFileInfoMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.IOService.FileSnapshotRequest,
       org.opendedup.grpc.IOService.FileSnapshotResponse> getCreateCopyMethod;
 
@@ -1345,6 +1376,13 @@ public final class FileIOServiceGrpc {
 
     /**
      */
+    public void getaAllFileInfo(org.opendedup.grpc.FileInfo.FileInfoRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FileInfo.FileMessageResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetaAllFileInfoMethod(), responseObserver);
+    }
+
+    /**
+     */
     public void createCopy(org.opendedup.grpc.IOService.FileSnapshotRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.FileSnapshotResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateCopyMethod(), responseObserver);
@@ -1597,6 +1635,13 @@ public final class FileIOServiceGrpc {
                 org.opendedup.grpc.FileInfo.FileInfoRequest,
                 org.opendedup.grpc.FileInfo.FileMessageResponse>(
                   this, METHODID_GET_FILE_INFO)))
+          .addMethod(
+            getGetaAllFileInfoMethod(),
+            io.grpc.stub.ServerCalls.asyncServerStreamingCall(
+              new MethodHandlers<
+                org.opendedup.grpc.FileInfo.FileInfoRequest,
+                org.opendedup.grpc.FileInfo.FileMessageResponse>(
+                  this, METHODID_GETA_ALL_FILE_INFO)))
           .addMethod(
             getCreateCopyMethod(),
             io.grpc.stub.ServerCalls.asyncUnaryCall(
@@ -1895,6 +1940,14 @@ public final class FileIOServiceGrpc {
 
     /**
      */
+    public void getaAllFileInfo(org.opendedup.grpc.FileInfo.FileInfoRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.FileInfo.FileMessageResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncServerStreamingCall(
+          getChannel().newCall(getGetaAllFileInfoMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
     public void createCopy(org.opendedup.grpc.IOService.FileSnapshotRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.IOService.FileSnapshotResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
@@ -2167,6 +2220,14 @@ public final class FileIOServiceGrpc {
     public org.opendedup.grpc.FileInfo.FileMessageResponse getFileInfo(org.opendedup.grpc.FileInfo.FileInfoRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetFileInfoMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public java.util.Iterator<org.opendedup.grpc.FileInfo.FileMessageResponse> getaAllFileInfo(
+        org.opendedup.grpc.FileInfo.FileInfoRequest request) {
+      return io.grpc.stub.ClientCalls.blockingServerStreamingCall(
+          getChannel(), getGetaAllFileInfoMethod(), getCallOptions(), request);
     }
 
     /**
@@ -2574,20 +2635,21 @@ public final class FileIOServiceGrpc {
   private static final int METHODID_MKNOD = 19;
   private static final int METHODID_OPEN = 20;
   private static final int METHODID_GET_FILE_INFO = 21;
-  private static final int METHODID_CREATE_COPY = 22;
-  private static final int METHODID_FILE_EXISTS = 23;
-  private static final int METHODID_MK_DIR_ALL = 24;
-  private static final int METHODID_STAT = 25;
-  private static final int METHODID_RENAME = 26;
-  private static final int METHODID_COPY_EXTENT = 27;
-  private static final int METHODID_SET_USER_META_DATA = 28;
-  private static final int METHODID_GET_CLOUD_FILE = 29;
-  private static final int METHODID_GET_CLOUD_META_FILE = 30;
-  private static final int METHODID_STAT_FS = 31;
-  private static final int METHODID_FILE_NOTIFICATION = 32;
-  private static final int METHODID_SET_RETRIEVAL_TIER = 33;
-  private static final int METHODID_GET_RETRIEVAL_TIER = 34;
-  private static final int METHODID_STREAM_WRITE = 35;
+  private static final int METHODID_GETA_ALL_FILE_INFO = 22;
+  private static final int METHODID_CREATE_COPY = 23;
+  private static final int METHODID_FILE_EXISTS = 24;
+  private static final int METHODID_MK_DIR_ALL = 25;
+  private static final int METHODID_STAT = 26;
+  private static final int METHODID_RENAME = 27;
+  private static final int METHODID_COPY_EXTENT = 28;
+  private static final int METHODID_SET_USER_META_DATA = 29;
+  private static final int METHODID_GET_CLOUD_FILE = 30;
+  private static final int METHODID_GET_CLOUD_META_FILE = 31;
+  private static final int METHODID_STAT_FS = 32;
+  private static final int METHODID_FILE_NOTIFICATION = 33;
+  private static final int METHODID_SET_RETRIEVAL_TIER = 34;
+  private static final int METHODID_GET_RETRIEVAL_TIER = 35;
+  private static final int METHODID_STREAM_WRITE = 36;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -2692,6 +2754,10 @@ public final class FileIOServiceGrpc {
           break;
         case METHODID_GET_FILE_INFO:
           serviceImpl.getFileInfo((org.opendedup.grpc.FileInfo.FileInfoRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.FileInfo.FileMessageResponse>) responseObserver);
+          break;
+        case METHODID_GETA_ALL_FILE_INFO:
+          serviceImpl.getaAllFileInfo((org.opendedup.grpc.FileInfo.FileInfoRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.FileInfo.FileMessageResponse>) responseObserver);
           break;
         case METHODID_CREATE_COPY:
@@ -2833,6 +2899,7 @@ public final class FileIOServiceGrpc {
               .addMethod(getMknodMethod())
               .addMethod(getOpenMethod())
               .addMethod(getGetFileInfoMethod())
+              .addMethod(getGetaAllFileInfoMethod())
               .addMethod(getCreateCopyMethod())
               .addMethod(getFileExistsMethod())
               .addMethod(getMkDirAllMethod())

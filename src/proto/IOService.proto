@@ -432,6 +432,7 @@ service FileIOService {
     rpc Mknod(MkNodRequest) returns (MkNodResponse);
     rpc Open(FileOpenRequest) returns (FileOpenResponse);
     rpc GetFileInfo(FileInfoRequest) returns (FileMessageResponse);
+    rpc GetaAllFileInfo(FileInfoRequest) returns (stream FileMessageResponse);
     rpc CreateCopy(FileSnapshotRequest) returns (FileSnapshotResponse);
     rpc FileExists(FileExistsRequest) returns (FileExistsResponse);
     rpc MkDirAll(MkDirRequest) returns (MkDirResponse);

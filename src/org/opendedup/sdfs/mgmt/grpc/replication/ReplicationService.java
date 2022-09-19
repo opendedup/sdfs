@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt.grpc.replication;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -11,10 +12,10 @@ import com.google.common.primitives.Longs;
 import org.opendedup.grpc.Storage.VolumeEvent;
 import org.opendedup.grpc.Storage.actionType;
 import org.opendedup.logging.SDFSLogger;
-import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.io.events.ReplEvent;
 import org.opendedup.util.RandomGUID;
 import org.rocksdb.ColumnFamilyDescriptor;
@@ -32,10 +33,11 @@ public class ReplicationService {
     private static RocksDB repldb = null;
     private EventBus eventBus = new EventBus();
     private AtomicLong sequence = null;
-    private static final int pl = Main.volume.getPath().length();
+    private int pl = 0;
 
-    public ReplicationService() throws Exception {
-        File directory = new File(Main.volume.getReplPath() + File.separator);
+    public ReplicationService(Volume vol) throws Exception {
+        File directory = new File(vol.getReplPath() + File.separator);
+        pl = vol.getPath().length();
         directory.mkdirs();
         RocksDB.loadLibrary();
         CompactionOptionsFIFO fifo = new CompactionOptionsFIFO();
@@ -76,6 +78,17 @@ public class ReplicationService {
             SDFSLogger.getLog().debug("unable to unregister listener", e);
         }
 
+    }
+
+    public RocksIterator getIterator(long startSequence) throws IOException {
+
+        RocksIterator iter = repldb.newIterator();
+        iter.seek(Longs.toByteArray(startSequence));
+
+        if (!iter.isValid()) {
+            throw new IOException("no sequence at " + startSequence);
+        }
+        return iter;
     }
 
     @Subscribe

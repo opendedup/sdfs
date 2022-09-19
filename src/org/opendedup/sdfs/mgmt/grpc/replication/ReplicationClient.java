@@ -1,121 +1,184 @@
 package org.opendedup.sdfs.mgmt.grpc.replication;
 
-import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
-import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
-import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
-import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.FileExistsException;
+import org.opendedup.collections.HashtableFullException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
+import org.opendedup.collections.RocksDBMap.ProcessPriorityThreadFactory;
 import org.opendedup.collections.SparseDataChunk;
-import org.opendedup.grpc.SDFSEventServiceGrpc;
-import org.opendedup.grpc.StorageServiceGrpc;
+import org.opendedup.grpc.FileIOServiceGrpc;
+import org.opendedup.grpc.FileIOServiceGrpc.FileIOServiceBlockingStub;
+import org.opendedup.grpc.FileInfo.FileInfoRequest;
+import org.opendedup.grpc.FileInfo.FileInfoResponse;
+import org.opendedup.grpc.FileInfo.FileMessageResponse;
 import org.opendedup.grpc.FileInfo.errorCodes;
 import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest;
 import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventResponse;
+import org.opendedup.grpc.SDFSEventServiceGrpc;
 import org.opendedup.grpc.SDFSEventServiceGrpc.SDFSEventServiceBlockingStub;
 import org.opendedup.grpc.Storage.ChunkEntry;
 import org.opendedup.grpc.Storage.GetChunksRequest;
+import org.opendedup.grpc.Storage.GetChunksRequest.Builder;
 import org.opendedup.grpc.Storage.MetaDataDedupeFileRequest;
 import org.opendedup.grpc.Storage.MetaDataDedupeFileResponse;
 import org.opendedup.grpc.Storage.RestoreArchivesRequest;
 import org.opendedup.grpc.Storage.RestoreArchivesResponse;
 import org.opendedup.grpc.Storage.SparseDataChunkP;
 import org.opendedup.grpc.Storage.SparseDedupeFileRequest;
-import org.opendedup.grpc.Storage.GetChunksRequest.Builder;
+import org.opendedup.grpc.Storage.VolumeEvent;
+import org.opendedup.grpc.Storage.VolumeEventListenRequest;
+import org.opendedup.grpc.Storage.actionType;
+import org.opendedup.grpc.StorageServiceGrpc;
 import org.opendedup.grpc.StorageServiceGrpc.StorageServiceBlockingStub;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
+import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
+import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.mgmt.CloseFile;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl;
 import org.opendedup.sdfs.mgmt.grpc.tls.DynamicTrustManager;
 import org.opendedup.sdfs.mgmt.grpc.tls.WatchForFile;
 import org.opendedup.sdfs.notification.ReplicationImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.EasyX509ClientTrustManager;
 import org.opendedup.util.StringUtils;
-import org.opendedup.sdfs.io.HashLocPair;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeMap;
-
-import org.opendedup.collections.HashtableFullException;
-import org.opendedup.collections.InsertRecord;
-
-import org.opendedup.sdfs.filestore.ChunkData;
-import org.opendedup.sdfs.servers.HCServiceProxy;
 
 import com.google.common.primitives.Longs;
 import com.google.protobuf.ByteString;
 
+import io.grpc.ConnectivityState;
+import io.grpc.ManagedChannel;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+
 public class ReplicationClient {
     ManagedChannel channel = null;
     private StorageServiceBlockingStub storageBlockingStub;
+    private FileIOServiceBlockingStub ioBlockingStub;
     private SDFSEventServiceBlockingStub evtBlockingStub;
-    private String url;
-    private long volumeid;
-    public static Map<String, ImportFile> imports = new ConcurrentHashMap<String, ImportFile>();
-    public static Set<String> activeImports = new HashSet<String>();
+    public String url;
+    public long volumeid;
+    public boolean mtls;
+    public Map<String, ImportFile> imports = new ConcurrentHashMap<String, ImportFile>();
+    public Set<String> activeImports = new HashSet<String>();
+    public long sequence = 0;
+    public Thread downloadThread;
+    public Thread listThread;
+    public Thread syncThread;
 
-    public ReplicationClient(String url, long volumeid, boolean mtls) throws Exception {
+    public ReplicationClient(String url, long volumeid, boolean mtls) {
         this.url = url;
         this.volumeid = volumeid;
-        String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
-        String certChainFilePath = keydir + File.separator + "tls_key.pem";
-        String privateKeyFilePath = keydir + File.separator + "tls_key.key";
-        String trustCertCollectionFilePath = keydir + File.separator + "signer_key.crt";
-        Map<String, String> env = System.getenv();
-        if (env.containsKey("SDFS_PRIVATE_KEY")) {
-            privateKeyFilePath = env.get("SDFS_PRIVATE_KEY");
-        }
-        if (env.containsKey("SDFS_CERT_CHAIN")) {
-            certChainFilePath = env.get("SDFS_CERT_CHAIN");
-        }
+        this.mtls = mtls;
 
-        if (env.containsKey("SDFS_SIGNER_CHAIN")) {
-            trustCertCollectionFilePath = env.get("SDFS_SIGNER_CHAIN");
-        }
-        boolean tls = false;
-        String target = null;
-        if (url.toLowerCase().startsWith("sdfs://")) {
-            target = url.toLowerCase().replace("sdfs://", "");
-        } else if (url.toLowerCase().startsWith("sdfss://")) {
-            target = url.toLowerCase().replace("sdfss://", "");
-            tls = true;
-        }
-        String host = target.split(":")[0];
-        int port = Integer.parseInt(target.split(":")[1]);
-        int maxMsgSize = 240 * 1024 * 1024;
-        if (mtls || tls) {
+    }
 
-            channel = NettyChannelBuilder.forAddress(host, port)
-                    .negotiationType(NegotiationType.TLS).maxInboundMessageSize(maxMsgSize)
-                    .sslContext(getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath)
-                            .build())
-                    .build();
-        } else {
-            channel = NettyChannelBuilder.forAddress(host, port).maxInboundMessageSize(maxMsgSize)
-                    .negotiationType(NegotiationType.PLAINTEXT)
-                    .build();
-        }
+    public void connect() throws Exception {
+        try {
+            if (channel != null) {
+                try {
+                    channel.shutdown();
 
-        SDFSLogger.getLog().info("Replication conneted to " + host + " " + port + " " + channel.toString());
-        storageBlockingStub = StorageServiceGrpc.newBlockingStub(channel);
-        evtBlockingStub = SDFSEventServiceGrpc.newBlockingStub(channel);
+                } catch (Exception e) {
+                }
+            }
+            String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
+            String certChainFilePath = keydir + File.separator + "tls_key.pem";
+            String privateKeyFilePath = keydir + File.separator + "tls_key.key";
+            String trustCertCollectionFilePath = keydir + File.separator + "signer_key.crt";
+            Map<String, String> env = System.getenv();
+            if (env.containsKey("SDFS_PRIVATE_KEY")) {
+                privateKeyFilePath = env.get("SDFS_PRIVATE_KEY");
+            }
+            if (env.containsKey("SDFS_CERT_CHAIN")) {
+                certChainFilePath = env.get("SDFS_CERT_CHAIN");
+            }
+
+            if (env.containsKey("SDFS_SIGNER_CHAIN")) {
+                trustCertCollectionFilePath = env.get("SDFS_SIGNER_CHAIN");
+            }
+            boolean tls = false;
+            String target = null;
+            if (url.toLowerCase().startsWith("sdfs://")) {
+                target = url.toLowerCase().replace("sdfs://", "");
+            } else if (url.toLowerCase().startsWith("sdfss://")) {
+                target = url.toLowerCase().replace("sdfss://", "");
+                tls = true;
+            }
+            String host = target.split(":")[0];
+            int port = Integer.parseInt(target.split(":")[1]);
+            int maxMsgSize = 240 * 1024 * 1024;
+            if (mtls || tls) {
+
+                channel = NettyChannelBuilder.forAddress(host, port)
+                        .negotiationType(NegotiationType.TLS).maxInboundMessageSize(maxMsgSize)
+                        .sslContext(
+                                getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath)
+                                        .build())
+                        .build();
+            } else {
+                channel = NettyChannelBuilder.forAddress(host, port).maxInboundMessageSize(maxMsgSize)
+                        .negotiationType(NegotiationType.PLAINTEXT)
+                        .build();
+            }
+
+            SDFSLogger.getLog().info("Replication conneted to " + host + " " + port + " " + channel.toString()
+                    + " connection state " + channel.getState(true));
+            storageBlockingStub = StorageServiceGrpc.newBlockingStub(channel);
+            evtBlockingStub = SDFSEventServiceGrpc.newBlockingStub(channel);
+            ioBlockingStub = FileIOServiceGrpc.newBlockingStub(channel);
+        } catch (Exception e) {
+            channel = null;
+            storageBlockingStub = null;
+            evtBlockingStub = null;
+            ioBlockingStub = null;
+            throw e;
+        }
+    }
+
+    public boolean isConnected() {
+        if (channel == null) {
+            return false;
+        }
+        return channel.getState(true) == ConnectivityState.READY;
+    }
+
+    public void checkConnection() {
+        if (!this.isConnected()) {
+            SDFSLogger.getLog().warn("Replication Client not connected for " + this.url + " volid " + this.volumeid);
+            try {
+                this.shutDown();
+                this.connect();
+                this.replicationSink();
+            } catch (Exception e) {
+                SDFSLogger.getLog().warn("Unable to reconnect to " + this.url + " volid " + this.volumeid, e);
+            }
+        }
     }
 
     private SslContextBuilder getSslContextBuilder(String certChainFilePath, String privateKeyFilePath,
@@ -172,6 +235,329 @@ public class ReplicationClient {
         }
     }
 
+    public void replicationSink() throws IOException {
+
+        if (this.sequence == 0) {
+            downloadThread = new Thread(new DownloadAll(this));
+            downloadThread.start();
+        } else {
+            this.listThread = new Thread(new ListReplLogs(this));
+            this.listThread.start();
+        }
+        syncThread = new Thread(new ListenRepl(this));
+        syncThread.start();
+    }
+
+    public static class ListenRepl implements Runnable {
+        ReplicationClient client;
+        private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+
+        public ListenRepl(ReplicationClient client) {
+            this.client = client;
+        }
+
+        public void listen() throws IOException {
+            SDFSLogger.getLog().info("listening for new file changes");
+            Iterator<VolumeEvent> fi = client.storageBlockingStub
+                    .subscribeToVolume(VolumeEventListenRequest.newBuilder()
+                            .setPvolumeID(this.client.volumeid).setStartSequence(this.client.sequence).build());
+            BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
+            ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
+                    10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
+                    executionHandler);
+            long seq = 0;
+            while (fi.hasNext()) {
+
+                VolumeEvent rs = fi.next();
+
+                if (rs.getErrorCode() != errorCodes.NOERR) {
+                    SDFSLogger.getLog().warn("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
+                    throw new IOException("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
+                }
+                ImportFile impf = null;
+                synchronized (client.activeImports) {
+                    try {
+                        if (!client.activeImports.contains(rs.getFile().getFilePath())) {
+                            client.activeImports.add(rs.getFile().getFilePath());
+                            if (rs.getActionType() == actionType.MFILEWRITTEN) {
+                                ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
+                                        rs.getFile().getFilePath(),
+                                        client.url, client.volumeid);
+                                impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
+                                        evt);
+
+                            } else if (rs.getActionType() == actionType.MFILEDELETED) {
+                                String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
+                                File _f = new File(pt);
+                                FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                                MetaFileStore.getMF(_f).clearRetentionLock();
+                                MetaFileStore.removeMetaFile(_f.getPath());
+                            } else if (rs.getActionType() == actionType.MFILERENAMED) {
+                                String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
+                                File _sf = new File(spt);
+                                String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
+                                File _df = new File(dpt);
+
+                                MetaFileStore.rename(_sf.getPath(), _df.getPath());
+                            }
+                            seq = rs.getSeq();
+                            if (client.sequence < seq) {
+                                client.sequence = seq;
+                            }
+
+                        }
+                        if (impf != null) {
+                            arExecutor.execute(impf);
+                        }
+                    } finally {
+                        if (impf == null) {
+                            client.activeImports.remove(rs.getFile().getFilePath());
+                        }
+                    }
+
+                }
+            }
+            arExecutor.shutdown();
+            try {
+                while (!arExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    SDFSLogger.getLog().debug("Awaiting replication to finish.");
+                }
+            } catch (InterruptedException e) {
+                throw new IOException(e);
+            }
+            synchronized (client.activeImports) {
+                if (client.sequence < seq) {
+                    client.sequence = seq;
+                }
+            }
+        }
+
+        @Override
+        public void run() {
+            for (;;) {
+                try {
+                    this.listen();
+                    break;
+                } catch (Exception e) {
+                    SDFSLogger.getLog().warn("ListenRepl Replication failed", e);
+                    try {
+                        Thread.sleep(60 * 1000 * 5);
+                    } catch (InterruptedException e1) {
+                        break;
+                    }
+                    if (client.listThread == null || !client.listThread.isAlive()) {
+                        client.listThread = new Thread(new ListReplLogs(this.client));
+                        client.listThread.start();
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    public static class ListReplLogs implements Runnable {
+        ReplicationClient client;
+        private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+
+        public ListReplLogs(ReplicationClient client) {
+            this.client = client;
+        }
+
+        public void list() throws IOException {
+            SDFSLogger.getLog().info("listing replication logs");
+            Iterator<VolumeEvent> fi = client.storageBlockingStub.listReplLogs(VolumeEventListenRequest.newBuilder()
+                    .setPvolumeID(this.client.volumeid).setStartSequence(this.client.sequence).build());
+            BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
+            ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
+                    10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
+                    executionHandler);
+            long seq = 0;
+            while (fi.hasNext()) {
+
+                VolumeEvent rs = fi.next();
+
+                if (rs.getErrorCode() != errorCodes.NOERR) {
+                    SDFSLogger.getLog().warn("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
+                    SDFSLogger.getLog().warn("Downloading all files");
+                    new DownloadAll(this.client).replicationSinkAll();
+                    return;
+                }
+                ImportFile impf = null;
+                synchronized (client.activeImports) {
+                    try {
+                        if (!client.activeImports.contains(rs.getFile().getFilePath())) {
+                            client.activeImports.add(rs.getFile().getFilePath());
+                            if (rs.getActionType() == actionType.MFILEWRITTEN) {
+                                ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
+                                        rs.getFile().getFilePath(),
+                                        client.url, client.volumeid);
+                                impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
+                                        evt);
+
+                            } else if (rs.getActionType() == actionType.MFILEDELETED) {
+                                String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
+                                File _f = new File(pt);
+                                MetaFileStore.removeMetaFile(_f.getPath());
+                            } else if (rs.getActionType() == actionType.MFILERENAMED) {
+                                String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
+                                File _sf = new File(spt);
+                                String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
+                                File _df = new File(dpt);
+
+                                MetaFileStore.rename(_sf.getPath(), _df.getPath());
+                            }
+
+                        }
+                        if (impf != null) {
+                            arExecutor.execute(impf);
+                        }
+                    } finally {
+                        if (impf == null) {
+                            client.activeImports.remove(rs.getFile().getFilePath());
+                        }
+                    }
+                    seq = rs.getSeq();
+
+                }
+            }
+            arExecutor.shutdown();
+            try {
+                while (!arExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    SDFSLogger.getLog().debug("Awaiting replication to finish.");
+                }
+            } catch (InterruptedException e) {
+                throw new IOException(e);
+            }
+            synchronized (client.activeImports) {
+                if (client.sequence < seq) {
+                    client.sequence = seq;
+                }
+            }
+        }
+
+        @Override
+        public void run() {
+            int retries = 0;
+            for (;;) {
+                try {
+                    this.list();
+                    break;
+                } catch (Exception e) {
+                    retries++;
+                    SDFSLogger.getLog().warn("Downloadall Replication failed", e);
+                    if (retries > 10) {
+                        SDFSLogger.getLog().warn("Download all replication failed. Giving up");
+                        break;
+                    } else {
+                        try {
+                            Thread.sleep(60 * 1000 * 5);
+                        } catch (InterruptedException e1) {
+                            break;
+                        }
+                    }
+
+                }
+            }
+
+        }
+
+    }
+
+    public void shutDown() {
+        synchronized (this.activeImports) {
+            if (this.channel != null) {
+                this.channel.shutdown();
+            }
+            if (this.listThread != null) {
+                this.listThread.interrupt();
+            }
+            if (this.downloadThread != null) {
+                this.downloadThread.interrupt();
+            }
+            if (this.downloadThread != null) {
+                this.syncThread.interrupt();
+            }
+            this.activeImports.clear();
+        }
+    }
+
+    public static class DownloadAll implements Runnable {
+        ReplicationClient client;
+        private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+
+        public DownloadAll(ReplicationClient client) {
+            this.client = client;
+            this.client.sequence = 0;
+        }
+
+        public void replicationSinkAll() throws IOException {
+            SDFSLogger.getLog().info("downloading all files");
+            Iterator<FileMessageResponse> fi = client.ioBlockingStub.getaAllFileInfo(
+                    FileInfoRequest.newBuilder().setPvolumeID(client.volumeid).setFileName(".").build());
+            BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
+            ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
+                    10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
+                    executionHandler);
+            while (fi.hasNext()) {
+
+                FileMessageResponse rs = fi.next();
+
+                if (rs.getErrorCode() != errorCodes.NOERR) {
+                    SDFSLogger.getLog().warn("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
+                    throw new IOException("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
+                }
+                FileInfoResponse file = rs.getResponseList().get(0);
+                ImportFile impf = null;
+                synchronized (client.activeImports) {
+                    if (!client.activeImports.contains(file.getFilePath())) {
+                        client.activeImports.add(file.getFilePath());
+                        ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(), file.getFilePath(),
+                                client.url, client.volumeid);
+                        impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt);
+                    }
+                }
+                if (impf != null) {
+                    arExecutor.execute(impf);
+                }
+
+            }
+            arExecutor.shutdown();
+            try {
+                while (!arExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    SDFSLogger.getLog().debug("Awaiting replication to finish.");
+                }
+            } catch (InterruptedException e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public void run() {
+            int retries = 0;
+            for (;;) {
+                try {
+                    replicationSinkAll();
+                    break;
+                } catch (Exception e) {
+                    retries++;
+                    SDFSLogger.getLog().warn("Downloadall Replication failed", e);
+                    if (retries > 10) {
+                        SDFSLogger.getLog().warn("Download all replication failed. Giving up");
+                        break;
+                    } else {
+                        try {
+                            Thread.sleep(60 * 1000 * 5);
+                        } catch (InterruptedException e1) {
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+
     public static class ImportFile implements Runnable {
         ReplicationImportEvent evt;
         String srcFile;
@@ -185,16 +571,21 @@ public class ReplicationClient {
             this.evt = evt;
             this.srcFile = srcFile;
             this.dstFile = dstFile;
-            ReplicationClient.imports.put(evt.uid, this);
+            client.imports.put(evt.uid, this);
         }
 
         @Override
         public void run() {
+            replicate();
+        }
+
+        private void replicate() {
             try {
-                if (new File(this.dstFile).exists()) {
-                    evt.endEvent("Unable to import archive [" + srcFile + "] " + "Destination [" + dstFile + "] " +
-                            " because destination exists",
-                            SDFSEvent.ERROR);
+
+                String pt = Main.volume.getPath() + File.separator + this.dstFile;
+                File _f = new File(pt);
+                if (_f.exists()) {
+                    MetaFileStore.removeMetaFile(_f.getPath());
                 }
                 try {
                     if (this.evt.canceled) {
@@ -224,7 +615,7 @@ public class ReplicationClient {
                     mf.setDfGuid(ng);
                     mf.sync();
                     try {
-                        downloadDDB(mf,sguid);
+                        downloadDDB(mf, sguid);
                         FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
                         CloseFile.close(mf, true);
                     } catch (ReplicationCanceledException e) {
@@ -247,10 +638,9 @@ public class ReplicationClient {
                     return;
                 }
             } finally {
-                ReplicationClient.activeImports.remove(dstFile);
-                ReplicationClient.imports.remove(this.evt.uid);
+                client.activeImports.remove(dstFile);
+                client.imports.remove(this.evt.uid);
             }
-
         }
 
         private MetaDataDedupFile downloadMetaFile() throws Exception {
@@ -287,7 +677,7 @@ public class ReplicationClient {
             SparseDedupeFileRequest req = SparseDedupeFileRequest.newBuilder()
                     .setPvolumeID(this.client.volumeid).setGuid(guid).build();
             Iterator<SparseDataChunkP> crs = this.client.storageBlockingStub.getSparseDedupeFile(req);
-            
+
             LongByteArrayMap mp = LongByteArrayMap.getMap(mf.getDfGuid());
             mf.getIOMonitor().clearFileCounters(false);
             while (crs.hasNext()) {
@@ -307,14 +697,15 @@ public class ReplicationClient {
                     throw new IOException(msg);
 
                 }
-                SparseDataChunk ck = importSparseDataChunk( new SparseDataChunk(cr), mf);
+                SparseDataChunk ck = importSparseDataChunk(new SparseDataChunk(cr), mf);
                 mp.put(ck.getFpos(), ck);
                 mf.setLength(ck.getFpos() + ck.len, false);
             }
             mp.forceClose();
         }
 
-        private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf) throws IOException, HashtableFullException {
+        private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf)
+                throws IOException, HashtableFullException {
 
             TreeMap<Integer, HashLocPair> al = ck.getFingers();
             HashMap<ByteString, ChunkEntry> ces = new HashMap<ByteString, ChunkEntry>();
@@ -358,9 +749,10 @@ public class ReplicationClient {
                 }
                 byte[] dt = ce.getData().toByteArray();
                 // SDFSLogger.getLog().info("dt len " + dt.length + " dt = " + new String(dt));
-                //HashFunction hf = Hashing.sha256();
-                //SDFSLogger.getLog().info(StringUtils.getHexString(hf.hashBytes(dt).asBytes()) + 
-                //" = " + StringUtils.getHexString(ce.getHash().toByteArray()));
+                // HashFunction hf = Hashing.sha256();
+                // SDFSLogger.getLog().info(StringUtils.getHexString(hf.hashBytes(dt).asBytes())
+                // +
+                // " = " + StringUtils.getHexString(ce.getHash().toByteArray()));
                 ChunkData cd = new ChunkData(ce.getHash().toByteArray(), dt.length, dt, mf.getDfGuid());
                 cd.references = claims.get(ce.getHash()).ct;
                 InsertRecord ir = HCServiceProxy.getHashesMap().put(cd, true);
