@@ -45,6 +45,7 @@ import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.io.events.ArchiveSync;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CommandLineProgressBar;
 import org.opendedup.util.StringUtils;
 import org.rocksdb.BlockBasedTableConfig;
@@ -725,10 +726,14 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			}
 
 		} catch (Exception e) {
+			evt.endEvent("garbage collection failed",SDFSEvent.ERROR);
 			SDFSLogger.getLog().warn("unable to finish Garbage Collection", e);
 		}
 		evt.addCount(1);
-		SDFSLogger.getLog().info("current count is " + evt.getCount());
+		if(!HCServiceProxy.getChunkStore().isDeleteRunning() && HCServiceProxy.getChunkStore().getDeleteSize() == 0) {
+			SDFSLogger.getLog().info("Garbage Collection ended in rocksdbmap");
+			evt.endEvent("garbage collection completed successfully");
+		}
 		return dct;
 	}
 

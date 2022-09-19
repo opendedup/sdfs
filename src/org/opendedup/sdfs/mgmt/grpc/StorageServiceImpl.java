@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.google.protobuf.ByteString;
 
@@ -191,7 +192,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     futures.add(lf);
                 }
                 for (ListenableFuture<Long> future : futures) {
-                    responses.add(future.get());
+                    responses.add(future.get(300,TimeUnit.SECONDS));
                 }
 
                 b.addAllLocations(responses);
@@ -259,7 +260,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     futures.add(lf);
                 }
                 for (ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf : futures) {
-                    responses.add(lf.get());
+                    responses.add(lf.get(300,TimeUnit.SECONDS));
                 }
                 b.addAllInsertRecords(responses);
                 responseObserver.onNext(b.build());
@@ -347,7 +348,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
                 }
                 for (ListenableFuture<Long> future : futures) {
-                    future.get();
+                    future.get(300, TimeUnit.SECONDS);
                 }
 
                 ch.setWrittenTo(true);

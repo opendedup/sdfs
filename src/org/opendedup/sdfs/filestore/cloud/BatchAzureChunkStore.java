@@ -117,6 +117,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private int tierInDays = 30;
 	private boolean tierImmedately = false;
 	private String endpoint = null;
+	private boolean deleteRunning = false;
 
 	// private String bucketLocation = null;
 	static {
@@ -1033,7 +1034,9 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		long startTime = System.currentTimeMillis() + 15 * 60 * 1000; // Start Archiving after 15 minutes
 		while (!closed) {
 			try {
+				this.deleteRunning = false;
 				Thread.sleep(60000);
+				this.deleteRunning = true;
 				try {
 					if (!this.clustered) {
 						HashMap<String, String> md = container.getMetadata();
@@ -1224,7 +1227,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 					for (SDFSDeleteEntry entry : odel.values()) {
 						if (entry.evt.endTime <=0 && entry.evt.getCount() > 33){
-						entry.evt.endEvent();
+							entry.evt.endEvent();
 						}
 
 					}
@@ -1238,6 +1241,20 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 		}
 
+	}
+	@Override
+	public int getDeleteSize() {
+		delLock.lock();
+		try{
+			return this.deletes.size();
+		}finally {
+			delLock.unlock();
+		}
+	}
+
+	@Override
+	public boolean isDeleteRunning() {
+		return this.deleteRunning;
 	}
 
 	@Override

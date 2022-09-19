@@ -227,4 +227,16 @@ public class NullChunkStore implements AbstractChunkStore {
 
 	}
 
+	@Override
+	public int getDeleteSize() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean isDeleteRunning() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
