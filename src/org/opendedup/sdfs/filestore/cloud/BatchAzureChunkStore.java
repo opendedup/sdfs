@@ -1148,8 +1148,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 								// hashString + "=" + odel.get(k));
 								delobj = delobj + odel.get(k).ct;
 								if (objs <= delobj) {
-									int size = Integer.parseInt((String) metaData.get("size"));
-									int compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
+									int size = Integer.parseInt((String) metaData.get("bsize"));
+									int compressedSize = Integer.parseInt((String) metaData.get("bcompressedsize"));
 
 									if (this.standAlone) {
 										if (HashBlobArchive.getCompressedLength() > 0) {
