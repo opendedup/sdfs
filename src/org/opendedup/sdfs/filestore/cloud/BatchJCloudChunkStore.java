@@ -119,6 +119,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	private String accessKey = Main.cloudAccessKey;
 	private String secretKey = Main.cloudSecretKey;
 	private boolean standAlone = true;
+	private boolean deleteRunning = false;
 
 	// private String bucketLocation = null;
 	static {
@@ -146,6 +147,23 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	public long bytesWritten() {
 		return 0;
 	}
+
+	@Override
+	public boolean isDeleteRunning() {
+		return this.deleteRunning;
+	}
+
+	@Override
+	public int getDeleteSize() {
+		delLock.lock();
+		try{
+			return this.deletes.size();
+		}finally {
+			delLock.unlock();
+		}
+	}
+
+
 
 	@Override
 	public void close() {
@@ -1189,7 +1207,9 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	public void run() {
 		while (!closed) {
 			try {
+				this.deleteRunning = false;
 				Thread.sleep(60000);
+				this.deleteRunning = true;
 				try {
 					String lbi = "bucketinfo/"
 							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
@@ -1299,7 +1319,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
 					}
 					for (SDFSDeleteEntry entry : odel.values()) {
-						if (entry.evt.endTime <= 0 && entry.evt.getCount() > 33) {
+						if (entry.evt.endTime <=0 && entry.evt.getCount() > 33) {
 							entry.evt.endEvent();
 						}
 

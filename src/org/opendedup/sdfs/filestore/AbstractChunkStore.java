@@ -180,4 +180,7 @@ public interface AbstractChunkStore {
 
 	public void set_move_blob(boolean status);
 
+	public int getDeleteSize();
+	public boolean isDeleteRunning();
+
 }

@@ -55,6 +55,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	int checkInterval = 15000;
 	public boolean clustered;
 	private int mdVersion = 0;
+	boolean deleteRunning = false;
 
 	// private String bucketLocation = null;
 	static {
@@ -406,7 +407,9 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	public void run() {
 		while (!closed) {
 			try {
+				this.deleteRunning = false;
 				Thread.sleep(5000);
+				this.deleteRunning = true;
 				try {
 					updateMD();
 				} catch (Exception e1) {
@@ -485,6 +488,21 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 			}
 		}
 
+	}
+
+	@Override
+	public int getDeleteSize() {
+		delLock.lock();
+		try{
+			return this.deletes.size();
+		}finally {
+			delLock.unlock();
+		}
+	}
+
+	@Override
+	public boolean isDeleteRunning() {
+		return this.deleteRunning;
 	}
 
 	@Override

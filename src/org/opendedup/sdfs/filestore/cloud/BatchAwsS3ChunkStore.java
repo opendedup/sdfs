@@ -198,6 +198,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private com.amazonaws.services.s3.model.Tier glacierTier = Tier.Bulk;
 	boolean gcsSigner = false;
 	TransferManager tx = null;
+	private boolean deleteRunning = false;
 	static {
 		try {
 
@@ -1657,7 +1658,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	public void run() {
 		while (!closed) {
 			try {
+				this.deleteRunning = false;
 				Thread.sleep(60000);
+				this.deleteRunning = true;
 				if (this.standAlone) {
 					try {
 						Map<String, String> md = this.getUserMetaData(binm);
@@ -1726,7 +1729,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
 						}
 						for (SDFSDeleteEntry entry : odel.values()) {
-							if (entry.evt.endTime <=0 && entry.evt.getCount() > 33){
+							if (entry.evt.endTime <=0){
 							entry.evt.endEvent();
 							}
 	
@@ -1790,6 +1793,21 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			// this.s3clientLock.readLock().unlock();
 		}
+	}
+
+	@Override
+	public int getDeleteSize() {
+		delLock.lock();
+		try{
+			return this.deletes.size();
+		}finally {
+			delLock.unlock();
+		}
+	}
+
+	@Override
+	public boolean isDeleteRunning() {
+		return this.deleteRunning;
 	}
 
 	public StringResult getStringResult(String key) throws IOException, InterruptedException {
