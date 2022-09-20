@@ -349,16 +349,18 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         } else {
             try {
                 LongByteArrayMap ddb = LongByteArrayMap.getMap(request.getGuid());
-                ddb.forceClose();
-                ddb = LongByteArrayMap.getMap(request.getGuid());
-                ddb.setIndexed(true);
-                ddb.iterInit();
-                for (;;) {
-                    LongKeyValue kv = ddb.nextKeyValue(false);
-                    if (kv == null)
-                        break;
-                    SparseDataChunk ck = kv.getValue();
-                    responseObserver.onNext(ck.toProtoBuf());
+                try {
+                    ddb.setIndexed(true);
+                    ddb.iterInit();
+                    for (;;) {
+                        LongKeyValue kv = ddb.nextKeyValue(false);
+                        if (kv == null)
+                            break;
+                        SparseDataChunk ck = kv.getValue();
+                        responseObserver.onNext(ck.toProtoBuf());
+                    }
+                } finally {
+                    ddb.close();
                 }
                 responseObserver.onCompleted();
             } catch (Exception e) {

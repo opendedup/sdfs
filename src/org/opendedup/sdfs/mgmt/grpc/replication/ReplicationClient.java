@@ -578,6 +578,7 @@ public class ReplicationClient {
             this.evt = evt;
             this.srcFile = srcFile;
             this.dstFile = dstFile;
+            SDFSLogger.getLog().info("Importing " + this.srcFile);
             client.imports.put(evt.uid, this);
         }
 
