@@ -83,13 +83,13 @@ public class VolumeIOMeter implements Runnable {
 		MDC.put("dseSz", Long.toString(this.dseSz));
 		MDC.put("dseCompSz", Long.toString(this.dseCompSz));
 		MDC.put("WIOPS", Long.toString(this.WIOPS));
-		MDC.put("sdfsCpuLoad", Double.toString(perf.getProcessCpuLoad()));
+		MDC.put("sdfsCpuLoad", Double.toString(perf.getSystemCpuLoad()));
 		MDC.put("sdfsCpuTime", Double.toString(perf.getProcessCpuTime()));
 		MDC.put("systemCpuLoad", Double.toString(perf.getCpuLoad()));
 		MDC.put("systemCpuAverage",
 				Double.toString(perf.getSystemLoadAverage()));
-		MDC.put("freeMemory", Long.toString(perf.getFreeMemorySize()));
-		MDC.put("totalMemory", Long.toString(perf.getTotalMemorySize()));
+		MDC.put("freeMemory", Long.toString(perf.getFreePhysicalMemorySize()));
+		MDC.put("totalMemory", Long.toString(perf.getTotalPhysicalMemorySize()));
 		MDC.put("freeSwap", Long.toString(perf.getFreeSwapSpaceSize()));
 		MDC.put("totalSwap", Long.toString(perf.getTotalSwapSpaceSize()));
 		MDC.clear();

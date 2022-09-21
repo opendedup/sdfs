@@ -431,7 +431,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads * 2);
-			if (tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))) {
+			if (tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))
+					&& !Main.partialTransition) {
 				this.bio = new BlobDataIO(this.name + "table", this.accessKey, this.secretKey, connectionProtocol);
 			}
 			/*
@@ -882,8 +883,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						metaData.put("suspect", "true");
 						int _size = Integer.parseInt((String) metaData.get("size"));
 						int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-							HashBlobArchive.addToLength(_size);
-							HashBlobArchive.addToCompressedLength(_compressedSize);
+						HashBlobArchive.addToLength(_size);
+						HashBlobArchive.addToCompressedLength(_compressedSize);
 						blob.setMetadata(metaData);
 						blob.uploadMetadata(null, null, opContext);
 						metaData = kblob.getMetadata();
@@ -946,8 +947,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				metaData.put("suspect", "true");
 				int _size = Integer.parseInt((String) metaData.get("size"));
 				int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-					HashBlobArchive.addToLength(_size);
-					HashBlobArchive.addToCompressedLength(_compressedSize);
+				HashBlobArchive.addToLength(_size);
+				HashBlobArchive.addToCompressedLength(_compressedSize);
 				metaData = kblob.getMetadata();
 				metaData.remove("deleted");
 				metaData.put("deletedobjects", Integer.toString(delobj));
@@ -1063,9 +1064,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						this.refresh.clear();
 					}
 					long currentTime = System.currentTimeMillis();
-					if (get_move_blob())
-						this.closed = true;
-					if (currentTime > startTime) {
+					if ((currentTime > startTime) && (!get_move_blob())) {
 						Iterable<BlobDataTracker> tri = null;
 						if (this.tierImmedately) {
 							long mins = (Long.valueOf(this.tierInDays) * 60 * 1000) + 60000;
@@ -1076,6 +1075,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						for (BlobDataTracker bt : tri) {
 							String hashString = EncyptUtils.encHashArchiveName(Long.parseLong(bt.getRowKey()),
 									Main.chunkStoreEncryptionEnabled);
+							if (Main.partialTransition)
+								break;
 							try {
 								SDFSLogger.getLog().debug("Moving  blocks/" + hashString + " to " + this.tier);
 								CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
@@ -1657,6 +1658,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			blob.downloadAttributes();
 			if (blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.ARCHIVE)) {
 				Main.rehydrateBlobs = true;
+				Main.partialTransition = true;
 				if (!Main.retrievalTier.equals("")) {
 					String ts = Main.retrievalTier;
 					if (ts.equalsIgnoreCase("high")) {
@@ -1919,8 +1921,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				int _sz = Integer.parseInt(md.get("bsize"));
 				int _cl = Integer.parseInt(md.get("compressedsize"));
-					HashBlobArchive.addToLength(_sz);
-					HashBlobArchive.addToCompressedLength(_cl);
+				HashBlobArchive.addToLength(_sz);
+				HashBlobArchive.addToCompressedLength(_cl);
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to update size", e);
 			}
@@ -2160,7 +2162,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void setStandAlone(boolean standAlone) {
-		
 
 	}
 
