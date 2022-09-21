@@ -183,7 +183,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             try {
                 if (SDFSEvent.getEvent(request.getEventID()) != null) {
                     ReplicationImportEvent evt = (ReplicationImportEvent) SDFSEvent.getEvent(request.getEventID());
-                    if (evt.endTime > 0) {
+                    if (evt.getEndTime() > 0) {
                         b.setError("UUID " + request.getEventID() + " alread done");
                         b.setErrorCode(errorCodes.EALREADY);
                         responseObserver.onNext(b.build());
@@ -224,7 +224,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
                 if (SDFSEvent.getEvent(request.getEventID()) != null) {
                     ReplicationImportEvent evt = (ReplicationImportEvent) SDFSEvent.getEvent(request.getEventID());
-                    if (evt.endTime > 0) {
+                    if (evt.getEndTime() > 0) {
                         b.setError("UUID " + request.getEventID() + " alread done");
                         b.setErrorCode(errorCodes.EALREADY);
                         responseObserver.onNext(b.build());
@@ -357,6 +357,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                         if (kv == null)
                             break;
                         SparseDataChunk ck = kv.getValue();
+                        SDFSLogger.getLog().info(ck.getFpos());
                         responseObserver.onNext(ck.toProtoBuf());
                     }
                 } finally {

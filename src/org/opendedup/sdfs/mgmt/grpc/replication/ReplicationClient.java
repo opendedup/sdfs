@@ -2,6 +2,8 @@ package org.opendedup.sdfs.mgmt.grpc.replication;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.io.FileExistsException;
+import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
@@ -65,7 +68,12 @@ import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.EasyX509ClientTrustManager;
 import org.opendedup.util.StringUtils;
 
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
 import com.google.common.primitives.Longs;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.google.protobuf.ByteString;
 
 import io.grpc.ConnectivityState;
@@ -90,12 +98,48 @@ public class ReplicationClient {
     public Thread downloadThread;
     public Thread listThread;
     public Thread syncThread;
+    private File jsonFile = null;
+    private Gson objGson = new GsonBuilder().setPrettyPrinting().create();
 
     public ReplicationClient(String url, long volumeid, boolean mtls) {
         this.url = url;
         this.volumeid = volumeid;
         this.mtls = mtls;
 
+    }
+
+    public static void RecoverReplicationClients() throws IOException {
+        File directory = new File(Main.volume.getReplPath() + File.separator);
+        if (directory.exists()) {
+            for (File jf : directory.listFiles()) {
+                if (jf.getPath().endsWith(".json")) {
+                    SDFSLogger.getLog().info("Reading From " + jf.getPath());
+                    Type listType = new TypeToken<HashSet<String>>() {
+                    }.getType();
+                    Gson objGson = new GsonBuilder().setPrettyPrinting().create();
+                    String content = FileUtils.readFileToString(jf, "UTF-8");
+                    Set<String> jsonToMap = objGson.fromJson(content, listType);
+                    ReplicationClient rc = null;
+                    for (String id : jsonToMap) {
+                        try {
+                            ReplicationImportEvent evt = (ReplicationImportEvent) SDFSEvent.getEvent(id);
+                            if (rc == null) {
+                                rc = new ReplicationClient(evt.url, evt.volumeid, evt.mtls);
+                                rc.connect();
+                            }
+                            ImportFile imf = new ImportFile(evt.src, evt.dst, rc, evt);
+                            imf.replicate();
+                        } catch (Exception e) {
+                            SDFSLogger.getLog().warn("recovery import failed for " + id, e);
+                        }
+                    }
+                    if (rc != null) {
+                        SDFSLogger.getLog()
+                                .info("Recovered " + jsonToMap.size() + " Active Imports for " + rc.volumeid);
+                    }
+                }
+            }
+        }
     }
 
     public void connect() throws Exception {
@@ -152,6 +196,10 @@ public class ReplicationClient {
             storageBlockingStub = StorageServiceGrpc.newBlockingStub(channel);
             evtBlockingStub = SDFSEventServiceGrpc.newBlockingStub(channel);
             ioBlockingStub = FileIOServiceGrpc.newBlockingStub(channel);
+            File directory = new File(Main.volume.getReplPath() + File.separator);
+            directory.mkdirs();
+            jsonFile = new File(directory, "activereplications-" + this.volumeid + ".json");
+
         } catch (Exception e) {
             channel = null;
             storageBlockingStub = null;
@@ -219,14 +267,16 @@ public class ReplicationClient {
         return GrpcSslContexts.configure(sslClientContextBuilder);
     }
 
-    public SDFSEvent replicate(String srcFile, String dstFile) throws FileExistsException {
+    public SDFSEvent replicate(String srcFile, String dstFile) throws IOException {
         synchronized (activeImports) {
             if (activeImports.contains(dstFile)) {
                 throw new FileExistsException("Replication already occuring for + dstFile");
             }
             activeImports.add(dstFile);
             SDFSLogger.getLog().info("Will Replicate " + srcFile + " to " + dstFile + " from " + url);
-            ReplicationImportEvent evt = new ReplicationImportEvent(srcFile, dstFile, this.url, this.volumeid);
+            ReplicationImportEvent evt = new ReplicationImportEvent(srcFile, dstFile, this.url, this.volumeid,
+                    this.mtls);
+            evt.persistEvent();
             ImportFile fl = new ImportFile(srcFile, dstFile, this, evt);
 
             Thread th = new Thread(fl);
@@ -283,7 +333,7 @@ public class ReplicationClient {
                             if (rs.getActionType() == actionType.MFILEWRITTEN) {
                                 ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                         rs.getFile().getFilePath(),
-                                        client.url, client.volumeid);
+                                        client.url, client.volumeid, client.mtls);
                                 impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
                                         evt);
 
@@ -394,7 +444,7 @@ public class ReplicationClient {
                             if (rs.getActionType() == actionType.MFILEWRITTEN) {
                                 ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                         rs.getFile().getFilePath(),
-                                        client.url, client.volumeid);
+                                        client.url, client.volumeid, client.mtls);
                                 impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
                                         evt);
 
@@ -402,7 +452,7 @@ public class ReplicationClient {
                                 String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
                                 File _f = new File(pt);
                                 FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
-                                 MetaFileStore.getMF(_f).clearRetentionLock();
+                                MetaFileStore.getMF(_f).clearRetentionLock();
                                 MetaFileStore.removeMetaFile(_f.getPath());
                             } else if (rs.getActionType() == actionType.MFILERENAMED) {
                                 String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
@@ -423,7 +473,6 @@ public class ReplicationClient {
                         }
                     }
                     seq = rs.getSeq();
-                   
 
                 }
             }
@@ -485,6 +534,12 @@ public class ReplicationClient {
             if (this.downloadThread != null) {
                 this.syncThread.interrupt();
             }
+            String mapToJson = objGson.toJson(this.imports.keySet());
+            try {
+                FileUtils.writeStringToFile(jsonFile, mapToJson, Charset.forName("UTF-8"));
+            } catch (IOException e) {
+                SDFSLogger.getLog().warn("Unable to persist active imports", e);
+            }
             this.activeImports.clear();
         }
     }
@@ -520,7 +575,7 @@ public class ReplicationClient {
                     if (!client.activeImports.contains(file.getFilePath())) {
                         client.activeImports.add(file.getFilePath());
                         ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(), file.getFilePath(),
-                                client.url, client.volumeid);
+                                client.url, client.volumeid, client.mtls);
                         impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt);
                     }
                 }
@@ -572,6 +627,7 @@ public class ReplicationClient {
         ReplicationClient client;
         boolean canceled = false;
         boolean paused = false;
+        private Gson objGson = new GsonBuilder().setPrettyPrinting().create();
 
         public ImportFile(String srcFile, String dstFile, ReplicationClient client, ReplicationImportEvent evt) {
             this.client = client;
@@ -579,7 +635,14 @@ public class ReplicationClient {
             this.srcFile = srcFile;
             this.dstFile = dstFile;
             SDFSLogger.getLog().info("Importing " + this.srcFile);
+
             client.imports.put(evt.uid, this);
+            String mapToJson = objGson.toJson(client.imports.keySet());
+            try {
+                FileUtils.writeStringToFile(client.jsonFile, mapToJson, Charset.forName("UTF-8"));
+            } catch (IOException e) {
+                SDFSLogger.getLog().warn("unable to persist active imports", e);
+            }
         }
 
         @Override
@@ -625,7 +688,7 @@ public class ReplicationClient {
                     mf.setDfGuid(ng);
                     mf.sync();
                     try {
-                        if(sguid != null && sguid.trim().length() > 0){
+                        if (sguid != null && sguid.trim().length() > 0) {
                             downloadDDB(mf, sguid);
                         }
                         FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
@@ -641,6 +704,7 @@ public class ReplicationClient {
                     MetaFileStore.addToCache(mf);
                     evt.addCount(1);
                     evt.endEvent("Import Successful for " + this.dstFile, SDFSEvent.INFO);
+                    SDFSLogger.getLog().info("Imported " + this.dstFile);
                 } catch (ReplicationCanceledException e) {
                     SDFSLogger.getLog().warn(e);
                     return;
@@ -650,8 +714,18 @@ public class ReplicationClient {
                     return;
                 }
             } finally {
-                client.activeImports.remove(dstFile);
-                client.imports.remove(this.evt.uid);
+                synchronized (client.activeImports) {
+                    client.activeImports.remove(dstFile);
+                    if (client.imports.remove(this.evt.uid) != null) {
+                        String mapToJson = objGson.toJson(client.imports.keySet());
+                        try {
+                            FileUtils.writeStringToFile(client.jsonFile, mapToJson, Charset.forName("UTF-8"));
+                        } catch (IOException e) {
+                            SDFSLogger.getLog().warn("unable to persist active imports", e);
+                        }
+                    }
+                }
+
             }
         }
 
@@ -674,6 +748,7 @@ public class ReplicationClient {
             String pt = Main.volume.getPath() + File.separator + this.dstFile;
             File _f = new File(pt);
             MetaDataDedupFile.fromProtoBuf(crs.getFile(), _f.getPath());
+            SDFSLogger.getLog().info("Download length = " + crs.getFile().getSize());
             return MetaFileStore.getMF(_f);
         }
 
@@ -692,6 +767,7 @@ public class ReplicationClient {
 
             LongByteArrayMap mp = LongByteArrayMap.getMap(mf.getDfGuid());
             mf.getIOMonitor().clearFileCounters(false);
+            long pos = 0;
             while (crs.hasNext()) {
                 if (this.evt.canceled) {
                     throw new ReplicationCanceledException("Replication Canceled");
@@ -710,9 +786,11 @@ public class ReplicationClient {
 
                 }
                 SparseDataChunk ck = importSparseDataChunk(new SparseDataChunk(cr), mf);
-                mp.put(ck.getFpos(), ck);
-                mf.setLength(ck.getFpos() + ck.len, false);
+                mp.put(pos, ck);
+                pos += ck.len;
+                mf.setLength(mf.length() + ck.len, false);
             }
+            SDFSLogger.getLog().info("MF Size = " + mf.length());
             mp.forceClose();
         }
 
@@ -761,10 +839,12 @@ public class ReplicationClient {
                 }
                 byte[] dt = ce.getData().toByteArray();
                 // SDFSLogger.getLog().info("dt len " + dt.length + " dt = " + new String(dt));
-                // HashFunction hf = Hashing.sha256();
-                // SDFSLogger.getLog().info(StringUtils.getHexString(hf.hashBytes(dt).asBytes())
-                // +
-                // " = " + StringUtils.getHexString(ce.getHash().toByteArray()));
+                HashFunction hf = Hashing.sha256();
+                if(!StringUtils.getHexString(hf.hashBytes(dt).asBytes()).equals(StringUtils.getHexString(ce.getHash().toByteArray()))){
+                    SDFSLogger.getLog().info(StringUtils.getHexString(hf.hashBytes(dt).asBytes())
+                    +
+                    " = " + StringUtils.getHexString(ce.getHash().toByteArray()));
+                }
                 ChunkData cd = new ChunkData(ce.getHash().toByteArray(), dt.length, dt, mf.getDfGuid());
                 cd.references = claims.get(ce.getHash()).ct;
                 InsertRecord ir = HCServiceProxy.getHashesMap().put(cd, true);

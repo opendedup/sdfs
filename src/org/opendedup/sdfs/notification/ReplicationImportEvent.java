@@ -31,13 +31,15 @@ public class ReplicationImportEvent extends SDFSEvent {
 	public boolean canceled;
 	public boolean paused;
 	public long pausets;
+	public boolean mtls;
 
-	public ReplicationImportEvent(String src, String dst, String url, long volumeid) {
+	public ReplicationImportEvent(String src, String dst, String url, long volumeid,boolean mtls) {
 		super(IMPORT, dst, "Importing " + src + " from " + url + " with volumeid " +
 				volumeid + " to " + dst, SDFSEvent.INFO);
 		this.src = src;
 		this.dst = dst;
 		this.url = url;
+		this.mtls = mtls;
 		this.volumeid = volumeid;
 	}
 
@@ -46,6 +48,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 		this.src = evt.getAttributesMap().get("src");
 		this.dst = evt.getAttributesMap().get("dst");
 		this.url = evt.getAttributesMap().get("url");
+		this.mtls = Boolean.parseBoolean(evt.getAttributesMap().get("mtls"));
 		this.volumeid = Long.parseLong(evt.getAttributesMap().get("volumeid"));
 		this.paused = Boolean.parseBoolean(evt.getAttributesMap().get("paused"));
 		this.pausets = Long.parseLong(evt.getAttributesMap().get("pausets"));
@@ -74,6 +77,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 		b.putAttributes("src", src);
 		b.putAttributes("dst", dst);
 		b.putAttributes("url", url);
+		b.putAttributes("mtls", Boolean.toString(mtls));
 		b.putAttributes("volumeid", Long.toString(this.volumeid));
 		b.putAttributes("paused", Boolean.toString(this.paused));
 		b.putAttributes("pausets", Long.toString(this.pausets));

@@ -1729,7 +1729,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
 						}
 						for (SDFSDeleteEntry entry : odel.values()) {
-							if (entry.evt.endTime <=0){
+							if (entry.evt.getEndTime() <=0){
 							entry.evt.endEvent();
 							}
 	

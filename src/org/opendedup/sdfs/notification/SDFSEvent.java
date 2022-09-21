@@ -64,7 +64,7 @@ public class SDFSEvent implements java.io.Serializable {
 	private AtomicLong maxCt = new AtomicLong(1);
 	private AtomicLong curCt = new AtomicLong(1);
 	public long startTime;
-	public long endTime = -1;
+	private long endTime = -1;
 	public long actionCount = 0;
 	public boolean success = true;
 	public String uid = null;
@@ -147,6 +147,10 @@ public class SDFSEvent implements java.io.Serializable {
 
 			});
 
+	public long getEndTime(){
+		return this.endTime;
+	}
+
 	public static void init() throws RocksDBException {
 		File directory = new File(Main.volume.getEvtPath() + File.separator);
 		directory.mkdirs();
@@ -184,25 +188,11 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public static SDFSEvent GetEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt) {
-		if (evt.getType().equals(MIMPORT.toString())) {
+		if (evt.getType().equals(IMPORT.toString())) {
 			return new ReplicationImportEvent(evt);
 		} else {
 			return new SDFSEvent(evt);
 		}
-	}
-
-	protected SDFSEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt) {
-		this.type = new Type(evt.getType());
-		this.target = evt.getTarget();
-		this.startTime = evt.getStartTime();
-		this.shortMsg = evt.getShortMsg();
-		this.uid = evt.getUuid();
-		this.maxCt.set(evt.getMaxCount());
-		this.curCt.set(evt.getCurrentCount());
-		this.puid = evt.getParentUuid();
-		this.success = evt.getSuccess();
-		this.level = new Level(evt.getLevel());
-		cachedEvents.put(this.uid, this);
 	}
 
 	public SDFSEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent pevt) {
@@ -219,6 +209,7 @@ public class SDFSEvent implements java.io.Serializable {
 		this.extendedInfo = pevt.getExtendedInfo();
 		this.success = pevt.getSuccess();
 		this.puid = pevt.getParentUuid();
+		cachedEvents.put(this.uid, this);
 	}
 
 	public void registerListener(Object obj) {
@@ -232,6 +223,15 @@ public class SDFSEvent implements java.io.Serializable {
 			SDFSLogger.getLog().debug("unable to unregister listener", e);
 		}
 
+	}
+
+	public void persistEvent() throws IOException {
+		try{
+		evtdb.put(this.uid.getBytes(), this.toProtoBuf().toByteArray());
+		}catch(Exception e) {
+			SDFSLogger.getLog().error("unable to persist event " + this.uid,e);
+			throw new IOException("unable to persist event " + this.uid);
+		}
 	}
 
 	public void addCount(long ct) {
@@ -265,6 +265,11 @@ public class SDFSEvent implements java.io.Serializable {
 			if (level == INFO) {
 				this.success = true;
 			}
+			try {
+				this.persistEvent();
+			} catch (IOException e) {
+				
+			}
 			eventBus.post(this);
 		}
 	}
@@ -274,6 +279,10 @@ public class SDFSEvent implements java.io.Serializable {
 			throw new IOException("Cannot add child with same event id");
 		evt.puid = this.uid;
 		this.children.add(evt);
+		try {
+			this.persistEvent();
+		} catch (IOException e) {
+		}
 		eventBus.post(this);
 	}
 
@@ -298,6 +307,10 @@ public class SDFSEvent implements java.io.Serializable {
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
 			this.success = false;
+			try {
+				this.persistEvent();
+			} catch (IOException e1) {
+			}
 			eventBus.post(this);
 		}
 	}
@@ -312,6 +325,10 @@ public class SDFSEvent implements java.io.Serializable {
 			this.endTime = System.currentTimeMillis();
 			this.level = SDFSEvent.INFO;
 			this.curCt = this.maxCt;
+			try {
+				this.persistEvent();
+			} catch (IOException e) {
+			}
 
 			eventBus.post(this);
 		}
@@ -328,6 +345,10 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
+			try {
+				this.persistEvent();
+			} catch (IOException e) {
+			}
 			eventBus.post(this);
 		}
 	}
@@ -343,6 +364,10 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
+			try {
+				this.persistEvent();
+			} catch (IOException e) {
+			}
 			eventBus.post(this);
 		}
 	}
@@ -358,6 +383,10 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
+			try {
+				this.persistEvent();
+			} catch (IOException e) {
+			}
 			eventBus.post(this);
 		}
 	}

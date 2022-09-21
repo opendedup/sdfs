@@ -310,7 +310,7 @@ public class Volume {
 
 	}
 
-	public void startReplClients() {
+	public void startReplClients() throws IOException {
 		if (replEnabled) {
 			try {
 				this.rService = new ReplicationService(this);
@@ -325,6 +325,7 @@ public class Volume {
 				SDFSLogger.getLog().warn("Unable to connect to " + rClient.url + " volumeid " + rClient.volumeid);
 			}
 		}
+		ReplicationClient.RecoverReplicationClients();
 		this.rChecker = new Thread(new ReplChecker(this));
 		this.rChecker.start();
 
