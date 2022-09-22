@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -46,7 +47,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 	private String name;
 	boolean compress = false;
 	boolean encrypt = false;
-
+	private HashSet<String> activeDeleteEvents = new HashSet<String>();
 	private HashMap<Long, SDFSDeleteEntry> deletes = new HashMap<Long, SDFSDeleteEntry>();
 	boolean closed = false;
 	boolean deleteUnclaimed = true;
@@ -169,6 +170,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 				this.deletes.get(start).evt = evt;
 			} else
 				this.deletes.put(start, new SDFSDeleteEntry(1, evt));
+			this.activeDeleteEvents.add(evt.uid);
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error putting data", e);
@@ -421,6 +423,7 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 					try {
 						odel = this.deletes;
 						this.deletes = new HashMap<Long, SDFSDeleteEntry>();
+						this.activeDeleteEvents.clear();
 						// SDFSLogger.getLog().info("delete hash table size of "
 						// + odel.size());
 					} finally {
@@ -471,11 +474,15 @@ public class BatchFileChunkStore implements AbstractChunkStore, AbstractBatchSto
 
 					}
 					for (SDFSDeleteEntry entry : odel.values()) {
-						if (entry.evt.endTime <=0 && entry.evt.getCount() > 33){
-							entry.evt.endEvent("Compacted [" + iter.size() + "] storage objects by ["
-									+ StorageUnit.of(sz).format(sz) + "]");
+						if (entry.evt.endTime <= 0 && entry.evt.getCount() > 33) {
+							this.delLock.lock();
+							try {
+								if (!this.activeDeleteEvents.contains(entry.evt.uid))
+									entry.evt.endEvent();
+							} finally {
+								this.delLock.unlock();
+							}
 						}
-
 					}
 					SDFSLogger.getLog().info("Compacted [" + iter.size() + "] storage objects by ["
 							+ StorageUnit.of(sz).format(sz) + "]");

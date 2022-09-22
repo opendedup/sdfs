@@ -188,6 +188,7 @@ public class SDFSEvent implements java.io.Serializable {
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
 			this.endTime = System.currentTimeMillis();
+			SDFSLogger.getLog().info("Event " + this.uid + " is done.");
 			eventBus.post(this);
 		}
 	}
@@ -221,6 +222,7 @@ public class SDFSEvent implements java.io.Serializable {
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
 			this.success = false;
+			SDFSLogger.getLog().info("Event " + this.uid + " is done.");
 			eventBus.post(this);
 		}
 	}
@@ -235,7 +237,7 @@ public class SDFSEvent implements java.io.Serializable {
 			this.endTime = System.currentTimeMillis();
 			this.level = SDFSEvent.INFO;
 			this.curCt = this.maxCt;
-
+			SDFSLogger.getLog().info("Event " + this.uid + " is done.");
 			eventBus.post(this);
 		}
 	}
@@ -251,6 +253,7 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
+			SDFSLogger.getLog().info("Event " + this.uid + " is done.");
 			eventBus.post(this);
 		}
 	}
@@ -266,6 +269,7 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
+			SDFSLogger.getLog().info("Event " + this.uid + " is done.");
 			eventBus.post(this);
 		}
 	}
@@ -281,6 +285,7 @@ public class SDFSEvent implements java.io.Serializable {
 			if (this.maxCt.get() == 0)
 				this.maxCt.incrementAndGet();
 			this.curCt = this.maxCt;
+			SDFSLogger.getLog().info("Event " + this.uid + " is done.");
 			eventBus.post(this);
 		}
 	}
