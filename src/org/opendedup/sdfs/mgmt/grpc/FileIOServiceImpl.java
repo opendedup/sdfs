@@ -1926,13 +1926,17 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
         Iterator<Path> stream = null;
         stream = Files.newDirectoryStream(dir).iterator();
         while (stream.hasNext()) {
+
             Path p = stream.next();
             File _mf = p.toFile();
+            SDFSLogger.getLog().info("1");
             if (_mf.isDirectory()) {
+                SDFSLogger.getLog().info("2");
                 streamList(f, responseObserver);
             } else {
                 MetaDataDedupFile mf = MetaFileStore.getNCMF(_mf);
                 FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
+                SDFSLogger.getLog().info("3");
                 b.addResponse(mf.toGRPC(false));
                 responseObserver.onNext(b.build());
             }
@@ -1963,6 +1967,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             String internalPath = Main.volume.getPath() + File.separator + req.getFileName();
             File f = new File(internalPath);
             if (!f.exists()) {
+                SDFSLogger.getLog().info("1");
                 FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
                 b.setError("File not found " + req.getFileName());
                 b.setErrorCode(errorCodes.ENOENT);
@@ -1972,6 +1977,8 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             }
             if (f.isDirectory()) {
                 try {
+                SDFSLogger.getLog().info("2");
+
                     this.streamList(f, responseObserver);
                 } catch (Exception e) {
                     SDFSLogger.getLog().warn("Unable to list director " + f.getPath(), e);
@@ -1984,6 +1991,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onCompleted();
 
             } else {
+
                 FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
                 try {
                     MetaDataDedupFile mf = MetaFileStore.getNCMF(new File(internalPath));
