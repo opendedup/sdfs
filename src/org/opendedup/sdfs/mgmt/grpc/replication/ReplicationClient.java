@@ -18,6 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.net.ssl.X509TrustManager;
 
@@ -342,7 +343,7 @@ public class ReplicationClient {
             Iterator<VolumeEvent> fi = client.storageBlockingStub
                     .subscribeToVolume(VolumeEventListenRequest.newBuilder()
                             .setPvolumeID(this.client.volumeid).setStartSequence(this.client.sequence).build());
-            BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
+            BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(100);
             ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
                     10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
                     executionHandler);
@@ -688,6 +689,7 @@ public class ReplicationClient {
         boolean canceled = false;
         boolean paused = false;
         private Gson objGson = new GsonBuilder().setPrettyPrinting().create();
+        private static HashMap<String, ReentrantLock> actives = new HashMap<String, ReentrantLock>();
 
         public ImportFile(String srcFile, String dstFile, ReplicationClient client, ReplicationImportEvent evt) {
             this.client = client;
@@ -707,46 +709,66 @@ public class ReplicationClient {
 
         @Override
         public void run() {
-            Exception e = null;
-            for (int i = 0; i < client.failRetries; i++) {
-                try {
-                    replicate();
-                    SDFSLogger.getLog().info("Replication Completed Successfully for " + srcFile);
-                    this.evt.endEvent("Replication Successful");
-                    e = null;
-                    break;
-                } catch (ReplicationCanceledException e1) {
-                    SDFSLogger.getLog().info("Replication Canceled");
-                    this.evt.endEvent("Replication Canceled", SDFSEvent.WARN);
-                    break;
-                } catch (Exception e1) {
-                    SDFSLogger.getLog().warn("unable to complete replication to " + client.url + " volume id "
-                            + client.volumeid + " for " + srcFile + " will retry in 5 minutes", e1);
-                    e = e1;
-                    this.evt.shortMsg = "unable to complete replication to " + client.url + " volume id "
-                            + client.volumeid + " for " + srcFile + " will retry in 5 minutes";
-                    try {
-                        Thread.sleep(5 * 60 * 1000);
-                    } catch (InterruptedException e2) {
-                        break;
-                    }
+            ReentrantLock active = null;
+            synchronized (actives) {
+                if (actives.containsKey(this.dstFile)) {
+                    active = actives.get(this.dstFile);
+                } else {
+                    active = new ReentrantLock();
+                    actives.put(this.dstFile, active);
                 }
             }
-            if (e != null) {
-                SDFSLogger.getLog().warn("replication failed for " + client.url + " volume id "
-                        + client.volumeid + " for " + srcFile, e);
-                synchronized (client.activeImports) {
-                    client.activeImports.remove(dstFile);
-                    if (client.imports.remove(this.evt.uid) != null) {
-                        String mapToJson = objGson.toJson(client.imports.keySet());
+            active.lock();
+            try {
+                Exception e = null;
+                for (int i = 0; i < client.failRetries; i++) {
+                    try {
+                        replicate();
+                        SDFSLogger.getLog().info("Replication Completed Successfully for " + srcFile);
+                        this.evt.endEvent("Replication Successful");
+                        e = null;
+                        break;
+                    } catch (ReplicationCanceledException e1) {
+                        SDFSLogger.getLog().info("Replication Canceled");
+                        this.evt.endEvent("Replication Canceled", SDFSEvent.WARN);
+                        break;
+                    } catch (Exception e1) {
+                        SDFSLogger.getLog().warn("unable to complete replication to " + client.url + " volume id "
+                                + client.volumeid + " for " + srcFile + " will retry in 5 minutes", e1);
+                        e = e1;
+                        this.evt.shortMsg = "unable to complete replication to " + client.url + " volume id "
+                                + client.volumeid + " for " + srcFile + " will retry in 5 minutes";
                         try {
-                            FileUtils.writeStringToFile(client.jsonFile, mapToJson, Charset.forName("UTF-8"));
-                        } catch (IOException e1) {
-                            SDFSLogger.getLog().warn("unable to persist active imports", e);
+                            Thread.sleep(5 * 60 * 1000);
+                        } catch (InterruptedException e2) {
+                            break;
                         }
                     }
                 }
+                if (e != null) {
+                    SDFSLogger.getLog().warn("replication failed for " + client.url + " volume id "
+                            + client.volumeid + " for " + srcFile, e);
+                    synchronized (client.activeImports) {
+                        client.activeImports.remove(dstFile);
+                        if (client.imports.remove(this.evt.uid) != null) {
+                            String mapToJson = objGson.toJson(client.imports.keySet());
+                            try {
+                                FileUtils.writeStringToFile(client.jsonFile, mapToJson, Charset.forName("UTF-8"));
+                            } catch (IOException e1) {
+                                SDFSLogger.getLog().warn("unable to persist active imports", e);
+                            }
+                        }
+                    }
+                }
+            } finally {
+                active.unlock();
             }
+            synchronized (actives) {
+                if (!active.isLocked()) {
+                    actives.remove(this.dstFile);
+                }
+            }
+
         }
 
         private void replicate() throws ReplicationCanceledException, Exception {

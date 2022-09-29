@@ -982,6 +982,11 @@ public class LongByteArrayMap implements DataMapInterface {
 
 		WriteLock l = this.hashlock.writeLock();
 		l.lock();
+		try {
+			throw new IOException();
+		}catch(Exception e) {
+			SDFSLogger.getLog().warn("close ", e);
+		}
 
 		try {
 			if (!this.closed) {
