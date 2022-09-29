@@ -59,10 +59,12 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.MMetaUpdated;
+import org.opendedup.sdfs.mgmt.GetCloudFile;
 import org.opendedup.sdfs.monitor.IOMonitor;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.ByteUtils;
@@ -121,6 +123,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean dirty = false;
 	private long attributes = 0;
 	private long retentionLock = -1;
+	private static final int pl = Main.volume.getPath().length();
+
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
@@ -1393,15 +1397,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		FileInfoResponse.Builder b = FileInfoResponse.newBuilder();
 		b.setFileName(this.getName());
 		String fl = this.getPath().substring(Main.volume.getPath().length());
-		String pl = "";
+		String plp = "";
 		if (fl.length() > 0) {
-			pl = this.getParent().substring(Main.volume.getPath().length());
+			plp = this.getParent().substring(Main.volume.getPath().length());
 		}
 		while (fl.startsWith("/") || fl.startsWith("\\"))
 			fl = fl.substring(1, fl.length());
-		if (pl.trim().length() == 0)
-			pl = "##rootDir##";
-		b.setId(Main.volume.getSerialNumber() + "/" + fl).setFilePath(fl).setParentPath(pl)
+		if (plp.trim().length() == 0)
+			plp = "##rootDir##";
+		b.setId(Main.volume.getSerialNumber() + "/" + fl).setFilePath(fl).setParentPath(plp)
 				.setMtime(this.lastModified());
 		if (this.isFile()) {
 			b.setType(fileType.FILE);

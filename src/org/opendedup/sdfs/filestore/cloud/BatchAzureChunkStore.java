@@ -1132,7 +1132,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					SDFSLogger.getLog().info("Removed size=" + rsz + " of remove data compressed size " +
 									rcsz + " Current DSE Size is " + HashBlobArchive.getCompressedLength());
 					for (SDFSDeleteEntry entry : odel.values()) {
-						if (entry.evt.endTime <= 0 && entry.evt.getCount() > 33) {
+						if (entry.evt.getEndTime() <= 0 && entry.evt.getCount() > 33) {
 							this.delLock.lock();
 							try {
 								if (!this.activeDeleteEvents.contains(entry.evt.uid))

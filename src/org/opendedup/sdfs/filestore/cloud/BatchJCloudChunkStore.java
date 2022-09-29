@@ -1322,7 +1322,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
 					}
 					for (SDFSDeleteEntry entry : odel.values()) {
-						if (entry.evt.endTime <= 0 && entry.evt.getCount() > 33) {
+						if (entry.evt.getEndTime() <= 0 && entry.evt.getCount() > 33) {
 							this.delLock.lock();
 							try {
 								if (!this.activeDeleteEvents.contains(entry.evt.uid))
