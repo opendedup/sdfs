@@ -84,7 +84,7 @@ public class VolumeConfigWriter {
 	// String fdisk_schedule = "0 59 23 * * ?";
 	String fdisk_schedule = "0 0 12 ? * SUN";
 	String ltrfdisk_schedule = "0 15 10 L * ?";
-	//String syncfs_schedule = "0 0 12 ? * SAT";
+	// String syncfs_schedule = "0 0 12 ? * SAT";
 	String syncfs_schedule = null;
 	private String dExt = null;
 	boolean azureEnabled = false;
@@ -199,7 +199,7 @@ public class VolumeConfigWriter {
 			int returnCode = Config.updateCloudCreds();
 			System.exit(returnCode);
 		}
-		
+
 		if (cmd.hasOption("encrypt-config")) {
 			if (cmd.getOptionValue("encrypt-config").length() < 6) {
 				System.out.println("--encrypt-config must be greater than 6 characters");
@@ -557,19 +557,20 @@ public class VolumeConfigWriter {
 					try {
 						creds = new BasicAWSCredentials(this.cloudAccessKey, this.cloudSecretKey);
 						AmazonS3 s3Service = AmazonS3ClientBuilder
-						.standard()
-						.withCredentials(new AWSStaticCredentialsProvider(creds))
-						.build();
+								.standard()
+								.withCredentials(new AWSStaticCredentialsProvider(creds))
+								.build();
 						if (!s3Service.doesBucketExistV2(this.cloudBucketName))
 							this.encryptBucket = true;
 						else {
 							String result = s3Service.getBucketEncryption(this.cloudBucketName).toString();
 							if (result.contains("AES256"))
 								this.encryptBucket = true;
-							else
+							else {
 								System.out.println(
 										"Warn : Unable to set AES256 encryption as bucket already exists without ServerSideEncryption enabled.");
-							this.encryptBucket = false;
+								this.encryptBucket = false;
+							}
 						}
 					} catch (Exception e) {
 						if (e.toString().contains("ServerSideEncryptionConfigurationNotFound"))
@@ -630,9 +631,12 @@ public class VolumeConfigWriter {
 			}
 		}
 
-		byte[] b = new byte[16];
-		b = Arrays.copyOf(this.cloudBucketName.getBytes(), 16);
-		this.chunk_store_iv = StringUtils.getHexString(b);
+
+		if (this.awsEnabled || this.minIOEnabled || this.gsEnabled || this.backblazeEnabled || this.azureEnabled) {
+			byte[] b = new byte[16];
+			b = Arrays.copyOf(this.cloudBucketName.getBytes(), 16);
+			this.chunk_store_iv = StringUtils.getHexString(b);
+		}
 		if (cmd.hasOption("chunk-store-io-threads")) {
 			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("chunk-store-io-threads"));
 		}

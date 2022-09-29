@@ -22,7 +22,6 @@ import java.io.File;
 
 import java.io.FileInputStream;
 
-import org.opendedup.sdfs.mgmt.GetCloudFile;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -60,7 +59,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.DedupFileStore;
 import org.opendedup.sdfs.filestore.MetaFileStore;
-import org.opendedup.sdfs.filestore.cloud.FileReplicationService;
 import org.opendedup.sdfs.io.events.MFileDeleted;
 import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileWritten;
@@ -123,7 +121,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean dirty = false;
 	private long attributes = 0;
 	private long retentionLock = -1;
-	private static final int pl = Main.volume.getPath().length();
 
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);

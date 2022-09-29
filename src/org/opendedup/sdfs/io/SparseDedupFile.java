@@ -747,7 +747,7 @@ public class SparseDedupFile implements DedupFile {
 			try {
 				WritableCacheBuffer wb = null;
 				wb = writeBuffers.get(chunkPos);
-				
+
 				/*
 				 * SDFSLogger.getLog() .info("active buffers=" + this.activeBuffers.size() +
 				 * " flushingBuffers=" + this.flushingBuffers.size() + " open buffers=" +
@@ -825,6 +825,9 @@ public class SparseDedupFile implements DedupFile {
 	public void sync(boolean force, boolean propigate) throws FileClosedException, IOException {
 		this.syncLock.lock();
 		try {
+			if (Main.volume.isFull()) {
+				throw new IOException("Disk is full");
+			}
 			if (!Volume.getStorageConnected())
 				throw new IOException("storage offline");
 			if (this.closed) {

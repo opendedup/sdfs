@@ -838,6 +838,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             } catch (Exception e) {
+                if (e.getMessage().contains("Disk is full")
+                        || e.getMessage().contains("There is not enough space on the disk")) {
+                    b.setError("Volume Full");
+                    b.setErrorCode(errorCodes.ENOSPC);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
                 SDFSLogger.getLog().error("unable to write to file" + request.getFileHandle(), e);
                 b.setError("unable to write to file" + request.getFileHandle());
                 b.setErrorCode(errorCodes.EIO);
@@ -880,6 +888,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     return;
                 }
             } catch (Exception e) {
+                if (e.getMessage().contains("Disk is full")
+                        || e.getMessage().contains("There is not enough space on the disk")) {
+                    b.setError("Volume Full");
+                    b.setErrorCode(errorCodes.ENOSPC);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
                 b.setError("unable to write to file" + request.getFileHandle());
                 b.setErrorCode(errorCodes.EBADFD);
                 responseObserver.onNext(b.build());
@@ -1328,6 +1344,14 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                 return;
 
             } catch (Exception e) {
+                if (e.getMessage().contains("Disk is full")
+                        || e.getMessage().contains("There is not enough space on the disk")) {
+                    b.setError("Volume Full");
+                    b.setErrorCode(errorCodes.ENOSPC);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
                 SDFSLogger.getLog().error("unable to sync file [" + path + "]", e);
                 b.setError("unable to sync file [" + path + "]");
                 b.setErrorCode(errorCodes.EACCES);
@@ -2451,6 +2475,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             synchronized (this) {
                 try {
                     String tierType = req.getTierType();
+                    Main.partialTransition = true;
                     if (!tierType.isEmpty()) {
                         SDFSLogger.getLog().info("Tier type: " + tierType);
                         if (tierType.equalsIgnoreCase("expedited") || tierType.equalsIgnoreCase("standard")

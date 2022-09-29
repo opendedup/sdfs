@@ -101,6 +101,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	OperationContext opContext = new OperationContext();
 	private HashMap<Long, SDFSDeleteEntry> deletes = new HashMap<Long, SDFSDeleteEntry>();
+	private HashSet<String> activeDeleteEvents = new HashSet<String>();
 	boolean closed = false;
 	boolean move_blob = false;
 	boolean deleteUnclaimed = true;
@@ -237,6 +238,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 				this.deletes.get(start).evt = evt;
 			} else
 				this.deletes.put(start, new SDFSDeleteEntry(1, evt));
+			this.activeDeleteEvents.add(evt.uid);
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error putting data", e);
@@ -431,7 +433,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads * 2);
-			if (tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))) {
+			if (tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))
+					&& !Main.partialTransition) {
 				this.bio = new BlobDataIO(this.name + "table", this.accessKey, this.secretKey, connectionProtocol);
 			}
 			/*
@@ -882,8 +885,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						metaData.put("suspect", "true");
 						int _size = Integer.parseInt((String) metaData.get("size"));
 						int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-							HashBlobArchive.addToLength(_size);
-							HashBlobArchive.addToCompressedLength(_compressedSize);
+						HashBlobArchive.addToLength(_size);
+						HashBlobArchive.addToCompressedLength(_compressedSize);
 						blob.setMetadata(metaData);
 						blob.uploadMetadata(null, null, opContext);
 						metaData = kblob.getMetadata();
@@ -922,83 +925,63 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 		String haName = EncyptUtils.encHashArchiveName(id, Main.chunkStoreEncryptionEnabled);
 		try {
 			CloudBlockBlob kblob = container.getBlockBlobReference("keys/" + haName);
-			CloudBlockBlob cblob = null;
-			if (this.clustered)
-				cblob = container.getBlockBlobReference(this.getClaimName(id));
+			CloudBlockBlob cblob = container.getBlockBlobReference(this.getClaimName(id));
 			kblob.downloadAttributes();
 			cblob.downloadAttributes();
-			HashMap<String, String> metaData = null;
-			if (clustered)
-				metaData = cblob.getMetadata();
-			else
-				metaData = kblob.getMetadata();
+
 			claims = this.getClaimedObjects(kblob, id);
-			if (claims > 0) {
-				SDFSLogger.getLog().warn("Reclaimed object " + id + " claims=" + claims);
-				int delobj = 0;
-				if (metaData.containsKey("deletedobjects")) {
-					delobj = Integer.parseInt(metaData.get("deletedobjects")) - claims;
-					if (delobj < 0)
-						delobj = 0;
-				}
-				metaData.remove("deleted");
-				metaData.put("deletedobjects", Integer.toString(delobj));
-				metaData.put("suspect", "true");
-				int _size = Integer.parseInt((String) metaData.get("size"));
-				int _compressedSize = Integer.parseInt((String) metaData.get("compressedsize"));
-					HashBlobArchive.addToLength(_size);
-					HashBlobArchive.addToCompressedLength(_compressedSize);
-				metaData = kblob.getMetadata();
-				metaData.remove("deleted");
-				metaData.put("deletedobjects", Integer.toString(delobj));
-				metaData.put("suspect", "true");
-				if (clustered) {
-					cblob.setMetadata(metaData);
-					cblob.uploadMetadata();
+			if (claims == 0) {
+				HashMap<String, String> metaData = cblob.getMetadata();
+				int size = Integer.parseInt((String) metaData.get("bsize"));
+				int compressedSize = Integer.parseInt((String) metaData.get("bcompressedsize"));
+
+				if (HashBlobArchive.getCompressedLength() > 0) {
+					HashBlobArchive.addToCompressedLength((-1 * compressedSize));
 				} else {
-					kblob.setMetadata(metaData);
-					kblob.uploadMetadata();
+					HashBlobArchive.setCompressedLength(0);
 				}
-			} else {
-				if (clustered) {
-					cblob.delete();
+
+				if (HashBlobArchive.getLength() > 0) {
+					HashBlobArchive.addToLength(-1 * size);
+				} else {
+					HashBlobArchive.setLength(0);
+				}
+
+				HashBlobArchive.removeLocalArchive(id);
+				cblob.delete();
+				try {
+					bio.removeBlobDataTracker(id,
+							EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
+					if (Main.REFRESH_BLOBS) {
+						synchronized (this.refresh) {
+							this.refresh.remove(id);
+						}
+					}
+				} catch (Exception e) {
+					SDFSLogger.getLog().debug("unable to remove " + id + " from tablelob", e);
+
+				}
+				if (!container.listBlobs("claims/keys/" + haName).iterator().hasNext()) {
 					try {
-						bio.removeBlobDataTracker(id,
-								EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled));
-						if (Main.REFRESH_BLOBS) {
-							synchronized (this.refresh) {
-								this.refresh.remove(id);
-							}
-						}
+						kblob.delete();
 					} catch (Exception e) {
-						SDFSLogger.getLog().debug("unable to remove " + id + " from tablelob", e);
-
+						SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
 					}
-					if (!container.listBlobs("claims/keys/" + haName).iterator().hasNext()) {
-						try {
-							kblob.delete();
-						} catch (Exception e) {
-							SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
-						}
-						kblob = container.getBlockBlobReference("blocks/" + haName);
-
-						try {
-							kblob.delete();
-						} catch (Exception e) {
-							SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
-						}
-						kblob = container.getBlockBlobReference("keys/" + haName);
-						try {
-							kblob.delete();
-						} catch (Exception e) {
-							SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
-						}
-						SDFSLogger.getLog().debug("deleted block " + id + " name=blocks/" + haName);
-					}
-				} else {
-					kblob.delete();
 					kblob = container.getBlockBlobReference("blocks/" + haName);
-					kblob.delete();
+
+					try {
+						kblob.delete();
+					} catch (Exception e) {
+						SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
+					}
+					kblob = container.getBlockBlobReference("keys/" + haName);
+					try {
+						kblob.delete();
+					} catch (Exception e) {
+						SDFSLogger.getLog().debug("unable to delete " + kblob.getName(), e);
+					}
+					SDFSLogger.getLog().debug("deleted block " + id + " name=blocks/" + haName);
+
 				}
 			}
 		} catch (Exception e) {
@@ -1063,9 +1046,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						this.refresh.clear();
 					}
 					long currentTime = System.currentTimeMillis();
-					if (get_move_blob())
-						this.closed = true;
-					if (currentTime > startTime) {
+					if ((currentTime > startTime) && (!get_move_blob())) {
 						Iterable<BlobDataTracker> tri = null;
 						if (this.tierImmedately) {
 							long mins = (Long.valueOf(this.tierInDays) * 60 * 1000) + 60000;
@@ -1076,6 +1057,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 						for (BlobDataTracker bt : tri) {
 							String hashString = EncyptUtils.encHashArchiveName(Long.parseLong(bt.getRowKey()),
 									Main.chunkStoreEncryptionEnabled);
+							if (Main.partialTransition)
+								break;
 							try {
 								SDFSLogger.getLog().debug("Moving  blocks/" + hashString + " to " + this.tier);
 								CloudBlockBlob blob = container.getBlockBlobReference("blocks/" + hashString);
@@ -1097,10 +1080,10 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					this.delLock.lock();
 					long rcsz = 0;
 					long rsz = 0;
-					long ct = 0;
 					HashMap<Long, SDFSDeleteEntry> odel = null;
 					try {
 						odel = this.deletes;
+						this.activeDeleteEvents.clear();
 						this.deletes = new HashMap<Long, SDFSDeleteEntry>();
 						// SDFSLogger.getLog().info("delete hash table size of "
 						// + odel.size());
@@ -1118,71 +1101,16 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 							else
 								blob = container.getBlockBlobReference("keys/" + hashString);
 							if (blob.exists()) {
-								blob.downloadAttributes();
+								SDFSLogger.getLog().debug("checking to delete " + k.longValue());
 								HashMap<String, String> metaData = blob.getMetadata();
-								int objs = Integer.parseInt(metaData.get("objects"));
-								// SDFSLogger.getLog().info("remove requests for " +
-								// hashString + "=" + odel.get(k));
-								int delobj = 0;
-								if (metaData.containsKey("deletedobjects"))
-									delobj = Integer.parseInt((String) metaData.get("deletedobjects"));
-								// SDFSLogger.getLog().info("remove requests for " +
-								// hashString + "=" + odel.get(k));
-								delobj = delobj + odel.get(k).ct;
-								if (objs <= delobj) {
+								if (this.verifyDelete(k.longValue()) == 0) {
 									int size = Integer.parseInt((String) metaData.get("bsize"));
 									int compressedSize = Integer.parseInt((String) metaData.get("bcompressedsize"));
-
-									if (HashBlobArchive.getCompressedLength() > 0) {
-										HashBlobArchive.addToCompressedLength((-1 * compressedSize));
-									} else {
-										HashBlobArchive.setCompressedLength(0);
-									}
-
-									if (HashBlobArchive.getLength() > 0) {
-										HashBlobArchive.addToLength(-1 * size);
-									} else {
-										HashBlobArchive.setLength(0);
-									}
-
-									HashBlobArchive.removeLocalArchive(k.longValue());
-									if (this.deleteUnclaimed) {
-										SDFSLogger.getLog().debug("checking to delete " + k.longValue());
-										this.verifyDelete(k.longValue());
-										rcsz += compressedSize;
-										rsz += size;
-										ct++;
-									} else {
-										// SDFSLogger.getLog().info("deleting " +
-										// hashString);
-										metaData.put("deleted", "true");
-										metaData.put("deletedobjects", Integer.toString(delobj));
-										blob.setMetadata(metaData);
-										blob.uploadMetadata(null, null, opContext);
-									}
-
-								} else {
-									// SDFSLogger.getLog().info("updating " +
-									// hashString + " sz=" +objs);
-									metaData.put("deletedobjects", Integer.toString(delobj));
-									blob.setMetadata(metaData);
-									blob.uploadMetadata();
-								}
-							} else {
-								int claims = 0;
-								String[] sar = HashBlobArchive.getStrings(k.longValue()).split(",");
-								if (sar != null) {
-									for (String ha : sar) {
-										byte[] b = BaseEncoding.base64().decode(ha.split(":")[0]);
-										if (HCServiceProxy.getHashesMap().mightContainKey(b, k.longValue()))
-											claims++;
-									}
-									if (claims == 0)
-										HashBlobArchive.removeLocalArchive(k.longValue());
+									rcsz += compressedSize;
+									rsz += size;
 								}
 							}
-							SDFSLogger.getLog().info("Removed size=" + rsz + " of remove data compressed size " +
-									rcsz + " removed blocks " + ct);
+							
 						} catch (Exception e) {
 							delLock.lock();
 							try {
@@ -1201,9 +1129,17 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 							// pool.returnObject(container);
 						}
 					}
+					SDFSLogger.getLog().info("Removed size=" + rsz + " of remove data compressed size " +
+									rcsz + " Current DSE Size is " + HashBlobArchive.getCompressedLength());
 					for (SDFSDeleteEntry entry : odel.values()) {
-						if (entry.evt.getEndTime() <= 0 && entry.evt.getCount() > 33) {
-							entry.evt.endEvent();
+						if (entry.evt.endTime <= 0 && entry.evt.getCount() > 33) {
+							this.delLock.lock();
+							try {
+								if (!this.activeDeleteEvents.contains(entry.evt.uid))
+									entry.evt.endEvent();
+							} finally {
+								this.delLock.unlock();
+							}
 						}
 
 					}
@@ -1657,6 +1593,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			blob.downloadAttributes();
 			if (blob.getProperties().getStandardBlobTier().equals(StandardBlobTier.ARCHIVE)) {
 				Main.rehydrateBlobs = true;
+				Main.partialTransition = true;
 				if (!Main.retrievalTier.equals("")) {
 					String ts = Main.retrievalTier;
 					if (ts.equalsIgnoreCase("high")) {
@@ -1919,8 +1856,8 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			try {
 				int _sz = Integer.parseInt(md.get("bsize"));
 				int _cl = Integer.parseInt(md.get("compressedsize"));
-					HashBlobArchive.addToLength(_sz);
-					HashBlobArchive.addToCompressedLength(_cl);
+				HashBlobArchive.addToLength(_sz);
+				HashBlobArchive.addToCompressedLength(_cl);
 			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to update size", e);
 			}
@@ -2160,7 +2097,6 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void setStandAlone(boolean standAlone) {
-		
 
 	}
 

@@ -169,6 +169,7 @@ import org.w3c.dom.Element;
 public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchStore, Runnable, AbstractCloudFileSync {
 	private BasicAWSCredentials awsCredentials = null;
 	private HashMap<Long, SDFSDeleteEntry> deletes = new HashMap<Long, SDFSDeleteEntry>();
+	private HashSet<String> activeDeleteEvents = new HashSet<String>();
 	private HashSet<Long> refresh = new HashSet<Long>();
 	private String name;
 	private Region bucketLocation = null;
@@ -379,6 +380,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				this.deletes.get(start).evt = evt;
 			} else
 				this.deletes.put(start, new SDFSDeleteEntry(1, evt));
+			this.activeDeleteEvents.add(evt.uid);
 
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error putting data", e);
@@ -587,12 +589,14 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				if (v4s) {
 					clientConfig.setSignerOverride("AWSS3V4SignerType");
 				}
-			} /*else if (config.hasAttribute("use-basic-signer")) {
-				boolean v4s = Boolean.parseBoolean(config.getAttribute("use-basic-signer"));
-				// if (v4s) {
-				// clientConfig.setSignerOverride("S3SignerType");
-				// }
-			} */else if (gcsSigner) {
+			} /*
+				 * else if (config.hasAttribute("use-basic-signer")) {
+				 * boolean v4s = Boolean.parseBoolean(config.getAttribute("use-basic-signer"));
+				 * // if (v4s) {
+				 * // clientConfig.setSignerOverride("S3SignerType");
+				 * // }
+				 * }
+				 */else if (gcsSigner) {
 				System.out.println("Target is GCS Storage");
 				Map<String, String> env = System.getenv();
 				if (config.hasAttribute("auth-file") || env.containsKey("GOOGLE_APPLICATION_CREDENTIALS")) {
@@ -714,7 +718,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 			if (!gcsSigner) {
 				if (config.hasAttribute("default-bucket-location")) {
-					String bl = config.getAttribute("default-bucket-location");
+					String bl = config.getAttribute(
+							"default-bucket-location");
 					System.out.println("bucketLocation=" + bucketLocation.toString());
 					builder = builder.withRegion(bl);
 				} else if (s3Target != null) {
@@ -724,7 +729,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						region = tokens[1];
 					}
 					SDFSLogger.getLog().info("region=" + region);
-					EndpointConfiguration ep = new EndpointConfiguration(s3Target, region);
+					EndpointConfiguration ep = new EndpointConfiguration(s3Target,
+							region);
 					builder = builder.withEndpointConfiguration(ep);
 					SDFSLogger.getLog().info("target=" + s3Target);
 				} else {
@@ -772,10 +778,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				SDFSLogger.getLog().info("created new store " + name);
 				if (Main.encryptBucket) {
 					SDFSLogger.getLog().info("Setting server-side encryption on the store " + name);
-					s3Service.setBucketEncryption(new SetBucketEncryptionRequest()
-							.withBucketName(this.name)
-							.withServerSideEncryptionConfiguration(new ServerSideEncryptionConfiguration()
-									.withRules(new ServerSideEncryptionRule()
+					s3Service.setBucketEncryption(new SetBucketEncryptionRequest().withBucketName(this.name)
+							.withServerSideEncryptionConfiguration(
+									new ServerSideEncryptionConfiguration().withRules(new ServerSideEncryptionRule()
 											.withApplyServerSideEncryptionByDefault(new ServerSideEncryptionByDefault()
 													.withSSEAlgorithm(SSEAlgorithm.AES256)))));
 				}
@@ -790,7 +795,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 					byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
 					if (md5sum) {
-						String mds = BaseEncoding.base64().encode(Hashing.md5().hashBytes(sz).asBytes());
+						String mds = BaseEncoding.base64().encode(Hashing.md5().hashBytes(sz)
+								.asBytes());
 						md.setContentMD5(mds);
 					}
 					md.setContentLength(sz.length);
@@ -834,7 +840,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							+ EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 					byte[] sz = Long.toString(System.currentTimeMillis()).getBytes();
 					if (md5sum) {
-						String mds = BaseEncoding.base64().encode(Hashing.md5().hashBytes(sz).asBytes());
+						String mds = BaseEncoding.base64().encode(Hashing.md5().hashBytes(sz)
+								.asBytes());
 						md.setContentMD5(mds);
 					}
 					md.setContentLength(sz.length);
@@ -854,7 +861,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					}
 
 					if (this.standAlone && obj.containsKey("currentcompressedsize")) {
-						long cl = Long.parseLong((String) obj.get("currentcompressedsize"));
+						long cl = Long
+								.parseLong((String) obj.get("currentcompressedsize"));
 						if (cl >= 0) {
 							HashBlobArchive.setCompressedLength(cl);
 
@@ -1711,6 +1719,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 						try {
 							odel = this.deletes;
 							this.deletes = new HashMap<Long, SDFSDeleteEntry>();
+							this.activeDeleteEvents.clear();
 							// SDFSLogger.getLog().info("delete hash table size of "
 							// + odel.size());
 						} finally {
@@ -1729,10 +1738,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 							SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
 						}
 						for (SDFSDeleteEntry entry : odel.values()) {
-							if (entry.evt.getEndTime() <=0){
-							entry.evt.endEvent();
+							if (entry.evt.getEndTime() <= 0 && entry.evt.getCount() > 33) {
+								this.delLock.lock();
+								try {
+									if (!this.activeDeleteEvents.contains(entry.evt.uid))
+										entry.evt.endEvent();
+								} finally {
+									this.delLock.unlock();
+								}
 							}
-	
 						}
 						SDFSLogger.getLog().info("done running garbage collection");
 					}
@@ -1798,9 +1812,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public int getDeleteSize() {
 		delLock.lock();
-		try{
+		try {
 			return this.deletes.size();
-		}finally {
+		} finally {
 			delLock.unlock();
 		}
 	}
@@ -2761,13 +2775,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			}
 			/*
-			if (props.containsKey("use-basic-signer")) {
-				boolean v4s = Boolean.parseBoolean(props.getProperty("use-basic-signer"));
-				// if (v4s) {
-				// clientConfig.setSignerOverride("S3SignerType");
-				// }
-			}
-			*/
+			 * if (props.containsKey("use-basic-signer")) {
+			 * boolean v4s = Boolean.parseBoolean(props.getProperty("use-basic-signer"));
+			 * // if (v4s) {
+			 * // clientConfig.setSignerOverride("S3SignerType");
+			 * // }
+			 * }
+			 */
 			if (props.containsKey("protocol")) {
 				String pr = props.getProperty("protocol");
 				if (pr.equalsIgnoreCase("http"))

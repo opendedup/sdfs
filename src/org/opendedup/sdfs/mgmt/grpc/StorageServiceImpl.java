@@ -477,6 +477,14 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             } catch (Exception e) {
+                if (e.getMessage().contains("Disk is full")
+                        || e.getMessage().contains("There is not enough space on the disk")) {
+                    b.setError("Volume Full");
+                    b.setErrorCode(errorCodes.ENOSPC);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
                 SDFSLogger.getLog().error("unable to write chunks ", e);
                 b.setError("unable to write chunks");
                 b.setErrorCode(errorCodes.EACCES);
@@ -580,6 +588,14 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             } catch (Exception er) {
+                if (er.getMessage().contains("Disk is full")
+                        || er.getMessage().contains("There is not enough space on the disk")) {
+                    b.setError("Volume Full");
+                    b.setErrorCode(errorCodes.ENOSPC);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
                 SDFSLogger.getLog().error("unable to write sparse data chunk", er);
                 b.setError("unable to write sparse data chunk");
                 b.setErrorCode(errorCodes.ENOENT);

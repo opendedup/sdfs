@@ -1275,6 +1275,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 						+ StringUtils.getHexString(hash) + "] recieved [" + StringUtils.getHexString(_hash) + "] ");
 			}
 		}
+		if (Main.volume.isFull()) {
+			throw new IOException("Disk is full");
+		}
 		Lock ul = this.uploadlock.readLock();
 
 		if (ul.tryLock()) {
@@ -2529,6 +2532,9 @@ public class HashBlobArchive implements Runnable, Serializable {
 				}
 			} else {
 				SDFSLogger.getLog().debug("archive for " + uuid + " not found");
+				if (!Main.retrievalTier.isEmpty()) {
+					Main.partialTransition = false;
+				}
 			}
 			int z = 0;
 			for (int i = 0; i < 6000; i++) {

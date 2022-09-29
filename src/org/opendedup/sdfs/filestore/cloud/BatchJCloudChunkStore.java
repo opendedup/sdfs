@@ -22,6 +22,7 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +121,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 	private String secretKey = Main.cloudSecretKey;
 	private boolean standAlone = true;
 	private boolean deleteRunning = false;
+	private HashSet<String> activeDeleteEvents = new HashSet<String>();
 
 	// private String bucketLocation = null;
 	static {
@@ -343,7 +345,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 				this.deletes.get(start).evt = evt;
 			} else
 				this.deletes.put(start, new SDFSDeleteEntry(1, evt));
-
+			this.activeDeleteEvents.add(evt.uid);
 		} catch (Exception e) {
 			SDFSLogger.getLog().error("error putting data", e);
 			throw new IOException(e);
@@ -1247,6 +1249,7 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 					HashMap<Long, SDFSDeleteEntry> odel = null;
 					try {
 						odel = this.deletes;
+						this.activeDeleteEvents.clear();
 						this.deletes = new HashMap<Long, SDFSDeleteEntry>();
 						// SDFSLogger.getLog().info("delete hash table size of "
 						// + odel.size());
@@ -1319,10 +1322,15 @@ public class BatchJCloudChunkStore implements AbstractChunkStore, AbstractBatchS
 						SDFSLogger.getLog().debug("Awaiting deletion task completion of threads.");
 					}
 					for (SDFSDeleteEntry entry : odel.values()) {
-						if (entry.evt.getEndTime() <=0 && entry.evt.getCount() > 33) {
-							entry.evt.endEvent();
+						if (entry.evt.endTime <= 0 && entry.evt.getCount() > 33) {
+							this.delLock.lock();
+							try {
+								if (!this.activeDeleteEvents.contains(entry.evt.uid))
+									entry.evt.endEvent();
+							} finally {
+								this.delLock.unlock();
+							}
 						}
-
 					}
 					SDFSLogger.getLog().info("done running garbage collection");
 
