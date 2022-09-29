@@ -84,7 +84,7 @@ public class Volume {
 	private transient VolumeIOMeter ioMeter = null;
 	private String configPath = null;
 	private String uuid = null;
-	private ReplicationService rService = null;
+	public ReplicationService rService = null;
 
 	AtomicLong writeErrors = new AtomicLong(0);
 	AtomicLong readErrors = new AtomicLong(0);
@@ -93,7 +93,7 @@ public class Volume {
 	private boolean volumeOffLine = false;
 	private boolean clustered = false;
 	public String connicalPath;
-	private boolean replEnabled = false;
+	public boolean replEnabled = false;
 	public ArrayList<ReplicationClient> replClients = new ArrayList<ReplicationClient>();
 	Thread rChecker = null;
 

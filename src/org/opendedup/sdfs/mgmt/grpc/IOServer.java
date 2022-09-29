@@ -57,6 +57,8 @@ public class IOServer {
   private Server server;
   private static final String DELIMITER = ";;";
   public static String trustStoreDir;
+  public static PrivateKey pvtKey;
+  public static X509Certificate serverCertChain;
 
   private X509Certificate getX509Certificate(String certPath) throws Exception {
     FileInputStream is = null;
@@ -113,11 +115,11 @@ public class IOServer {
       trustStoreDir = prodInfo.get(1);
       // Getting a method from the loaded class and invoke it
       Method method2 = beanClass.getMethod(key_method);
-      PrivateKey pvtKey = (PrivateKey) method2.invoke(beanObj);
+      IOServer.pvtKey = (PrivateKey) method2.invoke(beanObj);
       urlClassLoader.close();
-      X509Certificate serverCertChain = getX509Certificate(certChainFilePath);
+      IOServer.serverCertChain = getX509Certificate(certChainFilePath);
       EasyX509TrustManager tm = new EasyX509TrustManager();
-      sslClientContextBuilder = SslContextBuilder.forServer(pvtKey, serverCertChain)
+      sslClientContextBuilder = SslContextBuilder.forServer(IOServer.pvtKey, IOServer.serverCertChain)
           .clientAuth(ClientAuth.REQUIRE).trustManager(tm);
     } else {
       sslClientContextBuilder = SslContextBuilder.forServer(new File(certChainFilePath),
@@ -212,10 +214,10 @@ public class IOServer {
       trustStoreDir = prodInfo.get(1);
       // Getting a method from the loaded class and invoke it
       Method method2 = beanClass.getMethod(key_method);
-      PrivateKey pvtKey = (PrivateKey) method2.invoke(beanObj);
+      IOServer.pvtKey = (PrivateKey) method2.invoke(beanObj);
       urlClassLoader.close();
-      X509Certificate serverCertChain = getX509Certificate(certChainFilePath);
-      return new EncryptionService(trustStoreDir, pvtKey, serverCertChain);
+      IOServer.serverCertChain = getX509Certificate(certChainFilePath);
+      return new EncryptionService(trustStoreDir, IOServer.pvtKey, IOServer.serverCertChain);
     } catch (Exception e) {
       throw new Exception(e);
     }

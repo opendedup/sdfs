@@ -73,6 +73,7 @@ import org.opendedup.sdfs.io.Volume.ReplicationClientExistsException;
 import org.opendedup.sdfs.io.Volume.ReplicationClientNotExistsException;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl.FileIOError;
 import org.opendedup.sdfs.mgmt.grpc.replication.ReplicationClient;
+import org.opendedup.sdfs.mgmt.grpc.replication.ReplicationService;
 import org.opendedup.sdfs.notification.ReplicationImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.sdfs.servers.HCServiceProxy;
@@ -121,13 +122,15 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 ReplicationClient client = new ReplicationClient(request.getUrl(),
                         request.getRvolumeID(), request.getMtls());
                 client.connect();
-                SDFSEvent evt = client.replicate(request.getSrcFilePath(), request.getDstFilePath());
-                b.setEventID(evt.uid);
+                SDFSEvent[] evts = client.replicate(request.getFileLocationList());
+                for (SDFSEvent evt : evts) {
+                    b.addEventID(evt.uid);
+                }
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
             } catch (Exception e) {
-                String msg = "Unable to replicate " + request.getSrcFilePath() + " to " + request.getDstFilePath() +
-                        " with url " + request.getUrl() + " volumeid " + request.getPvolumeID();
+                String msg = "Unable to replicate  with url " + request.getUrl() + " volumeid "
+                        + request.getPvolumeID();
                 SDFSLogger.getLog().error(msg, e);
                 b.setError(msg + " because " + e.getMessage());
                 b.setErrorCode(errorCodes.EIO);
@@ -357,7 +360,6 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                         if (kv == null)
                             break;
                         SparseDataChunk ck = kv.getValue();
-                        SDFSLogger.getLog().info(ck.getFpos());
                         responseObserver.onNext(ck.toProtoBuf());
                     }
                 } finally {
@@ -400,7 +402,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     futures.add(lf);
                 }
                 for (ListenableFuture<Long> future : futures) {
-                    responses.add(future.get(300,TimeUnit.SECONDS));
+                    responses.add(future.get(300, TimeUnit.SECONDS));
                 }
 
                 b.addAllLocations(responses);
@@ -468,7 +470,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     futures.add(lf);
                 }
                 for (ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf : futures) {
-                    responses.add(lf.get(300,TimeUnit.SECONDS));
+                    responses.add(lf.get(300, TimeUnit.SECONDS));
                 }
                 b.addAllInsertRecords(responses);
                 responseObserver.onNext(b.build());
@@ -699,7 +701,13 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             ReplEventListener l = null;
             try {
                 l = new ReplEventListener(responseObserver);
-                Main.volume.getRSerivce().registerListener(l);
+                synchronized (Main.volume) {
+                    if (Main.volume.getRSerivce() == null) {
+                        Main.volume.rService = new ReplicationService(Main.volume);
+                        Main.volume.replEnabled = true;
+                    }
+                    Main.volume.getRSerivce().registerListener(l);
+                }
                 while (!l.exceptionThrown) {
                     Thread.sleep(1000);
                 }
@@ -735,7 +743,6 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
             try {
                 responseObserver.onNext(evt.getVolumeEvent());
-
             } catch (Exception e) {
                 VolumeEvent.Builder b = VolumeEvent.newBuilder();
                 SDFSLogger.getLog().info("nSent Event");

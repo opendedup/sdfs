@@ -3216,47 +3216,51 @@ public final class Storage {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string srcFilePath = 1;</code>
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
      */
-    java.lang.String getSrcFilePath();
+    java.util.List<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation> 
+        getFileLocationList();
     /**
-     * <code>string srcFilePath = 1;</code>
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
      */
-    com.google.protobuf.ByteString
-        getSrcFilePathBytes();
+    org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation getFileLocation(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+     */
+    int getFileLocationCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder> 
+        getFileLocationOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+     */
+    org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder getFileLocationOrBuilder(
+        int index);
 
     /**
-     * <code>string dstFilePath = 2;</code>
-     */
-    java.lang.String getDstFilePath();
-    /**
-     * <code>string dstFilePath = 2;</code>
-     */
-    com.google.protobuf.ByteString
-        getDstFilePathBytes();
-
-    /**
-     * <code>int64 pvolumeID = 3;</code>
+     * <code>int64 pvolumeID = 2;</code>
      */
     long getPvolumeID();
 
     /**
-     * <code>int64 rvolumeID = 4;</code>
+     * <code>int64 rvolumeID = 3;</code>
      */
     long getRvolumeID();
 
     /**
-     * <code>string url = 5;</code>
+     * <code>string url = 4;</code>
      */
     java.lang.String getUrl();
     /**
-     * <code>string url = 5;</code>
+     * <code>string url = 4;</code>
      */
     com.google.protobuf.ByteString
         getUrlBytes();
 
     /**
-     * <code>bool mtls = 6;</code>
+     * <code>bool mtls = 5;</code>
      */
     boolean getMtls();
   }
@@ -3273,8 +3277,7 @@ public final class Storage {
       super(builder);
     }
     private FileReplicationRequest() {
-      srcFilePath_ = "";
-      dstFilePath_ = "";
+      fileLocation_ = java.util.Collections.emptyList();
       pvolumeID_ = 0L;
       rvolumeID_ = 0L;
       url_ = "";
@@ -3306,34 +3309,31 @@ public final class Storage {
               done = true;
               break;
             case 10: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              srcFilePath_ = s;
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                fileLocation_ = new java.util.ArrayList<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              fileLocation_.add(
+                  input.readMessage(org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.parser(), extensionRegistry));
               break;
             }
-            case 18: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              dstFilePath_ = s;
-              break;
-            }
-            case 24: {
+            case 16: {
 
               pvolumeID_ = input.readInt64();
               break;
             }
-            case 32: {
+            case 24: {
 
               rvolumeID_ = input.readInt64();
               break;
             }
-            case 42: {
+            case 34: {
               java.lang.String s = input.readStringRequireUtf8();
 
               url_ = s;
               break;
             }
-            case 48: {
+            case 40: {
 
               mtls_ = input.readBool();
               break;
@@ -3353,6 +3353,9 @@ public final class Storage {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          fileLocation_ = java.util.Collections.unmodifiableList(fileLocation_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -3370,96 +3373,751 @@ public final class Storage {
               org.opendedup.grpc.Storage.FileReplicationRequest.class, org.opendedup.grpc.Storage.FileReplicationRequest.Builder.class);
     }
 
-    public static final int SRCFILEPATH_FIELD_NUMBER = 1;
-    private volatile java.lang.Object srcFilePath_;
-    /**
-     * <code>string srcFilePath = 1;</code>
-     */
-    public java.lang.String getSrcFilePath() {
-      java.lang.Object ref = srcFilePath_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        srcFilePath_ = s;
-        return s;
-      }
+    public interface ReplicationFileLocationOrBuilder extends
+        // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation)
+        com.google.protobuf.MessageOrBuilder {
+
+      /**
+       * <code>string srcFilePath = 1;</code>
+       */
+      java.lang.String getSrcFilePath();
+      /**
+       * <code>string srcFilePath = 1;</code>
+       */
+      com.google.protobuf.ByteString
+          getSrcFilePathBytes();
+
+      /**
+       * <code>string dstFilePath = 2;</code>
+       */
+      java.lang.String getDstFilePath();
+      /**
+       * <code>string dstFilePath = 2;</code>
+       */
+      com.google.protobuf.ByteString
+          getDstFilePathBytes();
     }
     /**
-     * <code>string srcFilePath = 1;</code>
+     * Protobuf type {@code org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation}
      */
-    public com.google.protobuf.ByteString
-        getSrcFilePathBytes() {
-      java.lang.Object ref = srcFilePath_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        srcFilePath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
+    public  static final class ReplicationFileLocation extends
+        com.google.protobuf.GeneratedMessageV3 implements
+        // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation)
+        ReplicationFileLocationOrBuilder {
+    private static final long serialVersionUID = 0L;
+      // Use ReplicationFileLocation.newBuilder() to construct.
+      private ReplicationFileLocation(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+        super(builder);
       }
+      private ReplicationFileLocation() {
+        srcFilePath_ = "";
+        dstFilePath_ = "";
+      }
+
+      @java.lang.Override
+      public final com.google.protobuf.UnknownFieldSet
+      getUnknownFields() {
+        return this.unknownFields;
+      }
+      private ReplicationFileLocation(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        this();
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        int mutable_bitField0_ = 0;
+        com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+            com.google.protobuf.UnknownFieldSet.newBuilder();
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                java.lang.String s = input.readStringRequireUtf8();
+
+                srcFilePath_ = s;
+                break;
+              }
+              case 18: {
+                java.lang.String s = input.readStringRequireUtf8();
+
+                dstFilePath_ = s;
+                break;
+              }
+              default: {
+                if (!parseUnknownFieldProto3(
+                    input, unknownFields, extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e).setUnfinishedMessage(this);
+        } finally {
+          this.unknownFields = unknownFields.build();
+          makeExtensionsImmutable();
+        }
+      }
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.class, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder.class);
+      }
+
+      public static final int SRCFILEPATH_FIELD_NUMBER = 1;
+      private volatile java.lang.Object srcFilePath_;
+      /**
+       * <code>string srcFilePath = 1;</code>
+       */
+      public java.lang.String getSrcFilePath() {
+        java.lang.Object ref = srcFilePath_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          srcFilePath_ = s;
+          return s;
+        }
+      }
+      /**
+       * <code>string srcFilePath = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSrcFilePathBytes() {
+        java.lang.Object ref = srcFilePath_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          srcFilePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      public static final int DSTFILEPATH_FIELD_NUMBER = 2;
+      private volatile java.lang.Object dstFilePath_;
+      /**
+       * <code>string dstFilePath = 2;</code>
+       */
+      public java.lang.String getDstFilePath() {
+        java.lang.Object ref = dstFilePath_;
+        if (ref instanceof java.lang.String) {
+          return (java.lang.String) ref;
+        } else {
+          com.google.protobuf.ByteString bs = 
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          dstFilePath_ = s;
+          return s;
+        }
+      }
+      /**
+       * <code>string dstFilePath = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getDstFilePathBytes() {
+        java.lang.Object ref = dstFilePath_;
+        if (ref instanceof java.lang.String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          dstFilePath_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+
+      private byte memoizedIsInitialized = -1;
+      @java.lang.Override
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized == 1) return true;
+        if (isInitialized == 0) return false;
+
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      @java.lang.Override
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        if (!getSrcFilePathBytes().isEmpty()) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 1, srcFilePath_);
+        }
+        if (!getDstFilePathBytes().isEmpty()) {
+          com.google.protobuf.GeneratedMessageV3.writeString(output, 2, dstFilePath_);
+        }
+        unknownFields.writeTo(output);
+      }
+
+      @java.lang.Override
+      public int getSerializedSize() {
+        int size = memoizedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (!getSrcFilePathBytes().isEmpty()) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, srcFilePath_);
+        }
+        if (!getDstFilePathBytes().isEmpty()) {
+          size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, dstFilePath_);
+        }
+        size += unknownFields.getSerializedSize();
+        memoizedSize = size;
+        return size;
+      }
+
+      @java.lang.Override
+      public boolean equals(final java.lang.Object obj) {
+        if (obj == this) {
+         return true;
+        }
+        if (!(obj instanceof org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation)) {
+          return super.equals(obj);
+        }
+        org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation other = (org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation) obj;
+
+        boolean result = true;
+        result = result && getSrcFilePath()
+            .equals(other.getSrcFilePath());
+        result = result && getDstFilePath()
+            .equals(other.getDstFilePath());
+        result = result && unknownFields.equals(other.unknownFields);
+        return result;
+      }
+
+      @java.lang.Override
+      public int hashCode() {
+        if (memoizedHashCode != 0) {
+          return memoizedHashCode;
+        }
+        int hash = 41;
+        hash = (19 * hash) + getDescriptor().hashCode();
+        hash = (37 * hash) + SRCFILEPATH_FIELD_NUMBER;
+        hash = (53 * hash) + getSrcFilePath().hashCode();
+        hash = (37 * hash) + DSTFILEPATH_FIELD_NUMBER;
+        hash = (53 * hash) + getDstFilePath().hashCode();
+        hash = (29 * hash) + unknownFields.hashCode();
+        memoizedHashCode = hash;
+        return hash;
+      }
+
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(
+          java.nio.ByteBuffer data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(
+          java.nio.ByteBuffer data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input);
+      }
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return com.google.protobuf.GeneratedMessageV3
+            .parseWithIOException(PARSER, input, extensionRegistry);
+      }
+
+      @java.lang.Override
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder() {
+        return DEFAULT_INSTANCE.toBuilder();
+      }
+      public static Builder newBuilder(org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation prototype) {
+        return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+      }
+      @java.lang.Override
+      public Builder toBuilder() {
+        return this == DEFAULT_INSTANCE
+            ? new Builder() : new Builder().mergeFrom(this);
+      }
+
+      @java.lang.Override
+      protected Builder newBuilderForType(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        Builder builder = new Builder(parent);
+        return builder;
+      }
+      /**
+       * Protobuf type {@code org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+          // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation)
+          org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder {
+        public static final com.google.protobuf.Descriptors.Descriptor
+            getDescriptor() {
+          return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_descriptor;
+        }
+
+        @java.lang.Override
+        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+            internalGetFieldAccessorTable() {
+          return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_fieldAccessorTable
+              .ensureFieldAccessorsInitialized(
+                  org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.class, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder.class);
+        }
+
+        // Construct using org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private Builder(
+            com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+          super(parent);
+          maybeForceBuilderInitialization();
+        }
+        private void maybeForceBuilderInitialization() {
+          if (com.google.protobuf.GeneratedMessageV3
+                  .alwaysUseFieldBuilders) {
+          }
+        }
+        @java.lang.Override
+        public Builder clear() {
+          super.clear();
+          srcFilePath_ = "";
+
+          dstFilePath_ = "";
+
+          return this;
+        }
+
+        @java.lang.Override
+        public com.google.protobuf.Descriptors.Descriptor
+            getDescriptorForType() {
+          return org.opendedup.grpc.Storage.internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_descriptor;
+        }
+
+        @java.lang.Override
+        public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation getDefaultInstanceForType() {
+          return org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.getDefaultInstance();
+        }
+
+        @java.lang.Override
+        public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation build() {
+          org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        @java.lang.Override
+        public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation buildPartial() {
+          org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation result = new org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation(this);
+          result.srcFilePath_ = srcFilePath_;
+          result.dstFilePath_ = dstFilePath_;
+          onBuilt();
+          return result;
+        }
+
+        @java.lang.Override
+        public Builder clone() {
+          return (Builder) super.clone();
+        }
+        @java.lang.Override
+        public Builder setField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return (Builder) super.setField(field, value);
+        }
+        @java.lang.Override
+        public Builder clearField(
+            com.google.protobuf.Descriptors.FieldDescriptor field) {
+          return (Builder) super.clearField(field);
+        }
+        @java.lang.Override
+        public Builder clearOneof(
+            com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+          return (Builder) super.clearOneof(oneof);
+        }
+        @java.lang.Override
+        public Builder setRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            int index, java.lang.Object value) {
+          return (Builder) super.setRepeatedField(field, index, value);
+        }
+        @java.lang.Override
+        public Builder addRepeatedField(
+            com.google.protobuf.Descriptors.FieldDescriptor field,
+            java.lang.Object value) {
+          return (Builder) super.addRepeatedField(field, value);
+        }
+        @java.lang.Override
+        public Builder mergeFrom(com.google.protobuf.Message other) {
+          if (other instanceof org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation) {
+            return mergeFrom((org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation)other);
+          } else {
+            super.mergeFrom(other);
+            return this;
+          }
+        }
+
+        public Builder mergeFrom(org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation other) {
+          if (other == org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.getDefaultInstance()) return this;
+          if (!other.getSrcFilePath().isEmpty()) {
+            srcFilePath_ = other.srcFilePath_;
+            onChanged();
+          }
+          if (!other.getDstFilePath().isEmpty()) {
+            dstFilePath_ = other.dstFilePath_;
+            onChanged();
+          }
+          this.mergeUnknownFields(other.unknownFields);
+          onChanged();
+          return this;
+        }
+
+        @java.lang.Override
+        public final boolean isInitialized() {
+          return true;
+        }
+
+        @java.lang.Override
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation) e.getUnfinishedMessage();
+            throw e.unwrapIOException();
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+
+        private java.lang.Object srcFilePath_ = "";
+        /**
+         * <code>string srcFilePath = 1;</code>
+         */
+        public java.lang.String getSrcFilePath() {
+          java.lang.Object ref = srcFilePath_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            srcFilePath_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>string srcFilePath = 1;</code>
+         */
+        public com.google.protobuf.ByteString
+            getSrcFilePathBytes() {
+          java.lang.Object ref = srcFilePath_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            srcFilePath_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>string srcFilePath = 1;</code>
+         */
+        public Builder setSrcFilePath(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  
+          srcFilePath_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>string srcFilePath = 1;</code>
+         */
+        public Builder clearSrcFilePath() {
+          
+          srcFilePath_ = getDefaultInstance().getSrcFilePath();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>string srcFilePath = 1;</code>
+         */
+        public Builder setSrcFilePathBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+          
+          srcFilePath_ = value;
+          onChanged();
+          return this;
+        }
+
+        private java.lang.Object dstFilePath_ = "";
+        /**
+         * <code>string dstFilePath = 2;</code>
+         */
+        public java.lang.String getDstFilePath() {
+          java.lang.Object ref = dstFilePath_;
+          if (!(ref instanceof java.lang.String)) {
+            com.google.protobuf.ByteString bs =
+                (com.google.protobuf.ByteString) ref;
+            java.lang.String s = bs.toStringUtf8();
+            dstFilePath_ = s;
+            return s;
+          } else {
+            return (java.lang.String) ref;
+          }
+        }
+        /**
+         * <code>string dstFilePath = 2;</code>
+         */
+        public com.google.protobuf.ByteString
+            getDstFilePathBytes() {
+          java.lang.Object ref = dstFilePath_;
+          if (ref instanceof String) {
+            com.google.protobuf.ByteString b = 
+                com.google.protobuf.ByteString.copyFromUtf8(
+                    (java.lang.String) ref);
+            dstFilePath_ = b;
+            return b;
+          } else {
+            return (com.google.protobuf.ByteString) ref;
+          }
+        }
+        /**
+         * <code>string dstFilePath = 2;</code>
+         */
+        public Builder setDstFilePath(
+            java.lang.String value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  
+          dstFilePath_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>string dstFilePath = 2;</code>
+         */
+        public Builder clearDstFilePath() {
+          
+          dstFilePath_ = getDefaultInstance().getDstFilePath();
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>string dstFilePath = 2;</code>
+         */
+        public Builder setDstFilePathBytes(
+            com.google.protobuf.ByteString value) {
+          if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+          
+          dstFilePath_ = value;
+          onChanged();
+          return this;
+        }
+        @java.lang.Override
+        public final Builder setUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.setUnknownFieldsProto3(unknownFields);
+        }
+
+        @java.lang.Override
+        public final Builder mergeUnknownFields(
+            final com.google.protobuf.UnknownFieldSet unknownFields) {
+          return super.mergeUnknownFields(unknownFields);
+        }
+
+
+        // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation)
+      }
+
+      // @@protoc_insertion_point(class_scope:org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation)
+      private static final org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation DEFAULT_INSTANCE;
+      static {
+        DEFAULT_INSTANCE = new org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation();
+      }
+
+      public static org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation getDefaultInstance() {
+        return DEFAULT_INSTANCE;
+      }
+
+      private static final com.google.protobuf.Parser<ReplicationFileLocation>
+          PARSER = new com.google.protobuf.AbstractParser<ReplicationFileLocation>() {
+        @java.lang.Override
+        public ReplicationFileLocation parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new ReplicationFileLocation(input, extensionRegistry);
+        }
+      };
+
+      public static com.google.protobuf.Parser<ReplicationFileLocation> parser() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<ReplicationFileLocation> getParserForType() {
+        return PARSER;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation getDefaultInstanceForType() {
+        return DEFAULT_INSTANCE;
+      }
+
     }
 
-    public static final int DSTFILEPATH_FIELD_NUMBER = 2;
-    private volatile java.lang.Object dstFilePath_;
+    private int bitField0_;
+    public static final int FILELOCATION_FIELD_NUMBER = 1;
+    private java.util.List<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation> fileLocation_;
     /**
-     * <code>string dstFilePath = 2;</code>
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
      */
-    public java.lang.String getDstFilePath() {
-      java.lang.Object ref = dstFilePath_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        dstFilePath_ = s;
-        return s;
-      }
+    public java.util.List<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation> getFileLocationList() {
+      return fileLocation_;
     }
     /**
-     * <code>string dstFilePath = 2;</code>
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
      */
-    public com.google.protobuf.ByteString
-        getDstFilePathBytes() {
-      java.lang.Object ref = dstFilePath_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        dstFilePath_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public java.util.List<? extends org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder> 
+        getFileLocationOrBuilderList() {
+      return fileLocation_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+     */
+    public int getFileLocationCount() {
+      return fileLocation_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+     */
+    public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation getFileLocation(int index) {
+      return fileLocation_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+     */
+    public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder getFileLocationOrBuilder(
+        int index) {
+      return fileLocation_.get(index);
     }
 
-    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
     private long pvolumeID_;
     /**
-     * <code>int64 pvolumeID = 3;</code>
+     * <code>int64 pvolumeID = 2;</code>
      */
     public long getPvolumeID() {
       return pvolumeID_;
     }
 
-    public static final int RVOLUMEID_FIELD_NUMBER = 4;
+    public static final int RVOLUMEID_FIELD_NUMBER = 3;
     private long rvolumeID_;
     /**
-     * <code>int64 rvolumeID = 4;</code>
+     * <code>int64 rvolumeID = 3;</code>
      */
     public long getRvolumeID() {
       return rvolumeID_;
     }
 
-    public static final int URL_FIELD_NUMBER = 5;
+    public static final int URL_FIELD_NUMBER = 4;
     private volatile java.lang.Object url_;
     /**
-     * <code>string url = 5;</code>
+     * <code>string url = 4;</code>
      */
     public java.lang.String getUrl() {
       java.lang.Object ref = url_;
@@ -3474,7 +4132,7 @@ public final class Storage {
       }
     }
     /**
-     * <code>string url = 5;</code>
+     * <code>string url = 4;</code>
      */
     public com.google.protobuf.ByteString
         getUrlBytes() {
@@ -3490,10 +4148,10 @@ public final class Storage {
       }
     }
 
-    public static final int MTLS_FIELD_NUMBER = 6;
+    public static final int MTLS_FIELD_NUMBER = 5;
     private boolean mtls_;
     /**
-     * <code>bool mtls = 6;</code>
+     * <code>bool mtls = 5;</code>
      */
     public boolean getMtls() {
       return mtls_;
@@ -3513,23 +4171,20 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getSrcFilePathBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, srcFilePath_);
-      }
-      if (!getDstFilePathBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, dstFilePath_);
+      for (int i = 0; i < fileLocation_.size(); i++) {
+        output.writeMessage(1, fileLocation_.get(i));
       }
       if (pvolumeID_ != 0L) {
-        output.writeInt64(3, pvolumeID_);
+        output.writeInt64(2, pvolumeID_);
       }
       if (rvolumeID_ != 0L) {
-        output.writeInt64(4, rvolumeID_);
+        output.writeInt64(3, rvolumeID_);
       }
       if (!getUrlBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, url_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, url_);
       }
       if (mtls_ != false) {
-        output.writeBool(6, mtls_);
+        output.writeBool(5, mtls_);
       }
       unknownFields.writeTo(output);
     }
@@ -3540,26 +4195,24 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getSrcFilePathBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, srcFilePath_);
-      }
-      if (!getDstFilePathBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, dstFilePath_);
+      for (int i = 0; i < fileLocation_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, fileLocation_.get(i));
       }
       if (pvolumeID_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(3, pvolumeID_);
+          .computeInt64Size(2, pvolumeID_);
       }
       if (rvolumeID_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(4, rvolumeID_);
+          .computeInt64Size(3, rvolumeID_);
       }
       if (!getUrlBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, url_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, url_);
       }
       if (mtls_ != false) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(6, mtls_);
+          .computeBoolSize(5, mtls_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3577,10 +4230,8 @@ public final class Storage {
       org.opendedup.grpc.Storage.FileReplicationRequest other = (org.opendedup.grpc.Storage.FileReplicationRequest) obj;
 
       boolean result = true;
-      result = result && getSrcFilePath()
-          .equals(other.getSrcFilePath());
-      result = result && getDstFilePath()
-          .equals(other.getDstFilePath());
+      result = result && getFileLocationList()
+          .equals(other.getFileLocationList());
       result = result && (getPvolumeID()
           == other.getPvolumeID());
       result = result && (getRvolumeID()
@@ -3600,10 +4251,10 @@ public final class Storage {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + SRCFILEPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getSrcFilePath().hashCode();
-      hash = (37 * hash) + DSTFILEPATH_FIELD_NUMBER;
-      hash = (53 * hash) + getDstFilePath().hashCode();
+      if (getFileLocationCount() > 0) {
+        hash = (37 * hash) + FILELOCATION_FIELD_NUMBER;
+        hash = (53 * hash) + getFileLocationList().hashCode();
+      }
       hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getPvolumeID());
@@ -3743,15 +4394,18 @@ public final class Storage {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
+          getFileLocationFieldBuilder();
         }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        srcFilePath_ = "";
-
-        dstFilePath_ = "";
-
+        if (fileLocationBuilder_ == null) {
+          fileLocation_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          fileLocationBuilder_.clear();
+        }
         pvolumeID_ = 0L;
 
         rvolumeID_ = 0L;
@@ -3786,12 +4440,22 @@ public final class Storage {
       @java.lang.Override
       public org.opendedup.grpc.Storage.FileReplicationRequest buildPartial() {
         org.opendedup.grpc.Storage.FileReplicationRequest result = new org.opendedup.grpc.Storage.FileReplicationRequest(this);
-        result.srcFilePath_ = srcFilePath_;
-        result.dstFilePath_ = dstFilePath_;
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (fileLocationBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            fileLocation_ = java.util.Collections.unmodifiableList(fileLocation_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.fileLocation_ = fileLocation_;
+        } else {
+          result.fileLocation_ = fileLocationBuilder_.build();
+        }
         result.pvolumeID_ = pvolumeID_;
         result.rvolumeID_ = rvolumeID_;
         result.url_ = url_;
         result.mtls_ = mtls_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -3840,13 +4504,31 @@ public final class Storage {
 
       public Builder mergeFrom(org.opendedup.grpc.Storage.FileReplicationRequest other) {
         if (other == org.opendedup.grpc.Storage.FileReplicationRequest.getDefaultInstance()) return this;
-        if (!other.getSrcFilePath().isEmpty()) {
-          srcFilePath_ = other.srcFilePath_;
-          onChanged();
-        }
-        if (!other.getDstFilePath().isEmpty()) {
-          dstFilePath_ = other.dstFilePath_;
-          onChanged();
+        if (fileLocationBuilder_ == null) {
+          if (!other.fileLocation_.isEmpty()) {
+            if (fileLocation_.isEmpty()) {
+              fileLocation_ = other.fileLocation_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureFileLocationIsMutable();
+              fileLocation_.addAll(other.fileLocation_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.fileLocation_.isEmpty()) {
+            if (fileLocationBuilder_.isEmpty()) {
+              fileLocationBuilder_.dispose();
+              fileLocationBuilder_ = null;
+              fileLocation_ = other.fileLocation_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              fileLocationBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getFileLocationFieldBuilder() : null;
+            } else {
+              fileLocationBuilder_.addAllMessages(other.fileLocation_);
+            }
+          }
         }
         if (other.getPvolumeID() != 0L) {
           setPvolumeID(other.getPvolumeID());
@@ -3889,154 +4571,257 @@ public final class Storage {
         }
         return this;
       }
+      private int bitField0_;
 
-      private java.lang.Object srcFilePath_ = "";
-      /**
-       * <code>string srcFilePath = 1;</code>
-       */
-      public java.lang.String getSrcFilePath() {
-        java.lang.Object ref = srcFilePath_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          srcFilePath_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string srcFilePath = 1;</code>
-       */
-      public com.google.protobuf.ByteString
-          getSrcFilePathBytes() {
-        java.lang.Object ref = srcFilePath_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          srcFilePath_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string srcFilePath = 1;</code>
-       */
-      public Builder setSrcFilePath(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        srcFilePath_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string srcFilePath = 1;</code>
-       */
-      public Builder clearSrcFilePath() {
-        
-        srcFilePath_ = getDefaultInstance().getSrcFilePath();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string srcFilePath = 1;</code>
-       */
-      public Builder setSrcFilePathBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        srcFilePath_ = value;
-        onChanged();
-        return this;
+      private java.util.List<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation> fileLocation_ =
+        java.util.Collections.emptyList();
+      private void ensureFileLocationIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          fileLocation_ = new java.util.ArrayList<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation>(fileLocation_);
+          bitField0_ |= 0x00000001;
+         }
       }
 
-      private java.lang.Object dstFilePath_ = "";
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder> fileLocationBuilder_;
+
       /**
-       * <code>string dstFilePath = 2;</code>
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
        */
-      public java.lang.String getDstFilePath() {
-        java.lang.Object ref = dstFilePath_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          dstFilePath_ = s;
-          return s;
+      public java.util.List<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation> getFileLocationList() {
+        if (fileLocationBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(fileLocation_);
         } else {
-          return (java.lang.String) ref;
+          return fileLocationBuilder_.getMessageList();
         }
       }
       /**
-       * <code>string dstFilePath = 2;</code>
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
        */
-      public com.google.protobuf.ByteString
-          getDstFilePathBytes() {
-        java.lang.Object ref = dstFilePath_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          dstFilePath_ = b;
-          return b;
+      public int getFileLocationCount() {
+        if (fileLocationBuilder_ == null) {
+          return fileLocation_.size();
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          return fileLocationBuilder_.getCount();
         }
       }
       /**
-       * <code>string dstFilePath = 2;</code>
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
        */
-      public Builder setDstFilePath(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        dstFilePath_ = value;
-        onChanged();
+      public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation getFileLocation(int index) {
+        if (fileLocationBuilder_ == null) {
+          return fileLocation_.get(index);
+        } else {
+          return fileLocationBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public Builder setFileLocation(
+          int index, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation value) {
+        if (fileLocationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileLocationIsMutable();
+          fileLocation_.set(index, value);
+          onChanged();
+        } else {
+          fileLocationBuilder_.setMessage(index, value);
+        }
         return this;
       }
       /**
-       * <code>string dstFilePath = 2;</code>
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
        */
-      public Builder clearDstFilePath() {
-        
-        dstFilePath_ = getDefaultInstance().getDstFilePath();
-        onChanged();
+      public Builder setFileLocation(
+          int index, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder builderForValue) {
+        if (fileLocationBuilder_ == null) {
+          ensureFileLocationIsMutable();
+          fileLocation_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          fileLocationBuilder_.setMessage(index, builderForValue.build());
+        }
         return this;
       }
       /**
-       * <code>string dstFilePath = 2;</code>
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
        */
-      public Builder setDstFilePathBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        dstFilePath_ = value;
-        onChanged();
+      public Builder addFileLocation(org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation value) {
+        if (fileLocationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileLocationIsMutable();
+          fileLocation_.add(value);
+          onChanged();
+        } else {
+          fileLocationBuilder_.addMessage(value);
+        }
         return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public Builder addFileLocation(
+          int index, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation value) {
+        if (fileLocationBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFileLocationIsMutable();
+          fileLocation_.add(index, value);
+          onChanged();
+        } else {
+          fileLocationBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public Builder addFileLocation(
+          org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder builderForValue) {
+        if (fileLocationBuilder_ == null) {
+          ensureFileLocationIsMutable();
+          fileLocation_.add(builderForValue.build());
+          onChanged();
+        } else {
+          fileLocationBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public Builder addFileLocation(
+          int index, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder builderForValue) {
+        if (fileLocationBuilder_ == null) {
+          ensureFileLocationIsMutable();
+          fileLocation_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          fileLocationBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public Builder addAllFileLocation(
+          java.lang.Iterable<? extends org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation> values) {
+        if (fileLocationBuilder_ == null) {
+          ensureFileLocationIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, fileLocation_);
+          onChanged();
+        } else {
+          fileLocationBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public Builder clearFileLocation() {
+        if (fileLocationBuilder_ == null) {
+          fileLocation_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          fileLocationBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public Builder removeFileLocation(int index) {
+        if (fileLocationBuilder_ == null) {
+          ensureFileLocationIsMutable();
+          fileLocation_.remove(index);
+          onChanged();
+        } else {
+          fileLocationBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder getFileLocationBuilder(
+          int index) {
+        return getFileLocationFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder getFileLocationOrBuilder(
+          int index) {
+        if (fileLocationBuilder_ == null) {
+          return fileLocation_.get(index);  } else {
+          return fileLocationBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder> 
+           getFileLocationOrBuilderList() {
+        if (fileLocationBuilder_ != null) {
+          return fileLocationBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(fileLocation_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder addFileLocationBuilder() {
+        return getFileLocationFieldBuilder().addBuilder(
+            org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder addFileLocationBuilder(
+          int index) {
+        return getFileLocationFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
+       */
+      public java.util.List<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder> 
+           getFileLocationBuilderList() {
+        return getFileLocationFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder> 
+          getFileLocationFieldBuilder() {
+        if (fileLocationBuilder_ == null) {
+          fileLocationBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder>(
+                  fileLocation_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          fileLocation_ = null;
+        }
+        return fileLocationBuilder_;
       }
 
       private long pvolumeID_ ;
       /**
-       * <code>int64 pvolumeID = 3;</code>
+       * <code>int64 pvolumeID = 2;</code>
        */
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
-       * <code>int64 pvolumeID = 3;</code>
+       * <code>int64 pvolumeID = 2;</code>
        */
       public Builder setPvolumeID(long value) {
         
@@ -4045,7 +4830,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>int64 pvolumeID = 3;</code>
+       * <code>int64 pvolumeID = 2;</code>
        */
       public Builder clearPvolumeID() {
         
@@ -4056,13 +4841,13 @@ public final class Storage {
 
       private long rvolumeID_ ;
       /**
-       * <code>int64 rvolumeID = 4;</code>
+       * <code>int64 rvolumeID = 3;</code>
        */
       public long getRvolumeID() {
         return rvolumeID_;
       }
       /**
-       * <code>int64 rvolumeID = 4;</code>
+       * <code>int64 rvolumeID = 3;</code>
        */
       public Builder setRvolumeID(long value) {
         
@@ -4071,7 +4856,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>int64 rvolumeID = 4;</code>
+       * <code>int64 rvolumeID = 3;</code>
        */
       public Builder clearRvolumeID() {
         
@@ -4082,7 +4867,7 @@ public final class Storage {
 
       private java.lang.Object url_ = "";
       /**
-       * <code>string url = 5;</code>
+       * <code>string url = 4;</code>
        */
       public java.lang.String getUrl() {
         java.lang.Object ref = url_;
@@ -4097,7 +4882,7 @@ public final class Storage {
         }
       }
       /**
-       * <code>string url = 5;</code>
+       * <code>string url = 4;</code>
        */
       public com.google.protobuf.ByteString
           getUrlBytes() {
@@ -4113,7 +4898,7 @@ public final class Storage {
         }
       }
       /**
-       * <code>string url = 5;</code>
+       * <code>string url = 4;</code>
        */
       public Builder setUrl(
           java.lang.String value) {
@@ -4126,7 +4911,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>string url = 5;</code>
+       * <code>string url = 4;</code>
        */
       public Builder clearUrl() {
         
@@ -4135,7 +4920,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>string url = 5;</code>
+       * <code>string url = 4;</code>
        */
       public Builder setUrlBytes(
           com.google.protobuf.ByteString value) {
@@ -4151,13 +4936,13 @@ public final class Storage {
 
       private boolean mtls_ ;
       /**
-       * <code>bool mtls = 6;</code>
+       * <code>bool mtls = 5;</code>
        */
       public boolean getMtls() {
         return mtls_;
       }
       /**
-       * <code>bool mtls = 6;</code>
+       * <code>bool mtls = 5;</code>
        */
       public Builder setMtls(boolean value) {
         
@@ -4166,7 +4951,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>bool mtls = 6;</code>
+       * <code>bool mtls = 5;</code>
        */
       public Builder clearMtls() {
         
@@ -6959,14 +7744,23 @@ public final class Storage {
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
-     * <code>string eventID = 3;</code>
+     * <code>repeated string eventID = 3;</code>
      */
-    java.lang.String getEventID();
+    java.util.List<java.lang.String>
+        getEventIDList();
     /**
-     * <code>string eventID = 3;</code>
+     * <code>repeated string eventID = 3;</code>
+     */
+    int getEventIDCount();
+    /**
+     * <code>repeated string eventID = 3;</code>
+     */
+    java.lang.String getEventID(int index);
+    /**
+     * <code>repeated string eventID = 3;</code>
      */
     com.google.protobuf.ByteString
-        getEventIDBytes();
+        getEventIDBytes(int index);
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.FileReplicationResponse}
@@ -6983,7 +7777,7 @@ public final class Storage {
     private FileReplicationResponse() {
       error_ = "";
       errorCode_ = 0;
-      eventID_ = "";
+      eventID_ = com.google.protobuf.LazyStringArrayList.EMPTY;
     }
 
     @java.lang.Override
@@ -7024,8 +7818,11 @@ public final class Storage {
             }
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
-
-              eventID_ = s;
+              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                eventID_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000004;
+              }
+              eventID_.add(s);
               break;
             }
             default: {
@@ -7043,6 +7840,9 @@ public final class Storage {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          eventID_ = eventID_.getUnmodifiableView();
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -7060,6 +7860,7 @@ public final class Storage {
               org.opendedup.grpc.Storage.FileReplicationResponse.class, org.opendedup.grpc.Storage.FileReplicationResponse.Builder.class);
     }
 
+    private int bitField0_;
     public static final int ERROR_FIELD_NUMBER = 1;
     private volatile java.lang.Object error_;
     /**
@@ -7112,37 +7913,32 @@ public final class Storage {
     }
 
     public static final int EVENTID_FIELD_NUMBER = 3;
-    private volatile java.lang.Object eventID_;
+    private com.google.protobuf.LazyStringList eventID_;
     /**
-     * <code>string eventID = 3;</code>
+     * <code>repeated string eventID = 3;</code>
      */
-    public java.lang.String getEventID() {
-      java.lang.Object ref = eventID_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        eventID_ = s;
-        return s;
-      }
+    public com.google.protobuf.ProtocolStringList
+        getEventIDList() {
+      return eventID_;
     }
     /**
-     * <code>string eventID = 3;</code>
+     * <code>repeated string eventID = 3;</code>
+     */
+    public int getEventIDCount() {
+      return eventID_.size();
+    }
+    /**
+     * <code>repeated string eventID = 3;</code>
+     */
+    public java.lang.String getEventID(int index) {
+      return eventID_.get(index);
+    }
+    /**
+     * <code>repeated string eventID = 3;</code>
      */
     public com.google.protobuf.ByteString
-        getEventIDBytes() {
-      java.lang.Object ref = eventID_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        eventID_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+        getEventIDBytes(int index) {
+      return eventID_.getByteString(index);
     }
 
     private byte memoizedIsInitialized = -1;
@@ -7165,8 +7961,8 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(2, errorCode_);
       }
-      if (!getEventIDBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, eventID_);
+      for (int i = 0; i < eventID_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, eventID_.getRaw(i));
       }
       unknownFields.writeTo(output);
     }
@@ -7184,8 +7980,13 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, errorCode_);
       }
-      if (!getEventIDBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, eventID_);
+      {
+        int dataSize = 0;
+        for (int i = 0; i < eventID_.size(); i++) {
+          dataSize += computeStringSizeNoTag(eventID_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getEventIDList().size();
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -7206,8 +8007,8 @@ public final class Storage {
       result = result && getError()
           .equals(other.getError());
       result = result && errorCode_ == other.errorCode_;
-      result = result && getEventID()
-          .equals(other.getEventID());
+      result = result && getEventIDList()
+          .equals(other.getEventIDList());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -7223,8 +8024,10 @@ public final class Storage {
       hash = (53 * hash) + getError().hashCode();
       hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
       hash = (53 * hash) + errorCode_;
-      hash = (37 * hash) + EVENTID_FIELD_NUMBER;
-      hash = (53 * hash) + getEventID().hashCode();
+      if (getEventIDCount() > 0) {
+        hash = (37 * hash) + EVENTID_FIELD_NUMBER;
+        hash = (53 * hash) + getEventIDList().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -7362,8 +8165,8 @@ public final class Storage {
 
         errorCode_ = 0;
 
-        eventID_ = "";
-
+        eventID_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -7390,9 +8193,16 @@ public final class Storage {
       @java.lang.Override
       public org.opendedup.grpc.Storage.FileReplicationResponse buildPartial() {
         org.opendedup.grpc.Storage.FileReplicationResponse result = new org.opendedup.grpc.Storage.FileReplicationResponse(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
         result.error_ = error_;
         result.errorCode_ = errorCode_;
+        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          eventID_ = eventID_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000004);
+        }
         result.eventID_ = eventID_;
+        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -7448,8 +8258,14 @@ public final class Storage {
         if (other.errorCode_ != 0) {
           setErrorCodeValue(other.getErrorCodeValue());
         }
-        if (!other.getEventID().isEmpty()) {
-          eventID_ = other.eventID_;
+        if (!other.eventID_.isEmpty()) {
+          if (eventID_.isEmpty()) {
+            eventID_ = other.eventID_;
+            bitField0_ = (bitField0_ & ~0x00000004);
+          } else {
+            ensureEventIDIsMutable();
+            eventID_.addAll(other.eventID_);
+          }
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -7480,6 +8296,7 @@ public final class Storage {
         }
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object error_ = "";
       /**
@@ -7595,71 +8412,96 @@ public final class Storage {
         return this;
       }
 
-      private java.lang.Object eventID_ = "";
-      /**
-       * <code>string eventID = 3;</code>
-       */
-      public java.lang.String getEventID() {
-        java.lang.Object ref = eventID_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          eventID_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      private com.google.protobuf.LazyStringList eventID_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureEventIDIsMutable() {
+        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          eventID_ = new com.google.protobuf.LazyStringArrayList(eventID_);
+          bitField0_ |= 0x00000004;
+         }
       }
       /**
-       * <code>string eventID = 3;</code>
+       * <code>repeated string eventID = 3;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getEventIDList() {
+        return eventID_.getUnmodifiableView();
+      }
+      /**
+       * <code>repeated string eventID = 3;</code>
+       */
+      public int getEventIDCount() {
+        return eventID_.size();
+      }
+      /**
+       * <code>repeated string eventID = 3;</code>
+       */
+      public java.lang.String getEventID(int index) {
+        return eventID_.get(index);
+      }
+      /**
+       * <code>repeated string eventID = 3;</code>
        */
       public com.google.protobuf.ByteString
-          getEventIDBytes() {
-        java.lang.Object ref = eventID_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          eventID_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
+          getEventIDBytes(int index) {
+        return eventID_.getByteString(index);
       }
       /**
-       * <code>string eventID = 3;</code>
+       * <code>repeated string eventID = 3;</code>
        */
       public Builder setEventID(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureEventIDIsMutable();
+        eventID_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string eventID = 3;</code>
+       */
+      public Builder addEventID(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  
-        eventID_ = value;
+  ensureEventIDIsMutable();
+        eventID_.add(value);
         onChanged();
         return this;
       }
       /**
-       * <code>string eventID = 3;</code>
+       * <code>repeated string eventID = 3;</code>
+       */
+      public Builder addAllEventID(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureEventIDIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, eventID_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string eventID = 3;</code>
        */
       public Builder clearEventID() {
-        
-        eventID_ = getDefaultInstance().getEventID();
+        eventID_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
         onChanged();
         return this;
       }
       /**
-       * <code>string eventID = 3;</code>
+       * <code>repeated string eventID = 3;</code>
        */
-      public Builder setEventIDBytes(
+      public Builder addEventIDBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
-        eventID_ = value;
+        ensureEventIDIsMutable();
+        eventID_.add(value);
         onChanged();
         return this;
       }
@@ -28604,6 +29446,11 @@ public final class Storage {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_FileReplicationRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_AddReplicaSourceRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -28771,155 +29618,158 @@ public final class Storage {
       "pendedup.grpc.errorCodes\022\017\n\007eventID\030\003 \001(" +
       "\t\"j\n\023CheckHashesResponse\022\021\n\tlocations\030\001 " +
       "\003(\003\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036." +
-      "org.opendedup.grpc.errorCodes\"\203\001\n\026FileRe" +
-      "plicationRequest\022\023\n\013srcFilePath\030\001 \001(\t\022\023\n" +
-      "\013dstFilePath\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\022\021\n" +
-      "\trvolumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\022\014\n\004mtls\030\006 " +
-      "\001(\010\"Z\n\027AddReplicaSourceRequest\022\021\n\tpvolum" +
-      "eID\030\003 \001(\003\022\021\n\trvolumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(" +
-      "\t\022\014\n\004mtls\030\006 \001(\010\"\\\n\030AddReplicaSourceRespo" +
-      "nse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036." +
-      "org.opendedup.grpc.errorCodes\"O\n\032RemoveR" +
-      "eplicaSourceRequest\022\021\n\tpvolumeID\030\003 \001(\003\022\021" +
-      "\n\trvolumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\"_\n\033Remove" +
-      "ReplicaSourceResponse\022\r\n\005error\030\001 \001(\t\0221\n\t" +
-      "errorCode\030\002 \001(\0162\036.org.opendedup.grpc.err" +
-      "orCodes\"l\n\027FileReplicationResponse\022\r\n\005er" +
-      "ror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\022\017\n\007eventID\030\003 \001(\t\"@\n" +
-      "\031MetaDataDedupeFileRequest\022\020\n\010filePath\030\001" +
-      " \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"\243\001\n\032MetaDataDedu" +
-      "peFileResponse\0222\n\004file\030\001 \001(\0132$.org.opend" +
-      "edup.grpc.FileInfoResponse\0221\n\terrorCode\030" +
-      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes\022\r\n" +
-      "\005error\030\003 \001(\t\022\017\n\007eventID\030\004 \001(\t\":\n\027SparseD" +
-      "edupeFileRequest\022\014\n\004guid\030\001 \001(\t\022\021\n\tpvolum" +
-      "eID\030\002 \001(\003\"\222\001\n\030SparseDedupeFileResponse\0224" +
-      "\n\006chunks\030\001 \003(\0132$.org.opendedup.grpc.Spar" +
-      "seDataChunkP\0221\n\terrorCode\030\002 \001(\0162\036.org.op" +
-      "endedup.grpc.errorCodes\022\r\n\005error\030\003 \001(\t\"\200" +
-      "\001\n\rChunkResponse\022\014\n\004data\030\001 \001(\014\022\013\n\003len\030\002 " +
-      "\001(\005\022\r\n\005error\030\003 \001(\t\0221\n\terrorCode\030\004 \001(\0162\036." +
-      "org.opendedup.grpc.errorCodes\022\022\n\ncompres" +
-      "sed\030\005 \001(\010\"\252\001\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014\022\014" +
-      "\n\004data\030\002 \001(\014\022\022\n\ncompressed\030\003 \001(\010\022\030\n\020comp" +
-      "ressedLength\030\004 \001(\005\022\020\n\010location\030\005 \001(\003\0221\n\t" +
-      "errorCode\030\006 \001(\0162\036.org.opendedup.grpc.err" +
-      "orCodes\022\r\n\005error\030\007 \001(\t\"k\n\022WriteChunksReq" +
-      "uest\022.\n\006chunks\030\001 \003(\0132\036.org.opendedup.grp" +
-      "c.ChunkEntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvol" +
-      "umeID\030\003 \001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005e" +
-      "rror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.open" +
-      "dedup.grpc.errorCodes\0227\n\rinsertRecords\030\003" +
-      " \003(\0132 .org.opendedup.grpc.InsertRecord\"U" +
-      "\n\020GetChunksRequest\022.\n\006chunks\030\001 \003(\0132\036.org" +
-      ".opendedup.grpc.ChunkEntry\022\021\n\tpvolumeID\030" +
-      "\002 \001(\003\"\231\001\n\022HashingInfoRequest\022.\n\006chunks\030\001" +
-      " \003(\0132\036.org.opendedup.grpc.ChunkEntry\022\r\n\005" +
-      "error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.ope" +
-      "ndedup.grpc.errorCodes\022\021\n\tpvolumeID\030\004 \001(" +
-      "\003\"\204\001\n\014HashLocPairP\022\014\n\004hash\030\001 \001(\014\022\017\n\007hash" +
-      "loc\030\002 \001(\003\022\013\n\003len\030\003 \001(\005\022\013\n\003pos\030\004 \001(\005\022\016\n\006o" +
-      "ffset\030\005 \001(\005\022\014\n\004nlen\030\006 \001(\005\022\013\n\003dup\030\007 \001(\010\022\020" +
-      "\n\010inserted\030\010 \001(\010\"L\n\027PauseReplicationRequ" +
-      "est\022\017\n\007eventID\030\001 \001(\t\022\r\n\005pause\030\002 \001(\010\022\021\n\tp" +
-      "volumeID\030\003 \001(\003\"\\\n\030PauseReplicationRespon" +
-      "se\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.o" +
-      "rg.opendedup.grpc.errorCodes\">\n\030CancelRe" +
-      "plicationRequest\022\017\n\007eventID\030\001 \001(\t\022\021\n\tpvo" +
-      "lumeID\030\002 \001(\003\"]\n\031CancelReplicationRespons" +
-      "e\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.or" +
-      "g.opendedup.grpc.errorCodes\"\365\002\n\020SparseDa" +
-      "taChunkP\022\014\n\004fpos\030\001 \001(\003\022\013\n\003len\030\002 \001(\005\0222\n\005f" +
-      "lags\030\003 \003(\0162#.org.opendedup.grpc.SparseDa" +
-      "taFlags\022\017\n\007version\030\004 \001(\005\0228\n\002ar\030\005 \003(\0132,.o" +
-      "rg.opendedup.grpc.SparseDataChunkP.ArEnt" +
-      "ry\022\014\n\004doop\030\006 \001(\005\022\020\n\010prevdoop\030\007 \001(\005\022\030\n\020co" +
-      "mpressedLength\030\010 \001(\005\022\r\n\005error\030\t \001(\t\0221\n\te" +
-      "rrorCode\030\n \001(\0162\036.org.opendedup.grpc.erro" +
-      "rCodes\032K\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005value\030" +
-      "\002 \001(\0132 .org.opendedup.grpc.HashLocPairP:" +
-      "\0028\001\"\327\001\n\035SparseDedupeChunkWriteRequest\0223\n" +
-      "\005chunk\030\001 \001(\0132$.org.opendedup.grpc.Sparse" +
-      "DataChunkP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014fileLo" +
-      "cation\030\003 \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\022\022\n\ncompr" +
-      "essed\030\005 \001(\010\022\027\n\017compressedChunk\030\006 \001(\014\022\027\n\017" +
-      "uncompressedLen\030\007 \001(\005\"b\n\036SparseDedupeChu" +
-      "nkWriteResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorC" +
-      "ode\030\002 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\"U\n\034SparseDedupeChunkReadRequest\022\016\n\006off" +
-      "set\030\001 \001(\003\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolume" +
-      "ID\030\003 \001(\003\"\226\001\n\035SparseDedupeChunkReadRespon" +
-      "se\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.o" +
-      "rg.opendedup.grpc.errorCodes\0223\n\005chunk\030\003 " +
-      "\001(\0132$.org.opendedup.grpc.SparseDataChunk" +
-      "P\"\206\002\n\023HashingInfoResponse\022\021\n\tchunkSize\030\001" +
-      " \001(\003\022\026\n\016minSegmentSize\030\002 \001(\003\022\026\n\016maxSegme" +
-      "ntSize\030\003 \001(\003\022\022\n\npolyNumber\030\004 \001(\003\022\022\n\nwind" +
-      "owSize\030\005 \001(\003\022.\n\010hashtype\030\006 \001(\0162\034.org.ope" +
-      "ndedup.grpc.hashtype\022\022\n\nmapVersion\030\007 \001(\005" +
-      "\022\r\n\005error\030\010 \001(\t\0221\n\terrorCode\030\t \001(\0162\036.org" +
-      ".opendedup.grpc.errorCodes\"K\n\014InsertReco" +
-      "rd\022\017\n\007hashloc\030\001 \001(\003\022\020\n\010inserted\030\002 \001(\010\022\030\n" +
-      "\020compressedLength\030\003 \001(\005\"\207\002\n\013VolumeEvent\022" +
-      "2\n\004file\030\001 \001(\0132$.org.opendedup.grpc.FileI" +
-      "nfoResponse\022\014\n\004uuid\030\002 \001(\t\022\021\n\ttimeStamp\030\003" +
-      " \001(\003\022\013\n\003seq\030\004 \001(\003\0222\n\nactionType\030\005 \001(\0162\036." +
-      "org.opendedup.grpc.actionType\022\r\n\005error\030\006" +
-      " \001(\t\0221\n\terrorCode\030\007 \001(\0162\036.org.opendedup." +
-      "grpc.errorCodes\022\017\n\007srcfile\030\010 \001(\t\022\017\n\007dstf" +
-      "ile\030\t \001(\t\"D\n\030VolumeEventListenRequest\022\021\n" +
-      "\tpvolumeID\030\001 \001(\003\022\025\n\rstartSequence\030\002 \001(\003*" +
-      "$\n\017SparseDataFlags\022\021\n\rRECONSTRUCTED\020\000*f\n" +
-      "\nactionType\022\020\n\014MFILEDELETED\020\000\022\020\n\014MFILEWR" +
-      "ITTEN\020\001\022\020\n\014MFILERENAMED\020\002\022\020\n\014SFILEWRITTE" +
-      "N\020\003\022\020\n\014SFILEDELETED\020\004*0\n\010hashtype\022\n\n\006SHA" +
-      "256\020\000\022\007\n\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\317\r\n\016Stor" +
-      "ageService\022^\n\013HashingInfo\022&.org.opendedu" +
-      "p.grpc.HashingInfoRequest\032\'.org.opendedu" +
-      "p.grpc.HashingInfoResponse\022^\n\013CheckHashe" +
-      "s\022&.org.opendedup.grpc.CheckHashesReques" +
-      "t\032\'.org.opendedup.grpc.CheckHashesRespon" +
-      "se\022^\n\013WriteChunks\022&.org.opendedup.grpc.W" +
-      "riteChunksRequest\032\'.org.opendedup.grpc.W" +
-      "riteChunksResponse\022S\n\tGetChunks\022$.org.op" +
-      "endedup.grpc.GetChunksRequest\032\036.org.open" +
-      "dedup.grpc.ChunkEntry0\001\022d\n\021SubscribeToVo" +
-      "lume\022,.org.opendedup.grpc.VolumeEventLis" +
-      "tenRequest\032\037.org.opendedup.grpc.VolumeEv" +
-      "ent0\001\022}\n\024WriteSparseDataChunk\0221.org.open" +
-      "dedup.grpc.SparseDedupeChunkWriteRequest" +
-      "\0322.org.opendedup.grpc.SparseDedupeChunkW" +
-      "riteResponse\022z\n\023ReadSparseDataChunk\0220.or" +
-      "g.opendedup.grpc.SparseDedupeChunkReadRe" +
-      "quest\0321.org.opendedup.grpc.SparseDedupeC" +
-      "hunkReadResponse\022v\n\025GetMetaDataDedupeFil" +
-      "e\022-.org.opendedup.grpc.MetaDataDedupeFil" +
-      "eRequest\032..org.opendedup.grpc.MetaDataDe" +
-      "dupeFileResponse\022j\n\023GetSparseDedupeFile\022" +
-      "+.org.opendedup.grpc.SparseDedupeFileReq" +
-      "uest\032$.org.opendedup.grpc.SparseDataChun" +
-      "kP0\001\022n\n\023ReplicateRemoteFile\022*.org.opende" +
-      "dup.grpc.FileReplicationRequest\032+.org.op" +
-      "endedup.grpc.FileReplicationResponse\022j\n\017" +
-      "RestoreArchives\022*.org.opendedup.grpc.Res" +
-      "toreArchivesRequest\032+.org.opendedup.grpc" +
-      ".RestoreArchivesResponse\022p\n\021CancelReplic" +
-      "ation\022,.org.opendedup.grpc.CancelReplica" +
-      "tionRequest\032-.org.opendedup.grpc.CancelR" +
-      "eplicationResponse\022m\n\020PauseReplication\022+" +
-      ".org.opendedup.grpc.PauseReplicationRequ" +
-      "est\032,.org.opendedup.grpc.PauseReplicatio" +
-      "nResponse\022_\n\014ListReplLogs\022,.org.opendedu" +
-      "p.grpc.VolumeEventListenRequest\032\037.org.op" +
-      "endedup.grpc.VolumeEvent0\001\022m\n\020AddReplica" +
-      "Source\022+.org.opendedup.grpc.AddReplicaSo" +
-      "urceRequest\032,.org.opendedup.grpc.AddRepl" +
-      "icaSourceResponse\022v\n\023RemoveReplicaSource" +
-      "\022..org.opendedup.grpc.RemoveReplicaSourc" +
-      "eRequest\032/.org.opendedup.grpc.RemoveRepl" +
-      "icaSourceResponseB0Z.github.com/opendedu" +
-      "p/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "org.opendedup.grpc.errorCodes\"\370\001\n\026FileRe" +
+      "plicationRequest\022X\n\014fileLocation\030\001 \003(\0132B" +
+      ".org.opendedup.grpc.FileReplicationReque" +
+      "st.ReplicationFileLocation\022\021\n\tpvolumeID\030" +
+      "\002 \001(\003\022\021\n\trvolumeID\030\003 \001(\003\022\013\n\003url\030\004 \001(\t\022\014\n" +
+      "\004mtls\030\005 \001(\010\032C\n\027ReplicationFileLocation\022\023" +
+      "\n\013srcFilePath\030\001 \001(\t\022\023\n\013dstFilePath\030\002 \001(\t" +
+      "\"Z\n\027AddReplicaSourceRequest\022\021\n\tpvolumeID" +
+      "\030\003 \001(\003\022\021\n\trvolumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\022\014" +
+      "\n\004mtls\030\006 \001(\010\"\\\n\030AddReplicaSourceResponse" +
+      "\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org" +
+      ".opendedup.grpc.errorCodes\"O\n\032RemoveRepl" +
+      "icaSourceRequest\022\021\n\tpvolumeID\030\003 \001(\003\022\021\n\tr" +
+      "volumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\"_\n\033RemoveRep" +
+      "licaSourceResponse\022\r\n\005error\030\001 \001(\t\0221\n\terr" +
+      "orCode\030\002 \001(\0162\036.org.opendedup.grpc.errorC" +
+      "odes\"l\n\027FileReplicationResponse\022\r\n\005error" +
+      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
+      "p.grpc.errorCodes\022\017\n\007eventID\030\003 \003(\t\"@\n\031Me" +
+      "taDataDedupeFileRequest\022\020\n\010filePath\030\001 \001(" +
+      "\t\022\021\n\tpvolumeID\030\002 \001(\003\"\243\001\n\032MetaDataDedupeF" +
+      "ileResponse\0222\n\004file\030\001 \001(\0132$.org.opendedu" +
+      "p.grpc.FileInfoResponse\0221\n\terrorCode\030\002 \001" +
+      "(\0162\036.org.opendedup.grpc.errorCodes\022\r\n\005er" +
+      "ror\030\003 \001(\t\022\017\n\007eventID\030\004 \001(\t\":\n\027SparseDedu" +
+      "peFileRequest\022\014\n\004guid\030\001 \001(\t\022\021\n\tpvolumeID" +
+      "\030\002 \001(\003\"\222\001\n\030SparseDedupeFileResponse\0224\n\006c" +
+      "hunks\030\001 \003(\0132$.org.opendedup.grpc.SparseD" +
+      "ataChunkP\0221\n\terrorCode\030\002 \001(\0162\036.org.opend" +
+      "edup.grpc.errorCodes\022\r\n\005error\030\003 \001(\t\"\200\001\n\r" +
+      "ChunkResponse\022\014\n\004data\030\001 \001(\014\022\013\n\003len\030\002 \001(\005" +
+      "\022\r\n\005error\030\003 \001(\t\0221\n\terrorCode\030\004 \001(\0162\036.org" +
+      ".opendedup.grpc.errorCodes\022\022\n\ncompressed" +
+      "\030\005 \001(\010\"\252\001\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014\022\014\n\004d" +
+      "ata\030\002 \001(\014\022\022\n\ncompressed\030\003 \001(\010\022\030\n\020compres" +
+      "sedLength\030\004 \001(\005\022\020\n\010location\030\005 \001(\003\0221\n\terr" +
+      "orCode\030\006 \001(\0162\036.org.opendedup.grpc.errorC" +
+      "odes\022\r\n\005error\030\007 \001(\t\"k\n\022WriteChunksReques" +
+      "t\022.\n\006chunks\030\001 \003(\0132\036.org.opendedup.grpc.C" +
+      "hunkEntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolume" +
+      "ID\030\003 \001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005erro" +
+      "r\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opended" +
+      "up.grpc.errorCodes\0227\n\rinsertRecords\030\003 \003(" +
+      "\0132 .org.opendedup.grpc.InsertRecord\"U\n\020G" +
+      "etChunksRequest\022.\n\006chunks\030\001 \003(\0132\036.org.op" +
+      "endedup.grpc.ChunkEntry\022\021\n\tpvolumeID\030\002 \001" +
+      "(\003\"\231\001\n\022HashingInfoRequest\022.\n\006chunks\030\001 \003(" +
+      "\0132\036.org.opendedup.grpc.ChunkEntry\022\r\n\005err" +
+      "or\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opende" +
+      "dup.grpc.errorCodes\022\021\n\tpvolumeID\030\004 \001(\003\"\204" +
+      "\001\n\014HashLocPairP\022\014\n\004hash\030\001 \001(\014\022\017\n\007hashloc" +
+      "\030\002 \001(\003\022\013\n\003len\030\003 \001(\005\022\013\n\003pos\030\004 \001(\005\022\016\n\006offs" +
+      "et\030\005 \001(\005\022\014\n\004nlen\030\006 \001(\005\022\013\n\003dup\030\007 \001(\010\022\020\n\010i" +
+      "nserted\030\010 \001(\010\"L\n\027PauseReplicationRequest" +
+      "\022\017\n\007eventID\030\001 \001(\t\022\r\n\005pause\030\002 \001(\010\022\021\n\tpvol" +
+      "umeID\030\003 \001(\003\"\\\n\030PauseReplicationResponse\022" +
+      "\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org." +
+      "opendedup.grpc.errorCodes\">\n\030CancelRepli" +
+      "cationRequest\022\017\n\007eventID\030\001 \001(\t\022\021\n\tpvolum" +
+      "eID\030\002 \001(\003\"]\n\031CancelReplicationResponse\022\r" +
+      "\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.o" +
+      "pendedup.grpc.errorCodes\"\365\002\n\020SparseDataC" +
+      "hunkP\022\014\n\004fpos\030\001 \001(\003\022\013\n\003len\030\002 \001(\005\0222\n\005flag" +
+      "s\030\003 \003(\0162#.org.opendedup.grpc.SparseDataF" +
+      "lags\022\017\n\007version\030\004 \001(\005\0228\n\002ar\030\005 \003(\0132,.org." +
+      "opendedup.grpc.SparseDataChunkP.ArEntry\022" +
+      "\014\n\004doop\030\006 \001(\005\022\020\n\010prevdoop\030\007 \001(\005\022\030\n\020compr" +
+      "essedLength\030\010 \001(\005\022\r\n\005error\030\t \001(\t\0221\n\terro" +
+      "rCode\030\n \001(\0162\036.org.opendedup.grpc.errorCo" +
+      "des\032K\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005value\030\002 \001" +
+      "(\0132 .org.opendedup.grpc.HashLocPairP:\0028\001" +
+      "\"\327\001\n\035SparseDedupeChunkWriteRequest\0223\n\005ch" +
+      "unk\030\001 \001(\0132$.org.opendedup.grpc.SparseDat" +
+      "aChunkP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014fileLocat" +
+      "ion\030\003 \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\022\022\n\ncompress" +
+      "ed\030\005 \001(\010\022\027\n\017compressedChunk\030\006 \001(\014\022\027\n\017unc" +
+      "ompressedLen\030\007 \001(\005\"b\n\036SparseDedupeChunkW" +
+      "riteResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode" +
+      "\030\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"U" +
+      "\n\034SparseDedupeChunkReadRequest\022\016\n\006offset" +
+      "\030\001 \001(\003\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolumeID\030" +
+      "\003 \001(\003\"\226\001\n\035SparseDedupeChunkReadResponse\022" +
+      "\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org." +
+      "opendedup.grpc.errorCodes\0223\n\005chunk\030\003 \001(\013" +
+      "2$.org.opendedup.grpc.SparseDataChunkP\"\206" +
+      "\002\n\023HashingInfoResponse\022\021\n\tchunkSize\030\001 \001(" +
+      "\003\022\026\n\016minSegmentSize\030\002 \001(\003\022\026\n\016maxSegmentS" +
+      "ize\030\003 \001(\003\022\022\n\npolyNumber\030\004 \001(\003\022\022\n\nwindowS" +
+      "ize\030\005 \001(\003\022.\n\010hashtype\030\006 \001(\0162\034.org.opende" +
+      "dup.grpc.hashtype\022\022\n\nmapVersion\030\007 \001(\005\022\r\n" +
+      "\005error\030\010 \001(\t\0221\n\terrorCode\030\t \001(\0162\036.org.op" +
+      "endedup.grpc.errorCodes\"K\n\014InsertRecord\022" +
+      "\017\n\007hashloc\030\001 \001(\003\022\020\n\010inserted\030\002 \001(\010\022\030\n\020co" +
+      "mpressedLength\030\003 \001(\005\"\207\002\n\013VolumeEvent\0222\n\004" +
+      "file\030\001 \001(\0132$.org.opendedup.grpc.FileInfo" +
+      "Response\022\014\n\004uuid\030\002 \001(\t\022\021\n\ttimeStamp\030\003 \001(" +
+      "\003\022\013\n\003seq\030\004 \001(\003\0222\n\nactionType\030\005 \001(\0162\036.org" +
+      ".opendedup.grpc.actionType\022\r\n\005error\030\006 \001(" +
+      "\t\0221\n\terrorCode\030\007 \001(\0162\036.org.opendedup.grp" +
+      "c.errorCodes\022\017\n\007srcfile\030\010 \001(\t\022\017\n\007dstfile" +
+      "\030\t \001(\t\"D\n\030VolumeEventListenRequest\022\021\n\tpv" +
+      "olumeID\030\001 \001(\003\022\025\n\rstartSequence\030\002 \001(\003*$\n\017" +
+      "SparseDataFlags\022\021\n\rRECONSTRUCTED\020\000*f\n\nac" +
+      "tionType\022\020\n\014MFILEDELETED\020\000\022\020\n\014MFILEWRITT" +
+      "EN\020\001\022\020\n\014MFILERENAMED\020\002\022\020\n\014SFILEWRITTEN\020\003" +
+      "\022\020\n\014SFILEDELETED\020\004*0\n\010hashtype\022\n\n\006SHA256" +
+      "\020\000\022\007\n\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\317\r\n\016Storage" +
+      "Service\022^\n\013HashingInfo\022&.org.opendedup.g" +
+      "rpc.HashingInfoRequest\032\'.org.opendedup.g" +
+      "rpc.HashingInfoResponse\022^\n\013CheckHashes\022&" +
+      ".org.opendedup.grpc.CheckHashesRequest\032\'" +
+      ".org.opendedup.grpc.CheckHashesResponse\022" +
+      "^\n\013WriteChunks\022&.org.opendedup.grpc.Writ" +
+      "eChunksRequest\032\'.org.opendedup.grpc.Writ" +
+      "eChunksResponse\022S\n\tGetChunks\022$.org.opend" +
+      "edup.grpc.GetChunksRequest\032\036.org.opended" +
+      "up.grpc.ChunkEntry0\001\022d\n\021SubscribeToVolum" +
+      "e\022,.org.opendedup.grpc.VolumeEventListen" +
+      "Request\032\037.org.opendedup.grpc.VolumeEvent" +
+      "0\001\022}\n\024WriteSparseDataChunk\0221.org.opended" +
+      "up.grpc.SparseDedupeChunkWriteRequest\0322." +
+      "org.opendedup.grpc.SparseDedupeChunkWrit" +
+      "eResponse\022z\n\023ReadSparseDataChunk\0220.org.o" +
+      "pendedup.grpc.SparseDedupeChunkReadReque" +
+      "st\0321.org.opendedup.grpc.SparseDedupeChun" +
+      "kReadResponse\022v\n\025GetMetaDataDedupeFile\022-" +
+      ".org.opendedup.grpc.MetaDataDedupeFileRe" +
+      "quest\032..org.opendedup.grpc.MetaDataDedup" +
+      "eFileResponse\022j\n\023GetSparseDedupeFile\022+.o" +
+      "rg.opendedup.grpc.SparseDedupeFileReques" +
+      "t\032$.org.opendedup.grpc.SparseDataChunkP0" +
+      "\001\022n\n\023ReplicateRemoteFile\022*.org.opendedup" +
+      ".grpc.FileReplicationRequest\032+.org.opend" +
+      "edup.grpc.FileReplicationResponse\022j\n\017Res" +
+      "toreArchives\022*.org.opendedup.grpc.Restor" +
+      "eArchivesRequest\032+.org.opendedup.grpc.Re" +
+      "storeArchivesResponse\022p\n\021CancelReplicati" +
+      "on\022,.org.opendedup.grpc.CancelReplicatio" +
+      "nRequest\032-.org.opendedup.grpc.CancelRepl" +
+      "icationResponse\022m\n\020PauseReplication\022+.or" +
+      "g.opendedup.grpc.PauseReplicationRequest" +
+      "\032,.org.opendedup.grpc.PauseReplicationRe" +
+      "sponse\022_\n\014ListReplLogs\022,.org.opendedup.g" +
+      "rpc.VolumeEventListenRequest\032\037.org.opend" +
+      "edup.grpc.VolumeEvent0\001\022m\n\020AddReplicaSou" +
+      "rce\022+.org.opendedup.grpc.AddReplicaSourc" +
+      "eRequest\032,.org.opendedup.grpc.AddReplica" +
+      "SourceResponse\022v\n\023RemoveReplicaSource\022.." +
+      "org.opendedup.grpc.RemoveReplicaSourceRe" +
+      "quest\032/.org.opendedup.grpc.RemoveReplica" +
+      "SourceResponseB0Z.github.com/opendedup/s" +
+      "dfs-client-go/sdfs/;sdfsb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -28963,7 +29813,13 @@ public final class Storage {
     internal_static_org_opendedup_grpc_FileReplicationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_FileReplicationRequest_descriptor,
-        new java.lang.String[] { "SrcFilePath", "DstFilePath", "PvolumeID", "RvolumeID", "Url", "Mtls", });
+        new java.lang.String[] { "FileLocation", "PvolumeID", "RvolumeID", "Url", "Mtls", });
+    internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_descriptor =
+      internal_static_org_opendedup_grpc_FileReplicationRequest_descriptor.getNestedTypes().get(0);
+    internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_descriptor,
+        new java.lang.String[] { "SrcFilePath", "DstFilePath", });
     internal_static_org_opendedup_grpc_AddReplicaSourceRequest_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_org_opendedup_grpc_AddReplicaSourceRequest_fieldAccessorTable = new

@@ -32,8 +32,9 @@ public class ReplicationImportEvent extends SDFSEvent {
 	public boolean paused;
 	public long pausets;
 	public boolean mtls;
+	public boolean onDemand;
 
-	public ReplicationImportEvent(String src, String dst, String url, long volumeid,boolean mtls) {
+	public ReplicationImportEvent(String src, String dst, String url, long volumeid,boolean mtls,boolean onDemand) {
 		super(IMPORT, dst, "Importing " + src + " from " + url + " with volumeid " +
 				volumeid + " to " + dst, SDFSEvent.INFO);
 		this.src = src;
@@ -41,6 +42,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 		this.url = url;
 		this.mtls = mtls;
 		this.volumeid = volumeid;
+		this.onDemand = onDemand;
 	}
 
 	public ReplicationImportEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt) {
@@ -52,6 +54,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 		this.volumeid = Long.parseLong(evt.getAttributesMap().get("volumeid"));
 		this.paused = Boolean.parseBoolean(evt.getAttributesMap().get("paused"));
 		this.pausets = Long.parseLong(evt.getAttributesMap().get("pausets"));
+		this.onDemand = Boolean.parseBoolean(evt.getAttributesMap().get("onDemand"));
 	}
 
 	public void cancel() {
@@ -81,6 +84,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 		b.putAttributes("volumeid", Long.toString(this.volumeid));
 		b.putAttributes("paused", Boolean.toString(this.paused));
 		b.putAttributes("pausets", Long.toString(this.pausets));
+		b.putAttributes("onDemand", Boolean.toString(this.onDemand));
 		return b.build();
 	}
 

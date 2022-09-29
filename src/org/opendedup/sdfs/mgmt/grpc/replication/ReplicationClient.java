@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -20,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.io.FileExistsException;
 import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
@@ -60,6 +60,7 @@ import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.mgmt.CloseFile;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl;
+import org.opendedup.sdfs.mgmt.grpc.IOServer;
 import org.opendedup.sdfs.mgmt.grpc.tls.DynamicTrustManager;
 import org.opendedup.sdfs.mgmt.grpc.tls.WatchForFile;
 import org.opendedup.sdfs.notification.ReplicationImportEvent;
@@ -83,6 +84,7 @@ import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
+import org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation;
 
 public class ReplicationClient {
     ManagedChannel channel = null;
@@ -100,12 +102,12 @@ public class ReplicationClient {
     public Thread syncThread;
     private File jsonFile = null;
     private Gson objGson = new GsonBuilder().setPrettyPrinting().create();
+    private int failRetries = 10;
 
     public ReplicationClient(String url, long volumeid, boolean mtls) {
         this.url = url;
         this.volumeid = volumeid;
         this.mtls = mtls;
-
     }
 
     public static void RecoverReplicationClients() throws IOException {
@@ -235,8 +237,8 @@ public class ReplicationClient {
         if (!Main.authJarFilePath.equals("") && !Main.authClassInfo.equals("")) {
 
             EasyX509ClientTrustManager tm = new EasyX509ClientTrustManager();
-            sslClientContextBuilder = SslContextBuilder.forClient()
-                    .clientAuth(ClientAuth.REQUIRE).trustManager(tm);
+            sslClientContextBuilder = SslContextBuilder.forClient().trustManager(tm).keyManager(IOServer.pvtKey,
+                    IOServer.serverCertChain);
         } else {
             try {
                 sslClientContextBuilder = SslContextBuilder.forClient();
@@ -267,30 +269,58 @@ public class ReplicationClient {
         return GrpcSslContexts.configure(sslClientContextBuilder);
     }
 
-    public SDFSEvent replicate(String srcFile, String dstFile) throws IOException {
+    public SDFSEvent[] replicate(List<ReplicationFileLocation> locations) throws IOException {
+        SDFSEvent[] evts = new SDFSEvent[locations.size()];
+        if (evts.length > 10) {
+            throw new IOException("The maximum number of replications is 10 ");
+        }
         synchronized (activeImports) {
-            if (activeImports.contains(dstFile)) {
-                throw new FileExistsException("Replication already occuring for + dstFile");
-            }
-            activeImports.add(dstFile);
-            SDFSLogger.getLog().info("Will Replicate " + srcFile + " to " + dstFile + " from " + url);
-            ReplicationImportEvent evt = new ReplicationImportEvent(srcFile, dstFile, this.url, this.volumeid,
-                    this.mtls);
-            evt.persistEvent();
-            ImportFile fl = new ImportFile(srcFile, dstFile, this, evt);
+            for (int i = 0; i < evts.length; i++) {
 
-            Thread th = new Thread(fl);
-            th.start();
-            return evt;
+                ReplicationFileLocation location = locations.get(i);
+                ReplicationImportEvent evt = new ReplicationImportEvent(location.getSrcFilePath(),
+                        location.getDstFilePath(), this.url, this.volumeid,
+                        this.mtls, true);
+                if (activeImports.contains(location.getDstFilePath())) {
+                    evt.endEvent("Replication already occuring for" + location.getDstFilePath(), SDFSEvent.ERROR);
+                } else {
+                    activeImports.add(location.getDstFilePath());
+                    SDFSLogger.getLog().info("Will Replicate " + location.getSrcFilePath() + " to "
+                            + location.getDstFilePath() + " from " + url);
+                    evt.persistEvent();
+                    if (location.getSrcFilePath().equalsIgnoreCase(".")) {
+                        if (downloadThread == null || !downloadThread.isAlive()) {
+                            downloadThread = new Thread(new DownloadAll(this, evt));
+                            downloadThread.start();
+                        } else {
+                            evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
+                        }
+                    } else {
+                        ImportFile fl = new ImportFile(location.getSrcFilePath(), location.getDstFilePath(), this, evt);
+                        Thread th = new Thread(fl);
+                        th.start();
+                    }
+                }
+                evts[i] = evt;
+            }
+            return evts;
         }
     }
 
     public void replicationSink() throws IOException {
         SDFSLogger.getLog().info("Sink Started at sequence " + this.sequence);
-
+        this.failRetries = 288;
         if (this.sequence == 0) {
-            downloadThread = new Thread(new DownloadAll(this));
-            downloadThread.start();
+            ReplicationImportEvent evt = new ReplicationImportEvent(".",
+                    ".", this.url, this.volumeid,
+                    this.mtls, false);
+            if (downloadThread == null || !downloadThread.isAlive()) {
+                downloadThread = new Thread(new DownloadAll(this, evt));
+                downloadThread.start();
+            } else {
+                evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
+                throw new IOException("DownloadAll Thread already Active");
+            }
         } else {
             this.listThread = new Thread(new ListReplLogs(this));
             this.listThread.start();
@@ -333,7 +363,7 @@ public class ReplicationClient {
                             if (rs.getActionType() == actionType.MFILEWRITTEN) {
                                 ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                         rs.getFile().getFilePath(),
-                                        client.url, client.volumeid, client.mtls);
+                                        client.url, client.volumeid, client.mtls, false);
                                 impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
                                         evt);
 
@@ -433,7 +463,15 @@ public class ReplicationClient {
                 if (rs.getErrorCode() != errorCodes.NOERR) {
                     SDFSLogger.getLog().warn("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
                     SDFSLogger.getLog().warn("Downloading all files");
-                    new DownloadAll(this.client).replicationSinkAll();
+                    ReplicationImportEvent evt = new ReplicationImportEvent(".",
+                            ".", client.url, client.volumeid,
+                            client.mtls, false);
+                    try {
+                        new DownloadAll(this.client, evt).replicationSinkAll();
+                    } catch (Exception e) {
+                        evt.endEvent("unable to download all", SDFSEvent.ERROR, e);
+                        throw new IOException(e);
+                    }
                     return;
                 }
                 ImportFile impf = null;
@@ -444,7 +482,7 @@ public class ReplicationClient {
                             if (rs.getActionType() == actionType.MFILEWRITTEN) {
                                 ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                         rs.getFile().getFilePath(),
-                                        client.url, client.volumeid, client.mtls);
+                                        client.url, client.volumeid, client.mtls, false);
                                 impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
                                         evt);
 
@@ -547,10 +585,12 @@ public class ReplicationClient {
     public static class DownloadAll implements Runnable {
         ReplicationClient client;
         private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+        SDFSEvent evt;
 
-        public DownloadAll(ReplicationClient client) {
+        public DownloadAll(ReplicationClient client, SDFSEvent evt) {
             this.client = client;
             this.client.sequence = 0;
+            this.evt = evt;
         }
 
         public void replicationSinkAll() throws IOException {
@@ -574,9 +614,26 @@ public class ReplicationClient {
                 synchronized (client.activeImports) {
                     if (!client.activeImports.contains(file.getFilePath())) {
                         client.activeImports.add(file.getFilePath());
-                        ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(), file.getFilePath(),
-                                client.url, client.volumeid, client.mtls);
-                        impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt);
+                        String pt = Main.volume.getPath() + File.separator + file.getFilePath();
+                        File _f = new File(pt);
+                        if (_f.exists()) {
+                            if (MetaFileStore.getMF(_f).lastModified() != file.getMtime()) {
+                                ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
+                                        file.getFilePath(),
+                                        client.url, client.volumeid, client.mtls, false);
+                                impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt);
+                            } else {
+                                ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
+                                        file.getFilePath(),
+                                        client.url, client.volumeid, client.mtls, false);
+                                evt.endEvent("File Already Exists and looks like the same " + file.getFilePath());
+                            }
+                        } else {
+                            ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
+                                    file.getFilePath(),
+                                    client.url, client.volumeid, client.mtls, false);
+                            impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt);
+                        }
                     }
                 }
                 if (impf != null) {
@@ -592,6 +649,7 @@ public class ReplicationClient {
             } catch (InterruptedException e) {
                 throw new IOException(e);
             }
+            evt.endEvent("Download All Replication ended Successfully");
         }
 
         @Override
@@ -606,6 +664,7 @@ public class ReplicationClient {
                     SDFSLogger.getLog().warn("Downloadall Replication failed", e);
                     if (retries > 10) {
                         SDFSLogger.getLog().warn("Download all replication failed. Giving up");
+                        evt.endEvent("Download all replication failed. Giving up");
                         break;
                     } else {
                         try {
@@ -617,6 +676,7 @@ public class ReplicationClient {
 
                 }
             }
+            client.downloadThread = null;
         }
     }
 
@@ -647,86 +707,116 @@ public class ReplicationClient {
 
         @Override
         public void run() {
-            replicate();
-        }
-
-        private void replicate() {
-            try {
-
-                String pt = Main.volume.getPath() + File.separator + this.dstFile;
-                File _f = new File(pt);
-                if (_f.exists()) {
-                    FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
-                    MetaFileStore.getMF(_f).clearRetentionLock();
-                    MetaFileStore.removeMetaFile(_f.getPath());
-                }
+            Exception e = null;
+            for (int i = 0; i < client.failRetries; i++) {
                 try {
-                    if (this.evt.canceled) {
-                        throw new ReplicationCanceledException("Replication Canceled");
-                    }
-                    if (this.evt.paused) {
-                        while (this.evt.paused) {
-                            Thread.sleep(1000);
-                        }
-                    }
-                    evt.shortMsg = "Importing metadata file for " + this.dstFile;
-                    MetaDataDedupFile mf = downloadMetaFile();
-                    evt.addCount(1);
-                    if (this.evt.canceled) {
-                        mf.deleteStub(false);
-                        throw new ReplicationCanceledException("Replication Canceled");
-                    }
-                    if (this.evt.paused) {
-                        while (this.evt.paused) {
-                            Thread.sleep(1000);
-                        }
-                    }
-                    evt.shortMsg = "Importing map for " + this.dstFile;
-                    String sguid = mf.getDfGuid();
-                    String ng = UUID.randomUUID().toString();
-                    mf.setLength(0, true);
-                    mf.setDfGuid(ng);
-                    mf.sync();
+                    replicate();
+                    SDFSLogger.getLog().info("Replication Completed Successfully for " + srcFile);
+                    this.evt.endEvent("Replication Successful");
+                    e = null;
+                    break;
+                } catch (ReplicationCanceledException e1) {
+                    SDFSLogger.getLog().info("Replication Canceled");
+                    this.evt.endEvent("Replication Canceled", SDFSEvent.WARN);
+                    break;
+                } catch (Exception e1) {
+                    SDFSLogger.getLog().warn("unable to complete replication to " + client.url + " volume id "
+                            + client.volumeid + " for " + srcFile + " will retry in 5 minutes", e1);
+                    e = e1;
+                    this.evt.shortMsg = "unable to complete replication to " + client.url + " volume id "
+                            + client.volumeid + " for " + srcFile + " will retry in 5 minutes";
                     try {
-                        if (sguid != null && sguid.trim().length() > 0) {
-                            downloadDDB(mf, sguid);
-                        }
-                        FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
-                        CloseFile.close(mf, true);
-                    } catch (ReplicationCanceledException e) {
-                        FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
-                        MetaFileStore.getMF(mf.getAbsolutePath()).clearRetentionLock();
-                        MetaFileStore.removeMetaFile(mf.getPath(), false, false, true);
-                        SDFSLogger.getLog().warn(e);
-                        return;
+                        Thread.sleep(5 * 60 * 1000);
+                    } catch (InterruptedException e2) {
+                        break;
                     }
-                    MetaFileStore.removedCachedMF(mf.getPath());
-                    MetaFileStore.addToCache(mf);
-                    evt.addCount(1);
-                    evt.endEvent("Import Successful for " + this.dstFile, SDFSEvent.INFO);
-                    SDFSLogger.getLog().info("Imported " + this.dstFile);
-                } catch (ReplicationCanceledException e) {
-                    SDFSLogger.getLog().warn(e);
-                    return;
-                } catch (Exception e) {
-                    SDFSLogger.getLog().warn("unable to replicate", e);
-                    evt.endEvent(e.getMessage(), SDFSEvent.ERROR);
-                    return;
                 }
-            } finally {
+            }
+            if (e != null) {
+                SDFSLogger.getLog().warn("replication failed for " + client.url + " volume id "
+                        + client.volumeid + " for " + srcFile, e);
                 synchronized (client.activeImports) {
                     client.activeImports.remove(dstFile);
                     if (client.imports.remove(this.evt.uid) != null) {
                         String mapToJson = objGson.toJson(client.imports.keySet());
                         try {
                             FileUtils.writeStringToFile(client.jsonFile, mapToJson, Charset.forName("UTF-8"));
-                        } catch (IOException e) {
+                        } catch (IOException e1) {
                             SDFSLogger.getLog().warn("unable to persist active imports", e);
                         }
                     }
                 }
-
             }
+        }
+
+        private void replicate() throws ReplicationCanceledException, Exception {
+
+            String pt = Main.volume.getPath() + File.separator + this.dstFile;
+            File _f = new File(pt);
+            if (_f.exists()) {
+                FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                MetaFileStore.getMF(_f).clearRetentionLock();
+                MetaFileStore.removeMetaFile(_f.getPath());
+            }
+            if (this.evt.canceled) {
+                throw new ReplicationCanceledException("Replication Canceled");
+            }
+            if (this.evt.paused) {
+                while (this.evt.paused) {
+                    Thread.sleep(1000);
+                }
+            }
+            evt.shortMsg = "Importing metadata file for " + this.dstFile;
+            MetaDataDedupFile mf = downloadMetaFile();
+            evt.addCount(1);
+            if (this.evt.canceled) {
+                mf.deleteStub(false);
+                throw new ReplicationCanceledException("Replication Canceled");
+            }
+            if (this.evt.paused) {
+                while (this.evt.paused) {
+                    Thread.sleep(1000);
+                }
+            }
+            evt.shortMsg = "Importing map for " + this.dstFile;
+            String sguid = mf.getDfGuid();
+            String ng = UUID.randomUUID().toString();
+            mf.setLength(0, true);
+            mf.setDfGuid(ng);
+            mf.sync();
+            try {
+                if (sguid != null && sguid.trim().length() > 0) {
+                    downloadDDB(mf, sguid);
+                }
+                mf.setRetentionLock();
+                CloseFile.close(mf, true);
+            } catch (ReplicationCanceledException e) {
+                FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+                MetaFileStore.getMF(mf.getAbsolutePath()).clearRetentionLock();
+                MetaFileStore.removeMetaFile(mf.getPath(), false, false, true);
+                SDFSLogger.getLog().warn(e);
+                throw e;
+            }
+
+            MetaFileStore.removedCachedMF(mf.getPath());
+            MetaFileStore.addToCache(mf);
+            evt.addCount(1);
+            FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
+            evt.endEvent("Import Successful for " + this.dstFile, SDFSEvent.INFO);
+            SDFSLogger.getLog().info("Imported " + this.dstFile);
+
+            synchronized (client.activeImports) {
+                client.activeImports.remove(dstFile);
+                if (client.imports.remove(this.evt.uid) != null) {
+                    String mapToJson = objGson.toJson(client.imports.keySet());
+                    try {
+                        FileUtils.writeStringToFile(client.jsonFile, mapToJson, Charset.forName("UTF-8"));
+                    } catch (IOException e) {
+                        SDFSLogger.getLog().warn("unable to persist active imports", e);
+                    }
+                }
+            }
+
         }
 
         private MetaDataDedupFile downloadMetaFile() throws Exception {
@@ -747,9 +837,7 @@ public class ReplicationClient {
             }
             String pt = Main.volume.getPath() + File.separator + this.dstFile;
             File _f = new File(pt);
-            MetaDataDedupFile.fromProtoBuf(crs.getFile(), _f.getPath());
-            SDFSLogger.getLog().info("Download length = " + crs.getFile().getSize());
-            return MetaFileStore.getMF(_f);
+            return MetaDataDedupFile.fromProtoBuf(crs.getFile(), _f.getPath());
         }
 
         private void downloadDDB(MetaDataDedupFile mf, String guid) throws Exception {
@@ -791,7 +879,7 @@ public class ReplicationClient {
                 mf.setLength(mf.length() + ck.len, false);
             }
             SDFSLogger.getLog().info("MF Size = " + mf.length());
-            mp.forceClose();
+            mp.close();
         }
 
         private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf)
@@ -840,10 +928,11 @@ public class ReplicationClient {
                 byte[] dt = ce.getData().toByteArray();
                 // SDFSLogger.getLog().info("dt len " + dt.length + " dt = " + new String(dt));
                 HashFunction hf = Hashing.sha256();
-                if(!StringUtils.getHexString(hf.hashBytes(dt).asBytes()).equals(StringUtils.getHexString(ce.getHash().toByteArray()))){
+                if (!StringUtils.getHexString(hf.hashBytes(dt).asBytes())
+                        .equals(StringUtils.getHexString(ce.getHash().toByteArray()))) {
                     SDFSLogger.getLog().info(StringUtils.getHexString(hf.hashBytes(dt).asBytes())
-                    +
-                    " = " + StringUtils.getHexString(ce.getHash().toByteArray()));
+                            +
+                            " = " + StringUtils.getHexString(ce.getHash().toByteArray()));
                 }
                 ChunkData cd = new ChunkData(ce.getHash().toByteArray(), dt.length, dt, mf.getDfGuid());
                 cd.references = claims.get(ce.getHash()).ct;
@@ -863,8 +952,10 @@ public class ReplicationClient {
                     cm.references = ctl.ct;
                     InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
                     if (ir.getInserted()) {
+                        HCServiceProxy.getHashesMap().claimKey(p.hash, Longs.fromByteArray(p.hashloc), ctl.ct);
                         throw new IOException(
-                                "Hash Invalid state found for " + StringUtils.getHexString(p.hash));
+                                "Hash Invalid state found for " + StringUtils.getHexString(p.hash) + " "
+                                        + Longs.fromByteArray(p.hashloc));
                     }
                     ctl.loc = Longs.fromByteArray(ir.getHashLocs());
                 }

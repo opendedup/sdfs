@@ -872,7 +872,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 							this.tempHt.put(new ByteArrayWrapper(cm.getHash()), bk);
 							return new InsertRecord(false, pos, 0);
 						} else if (db.get(cm.getHash()) != null) {
-							return this.put(cm, true);
+							return this.put(cm, persist);
 						} else {
 							v = new byte[16];
 							ByteBuffer bf = ByteBuffer.wrap(v);

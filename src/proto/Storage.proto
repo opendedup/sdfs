@@ -28,12 +28,15 @@ message CheckHashesResponse {
 }
 
 message FileReplicationRequest {
-  string srcFilePath =1;
-  string dstFilePath = 2;
-  int64 pvolumeID =3;
-  int64 rvolumeID = 4;
-  string url =5;
-  bool mtls = 6;
+  message  ReplicationFileLocation{
+    string srcFilePath =1;
+    string dstFilePath = 2;
+  }
+  repeated ReplicationFileLocation fileLocation=1;
+  int64 pvolumeID =2;
+  int64 rvolumeID = 3;
+  string url =4;
+  bool mtls = 5;
 }
 
 message AddReplicaSourceRequest {
@@ -66,7 +69,7 @@ message RemoveReplicaSourceResponse {
 message FileReplicationResponse {
   string error = 1;
   errorCodes errorCode = 2;
-  string eventID = 3;
+  repeated string eventID = 3;
 }
 
 

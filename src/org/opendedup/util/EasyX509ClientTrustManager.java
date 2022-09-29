@@ -47,7 +47,6 @@ import org.apache.commons.logging.LogFactory;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.mgmt.grpc.IOServer;
 
-import io.grpc.netty.shaded.io.netty.handler.ssl.ClientAuth;
 
 /**
  * <p>
@@ -85,7 +84,7 @@ public class EasyX509ClientTrustManager implements X509TrustManager {
 		super();
 		File trustedCertificatesDir=new File(IOServer.trustStoreDir);
 		try {
-			loadTrustManager(trustedCertificatesDir,ClientAuth.REQUIRE);
+			loadTrustManager(trustedCertificatesDir);
 		} catch (Exception e1) {
 			throw new KeyStoreException("Error occurred while setting up trust manager." + e1.getCause(), e1);
 		}
@@ -100,7 +99,7 @@ public class EasyX509ClientTrustManager implements X509TrustManager {
 		try {
 			SDFSLogger.getLog().info("EASYX509 checkClientTrusted authtype="+authType);
 			File trustedCertificatesDir=new File(IOServer.trustStoreDir);
-			loadTrustManager(trustedCertificatesDir,ClientAuth.REQUIRE);
+			loadTrustManager(trustedCertificatesDir);
 			standardTrustManager.checkClientTrusted(certificates, authType);
         } catch (Exception e) {
         	SDFSLogger.getLog().error("EASYX509 checkClientTrusted caught exception",e);
@@ -114,15 +113,24 @@ public class EasyX509ClientTrustManager implements X509TrustManager {
 	 */
 	public void checkServerTrusted(X509Certificate[] certificates,
 			String authType) throws CertificateException {
-		if ((certificates != null) && LOG.isDebugEnabled()) {
-			LOG.debug("Server certificate chain:");
+		SDFSLogger.getLog().info("In checkServerTrusted");
+		if ((certificates != null)) {
+			SDFSLogger.getLog().info("In checkServerTrusted1");
+			LOG.info("Server certificate chain:");
 			for (int i = 0; i < certificates.length; i++) {
-				LOG.debug("X509Certificate[" + i + "]=" + certificates[i]);
+				LOG.info("X509Certificate[" + i + "]=" + certificates[i]);
 			}
 		}
 		if ((certificates != null) && (certificates.length == 1)) {
+			try {
+				certificates[0].checkValidity();
+			} catch(Exception e) {
+				SDFSLogger.getLog().error("certificate issue",e);
+			}
+			SDFSLogger.getLog().info("In checkServerTrusted2");
 			certificates[0].checkValidity();
 		} else {
+			SDFSLogger.getLog().info("In checkServerTrusted3");
 			standardTrustManager.checkServerTrusted(certificates, authType);
 		}
 	}
@@ -131,10 +139,11 @@ public class EasyX509ClientTrustManager implements X509TrustManager {
 	 * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
 	 */
 	public X509Certificate[] getAcceptedIssuers() {
+		SDFSLogger.getLog().info("In getAcceptedIssuers");
 		return this.standardTrustManager.getAcceptedIssuers();
 	}
 
-	public void loadTrustManager(File trustedCertificatesDir,ClientAuth clientAuth) throws Exception {
+	public void loadTrustManager(File trustedCertificatesDir) throws Exception {
 		SDFSLogger.getLog().info("Load Trust Manager");
 		KeyStore trustStore = KeyStore.getInstance( KeyStore.getDefaultType() );
 	    trustStore.load( null, null );
