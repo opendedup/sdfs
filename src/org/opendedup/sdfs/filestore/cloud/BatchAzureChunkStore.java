@@ -433,8 +433,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 
 			serviceClient.getDefaultRequestOptions().setConcurrentRequestCount(Main.dseIOThreads * 2);
-			if (tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))
-					&& !Main.partialTransition) {
+			if (tier != null && (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))) {
 				this.bio = new BlobDataIO(this.name + "table", this.accessKey, this.secretKey, connectionProtocol);
 			}
 			/*
@@ -1027,7 +1026,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 					SDFSLogger.getLog().error("unable to update size", e);
 				}
 				if (this.tier != null
-						&& (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL))) {
+						&& (tier.equals(StandardBlobTier.ARCHIVE) || tier.equals(StandardBlobTier.COOL)) && !Main.partialTransition) {
 					HashSet<Long> orr = new HashSet<Long>();
 					String dseID = EncyptUtils.encHashArchiveName(Main.DSEID, Main.chunkStoreEncryptionEnabled);
 					if (Main.REFRESH_BLOBS) {

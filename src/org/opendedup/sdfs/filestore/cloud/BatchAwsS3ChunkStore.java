@@ -3211,9 +3211,6 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		@Override
 		public void run() {
 			try {
-				// String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
-				// Main.chunkStoreEncryptionEnabled);
-
 				String name = st.getClaimName(k.longValue());
 				if (st.s3Service.doesObjectExist(st.name, name)) {
 					if (st.deleteUnclaimed) {
