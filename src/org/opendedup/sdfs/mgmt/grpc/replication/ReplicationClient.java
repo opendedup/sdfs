@@ -131,6 +131,8 @@ public class ReplicationClient {
             } else if (url.toLowerCase().startsWith("sdfss://")) {
                 target = url.toLowerCase().replace("sdfss://", "");
                 tls = true;
+            } else {
+                throw new IOException("invalid url");
             }
             String host = target.split(":")[0];
             int port = Integer.parseInt(target.split(":")[1]);
@@ -149,7 +151,7 @@ public class ReplicationClient {
                         .build();
             }
 
-            SDFSLogger.getLog().info("Replication conneted to " + host + " " + port + " " + channel.toString()
+            SDFSLogger.getLog().info("Replication connected to " + host + " " + port + " " + channel.toString()
                     + " connection state " + channel.getState(true));
             storageBlockingStub = StorageServiceGrpc.newBlockingStub(channel);
             evtBlockingStub = SDFSEventServiceGrpc.newBlockingStub(channel);

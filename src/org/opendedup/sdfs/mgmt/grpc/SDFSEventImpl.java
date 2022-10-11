@@ -1,10 +1,18 @@
 package org.opendedup.sdfs.mgmt.grpc;
 
 import com.google.common.eventbus.Subscribe;
+
+import org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent;
 import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest;
 import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse;
 import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest;
 import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventResponse;
+import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest;
+import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.opendedup.grpc.SDFSEventServiceGrpc;
 import org.opendedup.grpc.FileInfo.errorCodes;
 import org.opendedup.logging.SDFSLogger;
@@ -146,6 +154,35 @@ public class SDFSEventImpl extends SDFSEventServiceGrpc.SDFSEventServiceImplBase
         }
         try {
             b.addAllEvents(org.opendedup.sdfs.notification.SDFSEvent.getProtoBufEvents());
+        } catch (Exception e) {
+            SDFSLogger.getLog().error("unable to serialize message", e);
+            b.setError("unable to serialize message");
+            b.setErrorCode(errorCodes.EIO);
+        }
+        responseObserver.onNext(b.build());
+        responseObserver.onCompleted();
+        return;
+    }
+
+    @Override
+    public void getEvents(SDFSEventsRequest request, StreamObserver<SDFSEventsResponse> responseObserver) {
+        SDFSEventsResponse.Builder b = SDFSEventsResponse.newBuilder();
+        if (!AuthUtils.validateUser(AuthUtils.ACTIONS.EVENT_READ)) {
+            b.setError("User is not a member of any group with access");
+            b.setErrorCode(errorCodes.EACCES);
+            responseObserver.onNext(b.build());
+            responseObserver.onCompleted();
+            return;
+        }
+        try {
+            List<SDFSEvent> evts = new ArrayList<SDFSEvent>();
+            for(String uuid : request.getUuidList()) {
+                org.opendedup.sdfs.notification.SDFSEvent evt = org.opendedup.sdfs.notification.SDFSEvent.getEvent(uuid);
+                if(evt != null) {
+                    evts.add(evt.toProtoBuf());
+                }
+            }
+            b.addAllEvents(evts);
         } catch (Exception e) {
             SDFSLogger.getLog().error("unable to serialize message", e);
             b.setError("unable to serialize message");

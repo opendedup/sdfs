@@ -5355,6 +5355,1693 @@ public final class SDFSEventOuterClass {
 
   }
 
+  public interface SDFSEventsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.SDFSEventsRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated string uuid = 1;</code>
+     */
+    java.util.List<java.lang.String>
+        getUuidList();
+    /**
+     * <code>repeated string uuid = 1;</code>
+     */
+    int getUuidCount();
+    /**
+     * <code>repeated string uuid = 1;</code>
+     */
+    java.lang.String getUuid(int index);
+    /**
+     * <code>repeated string uuid = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getUuidBytes(int index);
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     */
+    long getPvolumeID();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.SDFSEventsRequest}
+   */
+  public  static final class SDFSEventsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SDFSEventsRequest)
+      SDFSEventsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SDFSEventsRequest.newBuilder() to construct.
+    private SDFSEventsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SDFSEventsRequest() {
+      uuid_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SDFSEventsRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                uuid_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              uuid_.add(s);
+              break;
+            }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          uuid_ = uuid_.getUnmodifiableView();
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest.class, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int UUID_FIELD_NUMBER = 1;
+    private com.google.protobuf.LazyStringList uuid_;
+    /**
+     * <code>repeated string uuid = 1;</code>
+     */
+    public com.google.protobuf.ProtocolStringList
+        getUuidList() {
+      return uuid_;
+    }
+    /**
+     * <code>repeated string uuid = 1;</code>
+     */
+    public int getUuidCount() {
+      return uuid_.size();
+    }
+    /**
+     * <code>repeated string uuid = 1;</code>
+     */
+    public java.lang.String getUuid(int index) {
+      return uuid_.get(index);
+    }
+    /**
+     * <code>repeated string uuid = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUuidBytes(int index) {
+      return uuid_.getByteString(index);
+    }
+
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     */
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < uuid_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, uuid_.getRaw(i));
+      }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < uuid_.size(); i++) {
+          dataSize += computeStringSizeNoTag(uuid_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getUuidList().size();
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest other = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest) obj;
+
+      boolean result = true;
+      result = result && getUuidList()
+          .equals(other.getUuidList());
+      result = result && (getPvolumeID()
+          == other.getPvolumeID());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getUuidCount() > 0) {
+        hash = (37 * hash) + UUID_FIELD_NUMBER;
+        hash = (53 * hash) + getUuidList().hashCode();
+      }
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.SDFSEventsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.SDFSEventsRequest)
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest.class, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        uuid_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        pvolumeID_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest getDefaultInstanceForType() {
+        return org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest build() {
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest buildPartial() {
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest result = new org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          uuid_ = uuid_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.uuid_ = uuid_;
+        result.pvolumeID_ = pvolumeID_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest) {
+          return mergeFrom((org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest other) {
+        if (other == org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest.getDefaultInstance()) return this;
+        if (!other.uuid_.isEmpty()) {
+          if (uuid_.isEmpty()) {
+            uuid_ = other.uuid_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureUuidIsMutable();
+            uuid_.addAll(other.uuid_);
+          }
+          onChanged();
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.LazyStringList uuid_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureUuidIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          uuid_ = new com.google.protobuf.LazyStringArrayList(uuid_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated string uuid = 1;</code>
+       */
+      public com.google.protobuf.ProtocolStringList
+          getUuidList() {
+        return uuid_.getUnmodifiableView();
+      }
+      /**
+       * <code>repeated string uuid = 1;</code>
+       */
+      public int getUuidCount() {
+        return uuid_.size();
+      }
+      /**
+       * <code>repeated string uuid = 1;</code>
+       */
+      public java.lang.String getUuid(int index) {
+        return uuid_.get(index);
+      }
+      /**
+       * <code>repeated string uuid = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUuidBytes(int index) {
+        return uuid_.getByteString(index);
+      }
+      /**
+       * <code>repeated string uuid = 1;</code>
+       */
+      public Builder setUuid(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUuidIsMutable();
+        uuid_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string uuid = 1;</code>
+       */
+      public Builder addUuid(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUuidIsMutable();
+        uuid_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string uuid = 1;</code>
+       */
+      public Builder addAllUuid(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureUuidIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, uuid_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string uuid = 1;</code>
+       */
+      public Builder clearUuid() {
+        uuid_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string uuid = 1;</code>
+       */
+      public Builder addUuidBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureUuidIsMutable();
+        uuid_.add(value);
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       */
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.SDFSEventsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.SDFSEventsRequest)
+    private static final org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest();
+    }
+
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SDFSEventsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<SDFSEventsRequest>() {
+      @java.lang.Override
+      public SDFSEventsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SDFSEventsRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SDFSEventsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SDFSEventsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface SDFSEventsResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.SDFSEventsResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    java.util.List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> 
+        getEventsList();
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getEvents(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    int getEventsCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder> 
+        getEventsOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder getEventsOrBuilder(
+        int index);
+
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    int getErrorCodeValue();
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+
+    /**
+     * <code>string error = 3;</code>
+     */
+    java.lang.String getError();
+    /**
+     * <code>string error = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getErrorBytes();
+  }
+  /**
+   * Protobuf type {@code org.opendedup.grpc.SDFSEventsResponse}
+   */
+  public  static final class SDFSEventsResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SDFSEventsResponse)
+      SDFSEventsResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SDFSEventsResponse.newBuilder() to construct.
+    private SDFSEventsResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SDFSEventsResponse() {
+      events_ = java.util.Collections.emptyList();
+      errorCode_ = 0;
+      error_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SDFSEventsResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                events_ = new java.util.ArrayList<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              events_.add(
+                  input.readMessage(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.parser(), extensionRegistry));
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+
+              errorCode_ = rawValue;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              error_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          events_ = java.util.Collections.unmodifiableList(events_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse.class, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int EVENTS_FIELD_NUMBER = 1;
+    private java.util.List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> events_;
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    public java.util.List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> getEventsList() {
+      return events_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    public java.util.List<? extends org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder> 
+        getEventsOrBuilderList() {
+      return events_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    public int getEventsCount() {
+      return events_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getEvents(int index) {
+      return events_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+     */
+    public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder getEventsOrBuilder(
+        int index) {
+      return events_.get(index);
+    }
+
+    public static final int ERRORCODE_FIELD_NUMBER = 2;
+    private int errorCode_;
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    public int getErrorCodeValue() {
+      return errorCode_;
+    }
+    /**
+     * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     */
+    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+      @SuppressWarnings("deprecation")
+      org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+      return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+    }
+
+    public static final int ERROR_FIELD_NUMBER = 3;
+    private volatile java.lang.Object error_;
+    /**
+     * <code>string error = 3;</code>
+     */
+    public java.lang.String getError() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        error_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string error = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getErrorBytes() {
+      java.lang.Object ref = error_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        error_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < events_.size(); i++) {
+        output.writeMessage(1, events_.get(i));
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        output.writeEnum(2, errorCode_);
+      }
+      if (!getErrorBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, error_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < events_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, events_.get(i));
+      }
+      if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, errorCode_);
+      }
+      if (!getErrorBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, error_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse)) {
+        return super.equals(obj);
+      }
+      org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse other = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse) obj;
+
+      boolean result = true;
+      result = result && getEventsList()
+          .equals(other.getEventsList());
+      result = result && errorCode_ == other.errorCode_;
+      result = result && getError()
+          .equals(other.getError());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getEventsCount() > 0) {
+        hash = (37 * hash) + EVENTS_FIELD_NUMBER;
+        hash = (53 * hash) + getEventsList().hashCode();
+      }
+      hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
+      hash = (53 * hash) + errorCode_;
+      hash = (37 * hash) + ERROR_FIELD_NUMBER;
+      hash = (53 * hash) + getError().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code org.opendedup.grpc.SDFSEventsResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:org.opendedup.grpc.SDFSEventsResponse)
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse.class, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse.Builder.class);
+      }
+
+      // Construct using org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getEventsFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (eventsBuilder_ == null) {
+          events_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          eventsBuilder_.clear();
+        }
+        errorCode_ = 0;
+
+        error_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return org.opendedup.grpc.SDFSEventOuterClass.internal_static_org_opendedup_grpc_SDFSEventsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse getDefaultInstanceForType() {
+        return org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse build() {
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse buildPartial() {
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse result = new org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (eventsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            events_ = java.util.Collections.unmodifiableList(events_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.events_ = events_;
+        } else {
+          result.events_ = eventsBuilder_.build();
+        }
+        result.errorCode_ = errorCode_;
+        result.error_ = error_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse) {
+          return mergeFrom((org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse other) {
+        if (other == org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse.getDefaultInstance()) return this;
+        if (eventsBuilder_ == null) {
+          if (!other.events_.isEmpty()) {
+            if (events_.isEmpty()) {
+              events_ = other.events_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureEventsIsMutable();
+              events_.addAll(other.events_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.events_.isEmpty()) {
+            if (eventsBuilder_.isEmpty()) {
+              eventsBuilder_.dispose();
+              eventsBuilder_ = null;
+              events_ = other.events_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              eventsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getEventsFieldBuilder() : null;
+            } else {
+              eventsBuilder_.addAllMessages(other.events_);
+            }
+          }
+        }
+        if (other.errorCode_ != 0) {
+          setErrorCodeValue(other.getErrorCodeValue());
+        }
+        if (!other.getError().isEmpty()) {
+          error_ = other.error_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> events_ =
+        java.util.Collections.emptyList();
+      private void ensureEventsIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          events_ = new java.util.ArrayList<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent>(events_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder> eventsBuilder_;
+
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public java.util.List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> getEventsList() {
+        if (eventsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(events_);
+        } else {
+          return eventsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public int getEventsCount() {
+        if (eventsBuilder_ == null) {
+          return events_.size();
+        } else {
+          return eventsBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent getEvents(int index) {
+        if (eventsBuilder_ == null) {
+          return events_.get(index);
+        } else {
+          return eventsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public Builder setEvents(
+          int index, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent value) {
+        if (eventsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEventsIsMutable();
+          events_.set(index, value);
+          onChanged();
+        } else {
+          eventsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public Builder setEvents(
+          int index, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder builderForValue) {
+        if (eventsBuilder_ == null) {
+          ensureEventsIsMutable();
+          events_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          eventsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public Builder addEvents(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent value) {
+        if (eventsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEventsIsMutable();
+          events_.add(value);
+          onChanged();
+        } else {
+          eventsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public Builder addEvents(
+          int index, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent value) {
+        if (eventsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureEventsIsMutable();
+          events_.add(index, value);
+          onChanged();
+        } else {
+          eventsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public Builder addEvents(
+          org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder builderForValue) {
+        if (eventsBuilder_ == null) {
+          ensureEventsIsMutable();
+          events_.add(builderForValue.build());
+          onChanged();
+        } else {
+          eventsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public Builder addEvents(
+          int index, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder builderForValue) {
+        if (eventsBuilder_ == null) {
+          ensureEventsIsMutable();
+          events_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          eventsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public Builder addAllEvents(
+          java.lang.Iterable<? extends org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent> values) {
+        if (eventsBuilder_ == null) {
+          ensureEventsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, events_);
+          onChanged();
+        } else {
+          eventsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public Builder clearEvents() {
+        if (eventsBuilder_ == null) {
+          events_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          eventsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public Builder removeEvents(int index) {
+        if (eventsBuilder_ == null) {
+          ensureEventsIsMutable();
+          events_.remove(index);
+          onChanged();
+        } else {
+          eventsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder getEventsBuilder(
+          int index) {
+        return getEventsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder getEventsOrBuilder(
+          int index) {
+        if (eventsBuilder_ == null) {
+          return events_.get(index);  } else {
+          return eventsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder> 
+           getEventsOrBuilderList() {
+        if (eventsBuilder_ != null) {
+          return eventsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(events_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder addEventsBuilder() {
+        return getEventsFieldBuilder().addBuilder(
+            org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder addEventsBuilder(
+          int index) {
+        return getEventsFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.SDFSEvent events = 1;</code>
+       */
+      public java.util.List<org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder> 
+           getEventsBuilderList() {
+        return getEventsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder> 
+          getEventsFieldBuilder() {
+        if (eventsBuilder_ == null) {
+          eventsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent, org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent.Builder, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventOrBuilder>(
+                  events_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          events_ = null;
+        }
+        return eventsBuilder_;
+      }
+
+      private int errorCode_ = 0;
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public int getErrorCodeValue() {
+        return errorCode_;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public Builder setErrorCodeValue(int value) {
+        errorCode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+        @SuppressWarnings("deprecation")
+        org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
+        return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        errorCode_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       */
+      public Builder clearErrorCode() {
+        
+        errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object error_ = "";
+      /**
+       * <code>string error = 3;</code>
+       */
+      public java.lang.String getError() {
+        java.lang.Object ref = error_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          error_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string error = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getErrorBytes() {
+        java.lang.Object ref = error_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          error_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string error = 3;</code>
+       */
+      public Builder setError(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 3;</code>
+       */
+      public Builder clearError() {
+        
+        error_ = getDefaultInstance().getError();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string error = 3;</code>
+       */
+      public Builder setErrorBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        error_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:org.opendedup.grpc.SDFSEventsResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:org.opendedup.grpc.SDFSEventsResponse)
+    private static final org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse();
+    }
+
+    public static org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SDFSEventsResponse>
+        PARSER = new com.google.protobuf.AbstractParser<SDFSEventsResponse>() {
+      @java.lang.Override
+      public SDFSEventsResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SDFSEventsResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SDFSEventsResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SDFSEventsResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_org_opendedup_grpc_SDFSEvent_descriptor;
   private static final 
@@ -5385,6 +7072,16 @@ public final class SDFSEventOuterClass {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_org_opendedup_grpc_SDFSEventListResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_SDFSEventsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_SDFSEventsRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_org_opendedup_grpc_SDFSEventsResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_org_opendedup_grpc_SDFSEventsResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -5414,16 +7111,23 @@ public final class SDFSEventOuterClass {
       "umeID\030\001 \001(\003\"\210\001\n\025SDFSEventListResponse\022\r\n" +
       "\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.op" +
       "endedup.grpc.errorCodes\022-\n\006events\030\003 \003(\0132" +
-      "\035.org.opendedup.grpc.SDFSEvent2\257\002\n\020SDFSE" +
-      "ventService\022W\n\010GetEvent\022$.org.opendedup." +
-      "grpc.SDFSEventRequest\032%.org.opendedup.gr" +
-      "pc.SDFSEventResponse\022a\n\nListEvents\022(.org" +
-      ".opendedup.grpc.SDFSEventListRequest\032).o" +
-      "rg.opendedup.grpc.SDFSEventListResponse\022" +
-      "_\n\016SubscribeEvent\022$.org.opendedup.grpc.S" +
-      "DFSEventRequest\032%.org.opendedup.grpc.SDF" +
-      "SEventResponse0\001B0Z.github.com/opendedup" +
-      "/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "\035.org.opendedup.grpc.SDFSEvent\"4\n\021SDFSEv" +
+      "entsRequest\022\014\n\004uuid\030\001 \003(\t\022\021\n\tpvolumeID\030\002" +
+      " \001(\003\"\205\001\n\022SDFSEventsResponse\022-\n\006events\030\001 " +
+      "\003(\0132\035.org.opendedup.grpc.SDFSEvent\0221\n\ter" +
+      "rorCode\030\002 \001(\0162\036.org.opendedup.grpc.error" +
+      "Codes\022\r\n\005error\030\003 \001(\t2\213\003\n\020SDFSEventServic" +
+      "e\022W\n\010GetEvent\022$.org.opendedup.grpc.SDFSE" +
+      "ventRequest\032%.org.opendedup.grpc.SDFSEve" +
+      "ntResponse\022Z\n\tGetEvents\022%.org.opendedup." +
+      "grpc.SDFSEventsRequest\032&.org.opendedup.g" +
+      "rpc.SDFSEventsResponse\022a\n\nListEvents\022(.o" +
+      "rg.opendedup.grpc.SDFSEventListRequest\032)" +
+      ".org.opendedup.grpc.SDFSEventListRespons" +
+      "e\022_\n\016SubscribeEvent\022$.org.opendedup.grpc" +
+      ".SDFSEventRequest\032%.org.opendedup.grpc.S" +
+      "DFSEventResponse0\001B0Z.github.com/opended" +
+      "up/sdfs-client-go/sdfs/;sdfsb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -5474,6 +7178,18 @@ public final class SDFSEventOuterClass {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SDFSEventListResponse_descriptor,
         new java.lang.String[] { "Error", "ErrorCode", "Events", });
+    internal_static_org_opendedup_grpc_SDFSEventsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_org_opendedup_grpc_SDFSEventsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_SDFSEventsRequest_descriptor,
+        new java.lang.String[] { "Uuid", "PvolumeID", });
+    internal_static_org_opendedup_grpc_SDFSEventsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(6);
+    internal_static_org_opendedup_grpc_SDFSEventsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_org_opendedup_grpc_SDFSEventsResponse_descriptor,
+        new java.lang.String[] { "Events", "ErrorCode", "Error", });
     org.opendedup.grpc.FileInfo.getDescriptor();
   }
 

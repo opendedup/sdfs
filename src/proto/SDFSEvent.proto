@@ -44,8 +44,22 @@ message SDFSEventListResponse {
     errorCodes errorCode = 2;
     repeated SDFSEvent events = 3;
 }
+
+message SDFSEventsRequest {
+    repeated string uuid = 1;
+    int64 pvolumeID =2;
+}
+
+message SDFSEventsResponse {
+    repeated SDFSEvent events = 1;
+    errorCodes errorCode = 2;
+    string error = 3;
+}
+
+
 service SDFSEventService {
     rpc GetEvent(SDFSEventRequest) returns (SDFSEventResponse);
+    rpc GetEvents(SDFSEventsRequest) returns (SDFSEventsResponse);
     rpc ListEvents(SDFSEventListRequest) returns (SDFSEventListResponse);
     rpc SubscribeEvent(SDFSEventRequest) returns(stream SDFSEventResponse);
 }

@@ -46,6 +46,37 @@ public final class SDFSEventServiceGrpc {
     return getGetEventMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest,
+      org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse> getGetEventsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetEvents",
+      requestType = org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest.class,
+      responseType = org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest,
+      org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse> getGetEventsMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse> getGetEventsMethod;
+    if ((getGetEventsMethod = SDFSEventServiceGrpc.getGetEventsMethod) == null) {
+      synchronized (SDFSEventServiceGrpc.class) {
+        if ((getGetEventsMethod = SDFSEventServiceGrpc.getGetEventsMethod) == null) {
+          SDFSEventServiceGrpc.getGetEventsMethod = getGetEventsMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetEvents"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new SDFSEventServiceMethodDescriptorSupplier("GetEvents"))
+              .build();
+        }
+      }
+    }
+    return getGetEventsMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest,
       org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse> getListEventsMethod;
 
@@ -165,6 +196,13 @@ public final class SDFSEventServiceGrpc {
 
     /**
      */
+    public void getEvents(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetEventsMethod(), responseObserver);
+    }
+
+    /**
+     */
     public void listEvents(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListEventsMethod(), responseObserver);
@@ -186,6 +224,13 @@ public final class SDFSEventServiceGrpc {
                 org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest,
                 org.opendedup.grpc.SDFSEventOuterClass.SDFSEventResponse>(
                   this, METHODID_GET_EVENT)))
+          .addMethod(
+            getGetEventsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest,
+                org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse>(
+                  this, METHODID_GET_EVENTS)))
           .addMethod(
             getListEventsMethod(),
             io.grpc.stub.ServerCalls.asyncUnaryCall(
@@ -228,6 +273,14 @@ public final class SDFSEventServiceGrpc {
 
     /**
      */
+    public void getEvents(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest request,
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetEventsMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
     public void listEvents(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
@@ -262,6 +315,13 @@ public final class SDFSEventServiceGrpc {
     public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventResponse getEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetEventMethod(), getCallOptions(), request);
+    }
+
+    /**
+     */
+    public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse getEvents(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetEventsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -304,6 +364,14 @@ public final class SDFSEventServiceGrpc {
 
     /**
      */
+    public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse> getEvents(
+        org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetEventsMethod(), getCallOptions()), request);
+    }
+
+    /**
+     */
     public com.google.common.util.concurrent.ListenableFuture<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListResponse> listEvents(
         org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
@@ -312,8 +380,9 @@ public final class SDFSEventServiceGrpc {
   }
 
   private static final int METHODID_GET_EVENT = 0;
-  private static final int METHODID_LIST_EVENTS = 1;
-  private static final int METHODID_SUBSCRIBE_EVENT = 2;
+  private static final int METHODID_GET_EVENTS = 1;
+  private static final int METHODID_LIST_EVENTS = 2;
+  private static final int METHODID_SUBSCRIBE_EVENT = 3;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -335,6 +404,10 @@ public final class SDFSEventServiceGrpc {
         case METHODID_GET_EVENT:
           serviceImpl.getEvent((org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest) request,
               (io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventResponse>) responseObserver);
+          break;
+        case METHODID_GET_EVENTS:
+          serviceImpl.getEvents((org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsRequest) request,
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.SDFSEventOuterClass.SDFSEventsResponse>) responseObserver);
           break;
         case METHODID_LIST_EVENTS:
           serviceImpl.listEvents((org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest) request,
@@ -406,6 +479,7 @@ public final class SDFSEventServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new SDFSEventServiceFileDescriptorSupplier())
               .addMethod(getGetEventMethod())
+              .addMethod(getGetEventsMethod())
               .addMethod(getListEventsMethod())
               .addMethod(getSubscribeEventMethod())
               .build();
