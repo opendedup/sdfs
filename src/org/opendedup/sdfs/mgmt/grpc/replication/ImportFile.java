@@ -3,6 +3,7 @@ package org.opendedup.sdfs.mgmt.grpc.replication;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -99,6 +100,10 @@ public class ImportFile implements Runnable {
                     SDFSLogger.getLog().info("Replication Canceled");
                     this.evt.endEvent("Replication Canceled", SDFSEvent.WARN);
                     break;
+                } catch (FileAlreadyExistsException e1) {
+                    SDFSLogger.getLog().warn("File Already exists",e);
+                    this.evt.endEvent("File Already exists", SDFSEvent.WARN);
+                    break;
                 } catch (Exception e1) {
                     SDFSLogger.getLog().warn("unable to complete replication to " + client.url + " volume id "
                             + client.volumeid + " for " + srcFile + " will retry in 5 minutes", e1);
@@ -143,9 +148,7 @@ public class ImportFile implements Runnable {
         String pt = Main.volume.getPath() + File.separator + this.dstFile;
         File _f = new File(pt);
         if (_f.exists()) {
-            FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
-            MetaFileStore.getMF(_f).clearRetentionLock();
-            MetaFileStore.removeMetaFile(_f.getPath());
+            throw new FileAlreadyExistsException(pt);
         }
         if (this.evt.canceled) {
             throw new ReplicationCanceledException("Replication Canceled");
