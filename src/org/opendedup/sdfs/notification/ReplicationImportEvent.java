@@ -67,7 +67,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 		if (this.paused) {
 			this.shortMsg = "Replication Import Paused at " + System.currentTimeMillis();
 		}
-		if (this.paused) {
+		if (!this.paused) {
 			this.shortMsg = "Replication Import Restarted at " + System.currentTimeMillis();
 		}
 	}
