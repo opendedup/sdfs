@@ -62,7 +62,7 @@ public class DownloadAll implements Runnable {
                             ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                                     file.getFilePath(),
                                     client.url, client.volumeid, client.mtls, false);
-                            impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt);
+                            impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt,true);
                         } else {
                             ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                                     file.getFilePath(),
@@ -73,7 +73,7 @@ public class DownloadAll implements Runnable {
                         ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                                 file.getFilePath(),
                                 client.url, client.volumeid, client.mtls, false);
-                        impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt);
+                        impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt,true);
                     }
                 }
             }

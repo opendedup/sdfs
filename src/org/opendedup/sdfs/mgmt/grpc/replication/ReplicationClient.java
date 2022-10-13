@@ -85,7 +85,7 @@ public class ReplicationClient {
                                 rc = new ReplicationClient(evt.url, evt.volumeid, evt.mtls);
                                 rc.connect();
                             }
-                            ImportFile imf = new ImportFile(evt.src, evt.dst, rc, evt);
+                            ImportFile imf = new ImportFile(evt.src, evt.dst, rc, evt,true);
                             imf.replicate();
                         } catch (Exception e) {
                             SDFSLogger.getLog().warn("recovery import failed for " + id, e);
@@ -255,7 +255,7 @@ public class ReplicationClient {
                             evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
                         }
                     } else {
-                        ImportFile fl = new ImportFile(location.getSrcFilePath(), location.getDstFilePath(), this, evt);
+                        ImportFile fl = new ImportFile(location.getSrcFilePath(), location.getDstFilePath(), this, evt,false);
                         Thread th = new Thread(fl);
                         th.start();
                     }

@@ -56,14 +56,17 @@ public class ImportFile implements Runnable {
     ReplicationClient client;
     boolean canceled = false;
     boolean paused = false;
+    boolean overwrite;
+
     private Gson objGson = new GsonBuilder().setPrettyPrinting().create();
     private static HashMap<String, ReentrantLock> actives = new HashMap<String, ReentrantLock>();
 
-    public ImportFile(String srcFile, String dstFile, ReplicationClient client, ReplicationImportEvent evt) {
+    public ImportFile(String srcFile, String dstFile, ReplicationClient client, ReplicationImportEvent evt,boolean overwrite) {
         this.client = client;
         this.evt = evt;
         this.srcFile = srcFile;
         this.dstFile = dstFile;
+        this.overwrite = overwrite;
         SDFSLogger.getLog().info("Importing " + this.srcFile);
 
         client.imports.put(evt.uid, this);
@@ -147,7 +150,7 @@ public class ImportFile implements Runnable {
 
         String pt = Main.volume.getPath() + File.separator + this.dstFile;
         File _f = new File(pt);
-        if (_f.exists()) {
+        if (_f.exists() && !this.overwrite) {
             throw new FileAlreadyExistsException(pt);
         }
         if (this.evt.canceled) {

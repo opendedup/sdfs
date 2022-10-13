@@ -57,7 +57,7 @@ public class ListenRepl implements Runnable {
                                     rs.getFile().getFilePath(),
                                     client.url, client.volumeid, client.mtls, false);
                             impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
-                                    evt);
+                                    evt,true);
 
                         } else if (rs.getActionType() == actionType.MFILEDELETED) {
                             String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
