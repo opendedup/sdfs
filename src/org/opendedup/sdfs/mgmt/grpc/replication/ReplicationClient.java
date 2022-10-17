@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.X509TrustManager;
 
@@ -85,7 +86,7 @@ public class ReplicationClient {
                                 rc = new ReplicationClient(evt.url, evt.volumeid, evt.mtls);
                                 rc.connect();
                             }
-                            ImportFile imf = new ImportFile(evt.src, evt.dst, rc, evt,true);
+                            ImportFile imf = new ImportFile(evt.src, evt.dst, rc, evt, true);
                             imf.replicate();
                         } catch (Exception e) {
                             SDFSLogger.getLog().warn("recovery import failed for " + id, e);
@@ -102,9 +103,14 @@ public class ReplicationClient {
 
     public void connect() throws Exception {
         try {
-            if (channel != null) {
+            if (this.channel != null) {
                 try {
-                    channel.shutdown();
+                    this.channel.shutdown();
+                    this.channel.awaitTermination(60, TimeUnit.SECONDS);
+                    this.channel = null;
+                    this.storageBlockingStub = null;
+                    this.evtBlockingStub = null;
+                    this.ioBlockingStub = null;
 
                 } catch (Exception e) {
                 }
@@ -139,14 +145,14 @@ public class ReplicationClient {
             int maxMsgSize = 240 * 1024 * 1024;
             if (mtls || tls) {
 
-                channel = NettyChannelBuilder.forAddress(host, port)
+                this.channel = NettyChannelBuilder.forAddress(host, port)
                         .negotiationType(NegotiationType.TLS).maxInboundMessageSize(maxMsgSize)
                         .sslContext(
                                 getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath)
                                         .build())
                         .build();
             } else {
-                channel = NettyChannelBuilder.forAddress(host, port).maxInboundMessageSize(maxMsgSize)
+                this.channel = NettyChannelBuilder.forAddress(host, port).maxInboundMessageSize(maxMsgSize)
                         .negotiationType(NegotiationType.PLAINTEXT)
                         .build();
             }
@@ -162,10 +168,10 @@ public class ReplicationClient {
             this.closed = false;
 
         } catch (Exception e) {
-            channel = null;
-            storageBlockingStub = null;
-            evtBlockingStub = null;
-            ioBlockingStub = null;
+            this.channel = null;
+            this.storageBlockingStub = null;
+            this.evtBlockingStub = null;
+            this.ioBlockingStub = null;
             throw e;
         }
     }
@@ -255,7 +261,8 @@ public class ReplicationClient {
                             evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
                         }
                     } else {
-                        ImportFile fl = new ImportFile(location.getSrcFilePath(), location.getDstFilePath(), this, evt,false);
+                        ImportFile fl = new ImportFile(location.getSrcFilePath(), location.getDstFilePath(), this, evt,
+                                false);
                         Thread th = new Thread(fl);
                         th.start();
                     }
@@ -288,9 +295,13 @@ public class ReplicationClient {
         syncThread.start();
     }
 
-    
-
     public void shutDown() {
+        try {
+            this.channel.shutdown();
+            this.channel.awaitTermination(60, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            SDFSLogger.getLog().warn("unable to shutdown client connection", e);
+        }
         synchronized (this.activeImports) {
             this.closed = true;
             if (this.channel != null) {
@@ -314,10 +325,5 @@ public class ReplicationClient {
             this.activeImports.clear();
         }
     }
-
-
-    
-
-    
 
 }

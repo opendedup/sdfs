@@ -227,7 +227,13 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
                 if (SDFSEvent.getEvent(request.getEventID()) != null) {
                     ReplicationImportEvent evt = (ReplicationImportEvent) SDFSEvent.getEvent(request.getEventID());
-                    if (evt.getEndTime() > 0) {
+                    if(evt.canceled) {
+                        b.setError("UUID " + request.getEventID() + " alread canceled");
+                        b.setErrorCode(errorCodes.EAGAIN);
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                    }
+                    else if (evt.getEndTime() > 0) {
                         b.setError("UUID " + request.getEventID() + " alread done");
                         b.setErrorCode(errorCodes.EALREADY);
                         responseObserver.onNext(b.build());

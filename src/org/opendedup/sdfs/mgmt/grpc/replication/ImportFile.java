@@ -10,7 +10,6 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 import org.apache.commons.io.FileUtils;
 import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
@@ -48,7 +47,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.protobuf.ByteString;
 
-
 public class ImportFile implements Runnable {
     ReplicationImportEvent evt;
     String srcFile;
@@ -61,7 +59,8 @@ public class ImportFile implements Runnable {
     private Gson objGson = new GsonBuilder().setPrettyPrinting().create();
     private static HashMap<String, ReentrantLock> actives = new HashMap<String, ReentrantLock>();
 
-    public ImportFile(String srcFile, String dstFile, ReplicationClient client, ReplicationImportEvent evt,boolean overwrite) {
+    public ImportFile(String srcFile, String dstFile, ReplicationClient client, ReplicationImportEvent evt,
+            boolean overwrite) {
         this.client = client;
         this.evt = evt;
         this.srcFile = srcFile;
@@ -101,10 +100,22 @@ public class ImportFile implements Runnable {
                     break;
                 } catch (ReplicationCanceledException e1) {
                     SDFSLogger.getLog().info("Replication Canceled");
+                    synchronized (client.activeImports) {
+                        client.activeImports.remove(dstFile);
+                        if (client.imports.remove(this.evt.uid) != null) {
+                            String mapToJson = objGson.toJson(client.imports.keySet());
+                            try {
+                                FileUtils.writeStringToFile(client.jsonFile, mapToJson, Charset.forName("UTF-8"));
+                            } catch (IOException e2) {
+                                SDFSLogger.getLog().warn("unable to persist active imports", e);
+                            }
+                        }
+                    }
+
                     this.evt.endEvent("Replication Canceled", SDFSEvent.WARN);
                     break;
                 } catch (FileAlreadyExistsException e1) {
-                    SDFSLogger.getLog().warn("File Already exists",e);
+                    SDFSLogger.getLog().warn("File Already exists", e);
                     this.evt.endEvent("File Already exists", SDFSEvent.WARN);
                     break;
                 } catch (Exception e1) {
@@ -162,7 +173,17 @@ public class ImportFile implements Runnable {
             }
         }
         evt.shortMsg = "Importing metadata file for " + this.dstFile;
-        MetaDataDedupFile mf = downloadMetaFile();
+        MetaDataDedupFile mf = null;
+        try {
+            mf = downloadMetaFile();
+        } catch (ReplicationCanceledException e) {
+            if (_f.exists()) {
+                FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                MetaFileStore.getMF(_f.getAbsolutePath()).clearRetentionLock();
+                MetaFileStore.removeMetaFile(_f.getPath(), false, false, true);
+            }
+            throw e;
+        }
         evt.addCount(1);
         if (this.evt.canceled) {
             mf.deleteStub(false);
@@ -186,10 +207,12 @@ public class ImportFile implements Runnable {
             mf.setRetentionLock();
             CloseFile.close(mf, true);
         } catch (ReplicationCanceledException e) {
-            FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
-            MetaFileStore.getMF(mf.getAbsolutePath()).clearRetentionLock();
-            MetaFileStore.removeMetaFile(mf.getPath(), false, false, true);
-            SDFSLogger.getLog().warn(e);
+            if (_f.exists()) {
+                FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+                MetaFileStore.getMF(mf.getAbsolutePath()).clearRetentionLock();
+                MetaFileStore.removeMetaFile(mf.getPath(), false, false, true);
+                SDFSLogger.getLog().warn(e);
+            }
             throw e;
         }
 
