@@ -168,9 +168,11 @@ public class ImportFile implements Runnable {
             throw new ReplicationCanceledException("Replication Canceled");
         }
         if (this.evt.paused) {
+            SDFSLogger.getLog().info("Event " + this.evt.uid + " is paused");
             while (this.evt.paused) {
                 Thread.sleep(1000);
             }
+            SDFSLogger.getLog().info("Event " + this.evt.uid + " is unpaused");
         }
         evt.shortMsg = "Importing metadata file for " + this.dstFile;
         MetaDataDedupFile mf = null;
@@ -190,9 +192,11 @@ public class ImportFile implements Runnable {
             throw new ReplicationCanceledException("Replication Canceled");
         }
         if (this.evt.paused) {
+            SDFSLogger.getLog().info("Event " + this.evt.uid + " is paused");
             while (this.evt.paused) {
                 Thread.sleep(1000);
             }
+            SDFSLogger.getLog().info("Event " + this.evt.uid + " is unpaused");
         }
         evt.shortMsg = "Importing map for " + this.dstFile;
         String sguid = mf.getDfGuid();
@@ -211,7 +215,6 @@ public class ImportFile implements Runnable {
                 FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
                 MetaFileStore.getMF(mf.getAbsolutePath()).clearRetentionLock();
                 MetaFileStore.removeMetaFile(mf.getPath(), false, false, true);
-                SDFSLogger.getLog().warn(e);
             }
             throw e;
         }
@@ -242,9 +245,11 @@ public class ImportFile implements Runnable {
             throw new ReplicationCanceledException("Replication Canceled");
         }
         if (this.evt.paused) {
+            SDFSLogger.getLog().info("Event " + this.evt.uid + " is paused");
             while (this.evt.paused) {
                 Thread.sleep(1000);
             }
+            SDFSLogger.getLog().info("Event " + this.evt.uid + " is unpaused");
         }
         MetaDataDedupeFileRequest mr = MetaDataDedupeFileRequest.newBuilder().setPvolumeID(client.volumeid)
                 .setFilePath(srcFile).build();
@@ -263,9 +268,11 @@ public class ImportFile implements Runnable {
             throw new ReplicationCanceledException("Replication Canceled");
         }
         if (this.evt.paused) {
+            SDFSLogger.getLog().info("Event " + this.evt.uid + " is paused");
             while (this.evt.paused) {
                 Thread.sleep(1000);
             }
+            SDFSLogger.getLog().info("Event " + this.evt.uid + " is upaused");
         }
         SparseDedupeFileRequest req = SparseDedupeFileRequest.newBuilder()
                 .setPvolumeID(this.client.volumeid).setGuid(guid).build();
@@ -279,9 +286,11 @@ public class ImportFile implements Runnable {
                 throw new ReplicationCanceledException("Replication Canceled");
             }
             if (this.evt.paused) {
+                SDFSLogger.getLog().info("Event " + this.evt.uid + " is paused");
                 while (this.evt.paused) {
                     Thread.sleep(1000);
                 }
+                SDFSLogger.getLog().info("Event " + this.evt.uid + " is unpaused");
             }
             SparseDataChunkP cr = crs.next();
             if (cr.getErrorCode() != errorCodes.NOERR) {
