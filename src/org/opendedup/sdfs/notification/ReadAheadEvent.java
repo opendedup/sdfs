@@ -40,6 +40,7 @@ public class ReadAheadEvent extends SDFSEvent {
 	
 	public void cancelEvent() {
 		this.running = false;
+		this.endEvent("canceled");
 	}
 
 	

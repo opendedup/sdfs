@@ -74,7 +74,7 @@ public class PFullGC implements GCControllerImpl {
 						"Current DSE Percentage Full is [" + pFull
 								+ "] will run GC when [" + nFull + "]");
 				task.endEvent("Garbage Collection Succeeded");
-				task.shortMsg = "Garbage Collection Succeeded";
+				task.setShortMsg("Garbage Collection Succeeded");
 				task.longMsg = "Current DSE Percentage Full is [" + pFull
 						+ "] will run GC when [" + nFull + "]";
 			} catch (Exception e) {

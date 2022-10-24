@@ -622,7 +622,7 @@ public class FileReplicationService {
 			SDFSLogger.getLog().info("##################### Syncing Files from cloud now ########################");
 			executor = new ThreadPoolExecutor(Main.dseIOThreads, Main.dseIOThreads, 10, TimeUnit.SECONDS, worksQueue,
 					new ThreadPoolExecutor.CallerRunsPolicy());
-			req.getEvent().shortMsg = "Syncing Files From Cloud Volume [" + req.getVolumeID() + "]";
+			req.getEvent().setShortMsg("Syncing Files From Cloud Volume [" + req.getVolumeID() + "]");
 
 			try {
 				this.sync.clearIter();

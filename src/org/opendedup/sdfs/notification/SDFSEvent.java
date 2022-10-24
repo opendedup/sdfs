@@ -26,7 +26,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.common.cache.CacheBuilder;
@@ -35,7 +34,6 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.EventBus;
-
 
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -58,7 +56,7 @@ public class SDFSEvent implements java.io.Serializable {
 	private static final long serialVersionUID = -7418485011806466368L;
 	public Type type = null;
 	public Level level;
-	public String shortMsg = null;
+	private String shortMsg = null;
 	public String longMsg = "";
 	public String target = null;
 	private AtomicLong maxCt = new AtomicLong(1);
@@ -116,8 +114,9 @@ public class SDFSEvent implements java.io.Serializable {
 	public transient static final Level ERROR = new Level("error");
 	private static final long MB = 1024 * 1024;
 
-	protected static LoadingCache<String, SDFSEvent> cachedEvents = CacheBuilder.newBuilder().maximumSize(100)
-			.expireAfterAccess(60, TimeUnit.SECONDS).concurrencyLevel(Main.writeThreads)
+
+	protected static LoadingCache<String, SDFSEvent> cachedEvents = CacheBuilder.newBuilder().maximumSize(2000)
+			.concurrencyLevel(Main.writeThreads).weakValues()
 			.removalListener(new RemovalListener<String, SDFSEvent>() {
 				public void onRemoval(RemovalNotification<String, SDFSEvent> removal) {
 					SDFSEvent evt = removal.getValue();
@@ -144,11 +143,22 @@ public class SDFSEvent implements java.io.Serializable {
 						throw new NullPointerException("[" + uuid + "] could not be found");
 					}
 				}
-
 			});
 
-	public long getEndTime(){
+	
+	public long getEndTime() {
 		return this.endTime;
+	}
+
+	public void setShortMsg(String msg) {
+		synchronized (this.shortMsg) {
+			this.shortMsg = msg;
+			try {
+				this.persistEvent();
+			} catch (IOException e) {
+
+			}
+		}
 	}
 
 	public static void init() throws RocksDBException {
@@ -178,7 +188,6 @@ public class SDFSEvent implements java.io.Serializable {
 		this.startTime = System.currentTimeMillis();
 		this.shortMsg = shortMsg;
 		this.uid = RandomGUID.getGuid();
-
 		this.level = level;
 		try {
 			cachedEvents.put(this.uid, this);
@@ -226,10 +235,10 @@ public class SDFSEvent implements java.io.Serializable {
 	}
 
 	public void persistEvent() throws IOException {
-		try{
-		evtdb.put(this.uid.getBytes(), this.toProtoBuf().toByteArray());
-		}catch(Exception e) {
-			SDFSLogger.getLog().error("unable to persist event " + this.uid,e);
+		try {
+			evtdb.put(this.uid.getBytes(), this.toProtoBuf().toByteArray());
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to persist event " + this.uid, e);
 			throw new IOException("unable to persist event " + this.uid);
 		}
 	}
@@ -268,7 +277,7 @@ public class SDFSEvent implements java.io.Serializable {
 			try {
 				this.persistEvent();
 			} catch (IOException e) {
-				
+
 			}
 			eventBus.post(this);
 		}

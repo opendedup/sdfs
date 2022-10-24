@@ -122,8 +122,8 @@ public class ImportFile implements Runnable {
                     SDFSLogger.getLog().warn("unable to complete replication to " + client.url + " volume id "
                             + client.volumeid + " for " + srcFile + " will retry in 5 minutes", e1);
                     e = e1;
-                    this.evt.shortMsg = "unable to complete replication to " + client.url + " volume id "
-                            + client.volumeid + " for " + srcFile + " will retry in 5 minutes";
+                    this.evt.setShortMsg("unable to complete replication to " + client.url + " volume id "
+                            + client.volumeid + " for " + srcFile + " will retry in 5 minutes");
                     try {
                         Thread.sleep(5 * 60 * 1000);
                     } catch (InterruptedException e2) {
@@ -174,7 +174,7 @@ public class ImportFile implements Runnable {
             }
             SDFSLogger.getLog().info("Event " + this.evt.uid + " is unpaused");
         }
-        evt.shortMsg = "Importing metadata file for " + this.dstFile;
+        evt.setShortMsg("Importing metadata file for " + this.dstFile);
         MetaDataDedupFile mf = null;
         try {
             mf = downloadMetaFile();
@@ -198,7 +198,7 @@ public class ImportFile implements Runnable {
             }
             SDFSLogger.getLog().info("Event " + this.evt.uid + " is unpaused");
         }
-        evt.shortMsg = "Importing map for " + this.dstFile;
+        evt.setShortMsg("Importing map for " + this.dstFile);
         String sguid = mf.getDfGuid();
         String ng = UUID.randomUUID().toString();
         mf.setLength(0, true);
@@ -396,7 +396,7 @@ public class ImportFile implements Runnable {
         String msg = "During Replication Archive Data Found in " + mf.getPath() +
                 "requesting recovery of data from archive.";
         SDFSLogger.getLog().info(msg);
-        evt.shortMsg = msg;
+        evt.setShortMsg(msg);
         String basePath = Main.volume.getPath() + File.separator;
         String subPath = mf.getPath().substring(basePath.length());
         RestoreArchivesResponse rresp = this.client.storageBlockingStub.restoreArchives(
@@ -436,7 +436,7 @@ public class ImportFile implements Runnable {
                 " event endtime = " + evtResp.getEvent().getEndTime() +
                 " event level = " + evtResp.getEvent().getLevel();
         SDFSLogger.getLog().info(msg);
-        evt.shortMsg = msg;
+        evt.setShortMsg(msg);
 
     }
 

@@ -140,10 +140,10 @@ public class GetCloudFile implements Runnable {
 				fevt.setMaxCount(3);
 				fevt.setCurrentCount(1);
 				SDFSLogger.getLog().debug("downloading " + sfile);
-				fevt.shortMsg = "Downloading [" + sfile + "]";
+				fevt.setShortMsg("Downloading [" + sfile + "]");
 				MetaDataDedupFile _mf = FileReplicationService.getMF(sfile);
 				SDFSLogger.getLog().debug("downloaded " + sfile);
-				fevt.shortMsg = "Downloading Map Metadata for [" + sfile + "]";
+				fevt.setShortMsg("Downloading Map Metadata for [" + sfile + "]");
 				SDFSLogger.getLog().debug("downloading ddb " + _mf.getDfGuid());
 				if (_mf.getDfGuid() == null) {
 					throw new IOException("File " + sfile + " has no data");
@@ -197,7 +197,7 @@ public class GetCloudFile implements Runnable {
 
 	private void checkDedupFile(SDFSEvent fevt) throws IOException {
 
-		fevt.shortMsg = "Importing hashes for file";
+		fevt.setShortMsg("Importing hashes for file");
 		SDFSLogger.getLog().info("Importing " + mf.getDfGuid());
 		Set<Long> blks = new HashSet<Long>();
 		LongByteArrayMap ddb = LongByteArrayMap.getMap(mf.getDfGuid());

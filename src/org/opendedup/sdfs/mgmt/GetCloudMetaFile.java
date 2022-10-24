@@ -60,7 +60,7 @@ public class GetCloudMetaFile {
 				Element root = doc.getDocumentElement();
 				fevt.setMaxCount(4);
 				fevt.setCurrentCount(1);
-				fevt.shortMsg = "Downloading [" + file + "]";
+				fevt.setShortMsg("Downloading [" + file + "]");
 				mf = FileReplicationService.getMF(file);
 				mf.sync();
 				fevt.endEvent("retrieved file " + file);
