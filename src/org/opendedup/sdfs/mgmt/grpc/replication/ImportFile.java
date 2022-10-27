@@ -88,18 +88,20 @@ public class ImportFile implements Runnable {
                 actives.put(this.dstFile, active);
             }
         }
-        active.lock();
-        try {
-            Exception e = null;
-            for (int i = 0; i < client.failRetries; i++) {
+
+        Exception e = null;
+        for (int i = 0; i < client.failRetries; i++) {
+            active.lock();
+            try {
+                replicate();
+                SDFSLogger.getLog().info("Replication Completed Successfully for " + srcFile);
+                this.evt.endEvent("Replication Successful");
+                e = null;
+                active.unlock();
+                break;
+            } catch (ReplicationCanceledException e1) {
+                SDFSLogger.getLog().info("Replication Canceled");
                 try {
-                    replicate();
-                    SDFSLogger.getLog().info("Replication Completed Successfully for " + srcFile);
-                    this.evt.endEvent("Replication Successful");
-                    e = null;
-                    break;
-                } catch (ReplicationCanceledException e1) {
-                    SDFSLogger.getLog().info("Replication Canceled");
                     synchronized (client.activeImports) {
                         client.activeImports.remove(dstFile);
                         if (client.imports.remove(this.evt.uid) != null) {
@@ -113,22 +115,32 @@ public class ImportFile implements Runnable {
                     }
 
                     this.evt.endEvent("Replication Canceled", SDFSEvent.WARN);
-                    break;
-                } catch (FileAlreadyExistsException e1) {
+                } finally {
+                    active.unlock();
+                }
+                break;
+            } catch (FileAlreadyExistsException e1) {
+                try {
                     SDFSLogger.getLog().warn("File Already exists", e);
                     this.evt.endEvent("File Already exists", SDFSEvent.WARN);
-                    break;
-                } catch (Exception e1) {
+                } finally {
+                    active.unlock();
+                }
+                break;
+            } catch (Exception e1) {
+                try {
                     SDFSLogger.getLog().warn("unable to complete replication to " + client.url + " volume id "
                             + client.volumeid + " for " + srcFile + " will retry in 5 minutes", e1);
                     e = e1;
                     this.evt.setShortMsg("unable to complete replication to " + client.url + " volume id "
                             + client.volumeid + " for " + srcFile + " will retry in 5 minutes");
-                    try {
-                        Thread.sleep(5 * 60 * 1000);
-                    } catch (InterruptedException e2) {
-                        break;
-                    }
+                } finally {
+                    active.unlock();
+                }
+                try {
+                    Thread.sleep(5 * 60 * 1000);
+                } catch (InterruptedException e2) {
+                    break;
                 }
             }
             if (e != null) {
@@ -146,8 +158,6 @@ public class ImportFile implements Runnable {
                     }
                 }
             }
-        } finally {
-            active.unlock();
         }
         synchronized (actives) {
             if (!active.isLocked()) {

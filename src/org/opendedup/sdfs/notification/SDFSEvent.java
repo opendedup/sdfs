@@ -116,7 +116,7 @@ public class SDFSEvent implements java.io.Serializable {
 
 
 	protected static LoadingCache<String, SDFSEvent> cachedEvents = CacheBuilder.newBuilder().maximumSize(2000)
-			.concurrencyLevel(Main.writeThreads).weakValues()
+			.concurrencyLevel(Main.writeThreads)
 			.removalListener(new RemovalListener<String, SDFSEvent>() {
 				public void onRemoval(RemovalNotification<String, SDFSEvent> removal) {
 					SDFSEvent evt = removal.getValue();
