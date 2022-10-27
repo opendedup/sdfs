@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -86,8 +87,7 @@ public class ReplicationClient {
                                 rc = new ReplicationClient(evt.url, evt.volumeid, evt.mtls);
                                 rc.connect();
                             }
-                            ImportFile imf = new ImportFile(evt.src, evt.dst, rc, evt, true);
-                            imf.replicate();
+                            rc.importFile(evt.src, evt.dst,evt);
                         } catch (Exception e) {
                             SDFSLogger.getLog().warn("recovery import failed for " + id, e);
                         }
@@ -271,6 +271,31 @@ public class ReplicationClient {
             }
             return evts;
         }
+    }
+
+    private SDFSEvent importFile(String src, String dst,ReplicationImportEvent evt) throws IOException {
+        if (activeImports.contains(dst)) {
+            evt.endEvent("Replication already occuring for" + dst, SDFSEvent.ERROR);
+        } else {
+            activeImports.add(dst);
+            SDFSLogger.getLog().info("Will Replicate " + src + " to "
+                    + dst + " from " + url);
+            evt.persistEvent();
+            if (src.equalsIgnoreCase(".")) {
+                if (downloadThread == null || !downloadThread.isAlive()) {
+                    downloadThread = new Thread(new DownloadAll(this, evt));
+                    downloadThread.start();
+                } else {
+                    evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
+                }
+            } else {
+                ImportFile fl = new ImportFile(src, dst, this, evt,
+                        true);
+                Thread th = new Thread(fl);
+                th.start();
+            }
+        }
+        return evt;
     }
 
     public void replicationSink() throws IOException {

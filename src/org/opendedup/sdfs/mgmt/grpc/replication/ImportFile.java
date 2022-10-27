@@ -189,11 +189,7 @@ public class ImportFile implements Runnable {
         try {
             mf = downloadMetaFile();
         } catch (ReplicationCanceledException e) {
-            if (_f.exists()) {
-                FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
-                MetaFileStore.getMF(_f.getAbsolutePath()).clearRetentionLock();
-                MetaFileStore.removeMetaFile(_f.getPath(), false, false, true);
-            }
+            
             throw e;
         }
         evt.addCount(1);
