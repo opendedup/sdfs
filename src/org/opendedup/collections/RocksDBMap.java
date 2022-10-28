@@ -151,7 +151,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			wo.setDisableWAL(false);
 			wo.setSync(false);
 			owo = new WriteOptions();
-			owo.setDisableWAL(true);
+			owo.setDisableWAL(false);
 			owo.setSync(false);
 			flo = new FlushOptions();
 			flo.setWaitForFlush(false);
@@ -165,10 +165,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 			colFamily.add("default");
 			for (int i = 0; i < dbs.length; i++) {
 				File f = new File(fileName + File.separator + i);
-				int version = 2;
-				if (!f.exists()) {
-					version = 4;
-				}
+				
 				BlockBasedTableConfig blockConfig = new BlockBasedTableConfig();
 				// ColumnFamilyOptions cfOptions = new ColumnFamilyOptions();
 				// DBOptions dbo = new DBOptions();
@@ -220,6 +217,7 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				options.setTargetFileSizeBase(fsize);
 
 				// blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
+				int version =4;
 				blockConfig.setFormatVersion(version);
 				if (version == 4) {
 					blockConfig.setIndexType(IndexType.kBinarySearch);

@@ -134,6 +134,20 @@ public class ImportFile implements Runnable {
                     e = e1;
                     this.evt.setShortMsg("unable to complete replication to " + client.url + " volume id "
                             + client.volumeid + " for " + srcFile + " will retry in 5 minutes");
+                    String pt = Main.volume.getPath() + File.separator + this.dstFile;
+                    File _f = new File(pt);
+                    try {
+
+                        if (_f.exists()) {
+                            FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                            MetaFileStore.getMF(_f.getAbsolutePath()).clearRetentionLock();
+                            MetaFileStore.removeMetaFile(_f.getPath(), false, false, true);
+                        }
+                    } catch (Exception e2) {
+
+                    }
+                    _f.delete();
+
                 } finally {
                     active.unlock();
                 }
@@ -189,7 +203,7 @@ public class ImportFile implements Runnable {
         try {
             mf = downloadMetaFile();
         } catch (ReplicationCanceledException e) {
-            
+
             throw e;
         }
         evt.addCount(1);
