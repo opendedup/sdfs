@@ -152,7 +152,24 @@ public class ImportFile implements Runnable {
                     active.unlock();
                 }
                 try {
-                    Thread.sleep(5 * 60 * 1000);
+                    for(int z = 0; z < 5*60;z++){
+                        Thread.sleep(1000);
+                        if(this.canceled) {
+                            synchronized (client.activeImports) {
+                                client.activeImports.remove(dstFile);
+                                if (client.imports.remove(this.evt.uid) != null) {
+                                    String mapToJson = objGson.toJson(client.imports.keySet());
+                                    try {
+                                        FileUtils.writeStringToFile(client.jsonFile, mapToJson, Charset.forName("UTF-8"));
+                                    } catch (IOException e2) {
+                                        SDFSLogger.getLog().warn("unable to persist active imports", e);
+                                    }
+                                }
+                            }
+                            this.evt.endEvent("Replication Canceled", SDFSEvent.WARN);
+                            break;
+                        }
+                    }
                 } catch (InterruptedException e2) {
                     break;
                 }

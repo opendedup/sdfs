@@ -9,7 +9,6 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-
 import org.opendedup.collections.RocksDBMap.ProcessPriorityThreadFactory;
 import org.opendedup.grpc.FileInfo.FileInfoRequest;
 import org.opendedup.grpc.FileInfo.FileInfoResponse;
@@ -27,6 +26,7 @@ public class DownloadAll implements Runnable {
     ReplicationClient client;
     private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
     SDFSEvent evt;
+    boolean canceled = false;
 
     public DownloadAll(ReplicationClient client, SDFSEvent evt) {
         this.client = client;
@@ -34,7 +34,7 @@ public class DownloadAll implements Runnable {
         this.evt = evt;
     }
 
-    public void replicationSinkAll() throws IOException {
+    public void replicationSinkAll() throws IOException, DownloadCanceledException {
         SDFSLogger.getLog().info("downloading all files");
         Iterator<FileMessageResponse> fi = client.ioBlockingStub.getaAllFileInfo(
                 FileInfoRequest.newBuilder().setPvolumeID(client.volumeid).setFileName(".").build());
@@ -43,6 +43,10 @@ public class DownloadAll implements Runnable {
                 10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
                 executionHandler);
         while (fi.hasNext()) {
+            if(this.canceled) {
+                arExecutor.shutdown();
+                throw new DownloadCanceledException();
+            }
 
             FileMessageResponse rs = fi.next();
 
@@ -62,7 +66,7 @@ public class DownloadAll implements Runnable {
                             ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                                     file.getFilePath(),
                                     client.url, client.volumeid, client.mtls, false);
-                            impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt,true);
+                            impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
                         } else {
                             ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                                     file.getFilePath(),
@@ -73,7 +77,7 @@ public class DownloadAll implements Runnable {
                         ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                                 file.getFilePath(),
                                 client.url, client.volumeid, client.mtls, false);
-                        impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt,true);
+                        impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
                     }
                 }
             }
@@ -93,6 +97,10 @@ public class DownloadAll implements Runnable {
         evt.endEvent("Download All Replication ended Successfully");
     }
 
+    protected void cancel() {
+        this.canceled = true;
+    }
+
     @Override
     public void run() {
         int retries = 0;
@@ -100,7 +108,12 @@ public class DownloadAll implements Runnable {
             try {
                 replicationSinkAll();
                 break;
-            } catch (Exception e) {
+            } catch(DownloadCanceledException e) {
+                SDFSLogger.getLog().warn("Download canceled");
+                evt.endEvent("Download canceled");
+                    break;
+            }
+            catch (Exception e) {
                 retries++;
                 SDFSLogger.getLog().warn("Downloadall Replication failed", e);
                 if (retries > 10) {
@@ -111,12 +124,19 @@ public class DownloadAll implements Runnable {
                     try {
                         Thread.sleep(60 * 1000 * 5);
                     } catch (InterruptedException e1) {
+                        SDFSLogger.getLog().warn("Download canceled");
+                        evt.endEvent("Download canceled");
                         break;
                     }
                 }
 
             }
+
         }
         client.downloadThread = null;
+    }
+
+    private static class DownloadCanceledException extends Exception {
+
     }
 }

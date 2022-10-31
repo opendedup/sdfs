@@ -60,6 +60,7 @@ public class ReplicationClient {
     protected Gson objGson = new GsonBuilder().setPrettyPrinting().create();
     protected int failRetries = 10;
     protected boolean closed = false;
+    DownloadAll dl = null;
 
     public ReplicationClient(String url, long volumeid, boolean mtls) {
         this.url = url;
@@ -86,7 +87,7 @@ public class ReplicationClient {
                                 rc = new ReplicationClient(evt.url, evt.volumeid, evt.mtls);
                                 rc.connect();
                             }
-                            rc.importFile(evt.src, evt.dst,evt);
+                            rc.importFile(evt.src, evt.dst, evt);
                         } catch (Exception e) {
                             SDFSLogger.getLog().warn("recovery import failed for " + id, e);
                         }
@@ -254,7 +255,8 @@ public class ReplicationClient {
                     evt.persistEvent();
                     if (location.getSrcFilePath().equalsIgnoreCase(".")) {
                         if (downloadThread == null || !downloadThread.isAlive()) {
-                            downloadThread = new Thread(new DownloadAll(this, evt));
+                            dl = new DownloadAll(this, evt);
+                            downloadThread = new Thread(dl);
                             downloadThread.start();
                         } else {
                             evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
@@ -272,7 +274,7 @@ public class ReplicationClient {
         }
     }
 
-    private SDFSEvent importFile(String src, String dst,ReplicationImportEvent evt) throws IOException {
+    private SDFSEvent importFile(String src, String dst, ReplicationImportEvent evt) throws IOException {
         if (activeImports.contains(dst)) {
             evt.endEvent("Replication already occuring for" + dst, SDFSEvent.ERROR);
         } else {
@@ -282,7 +284,8 @@ public class ReplicationClient {
             evt.persistEvent();
             if (src.equalsIgnoreCase(".")) {
                 if (downloadThread == null || !downloadThread.isAlive()) {
-                    downloadThread = new Thread(new DownloadAll(this, evt));
+                    dl = new DownloadAll(this, evt);
+                    downloadThread = new Thread(dl);
                     downloadThread.start();
                 } else {
                     evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
@@ -305,7 +308,8 @@ public class ReplicationClient {
                     ".", this.url, this.volumeid,
                     this.mtls, false);
             if (downloadThread == null || !downloadThread.isAlive()) {
-                downloadThread = new Thread(new DownloadAll(this, evt));
+                dl = new DownloadAll(this, evt);
+                downloadThread = new Thread(dl);
                 downloadThread.start();
             } else {
                 evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
@@ -347,6 +351,34 @@ public class ReplicationClient {
                 SDFSLogger.getLog().warn("Unable to persist active imports", e);
             }
             this.activeImports.clear();
+        }
+    }
+
+    public void remove() {
+        try {
+            if(syncThread != null) {
+                syncThread.interrupt();
+            }
+            if(dl != null) {
+                dl.cancel();
+            }
+            if(downloadThread != null && downloadThread.isAlive()) {
+                downloadThread.interrupt();
+            }
+            synchronized (this.activeImports) {
+                for (String uuid : this.imports.keySet()) {
+                    try {
+                        ReplicationImportEvent revt = (ReplicationImportEvent) SDFSEvent.getEvent(uuid);
+                        revt.cancel();
+                    } catch (IOException e) {
+                        SDFSLogger.getLog().warn("error during remove cancel");
+                    }
+                }
+            }
+            this.shutDown();
+            jsonFile.delete();
+        } catch(Exception e) {
+            SDFSLogger.getLog().warn("error during remove",e);
         }
     }
 

@@ -493,14 +493,14 @@ public class Volume {
 		synchronized (this.replClients) {
 			ReplicationClient aClient = null;
 			for (ReplicationClient rClient : this.replClients) {
-				if (url.equalsIgnoreCase(url) && volumeID == rClient.volumeid) {
+				if (url.equalsIgnoreCase(rClient.url) && volumeID == rClient.volumeid) {
 					aClient = rClient;
 					break;
 				}
 			}
 			if (aClient != null) {
 				this.replClients.remove(aClient);
-				aClient.shutDown();
+				aClient.remove();
 			} else {
 				throw new ReplicationClientNotExistsException();
 			}
