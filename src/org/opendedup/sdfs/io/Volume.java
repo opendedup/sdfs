@@ -484,8 +484,10 @@ public class Volume {
 			rClient.connect();
 			rClient.replicationSink();
 			this.replClients.add(rClient);
+			writer.writeConfig();
 		}
-		writer.writeConfig();
+		SDFSLogger.getLog().info("added " + url + " volume id "+ volumeID);
+		
 	}
 
 	public void removeReplicationClient(String url, long volumeID) throws Exception {
@@ -504,8 +506,10 @@ public class Volume {
 			} else {
 				throw new ReplicationClientNotExistsException();
 			}
+			writer.writeConfig();
 		}
-		writer.writeConfig();
+		SDFSLogger.getLog().info("removed " + url + " volume id "+ volumeID);
+		
 	}
 
 	public static class ReplicationClientExistsException extends Exception {

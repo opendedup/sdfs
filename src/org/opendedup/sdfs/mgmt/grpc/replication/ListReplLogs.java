@@ -25,24 +25,30 @@ import org.opendedup.sdfs.notification.SDFSEvent;
 public class ListReplLogs implements Runnable {
     ReplicationClient client;
     private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+    ThreadPoolExecutor arExecutor = null;
 
     public ListReplLogs(ReplicationClient client) {
         this.client = client;
     }
 
-    public void list() throws IOException {
+    public void list() throws IOException, ListCanceledException {
         SDFSLogger.getLog().info("listing replication logs");
+        if(client.removed) {
+            throw new ListCanceledException();
+        }
         Iterator<VolumeEvent> fi = client.storageBlockingStub.listReplLogs(VolumeEventListenRequest.newBuilder()
                 .setPvolumeID(this.client.volumeid).setStartSequence(this.client.sequence).build());
         BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
-        ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
+        arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
                 10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
                 executionHandler);
         long seq = 0;
         while (fi.hasNext()) {
-
+            if(client.removed) {
+                arExecutor.shutdown();
+                throw new ListCanceledException();
+            }
             VolumeEvent rs = fi.next();
-
             if (rs.getErrorCode() != errorCodes.NOERR) {
                 SDFSLogger.getLog().warn("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
                 SDFSLogger.getLog().warn("Downloading all files");
@@ -120,11 +126,14 @@ public class ListReplLogs implements Runnable {
             try {
                 this.list();
                 break;
+            } catch (ListCanceledException e) {
+                SDFSLogger.getLog().warn("List Canceled. Giving up");
+                break;
             } catch (Exception e) {
                 retries++;
-                SDFSLogger.getLog().warn("Downloadall Replication failed", e);
+                SDFSLogger.getLog().warn("List Replication failed", e);
                 if (retries > 10) {
-                    SDFSLogger.getLog().warn("Download all replication failed. Giving up");
+                    SDFSLogger.getLog().warn("list all replication failed. Giving up");
                     break;
                 } else {
                     try {
@@ -136,6 +145,10 @@ public class ListReplLogs implements Runnable {
 
             }
         }
+
+    }
+
+    private static class ListCanceledException extends Exception {
 
     }
 

@@ -29,7 +29,14 @@ public class ListenRepl implements Runnable {
         this.client = client;
     }
 
-    public void listen() throws IOException {
+    private static class ListenReplCanceled extends Exception {
+
+    }
+
+    public void listen() throws IOException, ListenReplCanceled {
+        if(this.client.removed) {
+            throw new ListenReplCanceled();
+        }
         SDFSLogger.getLog().info("listening for new file changes");
         Iterator<VolumeEvent> fi = client.storageBlockingStub
                 .subscribeToVolume(VolumeEventListenRequest.newBuilder()
@@ -40,7 +47,9 @@ public class ListenRepl implements Runnable {
                 executionHandler);
         long seq = 0;
         while (fi.hasNext()) {
-
+            if(this.client.removed) {
+                throw new ListenReplCanceled();
+            }
             VolumeEvent rs = fi.next();
 
             if (rs.getErrorCode() != errorCodes.NOERR) {
@@ -113,7 +122,11 @@ public class ListenRepl implements Runnable {
             try {
                 this.listen();
                 break;
-            } catch (Exception e) {
+            } catch(ListenReplCanceled e)  {
+                SDFSLogger.getLog().warn("ListenRepl Replication canceled");
+                break;
+            }
+            catch (Exception e) {
                 SDFSLogger.getLog().warn("ListenRepl Replication failed", e);
                 try {
                     while (!client.isConnected()) {

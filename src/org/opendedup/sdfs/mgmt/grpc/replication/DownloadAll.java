@@ -26,7 +26,7 @@ public class DownloadAll implements Runnable {
     ReplicationClient client;
     private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
     SDFSEvent evt;
-    boolean canceled = false;
+    ThreadPoolExecutor arExecutor;
 
     public DownloadAll(ReplicationClient client, SDFSEvent evt) {
         this.client = client;
@@ -35,17 +35,23 @@ public class DownloadAll implements Runnable {
     }
 
     public void replicationSinkAll() throws IOException, DownloadCanceledException {
+        if (client.removed) {
+            throw new DownloadCanceledException();
+        }
         SDFSLogger.getLog().info("downloading all files");
         Iterator<FileMessageResponse> fi = client.ioBlockingStub.getaAllFileInfo(
                 FileInfoRequest.newBuilder().setPvolumeID(client.volumeid).setFileName(".").build());
         BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
-        ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
+        arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
                 10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
                 executionHandler);
         while (fi.hasNext()) {
-            if(this.canceled) {
-                arExecutor.shutdown();
+            if (client.removed) {
+                if (this.arExecutor != null) {
+                    arExecutor.shutdown();
+                }
                 throw new DownloadCanceledException();
+
             }
 
             FileMessageResponse rs = fi.next();
@@ -97,10 +103,6 @@ public class DownloadAll implements Runnable {
         evt.endEvent("Download All Replication ended Successfully");
     }
 
-    protected void cancel() {
-        this.canceled = true;
-    }
-
     @Override
     public void run() {
         int retries = 0;
@@ -108,12 +110,11 @@ public class DownloadAll implements Runnable {
             try {
                 replicationSinkAll();
                 break;
-            } catch(DownloadCanceledException e) {
+            } catch (DownloadCanceledException e) {
                 SDFSLogger.getLog().warn("Download canceled");
                 evt.endEvent("Download canceled");
-                    break;
-            }
-            catch (Exception e) {
+                break;
+            } catch (Exception e) {
                 retries++;
                 SDFSLogger.getLog().warn("Downloadall Replication failed", e);
                 if (retries > 10) {

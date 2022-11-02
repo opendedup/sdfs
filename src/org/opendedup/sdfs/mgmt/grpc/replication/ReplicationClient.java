@@ -60,7 +60,7 @@ public class ReplicationClient {
     protected Gson objGson = new GsonBuilder().setPrettyPrinting().create();
     protected int failRetries = 10;
     protected boolean closed = false;
-    DownloadAll dl = null;
+    protected boolean removed = false;
 
     public ReplicationClient(String url, long volumeid, boolean mtls) {
         this.url = url;
@@ -255,7 +255,7 @@ public class ReplicationClient {
                     evt.persistEvent();
                     if (location.getSrcFilePath().equalsIgnoreCase(".")) {
                         if (downloadThread == null || !downloadThread.isAlive()) {
-                            dl = new DownloadAll(this, evt);
+                            DownloadAll dl = new DownloadAll(this, evt);
                             downloadThread = new Thread(dl);
                             downloadThread.start();
                         } else {
@@ -284,7 +284,7 @@ public class ReplicationClient {
             evt.persistEvent();
             if (src.equalsIgnoreCase(".")) {
                 if (downloadThread == null || !downloadThread.isAlive()) {
-                    dl = new DownloadAll(this, evt);
+                    DownloadAll dl = new DownloadAll(this, evt);
                     downloadThread = new Thread(dl);
                     downloadThread.start();
                 } else {
@@ -308,7 +308,7 @@ public class ReplicationClient {
                     ".", this.url, this.volumeid,
                     this.mtls, false);
             if (downloadThread == null || !downloadThread.isAlive()) {
-                dl = new DownloadAll(this, evt);
+                DownloadAll dl = new DownloadAll(this, evt);
                 downloadThread = new Thread(dl);
                 downloadThread.start();
             } else {
@@ -316,7 +316,8 @@ public class ReplicationClient {
                 throw new IOException("DownloadAll Thread already Active");
             }
         } else {
-            this.listThread = new Thread(new ListReplLogs(this));
+            ListReplLogs ll = new ListReplLogs(this);
+            this.listThread = new Thread(ll);
             this.listThread.start();
         }
         syncThread = new Thread(new ListenRepl(this));
@@ -356,14 +357,12 @@ public class ReplicationClient {
 
     public void remove() {
         try {
-            if(syncThread != null) {
-                syncThread.interrupt();
-            }
-            if(dl != null) {
-                dl.cancel();
-            }
+            this.removed = true;
             if(downloadThread != null && downloadThread.isAlive()) {
                 downloadThread.interrupt();
+            }
+            if(listThread != null && listThread.isAlive()) {
+                listThread.interrupt();
             }
             synchronized (this.activeImports) {
                 for (String uuid : this.imports.keySet()) {

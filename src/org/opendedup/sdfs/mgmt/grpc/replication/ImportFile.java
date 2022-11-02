@@ -205,7 +205,7 @@ public class ImportFile implements Runnable {
         if (_f.exists() && !this.overwrite) {
             throw new FileAlreadyExistsException(pt);
         }
-        if (this.evt.canceled) {
+        if (this.evt.canceled || this.client.removed || this.client.closed) {
             throw new ReplicationCanceledException("Replication Canceled");
         }
         if (this.evt.paused) {
@@ -278,7 +278,7 @@ public class ImportFile implements Runnable {
     }
 
     private MetaDataDedupFile downloadMetaFile() throws Exception {
-        if (this.evt.canceled) {
+        if (this.evt.canceled || this.client.removed || this.client.closed) {
             throw new ReplicationCanceledException("Replication Canceled");
         }
         if (this.evt.paused) {
@@ -301,7 +301,7 @@ public class ImportFile implements Runnable {
     }
 
     private void downloadDDB(MetaDataDedupFile mf, String guid) throws Exception {
-        if (this.evt.canceled) {
+        if (this.evt.canceled || this.client.removed || this.client.closed) {
             throw new ReplicationCanceledException("Replication Canceled");
         }
         if (this.evt.paused) {
@@ -319,7 +319,7 @@ public class ImportFile implements Runnable {
         mf.getIOMonitor().clearFileCounters(false);
         long pos = 0;
         while (crs.hasNext()) {
-            if (this.evt.canceled) {
+            if (this.evt.canceled || this.client.removed || this.client.closed) {
                 throw new ReplicationCanceledException("Replication Canceled");
             }
             if (this.evt.paused) {
