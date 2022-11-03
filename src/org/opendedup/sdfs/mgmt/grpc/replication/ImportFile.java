@@ -152,15 +152,16 @@ public class ImportFile implements Runnable {
                     active.unlock();
                 }
                 try {
-                    for(int z = 0; z < 5*60;z++){
+                    for (int z = 0; z < 5 * 60; z++) {
                         Thread.sleep(1000);
-                        if(this.canceled) {
+                        if (this.canceled) {
                             synchronized (client.activeImports) {
                                 client.activeImports.remove(dstFile);
                                 if (client.imports.remove(this.evt.uid) != null) {
                                     String mapToJson = objGson.toJson(client.imports.keySet());
                                     try {
-                                        FileUtils.writeStringToFile(client.jsonFile, mapToJson, Charset.forName("UTF-8"));
+                                        FileUtils.writeStringToFile(client.jsonFile, mapToJson,
+                                                Charset.forName("UTF-8"));
                                     } catch (IOException e2) {
                                         SDFSLogger.getLog().warn("unable to persist active imports", e);
                                     }
@@ -297,6 +298,7 @@ public class ImportFile implements Runnable {
         }
         String pt = Main.volume.getPath() + File.separator + this.dstFile;
         File _f = new File(pt);
+        this.evt.fileSize = crs.getFile().getSize();
         return MetaDataDedupFile.fromProtoBuf(crs.getFile(), _f.getPath());
     }
 
@@ -406,6 +408,7 @@ public class ImportFile implements Runnable {
                 throw new IOException(
                         "Hash not found for " + StringUtils.getHexString(ce.getHash().toByteArray()));
             }
+            evt.bytesImported += ir.getCompressedLength();
             mf.getIOMonitor().addActualBytesWritten(ir.getCompressedLength(), false);
         }
         for (HashLocPair p : al.values()) {
@@ -424,6 +427,7 @@ public class ImportFile implements Runnable {
                 ctl.loc = Longs.fromByteArray(ir.getHashLocs());
             }
             p.hashloc = Longs.toByteArray(ctl.loc);
+            evt.bytesProcessed += p.nlen;
             mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
         }
         return ck;

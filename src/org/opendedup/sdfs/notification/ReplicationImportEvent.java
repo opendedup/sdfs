@@ -33,6 +33,9 @@ public class ReplicationImportEvent extends SDFSEvent {
 	public long pausets;
 	public boolean mtls;
 	public boolean onDemand;
+	public long fileSize;
+	public long bytesImported;
+	public long bytesProcessed;
 
 	public ReplicationImportEvent(String src, String dst, String url, long volumeid,boolean mtls,boolean onDemand) {
 		super(IMPORT, dst, "Importing " + src + " from " + url + " with volumeid " +
@@ -55,6 +58,9 @@ public class ReplicationImportEvent extends SDFSEvent {
 		this.paused = Boolean.parseBoolean(evt.getAttributesMap().get("paused"));
 		this.pausets = Long.parseLong(evt.getAttributesMap().get("pausets"));
 		this.onDemand = Boolean.parseBoolean(evt.getAttributesMap().get("onDemand"));
+		this.bytesImported =Long.parseLong(evt.getAttributesMap().get("bytesimported"));
+		this.fileSize =Long.parseLong(evt.getAttributesMap().get("filesize"));
+		this.bytesProcessed =Long.parseLong(evt.getAttributesMap().get("bytesprocessed"));
 	}
 
 	public void cancel() {
@@ -85,6 +91,9 @@ public class ReplicationImportEvent extends SDFSEvent {
 		b.putAttributes("paused", Boolean.toString(this.paused));
 		b.putAttributes("pausets", Long.toString(this.pausets));
 		b.putAttributes("onDemand", Boolean.toString(this.onDemand));
+		b.putAttributes("bytesimported",  Long.toString(this.bytesImported));
+		b.putAttributes("filesize",  Long.toString(this.fileSize));
+		b.putAttributes("bytesprocessed",  Long.toString(this.bytesProcessed));
 		return b.build();
 	}
 
