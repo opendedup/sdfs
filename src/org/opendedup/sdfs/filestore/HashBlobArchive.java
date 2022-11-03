@@ -748,7 +748,6 @@ public class HashBlobArchive implements Runnable, Serializable {
 				} catch (ArchiveFullException | NullPointerException | ReadOnlyArchiveException e) {
 					if (l != null)
 						l.unlock();
-
 					l = slock.writeLock();
 					l.lock();
 					try {
