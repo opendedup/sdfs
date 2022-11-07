@@ -1064,7 +1064,7 @@ public class VolumeConfigWriter {
 			cs.appendChild(aws);
 		} else if (ext) {
 			Element extended = xmldoc.createElement("extended-config");
-			extended.setAttribute("block-size", "60 MB");
+			extended.setAttribute("block-size", "640 MB");
 			if (this.dExt != null)
 				extended.setAttribute("data-appendix", this.dExt);
 			if (!this.tcpKeepAlive)
