@@ -318,16 +318,7 @@ public class Volume {
 				SDFSLogger.getLog().warn("Unable to start Replication Change Listener Server",e);
 			}
 		}
-		for (ReplicationClient rClient : this.replClients) {
-			try {
-				rClient.connect();
-			} catch (Exception e) {
-				SDFSLogger.getLog().warn("Unable to connect to " + rClient.url + " volumeid " + rClient.volumeid);
-			}
-		}
 		ReplicationClient.RecoverReplicationClients();
-		this.rChecker = new Thread(new ReplChecker(this));
-		this.rChecker.start();
 
 	}
 
@@ -481,7 +472,6 @@ public class Volume {
 				}
 			}
 			ReplicationClient rClient = new ReplicationClient(url, volumeID, mtls);
-			rClient.connect();
 			rClient.replicationSink();
 			this.replClients.add(rClient);
 			writer.writeConfig();
@@ -754,29 +744,5 @@ public class Volume {
 		this.serialNumber = serialNumber;
 	}
 
-	public static class ReplChecker implements Runnable {
-		Volume vol;
-
-		public ReplChecker(Volume vol) {
-			this.vol = vol;
-		}
-
-		@Override
-		public void run() {
-			for (;;) {
-				synchronized (vol.replClients) {
-					for (ReplicationClient rClient : vol.replClients) {
-						rClient.checkConnection();
-					}
-				}
-				try {
-					Thread.sleep(30 * 1000);
-				} catch (InterruptedException e) {
-					break;
-				}
-			}
-
-		}
-
-	}
+	
 }

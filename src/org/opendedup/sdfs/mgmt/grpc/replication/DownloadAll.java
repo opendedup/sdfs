@@ -16,6 +16,7 @@ import org.opendedup.grpc.FileInfo.FileMessageResponse;
 import org.opendedup.grpc.FileInfo.errorCodes;
 
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
+import org.opendedup.sdfs.mgmt.grpc.replication.ReplicationClient.ReplicationConnection;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
@@ -34,73 +35,78 @@ public class DownloadAll implements Runnable {
         this.evt = evt;
     }
 
-    public void replicationSinkAll() throws IOException, DownloadCanceledException {
-        if (client.removed) {
-            throw new DownloadCanceledException();
-        }
-        SDFSLogger.getLog().info("downloading all files");
-        Iterator<FileMessageResponse> fi = client.ioBlockingStub.getaAllFileInfo(
-                FileInfoRequest.newBuilder().setPvolumeID(client.volumeid).setFileName(".").build());
-        BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
-        arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
-                10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
-                executionHandler);
-        while (fi.hasNext()) {
+    public void replicationSinkAll() throws Exception, DownloadCanceledException {
+        ReplicationConnection rc = client.getReplicationConnection();
+        try {
             if (client.removed) {
-                if (this.arExecutor != null) {
-                    arExecutor.shutdown();
-                }
                 throw new DownloadCanceledException();
-
             }
+            SDFSLogger.getLog().info("downloading all files");
+            Iterator<FileMessageResponse> fi = rc.getIoBlockingStub().getaAllFileInfo(
+                    FileInfoRequest.newBuilder().setPvolumeID(client.volumeid).setFileName(".").build());
+            BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
+            arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
+                    10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
+                    executionHandler);
+            while (fi.hasNext()) {
+                if (client.removed) {
+                    if (this.arExecutor != null) {
+                        arExecutor.shutdown();
+                    }
+                    throw new DownloadCanceledException();
 
-            FileMessageResponse rs = fi.next();
+                }
 
-            if (rs.getErrorCode() != errorCodes.NOERR) {
-                SDFSLogger.getLog().warn("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
-                throw new IOException("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
-            }
-            FileInfoResponse file = rs.getResponseList().get(0);
-            ImportFile impf = null;
-            synchronized (client.activeImports) {
-                if (!client.activeImports.contains(file.getFilePath())) {
-                    client.activeImports.add(file.getFilePath());
-                    String pt = Main.volume.getPath() + File.separator + file.getFilePath();
-                    File _f = new File(pt);
-                    if (_f.exists()) {
-                        if (MetaFileStore.getMF(_f).lastModified() != file.getMtime()) {
-                            ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
-                                    file.getFilePath(),
-                                    client.url, client.volumeid, client.mtls, false);
-                            impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
+                FileMessageResponse rs = fi.next();
+
+                if (rs.getErrorCode() != errorCodes.NOERR) {
+                    SDFSLogger.getLog().warn("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
+                    throw new IOException("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
+                }
+                FileInfoResponse file = rs.getResponseList().get(0);
+                ImportFile impf = null;
+                synchronized (client.activeImports) {
+                    if (!client.activeImports.contains(file.getFilePath())) {
+                        client.activeImports.add(file.getFilePath());
+                        String pt = Main.volume.getPath() + File.separator + file.getFilePath();
+                        File _f = new File(pt);
+                        if (_f.exists()) {
+                            if (MetaFileStore.getMF(_f).lastModified() != file.getMtime()) {
+                                ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
+                                        file.getFilePath(),
+                                        client.url, client.volumeid, client.mtls, false);
+                                impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
+                            } else {
+                                ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
+                                        file.getFilePath(),
+                                        client.url, client.volumeid, client.mtls, false);
+                                evt.endEvent("File Already Exists and looks like the same " + file.getFilePath());
+                            }
                         } else {
                             ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                                     file.getFilePath(),
                                     client.url, client.volumeid, client.mtls, false);
-                            evt.endEvent("File Already Exists and looks like the same " + file.getFilePath());
+                            impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
                         }
-                    } else {
-                        ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
-                                file.getFilePath(),
-                                client.url, client.volumeid, client.mtls, false);
-                        impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
                     }
                 }
-            }
-            if (impf != null) {
-                arExecutor.execute(impf);
-            }
+                if (impf != null) {
+                    arExecutor.execute(impf);
+                }
 
-        }
-        arExecutor.shutdown();
-        try {
-            while (!arExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
-                SDFSLogger.getLog().debug("Awaiting replication to finish.");
             }
-        } catch (InterruptedException e) {
-            throw new IOException(e);
+            arExecutor.shutdown();
+            try {
+                while (!arExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    SDFSLogger.getLog().debug("Awaiting replication to finish.");
+                }
+            } catch (InterruptedException e) {
+                throw new IOException(e);
+            }
+            evt.endEvent("Download All Replication ended Successfully");
+        } finally {
+            client.closeReplicationConnection(rc);
         }
-        evt.endEvent("Download All Replication ended Successfully");
     }
 
     @Override

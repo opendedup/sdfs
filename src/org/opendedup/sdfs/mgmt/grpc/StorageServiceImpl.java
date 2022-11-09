@@ -121,7 +121,6 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             try {
                 ReplicationClient client = new ReplicationClient(request.getUrl(),
                         request.getRvolumeID(), request.getMtls());
-                client.connect();
                 SDFSEvent[] evts = client.replicate(request.getFileLocationList());
                 for (SDFSEvent evt : evts) {
                     b.addEventID(evt.uid);
@@ -319,16 +318,24 @@ public class StorageServiceImpl extends StorageServiceImplBase {
             b.setErrorCode(errorCodes.EACCES);
             responseObserver.onNext(b.build());
             responseObserver.onCompleted();
+            return;
         } else {
             MetaDataDedupeFileResponse.Builder b = MetaDataDedupeFileResponse.newBuilder();
             try {
-
+                SDFSLogger.getLog().info("1-1 " +request.getFilePath());
                 File f = FileIOServiceImpl.resolvePath(request.getFilePath());
+                SDFSLogger.getLog().info("1-2");
                 MetaDataDedupFile mf = MetaFileStore.getMF(f.getPath());
+                SDFSLogger.getLog().info("1-3");
                 b.setFile(mf.toGRPC(false));
+                SDFSLogger.getLog().info("1-4");
                 responseObserver.onNext(b.build());
+                SDFSLogger.getLog().info("1-5");
                 responseObserver.onCompleted();
+                SDFSLogger.getLog().info("1-6");
+                return;
             } catch (FileIOError e) {
+                SDFSLogger.getLog().warn("error getting file ",e);
                 b.setError(e.message);
                 b.setErrorCode(e.code);
                 responseObserver.onNext(b.build());

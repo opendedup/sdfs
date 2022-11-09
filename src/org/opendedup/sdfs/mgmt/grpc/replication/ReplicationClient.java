@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +30,6 @@ import org.opendedup.sdfs.mgmt.grpc.tls.WatchForFile;
 import org.opendedup.sdfs.notification.ReplicationImportEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.EasyX509ClientTrustManager;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -43,10 +44,7 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation;
 
 public class ReplicationClient {
-    ManagedChannel channel = null;
-    protected StorageServiceBlockingStub storageBlockingStub;
-    protected FileIOServiceBlockingStub ioBlockingStub;
-    protected SDFSEventServiceBlockingStub evtBlockingStub;
+
     public String url;
     public long volumeid;
     public boolean mtls;
@@ -61,6 +59,188 @@ public class ReplicationClient {
     protected int failRetries = 10;
     protected boolean closed = false;
     protected boolean removed = false;
+    public Map<String,ReplicationConnection> connections = new HashMap<String,ReplicationConnection>();
+
+    public ReplicationConnection getReplicationConnection() throws Exception {
+        ReplicationConnection rc= new ReplicationConnection();
+        rc.rc =this;
+        rc.connect();
+        this.connections.put(rc.id, rc);
+        return rc;
+    }
+
+    public void closeReplicationConnection(ReplicationConnection rc) {
+        try {
+            rc.getChannel().shutdown();
+            Boolean term = rc.getChannel().awaitTermination(60, TimeUnit.SECONDS);
+            SDFSLogger.getLog().info("Channel Terminated " + term);
+        } catch (Exception e) {
+            SDFSLogger.getLog().warn("unable to shutdown client connection", e);
+        }
+        connections.remove(rc.id);
+    }
+
+    public static class ReplicationConnection {
+        private ManagedChannel channel = null;
+        private StorageServiceBlockingStub storageBlockingStub;
+        private FileIOServiceBlockingStub ioBlockingStub;
+        private SDFSEventServiceBlockingStub evtBlockingStub;
+        private ReplicationClient rc;
+
+        protected String id = UUID.randomUUID().toString();
+
+        public ManagedChannel getChannel() {
+            return channel;
+        }
+
+        public StorageServiceBlockingStub getStorageBlockingStub() {
+            return storageBlockingStub;
+        }
+
+        public FileIOServiceBlockingStub getIoBlockingStub() {
+            return ioBlockingStub;
+        }
+
+        public SDFSEventServiceBlockingStub getEvtBlockingStub() {
+            return evtBlockingStub;
+        }
+
+        public ReplicationClient getReplicationClient() {
+            return this.rc;
+        }
+
+        public void connect() throws Exception {
+            try {
+                if (this.channel != null) {
+                    try {
+                        this.channel.shutdown();
+                        this.channel.awaitTermination(60, TimeUnit.SECONDS);
+                        this.channel = null;
+                        this.storageBlockingStub = null;
+                        this.evtBlockingStub = null;
+                        this.ioBlockingStub = null;
+    
+                    } catch (Exception e) {
+                    }
+                }
+                String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
+                String certChainFilePath = keydir + File.separator + "tls_key.pem";
+                String privateKeyFilePath = keydir + File.separator + "tls_key.key";
+                String trustCertCollectionFilePath = keydir + File.separator + "signer_key.crt";
+                Map<String, String> env = System.getenv();
+                if (env.containsKey("SDFS_PRIVATE_KEY")) {
+                    privateKeyFilePath = env.get("SDFS_PRIVATE_KEY");
+                }
+                if (env.containsKey("SDFS_CERT_CHAIN")) {
+                    certChainFilePath = env.get("SDFS_CERT_CHAIN");
+                }
+    
+                if (env.containsKey("SDFS_SIGNER_CHAIN")) {
+                    trustCertCollectionFilePath = env.get("SDFS_SIGNER_CHAIN");
+                }
+                boolean tls = false;
+                String target = null;
+                if (rc.url.toLowerCase().startsWith("sdfs://")) {
+                    target = rc.url.toLowerCase().replace("sdfs://", "");
+                } else if (rc.url.toLowerCase().startsWith("sdfss://")) {
+                    target = rc.url.toLowerCase().replace("sdfss://", "");
+                    tls = true;
+                } else {
+                    throw new IOException("invalid url");
+                }
+                String host = target.split(":")[0];
+                int port = Integer.parseInt(target.split(":")[1]);
+                int maxMsgSize = 240 * 1024 * 1024;
+                if (rc.mtls || tls) {
+    
+                    this.channel = NettyChannelBuilder.forAddress(host, port)
+                            .negotiationType(NegotiationType.TLS).maxInboundMessageSize(maxMsgSize)
+                            .sslContext(
+                                    getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath)
+                                            .build())
+                            .build();
+                } else {
+                    this.channel = NettyChannelBuilder.forAddress(host, port).maxInboundMessageSize(maxMsgSize)
+                            .negotiationType(NegotiationType.PLAINTEXT)
+                            .build();
+                }
+    
+                SDFSLogger.getLog().info("Replication connected to " + host + " " + port + " " + channel.toString()
+                        + " connection state " + channel.getState(true));
+                storageBlockingStub = StorageServiceGrpc.newBlockingStub(channel);
+                evtBlockingStub = SDFSEventServiceGrpc.newBlockingStub(channel);
+                ioBlockingStub = FileIOServiceGrpc.newBlockingStub(channel);
+                File directory = new File(Main.volume.getReplPath() + File.separator);
+                directory.mkdirs();
+                rc.jsonFile = new File(directory, "activereplications-" + rc.volumeid + ".json");
+                rc.closed = false;
+            } catch (Exception e) {
+                this.channel = null;
+                this.storageBlockingStub = null;
+                this.evtBlockingStub = null;
+                this.ioBlockingStub = null;
+                throw e;
+            }
+        }
+    
+        public boolean isConnected() {
+            if (channel == null) {
+                return false;
+            }
+            return channel.getState(true) == ConnectivityState.READY;
+        }
+    
+        public void checkConnection() {
+            if (!this.isConnected()) {
+                SDFSLogger.getLog().warn("Replication Client not connected for " + rc.url + " volid " + rc.volumeid);
+                try {
+                    rc.shutDown();
+                    this.connect();
+                    rc.replicationSink();
+                } catch (Exception e) {
+                    SDFSLogger.getLog().warn("Unable to reconnect to " + rc.url + " volid " + rc.volumeid, e);
+                }
+            }
+        }
+    
+        private SslContextBuilder getSslContextBuilder(String certChainFilePath, String privateKeyFilePath,
+                String trustCertCollectionFilePath) throws Exception {
+            SslContextBuilder sslClientContextBuilder = null;
+            if (!Main.authJarFilePath.equals("") && !Main.authClassInfo.equals("")) {
+    
+                EasyX509ClientTrustManager tm = new EasyX509ClientTrustManager();
+                sslClientContextBuilder = SslContextBuilder.forClient().trustManager(tm).keyManager(IOServer.pvtKey,
+                        IOServer.serverCertChain);
+            } else {
+                try {
+                    sslClientContextBuilder = SslContextBuilder.forClient();
+                    DynamicTrustManager tm = new DynamicTrustManager(new File(trustCertCollectionFilePath).getParent());
+                    sslClientContextBuilder.trustManager(tm);
+                    sslClientContextBuilder.clientAuth(ClientAuth.REQUIRE);
+                    WatchForFile wf = new WatchForFile(tm);
+                    Thread th = new Thread(wf);
+                    th.start();
+                } catch (Exception e) {
+    
+                    sslClientContextBuilder = SslContextBuilder.forClient().trustManager(new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                        }
+    
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
+                        }
+    
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new java.security.cert.X509Certificate[] {};
+                        }
+                    });
+                }
+            }
+            return GrpcSslContexts.configure(sslClientContextBuilder);
+        }
+    }
 
     public ReplicationClient(String url, long volumeid, boolean mtls) {
         this.url = url;
@@ -85,7 +265,6 @@ public class ReplicationClient {
                             ReplicationImportEvent evt = (ReplicationImportEvent) SDFSEvent.getEvent(id);
                             if (rc == null) {
                                 rc = new ReplicationClient(evt.url, evt.volumeid, evt.mtls);
-                                rc.connect();
                             }
                             rc.importFile(evt.src, evt.dst, evt);
                         } catch (Exception e) {
@@ -101,138 +280,7 @@ public class ReplicationClient {
         }
     }
 
-    public void connect() throws Exception {
-        try {
-            if (this.channel != null) {
-                try {
-                    this.channel.shutdown();
-                    this.channel.awaitTermination(60, TimeUnit.SECONDS);
-                    this.channel = null;
-                    this.storageBlockingStub = null;
-                    this.evtBlockingStub = null;
-                    this.ioBlockingStub = null;
-
-                } catch (Exception e) {
-                }
-            }
-            String keydir = new File(Main.volume.getPath()).getParent() + File.separator + "keys";
-            String certChainFilePath = keydir + File.separator + "tls_key.pem";
-            String privateKeyFilePath = keydir + File.separator + "tls_key.key";
-            String trustCertCollectionFilePath = keydir + File.separator + "signer_key.crt";
-            Map<String, String> env = System.getenv();
-            if (env.containsKey("SDFS_PRIVATE_KEY")) {
-                privateKeyFilePath = env.get("SDFS_PRIVATE_KEY");
-            }
-            if (env.containsKey("SDFS_CERT_CHAIN")) {
-                certChainFilePath = env.get("SDFS_CERT_CHAIN");
-            }
-
-            if (env.containsKey("SDFS_SIGNER_CHAIN")) {
-                trustCertCollectionFilePath = env.get("SDFS_SIGNER_CHAIN");
-            }
-            boolean tls = false;
-            String target = null;
-            if (url.toLowerCase().startsWith("sdfs://")) {
-                target = url.toLowerCase().replace("sdfs://", "");
-            } else if (url.toLowerCase().startsWith("sdfss://")) {
-                target = url.toLowerCase().replace("sdfss://", "");
-                tls = true;
-            } else {
-                throw new IOException("invalid url");
-            }
-            String host = target.split(":")[0];
-            int port = Integer.parseInt(target.split(":")[1]);
-            int maxMsgSize = 240 * 1024 * 1024;
-            if (mtls || tls) {
-
-                this.channel = NettyChannelBuilder.forAddress(host, port)
-                        .negotiationType(NegotiationType.TLS).maxInboundMessageSize(maxMsgSize)
-                        .sslContext(
-                                getSslContextBuilder(certChainFilePath, privateKeyFilePath, trustCertCollectionFilePath)
-                                        .build())
-                        .build();
-            } else {
-                this.channel = NettyChannelBuilder.forAddress(host, port).maxInboundMessageSize(maxMsgSize)
-                        .negotiationType(NegotiationType.PLAINTEXT)
-                        .build();
-            }
-
-            SDFSLogger.getLog().info("Replication connected to " + host + " " + port + " " + channel.toString()
-                    + " connection state " + channel.getState(true));
-            storageBlockingStub = StorageServiceGrpc.newBlockingStub(channel);
-            evtBlockingStub = SDFSEventServiceGrpc.newBlockingStub(channel);
-            ioBlockingStub = FileIOServiceGrpc.newBlockingStub(channel);
-            File directory = new File(Main.volume.getReplPath() + File.separator);
-            directory.mkdirs();
-            jsonFile = new File(directory, "activereplications-" + this.volumeid + ".json");
-            this.closed = false;
-
-        } catch (Exception e) {
-            this.channel = null;
-            this.storageBlockingStub = null;
-            this.evtBlockingStub = null;
-            this.ioBlockingStub = null;
-            throw e;
-        }
-    }
-
-    public boolean isConnected() {
-        if (channel == null) {
-            return false;
-        }
-        return channel.getState(true) == ConnectivityState.READY;
-    }
-
-    public void checkConnection() {
-        if (!this.isConnected()) {
-            SDFSLogger.getLog().warn("Replication Client not connected for " + this.url + " volid " + this.volumeid);
-            try {
-                this.shutDown();
-                this.connect();
-                this.replicationSink();
-            } catch (Exception e) {
-                SDFSLogger.getLog().warn("Unable to reconnect to " + this.url + " volid " + this.volumeid, e);
-            }
-        }
-    }
-
-    private SslContextBuilder getSslContextBuilder(String certChainFilePath, String privateKeyFilePath,
-            String trustCertCollectionFilePath) throws Exception {
-        SslContextBuilder sslClientContextBuilder = null;
-        if (!Main.authJarFilePath.equals("") && !Main.authClassInfo.equals("")) {
-
-            EasyX509ClientTrustManager tm = new EasyX509ClientTrustManager();
-            sslClientContextBuilder = SslContextBuilder.forClient().trustManager(tm).keyManager(IOServer.pvtKey,
-                    IOServer.serverCertChain);
-        } else {
-            try {
-                sslClientContextBuilder = SslContextBuilder.forClient();
-                DynamicTrustManager tm = new DynamicTrustManager(new File(trustCertCollectionFilePath).getParent());
-                sslClientContextBuilder.trustManager(tm);
-                sslClientContextBuilder.clientAuth(ClientAuth.REQUIRE);
-                WatchForFile wf = new WatchForFile(tm);
-                Thread th = new Thread(wf);
-                th.start();
-            } catch (Exception e) {
-
-                sslClientContextBuilder = SslContextBuilder.forClient().trustManager(new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                    }
-
-                    @Override
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {
-                    }
-
-                    @Override
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return new java.security.cert.X509Certificate[] {};
-                    }
-                });
-            }
-        }
-        return GrpcSslContexts.configure(sslClientContextBuilder);
-    }
+    
 
     public SDFSEvent[] replicate(List<ReplicationFileLocation> locations) throws IOException {
         SDFSEvent[] evts = new SDFSEvent[locations.size()];
@@ -325,17 +373,18 @@ public class ReplicationClient {
     }
 
     public void shutDown() {
-        try {
-            this.channel.shutdown();
-            this.channel.awaitTermination(60, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            SDFSLogger.getLog().warn("unable to shutdown client connection", e);
-        }
         synchronized (this.activeImports) {
             this.closed = true;
-            if (this.channel != null) {
-                this.channel.shutdown();
+            for(ReplicationConnection ce : this.connections.values()) {
+                try {
+                    ce.channel.shutdown();
+                    ce.channel.awaitTermination(60, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    SDFSLogger.getLog().warn("unable to shutdown client connection", e);
+                }
             }
+            this.connections.clear();
+            
             if (this.listThread != null) {
                 this.listThread.interrupt();
             }
