@@ -28,6 +28,7 @@ public class DownloadAll implements Runnable {
     private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
     SDFSEvent evt;
     ThreadPoolExecutor arExecutor;
+    ReplicationConnection rc = null;
 
     public DownloadAll(ReplicationClient client, SDFSEvent evt) {
         this.client = client;
@@ -36,7 +37,7 @@ public class DownloadAll implements Runnable {
     }
 
     public void replicationSinkAll() throws Exception, DownloadCanceledException {
-        ReplicationConnection rc = client.getReplicationConnection();
+        rc = client.getReplicationConnection();
         try {
             if (client.removed) {
                 throw new DownloadCanceledException();

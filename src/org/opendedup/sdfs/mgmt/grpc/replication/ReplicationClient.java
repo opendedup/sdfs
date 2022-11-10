@@ -60,6 +60,7 @@ public class ReplicationClient {
     protected boolean closed = false;
     protected boolean removed = false;
     public Map<String,ReplicationConnection> connections = new HashMap<String,ReplicationConnection>();
+    
 
     public ReplicationConnection getReplicationConnection() throws Exception {
         ReplicationConnection rc= new ReplicationConnection();

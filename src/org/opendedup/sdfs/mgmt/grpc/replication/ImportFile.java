@@ -203,7 +203,7 @@ public class ImportFile implements Runnable {
     }
 
     void replicate() throws ReplicationCanceledException, Exception {
-        ReplicationConnection rc = client.getReplicationConnection();
+        rc = client.getReplicationConnection();
         try {
 
             String pt = Main.volume.getPath() + File.separator + this.dstFile;

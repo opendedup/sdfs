@@ -24,6 +24,7 @@ import org.opendedup.sdfs.notification.ReplicationImportEvent;
 
 public class ListenRepl implements Runnable {
     ReplicationClient client;
+    ReplicationConnection rc = null;
     private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
 
     public ListenRepl(ReplicationClient client) {
@@ -38,7 +39,7 @@ public class ListenRepl implements Runnable {
         if (this.client.removed) {
             throw new ListenReplCanceled();
         }
-        ReplicationConnection rc = client.getReplicationConnection();
+        rc = client.getReplicationConnection();
         try {
             SDFSLogger.getLog().info("listening for new file changes");
             Iterator<VolumeEvent> fi = rc.getStorageBlockingStub()

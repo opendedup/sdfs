@@ -27,13 +27,14 @@ public class ListReplLogs implements Runnable {
     ReplicationClient client;
     private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
     ThreadPoolExecutor arExecutor = null;
+    ReplicationConnection rc = null;
 
     public ListReplLogs(ReplicationClient client) {
         this.client = client;
     }
 
     public void list() throws Exception, ListCanceledException {
-        ReplicationConnection rc = client.getReplicationConnection();
+        rc = client.getReplicationConnection();
         try {
             SDFSLogger.getLog().info("listing replication logs");
             if (client.removed) {
