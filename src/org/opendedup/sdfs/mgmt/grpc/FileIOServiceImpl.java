@@ -1953,14 +1953,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
             Path p = stream.next();
             File _mf = p.toFile();
-            SDFSLogger.getLog().info("1");
             if (_mf.isDirectory()) {
-                SDFSLogger.getLog().info("2");
                 streamList(f, responseObserver);
             } else {
                 MetaDataDedupFile mf = MetaFileStore.getNCMF(_mf);
                 FileMessageResponse.Builder b = FileMessageResponse.newBuilder();
-                SDFSLogger.getLog().info("3");
                 b.addResponse(mf.toGRPC(false));
                 responseObserver.onNext(b.build());
             }
@@ -2001,7 +1998,6 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
             }
             if (f.isDirectory()) {
                 try {
-                SDFSLogger.getLog().info("2");
 
                     this.streamList(f, responseObserver);
                 } catch (Exception e) {
@@ -2013,6 +2009,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
                 }
                 responseObserver.onCompleted();
+                return;
 
             } else {
 

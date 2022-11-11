@@ -26,6 +26,10 @@ public class ListenRepl implements Runnable {
     ReplicationClient client;
     ReplicationConnection rc = null;
     private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
+    private Thread listThread;
+    private Thread downloadThread;
+    ListReplLogs ll;
+    DownloadAll dl;
 
     public ListenRepl(ReplicationClient client) {
         this.client = client;
@@ -44,7 +48,7 @@ public class ListenRepl implements Runnable {
             SDFSLogger.getLog().info("listening for new file changes");
             Iterator<VolumeEvent> fi = rc.getStorageBlockingStub()
                     .subscribeToVolume(VolumeEventListenRequest.newBuilder()
-                            .setPvolumeID(this.client.volumeid).setStartSequence(this.client.sequence).build());
+                            .setPvolumeID(this.client.volumeid).setStartSequence(this.client.getSeq()).build());
             BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(100);
             ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
                     10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
@@ -86,11 +90,12 @@ public class ListenRepl implements Runnable {
 
                                 MetaFileStore.rename(_sf.getPath(), _df.getPath());
                             }
-                            seq = rs.getSeq();
-                            SDFSLogger.getLog().info("Sequence = " + seq);
-                            if (client.sequence < seq) {
-                                client.sequence = seq;
-                                SDFSLogger.getLog().info("Client Sequence = " + client.sequence);
+                            if (checkUpdateSeq()) {
+                                seq = rs.getSeq();
+
+                                if (client.getSeq() < seq) {
+                                    client.setSequence(seq);
+                                }
                             }
 
                         }
@@ -114,38 +119,114 @@ public class ListenRepl implements Runnable {
                 throw new IOException(e);
             }
             synchronized (client.activeImports) {
-                if (client.sequence < seq) {
-                    client.sequence = seq;
+                if (client.getSeq() < seq) {
+                    client.setSequence(seq);
                 }
             }
         } finally {
-            client.closeReplicationConnection(rc);
+            try {
+                client.closeReplicationConnection(rc);
+            } catch (Exception e) {
+
+            }
         }
+    }
+
+    private boolean checkUpdateSeq() {
+        if (dl == null && !listThread.isAlive()) {
+            return true;
+        }
+        if (dl != null && dl.evt.success && dl.evt.getEndTime() > 0) {
+            return true;
+        }
+        
+        return false;
+
     }
 
     @Override
     public void run() {
         for (;;) {
-            try {
-                this.listen();
+            boolean interrupted = false;
+            for (;;) {
+                try {
+                    client.getReplicationConnection();
+                    break;
+                } catch (Exception e) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e1) {
+                        interrupted = true;
+                        break;
+                    }
+                } finally {
+                    try {
+                        client.closeReplicationConnection(rc);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+            if (interrupted) {
                 break;
+            }
+
+            try {
+                if (client.getSeq() > 0) {
+                    if (this.ll != null) {
+                        ll.close();
+                        this.listThread.interrupt();
+                        while (this.listThread.isAlive()) {
+                            try {
+                                Thread.sleep(10000);
+                                SDFSLogger.getLog().info("List Thread Alive = " + this.listThread.isAlive());
+                            } catch (Exception e) {
+                                break;
+                            }
+                        }
+                    }
+                    this.ll = new ListReplLogs(this.client);
+                    this.listThread = new Thread(ll);
+                    this.listThread.start();
+                } else {
+                    if (this.dl != null) {
+                        dl.close();
+                        this.downloadThread.interrupt();
+                        while (this.downloadThread.isAlive()) {
+                            try {
+                                Thread.sleep(10000);
+                                SDFSLogger.getLog().info("List Thread Alive = " + this.downloadThread.isAlive());
+                            } catch (Exception e) {
+                                break;
+                            }
+                        }
+                    }
+                    ReplicationImportEvent evt = new ReplicationImportEvent(".",
+                            ".", this.client.url, this.client.volumeid,
+                            this.client.mtls, false);
+                    dl = new DownloadAll(this.client, evt);
+                    downloadThread = new Thread(dl);
+                    downloadThread.start();
+                }
+                this.listen();
             } catch (ListenReplCanceled e) {
                 SDFSLogger.getLog().warn("ListenRepl Replication canceled");
                 break;
             } catch (Exception e) {
                 SDFSLogger.getLog().warn("ListenRepl Replication failed", e);
                 try {
-                    try {
-                        client.listThread = new Thread(new ListReplLogs(this.client));
-                        client.listThread.start();
-                    } catch (Exception e1) {
-                        SDFSLogger.getLog().warn("Connecting to Source Failed", e1);
-                        Thread.sleep(60 * 1000 * 5);
-                    }
-                } catch (InterruptedException e1) {
+                    Thread.sleep(60 * 1000 * 5);
+                } catch (Exception e1) {
                     break;
+
                 }
 
+            } finally {
+                try {
+                    client.closeReplicationConnection(rc);
+                } catch (Exception e) {
+
+                }
             }
         }
     }

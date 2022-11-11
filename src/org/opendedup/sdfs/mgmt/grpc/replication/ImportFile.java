@@ -48,7 +48,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.protobuf.ByteString;
 
-
 public class ImportFile implements Runnable {
     ReplicationImportEvent evt;
     String srcFile;
@@ -101,6 +100,7 @@ public class ImportFile implements Runnable {
                 this.evt.endEvent("Replication Successful");
                 e = null;
                 active.unlock();
+
                 break;
             } catch (ReplicationCanceledException e1) {
                 SDFSLogger.getLog().info("Replication Canceled");
@@ -197,7 +197,7 @@ public class ImportFile implements Runnable {
         synchronized (actives) {
             if (!active.isLocked()) {
                 actives.remove(this.dstFile);
-            }
+            } 
         }
 
     }
@@ -281,7 +281,11 @@ public class ImportFile implements Runnable {
                 }
             }
         } finally {
-            client.closeReplicationConnection(rc);
+            try {
+                client.closeReplicationConnection(rc);
+            } catch (Exception e) {
+
+            }
         }
 
     }
@@ -352,7 +356,6 @@ public class ImportFile implements Runnable {
             pos += ck.len;
             mf.setLength(mf.length() + ck.len, false);
         }
-        SDFSLogger.getLog().info("MF Size = " + mf.length());
         mp.close();
     }
 

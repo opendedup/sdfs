@@ -295,9 +295,12 @@ public class Volume {
 				Element el = (Element) vol.getElementsByTagName("replica-source").item(i);
 				try {
 					ReplicationClient r = new ReplicationClient(el.getAttribute("url"),
-							Long.parseLong(el.getAttribute("volumeid")), Boolean.parseBoolean(el.getAttribute("mtls")));
-					r.sequence = Long.parseLong(el.getAttribute("sequence"));
+							Long.parseLong(el.getAttribute("volumeid")), Boolean.parseBoolean(el.getAttribute("mtls")),this.getReplPath());
+					r.setSequence(Long.parseLong(el.getAttribute("sequence")));
 					this.replClients.add(r);
+					
+					SDFSLogger.getLog().info(" Added " + r);
+
 				} catch (Exception e) {
 					SDFSLogger.getLog().warn("Unable to add replication client", e);
 				}
@@ -318,13 +321,17 @@ public class Volume {
 				SDFSLogger.getLog().warn("Unable to start Replication Change Listener Server",e);
 			}
 		}
-		ReplicationClient.RecoverReplicationClients();
+		ReplicationClient.RecoverReplicationClients(this.getReplPath());
+		DedupFileStore.init();
+		for(ReplicationClient r :  this.replClients) {
+			r.replicationSink();
+		}
 
 	}
 
 	public void init() throws Exception {
 
-		DedupFileStore.init();
+		
 	}
 
 	public void writeUpdate() throws Exception {
@@ -471,7 +478,7 @@ public class Volume {
 					throw new ReplicationClientExistsException();
 				}
 			}
-			ReplicationClient rClient = new ReplicationClient(url, volumeID, mtls);
+			ReplicationClient rClient = new ReplicationClient(url, volumeID, mtls,this.getReplPath());
 			rClient.replicationSink();
 			this.replClients.add(rClient);
 			writer.writeConfig();
@@ -579,7 +586,7 @@ public class Volume {
 			rmq.setAttribute("url", rClient.url);
 			rmq.setAttribute("mtls", Boolean.toString(rClient.mtls));
 			rmq.setAttribute("volumeid", Long.toString(rClient.volumeid));
-			rmq.setAttribute("sequence", Long.toString(rClient.sequence));
+			rmq.setAttribute("sequence", Long.toString(rClient.getSeq()));
 			doc.adoptNode(rmq);
 			root.appendChild(rmq);
 		}
@@ -640,7 +647,8 @@ public class Volume {
 			rmq.setAttribute("url", rClient.url);
 			rmq.setAttribute("mtls", Boolean.toString(rClient.mtls));
 			rmq.setAttribute("volumeid", Long.toString(rClient.volumeid));
-			rmq.setAttribute("sequence", Long.toString(rClient.sequence));
+			rmq.setAttribute("sequence", Long.toString(rClient.getSeq()));
+			SDFSLogger.getLog().info("Wrote " + rClient);
 			doc.adoptNode(rmq);
 			root.appendChild(rmq);
 		}
@@ -676,7 +684,7 @@ public class Volume {
 			rb.setMtls(rClient.mtls);
 			rb.setUrl(rClient.url);
 			rb.setVolumeID(rClient.volumeid);
-			rb.setSequence(rClient.sequence);
+			rb.setSequence(rClient.getSeq());
 			b.addReplicationClient(rb.build());
 		}
 		return b.build();

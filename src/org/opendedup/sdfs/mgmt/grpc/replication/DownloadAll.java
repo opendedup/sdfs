@@ -29,10 +29,11 @@ public class DownloadAll implements Runnable {
     SDFSEvent evt;
     ThreadPoolExecutor arExecutor;
     ReplicationConnection rc = null;
+    boolean closed = false;
 
     public DownloadAll(ReplicationClient client, SDFSEvent evt) {
         this.client = client;
-        this.client.sequence = 0;
+        this.client.setSequence(0);
         this.evt = evt;
     }
 
@@ -106,42 +107,31 @@ public class DownloadAll implements Runnable {
             }
             evt.endEvent("Download All Replication ended Successfully");
         } finally {
-            client.closeReplicationConnection(rc);
+            try {
+                client.closeReplicationConnection(rc);
+            } catch (Exception e) {
+
+            }
         }
+    }
+
+    public void close() {
+        this.closed = true;
     }
 
     @Override
     public void run() {
-        int retries = 0;
-        for (;;) {
-            try {
-                replicationSinkAll();
-                break;
-            } catch (DownloadCanceledException e) {
-                SDFSLogger.getLog().warn("Download canceled");
-                evt.endEvent("Download canceled");
-                break;
-            } catch (Exception e) {
-                retries++;
-                SDFSLogger.getLog().warn("Downloadall Replication failed", e);
-                if (retries > 10) {
-                    SDFSLogger.getLog().warn("Download all replication failed. Giving up");
-                    evt.endEvent("Download all replication failed. Giving up");
-                    break;
-                } else {
-                    try {
-                        Thread.sleep(60 * 1000 * 5);
-                    } catch (InterruptedException e1) {
-                        SDFSLogger.getLog().warn("Download canceled");
-                        evt.endEvent("Download canceled");
-                        break;
-                    }
-                }
-
-            }
+        try {
+            replicationSinkAll();
+        } catch (DownloadCanceledException e) {
+            SDFSLogger.getLog().warn("Download canceled");
+            evt.endEvent("Download canceled", SDFSEvent.WARN);
+        } catch (Exception e) {
+            SDFSLogger.getLog().warn("Downloadall Replication failed", e);
+            evt.endEvent("Download canceled", SDFSEvent.WARN);
 
         }
-        client.downloadThread = null;
+
     }
 
     private static class DownloadCanceledException extends Exception {

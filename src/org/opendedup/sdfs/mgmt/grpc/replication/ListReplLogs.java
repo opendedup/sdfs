@@ -28,6 +28,7 @@ public class ListReplLogs implements Runnable {
     private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
     ThreadPoolExecutor arExecutor = null;
     ReplicationConnection rc = null;
+    boolean closed = false;
 
     public ListReplLogs(ReplicationClient client) {
         this.client = client;
@@ -41,7 +42,7 @@ public class ListReplLogs implements Runnable {
                 throw new ListCanceledException();
             }
             Iterator<VolumeEvent> fi = rc.getStorageBlockingStub().listReplLogs(VolumeEventListenRequest.newBuilder()
-                    .setPvolumeID(this.client.volumeid).setStartSequence(this.client.sequence).build());
+                    .setPvolumeID(this.client.volumeid).setStartSequence(this.client.getSeq()).build());
             BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
             arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
                     10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
@@ -68,44 +69,41 @@ public class ListReplLogs implements Runnable {
                     return;
                 }
                 ImportFile impf = null;
-                synchronized (client.activeImports) {
-                    try {
-                        if (!client.activeImports.contains(rs.getFile().getFilePath())) {
-                            client.activeImports.add(rs.getFile().getFilePath());
-                            if (rs.getActionType() == actionType.MFILEWRITTEN) {
-                                ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
-                                        rs.getFile().getFilePath(),
-                                        client.url, client.volumeid, client.mtls, false);
-                                impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
-                                        evt, true);
+                try {
+                    if (!client.activeImports.contains(rs.getFile().getFilePath())) {
+                        client.activeImports.add(rs.getFile().getFilePath());
+                        if (rs.getActionType() == actionType.MFILEWRITTEN) {
+                            ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
+                                    rs.getFile().getFilePath(),
+                                    client.url, client.volumeid, client.mtls, false);
+                            impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
+                                    evt, true);
 
-                            } else if (rs.getActionType() == actionType.MFILEDELETED) {
-                                String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
-                                File _f = new File(pt);
-                                FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
-                                MetaFileStore.getMF(_f).clearRetentionLock();
-                                MetaFileStore.removeMetaFile(_f.getPath());
-                            } else if (rs.getActionType() == actionType.MFILERENAMED) {
-                                String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
-                                File _sf = new File(spt);
-                                String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
-                                File _df = new File(dpt);
+                        } else if (rs.getActionType() == actionType.MFILEDELETED) {
+                            String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
+                            File _f = new File(pt);
+                            FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                            MetaFileStore.getMF(_f).clearRetentionLock();
+                            MetaFileStore.removeMetaFile(_f.getPath());
+                        } else if (rs.getActionType() == actionType.MFILERENAMED) {
+                            String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
+                            File _sf = new File(spt);
+                            String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
+                            File _df = new File(dpt);
 
-                                MetaFileStore.rename(_sf.getPath(), _df.getPath());
-                            }
+                            MetaFileStore.rename(_sf.getPath(), _df.getPath());
+                        }
 
-                        }
-                        if (impf != null) {
-                            arExecutor.execute(impf);
-                        }
-                    } finally {
-                        if (impf == null) {
-                            client.activeImports.remove(rs.getFile().getFilePath());
-                        }
                     }
-                    seq = rs.getSeq();
-
+                    if (impf != null) {
+                        arExecutor.execute(impf);
+                    }
+                } finally {
+                    if (impf == null) {
+                        client.activeImports.remove(rs.getFile().getFilePath());
+                    }
                 }
+                seq = rs.getSeq();
             }
             arExecutor.shutdown();
             try {
@@ -116,41 +114,31 @@ public class ListReplLogs implements Runnable {
                 throw new IOException(e);
             }
             synchronized (client.activeImports) {
-                if (client.sequence < seq) {
-                    client.sequence = seq;
-                    SDFSLogger.getLog().info("Client Sequence = " + client.sequence);
+                if (client.getSeq() < seq) {
+                    client.setSequence(seq);
                 }
             }
         } finally {
-            client.closeReplicationConnection(rc);
+            try {
+                client.closeReplicationConnection(rc);
+            } catch (Exception e) {
+
+            }
         }
+    }
+
+    public void close() {
+        this.closed = true;
     }
 
     @Override
     public void run() {
-        int retries = 0;
-        for (;;) {
-            try {
-                this.list();
-                break;
-            } catch (ListCanceledException e) {
-                SDFSLogger.getLog().warn("List Canceled. Giving up");
-                break;
-            } catch (Exception e) {
-                retries++;
-                SDFSLogger.getLog().warn("List Replication failed", e);
-                if (retries > 10) {
-                    SDFSLogger.getLog().warn("list all replication failed. Giving up");
-                    break;
-                } else {
-                    try {
-                        Thread.sleep(60 * 1000 * 5);
-                    } catch (InterruptedException e1) {
-                        break;
-                    }
-                }
-
-            }
+        try {
+            this.list();
+        } catch (ListCanceledException e) {
+            SDFSLogger.getLog().warn("List Canceled.");
+        } catch (Exception e) {
+            SDFSLogger.getLog().warn("List Replication failed", e);
         }
 
     }
