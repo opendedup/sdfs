@@ -343,6 +343,10 @@ public class SDFSEvent implements java.io.Serializable {
 		}
 	}
 
+	public String getShortMsg() {
+		return this.shortMsg;
+	}
+
 	public void endEvent() {
 		synchronized (this) {
 			for (int i = 0; i < this.children.size(); i++) {

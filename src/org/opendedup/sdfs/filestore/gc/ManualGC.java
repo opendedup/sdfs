@@ -145,8 +145,9 @@ public class ManualGC {
 					}
 				}
 				
+				
+				
 			
-
 		} catch (Throwable e) {
 			SDFSLogger.getLog().warn("unable to finish garbage collection", e);
 			evt.endEvent(
@@ -154,6 +155,9 @@ public class ManualGC {
 					SDFSEvent.ERROR);
 			evt.success = false;
 			throw new IOException(e);
+		}
+		if(evt.getShortMsg().startsWith("SDFS Volume Cleanup Initiated")) {
+			evt.endEvent("Garbage Collection Complete");
 		}
 		return rm;
 	}

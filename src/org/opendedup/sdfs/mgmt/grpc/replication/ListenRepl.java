@@ -116,7 +116,7 @@ public class ListenRepl implements Runnable {
                     SDFSLogger.getLog().debug("Awaiting replication to finish.");
                 }
             } catch (InterruptedException e) {
-                throw new IOException(e);
+                
             }
             synchronized (client.activeImports) {
                 if (client.getSeq() < seq) {
@@ -212,10 +212,26 @@ public class ListenRepl implements Runnable {
             } catch (ListenReplCanceled e) {
                 SDFSLogger.getLog().warn("ListenRepl Replication canceled");
                 break;
-            } catch (Exception e) {
-                SDFSLogger.getLog().warn("ListenRepl Replication failed", e);
+            } catch(io.grpc.StatusRuntimeException e) {
+                if(e.getCause() instanceof java.lang.InterruptedException) {
+                    SDFSLogger.getLog().warn("ListenRepl Replication canceled");
+                    break;
+                } else {
+                    try {
+                        SDFSLogger.getLog().warn("ListenRepl Replication disconnected," +
+                        " will try to reconnect in 1 minute ", e);
+                        Thread.sleep(60 * 1000 * 1);
+                    } catch (Exception e1) {
+                        break;
+    
+                    }
+                }
+            } 
+            catch (Exception e) {
+                SDFSLogger.getLog().warn("ListenRepl Replication disconnected," +
+                " will try to reconnect in 1 minute", e);
                 try {
-                    Thread.sleep(60 * 1000 * 5);
+                    Thread.sleep(60 * 1000 * 1);
                 } catch (Exception e1) {
                     break;
 

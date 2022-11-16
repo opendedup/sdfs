@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -57,7 +58,7 @@ public class ReplicationClient {
     protected int failRetries = 10;
     protected boolean closed = false;
     protected boolean removed = false;
-    public Map<String, ReplicationConnection> connections = new HashMap<String, ReplicationConnection>();
+    private Map<String, ReplicationConnection> connections = new HashMap<String, ReplicationConnection>();
     private Thread downloadThread;
 
     public ReplicationConnection getReplicationConnection() throws Exception {
@@ -82,8 +83,10 @@ public class ReplicationClient {
         if (rc != null) {
             try {
                 rc.getChannel().shutdown();
-                Boolean term = rc.getChannel().awaitTermination(60, TimeUnit.SECONDS);
-                SDFSLogger.getLog().info("Channel Terminated " + term);
+                rc.getChannel().awaitTermination(60, TimeUnit.SECONDS);
+                SDFSLogger.getLog().debug("Channel Terminated");
+            } catch (InterruptedException e) {
+                SDFSLogger.getLog().debug("Channel Terminated");
             } catch (Exception e) {
                 SDFSLogger.getLog().warn("unable to shutdown client connection", e);
             }
@@ -198,19 +201,6 @@ public class ReplicationClient {
                 return false;
             }
             return channel.getState(true) == ConnectivityState.READY;
-        }
-
-        public void checkConnection() {
-            if (!this.isConnected()) {
-                SDFSLogger.getLog().warn("Replication Client not connected for " + rc.url + " volid " + rc.volumeid);
-                try {
-                    rc.shutDown();
-                    this.connect();
-                    rc.replicationSink();
-                } catch (Exception e) {
-                    SDFSLogger.getLog().warn("Unable to reconnect to " + rc.url + " volid " + rc.volumeid, e);
-                }
-            }
         }
 
         private SslContextBuilder getSslContextBuilder(String certChainFilePath, String privateKeyFilePath,
@@ -328,7 +318,7 @@ public class ReplicationClient {
                         }
                     } else {
                         ImportFile fl = new ImportFile(location.getSrcFilePath(), location.getDstFilePath(), this, evt,
-                                false);
+                                true);
                         Thread th = new Thread(fl);
                         th.start();
                     }
@@ -379,6 +369,7 @@ public class ReplicationClient {
                 try {
                     ce.channel.shutdown();
                     ce.channel.awaitTermination(60, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
                 } catch (Exception e) {
                     SDFSLogger.getLog().warn("unable to shutdown client connection", e);
                 }
@@ -404,16 +395,39 @@ public class ReplicationClient {
                 syncThread.interrupt();
             }
             synchronized (this.activeImports) {
+                ArrayList<ReplicationImportEvent> ie = new ArrayList<ReplicationImportEvent>();
                 for (String uuid : this.imports.keySet()) {
                     try {
                         ReplicationImportEvent revt = (ReplicationImportEvent) SDFSEvent.getEvent(uuid);
                         revt.cancel();
+                        ie.add(revt);
                     } catch (IOException e) {
                         SDFSLogger.getLog().warn("error during remove cancel");
                     }
                 }
+                int tries = 0;
+                while (ie.size() > 0) {
+                    if (tries > 6) {
+                        SDFSLogger.getLog().info("Giving up waiting to remove " + ie.size() + " canceled imports");
+                        break;
+                    }
+                    tries++;
+                    SDFSLogger.getLog().info("Waiting to remove " + ie.size() + " canceled imports");
+                    Thread.sleep(10 * 1000);
+                    ArrayList<ReplicationImportEvent> nie = new ArrayList<ReplicationImportEvent>();
+                    for (ReplicationImportEvent revt : ie) {
+                        if (revt.getEndTime() <= 0) {
+                            nie.add(revt);
+                        }
+                    }
+                    ie = nie;
+                }
             }
-            this.shutDown();
+            try {
+                this.shutDown();
+            } catch (Exception e) {
+                SDFSLogger.getLog().debug("error during remove", e);
+            }
             jsonFile.delete();
         } catch (Exception e) {
             SDFSLogger.getLog().warn("error during remove", e);
