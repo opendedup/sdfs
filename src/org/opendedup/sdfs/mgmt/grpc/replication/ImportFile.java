@@ -229,6 +229,7 @@ public class ImportFile implements Runnable {
 
                 throw e;
             }
+            long expectedSize = mf.length();
             evt.addCount(1);
             if (this.evt.canceled) {
                 mf.deleteStub(false);
@@ -261,6 +262,7 @@ public class ImportFile implements Runnable {
                 }
                 throw e;
             }
+            mf.setLength(expectedSize, true);
 
             MetaFileStore.removedCachedMF(mf.getPath());
             MetaFileStore.addToCache(mf);
@@ -354,7 +356,7 @@ public class ImportFile implements Runnable {
             SparseDataChunk ck = importSparseDataChunk(new SparseDataChunk(cr), mf);
             mp.put(pos, ck);
             pos += ck.len;
-            mf.setLength(mf.length() + ck.len, false);
+            
         }
         mp.close();
     }
@@ -440,6 +442,7 @@ public class ImportFile implements Runnable {
             p.hashloc = Longs.toByteArray(ctl.loc);
             evt.bytesProcessed += p.nlen;
             mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
+            mf.setLength(mf.length() + p.nlen, false);
         }
         return ck;
     }
