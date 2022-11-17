@@ -78,15 +78,15 @@ public class ListenRepl implements Runnable {
 
                             } else if (rs.getActionType() == actionType.MFILEDELETED) {
                                 String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
-                                File _f = new File(pt);
+                                File _f = new File(pt.replaceFirst("\\./", ""));
                                 FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                                 MetaFileStore.getMF(_f).clearRetentionLock();
                                 MetaFileStore.removeMetaFile(_f.getPath());
                             } else if (rs.getActionType() == actionType.MFILERENAMED) {
                                 String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
-                                File _sf = new File(spt);
+                                File _sf = new File(spt.replaceFirst("\\./", ""));
                                 String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
-                                File _df = new File(dpt);
+                                File _df = new File(dpt.replaceFirst("\\./", ""));
 
                                 MetaFileStore.rename(_sf.getPath(), _df.getPath());
                             }

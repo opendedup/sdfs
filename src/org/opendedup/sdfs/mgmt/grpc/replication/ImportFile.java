@@ -66,9 +66,9 @@ public class ImportFile implements Runnable {
         this.client = client;
         this.evt = evt;
         this.srcFile = srcFile;
-        this.dstFile = dstFile;
+        this.dstFile = dstFile.replaceFirst("\\./", "");
         this.overwrite = overwrite;
-        SDFSLogger.getLog().info("Importing " + this.srcFile);
+        SDFSLogger.getLog().info("Importing " + this.srcFile + " to " + this.dstFile);
 
         client.imports.put(evt.uid, this);
         String mapToJson = objGson.toJson(client.imports.keySet());
