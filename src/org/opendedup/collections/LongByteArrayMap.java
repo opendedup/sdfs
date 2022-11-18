@@ -70,6 +70,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	public static byte[] _V2FREE = new byte[_v2arrayLength];
 	public AtomicLong iterPos = new AtomicLong();
 	FileChannel bdbc = null;
+	private String GUID;
 	// private int maxReadBufferSize = Integer.MAX_VALUE;
 	// private int eI = 1024 * 1024;
 	// private long endPos = maxReadBufferSize;
@@ -101,10 +102,10 @@ public class LongByteArrayMap implements DataMapInterface {
 	private static ReentrantLock getLock(String st) {
 		iLock.lock();
 		try {
-			ReentrantLock l = activeTasks.get(st);
+			ReentrantLock l = activeTasks.get(st.toLowerCase());
 			if (l == null) {
 				l = new ReentrantLock(true);
-				activeTasks.put(st, l);
+				activeTasks.put(st.toLowerCase(), l);
 			}
 			return l;
 		} finally {
@@ -115,11 +116,11 @@ public class LongByteArrayMap implements DataMapInterface {
 	private static void removeLock(String st) {
 		iLock.lock();
 		try {
-			ReentrantLock l = activeTasks.get(st);
+			ReentrantLock l = activeTasks.get(st.toLowerCase());
 			try {
 
 				if (l != null && !l.hasQueuedThreads()) {
-					activeTasks.remove(st);
+					activeTasks.remove(st.toLowerCase());
 				}
 			} finally {
 				if (l != null)
@@ -131,8 +132,9 @@ public class LongByteArrayMap implements DataMapInterface {
 		}
 	}
 
-	private LongByteArrayMap(String filePath) throws IOException {
+	private LongByteArrayMap(String filePath, String GUID) throws IOException {
 		this.filePath = filePath;
+		this.GUID = GUID;
 		this.openFile();
 	}
 
@@ -156,8 +158,8 @@ public class LongByteArrayMap implements DataMapInterface {
 		return mapFile;
 	}
 
-	public static LongByteArrayMap getMap(File mapFile) throws IOException {
-		return new LongByteArrayMap(mapFile.getPath());
+	public static LongByteArrayMap getMap(File mapFile, String GUID) throws IOException {
+		return new LongByteArrayMap(mapFile.getPath(),GUID);
 	}
 
 	public static LongByteArrayMap getMap(String GUID) throws IOException {
@@ -166,7 +168,7 @@ public class LongByteArrayMap implements DataMapInterface {
 		ReentrantLock l = getLock(GUID);
 		l.lock();
 		try {
-			LongByteArrayMap map = mp.get(mapFile.getPath());
+			LongByteArrayMap map = mp.get(mapFile.getPath().toLowerCase());
 			if (map != null) {
 				map.openFile();
 				return map;
@@ -175,21 +177,21 @@ public class LongByteArrayMap implements DataMapInterface {
 						+ GUID + File.separator + GUID + ".map.lz4");
 				if (zmapFile.exists()) {
 					try {
-						map = new LongByteArrayMap(zmapFile.getPath());
+						map = new LongByteArrayMap(zmapFile.getPath(),GUID);
 					} catch (java.io.EOFException e) {
 						if (mapFile.exists()) {
-							map = new LongByteArrayMap(mapFile.getPath());
+							map = new LongByteArrayMap(mapFile.getPath(),GUID);
 							zmapFile.delete();
 						}
 					}
 				} else if (new File(mapFile.getPath()).exists()) {
-					map = new LongByteArrayMap(mapFile.getPath());
+					map = new LongByteArrayMap(mapFile.getPath(),GUID);
 				} else if (FileReplicationService.DDBExists(GUID)) {
 					map = FileReplicationService.getDDB(GUID);
 				} else {
-					map = new LongByteArrayMap(mapFile.getPath());
+					map = new LongByteArrayMap(mapFile.getPath(),GUID);
 				}
-				mp.put(mapFile.getPath(), map);
+				mp.put(mapFile.getPath().toLowerCase(), map);
 				return map;
 			}
 		} finally {
@@ -529,7 +531,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				}
 			}
 			this.addOpen();
-			mp.put(this.filePath, this);
+			mp.put(this.filePath.toLowerCase(), this);
 		} finally {
 			l.unlock();
 		}
@@ -897,7 +899,7 @@ public class LongByteArrayMap implements DataMapInterface {
 	 * @see org.opendedup.collections.DataMap#copy(java.lang.String)
 	 */
 	@Override
-	public void copy(String destFilePath, boolean index) throws IOException {
+	public void copy(String destFilePath, boolean index,String DGUID) throws IOException {
 		ReadLock l = this.hashlock.readLock();
 		l.lock();
 		FileChannel srcC = null;
@@ -933,7 +935,7 @@ public class LongByteArrayMap implements DataMapInterface {
 				SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
 			}
 			if (index) {
-				LongByteArrayMap m = new LongByteArrayMap(dest.getPath());
+				LongByteArrayMap m = new LongByteArrayMap(dest.getPath(),DGUID);
 				m.index();
 				m.close();
 			} else if (Main.COMPRESS_METADATA) {
@@ -982,6 +984,8 @@ public class LongByteArrayMap implements DataMapInterface {
 
 		WriteLock l = this.hashlock.writeLock();
 		l.lock();
+		ReentrantLock ul = getLock(GUID);
+		ul.lock();
 		try {
 			if (!this.closed) {
 				int op = this.opens.decrementAndGet();
@@ -1009,7 +1013,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						if (!df.exists()) {
 							throw new IOException(df.getPath() + " does not exist");
 						} else if (cf.exists() && df.exists()) {
-							SDFSLogger.getLog().error("both " + df.getPath() + " exists and " + cf.getPath());
+							SDFSLogger.getLog().warn("both " + df.getPath() + " exists and " + cf.getPath());
 							throw new IOException("both " + df.getPath() + " exists and " + cf.getPath());
 						} else {
 							SDFSLogger.getLog().debug("compressing " + df.getPath() + " to " + cf.getPath());
@@ -1018,13 +1022,14 @@ public class LongByteArrayMap implements DataMapInterface {
 							SDFSLogger.getLog().debug("compressed " + cf.getPath());
 						}
 					}
-					mp.remove(this.filePath);
+					mp.remove(this.filePath.toLowerCase());
 					openFiles.decrementAndGet();
 				} else {
 					SDFSLogger.getLog().debug("not closing " + this.filePath + " opens=" + this.opens.get());
 				}
 			}
 		} finally {
+			removeLock(GUID);
 			l.unlock();
 		}
 	}

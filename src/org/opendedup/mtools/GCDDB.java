@@ -149,7 +149,7 @@ public class GCDDB {
 					fd.failed = true;
 					return;
 				}
-				mp = LongByteArrayMap.getMap(f);
+				mp = LongByteArrayMap.getMap(f,"GCDDB");
 				if (GCDDB.closed) {
 					fd.failed = true;
 					return;

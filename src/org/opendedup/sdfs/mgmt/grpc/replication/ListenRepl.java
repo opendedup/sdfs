@@ -78,17 +78,32 @@ public class ListenRepl implements Runnable {
 
                             } else if (rs.getActionType() == actionType.MFILEDELETED) {
                                 String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
-                                File _f = new File(pt.replaceFirst("\\./", ""));
+                                pt = pt.replaceFirst("\\./", "");
+                                pt = pt.replaceFirst("\\.\\\\", "");
+                                File _f = new File(pt);
                                 FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                                 MetaFileStore.getMF(_f).clearRetentionLock();
                                 MetaFileStore.removeMetaFile(_f.getPath());
                             } else if (rs.getActionType() == actionType.MFILERENAMED) {
                                 String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
-                                File _sf = new File(spt.replaceFirst("\\./", ""));
+                                spt = spt.replaceFirst("\\./", "");
+                                spt = spt.replaceFirst("\\.\\\\", "");
+                                File _sf = new File(spt);
                                 String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
-                                File _df = new File(dpt.replaceFirst("\\./", ""));
+                                dpt = dpt.replaceFirst("\\./", "");
+                                dpt = dpt.replaceFirst("\\.\\\\", "");
+                                File _df = new File(dpt);
+                                if (!_sf.exists()) {
 
-                                MetaFileStore.rename(_sf.getPath(), _df.getPath());
+                                    ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
+                                            rs.getFile().getFilePath(),
+                                            client.url, client.volumeid, client.mtls, false);
+                                    impf = new ImportFile(rs.getDstfile(), rs.getDstfile(),
+                                            client,
+                                            evt, true);
+                                } else {
+                                    MetaFileStore.rename(_sf.getPath(), _df.getPath());
+                                }
                             }
                             if (checkUpdateSeq()) {
                                 seq = rs.getSeq();
@@ -116,7 +131,7 @@ public class ListenRepl implements Runnable {
                     SDFSLogger.getLog().debug("Awaiting replication to finish.");
                 }
             } catch (InterruptedException e) {
-                
+
             }
             synchronized (client.activeImports) {
                 if (client.getSeq() < seq) {
@@ -139,7 +154,7 @@ public class ListenRepl implements Runnable {
         if (dl != null && dl.evt.success && dl.evt.getEndTime() > 0) {
             return true;
         }
-        
+
         return false;
 
     }
@@ -212,24 +227,23 @@ public class ListenRepl implements Runnable {
             } catch (ListenReplCanceled e) {
                 SDFSLogger.getLog().warn("ListenRepl Replication canceled");
                 break;
-            } catch(io.grpc.StatusRuntimeException e) {
-                if(e.getCause() instanceof java.lang.InterruptedException) {
+            } catch (io.grpc.StatusRuntimeException e) {
+                if (e.getCause() instanceof java.lang.InterruptedException) {
                     SDFSLogger.getLog().warn("ListenRepl Replication canceled");
                     break;
                 } else {
                     try {
                         SDFSLogger.getLog().warn("ListenRepl Replication disconnected," +
-                        " will try to reconnect in 1 minute ", e);
+                                " will try to reconnect in 1 minute ", e);
                         Thread.sleep(60 * 1000 * 1);
                     } catch (Exception e1) {
                         break;
-    
+
                     }
                 }
-            } 
-            catch (Exception e) {
+            } catch (Exception e) {
                 SDFSLogger.getLog().warn("ListenRepl Replication disconnected," +
-                " will try to reconnect in 1 minute", e);
+                        " will try to reconnect in 1 minute", e);
                 try {
                     Thread.sleep(60 * 1000 * 1);
                 } catch (Exception e1) {

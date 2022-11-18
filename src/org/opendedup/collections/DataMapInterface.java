@@ -73,7 +73,7 @@ public interface DataMapInterface {
 
 	public abstract void vanish(boolean refcount) throws IOException;
 
-	public abstract void copy(String destFilePath,boolean index) throws IOException;
+	public abstract void copy(String destFilePath,boolean index,String GUID) throws IOException;
 
 	public abstract long size();
 

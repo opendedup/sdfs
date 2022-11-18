@@ -1,6 +1,7 @@
 package org.opendedup.sdfs.mgmt.grpc.replication;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileAlreadyExistsException;
@@ -67,6 +68,7 @@ public class ImportFile implements Runnable {
         this.evt = evt;
         this.srcFile = srcFile;
         this.dstFile = dstFile.replaceFirst("\\./", "");
+        this.dstFile = dstFile.replaceFirst("\\.\\\\", "");
         this.overwrite = overwrite;
         SDFSLogger.getLog().info("Importing " + this.srcFile + " to " + this.dstFile);
 
@@ -102,7 +104,10 @@ public class ImportFile implements Runnable {
                 active.unlock();
 
                 break;
-            } catch (ReplicationCanceledException e1) {
+            } catch (FileNotFoundException | ReplicationCanceledException e1) {
+                if(e1 instanceof FileNotFoundException) {
+                    SDFSLogger.getLog().warn("File " + this.srcFile + " not found on source");
+                }
                 SDFSLogger.getLog().info("Replication Canceled");
                 try {
                     synchronized (client.activeImports) {
@@ -197,7 +202,7 @@ public class ImportFile implements Runnable {
         synchronized (actives) {
             if (!active.isLocked()) {
                 actives.remove(this.dstFile);
-            } 
+            }
         }
 
     }
@@ -307,8 +312,12 @@ public class ImportFile implements Runnable {
                 .setFilePath(srcFile).build();
         MetaDataDedupeFileResponse crs = this.rc.getStorageBlockingStub().getMetaDataDedupeFile(mr);
         if (crs.getErrorCode() != errorCodes.NOERR) {
-            throw new IOException(
-                    "Error found during file request " + crs.getErrorCode() + " err : " + crs.getError());
+            if (crs.getErrorCode() == errorCodes.ENOENT) {
+                throw new FileNotFoundException(crs.getError());
+            } else {
+                throw new IOException(
+                        "Error found during file request " + crs.getErrorCode() + " err : " + crs.getError());
+            }
         }
         String pt = Main.volume.getPath() + File.separator + this.dstFile;
         File _f = new File(pt);
@@ -356,7 +365,7 @@ public class ImportFile implements Runnable {
             SparseDataChunk ck = importSparseDataChunk(new SparseDataChunk(cr), mf);
             mp.put(pos, ck);
             pos += ck.len;
-            
+
         }
         mp.close();
     }

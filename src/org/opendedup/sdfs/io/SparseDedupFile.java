@@ -215,7 +215,7 @@ public class SparseDedupFile implements DedupFile {
 			SDFSLogger.getLog().debug("Snap folder is " + _directory);
 			SDFSLogger.getLog().debug("Snap map is " + _dbf);
 			SDFSLogger.getLog().debug("Snap chunk is " + _dbc);
-			bdb.copy(_dbf.getPath(), true);
+			bdb.copy(_dbf.getPath(), true,_df.GUID);
 
 			snapmf.setDedupFile(_df);
 			return _df;
@@ -252,7 +252,7 @@ public class SparseDedupFile implements DedupFile {
 			ch = this.getChannel(-1);
 			this.writeCache();
 			this.sync(true);
-			bdb.copy(dest.getPath() + File.separator + this.GUID + ".map", true);
+			bdb.copy(dest.getPath() + File.separator + this.GUID + ".map", true,this.GUID);
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("unable to copy to" + mf.getPath(), e);
 			throw new IOException("unable to clone file " + mf.getPath(), e);
@@ -298,10 +298,10 @@ public class SparseDedupFile implements DedupFile {
 						File dest = new File(Main.dedupDBTrashStore + File.separator + "ddb" + File.separator
 								+ this.GUID.substring(0, 2) + File.separator + this.GUID + File.separator + this.GUID
 								+ ext);
-						this.bdb.copy(dest.getPath(), false);
+						this.bdb.copy(dest.getPath(), false,this.GUID);
 						this.bdb.vanish(false);
 						this.bdb.close();
-						LongByteArrayMap.getMap(dest).close();
+						LongByteArrayMap.getMap(dest,this.GUID).close();
 					} else {
 						this.bdb.vanish(Main.refCount);
 						this.bdb.close();
