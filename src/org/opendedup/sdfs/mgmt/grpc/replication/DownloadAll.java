@@ -67,30 +67,27 @@ public class DownloadAll implements Runnable {
                 }
                 FileInfoResponse file = rs.getResponseList().get(0);
                 ImportFile impf = null;
-                synchronized (client.activeImports) {
-                    if (!client.activeImports.contains(file.getFilePath())) {
-                        client.activeImports.add(file.getFilePath());
-                        String pt = Main.volume.getPath() + File.separator + file.getFilePath();
-                        File _f = new File(pt);
-                        if (_f.exists()) {
-                            if (MetaFileStore.getMF(_f).lastModified() != file.getMtime()) {
-                                ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
-                                        file.getFilePath(),
-                                        client.url, client.volumeid, client.mtls, false);
-                                impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
-                            } else {
-                                ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
-                                        file.getFilePath(),
-                                        client.url, client.volumeid, client.mtls, false);
-                                evt.endEvent("File Already Exists and looks like the same " + file.getFilePath());
-                            }
-                        } else {
-                            ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
-                                    file.getFilePath(),
-                                    client.url, client.volumeid, client.mtls, false);
-                            impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
-                        }
+                String pt = Main.volume.getPath() + File.separator + file.getFilePath();
+                File _f = new File(pt);
+                if (_f.exists()) {
+                    if (MetaFileStore.getMF(_f).lastModified() != file.getMtime()) {
+                        ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
+                                file.getFilePath(),
+                                client.url, client.volumeid, client.mtls, false);
+                        evt.persistEvent();
+                        impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
+                    } else {
+                        ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
+                                file.getFilePath(),
+                                client.url, client.volumeid, client.mtls, false);
+                        evt.endEvent("File Already Exists and looks like the same " + file.getFilePath());
                     }
+                } else {
+                    ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
+                            file.getFilePath(),
+                            client.url, client.volumeid, client.mtls, false);
+                    evt.persistEvent();
+                    impf = new ImportFile(file.getFilePath(), file.getFilePath(), client, evt, true);
                 }
                 if (impf != null) {
                     arExecutor.execute(impf);

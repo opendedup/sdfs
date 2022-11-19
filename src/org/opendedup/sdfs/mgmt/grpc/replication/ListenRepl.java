@@ -3,6 +3,7 @@ package org.opendedup.sdfs.mgmt.grpc.replication;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -39,6 +40,16 @@ public class ListenRepl implements Runnable {
 
     }
 
+    private static class ReplicationAction implements Runnable {
+
+        @Override
+        public void run() {
+            // TODO Auto-generated method stub
+
+        }
+
+    }
+
     public void listen() throws Exception, ListenReplCanceled {
         if (this.client.removed) {
             throw new ListenReplCanceled();
@@ -65,65 +76,90 @@ public class ListenRepl implements Runnable {
                     throw new IOException("Sync Failed because " + rs.getErrorCode() + " msg:" + rs.getError());
                 }
                 ImportFile impf = null;
-                synchronized (client.activeImports) {
-                    try {
-                        if (!client.activeImports.contains(rs.getFile().getFilePath())) {
-                            client.activeImports.add(rs.getFile().getFilePath());
-                            if (rs.getActionType() == actionType.MFILEWRITTEN) {
-                                ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
-                                        rs.getFile().getFilePath(),
-                                        client.url, client.volumeid, client.mtls, false);
-                                impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
-                                        evt, true);
+                synchronized (client) {
+                    if (rs.getActionType() == actionType.MFILEWRITTEN) {
+                        ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
+                                rs.getFile().getFilePath(),
+                                client.url, client.volumeid, client.mtls, false);
+                        evt.persistEvent();
+                        impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
+                                evt, true);
 
-                            } else if (rs.getActionType() == actionType.MFILEDELETED) {
-                                String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
-                                pt = pt.replaceFirst("\\./", "");
-                                pt = pt.replaceFirst("\\.\\\\", "");
-                                File _f = new File(pt);
-                                FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
-                                MetaFileStore.getMF(_f).clearRetentionLock();
-                                MetaFileStore.removeMetaFile(_f.getPath());
-                            } else if (rs.getActionType() == actionType.MFILERENAMED) {
-                                String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
-                                spt = spt.replaceFirst("\\./", "");
-                                spt = spt.replaceFirst("\\.\\\\", "");
-                                File _sf = new File(spt);
-                                String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
-                                dpt = dpt.replaceFirst("\\./", "");
-                                dpt = dpt.replaceFirst("\\.\\\\", "");
-                                File _df = new File(dpt);
-                                if (!_sf.exists()) {
-
-                                    ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
-                                            rs.getFile().getFilePath(),
-                                            client.url, client.volumeid, client.mtls, false);
-                                    impf = new ImportFile(rs.getDstfile(), rs.getDstfile(),
-                                            client,
-                                            evt, true);
-                                } else {
-                                    MetaFileStore.rename(_sf.getPath(), _df.getPath());
+                    } else if (rs.getActionType() == actionType.MFILEDELETED) {
+                        String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
+                        pt = pt.replaceFirst("\\.\\/", "");
+                        pt = pt.replaceFirst("\\.\\\\", "");
+                        File _f = new File(pt);
+                        if (client.activeImports.containsKey(_f.getPath())) {
+                            List<ReplicationImportEvent> al = client.activeImports.get(_f.getPath());
+                            for (ReplicationImportEvent evt : al) {
+                                evt.cancel();
+                            }
+                            boolean active = true;
+                            while (active) {
+                                Thread.sleep(1000);
+                                active = false;
+                                for (ReplicationImportEvent evt : al) {
+                                    if (evt.getEndTime() <= 0) {
+                                        active = true;
+                                    }
                                 }
                             }
-                            if (checkUpdateSeq()) {
-                                seq = rs.getSeq();
+                        }
+                        FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                        MetaFileStore.getMF(_f).clearRetentionLock();
+                        MetaFileStore.removeMetaFile(_f.getPath());
+                    } else if (rs.getActionType() == actionType.MFILERENAMED) {
+                        String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
+                        spt = spt.replaceFirst("\\.\\/", "");
+                        spt = spt.replaceFirst("\\.\\\\", "");
+                        File _sf = new File(spt);
+                        String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
+                        dpt = dpt.replaceFirst("\\.\\/", "");
+                        dpt = dpt.replaceFirst("\\.\\\\", "");
+                        File _df = new File(dpt);
+                        if (!_sf.exists()) {
 
-                                if (client.getSeq() < seq) {
-                                    client.setSequence(seq);
+                            ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
+                                    rs.getFile().getFilePath(),
+                                    client.url, client.volumeid, client.mtls, false);
+                            evt.persistEvent();
+                            impf = new ImportFile(rs.getDstfile(), rs.getDstfile(),
+                                    client,
+                                    evt, true);
+                        } else {
+                            if (client.activeImports.containsKey(_sf.getPath())) {
+                                List<ReplicationImportEvent> al = client.activeImports.get(_sf.getPath());
+                                for (ReplicationImportEvent evt : al) {
+                                    evt.cancel();
+                                }
+                                boolean active = true;
+                                while (active) {
+                                    Thread.sleep(1000);
+                                    active = false;
+                                    for (ReplicationImportEvent evt : al) {
+                                        if (evt.getEndTime() <= 0) {
+                                            active = true;
+                                        }
+                                    }
                                 }
                             }
-
-                        }
-                        if (impf != null) {
-                            arExecutor.execute(impf);
-                        }
-                    } finally {
-                        if (impf == null) {
-                            client.activeImports.remove(rs.getFile().getFilePath());
+                            MetaFileStore.rename(_sf.getPath(), _df.getPath());
                         }
                     }
+                    if (checkUpdateSeq()) {
+                        seq = rs.getSeq();
 
+                        if (client.getSeq() < seq) {
+                            client.setSequence(seq);
+                        }
+                    }
                 }
+
+                if (impf != null) {
+                    arExecutor.execute(impf);
+                }
+
             }
             arExecutor.shutdown();
             try {

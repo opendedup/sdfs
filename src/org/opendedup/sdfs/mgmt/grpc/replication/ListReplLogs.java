@@ -69,39 +69,32 @@ public class ListReplLogs implements Runnable {
                     return;
                 }
                 ImportFile impf = null;
-                try {
-                    if (!client.activeImports.contains(rs.getFile().getFilePath())) {
-                        client.activeImports.add(rs.getFile().getFilePath());
-                        if (rs.getActionType() == actionType.MFILEWRITTEN) {
-                            ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
-                                    rs.getFile().getFilePath(),
-                                    client.url, client.volumeid, client.mtls, false);
-                            impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
-                                    evt, true);
+                synchronized (client) {
+                    if (rs.getActionType() == actionType.MFILEWRITTEN) {
+                        ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
+                                rs.getFile().getFilePath(),
+                                client.url, client.volumeid, client.mtls, false);
+                        impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
+                                evt, true);
 
-                        } else if (rs.getActionType() == actionType.MFILEDELETED) {
-                            String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
-                            File _f = new File(pt);
-                            FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
-                            MetaFileStore.getMF(_f).clearRetentionLock();
-                            MetaFileStore.removeMetaFile(_f.getPath());
-                        } else if (rs.getActionType() == actionType.MFILERENAMED) {
-                            String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
-                            File _sf = new File(spt);
-                            String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
-                            File _df = new File(dpt);
+                    } else if (rs.getActionType() == actionType.MFILEDELETED) {
+                        String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
+                        File _f = new File(pt);
+                        FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                        MetaFileStore.getMF(_f).clearRetentionLock();
+                        MetaFileStore.removeMetaFile(_f.getPath());
+                    } else if (rs.getActionType() == actionType.MFILERENAMED) {
+                        String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
+                        File _sf = new File(spt);
+                        String dpt = Main.volume.getPath() + File.separator + rs.getDstfile();
+                        File _df = new File(dpt);
 
-                            MetaFileStore.rename(_sf.getPath(), _df.getPath());
-                        }
+                        MetaFileStore.rename(_sf.getPath(), _df.getPath());
+                    }
 
-                    }
-                    if (impf != null) {
-                        arExecutor.execute(impf);
-                    }
-                } finally {
-                    if (impf == null) {
-                        client.activeImports.remove(rs.getFile().getFilePath());
-                    }
+                }
+                if (impf != null) {
+                    arExecutor.execute(impf);
                 }
                 seq = rs.getSeq();
             }
@@ -118,7 +111,9 @@ public class ListReplLogs implements Runnable {
                     client.setSequence(seq);
                 }
             }
-        } finally {
+        } finally
+
+        {
             try {
                 client.closeReplicationConnection(rc);
             } catch (Exception e) {

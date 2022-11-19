@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
@@ -67,10 +69,10 @@ public class ImportFile implements Runnable {
         this.client = client;
         this.evt = evt;
         this.srcFile = srcFile;
-        this.dstFile = dstFile.replaceFirst("\\./", "");
-        this.dstFile = dstFile.replaceFirst("\\.\\\\", "");
+        this.dstFile = dstFile.replaceFirst("\\.\\/", "");
+        this.dstFile = this.dstFile.replaceFirst("\\.\\\\", "");
         this.overwrite = overwrite;
-        SDFSLogger.getLog().info("Importing " + this.srcFile + " to " + this.dstFile);
+        
 
         client.imports.put(evt.uid, this);
         String mapToJson = objGson.toJson(client.imports.keySet());
@@ -96,22 +98,40 @@ public class ImportFile implements Runnable {
         Exception e = null;
         for (int i = 0; i < client.failRetries; i++) {
             active.lock();
+            synchronized (client.activeImports) {
+                List<ReplicationImportEvent> al = null;
+                if (client.activeImports.containsKey(this.dstFile)) {
+                    al = client.activeImports.get(this.dstFile);
+                } else {
+                    al = new ArrayList<ReplicationImportEvent>();
+                }
+                al.add(evt);
+                client.activeImports.put(this.dstFile, al);
+            }
             try {
                 replicate();
-                SDFSLogger.getLog().info("Replication Completed Successfully for " + srcFile);
                 this.evt.endEvent("Replication Successful");
                 e = null;
                 active.unlock();
 
                 break;
             } catch (FileNotFoundException | ReplicationCanceledException e1) {
-                if(e1 instanceof FileNotFoundException) {
+                if (e1 instanceof FileNotFoundException) {
                     SDFSLogger.getLog().warn("File " + this.srcFile + " not found on source");
                 }
                 SDFSLogger.getLog().info("Replication Canceled");
                 try {
                     synchronized (client.activeImports) {
-                        client.activeImports.remove(dstFile);
+                        List<ReplicationImportEvent> al = null;
+                        if (client.activeImports.containsKey(this.dstFile)) {
+                            al = client.activeImports.get(this.dstFile);
+                            al.remove(this.evt);
+                        } else {
+                            al = new ArrayList<ReplicationImportEvent>();
+                        }
+                        if (al.size() == 0) {
+                            client.activeImports.remove(dstFile);
+                        }
                         if (client.imports.remove(this.evt.uid) != null) {
                             String mapToJson = objGson.toJson(client.imports.keySet());
                             try {
@@ -210,7 +230,7 @@ public class ImportFile implements Runnable {
     void replicate() throws ReplicationCanceledException, Exception {
         rc = client.getReplicationConnection();
         try {
-
+            SDFSLogger.getLog().info("Importing " + this.srcFile + " to " + this.dstFile);
             String pt = Main.volume.getPath() + File.separator + this.dstFile;
             File _f = new File(pt);
             if (_f.exists() && !this.overwrite) {
