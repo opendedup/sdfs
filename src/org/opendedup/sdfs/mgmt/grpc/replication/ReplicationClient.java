@@ -50,7 +50,7 @@ public class ReplicationClient {
     public long volumeid;
     public boolean mtls;
     public Map<String, ImportFile> imports = new ConcurrentHashMap<String, ImportFile>();
-    public Set<String> activeImports = new HashSet<String>();
+    public Map<String, List<ReplicationImportEvent>> activeImports = new HashMap<String,List<ReplicationImportEvent>>();
     private long sequence = 0;
     public Thread syncThread;
     File jsonFile = null;
@@ -289,6 +289,9 @@ public class ReplicationClient {
         }
     }
 
+    
+
+
     public SDFSEvent[] replicate(List<ReplicationFileLocation> locations) throws IOException {
         SDFSEvent[] evts = new SDFSEvent[locations.size()];
         if (evts.length > 10) {
@@ -301,10 +304,10 @@ public class ReplicationClient {
                 ReplicationImportEvent evt = new ReplicationImportEvent(location.getSrcFilePath(),
                         location.getDstFilePath(), this.url, this.volumeid,
                         this.mtls, true);
-                if (activeImports.contains(location.getDstFilePath())) {
+                evt.persistEvent();
+                if (activeImports.containsKey(location.getDstFilePath())) {
                     evt.endEvent("Replication already occuring for" + location.getDstFilePath(), SDFSEvent.ERROR);
                 } else {
-                    activeImports.add(location.getDstFilePath());
                     SDFSLogger.getLog().info("Will Replicate " + location.getSrcFilePath() + " to "
                             + location.getDstFilePath() + " from " + url);
                     evt.persistEvent();
@@ -330,10 +333,10 @@ public class ReplicationClient {
     }
 
     private SDFSEvent importFile(String src, String dst, ReplicationImportEvent evt) throws IOException {
-        if (activeImports.contains(dst)) {
+        
+        if (activeImports.containsKey(dst)) {
             evt.endEvent("Replication already occuring for" + dst, SDFSEvent.ERROR);
         } else {
-            activeImports.add(dst);
             SDFSLogger.getLog().info("Will Replicate " + src + " to "
                     + dst + " from " + url);
             evt.persistEvent();
