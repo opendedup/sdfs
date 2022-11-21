@@ -20,6 +20,7 @@ public final class CloudFileInfo {
 
     /**
      * <code>int64 date = 1;</code>
+     * @return The date.
      */
     long getDate();
 
@@ -47,9 +48,11 @@ public final class CloudFileInfo {
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
 
-    java.lang.String getAttributesOrDefault(
+    /* nullable */
+java.lang.String getAttributesOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue);
+        /* nullable */
+java.lang.String defaultValue);
     /**
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
@@ -59,13 +62,14 @@ public final class CloudFileInfo {
 
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CloudMetaData}
    */
-  public  static final class CloudMetaData extends
+  public static final class CloudMetaData extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CloudMetaData)
       CloudMetaDataOrBuilder {
@@ -75,8 +79,13 @@ public final class CloudFileInfo {
       super(builder);
     }
     private CloudMetaData() {
-      date_ = 0L;
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CloudMetaData();
     }
 
     @java.lang.Override
@@ -109,10 +118,10 @@ public final class CloudFileInfo {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 attributes_ = com.google.protobuf.MapField.newMapField(
                     AttributesDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
               attributes__ = input.readMessage(
@@ -127,7 +136,7 @@ public final class CloudFileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -137,6 +146,8 @@ public final class CloudFileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -170,12 +181,13 @@ public final class CloudFileInfo {
               org.opendedup.grpc.CloudFileInfo.CloudMetaData.class, org.opendedup.grpc.CloudFileInfo.CloudMetaData.Builder.class);
     }
 
-    private int bitField0_;
     public static final int DATE_FIELD_NUMBER = 1;
     private long date_;
     /**
      * <code>int64 date = 1;</code>
+     * @return The date.
      */
+    @java.lang.Override
     public long getDate() {
       return date_;
     }
@@ -210,14 +222,16 @@ public final class CloudFileInfo {
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
 
+    @java.lang.Override
     public boolean containsAttributes(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetAttributes().getMap().containsKey(key);
     }
     /**
      * Use {@link #getAttributesMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getAttributes() {
       return getAttributesMap();
@@ -225,6 +239,7 @@ public final class CloudFileInfo {
     /**
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
       return internalGetAttributes().getMap();
@@ -232,11 +247,12 @@ public final class CloudFileInfo {
     /**
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getAttributesOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetAttributes().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -244,10 +260,11 @@ public final class CloudFileInfo {
     /**
      * <code>map&lt;string, string&gt; attributes = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getAttributesOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetAttributes().getMap();
       if (!map.containsKey(key)) {
@@ -260,7 +277,9 @@ public final class CloudFileInfo {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -333,15 +352,14 @@ public final class CloudFileInfo {
       }
       org.opendedup.grpc.CloudFileInfo.CloudMetaData other = (org.opendedup.grpc.CloudFileInfo.CloudMetaData) obj;
 
-      boolean result = true;
-      result = result && (getDate()
-          == other.getDate());
-      result = result && internalGetAttributes().equals(
-          other.internalGetAttributes());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getDate()
+          != other.getDate()) return false;
+      if (!internalGetAttributes().equals(
+          other.internalGetAttributes())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -548,47 +566,45 @@ public final class CloudFileInfo {
       public org.opendedup.grpc.CloudFileInfo.CloudMetaData buildPartial() {
         org.opendedup.grpc.CloudFileInfo.CloudMetaData result = new org.opendedup.grpc.CloudFileInfo.CloudMetaData(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.date_ = date_;
         result.attributes_ = internalGetAttributes();
         result.attributes_.makeImmutable();
         result.pvolumeID_ = pvolumeID_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -643,12 +659,16 @@ public final class CloudFileInfo {
       private long date_ ;
       /**
        * <code>int64 date = 1;</code>
+       * @return The date.
        */
+      @java.lang.Override
       public long getDate() {
         return date_;
       }
       /**
        * <code>int64 date = 1;</code>
+       * @param value The date to set.
+       * @return This builder for chaining.
        */
       public Builder setDate(long value) {
         
@@ -658,6 +678,7 @@ public final class CloudFileInfo {
       }
       /**
        * <code>int64 date = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDate() {
         
@@ -696,14 +717,16 @@ public final class CloudFileInfo {
        * <code>map&lt;string, string&gt; attributes = 2;</code>
        */
 
+      @java.lang.Override
       public boolean containsAttributes(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetAttributes().getMap().containsKey(key);
       }
       /**
        * Use {@link #getAttributesMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getAttributes() {
         return getAttributesMap();
@@ -711,6 +734,7 @@ public final class CloudFileInfo {
       /**
        * <code>map&lt;string, string&gt; attributes = 2;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getAttributesMap() {
         return internalGetAttributes().getMap();
@@ -718,11 +742,12 @@ public final class CloudFileInfo {
       /**
        * <code>map&lt;string, string&gt; attributes = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getAttributesOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetAttributes().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -730,10 +755,11 @@ public final class CloudFileInfo {
       /**
        * <code>map&lt;string, string&gt; attributes = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getAttributesOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetAttributes().getMap();
         if (!map.containsKey(key)) {
@@ -753,7 +779,7 @@ public final class CloudFileInfo {
 
       public Builder removeAttributes(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableAttributes().getMutableMap()
             .remove(key);
         return this;
@@ -772,8 +798,11 @@ public final class CloudFileInfo {
       public Builder putAttributes(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableAttributes().getMutableMap()
             .put(key, value);
         return this;
@@ -792,12 +821,16 @@ public final class CloudFileInfo {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -807,6 +840,7 @@ public final class CloudFileInfo {
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -817,7 +851,7 @@ public final class CloudFileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -894,18 +928,10 @@ public final class CloudFileInfo {
       "alue\030\002 \001(\t:\0028\001B0Z.github.com/opendedup/s" +
       "dfs-client-go/sdfs/;sdfsb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_org_opendedup_grpc_CloudMetaData_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_org_opendedup_grpc_CloudMetaData_fieldAccessorTable = new

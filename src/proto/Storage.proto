@@ -31,6 +31,10 @@ message FileReplicationRequest {
   message  ReplicationFileLocation{
     string srcFilePath =1;
     string dstFilePath = 2;
+    int64 srcoffset =3;
+    int64 srcsize=4;
+    int64 dstoffset=5;
+    bool overwrite=7;
   }
   repeated ReplicationFileLocation fileLocation=1;
   int64 pvolumeID =2;

@@ -3,6 +3,7 @@ package org.opendedup.sdfs.mgmt.grpc.replication;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import org.opendedup.collections.HashtableFullException;
 import org.opendedup.collections.InsertRecord;
 import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.SparseDataChunk;
+import org.opendedup.grpc.FileInfo.FileInfoResponse;
 import org.opendedup.grpc.FileInfo.errorCodes;
 import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest;
 import org.opendedup.grpc.SDFSEventOuterClass.SDFSEventResponse;
@@ -33,7 +35,9 @@ import org.opendedup.grpc.Storage.SparseDedupeFileRequest;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
+import org.opendedup.sdfs.filestore.HashBlobArchive;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.DedupFileChannel;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.mgmt.CloseFile;
@@ -53,26 +57,19 @@ import com.google.protobuf.ByteString;
 
 public class ImportFile implements Runnable {
     ReplicationImportEvent evt;
-    String srcFile;
-    String dstFile;
     ReplicationClient client;
     boolean canceled = false;
     boolean paused = false;
-    boolean overwrite;
     ReplicationConnection rc = null;
 
     private Gson objGson = new GsonBuilder().setPrettyPrinting().create();
     private static HashMap<String, ReentrantLock> actives = new HashMap<String, ReentrantLock>();
 
-    public ImportFile(String srcFile, String dstFile, ReplicationClient client, ReplicationImportEvent evt,
-            boolean overwrite) {
+    public ImportFile(ReplicationClient client, ReplicationImportEvent evt) {
         this.client = client;
         this.evt = evt;
-        this.srcFile = srcFile;
-        this.dstFile = dstFile.replaceFirst("\\.\\/", "");
-        this.dstFile = this.dstFile.replaceFirst("\\.\\\\", "");
-        this.overwrite = overwrite;
-        
+        evt.dst = evt.dst.replaceFirst("\\.\\/", "");
+        evt.dst = evt.dst.replaceFirst("\\.\\\\", "");
 
         client.imports.put(evt.uid, this);
         String mapToJson = objGson.toJson(client.imports.keySet());
@@ -87,11 +84,11 @@ public class ImportFile implements Runnable {
     public void run() {
         ReentrantLock active = null;
         synchronized (actives) {
-            if (actives.containsKey(this.dstFile)) {
-                active = actives.get(this.dstFile);
+            if (actives.containsKey(evt.dst)) {
+                active = actives.get(evt.dst);
             } else {
                 active = new ReentrantLock();
-                actives.put(this.dstFile, active);
+                actives.put(evt.dst, active);
             }
         }
 
@@ -100,13 +97,13 @@ public class ImportFile implements Runnable {
             active.lock();
             synchronized (client.activeImports) {
                 List<ReplicationImportEvent> al = null;
-                if (client.activeImports.containsKey(this.dstFile)) {
-                    al = client.activeImports.get(this.dstFile);
+                if (client.activeImports.containsKey(evt.dst)) {
+                    al = client.activeImports.get(evt.dst);
                 } else {
                     al = new ArrayList<ReplicationImportEvent>();
                 }
                 al.add(evt);
-                client.activeImports.put(this.dstFile, al);
+                client.activeImports.put(evt.dst, al);
             }
             try {
                 replicate();
@@ -117,20 +114,20 @@ public class ImportFile implements Runnable {
                 break;
             } catch (FileNotFoundException | ReplicationCanceledException e1) {
                 if (e1 instanceof FileNotFoundException) {
-                    SDFSLogger.getLog().warn("File " + this.srcFile + " not found on source");
+                    SDFSLogger.getLog().warn("File " + evt.src + " not found on source");
                 }
                 SDFSLogger.getLog().info("Replication Canceled");
                 try {
                     synchronized (client.activeImports) {
                         List<ReplicationImportEvent> al = null;
-                        if (client.activeImports.containsKey(this.dstFile)) {
-                            al = client.activeImports.get(this.dstFile);
+                        if (client.activeImports.containsKey(evt.dst)) {
+                            al = client.activeImports.get(evt.dst);
                             al.remove(this.evt);
                         } else {
                             al = new ArrayList<ReplicationImportEvent>();
                         }
                         if (al.size() == 0) {
-                            client.activeImports.remove(dstFile);
+                            client.activeImports.remove(evt.dst);
                         }
                         if (client.imports.remove(this.evt.uid) != null) {
                             String mapToJson = objGson.toJson(client.imports.keySet());
@@ -158,18 +155,18 @@ public class ImportFile implements Runnable {
             } catch (Exception e1) {
                 try {
                     SDFSLogger.getLog().warn("unable to complete replication to " + client.url + " volume id "
-                            + client.volumeid + " for " + srcFile + " will retry in 5 minutes", e1);
+                            + client.volumeid + " for " + evt.src + " will retry in 5 minutes", e1);
                     e = e1;
                     this.evt.setShortMsg("unable to complete replication to " + client.url + " volume id "
-                            + client.volumeid + " for " + srcFile + " will retry in 5 minutes");
-                    String pt = Main.volume.getPath() + File.separator + this.dstFile;
+                            + client.volumeid + " for " + evt.src + " will retry in 5 minutes");
+                    String pt = Main.volume.getPath() + File.separator + evt.dst;
                     File _f = new File(pt);
                     try {
 
                         if (_f.exists()) {
                             FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                             MetaFileStore.getMF(_f.getAbsolutePath()).clearRetentionLock();
-                            MetaFileStore.removeMetaFile(_f.getPath(), false, false, true);
+                            MetaFileStore.removeMetaFile(_f.getPath(), false, false, false);
                         }
                     } catch (Exception e2) {
 
@@ -184,7 +181,7 @@ public class ImportFile implements Runnable {
                         Thread.sleep(1000);
                         if (this.canceled) {
                             synchronized (client.activeImports) {
-                                client.activeImports.remove(dstFile);
+                                client.activeImports.remove(evt.dst);
                                 if (client.imports.remove(this.evt.uid) != null) {
                                     String mapToJson = objGson.toJson(client.imports.keySet());
                                     try {
@@ -205,9 +202,9 @@ public class ImportFile implements Runnable {
             }
             if (e != null) {
                 SDFSLogger.getLog().warn("replication failed for " + client.url + " volume id "
-                        + client.volumeid + " for " + srcFile, e);
+                        + client.volumeid + " for " + evt.src, e);
                 synchronized (client.activeImports) {
-                    client.activeImports.remove(dstFile);
+                    client.activeImports.remove(evt.dst);
                     if (client.imports.remove(this.evt.uid) != null) {
                         String mapToJson = objGson.toJson(client.imports.keySet());
                         try {
@@ -221,7 +218,7 @@ public class ImportFile implements Runnable {
         }
         synchronized (actives) {
             if (!active.isLocked()) {
-                actives.remove(this.dstFile);
+                actives.remove(evt.dst);
             }
         }
 
@@ -230,10 +227,10 @@ public class ImportFile implements Runnable {
     void replicate() throws ReplicationCanceledException, Exception {
         rc = client.getReplicationConnection();
         try {
-            SDFSLogger.getLog().info("Importing " + this.srcFile + " to " + this.dstFile);
-            String pt = Main.volume.getPath() + File.separator + this.dstFile;
+            SDFSLogger.getLog().info("Importing " + evt.src + " to " + evt.dst);
+            String pt = Main.volume.getPath() + File.separator + evt.dst;
             File _f = new File(pt);
-            if (_f.exists() && !this.overwrite) {
+            if (_f.exists() && !evt.overwrite) {
                 throw new FileAlreadyExistsException(pt);
             }
             if (this.evt.canceled || this.client.removed || this.client.closed) {
@@ -246,15 +243,31 @@ public class ImportFile implements Runnable {
                 }
                 SDFSLogger.getLog().info("Event " + this.evt.uid + " is unpaused");
             }
-            evt.setShortMsg("Importing metadata file for " + this.dstFile);
+            evt.setShortMsg("Importing metadata file for " + evt.dst);
             MetaDataDedupFile mf = null;
+            FileInfoResponse fi = null;
             try {
-                mf = downloadMetaFile();
+                fi = downloadMetaFile();
+                if (!_f.exists()) {
+                    mf = MetaDataDedupFile.fromProtoBuf(fi, _f.getPath());
+                    String ng = UUID.randomUUID().toString();
+                    mf.setLength(0, true);
+                    mf.setDfGuid(ng);
+                    mf.sync();
+                } else {
+                    mf = MetaFileStore.getMF(_f);
+                    if (mf.getGUID() == null) {
+                        String ng = UUID.randomUUID().toString();
+                        mf.setLength(0, true);
+                        mf.setDfGuid(ng);
+                        mf.sync();
+                    }
+                }
             } catch (ReplicationCanceledException e) {
 
                 throw e;
             }
-            long expectedSize = mf.length();
+            long expectedSize = evt.dstOffset + evt.srcSize;
             evt.addCount(1);
             if (this.evt.canceled) {
                 mf.deleteStub(false);
@@ -267,14 +280,11 @@ public class ImportFile implements Runnable {
                 }
                 SDFSLogger.getLog().info("Event " + this.evt.uid + " is unpaused");
             }
-            evt.setShortMsg("Importing map for " + this.dstFile);
-            String sguid = mf.getDfGuid();
-            String ng = UUID.randomUUID().toString();
-            mf.setLength(0, true);
-            mf.setDfGuid(ng);
-            mf.sync();
+            evt.setShortMsg("Importing map for " + evt.dst);
+            String sguid = fi.getMapGuid();
+
             try {
-                if (sguid != null && sguid.trim().length() > 0) {
+                if (sguid != null && sguid.trim().length() > 0 && evt.srcSize > 0) {
                     downloadDDB(mf, sguid);
                 }
                 mf.setRetentionLock();
@@ -283,7 +293,7 @@ public class ImportFile implements Runnable {
                 if (_f.exists()) {
                     FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
                     MetaFileStore.getMF(mf.getAbsolutePath()).clearRetentionLock();
-                    MetaFileStore.removeMetaFile(mf.getPath(), false, false, true);
+                    MetaFileStore.removeMetaFile(mf.getPath(), false, false, false);
                 }
                 throw e;
             }
@@ -293,11 +303,11 @@ public class ImportFile implements Runnable {
             MetaFileStore.addToCache(mf);
             evt.addCount(1);
             FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
-            evt.endEvent("Import Successful for " + this.dstFile, SDFSEvent.INFO);
-            SDFSLogger.getLog().info("Imported " + this.dstFile);
+            evt.endEvent("Import Successful for " + evt.dst, SDFSEvent.INFO);
+            SDFSLogger.getLog().info("Imported " + evt.dst);
 
             synchronized (client.activeImports) {
-                client.activeImports.remove(dstFile);
+                client.activeImports.remove(evt.dst);
                 if (client.imports.remove(this.evt.uid) != null) {
                     String mapToJson = objGson.toJson(client.imports.keySet());
                     try {
@@ -317,7 +327,7 @@ public class ImportFile implements Runnable {
 
     }
 
-    private MetaDataDedupFile downloadMetaFile() throws Exception {
+    private FileInfoResponse downloadMetaFile() throws Exception {
         if (this.evt.canceled || this.client.removed || this.client.closed) {
             throw new ReplicationCanceledException("Replication Canceled");
         }
@@ -329,7 +339,7 @@ public class ImportFile implements Runnable {
             SDFSLogger.getLog().info("Event " + this.evt.uid + " is unpaused");
         }
         MetaDataDedupeFileRequest mr = MetaDataDedupeFileRequest.newBuilder().setPvolumeID(client.volumeid)
-                .setFilePath(srcFile).build();
+                .setFilePath(evt.src).build();
         MetaDataDedupeFileResponse crs = this.rc.getStorageBlockingStub().getMetaDataDedupeFile(mr);
         if (crs.getErrorCode() != errorCodes.NOERR) {
             if (crs.getErrorCode() == errorCodes.ENOENT) {
@@ -339,10 +349,19 @@ public class ImportFile implements Runnable {
                         "Error found during file request " + crs.getErrorCode() + " err : " + crs.getError());
             }
         }
-        String pt = Main.volume.getPath() + File.separator + this.dstFile;
+        String pt = Main.volume.getPath() + File.separator + evt.dst;
         File _f = new File(pt);
+        if (_f.exists() && evt.srcOffset == 0 && evt.dstOffset == 0 && (evt.srcSize ==0 || evt.srcSize ==crs.getFile().getSize())) {
+            FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+            MetaFileStore.getMF(_f.getAbsolutePath()).clearRetentionLock();
+            MetaFileStore.removeMetaFile(_f.getPath(), false, false, false);
+        }
+        if (evt.srcSize == 0) {
+            evt.srcSize = crs.getFile().getSize();
+        }
         this.evt.fileSize = crs.getFile().getSize();
-        return MetaDataDedupFile.fromProtoBuf(crs.getFile(), _f.getPath());
+
+        return crs.getFile();
     }
 
     private void downloadDDB(MetaDataDedupFile mf, String guid) throws Exception {
@@ -360,9 +379,24 @@ public class ImportFile implements Runnable {
                 .setPvolumeID(this.client.volumeid).setGuid(guid).build();
         Iterator<SparseDataChunkP> crs = this.rc.getStorageBlockingStub().getSparseDedupeFile(req);
 
+        long spos = this.getChuckPosition(evt.srcOffset);
+        long dpos = this.getChuckPosition(evt.dstOffset);
+        long endPos = evt.srcOffset + evt.srcSize;
+        ByteBuffer bf = null;
+
+        if (evt.dstOffset > 0 && evt.srcOffset > 0) {
+
+            int rl = (int) ((int) evt.dstOffset - (int) dpos);
+            if (rl > 0) {
+                DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
+                bf = ByteBuffer.wrap(new byte[rl]);
+                ch.read(bf, 0, rl, dpos);
+                ch.getDedupFile().unRegisterChannel(ch, -2);
+                ch.getDedupFile().forceClose();
+            }
+        }
         LongByteArrayMap mp = LongByteArrayMap.getMap(mf.getDfGuid());
         mf.getIOMonitor().clearFileCounters(false);
-        long pos = 0;
         while (crs.hasNext()) {
             if (this.evt.canceled || this.client.removed || this.client.closed) {
                 throw new ReplicationCanceledException("Replication Canceled");
@@ -380,14 +414,36 @@ public class ImportFile implements Runnable {
                         " because :" + cr.getError() + " code:" + cr.getErrorCodeValue();
 
                 throw new IOException(msg);
+            }
+            SparseDataChunk sp = new SparseDataChunk(cr);
+            if (sp.getFpos() >= spos && sp.getFpos() < endPos) {
+                SparseDataChunk ck = importSparseDataChunk(sp, mf);
+                mp.put(dpos, ck);
+                dpos += ck.len;
+            } else if (sp.getFpos() >= endPos) {
+                break;
 
             }
-            SparseDataChunk ck = importSparseDataChunk(new SparseDataChunk(cr), mf);
-            mp.put(pos, ck);
-            pos += ck.len;
 
         }
+        
         mp.close();
+        if (bf != null) {
+            DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
+            long place = this.getChuckPosition(evt.dstOffset);
+            int rl = (int) ((int) evt.dstOffset - (int) place);
+            bf.position(0);
+            ch.writeFile(bf, rl, 0, place, false);
+            ch.getDedupFile().unRegisterChannel(ch, -2);
+            ch.getDedupFile().forceClose();
+        }
+        HashBlobArchive.sync(mf.getDfGuid());
+    }
+
+    private long getChuckPosition(long location) {
+        long place = location / Main.CHUNK_LENGTH;
+        place = place * Main.CHUNK_LENGTH;
+        return place;
     }
 
     private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf)

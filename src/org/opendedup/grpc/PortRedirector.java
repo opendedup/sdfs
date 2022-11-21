@@ -25,7 +25,7 @@ public final class PortRedirector {
    *
    * Protobuf type {@code org.opendedup.grpc.ProxyVolumeInfoRequest}
    */
-  public  static final class ProxyVolumeInfoRequest extends
+  public static final class ProxyVolumeInfoRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ProxyVolumeInfoRequest)
       ProxyVolumeInfoRequestOrBuilder {
@@ -35,6 +35,13 @@ public final class PortRedirector {
       super(builder);
     }
     private ProxyVolumeInfoRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ProxyVolumeInfoRequest();
     }
 
     @java.lang.Override
@@ -61,7 +68,7 @@ public final class PortRedirector {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -71,6 +78,8 @@ public final class PortRedirector {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -130,9 +139,8 @@ public final class PortRedirector {
       }
       org.opendedup.grpc.PortRedirector.ProxyVolumeInfoRequest other = (org.opendedup.grpc.PortRedirector.ProxyVolumeInfoRequest) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -311,35 +319,35 @@ public final class PortRedirector {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -384,7 +392,7 @@ public final class PortRedirector {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -464,27 +472,31 @@ public final class PortRedirector {
 
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ProxyVolumeInfoResponse}
    */
-  public  static final class ProxyVolumeInfoResponse extends
+  public static final class ProxyVolumeInfoResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ProxyVolumeInfoResponse)
       ProxyVolumeInfoResponseOrBuilder {
@@ -497,6 +509,13 @@ public final class PortRedirector {
       volumeInfoResponse_ = java.util.Collections.emptyList();
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ProxyVolumeInfoResponse();
     }
 
     @java.lang.Override
@@ -524,7 +543,7 @@ public final class PortRedirector {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 volumeInfoResponse_ = new java.util.ArrayList<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -545,7 +564,7 @@ public final class PortRedirector {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -555,11 +574,13 @@ public final class PortRedirector {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           volumeInfoResponse_ = java.util.Collections.unmodifiableList(volumeInfoResponse_);
         }
         this.unknownFields = unknownFields.build();
@@ -579,18 +600,19 @@ public final class PortRedirector {
               org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse.class, org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int VOLUMEINFORESPONSE_FIELD_NUMBER = 1;
     private java.util.List<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse> volumeInfoResponse_;
     /**
      * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse> getVolumeInfoResponseList() {
       return volumeInfoResponse_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder> 
         getVolumeInfoResponseOrBuilderList() {
       return volumeInfoResponse_;
@@ -598,18 +620,21 @@ public final class PortRedirector {
     /**
      * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
      */
+    @java.lang.Override
     public int getVolumeInfoResponseCount() {
       return volumeInfoResponse_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse getVolumeInfoResponse(int index) {
       return volumeInfoResponse_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.VolumeInfoResponse volumeInfoResponse = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder getVolumeInfoResponseOrBuilder(
         int index) {
       return volumeInfoResponse_.get(index);
@@ -619,7 +644,9 @@ public final class PortRedirector {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -634,7 +661,9 @@ public final class PortRedirector {
     }
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -653,14 +682,16 @@ public final class PortRedirector {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -683,7 +714,7 @@ public final class PortRedirector {
       for (int i = 0; i < volumeInfoResponse_.size(); i++) {
         output.writeMessage(1, volumeInfoResponse_.get(i));
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -702,7 +733,7 @@ public final class PortRedirector {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, volumeInfoResponse_.get(i));
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -724,14 +755,13 @@ public final class PortRedirector {
       }
       org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse other = (org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse) obj;
 
-      boolean result = true;
-      result = result && getVolumeInfoResponseList()
-          .equals(other.getVolumeInfoResponseList());
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getVolumeInfoResponseList()
+          .equals(other.getVolumeInfoResponseList())) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -920,9 +950,8 @@ public final class PortRedirector {
       public org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse buildPartial() {
         org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse result = new org.opendedup.grpc.PortRedirector.ProxyVolumeInfoResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (volumeInfoResponseBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             volumeInfoResponse_ = java.util.Collections.unmodifiableList(volumeInfoResponse_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -932,42 +961,41 @@ public final class PortRedirector {
         }
         result.error_ = error_;
         result.errorCode_ = errorCode_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1047,7 +1075,7 @@ public final class PortRedirector {
       private java.util.List<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse> volumeInfoResponse_ =
         java.util.Collections.emptyList();
       private void ensureVolumeInfoResponseIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           volumeInfoResponse_ = new java.util.ArrayList<org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse>(volumeInfoResponse_);
           bitField0_ |= 0x00000001;
          }
@@ -1276,7 +1304,7 @@ public final class PortRedirector {
           volumeInfoResponseBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponse.Builder, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoResponseOrBuilder>(
                   volumeInfoResponse_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           volumeInfoResponse_ = null;
@@ -1287,6 +1315,7 @@ public final class PortRedirector {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 2;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -1302,6 +1331,7 @@ public final class PortRedirector {
       }
       /**
        * <code>string error = 2;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -1318,6 +1348,8 @@ public final class PortRedirector {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -1331,6 +1363,7 @@ public final class PortRedirector {
       }
       /**
        * <code>string error = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -1340,6 +1373,8 @@ public final class PortRedirector {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -1356,21 +1391,27 @@ public final class PortRedirector {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -1378,6 +1419,8 @@ public final class PortRedirector {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -1390,6 +1433,7 @@ public final class PortRedirector {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -1400,7 +1444,7 @@ public final class PortRedirector {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1457,7 +1501,7 @@ public final class PortRedirector {
   /**
    * Protobuf type {@code org.opendedup.grpc.ReloadConfigRequest}
    */
-  public  static final class ReloadConfigRequest extends
+  public static final class ReloadConfigRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ReloadConfigRequest)
       ReloadConfigRequestOrBuilder {
@@ -1467,6 +1511,13 @@ public final class PortRedirector {
       super(builder);
     }
     private ReloadConfigRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ReloadConfigRequest();
     }
 
     @java.lang.Override
@@ -1493,7 +1544,7 @@ public final class PortRedirector {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1503,6 +1554,8 @@ public final class PortRedirector {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1562,9 +1615,8 @@ public final class PortRedirector {
       }
       org.opendedup.grpc.PortRedirector.ReloadConfigRequest other = (org.opendedup.grpc.PortRedirector.ReloadConfigRequest) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1739,35 +1791,35 @@ public final class PortRedirector {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1812,7 +1864,7 @@ public final class PortRedirector {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1868,27 +1920,31 @@ public final class PortRedirector {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ReloadConfigResponse}
    */
-  public  static final class ReloadConfigResponse extends
+  public static final class ReloadConfigResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ReloadConfigResponse)
       ReloadConfigResponseOrBuilder {
@@ -1900,6 +1956,13 @@ public final class PortRedirector {
     private ReloadConfigResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ReloadConfigResponse();
     }
 
     @java.lang.Override
@@ -1915,7 +1978,6 @@ public final class PortRedirector {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1939,7 +2001,7 @@ public final class PortRedirector {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1949,6 +2011,8 @@ public final class PortRedirector {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1974,7 +2038,9 @@ public final class PortRedirector {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -1989,7 +2055,9 @@ public final class PortRedirector {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -2008,14 +2076,16 @@ public final class PortRedirector {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -2035,7 +2105,7 @@ public final class PortRedirector {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -2050,7 +2120,7 @@ public final class PortRedirector {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -2072,12 +2142,11 @@ public final class PortRedirector {
       }
       org.opendedup.grpc.PortRedirector.ReloadConfigResponse other = (org.opendedup.grpc.PortRedirector.ReloadConfigResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2262,35 +2331,35 @@ public final class PortRedirector {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2343,6 +2412,7 @@ public final class PortRedirector {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -2358,6 +2428,7 @@ public final class PortRedirector {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -2374,6 +2445,8 @@ public final class PortRedirector {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -2387,6 +2460,7 @@ public final class PortRedirector {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -2396,6 +2470,8 @@ public final class PortRedirector {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -2412,21 +2488,27 @@ public final class PortRedirector {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -2434,6 +2516,8 @@ public final class PortRedirector {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -2446,6 +2530,7 @@ public final class PortRedirector {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -2456,7 +2541,7 @@ public final class PortRedirector {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2553,20 +2638,12 @@ public final class PortRedirector {
       "onfigResponseB0Z.github.com/opendedup/sd" +
       "fs-client-go/sdfs/;sdfsb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.opendedup.grpc.FileInfo.getDescriptor(),
           org.opendedup.grpc.VolumeServiceOuterClass.getDescriptor(),
-        }, assigner);
+        });
     internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_org_opendedup_grpc_ProxyVolumeInfoRequest_fieldAccessorTable = new

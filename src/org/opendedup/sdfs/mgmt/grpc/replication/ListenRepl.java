@@ -40,16 +40,6 @@ public class ListenRepl implements Runnable {
 
     }
 
-    private static class ReplicationAction implements Runnable {
-
-        @Override
-        public void run() {
-            // TODO Auto-generated method stub
-
-        }
-
-    }
-
     public void listen() throws Exception, ListenReplCanceled {
         if (this.client.removed) {
             throw new ListenReplCanceled();
@@ -80,10 +70,11 @@ public class ListenRepl implements Runnable {
                     if (rs.getActionType() == actionType.MFILEWRITTEN) {
                         ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                 rs.getFile().getFilePath(),
-                                client.url, client.volumeid, client.mtls, false);
+                                client.url, client.volumeid, client.mtls, false,
+                                0,0,0,true);
                         evt.persistEvent();
-                        impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
-                                evt, true);
+                        impf = new ImportFile(client,
+                                evt);
 
                     } else if (rs.getActionType() == actionType.MFILEDELETED) {
                         String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
@@ -108,7 +99,7 @@ public class ListenRepl implements Runnable {
                         }
                         FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                         MetaFileStore.getMF(_f).clearRetentionLock();
-                        MetaFileStore.removeMetaFile(_f.getPath());
+                        MetaFileStore.removeMetaFile(_f.getPath(), false, false, false);
                     } else if (rs.getActionType() == actionType.MFILERENAMED) {
                         String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
                         spt = spt.replaceFirst("\\.\\/", "");
@@ -122,11 +113,10 @@ public class ListenRepl implements Runnable {
 
                             ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                     rs.getFile().getFilePath(),
-                                    client.url, client.volumeid, client.mtls, false);
+                                    client.url, client.volumeid, client.mtls, false,0,0,0,true);
                             evt.persistEvent();
-                            impf = new ImportFile(rs.getDstfile(), rs.getDstfile(),
-                                    client,
-                                    evt, true);
+                            impf = new ImportFile(
+                                    client,evt);
                         } else {
                             if (client.activeImports.containsKey(_sf.getPath())) {
                                 List<ReplicationImportEvent> al = client.activeImports.get(_sf.getPath());
@@ -254,7 +244,7 @@ public class ListenRepl implements Runnable {
                     }
                     ReplicationImportEvent evt = new ReplicationImportEvent(".",
                             ".", this.client.url, this.client.volumeid,
-                            this.client.mtls, false);
+                            this.client.mtls, false,0,0,0,true);
                     dl = new DownloadAll(this.client, evt);
                     downloadThread = new Thread(dl);
                     downloadThread.start();

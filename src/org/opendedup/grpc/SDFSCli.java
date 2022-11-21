@@ -20,50 +20,60 @@ public final class SDFSCli {
 
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
     java.lang.String getUser();
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
     com.google.protobuf.ByteString
         getUserBytes();
 
     /**
      * <code>string description = 2;</code>
+     * @return The description.
      */
     java.lang.String getDescription();
     /**
      * <code>string description = 2;</code>
+     * @return The bytes for description.
      */
     com.google.protobuf.ByteString
         getDescriptionBytes();
 
     /**
      * <code>string passwordHash = 3;</code>
+     * @return The passwordHash.
      */
     java.lang.String getPasswordHash();
     /**
      * <code>string passwordHash = 3;</code>
+     * @return The bytes for passwordHash.
      */
     com.google.protobuf.ByteString
         getPasswordHashBytes();
 
     /**
      * <code>string salt = 4;</code>
+     * @return The salt.
      */
     java.lang.String getSalt();
     /**
      * <code>string salt = 4;</code>
+     * @return The bytes for salt.
      */
     com.google.protobuf.ByteString
         getSaltBytes();
 
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * @return Whether the permissions field is set.
      */
     boolean hasPermissions();
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * @return The permissions.
      */
     org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions();
     /**
@@ -73,18 +83,20 @@ public final class SDFSCli {
 
     /**
      * <code>int64 lastLogin = 6;</code>
+     * @return The lastLogin.
      */
     long getLastLogin();
 
     /**
      * <code>int64 lastFailedLogin = 7;</code>
+     * @return The lastFailedLogin.
      */
     long getLastFailedLogin();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SdfsUser}
    */
-  public  static final class SdfsUser extends
+  public static final class SdfsUser extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SdfsUser)
       SdfsUserOrBuilder {
@@ -98,8 +110,13 @@ public final class SDFSCli {
       description_ = "";
       passwordHash_ = "";
       salt_ = "";
-      lastLogin_ = 0L;
-      lastFailedLogin_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SdfsUser();
     }
 
     @java.lang.Override
@@ -115,7 +132,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -174,7 +190,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -184,6 +200,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -209,7 +227,9 @@ public final class SDFSCli {
     private volatile java.lang.Object user_;
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
+    @java.lang.Override
     public java.lang.String getUser() {
       java.lang.Object ref = user_;
       if (ref instanceof java.lang.String) {
@@ -224,7 +244,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserBytes() {
       java.lang.Object ref = user_;
@@ -243,7 +265,9 @@ public final class SDFSCli {
     private volatile java.lang.Object description_;
     /**
      * <code>string description = 2;</code>
+     * @return The description.
      */
+    @java.lang.Override
     public java.lang.String getDescription() {
       java.lang.Object ref = description_;
       if (ref instanceof java.lang.String) {
@@ -258,7 +282,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string description = 2;</code>
+     * @return The bytes for description.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDescriptionBytes() {
       java.lang.Object ref = description_;
@@ -277,7 +303,9 @@ public final class SDFSCli {
     private volatile java.lang.Object passwordHash_;
     /**
      * <code>string passwordHash = 3;</code>
+     * @return The passwordHash.
      */
+    @java.lang.Override
     public java.lang.String getPasswordHash() {
       java.lang.Object ref = passwordHash_;
       if (ref instanceof java.lang.String) {
@@ -292,7 +320,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string passwordHash = 3;</code>
+     * @return The bytes for passwordHash.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPasswordHashBytes() {
       java.lang.Object ref = passwordHash_;
@@ -311,7 +341,9 @@ public final class SDFSCli {
     private volatile java.lang.Object salt_;
     /**
      * <code>string salt = 4;</code>
+     * @return The salt.
      */
+    @java.lang.Override
     public java.lang.String getSalt() {
       java.lang.Object ref = salt_;
       if (ref instanceof java.lang.String) {
@@ -326,7 +358,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string salt = 4;</code>
+     * @return The bytes for salt.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSaltBytes() {
       java.lang.Object ref = salt_;
@@ -345,19 +379,24 @@ public final class SDFSCli {
     private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_;
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * @return Whether the permissions field is set.
      */
+    @java.lang.Override
     public boolean hasPermissions() {
       return permissions_ != null;
     }
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * @return The permissions.
      */
+    @java.lang.Override
     public org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions() {
       return permissions_ == null ? org.opendedup.grpc.SDFSCli.SdfsPermissions.getDefaultInstance() : permissions_;
     }
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder getPermissionsOrBuilder() {
       return getPermissions();
     }
@@ -366,7 +405,9 @@ public final class SDFSCli {
     private long lastLogin_;
     /**
      * <code>int64 lastLogin = 6;</code>
+     * @return The lastLogin.
      */
+    @java.lang.Override
     public long getLastLogin() {
       return lastLogin_;
     }
@@ -375,7 +416,9 @@ public final class SDFSCli {
     private long lastFailedLogin_;
     /**
      * <code>int64 lastFailedLogin = 7;</code>
+     * @return The lastFailedLogin.
      */
+    @java.lang.Override
     public long getLastFailedLogin() {
       return lastFailedLogin_;
     }
@@ -394,16 +437,16 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, user_);
       }
-      if (!getDescriptionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, description_);
       }
-      if (!getPasswordHashBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(passwordHash_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, passwordHash_);
       }
-      if (!getSaltBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(salt_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, salt_);
       }
       if (permissions_ != null) {
@@ -424,16 +467,16 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, user_);
       }
-      if (!getDescriptionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, description_);
       }
-      if (!getPasswordHashBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(passwordHash_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, passwordHash_);
       }
-      if (!getSaltBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(salt_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, salt_);
       }
       if (permissions_ != null) {
@@ -463,26 +506,25 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.SdfsUser other = (org.opendedup.grpc.SDFSCli.SdfsUser) obj;
 
-      boolean result = true;
-      result = result && getUser()
-          .equals(other.getUser());
-      result = result && getDescription()
-          .equals(other.getDescription());
-      result = result && getPasswordHash()
-          .equals(other.getPasswordHash());
-      result = result && getSalt()
-          .equals(other.getSalt());
-      result = result && (hasPermissions() == other.hasPermissions());
+      if (!getUser()
+          .equals(other.getUser())) return false;
+      if (!getDescription()
+          .equals(other.getDescription())) return false;
+      if (!getPasswordHash()
+          .equals(other.getPasswordHash())) return false;
+      if (!getSalt()
+          .equals(other.getSalt())) return false;
+      if (hasPermissions() != other.hasPermissions()) return false;
       if (hasPermissions()) {
-        result = result && getPermissions()
-            .equals(other.getPermissions());
+        if (!getPermissions()
+            .equals(other.getPermissions())) return false;
       }
-      result = result && (getLastLogin()
-          == other.getLastLogin());
-      result = result && (getLastFailedLogin()
-          == other.getLastFailedLogin());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getLastLogin()
+          != other.getLastLogin()) return false;
+      if (getLastFailedLogin()
+          != other.getLastFailedLogin()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -704,35 +746,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -803,6 +845,7 @@ public final class SDFSCli {
       private java.lang.Object user_ = "";
       /**
        * <code>string user = 1;</code>
+       * @return The user.
        */
       public java.lang.String getUser() {
         java.lang.Object ref = user_;
@@ -818,6 +861,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return The bytes for user.
        */
       public com.google.protobuf.ByteString
           getUserBytes() {
@@ -834,6 +878,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The user to set.
+       * @return This builder for chaining.
        */
       public Builder setUser(
           java.lang.String value) {
@@ -847,6 +893,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUser() {
         
@@ -856,6 +903,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The bytes for user to set.
+       * @return This builder for chaining.
        */
       public Builder setUserBytes(
           com.google.protobuf.ByteString value) {
@@ -872,6 +921,7 @@ public final class SDFSCli {
       private java.lang.Object description_ = "";
       /**
        * <code>string description = 2;</code>
+       * @return The description.
        */
       public java.lang.String getDescription() {
         java.lang.Object ref = description_;
@@ -887,6 +937,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string description = 2;</code>
+       * @return The bytes for description.
        */
       public com.google.protobuf.ByteString
           getDescriptionBytes() {
@@ -903,6 +954,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string description = 2;</code>
+       * @param value The description to set.
+       * @return This builder for chaining.
        */
       public Builder setDescription(
           java.lang.String value) {
@@ -916,6 +969,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string description = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDescription() {
         
@@ -925,6 +979,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string description = 2;</code>
+       * @param value The bytes for description to set.
+       * @return This builder for chaining.
        */
       public Builder setDescriptionBytes(
           com.google.protobuf.ByteString value) {
@@ -941,6 +997,7 @@ public final class SDFSCli {
       private java.lang.Object passwordHash_ = "";
       /**
        * <code>string passwordHash = 3;</code>
+       * @return The passwordHash.
        */
       public java.lang.String getPasswordHash() {
         java.lang.Object ref = passwordHash_;
@@ -956,6 +1013,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string passwordHash = 3;</code>
+       * @return The bytes for passwordHash.
        */
       public com.google.protobuf.ByteString
           getPasswordHashBytes() {
@@ -972,6 +1030,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string passwordHash = 3;</code>
+       * @param value The passwordHash to set.
+       * @return This builder for chaining.
        */
       public Builder setPasswordHash(
           java.lang.String value) {
@@ -985,6 +1045,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string passwordHash = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPasswordHash() {
         
@@ -994,6 +1055,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string passwordHash = 3;</code>
+       * @param value The bytes for passwordHash to set.
+       * @return This builder for chaining.
        */
       public Builder setPasswordHashBytes(
           com.google.protobuf.ByteString value) {
@@ -1010,6 +1073,7 @@ public final class SDFSCli {
       private java.lang.Object salt_ = "";
       /**
        * <code>string salt = 4;</code>
+       * @return The salt.
        */
       public java.lang.String getSalt() {
         java.lang.Object ref = salt_;
@@ -1025,6 +1089,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string salt = 4;</code>
+       * @return The bytes for salt.
        */
       public com.google.protobuf.ByteString
           getSaltBytes() {
@@ -1041,6 +1106,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string salt = 4;</code>
+       * @param value The salt to set.
+       * @return This builder for chaining.
        */
       public Builder setSalt(
           java.lang.String value) {
@@ -1054,6 +1121,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string salt = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSalt() {
         
@@ -1063,6 +1131,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string salt = 4;</code>
+       * @param value The bytes for salt to set.
+       * @return This builder for chaining.
        */
       public Builder setSaltBytes(
           com.google.protobuf.ByteString value) {
@@ -1076,17 +1146,19 @@ public final class SDFSCli {
         return this;
       }
 
-      private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_ = null;
+      private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_;
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.SDFSCli.SdfsPermissions, org.opendedup.grpc.SDFSCli.SdfsPermissions.Builder, org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder> permissionsBuilder_;
       /**
        * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * @return Whether the permissions field is set.
        */
       public boolean hasPermissions() {
         return permissionsBuilder_ != null || permissions_ != null;
       }
       /**
        * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * @return The permissions.
        */
       public org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions() {
         if (permissionsBuilder_ == null) {
@@ -1196,12 +1268,16 @@ public final class SDFSCli {
       private long lastLogin_ ;
       /**
        * <code>int64 lastLogin = 6;</code>
+       * @return The lastLogin.
        */
+      @java.lang.Override
       public long getLastLogin() {
         return lastLogin_;
       }
       /**
        * <code>int64 lastLogin = 6;</code>
+       * @param value The lastLogin to set.
+       * @return This builder for chaining.
        */
       public Builder setLastLogin(long value) {
         
@@ -1211,6 +1287,7 @@ public final class SDFSCli {
       }
       /**
        * <code>int64 lastLogin = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLastLogin() {
         
@@ -1222,12 +1299,16 @@ public final class SDFSCli {
       private long lastFailedLogin_ ;
       /**
        * <code>int64 lastFailedLogin = 7;</code>
+       * @return The lastFailedLogin.
        */
+      @java.lang.Override
       public long getLastFailedLogin() {
         return lastFailedLogin_;
       }
       /**
        * <code>int64 lastFailedLogin = 7;</code>
+       * @param value The lastFailedLogin to set.
+       * @return This builder for chaining.
        */
       public Builder setLastFailedLogin(long value) {
         
@@ -1237,6 +1318,7 @@ public final class SDFSCli {
       }
       /**
        * <code>int64 lastFailedLogin = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLastFailedLogin() {
         
@@ -1247,7 +1329,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1303,68 +1385,80 @@ public final class SDFSCli {
 
     /**
      * <code>bool METADATA_READ = 1;</code>
+     * @return The mETADATAREAD.
      */
     boolean getMETADATAREAD();
 
     /**
      * <code>bool METADATA_WRITE = 2;</code>
+     * @return The mETADATAWRITE.
      */
     boolean getMETADATAWRITE();
 
     /**
      * <code>bool FILE_READ = 3;</code>
+     * @return The fILEREAD.
      */
     boolean getFILEREAD();
 
     /**
      * <code>bool FILE_WRITE = 4;</code>
+     * @return The fILEWRITE.
      */
     boolean getFILEWRITE();
 
     /**
      * <code>bool FILE_DELETE = 5;</code>
+     * @return The fILEDELETE.
      */
     boolean getFILEDELETE();
 
     /**
      * <code>bool VOLUME_READ = 6;</code>
+     * @return The vOLUMEREAD.
      */
     boolean getVOLUMEREAD();
 
     /**
      * <code>bool CONFIG_READ = 7;</code>
+     * @return The cONFIGREAD.
      */
     boolean getCONFIGREAD();
 
     /**
      * <code>bool CONFIG_WRITE = 8;</code>
+     * @return The cONFIGWRITE.
      */
     boolean getCONFIGWRITE();
 
     /**
      * <code>bool EVENT_READ = 9;</code>
+     * @return The eVENTREAD.
      */
     boolean getEVENTREAD();
 
     /**
      * <code>bool AUTH_READ = 10;</code>
+     * @return The aUTHREAD.
      */
     boolean getAUTHREAD();
 
     /**
      * <code>bool AUTH_WRITE = 11;</code>
+     * @return The aUTHWRITE.
      */
     boolean getAUTHWRITE();
 
     /**
      * <code>bool ADMIN = 12;</code>
+     * @return The aDMIN.
      */
     boolean getADMIN();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SdfsPermissions}
    */
-  public  static final class SdfsPermissions extends
+  public static final class SdfsPermissions extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SdfsPermissions)
       SdfsPermissionsOrBuilder {
@@ -1374,18 +1468,13 @@ public final class SDFSCli {
       super(builder);
     }
     private SdfsPermissions() {
-      mETADATAREAD_ = false;
-      mETADATAWRITE_ = false;
-      fILEREAD_ = false;
-      fILEWRITE_ = false;
-      fILEDELETE_ = false;
-      vOLUMEREAD_ = false;
-      cONFIGREAD_ = false;
-      cONFIGWRITE_ = false;
-      eVENTREAD_ = false;
-      aUTHREAD_ = false;
-      aUTHWRITE_ = false;
-      aDMIN_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SdfsPermissions();
     }
 
     @java.lang.Override
@@ -1401,7 +1490,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1473,7 +1561,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1483,6 +1571,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1508,7 +1598,9 @@ public final class SDFSCli {
     private boolean mETADATAREAD_;
     /**
      * <code>bool METADATA_READ = 1;</code>
+     * @return The mETADATAREAD.
      */
+    @java.lang.Override
     public boolean getMETADATAREAD() {
       return mETADATAREAD_;
     }
@@ -1517,7 +1609,9 @@ public final class SDFSCli {
     private boolean mETADATAWRITE_;
     /**
      * <code>bool METADATA_WRITE = 2;</code>
+     * @return The mETADATAWRITE.
      */
+    @java.lang.Override
     public boolean getMETADATAWRITE() {
       return mETADATAWRITE_;
     }
@@ -1526,7 +1620,9 @@ public final class SDFSCli {
     private boolean fILEREAD_;
     /**
      * <code>bool FILE_READ = 3;</code>
+     * @return The fILEREAD.
      */
+    @java.lang.Override
     public boolean getFILEREAD() {
       return fILEREAD_;
     }
@@ -1535,7 +1631,9 @@ public final class SDFSCli {
     private boolean fILEWRITE_;
     /**
      * <code>bool FILE_WRITE = 4;</code>
+     * @return The fILEWRITE.
      */
+    @java.lang.Override
     public boolean getFILEWRITE() {
       return fILEWRITE_;
     }
@@ -1544,7 +1642,9 @@ public final class SDFSCli {
     private boolean fILEDELETE_;
     /**
      * <code>bool FILE_DELETE = 5;</code>
+     * @return The fILEDELETE.
      */
+    @java.lang.Override
     public boolean getFILEDELETE() {
       return fILEDELETE_;
     }
@@ -1553,7 +1653,9 @@ public final class SDFSCli {
     private boolean vOLUMEREAD_;
     /**
      * <code>bool VOLUME_READ = 6;</code>
+     * @return The vOLUMEREAD.
      */
+    @java.lang.Override
     public boolean getVOLUMEREAD() {
       return vOLUMEREAD_;
     }
@@ -1562,7 +1664,9 @@ public final class SDFSCli {
     private boolean cONFIGREAD_;
     /**
      * <code>bool CONFIG_READ = 7;</code>
+     * @return The cONFIGREAD.
      */
+    @java.lang.Override
     public boolean getCONFIGREAD() {
       return cONFIGREAD_;
     }
@@ -1571,7 +1675,9 @@ public final class SDFSCli {
     private boolean cONFIGWRITE_;
     /**
      * <code>bool CONFIG_WRITE = 8;</code>
+     * @return The cONFIGWRITE.
      */
+    @java.lang.Override
     public boolean getCONFIGWRITE() {
       return cONFIGWRITE_;
     }
@@ -1580,7 +1686,9 @@ public final class SDFSCli {
     private boolean eVENTREAD_;
     /**
      * <code>bool EVENT_READ = 9;</code>
+     * @return The eVENTREAD.
      */
+    @java.lang.Override
     public boolean getEVENTREAD() {
       return eVENTREAD_;
     }
@@ -1589,7 +1697,9 @@ public final class SDFSCli {
     private boolean aUTHREAD_;
     /**
      * <code>bool AUTH_READ = 10;</code>
+     * @return The aUTHREAD.
      */
+    @java.lang.Override
     public boolean getAUTHREAD() {
       return aUTHREAD_;
     }
@@ -1598,7 +1708,9 @@ public final class SDFSCli {
     private boolean aUTHWRITE_;
     /**
      * <code>bool AUTH_WRITE = 11;</code>
+     * @return The aUTHWRITE.
      */
+    @java.lang.Override
     public boolean getAUTHWRITE() {
       return aUTHWRITE_;
     }
@@ -1607,7 +1719,9 @@ public final class SDFSCli {
     private boolean aDMIN_;
     /**
      * <code>bool ADMIN = 12;</code>
+     * @return The aDMIN.
      */
+    @java.lang.Override
     public boolean getADMIN() {
       return aDMIN_;
     }
@@ -1734,33 +1848,32 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.SdfsPermissions other = (org.opendedup.grpc.SDFSCli.SdfsPermissions) obj;
 
-      boolean result = true;
-      result = result && (getMETADATAREAD()
-          == other.getMETADATAREAD());
-      result = result && (getMETADATAWRITE()
-          == other.getMETADATAWRITE());
-      result = result && (getFILEREAD()
-          == other.getFILEREAD());
-      result = result && (getFILEWRITE()
-          == other.getFILEWRITE());
-      result = result && (getFILEDELETE()
-          == other.getFILEDELETE());
-      result = result && (getVOLUMEREAD()
-          == other.getVOLUMEREAD());
-      result = result && (getCONFIGREAD()
-          == other.getCONFIGREAD());
-      result = result && (getCONFIGWRITE()
-          == other.getCONFIGWRITE());
-      result = result && (getEVENTREAD()
-          == other.getEVENTREAD());
-      result = result && (getAUTHREAD()
-          == other.getAUTHREAD());
-      result = result && (getAUTHWRITE()
-          == other.getAUTHWRITE());
-      result = result && (getADMIN()
-          == other.getADMIN());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getMETADATAREAD()
+          != other.getMETADATAREAD()) return false;
+      if (getMETADATAWRITE()
+          != other.getMETADATAWRITE()) return false;
+      if (getFILEREAD()
+          != other.getFILEREAD()) return false;
+      if (getFILEWRITE()
+          != other.getFILEWRITE()) return false;
+      if (getFILEDELETE()
+          != other.getFILEDELETE()) return false;
+      if (getVOLUMEREAD()
+          != other.getVOLUMEREAD()) return false;
+      if (getCONFIGREAD()
+          != other.getCONFIGREAD()) return false;
+      if (getCONFIGWRITE()
+          != other.getCONFIGWRITE()) return false;
+      if (getEVENTREAD()
+          != other.getEVENTREAD()) return false;
+      if (getAUTHREAD()
+          != other.getAUTHREAD()) return false;
+      if (getAUTHWRITE()
+          != other.getAUTHWRITE()) return false;
+      if (getADMIN()
+          != other.getADMIN()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2007,35 +2120,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2117,12 +2230,16 @@ public final class SDFSCli {
       private boolean mETADATAREAD_ ;
       /**
        * <code>bool METADATA_READ = 1;</code>
+       * @return The mETADATAREAD.
        */
+      @java.lang.Override
       public boolean getMETADATAREAD() {
         return mETADATAREAD_;
       }
       /**
        * <code>bool METADATA_READ = 1;</code>
+       * @param value The mETADATAREAD to set.
+       * @return This builder for chaining.
        */
       public Builder setMETADATAREAD(boolean value) {
         
@@ -2132,6 +2249,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool METADATA_READ = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMETADATAREAD() {
         
@@ -2143,12 +2261,16 @@ public final class SDFSCli {
       private boolean mETADATAWRITE_ ;
       /**
        * <code>bool METADATA_WRITE = 2;</code>
+       * @return The mETADATAWRITE.
        */
+      @java.lang.Override
       public boolean getMETADATAWRITE() {
         return mETADATAWRITE_;
       }
       /**
        * <code>bool METADATA_WRITE = 2;</code>
+       * @param value The mETADATAWRITE to set.
+       * @return This builder for chaining.
        */
       public Builder setMETADATAWRITE(boolean value) {
         
@@ -2158,6 +2280,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool METADATA_WRITE = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMETADATAWRITE() {
         
@@ -2169,12 +2292,16 @@ public final class SDFSCli {
       private boolean fILEREAD_ ;
       /**
        * <code>bool FILE_READ = 3;</code>
+       * @return The fILEREAD.
        */
+      @java.lang.Override
       public boolean getFILEREAD() {
         return fILEREAD_;
       }
       /**
        * <code>bool FILE_READ = 3;</code>
+       * @param value The fILEREAD to set.
+       * @return This builder for chaining.
        */
       public Builder setFILEREAD(boolean value) {
         
@@ -2184,6 +2311,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool FILE_READ = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFILEREAD() {
         
@@ -2195,12 +2323,16 @@ public final class SDFSCli {
       private boolean fILEWRITE_ ;
       /**
        * <code>bool FILE_WRITE = 4;</code>
+       * @return The fILEWRITE.
        */
+      @java.lang.Override
       public boolean getFILEWRITE() {
         return fILEWRITE_;
       }
       /**
        * <code>bool FILE_WRITE = 4;</code>
+       * @param value The fILEWRITE to set.
+       * @return This builder for chaining.
        */
       public Builder setFILEWRITE(boolean value) {
         
@@ -2210,6 +2342,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool FILE_WRITE = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFILEWRITE() {
         
@@ -2221,12 +2354,16 @@ public final class SDFSCli {
       private boolean fILEDELETE_ ;
       /**
        * <code>bool FILE_DELETE = 5;</code>
+       * @return The fILEDELETE.
        */
+      @java.lang.Override
       public boolean getFILEDELETE() {
         return fILEDELETE_;
       }
       /**
        * <code>bool FILE_DELETE = 5;</code>
+       * @param value The fILEDELETE to set.
+       * @return This builder for chaining.
        */
       public Builder setFILEDELETE(boolean value) {
         
@@ -2236,6 +2373,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool FILE_DELETE = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFILEDELETE() {
         
@@ -2247,12 +2385,16 @@ public final class SDFSCli {
       private boolean vOLUMEREAD_ ;
       /**
        * <code>bool VOLUME_READ = 6;</code>
+       * @return The vOLUMEREAD.
        */
+      @java.lang.Override
       public boolean getVOLUMEREAD() {
         return vOLUMEREAD_;
       }
       /**
        * <code>bool VOLUME_READ = 6;</code>
+       * @param value The vOLUMEREAD to set.
+       * @return This builder for chaining.
        */
       public Builder setVOLUMEREAD(boolean value) {
         
@@ -2262,6 +2404,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool VOLUME_READ = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearVOLUMEREAD() {
         
@@ -2273,12 +2416,16 @@ public final class SDFSCli {
       private boolean cONFIGREAD_ ;
       /**
        * <code>bool CONFIG_READ = 7;</code>
+       * @return The cONFIGREAD.
        */
+      @java.lang.Override
       public boolean getCONFIGREAD() {
         return cONFIGREAD_;
       }
       /**
        * <code>bool CONFIG_READ = 7;</code>
+       * @param value The cONFIGREAD to set.
+       * @return This builder for chaining.
        */
       public Builder setCONFIGREAD(boolean value) {
         
@@ -2288,6 +2435,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool CONFIG_READ = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCONFIGREAD() {
         
@@ -2299,12 +2447,16 @@ public final class SDFSCli {
       private boolean cONFIGWRITE_ ;
       /**
        * <code>bool CONFIG_WRITE = 8;</code>
+       * @return The cONFIGWRITE.
        */
+      @java.lang.Override
       public boolean getCONFIGWRITE() {
         return cONFIGWRITE_;
       }
       /**
        * <code>bool CONFIG_WRITE = 8;</code>
+       * @param value The cONFIGWRITE to set.
+       * @return This builder for chaining.
        */
       public Builder setCONFIGWRITE(boolean value) {
         
@@ -2314,6 +2466,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool CONFIG_WRITE = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCONFIGWRITE() {
         
@@ -2325,12 +2478,16 @@ public final class SDFSCli {
       private boolean eVENTREAD_ ;
       /**
        * <code>bool EVENT_READ = 9;</code>
+       * @return The eVENTREAD.
        */
+      @java.lang.Override
       public boolean getEVENTREAD() {
         return eVENTREAD_;
       }
       /**
        * <code>bool EVENT_READ = 9;</code>
+       * @param value The eVENTREAD to set.
+       * @return This builder for chaining.
        */
       public Builder setEVENTREAD(boolean value) {
         
@@ -2340,6 +2497,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool EVENT_READ = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEVENTREAD() {
         
@@ -2351,12 +2509,16 @@ public final class SDFSCli {
       private boolean aUTHREAD_ ;
       /**
        * <code>bool AUTH_READ = 10;</code>
+       * @return The aUTHREAD.
        */
+      @java.lang.Override
       public boolean getAUTHREAD() {
         return aUTHREAD_;
       }
       /**
        * <code>bool AUTH_READ = 10;</code>
+       * @param value The aUTHREAD to set.
+       * @return This builder for chaining.
        */
       public Builder setAUTHREAD(boolean value) {
         
@@ -2366,6 +2528,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool AUTH_READ = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAUTHREAD() {
         
@@ -2377,12 +2540,16 @@ public final class SDFSCli {
       private boolean aUTHWRITE_ ;
       /**
        * <code>bool AUTH_WRITE = 11;</code>
+       * @return The aUTHWRITE.
        */
+      @java.lang.Override
       public boolean getAUTHWRITE() {
         return aUTHWRITE_;
       }
       /**
        * <code>bool AUTH_WRITE = 11;</code>
+       * @param value The aUTHWRITE to set.
+       * @return This builder for chaining.
        */
       public Builder setAUTHWRITE(boolean value) {
         
@@ -2392,6 +2559,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool AUTH_WRITE = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAUTHWRITE() {
         
@@ -2403,12 +2571,16 @@ public final class SDFSCli {
       private boolean aDMIN_ ;
       /**
        * <code>bool ADMIN = 12;</code>
+       * @return The aDMIN.
        */
+      @java.lang.Override
       public boolean getADMIN() {
         return aDMIN_;
       }
       /**
        * <code>bool ADMIN = 12;</code>
+       * @param value The aDMIN to set.
+       * @return This builder for chaining.
        */
       public Builder setADMIN(boolean value) {
         
@@ -2418,6 +2590,7 @@ public final class SDFSCli {
       }
       /**
        * <code>bool ADMIN = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearADMIN() {
         
@@ -2428,7 +2601,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2506,9 +2679,11 @@ public final class SDFSCli {
      * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
      */
 
-    org.opendedup.grpc.SDFSCli.SdfsUser getUsersOrDefault(
+    /* nullable */
+org.opendedup.grpc.SDFSCli.SdfsUser getUsersOrDefault(
         java.lang.String key,
-        org.opendedup.grpc.SDFSCli.SdfsUser defaultValue);
+        /* nullable */
+org.opendedup.grpc.SDFSCli.SdfsUser defaultValue);
     /**
      * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
      */
@@ -2519,7 +2694,7 @@ public final class SDFSCli {
   /**
    * Protobuf type {@code org.opendedup.grpc.SdfsUsers}
    */
-  public  static final class SdfsUsers extends
+  public static final class SdfsUsers extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SdfsUsers)
       SdfsUsersOrBuilder {
@@ -2529,6 +2704,13 @@ public final class SDFSCli {
       super(builder);
     }
     private SdfsUsers() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SdfsUsers();
     }
 
     @java.lang.Override
@@ -2556,7 +2738,7 @@ public final class SDFSCli {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 users_ = com.google.protobuf.MapField.newMapField(
                     UsersDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000001;
@@ -2569,7 +2751,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2579,6 +2761,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2642,14 +2826,16 @@ public final class SDFSCli {
      * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
      */
 
+    @java.lang.Override
     public boolean containsUsers(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetUsers().getMap().containsKey(key);
     }
     /**
      * Use {@link #getUsersMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, org.opendedup.grpc.SDFSCli.SdfsUser> getUsers() {
       return getUsersMap();
@@ -2657,6 +2843,7 @@ public final class SDFSCli {
     /**
      * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, org.opendedup.grpc.SDFSCli.SdfsUser> getUsersMap() {
       return internalGetUsers().getMap();
@@ -2664,11 +2851,12 @@ public final class SDFSCli {
     /**
      * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
      */
+    @java.lang.Override
 
     public org.opendedup.grpc.SDFSCli.SdfsUser getUsersOrDefault(
         java.lang.String key,
         org.opendedup.grpc.SDFSCli.SdfsUser defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, org.opendedup.grpc.SDFSCli.SdfsUser> map =
           internalGetUsers().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -2676,10 +2864,11 @@ public final class SDFSCli {
     /**
      * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
      */
+    @java.lang.Override
 
     public org.opendedup.grpc.SDFSCli.SdfsUser getUsersOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, org.opendedup.grpc.SDFSCli.SdfsUser> map =
           internalGetUsers().getMap();
       if (!map.containsKey(key)) {
@@ -2742,11 +2931,10 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.SdfsUsers other = (org.opendedup.grpc.SDFSCli.SdfsUsers) obj;
 
-      boolean result = true;
-      result = result && internalGetUsers().equals(
-          other.internalGetUsers());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!internalGetUsers().equals(
+          other.internalGetUsers())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2951,35 +3139,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3055,14 +3243,16 @@ public final class SDFSCli {
        * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
        */
 
+      @java.lang.Override
       public boolean containsUsers(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetUsers().getMap().containsKey(key);
       }
       /**
        * Use {@link #getUsersMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, org.opendedup.grpc.SDFSCli.SdfsUser> getUsers() {
         return getUsersMap();
@@ -3070,6 +3260,7 @@ public final class SDFSCli {
       /**
        * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, org.opendedup.grpc.SDFSCli.SdfsUser> getUsersMap() {
         return internalGetUsers().getMap();
@@ -3077,11 +3268,12 @@ public final class SDFSCli {
       /**
        * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
        */
+      @java.lang.Override
 
       public org.opendedup.grpc.SDFSCli.SdfsUser getUsersOrDefault(
           java.lang.String key,
           org.opendedup.grpc.SDFSCli.SdfsUser defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, org.opendedup.grpc.SDFSCli.SdfsUser> map =
             internalGetUsers().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -3089,10 +3281,11 @@ public final class SDFSCli {
       /**
        * <code>map&lt;string, .org.opendedup.grpc.SdfsUser&gt; users = 1;</code>
        */
+      @java.lang.Override
 
       public org.opendedup.grpc.SDFSCli.SdfsUser getUsersOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, org.opendedup.grpc.SDFSCli.SdfsUser> map =
             internalGetUsers().getMap();
         if (!map.containsKey(key)) {
@@ -3112,7 +3305,7 @@ public final class SDFSCli {
 
       public Builder removeUsers(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableUsers().getMutableMap()
             .remove(key);
         return this;
@@ -3131,8 +3324,11 @@ public final class SDFSCli {
       public Builder putUsers(
           java.lang.String key,
           org.opendedup.grpc.SDFSCli.SdfsUser value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableUsers().getMutableMap()
             .put(key, value);
         return this;
@@ -3150,7 +3346,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3206,40 +3402,48 @@ public final class SDFSCli {
 
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
     java.lang.String getUser();
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
     com.google.protobuf.ByteString
         getUserBytes();
 
     /**
      * <code>string password = 2;</code>
+     * @return The password.
      */
     java.lang.String getPassword();
     /**
      * <code>string password = 2;</code>
+     * @return The bytes for password.
      */
     com.google.protobuf.ByteString
         getPasswordBytes();
 
     /**
      * <code>string description = 3;</code>
+     * @return The description.
      */
     java.lang.String getDescription();
     /**
      * <code>string description = 3;</code>
+     * @return The bytes for description.
      */
     com.google.protobuf.ByteString
         getDescriptionBytes();
 
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * @return Whether the permissions field is set.
      */
     boolean hasPermissions();
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * @return The permissions.
      */
     org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions();
     /**
@@ -3249,13 +3453,14 @@ public final class SDFSCli {
 
     /**
      * <code>int64 pvolumeID = 6;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.AddUserRequest}
    */
-  public  static final class AddUserRequest extends
+  public static final class AddUserRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.AddUserRequest)
       AddUserRequestOrBuilder {
@@ -3268,7 +3473,13 @@ public final class SDFSCli {
       user_ = "";
       password_ = "";
       description_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AddUserRequest();
     }
 
     @java.lang.Override
@@ -3284,7 +3495,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3332,7 +3542,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3342,6 +3552,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -3367,7 +3579,9 @@ public final class SDFSCli {
     private volatile java.lang.Object user_;
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
+    @java.lang.Override
     public java.lang.String getUser() {
       java.lang.Object ref = user_;
       if (ref instanceof java.lang.String) {
@@ -3382,7 +3596,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserBytes() {
       java.lang.Object ref = user_;
@@ -3401,7 +3617,9 @@ public final class SDFSCli {
     private volatile java.lang.Object password_;
     /**
      * <code>string password = 2;</code>
+     * @return The password.
      */
+    @java.lang.Override
     public java.lang.String getPassword() {
       java.lang.Object ref = password_;
       if (ref instanceof java.lang.String) {
@@ -3416,7 +3634,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string password = 2;</code>
+     * @return The bytes for password.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPasswordBytes() {
       java.lang.Object ref = password_;
@@ -3435,7 +3655,9 @@ public final class SDFSCli {
     private volatile java.lang.Object description_;
     /**
      * <code>string description = 3;</code>
+     * @return The description.
      */
+    @java.lang.Override
     public java.lang.String getDescription() {
       java.lang.Object ref = description_;
       if (ref instanceof java.lang.String) {
@@ -3450,7 +3672,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string description = 3;</code>
+     * @return The bytes for description.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDescriptionBytes() {
       java.lang.Object ref = description_;
@@ -3469,19 +3693,24 @@ public final class SDFSCli {
     private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_;
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * @return Whether the permissions field is set.
      */
+    @java.lang.Override
     public boolean hasPermissions() {
       return permissions_ != null;
     }
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+     * @return The permissions.
      */
+    @java.lang.Override
     public org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions() {
       return permissions_ == null ? org.opendedup.grpc.SDFSCli.SdfsPermissions.getDefaultInstance() : permissions_;
     }
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder getPermissionsOrBuilder() {
       return getPermissions();
     }
@@ -3490,7 +3719,9 @@ public final class SDFSCli {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 6;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -3509,13 +3740,13 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, user_);
       }
-      if (!getPasswordBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(password_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, password_);
       }
-      if (!getDescriptionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, description_);
       }
       if (permissions_ != null) {
@@ -3533,13 +3764,13 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, user_);
       }
-      if (!getPasswordBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(password_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, password_);
       }
-      if (!getDescriptionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(description_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, description_);
       }
       if (permissions_ != null) {
@@ -3565,22 +3796,21 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.AddUserRequest other = (org.opendedup.grpc.SDFSCli.AddUserRequest) obj;
 
-      boolean result = true;
-      result = result && getUser()
-          .equals(other.getUser());
-      result = result && getPassword()
-          .equals(other.getPassword());
-      result = result && getDescription()
-          .equals(other.getDescription());
-      result = result && (hasPermissions() == other.hasPermissions());
+      if (!getUser()
+          .equals(other.getUser())) return false;
+      if (!getPassword()
+          .equals(other.getPassword())) return false;
+      if (!getDescription()
+          .equals(other.getDescription())) return false;
+      if (hasPermissions() != other.hasPermissions()) return false;
       if (hasPermissions()) {
-        result = result && getPermissions()
-            .equals(other.getPermissions());
+        if (!getPermissions()
+            .equals(other.getPermissions())) return false;
       }
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3791,35 +4021,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3883,6 +4113,7 @@ public final class SDFSCli {
       private java.lang.Object user_ = "";
       /**
        * <code>string user = 1;</code>
+       * @return The user.
        */
       public java.lang.String getUser() {
         java.lang.Object ref = user_;
@@ -3898,6 +4129,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return The bytes for user.
        */
       public com.google.protobuf.ByteString
           getUserBytes() {
@@ -3914,6 +4146,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The user to set.
+       * @return This builder for chaining.
        */
       public Builder setUser(
           java.lang.String value) {
@@ -3927,6 +4161,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUser() {
         
@@ -3936,6 +4171,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The bytes for user to set.
+       * @return This builder for chaining.
        */
       public Builder setUserBytes(
           com.google.protobuf.ByteString value) {
@@ -3952,6 +4189,7 @@ public final class SDFSCli {
       private java.lang.Object password_ = "";
       /**
        * <code>string password = 2;</code>
+       * @return The password.
        */
       public java.lang.String getPassword() {
         java.lang.Object ref = password_;
@@ -3967,6 +4205,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string password = 2;</code>
+       * @return The bytes for password.
        */
       public com.google.protobuf.ByteString
           getPasswordBytes() {
@@ -3983,6 +4222,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string password = 2;</code>
+       * @param value The password to set.
+       * @return This builder for chaining.
        */
       public Builder setPassword(
           java.lang.String value) {
@@ -3996,6 +4237,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string password = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPassword() {
         
@@ -4005,6 +4247,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string password = 2;</code>
+       * @param value The bytes for password to set.
+       * @return This builder for chaining.
        */
       public Builder setPasswordBytes(
           com.google.protobuf.ByteString value) {
@@ -4021,6 +4265,7 @@ public final class SDFSCli {
       private java.lang.Object description_ = "";
       /**
        * <code>string description = 3;</code>
+       * @return The description.
        */
       public java.lang.String getDescription() {
         java.lang.Object ref = description_;
@@ -4036,6 +4281,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string description = 3;</code>
+       * @return The bytes for description.
        */
       public com.google.protobuf.ByteString
           getDescriptionBytes() {
@@ -4052,6 +4298,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string description = 3;</code>
+       * @param value The description to set.
+       * @return This builder for chaining.
        */
       public Builder setDescription(
           java.lang.String value) {
@@ -4065,6 +4313,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string description = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDescription() {
         
@@ -4074,6 +4323,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string description = 3;</code>
+       * @param value The bytes for description to set.
+       * @return This builder for chaining.
        */
       public Builder setDescriptionBytes(
           com.google.protobuf.ByteString value) {
@@ -4087,17 +4338,19 @@ public final class SDFSCli {
         return this;
       }
 
-      private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_ = null;
+      private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_;
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.SDFSCli.SdfsPermissions, org.opendedup.grpc.SDFSCli.SdfsPermissions.Builder, org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder> permissionsBuilder_;
       /**
        * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * @return Whether the permissions field is set.
        */
       public boolean hasPermissions() {
         return permissionsBuilder_ != null || permissions_ != null;
       }
       /**
        * <code>.org.opendedup.grpc.SdfsPermissions permissions = 5;</code>
+       * @return The permissions.
        */
       public org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions() {
         if (permissionsBuilder_ == null) {
@@ -4207,12 +4460,16 @@ public final class SDFSCli {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 6;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 6;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -4222,6 +4479,7 @@ public final class SDFSCli {
       }
       /**
        * <code>int64 pvolumeID = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -4232,7 +4490,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4288,27 +4546,31 @@ public final class SDFSCli {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.AddUserResponse}
    */
-  public  static final class AddUserResponse extends
+  public static final class AddUserResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.AddUserResponse)
       AddUserResponseOrBuilder {
@@ -4320,6 +4582,13 @@ public final class SDFSCli {
     private AddUserResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AddUserResponse();
     }
 
     @java.lang.Override
@@ -4335,7 +4604,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4359,7 +4627,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4369,6 +4637,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -4394,7 +4664,9 @@ public final class SDFSCli {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -4409,7 +4681,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -4428,14 +4702,16 @@ public final class SDFSCli {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -4455,7 +4731,7 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -4470,7 +4746,7 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -4492,12 +4768,11 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.AddUserResponse other = (org.opendedup.grpc.SDFSCli.AddUserResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4682,35 +4957,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4763,6 +5038,7 @@ public final class SDFSCli {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -4778,6 +5054,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -4794,6 +5071,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -4807,6 +5086,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -4816,6 +5096,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -4832,21 +5114,27 @@ public final class SDFSCli {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -4854,6 +5142,8 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -4866,6 +5156,7 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -4876,7 +5167,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4932,23 +5223,26 @@ public final class SDFSCli {
 
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
     java.lang.String getUser();
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
     com.google.protobuf.ByteString
         getUserBytes();
 
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DeleteUserRequest}
    */
-  public  static final class DeleteUserRequest extends
+  public static final class DeleteUserRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DeleteUserRequest)
       DeleteUserRequestOrBuilder {
@@ -4959,7 +5253,13 @@ public final class SDFSCli {
     }
     private DeleteUserRequest() {
       user_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeleteUserRequest();
     }
 
     @java.lang.Override
@@ -4975,7 +5275,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4998,7 +5297,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5008,6 +5307,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -5033,7 +5334,9 @@ public final class SDFSCli {
     private volatile java.lang.Object user_;
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
+    @java.lang.Override
     public java.lang.String getUser() {
       java.lang.Object ref = user_;
       if (ref instanceof java.lang.String) {
@@ -5048,7 +5351,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserBytes() {
       java.lang.Object ref = user_;
@@ -5067,7 +5372,9 @@ public final class SDFSCli {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -5086,7 +5393,7 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, user_);
       }
       if (pvolumeID_ != 0L) {
@@ -5101,7 +5408,7 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, user_);
       }
       if (pvolumeID_ != 0L) {
@@ -5123,13 +5430,12 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.DeleteUserRequest other = (org.opendedup.grpc.SDFSCli.DeleteUserRequest) obj;
 
-      boolean result = true;
-      result = result && getUser()
-          .equals(other.getUser());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getUser()
+          .equals(other.getUser())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5315,35 +5621,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5396,6 +5702,7 @@ public final class SDFSCli {
       private java.lang.Object user_ = "";
       /**
        * <code>string user = 1;</code>
+       * @return The user.
        */
       public java.lang.String getUser() {
         java.lang.Object ref = user_;
@@ -5411,6 +5718,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return The bytes for user.
        */
       public com.google.protobuf.ByteString
           getUserBytes() {
@@ -5427,6 +5735,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The user to set.
+       * @return This builder for chaining.
        */
       public Builder setUser(
           java.lang.String value) {
@@ -5440,6 +5750,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUser() {
         
@@ -5449,6 +5760,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The bytes for user to set.
+       * @return This builder for chaining.
        */
       public Builder setUserBytes(
           com.google.protobuf.ByteString value) {
@@ -5465,12 +5778,16 @@ public final class SDFSCli {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -5480,6 +5797,7 @@ public final class SDFSCli {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -5490,7 +5808,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5546,27 +5864,31 @@ public final class SDFSCli {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DeleteUserResponse}
    */
-  public  static final class DeleteUserResponse extends
+  public static final class DeleteUserResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.DeleteUserResponse)
       DeleteUserResponseOrBuilder {
@@ -5578,6 +5900,13 @@ public final class SDFSCli {
     private DeleteUserResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeleteUserResponse();
     }
 
     @java.lang.Override
@@ -5593,7 +5922,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -5617,7 +5945,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5627,6 +5955,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -5652,7 +5982,9 @@ public final class SDFSCli {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -5667,7 +5999,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -5686,14 +6020,16 @@ public final class SDFSCli {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -5713,7 +6049,7 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -5728,7 +6064,7 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -5750,12 +6086,11 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.DeleteUserResponse other = (org.opendedup.grpc.SDFSCli.DeleteUserResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5940,35 +6275,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6021,6 +6356,7 @@ public final class SDFSCli {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -6036,6 +6372,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -6052,6 +6389,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -6065,6 +6404,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -6074,6 +6414,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -6090,21 +6432,27 @@ public final class SDFSCli {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -6112,6 +6460,8 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -6124,6 +6474,7 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -6134,7 +6485,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6190,20 +6541,24 @@ public final class SDFSCli {
 
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
     java.lang.String getUser();
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
     com.google.protobuf.ByteString
         getUserBytes();
 
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
+     * @return Whether the permissions field is set.
      */
     boolean hasPermissions();
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
+     * @return The permissions.
      */
     org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions();
     /**
@@ -6213,13 +6568,14 @@ public final class SDFSCli {
 
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetPermissionsRequest}
    */
-  public  static final class SetPermissionsRequest extends
+  public static final class SetPermissionsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetPermissionsRequest)
       SetPermissionsRequestOrBuilder {
@@ -6230,7 +6586,13 @@ public final class SDFSCli {
     }
     private SetPermissionsRequest() {
       user_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SetPermissionsRequest();
     }
 
     @java.lang.Override
@@ -6246,7 +6608,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -6282,7 +6643,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6292,6 +6653,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -6317,7 +6680,9 @@ public final class SDFSCli {
     private volatile java.lang.Object user_;
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
+    @java.lang.Override
     public java.lang.String getUser() {
       java.lang.Object ref = user_;
       if (ref instanceof java.lang.String) {
@@ -6332,7 +6697,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserBytes() {
       java.lang.Object ref = user_;
@@ -6351,19 +6718,24 @@ public final class SDFSCli {
     private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_;
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
+     * @return Whether the permissions field is set.
      */
+    @java.lang.Override
     public boolean hasPermissions() {
       return permissions_ != null;
     }
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
+     * @return The permissions.
      */
+    @java.lang.Override
     public org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions() {
       return permissions_ == null ? org.opendedup.grpc.SDFSCli.SdfsPermissions.getDefaultInstance() : permissions_;
     }
     /**
      * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder getPermissionsOrBuilder() {
       return getPermissions();
     }
@@ -6372,7 +6744,9 @@ public final class SDFSCli {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -6391,7 +6765,7 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, user_);
       }
       if (permissions_ != null) {
@@ -6409,7 +6783,7 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, user_);
       }
       if (permissions_ != null) {
@@ -6435,18 +6809,17 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.SetPermissionsRequest other = (org.opendedup.grpc.SDFSCli.SetPermissionsRequest) obj;
 
-      boolean result = true;
-      result = result && getUser()
-          .equals(other.getUser());
-      result = result && (hasPermissions() == other.hasPermissions());
+      if (!getUser()
+          .equals(other.getUser())) return false;
+      if (hasPermissions() != other.hasPermissions()) return false;
       if (hasPermissions()) {
-        result = result && getPermissions()
-            .equals(other.getPermissions());
+        if (!getPermissions()
+            .equals(other.getPermissions())) return false;
       }
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6647,35 +7020,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6731,6 +7104,7 @@ public final class SDFSCli {
       private java.lang.Object user_ = "";
       /**
        * <code>string user = 1;</code>
+       * @return The user.
        */
       public java.lang.String getUser() {
         java.lang.Object ref = user_;
@@ -6746,6 +7120,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return The bytes for user.
        */
       public com.google.protobuf.ByteString
           getUserBytes() {
@@ -6762,6 +7137,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The user to set.
+       * @return This builder for chaining.
        */
       public Builder setUser(
           java.lang.String value) {
@@ -6775,6 +7152,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUser() {
         
@@ -6784,6 +7162,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The bytes for user to set.
+       * @return This builder for chaining.
        */
       public Builder setUserBytes(
           com.google.protobuf.ByteString value) {
@@ -6797,17 +7177,19 @@ public final class SDFSCli {
         return this;
       }
 
-      private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_ = null;
+      private org.opendedup.grpc.SDFSCli.SdfsPermissions permissions_;
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.SDFSCli.SdfsPermissions, org.opendedup.grpc.SDFSCli.SdfsPermissions.Builder, org.opendedup.grpc.SDFSCli.SdfsPermissionsOrBuilder> permissionsBuilder_;
       /**
        * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
+       * @return Whether the permissions field is set.
        */
       public boolean hasPermissions() {
         return permissionsBuilder_ != null || permissions_ != null;
       }
       /**
        * <code>.org.opendedup.grpc.SdfsPermissions permissions = 2;</code>
+       * @return The permissions.
        */
       public org.opendedup.grpc.SDFSCli.SdfsPermissions getPermissions() {
         if (permissionsBuilder_ == null) {
@@ -6917,12 +7299,16 @@ public final class SDFSCli {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -6932,6 +7318,7 @@ public final class SDFSCli {
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -6942,7 +7329,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6998,27 +7385,31 @@ public final class SDFSCli {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetPermissionsResponse}
    */
-  public  static final class SetPermissionsResponse extends
+  public static final class SetPermissionsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetPermissionsResponse)
       SetPermissionsResponseOrBuilder {
@@ -7030,6 +7421,13 @@ public final class SDFSCli {
     private SetPermissionsResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SetPermissionsResponse();
     }
 
     @java.lang.Override
@@ -7045,7 +7443,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -7069,7 +7466,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7079,6 +7476,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -7104,7 +7503,9 @@ public final class SDFSCli {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -7119,7 +7520,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -7138,14 +7541,16 @@ public final class SDFSCli {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -7165,7 +7570,7 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -7180,7 +7585,7 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -7202,12 +7607,11 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.SetPermissionsResponse other = (org.opendedup.grpc.SDFSCli.SetPermissionsResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7392,35 +7796,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7473,6 +7877,7 @@ public final class SDFSCli {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -7488,6 +7893,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -7504,6 +7910,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -7517,6 +7925,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -7526,6 +7935,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -7542,21 +7953,27 @@ public final class SDFSCli {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -7564,6 +7981,8 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -7576,6 +7995,7 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -7586,7 +8006,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7642,33 +8062,38 @@ public final class SDFSCli {
 
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
     java.lang.String getUser();
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
     com.google.protobuf.ByteString
         getUserBytes();
 
     /**
      * <code>string password = 2;</code>
+     * @return The password.
      */
     java.lang.String getPassword();
     /**
      * <code>string password = 2;</code>
+     * @return The bytes for password.
      */
     com.google.protobuf.ByteString
         getPasswordBytes();
 
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetUserPasswordRequest}
    */
-  public  static final class SetUserPasswordRequest extends
+  public static final class SetUserPasswordRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetUserPasswordRequest)
       SetUserPasswordRequestOrBuilder {
@@ -7680,7 +8105,13 @@ public final class SDFSCli {
     private SetUserPasswordRequest() {
       user_ = "";
       password_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SetUserPasswordRequest();
     }
 
     @java.lang.Override
@@ -7696,7 +8127,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -7725,7 +8155,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7735,6 +8165,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -7760,7 +8192,9 @@ public final class SDFSCli {
     private volatile java.lang.Object user_;
     /**
      * <code>string user = 1;</code>
+     * @return The user.
      */
+    @java.lang.Override
     public java.lang.String getUser() {
       java.lang.Object ref = user_;
       if (ref instanceof java.lang.String) {
@@ -7775,7 +8209,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string user = 1;</code>
+     * @return The bytes for user.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserBytes() {
       java.lang.Object ref = user_;
@@ -7794,7 +8230,9 @@ public final class SDFSCli {
     private volatile java.lang.Object password_;
     /**
      * <code>string password = 2;</code>
+     * @return The password.
      */
+    @java.lang.Override
     public java.lang.String getPassword() {
       java.lang.Object ref = password_;
       if (ref instanceof java.lang.String) {
@@ -7809,7 +8247,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string password = 2;</code>
+     * @return The bytes for password.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPasswordBytes() {
       java.lang.Object ref = password_;
@@ -7828,7 +8268,9 @@ public final class SDFSCli {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -7847,10 +8289,10 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, user_);
       }
-      if (!getPasswordBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(password_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, password_);
       }
       if (pvolumeID_ != 0L) {
@@ -7865,10 +8307,10 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, user_);
       }
-      if (!getPasswordBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(password_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, password_);
       }
       if (pvolumeID_ != 0L) {
@@ -7890,15 +8332,14 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.SetUserPasswordRequest other = (org.opendedup.grpc.SDFSCli.SetUserPasswordRequest) obj;
 
-      boolean result = true;
-      result = result && getUser()
-          .equals(other.getUser());
-      result = result && getPassword()
-          .equals(other.getPassword());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getUser()
+          .equals(other.getUser())) return false;
+      if (!getPassword()
+          .equals(other.getPassword())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8089,35 +8530,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8174,6 +8615,7 @@ public final class SDFSCli {
       private java.lang.Object user_ = "";
       /**
        * <code>string user = 1;</code>
+       * @return The user.
        */
       public java.lang.String getUser() {
         java.lang.Object ref = user_;
@@ -8189,6 +8631,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return The bytes for user.
        */
       public com.google.protobuf.ByteString
           getUserBytes() {
@@ -8205,6 +8648,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The user to set.
+       * @return This builder for chaining.
        */
       public Builder setUser(
           java.lang.String value) {
@@ -8218,6 +8663,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUser() {
         
@@ -8227,6 +8673,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string user = 1;</code>
+       * @param value The bytes for user to set.
+       * @return This builder for chaining.
        */
       public Builder setUserBytes(
           com.google.protobuf.ByteString value) {
@@ -8243,6 +8691,7 @@ public final class SDFSCli {
       private java.lang.Object password_ = "";
       /**
        * <code>string password = 2;</code>
+       * @return The password.
        */
       public java.lang.String getPassword() {
         java.lang.Object ref = password_;
@@ -8258,6 +8707,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string password = 2;</code>
+       * @return The bytes for password.
        */
       public com.google.protobuf.ByteString
           getPasswordBytes() {
@@ -8274,6 +8724,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string password = 2;</code>
+       * @param value The password to set.
+       * @return This builder for chaining.
        */
       public Builder setPassword(
           java.lang.String value) {
@@ -8287,6 +8739,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string password = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPassword() {
         
@@ -8296,6 +8749,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string password = 2;</code>
+       * @param value The bytes for password to set.
+       * @return This builder for chaining.
        */
       public Builder setPasswordBytes(
           com.google.protobuf.ByteString value) {
@@ -8312,12 +8767,16 @@ public final class SDFSCli {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -8327,6 +8786,7 @@ public final class SDFSCli {
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -8337,7 +8797,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -8393,27 +8853,31 @@ public final class SDFSCli {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetUserPasswordResponse}
    */
-  public  static final class SetUserPasswordResponse extends
+  public static final class SetUserPasswordResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SetUserPasswordResponse)
       SetUserPasswordResponseOrBuilder {
@@ -8425,6 +8889,13 @@ public final class SDFSCli {
     private SetUserPasswordResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SetUserPasswordResponse();
     }
 
     @java.lang.Override
@@ -8440,7 +8911,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -8464,7 +8934,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8474,6 +8944,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -8499,7 +8971,9 @@ public final class SDFSCli {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -8514,7 +8988,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -8533,14 +9009,16 @@ public final class SDFSCli {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -8560,7 +9038,7 @@ public final class SDFSCli {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -8575,7 +9053,7 @@ public final class SDFSCli {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -8597,12 +9075,11 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.SetUserPasswordResponse other = (org.opendedup.grpc.SDFSCli.SetUserPasswordResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8787,35 +9264,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8868,6 +9345,7 @@ public final class SDFSCli {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -8883,6 +9361,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -8899,6 +9378,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -8912,6 +9393,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -8921,6 +9403,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -8937,21 +9421,27 @@ public final class SDFSCli {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -8959,6 +9449,8 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -8971,6 +9463,7 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -8981,7 +9474,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -9037,13 +9530,14 @@ public final class SDFSCli {
 
     /**
      * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ListUsersRequest}
    */
-  public  static final class ListUsersRequest extends
+  public static final class ListUsersRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ListUsersRequest)
       ListUsersRequestOrBuilder {
@@ -9053,7 +9547,13 @@ public final class SDFSCli {
       super(builder);
     }
     private ListUsersRequest() {
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListUsersRequest();
     }
 
     @java.lang.Override
@@ -9069,7 +9569,6 @@ public final class SDFSCli {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -9086,7 +9585,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -9096,6 +9595,8 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -9121,7 +9622,9 @@ public final class SDFSCli {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -9171,11 +9674,10 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.ListUsersRequest other = (org.opendedup.grpc.SDFSCli.ListUsersRequest) obj;
 
-      boolean result = true;
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -9356,35 +9858,35 @@ public final class SDFSCli {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -9433,12 +9935,16 @@ public final class SDFSCli {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -9448,6 +9954,7 @@ public final class SDFSCli {
       }
       /**
        * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -9458,7 +9965,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -9538,27 +10045,31 @@ public final class SDFSCli {
 
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ListUsersResponse}
    */
-  public  static final class ListUsersResponse extends
+  public static final class ListUsersResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ListUsersResponse)
       ListUsersResponseOrBuilder {
@@ -9571,6 +10082,13 @@ public final class SDFSCli {
       users_ = java.util.Collections.emptyList();
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListUsersResponse();
     }
 
     @java.lang.Override
@@ -9598,7 +10116,7 @@ public final class SDFSCli {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 users_ = new java.util.ArrayList<org.opendedup.grpc.SDFSCli.SdfsUser>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -9619,7 +10137,7 @@ public final class SDFSCli {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -9629,11 +10147,13 @@ public final class SDFSCli {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           users_ = java.util.Collections.unmodifiableList(users_);
         }
         this.unknownFields = unknownFields.build();
@@ -9653,18 +10173,19 @@ public final class SDFSCli {
               org.opendedup.grpc.SDFSCli.ListUsersResponse.class, org.opendedup.grpc.SDFSCli.ListUsersResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int USERS_FIELD_NUMBER = 1;
     private java.util.List<org.opendedup.grpc.SDFSCli.SdfsUser> users_;
     /**
      * <code>repeated .org.opendedup.grpc.SdfsUser users = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.SDFSCli.SdfsUser> getUsersList() {
       return users_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.SdfsUser users = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.SDFSCli.SdfsUserOrBuilder> 
         getUsersOrBuilderList() {
       return users_;
@@ -9672,18 +10193,21 @@ public final class SDFSCli {
     /**
      * <code>repeated .org.opendedup.grpc.SdfsUser users = 1;</code>
      */
+    @java.lang.Override
     public int getUsersCount() {
       return users_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.SdfsUser users = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.SDFSCli.SdfsUser getUsers(int index) {
       return users_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.SdfsUser users = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.SDFSCli.SdfsUserOrBuilder getUsersOrBuilder(
         int index) {
       return users_.get(index);
@@ -9693,7 +10217,9 @@ public final class SDFSCli {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -9708,7 +10234,9 @@ public final class SDFSCli {
     }
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -9727,14 +10255,16 @@ public final class SDFSCli {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -9757,7 +10287,7 @@ public final class SDFSCli {
       for (int i = 0; i < users_.size(); i++) {
         output.writeMessage(1, users_.get(i));
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -9776,7 +10306,7 @@ public final class SDFSCli {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, users_.get(i));
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -9798,14 +10328,13 @@ public final class SDFSCli {
       }
       org.opendedup.grpc.SDFSCli.ListUsersResponse other = (org.opendedup.grpc.SDFSCli.ListUsersResponse) obj;
 
-      boolean result = true;
-      result = result && getUsersList()
-          .equals(other.getUsersList());
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getUsersList()
+          .equals(other.getUsersList())) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -9994,9 +10523,8 @@ public final class SDFSCli {
       public org.opendedup.grpc.SDFSCli.ListUsersResponse buildPartial() {
         org.opendedup.grpc.SDFSCli.ListUsersResponse result = new org.opendedup.grpc.SDFSCli.ListUsersResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (usersBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             users_ = java.util.Collections.unmodifiableList(users_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -10006,42 +10534,41 @@ public final class SDFSCli {
         }
         result.error_ = error_;
         result.errorCode_ = errorCode_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10121,7 +10648,7 @@ public final class SDFSCli {
       private java.util.List<org.opendedup.grpc.SDFSCli.SdfsUser> users_ =
         java.util.Collections.emptyList();
       private void ensureUsersIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           users_ = new java.util.ArrayList<org.opendedup.grpc.SDFSCli.SdfsUser>(users_);
           bitField0_ |= 0x00000001;
          }
@@ -10350,7 +10877,7 @@ public final class SDFSCli {
           usersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.SDFSCli.SdfsUser, org.opendedup.grpc.SDFSCli.SdfsUser.Builder, org.opendedup.grpc.SDFSCli.SdfsUserOrBuilder>(
                   users_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           users_ = null;
@@ -10361,6 +10888,7 @@ public final class SDFSCli {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 2;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -10376,6 +10904,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 2;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -10392,6 +10921,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -10405,6 +10936,7 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -10414,6 +10946,8 @@ public final class SDFSCli {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -10430,21 +10964,27 @@ public final class SDFSCli {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -10452,6 +10992,8 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -10464,6 +11006,7 @@ public final class SDFSCli {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -10474,7 +11017,7 @@ public final class SDFSCli {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10658,19 +11201,11 @@ public final class SDFSCli {
       "0Z.github.com/opendedup/sdfs-client-go/s" +
       "dfs/;sdfsb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.opendedup.grpc.FileInfo.getDescriptor(),
-        }, assigner);
+        });
     internal_static_org_opendedup_grpc_SdfsUser_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_org_opendedup_grpc_SdfsUser_fieldAccessorTable = new

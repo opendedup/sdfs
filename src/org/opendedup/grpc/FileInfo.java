@@ -113,6 +113,8 @@ public final class FileInfo {
     }
 
     /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
@@ -120,6 +122,10 @@ public final class FileInfo {
       return forNumber(value);
     }
 
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
     public static syncaction forNumber(int value) {
       switch (value) {
         case 0: return DOWNLOAD;
@@ -145,6 +151,10 @@ public final class FileInfo {
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -2158,6 +2168,8 @@ public final class FileInfo {
     }
 
     /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
@@ -2165,6 +2177,10 @@ public final class FileInfo {
       return forNumber(value);
     }
 
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
     public static errorCodes forNumber(int value) {
       switch (value) {
         case 0: return NOERR;
@@ -2308,6 +2324,10 @@ public final class FileInfo {
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -2348,36 +2368,43 @@ public final class FileInfo {
 
     /**
      * <code>string fileName = 1;</code>
+     * @return The fileName.
      */
     java.lang.String getFileName();
     /**
      * <code>string fileName = 1;</code>
+     * @return The bytes for fileName.
      */
     com.google.protobuf.ByteString
         getFileNameBytes();
 
     /**
      * <code>bool compact = 2;</code>
+     * @return The compact.
      */
     boolean getCompact();
 
     /**
      * <code>int32 numberOfFiles = 3;</code>
+     * @return The numberOfFiles.
      */
     int getNumberOfFiles();
 
     /**
      * <code>string listGuid = 4;</code>
+     * @return The listGuid.
      */
     java.lang.String getListGuid();
     /**
      * <code>string listGuid = 4;</code>
+     * @return The bytes for listGuid.
      */
     com.google.protobuf.ByteString
         getListGuidBytes();
 
     /**
      * <code>int64 pvolumeID = 5;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
@@ -2388,7 +2415,7 @@ public final class FileInfo {
    *
    * Protobuf type {@code org.opendedup.grpc.FileInfoRequest}
    */
-  public  static final class FileInfoRequest extends
+  public static final class FileInfoRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileInfoRequest)
       FileInfoRequestOrBuilder {
@@ -2399,10 +2426,14 @@ public final class FileInfo {
     }
     private FileInfoRequest() {
       fileName_ = "";
-      compact_ = false;
-      numberOfFiles_ = 0;
       listGuid_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileInfoRequest();
     }
 
     @java.lang.Override
@@ -2418,7 +2449,6 @@ public final class FileInfo {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -2457,7 +2487,7 @@ public final class FileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2467,6 +2497,8 @@ public final class FileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -2492,7 +2524,9 @@ public final class FileInfo {
     private volatile java.lang.Object fileName_;
     /**
      * <code>string fileName = 1;</code>
+     * @return The fileName.
      */
+    @java.lang.Override
     public java.lang.String getFileName() {
       java.lang.Object ref = fileName_;
       if (ref instanceof java.lang.String) {
@@ -2507,7 +2541,9 @@ public final class FileInfo {
     }
     /**
      * <code>string fileName = 1;</code>
+     * @return The bytes for fileName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFileNameBytes() {
       java.lang.Object ref = fileName_;
@@ -2526,7 +2562,9 @@ public final class FileInfo {
     private boolean compact_;
     /**
      * <code>bool compact = 2;</code>
+     * @return The compact.
      */
+    @java.lang.Override
     public boolean getCompact() {
       return compact_;
     }
@@ -2535,7 +2573,9 @@ public final class FileInfo {
     private int numberOfFiles_;
     /**
      * <code>int32 numberOfFiles = 3;</code>
+     * @return The numberOfFiles.
      */
+    @java.lang.Override
     public int getNumberOfFiles() {
       return numberOfFiles_;
     }
@@ -2544,7 +2584,9 @@ public final class FileInfo {
     private volatile java.lang.Object listGuid_;
     /**
      * <code>string listGuid = 4;</code>
+     * @return The listGuid.
      */
+    @java.lang.Override
     public java.lang.String getListGuid() {
       java.lang.Object ref = listGuid_;
       if (ref instanceof java.lang.String) {
@@ -2559,7 +2601,9 @@ public final class FileInfo {
     }
     /**
      * <code>string listGuid = 4;</code>
+     * @return The bytes for listGuid.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getListGuidBytes() {
       java.lang.Object ref = listGuid_;
@@ -2578,7 +2622,9 @@ public final class FileInfo {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 5;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -2597,7 +2643,7 @@ public final class FileInfo {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getFileNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, fileName_);
       }
       if (compact_ != false) {
@@ -2606,7 +2652,7 @@ public final class FileInfo {
       if (numberOfFiles_ != 0) {
         output.writeInt32(3, numberOfFiles_);
       }
-      if (!getListGuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(listGuid_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, listGuid_);
       }
       if (pvolumeID_ != 0L) {
@@ -2621,7 +2667,7 @@ public final class FileInfo {
       if (size != -1) return size;
 
       size = 0;
-      if (!getFileNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, fileName_);
       }
       if (compact_ != false) {
@@ -2632,7 +2678,7 @@ public final class FileInfo {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, numberOfFiles_);
       }
-      if (!getListGuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(listGuid_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, listGuid_);
       }
       if (pvolumeID_ != 0L) {
@@ -2654,19 +2700,18 @@ public final class FileInfo {
       }
       org.opendedup.grpc.FileInfo.FileInfoRequest other = (org.opendedup.grpc.FileInfo.FileInfoRequest) obj;
 
-      boolean result = true;
-      result = result && getFileName()
-          .equals(other.getFileName());
-      result = result && (getCompact()
-          == other.getCompact());
-      result = result && (getNumberOfFiles()
-          == other.getNumberOfFiles());
-      result = result && getListGuid()
-          .equals(other.getListGuid());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getFileName()
+          .equals(other.getFileName())) return false;
+      if (getCompact()
+          != other.getCompact()) return false;
+      if (getNumberOfFiles()
+          != other.getNumberOfFiles()) return false;
+      if (!getListGuid()
+          .equals(other.getListGuid())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2872,35 +2917,35 @@ public final class FileInfo {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2963,6 +3008,7 @@ public final class FileInfo {
       private java.lang.Object fileName_ = "";
       /**
        * <code>string fileName = 1;</code>
+       * @return The fileName.
        */
       public java.lang.String getFileName() {
         java.lang.Object ref = fileName_;
@@ -2978,6 +3024,7 @@ public final class FileInfo {
       }
       /**
        * <code>string fileName = 1;</code>
+       * @return The bytes for fileName.
        */
       public com.google.protobuf.ByteString
           getFileNameBytes() {
@@ -2994,6 +3041,8 @@ public final class FileInfo {
       }
       /**
        * <code>string fileName = 1;</code>
+       * @param value The fileName to set.
+       * @return This builder for chaining.
        */
       public Builder setFileName(
           java.lang.String value) {
@@ -3007,6 +3056,7 @@ public final class FileInfo {
       }
       /**
        * <code>string fileName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFileName() {
         
@@ -3016,6 +3066,8 @@ public final class FileInfo {
       }
       /**
        * <code>string fileName = 1;</code>
+       * @param value The bytes for fileName to set.
+       * @return This builder for chaining.
        */
       public Builder setFileNameBytes(
           com.google.protobuf.ByteString value) {
@@ -3032,12 +3084,16 @@ public final class FileInfo {
       private boolean compact_ ;
       /**
        * <code>bool compact = 2;</code>
+       * @return The compact.
        */
+      @java.lang.Override
       public boolean getCompact() {
         return compact_;
       }
       /**
        * <code>bool compact = 2;</code>
+       * @param value The compact to set.
+       * @return This builder for chaining.
        */
       public Builder setCompact(boolean value) {
         
@@ -3047,6 +3103,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool compact = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCompact() {
         
@@ -3058,12 +3115,16 @@ public final class FileInfo {
       private int numberOfFiles_ ;
       /**
        * <code>int32 numberOfFiles = 3;</code>
+       * @return The numberOfFiles.
        */
+      @java.lang.Override
       public int getNumberOfFiles() {
         return numberOfFiles_;
       }
       /**
        * <code>int32 numberOfFiles = 3;</code>
+       * @param value The numberOfFiles to set.
+       * @return This builder for chaining.
        */
       public Builder setNumberOfFiles(int value) {
         
@@ -3073,6 +3134,7 @@ public final class FileInfo {
       }
       /**
        * <code>int32 numberOfFiles = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNumberOfFiles() {
         
@@ -3084,6 +3146,7 @@ public final class FileInfo {
       private java.lang.Object listGuid_ = "";
       /**
        * <code>string listGuid = 4;</code>
+       * @return The listGuid.
        */
       public java.lang.String getListGuid() {
         java.lang.Object ref = listGuid_;
@@ -3099,6 +3162,7 @@ public final class FileInfo {
       }
       /**
        * <code>string listGuid = 4;</code>
+       * @return The bytes for listGuid.
        */
       public com.google.protobuf.ByteString
           getListGuidBytes() {
@@ -3115,6 +3179,8 @@ public final class FileInfo {
       }
       /**
        * <code>string listGuid = 4;</code>
+       * @param value The listGuid to set.
+       * @return This builder for chaining.
        */
       public Builder setListGuid(
           java.lang.String value) {
@@ -3128,6 +3194,7 @@ public final class FileInfo {
       }
       /**
        * <code>string listGuid = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearListGuid() {
         
@@ -3137,6 +3204,8 @@ public final class FileInfo {
       }
       /**
        * <code>string listGuid = 4;</code>
+       * @param value The bytes for listGuid to set.
+       * @return This builder for chaining.
        */
       public Builder setListGuidBytes(
           com.google.protobuf.ByteString value) {
@@ -3153,12 +3222,16 @@ public final class FileInfo {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 5;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 5;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -3168,6 +3241,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 pvolumeID = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -3178,7 +3252,7 @@ public final class FileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3234,20 +3308,24 @@ public final class FileInfo {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>string listGuid = 2;</code>
+     * @return The listGuid.
      */
     java.lang.String getListGuid();
     /**
      * <code>string listGuid = 2;</code>
+     * @return The bytes for listGuid.
      */
     com.google.protobuf.ByteString
         getListGuidBytes();
@@ -3278,31 +3356,36 @@ public final class FileInfo {
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>int32 maxNumberOfFiles = 5;</code>
+     * @return The maxNumberOfFiles.
      */
     int getMaxNumberOfFiles();
 
     /**
      * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+     * @return The enum numeric value on the wire for action.
      */
     int getActionValue();
     /**
      * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+     * @return The action.
      */
     org.opendedup.grpc.FileInfo.syncaction getAction();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.FileMessageResponse}
    */
-  public  static final class FileMessageResponse extends
+  public static final class FileMessageResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileMessageResponse)
       FileMessageResponseOrBuilder {
@@ -3316,8 +3399,14 @@ public final class FileInfo {
       listGuid_ = "";
       response_ = java.util.Collections.emptyList();
       errorCode_ = 0;
-      maxNumberOfFiles_ = 0;
       action_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileMessageResponse();
     }
 
     @java.lang.Override
@@ -3357,9 +3446,9 @@ public final class FileInfo {
               break;
             }
             case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 response_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileInfoResponse>();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000001;
               }
               response_.add(
                   input.readMessage(org.opendedup.grpc.FileInfo.FileInfoResponse.parser(), extensionRegistry));
@@ -3383,7 +3472,7 @@ public final class FileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3393,11 +3482,13 @@ public final class FileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           response_ = java.util.Collections.unmodifiableList(response_);
         }
         this.unknownFields = unknownFields.build();
@@ -3417,12 +3508,13 @@ public final class FileInfo {
               org.opendedup.grpc.FileInfo.FileMessageResponse.class, org.opendedup.grpc.FileInfo.FileMessageResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int ERROR_FIELD_NUMBER = 1;
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -3437,7 +3529,9 @@ public final class FileInfo {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -3456,7 +3550,9 @@ public final class FileInfo {
     private volatile java.lang.Object listGuid_;
     /**
      * <code>string listGuid = 2;</code>
+     * @return The listGuid.
      */
+    @java.lang.Override
     public java.lang.String getListGuid() {
       java.lang.Object ref = listGuid_;
       if (ref instanceof java.lang.String) {
@@ -3471,7 +3567,9 @@ public final class FileInfo {
     }
     /**
      * <code>string listGuid = 2;</code>
+     * @return The bytes for listGuid.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getListGuidBytes() {
       java.lang.Object ref = listGuid_;
@@ -3491,12 +3589,14 @@ public final class FileInfo {
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> getResponseList() {
       return response_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
         getResponseOrBuilderList() {
       return response_;
@@ -3504,18 +3604,21 @@ public final class FileInfo {
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
      */
+    @java.lang.Override
     public int getResponseCount() {
       return response_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileInfoResponse getResponse(int index) {
       return response_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse response = 3;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getResponseOrBuilder(
         int index) {
       return response_.get(index);
@@ -3525,14 +3628,16 @@ public final class FileInfo {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -3542,7 +3647,9 @@ public final class FileInfo {
     private int maxNumberOfFiles_;
     /**
      * <code>int32 maxNumberOfFiles = 5;</code>
+     * @return The maxNumberOfFiles.
      */
+    @java.lang.Override
     public int getMaxNumberOfFiles() {
       return maxNumberOfFiles_;
     }
@@ -3551,14 +3658,16 @@ public final class FileInfo {
     private int action_;
     /**
      * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+     * @return The enum numeric value on the wire for action.
      */
-    public int getActionValue() {
+    @java.lang.Override public int getActionValue() {
       return action_;
     }
     /**
      * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+     * @return The action.
      */
-    public org.opendedup.grpc.FileInfo.syncaction getAction() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.syncaction getAction() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.syncaction result = org.opendedup.grpc.FileInfo.syncaction.valueOf(action_);
       return result == null ? org.opendedup.grpc.FileInfo.syncaction.UNRECOGNIZED : result;
@@ -3578,10 +3687,10 @@ public final class FileInfo {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
-      if (!getListGuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(listGuid_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, listGuid_);
       }
       for (int i = 0; i < response_.size(); i++) {
@@ -3605,10 +3714,10 @@ public final class FileInfo {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
-      if (!getListGuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(listGuid_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, listGuid_);
       }
       for (int i = 0; i < response_.size(); i++) {
@@ -3642,19 +3751,18 @@ public final class FileInfo {
       }
       org.opendedup.grpc.FileInfo.FileMessageResponse other = (org.opendedup.grpc.FileInfo.FileMessageResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && getListGuid()
-          .equals(other.getListGuid());
-      result = result && getResponseList()
-          .equals(other.getResponseList());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && (getMaxNumberOfFiles()
-          == other.getMaxNumberOfFiles());
-      result = result && action_ == other.action_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (!getListGuid()
+          .equals(other.getListGuid())) return false;
+      if (!getResponseList()
+          .equals(other.getResponseList())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (getMaxNumberOfFiles()
+          != other.getMaxNumberOfFiles()) return false;
+      if (action_ != other.action_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3818,7 +3926,7 @@ public final class FileInfo {
 
         if (responseBuilder_ == null) {
           response_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
           responseBuilder_.clear();
         }
@@ -3855,13 +3963,12 @@ public final class FileInfo {
       public org.opendedup.grpc.FileInfo.FileMessageResponse buildPartial() {
         org.opendedup.grpc.FileInfo.FileMessageResponse result = new org.opendedup.grpc.FileInfo.FileMessageResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.error_ = error_;
         result.listGuid_ = listGuid_;
         if (responseBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             response_ = java.util.Collections.unmodifiableList(response_);
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.response_ = response_;
         } else {
@@ -3870,42 +3977,41 @@ public final class FileInfo {
         result.errorCode_ = errorCode_;
         result.maxNumberOfFiles_ = maxNumberOfFiles_;
         result.action_ = action_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3931,7 +4037,7 @@ public final class FileInfo {
           if (!other.response_.isEmpty()) {
             if (response_.isEmpty()) {
               response_ = other.response_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000001);
             } else {
               ensureResponseIsMutable();
               response_.addAll(other.response_);
@@ -3944,7 +4050,7 @@ public final class FileInfo {
               responseBuilder_.dispose();
               responseBuilder_ = null;
               response_ = other.response_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000001);
               responseBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getResponseFieldBuilder() : null;
@@ -3995,6 +4101,7 @@ public final class FileInfo {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -4010,6 +4117,7 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -4026,6 +4134,8 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -4039,6 +4149,7 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -4048,6 +4159,8 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -4064,6 +4177,7 @@ public final class FileInfo {
       private java.lang.Object listGuid_ = "";
       /**
        * <code>string listGuid = 2;</code>
+       * @return The listGuid.
        */
       public java.lang.String getListGuid() {
         java.lang.Object ref = listGuid_;
@@ -4079,6 +4193,7 @@ public final class FileInfo {
       }
       /**
        * <code>string listGuid = 2;</code>
+       * @return The bytes for listGuid.
        */
       public com.google.protobuf.ByteString
           getListGuidBytes() {
@@ -4095,6 +4210,8 @@ public final class FileInfo {
       }
       /**
        * <code>string listGuid = 2;</code>
+       * @param value The listGuid to set.
+       * @return This builder for chaining.
        */
       public Builder setListGuid(
           java.lang.String value) {
@@ -4108,6 +4225,7 @@ public final class FileInfo {
       }
       /**
        * <code>string listGuid = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearListGuid() {
         
@@ -4117,6 +4235,8 @@ public final class FileInfo {
       }
       /**
        * <code>string listGuid = 2;</code>
+       * @param value The bytes for listGuid to set.
+       * @return This builder for chaining.
        */
       public Builder setListGuidBytes(
           com.google.protobuf.ByteString value) {
@@ -4133,9 +4253,9 @@ public final class FileInfo {
       private java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> response_ =
         java.util.Collections.emptyList();
       private void ensureResponseIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           response_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileInfoResponse>(response_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000001;
          }
       }
 
@@ -4285,7 +4405,7 @@ public final class FileInfo {
       public Builder clearResponse() {
         if (responseBuilder_ == null) {
           response_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
           responseBuilder_.clear();
@@ -4362,7 +4482,7 @@ public final class FileInfo {
           responseBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder>(
                   response_,
-                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           response_ = null;
@@ -4373,21 +4493,27 @@ public final class FileInfo {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -4395,6 +4521,8 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -4407,6 +4535,7 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -4418,12 +4547,16 @@ public final class FileInfo {
       private int maxNumberOfFiles_ ;
       /**
        * <code>int32 maxNumberOfFiles = 5;</code>
+       * @return The maxNumberOfFiles.
        */
+      @java.lang.Override
       public int getMaxNumberOfFiles() {
         return maxNumberOfFiles_;
       }
       /**
        * <code>int32 maxNumberOfFiles = 5;</code>
+       * @param value The maxNumberOfFiles to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxNumberOfFiles(int value) {
         
@@ -4433,6 +4566,7 @@ public final class FileInfo {
       }
       /**
        * <code>int32 maxNumberOfFiles = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxNumberOfFiles() {
         
@@ -4444,21 +4578,27 @@ public final class FileInfo {
       private int action_ = 0;
       /**
        * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @return The enum numeric value on the wire for action.
        */
-      public int getActionValue() {
+      @java.lang.Override public int getActionValue() {
         return action_;
       }
       /**
        * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @param value The enum numeric value on the wire for action to set.
+       * @return This builder for chaining.
        */
       public Builder setActionValue(int value) {
+        
         action_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @return The action.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.syncaction getAction() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.syncaction result = org.opendedup.grpc.FileInfo.syncaction.valueOf(action_);
@@ -4466,6 +4606,8 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @param value The action to set.
+       * @return This builder for chaining.
        */
       public Builder setAction(org.opendedup.grpc.FileInfo.syncaction value) {
         if (value == null) {
@@ -4478,6 +4620,7 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.syncaction action = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAction() {
         
@@ -4488,7 +4631,7 @@ public final class FileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4544,120 +4687,144 @@ public final class FileInfo {
 
     /**
      * <code>string fileName = 1;</code>
+     * @return The fileName.
      */
     java.lang.String getFileName();
     /**
      * <code>string fileName = 1;</code>
+     * @return The bytes for fileName.
      */
     com.google.protobuf.ByteString
         getFileNameBytes();
 
     /**
      * <code>string filePath = 2;</code>
+     * @return The filePath.
      */
     java.lang.String getFilePath();
     /**
      * <code>string filePath = 2;</code>
+     * @return The bytes for filePath.
      */
     com.google.protobuf.ByteString
         getFilePathBytes();
 
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+     * @return The enum numeric value on the wire for type.
      */
     int getTypeValue();
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+     * @return The type.
      */
     org.opendedup.grpc.FileInfo.FileInfoResponse.fileType getType();
 
     /**
      * <code>string sdfsPath = 4;</code>
+     * @return The sdfsPath.
      */
     java.lang.String getSdfsPath();
     /**
      * <code>string sdfsPath = 4;</code>
+     * @return The bytes for sdfsPath.
      */
     com.google.protobuf.ByteString
         getSdfsPathBytes();
 
     /**
      * <code>int64 atime = 5;</code>
+     * @return The atime.
      */
     long getAtime();
 
     /**
      * <code>int64 mtime = 6;</code>
+     * @return The mtime.
      */
     long getMtime();
 
     /**
      * <code>int64 ctime = 7;</code>
+     * @return The ctime.
      */
     long getCtime();
 
     /**
      * <code>bool hidden = 8;</code>
+     * @return The hidden.
      */
     boolean getHidden();
 
     /**
      * <code>int64 size = 9;</code>
+     * @return The size.
      */
     long getSize();
 
     /**
      * <code>bool open = 10;</code>
+     * @return The open.
      */
     boolean getOpen();
 
     /**
      * <code>string fileGuild = 11;</code>
+     * @return The fileGuild.
      */
     java.lang.String getFileGuild();
     /**
      * <code>string fileGuild = 11;</code>
+     * @return The bytes for fileGuild.
      */
     com.google.protobuf.ByteString
         getFileGuildBytes();
 
     /**
      * <code>string mapGuid = 12;</code>
+     * @return The mapGuid.
      */
     java.lang.String getMapGuid();
     /**
      * <code>string mapGuid = 12;</code>
+     * @return The bytes for mapGuid.
      */
     com.google.protobuf.ByteString
         getMapGuidBytes();
 
     /**
      * <code>bool localOwner = 13;</code>
+     * @return The localOwner.
      */
     boolean getLocalOwner();
 
     /**
      * <code>bool execute = 14;</code>
+     * @return The execute.
      */
     boolean getExecute();
 
     /**
      * <code>bool read = 15;</code>
+     * @return The read.
      */
     boolean getRead();
 
     /**
      * <code>bool write = 16;</code>
+     * @return The write.
      */
     boolean getWrite();
 
     /**
      * <code>bool importing = 17;</code>
+     * @return The importing.
      */
     boolean getImporting();
 
     /**
      * <code>bool symlink = 18;</code>
+     * @return The symlink.
      */
     boolean getSymlink();
 
@@ -4687,10 +4854,12 @@ public final class FileInfo {
 
     /**
      * <code>string id = 20;</code>
+     * @return The id.
      */
     java.lang.String getId();
     /**
      * <code>string id = 20;</code>
+     * @return The bytes for id.
      */
     com.google.protobuf.ByteString
         getIdBytes();
@@ -4721,25 +4890,30 @@ public final class FileInfo {
 
     /**
      * <code>string parentPath = 22;</code>
+     * @return The parentPath.
      */
     java.lang.String getParentPath();
     /**
      * <code>string parentPath = 22;</code>
+     * @return The bytes for parentPath.
      */
     com.google.protobuf.ByteString
         getParentPathBytes();
 
     /**
      * <code>int64 pvolumeID = 23;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
 
     /**
      * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return Whether the ioMonitor field is set.
      */
     boolean hasIoMonitor();
     /**
      * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return The ioMonitor.
      */
     org.opendedup.grpc.FileInfo.IOMonitorResponse getIoMonitor();
     /**
@@ -4749,68 +4923,80 @@ public final class FileInfo {
 
     /**
      * <code>string symlinkPath = 25;</code>
+     * @return The symlinkPath.
      */
     java.lang.String getSymlinkPath();
     /**
      * <code>string symlinkPath = 25;</code>
+     * @return The bytes for symlinkPath.
      */
     com.google.protobuf.ByteString
         getSymlinkPathBytes();
 
     /**
      * <code>int64 group_id = 26;</code>
+     * @return The groupId.
      */
     long getGroupId();
 
     /**
      * <code>int64 user_id = 27;</code>
+     * @return The userId.
      */
     long getUserId();
 
     /**
      * <code>int32 permissions = 28;</code>
+     * @return The permissions.
      */
     int getPermissions();
 
     /**
      * <code>int64 hashcode = 29;</code>
+     * @return The hashcode.
      */
     long getHashcode();
 
     /**
      * <code>int64 retentionLock = 30;</code>
+     * @return The retentionLock.
      */
     long getRetentionLock();
 
     /**
      * <code>int64 attributes = 31;</code>
+     * @return The attributes.
      */
     long getAttributes();
 
     /**
      * <code>string version = 32;</code>
+     * @return The version.
      */
     java.lang.String getVersion();
     /**
      * <code>string version = 32;</code>
+     * @return The bytes for version.
      */
     com.google.protobuf.ByteString
         getVersionBytes();
 
     /**
      * <code>int32 mode = 33;</code>
+     * @return The mode.
      */
     int getMode();
 
     /**
      * <code>bool delete_on_close = 34;</code>
+     * @return The deleteOnClose.
      */
     boolean getDeleteOnClose();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.FileInfoResponse}
    */
-  public  static final class FileInfoResponse extends
+  public static final class FileInfoResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileInfoResponse)
       FileInfoResponseOrBuilder {
@@ -4824,35 +5010,21 @@ public final class FileInfo {
       filePath_ = "";
       type_ = 0;
       sdfsPath_ = "";
-      atime_ = 0L;
-      mtime_ = 0L;
-      ctime_ = 0L;
-      hidden_ = false;
-      size_ = 0L;
-      open_ = false;
       fileGuild_ = "";
       mapGuid_ = "";
-      localOwner_ = false;
-      execute_ = false;
-      read_ = false;
-      write_ = false;
-      importing_ = false;
-      symlink_ = false;
       fileAttributes_ = java.util.Collections.emptyList();
       id_ = "";
       files_ = java.util.Collections.emptyList();
       parentPath_ = "";
-      pvolumeID_ = 0L;
       symlinkPath_ = "";
-      groupId_ = 0L;
-      userId_ = 0L;
-      permissions_ = 0;
-      hashcode_ = 0L;
-      retentionLock_ = 0L;
-      attributes_ = 0L;
       version_ = "";
-      mode_ = 0;
-      deleteOnClose_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileInfoResponse();
     }
 
     @java.lang.Override
@@ -4869,7 +5041,6 @@ public final class FileInfo {
         throw new java.lang.NullPointerException();
       }
       int mutable_bitField0_ = 0;
-      int mutable_bitField1_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4977,9 +5148,9 @@ public final class FileInfo {
               break;
             }
             case 154: {
-              if (!((mutable_bitField0_ & 0x00040000) == 0x00040000)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>();
-                mutable_bitField0_ |= 0x00040000;
+                mutable_bitField0_ |= 0x00000001;
               }
               fileAttributes_.add(
                   input.readMessage(org.opendedup.grpc.FileInfo.FileAttributes.parser(), extensionRegistry));
@@ -4992,9 +5163,9 @@ public final class FileInfo {
               break;
             }
             case 170: {
-              if (!((mutable_bitField0_ & 0x00100000) == 0x00100000)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 files_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileInfoResponse>();
-                mutable_bitField0_ |= 0x00100000;
+                mutable_bitField0_ |= 0x00000002;
               }
               files_.add(
                   input.readMessage(org.opendedup.grpc.FileInfo.FileInfoResponse.parser(), extensionRegistry));
@@ -5077,7 +5248,7 @@ public final class FileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5087,14 +5258,16 @@ public final class FileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00040000) == 0x00040000)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
         }
-        if (((mutable_bitField0_ & 0x00100000) == 0x00100000)) {
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
           files_ = java.util.Collections.unmodifiableList(files_);
         }
         this.unknownFields = unknownFields.build();
@@ -5149,6 +5322,8 @@ public final class FileInfo {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -5156,6 +5331,10 @@ public final class FileInfo {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static fileType forNumber(int value) {
         switch (value) {
           case 0: return FILE;
@@ -5178,6 +5357,10 @@ public final class FileInfo {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -5212,12 +5395,13 @@ public final class FileInfo {
       // @@protoc_insertion_point(enum_scope:org.opendedup.grpc.FileInfoResponse.fileType)
     }
 
-    private int bitField0_;
     public static final int FILENAME_FIELD_NUMBER = 1;
     private volatile java.lang.Object fileName_;
     /**
      * <code>string fileName = 1;</code>
+     * @return The fileName.
      */
+    @java.lang.Override
     public java.lang.String getFileName() {
       java.lang.Object ref = fileName_;
       if (ref instanceof java.lang.String) {
@@ -5232,7 +5416,9 @@ public final class FileInfo {
     }
     /**
      * <code>string fileName = 1;</code>
+     * @return The bytes for fileName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFileNameBytes() {
       java.lang.Object ref = fileName_;
@@ -5251,7 +5437,9 @@ public final class FileInfo {
     private volatile java.lang.Object filePath_;
     /**
      * <code>string filePath = 2;</code>
+     * @return The filePath.
      */
+    @java.lang.Override
     public java.lang.String getFilePath() {
       java.lang.Object ref = filePath_;
       if (ref instanceof java.lang.String) {
@@ -5266,7 +5454,9 @@ public final class FileInfo {
     }
     /**
      * <code>string filePath = 2;</code>
+     * @return The bytes for filePath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFilePathBytes() {
       java.lang.Object ref = filePath_;
@@ -5285,14 +5475,16 @@ public final class FileInfo {
     private int type_;
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+     * @return The enum numeric value on the wire for type.
      */
-    public int getTypeValue() {
+    @java.lang.Override public int getTypeValue() {
       return type_;
     }
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+     * @return The type.
      */
-    public org.opendedup.grpc.FileInfo.FileInfoResponse.fileType getType() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.FileInfoResponse.fileType getType() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.FileInfoResponse.fileType result = org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.valueOf(type_);
       return result == null ? org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.UNRECOGNIZED : result;
@@ -5302,7 +5494,9 @@ public final class FileInfo {
     private volatile java.lang.Object sdfsPath_;
     /**
      * <code>string sdfsPath = 4;</code>
+     * @return The sdfsPath.
      */
+    @java.lang.Override
     public java.lang.String getSdfsPath() {
       java.lang.Object ref = sdfsPath_;
       if (ref instanceof java.lang.String) {
@@ -5317,7 +5511,9 @@ public final class FileInfo {
     }
     /**
      * <code>string sdfsPath = 4;</code>
+     * @return The bytes for sdfsPath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSdfsPathBytes() {
       java.lang.Object ref = sdfsPath_;
@@ -5336,7 +5532,9 @@ public final class FileInfo {
     private long atime_;
     /**
      * <code>int64 atime = 5;</code>
+     * @return The atime.
      */
+    @java.lang.Override
     public long getAtime() {
       return atime_;
     }
@@ -5345,7 +5543,9 @@ public final class FileInfo {
     private long mtime_;
     /**
      * <code>int64 mtime = 6;</code>
+     * @return The mtime.
      */
+    @java.lang.Override
     public long getMtime() {
       return mtime_;
     }
@@ -5354,7 +5554,9 @@ public final class FileInfo {
     private long ctime_;
     /**
      * <code>int64 ctime = 7;</code>
+     * @return The ctime.
      */
+    @java.lang.Override
     public long getCtime() {
       return ctime_;
     }
@@ -5363,7 +5565,9 @@ public final class FileInfo {
     private boolean hidden_;
     /**
      * <code>bool hidden = 8;</code>
+     * @return The hidden.
      */
+    @java.lang.Override
     public boolean getHidden() {
       return hidden_;
     }
@@ -5372,7 +5576,9 @@ public final class FileInfo {
     private long size_;
     /**
      * <code>int64 size = 9;</code>
+     * @return The size.
      */
+    @java.lang.Override
     public long getSize() {
       return size_;
     }
@@ -5381,7 +5587,9 @@ public final class FileInfo {
     private boolean open_;
     /**
      * <code>bool open = 10;</code>
+     * @return The open.
      */
+    @java.lang.Override
     public boolean getOpen() {
       return open_;
     }
@@ -5390,7 +5598,9 @@ public final class FileInfo {
     private volatile java.lang.Object fileGuild_;
     /**
      * <code>string fileGuild = 11;</code>
+     * @return The fileGuild.
      */
+    @java.lang.Override
     public java.lang.String getFileGuild() {
       java.lang.Object ref = fileGuild_;
       if (ref instanceof java.lang.String) {
@@ -5405,7 +5615,9 @@ public final class FileInfo {
     }
     /**
      * <code>string fileGuild = 11;</code>
+     * @return The bytes for fileGuild.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFileGuildBytes() {
       java.lang.Object ref = fileGuild_;
@@ -5424,7 +5636,9 @@ public final class FileInfo {
     private volatile java.lang.Object mapGuid_;
     /**
      * <code>string mapGuid = 12;</code>
+     * @return The mapGuid.
      */
+    @java.lang.Override
     public java.lang.String getMapGuid() {
       java.lang.Object ref = mapGuid_;
       if (ref instanceof java.lang.String) {
@@ -5439,7 +5653,9 @@ public final class FileInfo {
     }
     /**
      * <code>string mapGuid = 12;</code>
+     * @return The bytes for mapGuid.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getMapGuidBytes() {
       java.lang.Object ref = mapGuid_;
@@ -5458,7 +5674,9 @@ public final class FileInfo {
     private boolean localOwner_;
     /**
      * <code>bool localOwner = 13;</code>
+     * @return The localOwner.
      */
+    @java.lang.Override
     public boolean getLocalOwner() {
       return localOwner_;
     }
@@ -5467,7 +5685,9 @@ public final class FileInfo {
     private boolean execute_;
     /**
      * <code>bool execute = 14;</code>
+     * @return The execute.
      */
+    @java.lang.Override
     public boolean getExecute() {
       return execute_;
     }
@@ -5476,7 +5696,9 @@ public final class FileInfo {
     private boolean read_;
     /**
      * <code>bool read = 15;</code>
+     * @return The read.
      */
+    @java.lang.Override
     public boolean getRead() {
       return read_;
     }
@@ -5485,7 +5707,9 @@ public final class FileInfo {
     private boolean write_;
     /**
      * <code>bool write = 16;</code>
+     * @return The write.
      */
+    @java.lang.Override
     public boolean getWrite() {
       return write_;
     }
@@ -5494,7 +5718,9 @@ public final class FileInfo {
     private boolean importing_;
     /**
      * <code>bool importing = 17;</code>
+     * @return The importing.
      */
+    @java.lang.Override
     public boolean getImporting() {
       return importing_;
     }
@@ -5503,7 +5729,9 @@ public final class FileInfo {
     private boolean symlink_;
     /**
      * <code>bool symlink = 18;</code>
+     * @return The symlink.
      */
+    @java.lang.Override
     public boolean getSymlink() {
       return symlink_;
     }
@@ -5513,12 +5741,14 @@ public final class FileInfo {
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> getFileAttributesList() {
       return fileAttributes_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
         getFileAttributesOrBuilderList() {
       return fileAttributes_;
@@ -5526,18 +5756,21 @@ public final class FileInfo {
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
+    @java.lang.Override
     public int getFileAttributesCount() {
       return fileAttributes_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index) {
       return fileAttributes_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 19;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
         int index) {
       return fileAttributes_.get(index);
@@ -5547,7 +5780,9 @@ public final class FileInfo {
     private volatile java.lang.Object id_;
     /**
      * <code>string id = 20;</code>
+     * @return The id.
      */
+    @java.lang.Override
     public java.lang.String getId() {
       java.lang.Object ref = id_;
       if (ref instanceof java.lang.String) {
@@ -5562,7 +5797,9 @@ public final class FileInfo {
     }
     /**
      * <code>string id = 20;</code>
+     * @return The bytes for id.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdBytes() {
       java.lang.Object ref = id_;
@@ -5582,12 +5819,14 @@ public final class FileInfo {
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> getFilesList() {
       return files_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> 
         getFilesOrBuilderList() {
       return files_;
@@ -5595,18 +5834,21 @@ public final class FileInfo {
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
      */
+    @java.lang.Override
     public int getFilesCount() {
       return files_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileInfoResponse getFiles(int index) {
       return files_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileInfoResponse files = 21;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getFilesOrBuilder(
         int index) {
       return files_.get(index);
@@ -5616,7 +5858,9 @@ public final class FileInfo {
     private volatile java.lang.Object parentPath_;
     /**
      * <code>string parentPath = 22;</code>
+     * @return The parentPath.
      */
+    @java.lang.Override
     public java.lang.String getParentPath() {
       java.lang.Object ref = parentPath_;
       if (ref instanceof java.lang.String) {
@@ -5631,7 +5875,9 @@ public final class FileInfo {
     }
     /**
      * <code>string parentPath = 22;</code>
+     * @return The bytes for parentPath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getParentPathBytes() {
       java.lang.Object ref = parentPath_;
@@ -5650,7 +5896,9 @@ public final class FileInfo {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 23;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -5659,19 +5907,24 @@ public final class FileInfo {
     private org.opendedup.grpc.FileInfo.IOMonitorResponse ioMonitor_;
     /**
      * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return Whether the ioMonitor field is set.
      */
+    @java.lang.Override
     public boolean hasIoMonitor() {
       return ioMonitor_ != null;
     }
     /**
      * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+     * @return The ioMonitor.
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.IOMonitorResponse getIoMonitor() {
       return ioMonitor_ == null ? org.opendedup.grpc.FileInfo.IOMonitorResponse.getDefaultInstance() : ioMonitor_;
     }
     /**
      * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.IOMonitorResponseOrBuilder getIoMonitorOrBuilder() {
       return getIoMonitor();
     }
@@ -5680,7 +5933,9 @@ public final class FileInfo {
     private volatile java.lang.Object symlinkPath_;
     /**
      * <code>string symlinkPath = 25;</code>
+     * @return The symlinkPath.
      */
+    @java.lang.Override
     public java.lang.String getSymlinkPath() {
       java.lang.Object ref = symlinkPath_;
       if (ref instanceof java.lang.String) {
@@ -5695,7 +5950,9 @@ public final class FileInfo {
     }
     /**
      * <code>string symlinkPath = 25;</code>
+     * @return The bytes for symlinkPath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSymlinkPathBytes() {
       java.lang.Object ref = symlinkPath_;
@@ -5714,7 +5971,9 @@ public final class FileInfo {
     private long groupId_;
     /**
      * <code>int64 group_id = 26;</code>
+     * @return The groupId.
      */
+    @java.lang.Override
     public long getGroupId() {
       return groupId_;
     }
@@ -5723,7 +5982,9 @@ public final class FileInfo {
     private long userId_;
     /**
      * <code>int64 user_id = 27;</code>
+     * @return The userId.
      */
+    @java.lang.Override
     public long getUserId() {
       return userId_;
     }
@@ -5732,7 +5993,9 @@ public final class FileInfo {
     private int permissions_;
     /**
      * <code>int32 permissions = 28;</code>
+     * @return The permissions.
      */
+    @java.lang.Override
     public int getPermissions() {
       return permissions_;
     }
@@ -5741,7 +6004,9 @@ public final class FileInfo {
     private long hashcode_;
     /**
      * <code>int64 hashcode = 29;</code>
+     * @return The hashcode.
      */
+    @java.lang.Override
     public long getHashcode() {
       return hashcode_;
     }
@@ -5750,7 +6015,9 @@ public final class FileInfo {
     private long retentionLock_;
     /**
      * <code>int64 retentionLock = 30;</code>
+     * @return The retentionLock.
      */
+    @java.lang.Override
     public long getRetentionLock() {
       return retentionLock_;
     }
@@ -5759,7 +6026,9 @@ public final class FileInfo {
     private long attributes_;
     /**
      * <code>int64 attributes = 31;</code>
+     * @return The attributes.
      */
+    @java.lang.Override
     public long getAttributes() {
       return attributes_;
     }
@@ -5768,7 +6037,9 @@ public final class FileInfo {
     private volatile java.lang.Object version_;
     /**
      * <code>string version = 32;</code>
+     * @return The version.
      */
+    @java.lang.Override
     public java.lang.String getVersion() {
       java.lang.Object ref = version_;
       if (ref instanceof java.lang.String) {
@@ -5783,7 +6054,9 @@ public final class FileInfo {
     }
     /**
      * <code>string version = 32;</code>
+     * @return The bytes for version.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getVersionBytes() {
       java.lang.Object ref = version_;
@@ -5802,7 +6075,9 @@ public final class FileInfo {
     private int mode_;
     /**
      * <code>int32 mode = 33;</code>
+     * @return The mode.
      */
+    @java.lang.Override
     public int getMode() {
       return mode_;
     }
@@ -5811,7 +6086,9 @@ public final class FileInfo {
     private boolean deleteOnClose_;
     /**
      * <code>bool delete_on_close = 34;</code>
+     * @return The deleteOnClose.
      */
+    @java.lang.Override
     public boolean getDeleteOnClose() {
       return deleteOnClose_;
     }
@@ -5830,16 +6107,16 @@ public final class FileInfo {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getFileNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, fileName_);
       }
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, filePath_);
       }
       if (type_ != org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.FILE.getNumber()) {
         output.writeEnum(3, type_);
       }
-      if (!getSdfsPathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sdfsPath_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, sdfsPath_);
       }
       if (atime_ != 0L) {
@@ -5860,10 +6137,10 @@ public final class FileInfo {
       if (open_ != false) {
         output.writeBool(10, open_);
       }
-      if (!getFileGuildBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileGuild_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 11, fileGuild_);
       }
-      if (!getMapGuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(mapGuid_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 12, mapGuid_);
       }
       if (localOwner_ != false) {
@@ -5887,13 +6164,13 @@ public final class FileInfo {
       for (int i = 0; i < fileAttributes_.size(); i++) {
         output.writeMessage(19, fileAttributes_.get(i));
       }
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 20, id_);
       }
       for (int i = 0; i < files_.size(); i++) {
         output.writeMessage(21, files_.get(i));
       }
-      if (!getParentPathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(parentPath_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 22, parentPath_);
       }
       if (pvolumeID_ != 0L) {
@@ -5902,7 +6179,7 @@ public final class FileInfo {
       if (ioMonitor_ != null) {
         output.writeMessage(24, getIoMonitor());
       }
-      if (!getSymlinkPathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(symlinkPath_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 25, symlinkPath_);
       }
       if (groupId_ != 0L) {
@@ -5923,7 +6200,7 @@ public final class FileInfo {
       if (attributes_ != 0L) {
         output.writeInt64(31, attributes_);
       }
-      if (!getVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 32, version_);
       }
       if (mode_ != 0) {
@@ -5941,17 +6218,17 @@ public final class FileInfo {
       if (size != -1) return size;
 
       size = 0;
-      if (!getFileNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, fileName_);
       }
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, filePath_);
       }
       if (type_ != org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.FILE.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, type_);
       }
-      if (!getSdfsPathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sdfsPath_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, sdfsPath_);
       }
       if (atime_ != 0L) {
@@ -5978,10 +6255,10 @@ public final class FileInfo {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(10, open_);
       }
-      if (!getFileGuildBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fileGuild_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, fileGuild_);
       }
-      if (!getMapGuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(mapGuid_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, mapGuid_);
       }
       if (localOwner_ != false) {
@@ -6012,14 +6289,14 @@ public final class FileInfo {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(19, fileAttributes_.get(i));
       }
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(20, id_);
       }
       for (int i = 0; i < files_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(21, files_.get(i));
       }
-      if (!getParentPathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(parentPath_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(22, parentPath_);
       }
       if (pvolumeID_ != 0L) {
@@ -6030,7 +6307,7 @@ public final class FileInfo {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(24, getIoMonitor());
       }
-      if (!getSymlinkPathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(symlinkPath_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(25, symlinkPath_);
       }
       if (groupId_ != 0L) {
@@ -6057,7 +6334,7 @@ public final class FileInfo {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(31, attributes_);
       }
-      if (!getVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(32, version_);
       }
       if (mode_ != 0) {
@@ -6083,79 +6360,78 @@ public final class FileInfo {
       }
       org.opendedup.grpc.FileInfo.FileInfoResponse other = (org.opendedup.grpc.FileInfo.FileInfoResponse) obj;
 
-      boolean result = true;
-      result = result && getFileName()
-          .equals(other.getFileName());
-      result = result && getFilePath()
-          .equals(other.getFilePath());
-      result = result && type_ == other.type_;
-      result = result && getSdfsPath()
-          .equals(other.getSdfsPath());
-      result = result && (getAtime()
-          == other.getAtime());
-      result = result && (getMtime()
-          == other.getMtime());
-      result = result && (getCtime()
-          == other.getCtime());
-      result = result && (getHidden()
-          == other.getHidden());
-      result = result && (getSize()
-          == other.getSize());
-      result = result && (getOpen()
-          == other.getOpen());
-      result = result && getFileGuild()
-          .equals(other.getFileGuild());
-      result = result && getMapGuid()
-          .equals(other.getMapGuid());
-      result = result && (getLocalOwner()
-          == other.getLocalOwner());
-      result = result && (getExecute()
-          == other.getExecute());
-      result = result && (getRead()
-          == other.getRead());
-      result = result && (getWrite()
-          == other.getWrite());
-      result = result && (getImporting()
-          == other.getImporting());
-      result = result && (getSymlink()
-          == other.getSymlink());
-      result = result && getFileAttributesList()
-          .equals(other.getFileAttributesList());
-      result = result && getId()
-          .equals(other.getId());
-      result = result && getFilesList()
-          .equals(other.getFilesList());
-      result = result && getParentPath()
-          .equals(other.getParentPath());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && (hasIoMonitor() == other.hasIoMonitor());
+      if (!getFileName()
+          .equals(other.getFileName())) return false;
+      if (!getFilePath()
+          .equals(other.getFilePath())) return false;
+      if (type_ != other.type_) return false;
+      if (!getSdfsPath()
+          .equals(other.getSdfsPath())) return false;
+      if (getAtime()
+          != other.getAtime()) return false;
+      if (getMtime()
+          != other.getMtime()) return false;
+      if (getCtime()
+          != other.getCtime()) return false;
+      if (getHidden()
+          != other.getHidden()) return false;
+      if (getSize()
+          != other.getSize()) return false;
+      if (getOpen()
+          != other.getOpen()) return false;
+      if (!getFileGuild()
+          .equals(other.getFileGuild())) return false;
+      if (!getMapGuid()
+          .equals(other.getMapGuid())) return false;
+      if (getLocalOwner()
+          != other.getLocalOwner()) return false;
+      if (getExecute()
+          != other.getExecute()) return false;
+      if (getRead()
+          != other.getRead()) return false;
+      if (getWrite()
+          != other.getWrite()) return false;
+      if (getImporting()
+          != other.getImporting()) return false;
+      if (getSymlink()
+          != other.getSymlink()) return false;
+      if (!getFileAttributesList()
+          .equals(other.getFileAttributesList())) return false;
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (!getFilesList()
+          .equals(other.getFilesList())) return false;
+      if (!getParentPath()
+          .equals(other.getParentPath())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (hasIoMonitor() != other.hasIoMonitor()) return false;
       if (hasIoMonitor()) {
-        result = result && getIoMonitor()
-            .equals(other.getIoMonitor());
+        if (!getIoMonitor()
+            .equals(other.getIoMonitor())) return false;
       }
-      result = result && getSymlinkPath()
-          .equals(other.getSymlinkPath());
-      result = result && (getGroupId()
-          == other.getGroupId());
-      result = result && (getUserId()
-          == other.getUserId());
-      result = result && (getPermissions()
-          == other.getPermissions());
-      result = result && (getHashcode()
-          == other.getHashcode());
-      result = result && (getRetentionLock()
-          == other.getRetentionLock());
-      result = result && (getAttributes()
-          == other.getAttributes());
-      result = result && getVersion()
-          .equals(other.getVersion());
-      result = result && (getMode()
-          == other.getMode());
-      result = result && (getDeleteOnClose()
-          == other.getDeleteOnClose());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getSymlinkPath()
+          .equals(other.getSymlinkPath())) return false;
+      if (getGroupId()
+          != other.getGroupId()) return false;
+      if (getUserId()
+          != other.getUserId()) return false;
+      if (getPermissions()
+          != other.getPermissions()) return false;
+      if (getHashcode()
+          != other.getHashcode()) return false;
+      if (getRetentionLock()
+          != other.getRetentionLock()) return false;
+      if (getAttributes()
+          != other.getAttributes()) return false;
+      if (!getVersion()
+          .equals(other.getVersion())) return false;
+      if (getMode()
+          != other.getMode()) return false;
+      if (getDeleteOnClose()
+          != other.getDeleteOnClose()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6431,7 +6707,7 @@ public final class FileInfo {
 
         if (fileAttributesBuilder_ == null) {
           fileAttributes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00040000);
+          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
           fileAttributesBuilder_.clear();
         }
@@ -6439,7 +6715,7 @@ public final class FileInfo {
 
         if (filesBuilder_ == null) {
           files_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00100000);
+          bitField0_ = (bitField0_ & ~0x00000002);
         } else {
           filesBuilder_.clear();
         }
@@ -6500,8 +6776,6 @@ public final class FileInfo {
       public org.opendedup.grpc.FileInfo.FileInfoResponse buildPartial() {
         org.opendedup.grpc.FileInfo.FileInfoResponse result = new org.opendedup.grpc.FileInfo.FileInfoResponse(this);
         int from_bitField0_ = bitField0_;
-        int from_bitField1_ = bitField1_;
-        int to_bitField0_ = 0;
         result.fileName_ = fileName_;
         result.filePath_ = filePath_;
         result.type_ = type_;
@@ -6521,9 +6795,9 @@ public final class FileInfo {
         result.importing_ = importing_;
         result.symlink_ = symlink_;
         if (fileAttributesBuilder_ == null) {
-          if (((bitField0_ & 0x00040000) == 0x00040000)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
-            bitField0_ = (bitField0_ & ~0x00040000);
+            bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.fileAttributes_ = fileAttributes_;
         } else {
@@ -6531,9 +6805,9 @@ public final class FileInfo {
         }
         result.id_ = id_;
         if (filesBuilder_ == null) {
-          if (((bitField0_ & 0x00100000) == 0x00100000)) {
+          if (((bitField0_ & 0x00000002) != 0)) {
             files_ = java.util.Collections.unmodifiableList(files_);
-            bitField0_ = (bitField0_ & ~0x00100000);
+            bitField0_ = (bitField0_ & ~0x00000002);
           }
           result.files_ = files_;
         } else {
@@ -6556,42 +6830,41 @@ public final class FileInfo {
         result.version_ = version_;
         result.mode_ = mode_;
         result.deleteOnClose_ = deleteOnClose_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6668,7 +6941,7 @@ public final class FileInfo {
           if (!other.fileAttributes_.isEmpty()) {
             if (fileAttributes_.isEmpty()) {
               fileAttributes_ = other.fileAttributes_;
-              bitField0_ = (bitField0_ & ~0x00040000);
+              bitField0_ = (bitField0_ & ~0x00000001);
             } else {
               ensureFileAttributesIsMutable();
               fileAttributes_.addAll(other.fileAttributes_);
@@ -6681,7 +6954,7 @@ public final class FileInfo {
               fileAttributesBuilder_.dispose();
               fileAttributesBuilder_ = null;
               fileAttributes_ = other.fileAttributes_;
-              bitField0_ = (bitField0_ & ~0x00040000);
+              bitField0_ = (bitField0_ & ~0x00000001);
               fileAttributesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getFileAttributesFieldBuilder() : null;
@@ -6698,7 +6971,7 @@ public final class FileInfo {
           if (!other.files_.isEmpty()) {
             if (files_.isEmpty()) {
               files_ = other.files_;
-              bitField0_ = (bitField0_ & ~0x00100000);
+              bitField0_ = (bitField0_ & ~0x00000002);
             } else {
               ensureFilesIsMutable();
               files_.addAll(other.files_);
@@ -6711,7 +6984,7 @@ public final class FileInfo {
               filesBuilder_.dispose();
               filesBuilder_ = null;
               files_ = other.files_;
-              bitField0_ = (bitField0_ & ~0x00100000);
+              bitField0_ = (bitField0_ & ~0x00000002);
               filesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getFilesFieldBuilder() : null;
@@ -6791,11 +7064,11 @@ public final class FileInfo {
         return this;
       }
       private int bitField0_;
-      private int bitField1_;
 
       private java.lang.Object fileName_ = "";
       /**
        * <code>string fileName = 1;</code>
+       * @return The fileName.
        */
       public java.lang.String getFileName() {
         java.lang.Object ref = fileName_;
@@ -6811,6 +7084,7 @@ public final class FileInfo {
       }
       /**
        * <code>string fileName = 1;</code>
+       * @return The bytes for fileName.
        */
       public com.google.protobuf.ByteString
           getFileNameBytes() {
@@ -6827,6 +7101,8 @@ public final class FileInfo {
       }
       /**
        * <code>string fileName = 1;</code>
+       * @param value The fileName to set.
+       * @return This builder for chaining.
        */
       public Builder setFileName(
           java.lang.String value) {
@@ -6840,6 +7116,7 @@ public final class FileInfo {
       }
       /**
        * <code>string fileName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFileName() {
         
@@ -6849,6 +7126,8 @@ public final class FileInfo {
       }
       /**
        * <code>string fileName = 1;</code>
+       * @param value The bytes for fileName to set.
+       * @return This builder for chaining.
        */
       public Builder setFileNameBytes(
           com.google.protobuf.ByteString value) {
@@ -6865,6 +7144,7 @@ public final class FileInfo {
       private java.lang.Object filePath_ = "";
       /**
        * <code>string filePath = 2;</code>
+       * @return The filePath.
        */
       public java.lang.String getFilePath() {
         java.lang.Object ref = filePath_;
@@ -6880,6 +7160,7 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 2;</code>
+       * @return The bytes for filePath.
        */
       public com.google.protobuf.ByteString
           getFilePathBytes() {
@@ -6896,6 +7177,8 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 2;</code>
+       * @param value The filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePath(
           java.lang.String value) {
@@ -6909,6 +7192,7 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFilePath() {
         
@@ -6918,6 +7202,8 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 2;</code>
+       * @param value The bytes for filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePathBytes(
           com.google.protobuf.ByteString value) {
@@ -6934,21 +7220,27 @@ public final class FileInfo {
       private int type_ = 0;
       /**
        * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @return The enum numeric value on the wire for type.
        */
-      public int getTypeValue() {
+      @java.lang.Override public int getTypeValue() {
         return type_;
       }
       /**
        * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @param value The enum numeric value on the wire for type to set.
+       * @return This builder for chaining.
        */
       public Builder setTypeValue(int value) {
+        
         type_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @return The type.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.FileInfoResponse.fileType getType() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.FileInfoResponse.fileType result = org.opendedup.grpc.FileInfo.FileInfoResponse.fileType.valueOf(type_);
@@ -6956,6 +7248,8 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
        */
       public Builder setType(org.opendedup.grpc.FileInfo.FileInfoResponse.fileType value) {
         if (value == null) {
@@ -6968,6 +7262,7 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.FileInfoResponse.fileType type = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearType() {
         
@@ -6979,6 +7274,7 @@ public final class FileInfo {
       private java.lang.Object sdfsPath_ = "";
       /**
        * <code>string sdfsPath = 4;</code>
+       * @return The sdfsPath.
        */
       public java.lang.String getSdfsPath() {
         java.lang.Object ref = sdfsPath_;
@@ -6994,6 +7290,7 @@ public final class FileInfo {
       }
       /**
        * <code>string sdfsPath = 4;</code>
+       * @return The bytes for sdfsPath.
        */
       public com.google.protobuf.ByteString
           getSdfsPathBytes() {
@@ -7010,6 +7307,8 @@ public final class FileInfo {
       }
       /**
        * <code>string sdfsPath = 4;</code>
+       * @param value The sdfsPath to set.
+       * @return This builder for chaining.
        */
       public Builder setSdfsPath(
           java.lang.String value) {
@@ -7023,6 +7322,7 @@ public final class FileInfo {
       }
       /**
        * <code>string sdfsPath = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSdfsPath() {
         
@@ -7032,6 +7332,8 @@ public final class FileInfo {
       }
       /**
        * <code>string sdfsPath = 4;</code>
+       * @param value The bytes for sdfsPath to set.
+       * @return This builder for chaining.
        */
       public Builder setSdfsPathBytes(
           com.google.protobuf.ByteString value) {
@@ -7048,12 +7350,16 @@ public final class FileInfo {
       private long atime_ ;
       /**
        * <code>int64 atime = 5;</code>
+       * @return The atime.
        */
+      @java.lang.Override
       public long getAtime() {
         return atime_;
       }
       /**
        * <code>int64 atime = 5;</code>
+       * @param value The atime to set.
+       * @return This builder for chaining.
        */
       public Builder setAtime(long value) {
         
@@ -7063,6 +7369,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 atime = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAtime() {
         
@@ -7074,12 +7381,16 @@ public final class FileInfo {
       private long mtime_ ;
       /**
        * <code>int64 mtime = 6;</code>
+       * @return The mtime.
        */
+      @java.lang.Override
       public long getMtime() {
         return mtime_;
       }
       /**
        * <code>int64 mtime = 6;</code>
+       * @param value The mtime to set.
+       * @return This builder for chaining.
        */
       public Builder setMtime(long value) {
         
@@ -7089,6 +7400,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 mtime = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMtime() {
         
@@ -7100,12 +7412,16 @@ public final class FileInfo {
       private long ctime_ ;
       /**
        * <code>int64 ctime = 7;</code>
+       * @return The ctime.
        */
+      @java.lang.Override
       public long getCtime() {
         return ctime_;
       }
       /**
        * <code>int64 ctime = 7;</code>
+       * @param value The ctime to set.
+       * @return This builder for chaining.
        */
       public Builder setCtime(long value) {
         
@@ -7115,6 +7431,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 ctime = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCtime() {
         
@@ -7126,12 +7443,16 @@ public final class FileInfo {
       private boolean hidden_ ;
       /**
        * <code>bool hidden = 8;</code>
+       * @return The hidden.
        */
+      @java.lang.Override
       public boolean getHidden() {
         return hidden_;
       }
       /**
        * <code>bool hidden = 8;</code>
+       * @param value The hidden to set.
+       * @return This builder for chaining.
        */
       public Builder setHidden(boolean value) {
         
@@ -7141,6 +7462,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool hidden = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHidden() {
         
@@ -7152,12 +7474,16 @@ public final class FileInfo {
       private long size_ ;
       /**
        * <code>int64 size = 9;</code>
+       * @return The size.
        */
+      @java.lang.Override
       public long getSize() {
         return size_;
       }
       /**
        * <code>int64 size = 9;</code>
+       * @param value The size to set.
+       * @return This builder for chaining.
        */
       public Builder setSize(long value) {
         
@@ -7167,6 +7493,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 size = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSize() {
         
@@ -7178,12 +7505,16 @@ public final class FileInfo {
       private boolean open_ ;
       /**
        * <code>bool open = 10;</code>
+       * @return The open.
        */
+      @java.lang.Override
       public boolean getOpen() {
         return open_;
       }
       /**
        * <code>bool open = 10;</code>
+       * @param value The open to set.
+       * @return This builder for chaining.
        */
       public Builder setOpen(boolean value) {
         
@@ -7193,6 +7524,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool open = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOpen() {
         
@@ -7204,6 +7536,7 @@ public final class FileInfo {
       private java.lang.Object fileGuild_ = "";
       /**
        * <code>string fileGuild = 11;</code>
+       * @return The fileGuild.
        */
       public java.lang.String getFileGuild() {
         java.lang.Object ref = fileGuild_;
@@ -7219,6 +7552,7 @@ public final class FileInfo {
       }
       /**
        * <code>string fileGuild = 11;</code>
+       * @return The bytes for fileGuild.
        */
       public com.google.protobuf.ByteString
           getFileGuildBytes() {
@@ -7235,6 +7569,8 @@ public final class FileInfo {
       }
       /**
        * <code>string fileGuild = 11;</code>
+       * @param value The fileGuild to set.
+       * @return This builder for chaining.
        */
       public Builder setFileGuild(
           java.lang.String value) {
@@ -7248,6 +7584,7 @@ public final class FileInfo {
       }
       /**
        * <code>string fileGuild = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFileGuild() {
         
@@ -7257,6 +7594,8 @@ public final class FileInfo {
       }
       /**
        * <code>string fileGuild = 11;</code>
+       * @param value The bytes for fileGuild to set.
+       * @return This builder for chaining.
        */
       public Builder setFileGuildBytes(
           com.google.protobuf.ByteString value) {
@@ -7273,6 +7612,7 @@ public final class FileInfo {
       private java.lang.Object mapGuid_ = "";
       /**
        * <code>string mapGuid = 12;</code>
+       * @return The mapGuid.
        */
       public java.lang.String getMapGuid() {
         java.lang.Object ref = mapGuid_;
@@ -7288,6 +7628,7 @@ public final class FileInfo {
       }
       /**
        * <code>string mapGuid = 12;</code>
+       * @return The bytes for mapGuid.
        */
       public com.google.protobuf.ByteString
           getMapGuidBytes() {
@@ -7304,6 +7645,8 @@ public final class FileInfo {
       }
       /**
        * <code>string mapGuid = 12;</code>
+       * @param value The mapGuid to set.
+       * @return This builder for chaining.
        */
       public Builder setMapGuid(
           java.lang.String value) {
@@ -7317,6 +7660,7 @@ public final class FileInfo {
       }
       /**
        * <code>string mapGuid = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMapGuid() {
         
@@ -7326,6 +7670,8 @@ public final class FileInfo {
       }
       /**
        * <code>string mapGuid = 12;</code>
+       * @param value The bytes for mapGuid to set.
+       * @return This builder for chaining.
        */
       public Builder setMapGuidBytes(
           com.google.protobuf.ByteString value) {
@@ -7342,12 +7688,16 @@ public final class FileInfo {
       private boolean localOwner_ ;
       /**
        * <code>bool localOwner = 13;</code>
+       * @return The localOwner.
        */
+      @java.lang.Override
       public boolean getLocalOwner() {
         return localOwner_;
       }
       /**
        * <code>bool localOwner = 13;</code>
+       * @param value The localOwner to set.
+       * @return This builder for chaining.
        */
       public Builder setLocalOwner(boolean value) {
         
@@ -7357,6 +7707,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool localOwner = 13;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLocalOwner() {
         
@@ -7368,12 +7719,16 @@ public final class FileInfo {
       private boolean execute_ ;
       /**
        * <code>bool execute = 14;</code>
+       * @return The execute.
        */
+      @java.lang.Override
       public boolean getExecute() {
         return execute_;
       }
       /**
        * <code>bool execute = 14;</code>
+       * @param value The execute to set.
+       * @return This builder for chaining.
        */
       public Builder setExecute(boolean value) {
         
@@ -7383,6 +7738,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool execute = 14;</code>
+       * @return This builder for chaining.
        */
       public Builder clearExecute() {
         
@@ -7394,12 +7750,16 @@ public final class FileInfo {
       private boolean read_ ;
       /**
        * <code>bool read = 15;</code>
+       * @return The read.
        */
+      @java.lang.Override
       public boolean getRead() {
         return read_;
       }
       /**
        * <code>bool read = 15;</code>
+       * @param value The read to set.
+       * @return This builder for chaining.
        */
       public Builder setRead(boolean value) {
         
@@ -7409,6 +7769,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool read = 15;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRead() {
         
@@ -7420,12 +7781,16 @@ public final class FileInfo {
       private boolean write_ ;
       /**
        * <code>bool write = 16;</code>
+       * @return The write.
        */
+      @java.lang.Override
       public boolean getWrite() {
         return write_;
       }
       /**
        * <code>bool write = 16;</code>
+       * @param value The write to set.
+       * @return This builder for chaining.
        */
       public Builder setWrite(boolean value) {
         
@@ -7435,6 +7800,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool write = 16;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWrite() {
         
@@ -7446,12 +7812,16 @@ public final class FileInfo {
       private boolean importing_ ;
       /**
        * <code>bool importing = 17;</code>
+       * @return The importing.
        */
+      @java.lang.Override
       public boolean getImporting() {
         return importing_;
       }
       /**
        * <code>bool importing = 17;</code>
+       * @param value The importing to set.
+       * @return This builder for chaining.
        */
       public Builder setImporting(boolean value) {
         
@@ -7461,6 +7831,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool importing = 17;</code>
+       * @return This builder for chaining.
        */
       public Builder clearImporting() {
         
@@ -7472,12 +7843,16 @@ public final class FileInfo {
       private boolean symlink_ ;
       /**
        * <code>bool symlink = 18;</code>
+       * @return The symlink.
        */
+      @java.lang.Override
       public boolean getSymlink() {
         return symlink_;
       }
       /**
        * <code>bool symlink = 18;</code>
+       * @param value The symlink to set.
+       * @return This builder for chaining.
        */
       public Builder setSymlink(boolean value) {
         
@@ -7487,6 +7862,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool symlink = 18;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSymlink() {
         
@@ -7498,9 +7874,9 @@ public final class FileInfo {
       private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_ =
         java.util.Collections.emptyList();
       private void ensureFileAttributesIsMutable() {
-        if (!((bitField0_ & 0x00040000) == 0x00040000)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>(fileAttributes_);
-          bitField0_ |= 0x00040000;
+          bitField0_ |= 0x00000001;
          }
       }
 
@@ -7650,7 +8026,7 @@ public final class FileInfo {
       public Builder clearFileAttributes() {
         if (fileAttributesBuilder_ == null) {
           fileAttributes_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00040000);
+          bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
           fileAttributesBuilder_.clear();
@@ -7727,7 +8103,7 @@ public final class FileInfo {
           fileAttributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder>(
                   fileAttributes_,
-                  ((bitField0_ & 0x00040000) == 0x00040000),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           fileAttributes_ = null;
@@ -7738,6 +8114,7 @@ public final class FileInfo {
       private java.lang.Object id_ = "";
       /**
        * <code>string id = 20;</code>
+       * @return The id.
        */
       public java.lang.String getId() {
         java.lang.Object ref = id_;
@@ -7753,6 +8130,7 @@ public final class FileInfo {
       }
       /**
        * <code>string id = 20;</code>
+       * @return The bytes for id.
        */
       public com.google.protobuf.ByteString
           getIdBytes() {
@@ -7769,6 +8147,8 @@ public final class FileInfo {
       }
       /**
        * <code>string id = 20;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
        */
       public Builder setId(
           java.lang.String value) {
@@ -7782,6 +8162,7 @@ public final class FileInfo {
       }
       /**
        * <code>string id = 20;</code>
+       * @return This builder for chaining.
        */
       public Builder clearId() {
         
@@ -7791,6 +8172,8 @@ public final class FileInfo {
       }
       /**
        * <code>string id = 20;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
        */
       public Builder setIdBytes(
           com.google.protobuf.ByteString value) {
@@ -7807,9 +8190,9 @@ public final class FileInfo {
       private java.util.List<org.opendedup.grpc.FileInfo.FileInfoResponse> files_ =
         java.util.Collections.emptyList();
       private void ensureFilesIsMutable() {
-        if (!((bitField0_ & 0x00100000) == 0x00100000)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           files_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileInfoResponse>(files_);
-          bitField0_ |= 0x00100000;
+          bitField0_ |= 0x00000002;
          }
       }
 
@@ -7959,7 +8342,7 @@ public final class FileInfo {
       public Builder clearFiles() {
         if (filesBuilder_ == null) {
           files_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00100000);
+          bitField0_ = (bitField0_ & ~0x00000002);
           onChanged();
         } else {
           filesBuilder_.clear();
@@ -8036,7 +8419,7 @@ public final class FileInfo {
           filesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder>(
                   files_,
-                  ((bitField0_ & 0x00100000) == 0x00100000),
+                  ((bitField0_ & 0x00000002) != 0),
                   getParentForChildren(),
                   isClean());
           files_ = null;
@@ -8047,6 +8430,7 @@ public final class FileInfo {
       private java.lang.Object parentPath_ = "";
       /**
        * <code>string parentPath = 22;</code>
+       * @return The parentPath.
        */
       public java.lang.String getParentPath() {
         java.lang.Object ref = parentPath_;
@@ -8062,6 +8446,7 @@ public final class FileInfo {
       }
       /**
        * <code>string parentPath = 22;</code>
+       * @return The bytes for parentPath.
        */
       public com.google.protobuf.ByteString
           getParentPathBytes() {
@@ -8078,6 +8463,8 @@ public final class FileInfo {
       }
       /**
        * <code>string parentPath = 22;</code>
+       * @param value The parentPath to set.
+       * @return This builder for chaining.
        */
       public Builder setParentPath(
           java.lang.String value) {
@@ -8091,6 +8478,7 @@ public final class FileInfo {
       }
       /**
        * <code>string parentPath = 22;</code>
+       * @return This builder for chaining.
        */
       public Builder clearParentPath() {
         
@@ -8100,6 +8488,8 @@ public final class FileInfo {
       }
       /**
        * <code>string parentPath = 22;</code>
+       * @param value The bytes for parentPath to set.
+       * @return This builder for chaining.
        */
       public Builder setParentPathBytes(
           com.google.protobuf.ByteString value) {
@@ -8116,12 +8506,16 @@ public final class FileInfo {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 23;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 23;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -8131,6 +8525,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 pvolumeID = 23;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -8139,17 +8534,19 @@ public final class FileInfo {
         return this;
       }
 
-      private org.opendedup.grpc.FileInfo.IOMonitorResponse ioMonitor_ = null;
+      private org.opendedup.grpc.FileInfo.IOMonitorResponse ioMonitor_;
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.FileInfo.IOMonitorResponse, org.opendedup.grpc.FileInfo.IOMonitorResponse.Builder, org.opendedup.grpc.FileInfo.IOMonitorResponseOrBuilder> ioMonitorBuilder_;
       /**
        * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       * @return Whether the ioMonitor field is set.
        */
       public boolean hasIoMonitor() {
         return ioMonitorBuilder_ != null || ioMonitor_ != null;
       }
       /**
        * <code>.org.opendedup.grpc.IOMonitorResponse ioMonitor = 24;</code>
+       * @return The ioMonitor.
        */
       public org.opendedup.grpc.FileInfo.IOMonitorResponse getIoMonitor() {
         if (ioMonitorBuilder_ == null) {
@@ -8259,6 +8656,7 @@ public final class FileInfo {
       private java.lang.Object symlinkPath_ = "";
       /**
        * <code>string symlinkPath = 25;</code>
+       * @return The symlinkPath.
        */
       public java.lang.String getSymlinkPath() {
         java.lang.Object ref = symlinkPath_;
@@ -8274,6 +8672,7 @@ public final class FileInfo {
       }
       /**
        * <code>string symlinkPath = 25;</code>
+       * @return The bytes for symlinkPath.
        */
       public com.google.protobuf.ByteString
           getSymlinkPathBytes() {
@@ -8290,6 +8689,8 @@ public final class FileInfo {
       }
       /**
        * <code>string symlinkPath = 25;</code>
+       * @param value The symlinkPath to set.
+       * @return This builder for chaining.
        */
       public Builder setSymlinkPath(
           java.lang.String value) {
@@ -8303,6 +8704,7 @@ public final class FileInfo {
       }
       /**
        * <code>string symlinkPath = 25;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSymlinkPath() {
         
@@ -8312,6 +8714,8 @@ public final class FileInfo {
       }
       /**
        * <code>string symlinkPath = 25;</code>
+       * @param value The bytes for symlinkPath to set.
+       * @return This builder for chaining.
        */
       public Builder setSymlinkPathBytes(
           com.google.protobuf.ByteString value) {
@@ -8328,12 +8732,16 @@ public final class FileInfo {
       private long groupId_ ;
       /**
        * <code>int64 group_id = 26;</code>
+       * @return The groupId.
        */
+      @java.lang.Override
       public long getGroupId() {
         return groupId_;
       }
       /**
        * <code>int64 group_id = 26;</code>
+       * @param value The groupId to set.
+       * @return This builder for chaining.
        */
       public Builder setGroupId(long value) {
         
@@ -8343,6 +8751,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 group_id = 26;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGroupId() {
         
@@ -8354,12 +8763,16 @@ public final class FileInfo {
       private long userId_ ;
       /**
        * <code>int64 user_id = 27;</code>
+       * @return The userId.
        */
+      @java.lang.Override
       public long getUserId() {
         return userId_;
       }
       /**
        * <code>int64 user_id = 27;</code>
+       * @param value The userId to set.
+       * @return This builder for chaining.
        */
       public Builder setUserId(long value) {
         
@@ -8369,6 +8782,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 user_id = 27;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserId() {
         
@@ -8380,12 +8794,16 @@ public final class FileInfo {
       private int permissions_ ;
       /**
        * <code>int32 permissions = 28;</code>
+       * @return The permissions.
        */
+      @java.lang.Override
       public int getPermissions() {
         return permissions_;
       }
       /**
        * <code>int32 permissions = 28;</code>
+       * @param value The permissions to set.
+       * @return This builder for chaining.
        */
       public Builder setPermissions(int value) {
         
@@ -8395,6 +8813,7 @@ public final class FileInfo {
       }
       /**
        * <code>int32 permissions = 28;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPermissions() {
         
@@ -8406,12 +8825,16 @@ public final class FileInfo {
       private long hashcode_ ;
       /**
        * <code>int64 hashcode = 29;</code>
+       * @return The hashcode.
        */
+      @java.lang.Override
       public long getHashcode() {
         return hashcode_;
       }
       /**
        * <code>int64 hashcode = 29;</code>
+       * @param value The hashcode to set.
+       * @return This builder for chaining.
        */
       public Builder setHashcode(long value) {
         
@@ -8421,6 +8844,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 hashcode = 29;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHashcode() {
         
@@ -8432,12 +8856,16 @@ public final class FileInfo {
       private long retentionLock_ ;
       /**
        * <code>int64 retentionLock = 30;</code>
+       * @return The retentionLock.
        */
+      @java.lang.Override
       public long getRetentionLock() {
         return retentionLock_;
       }
       /**
        * <code>int64 retentionLock = 30;</code>
+       * @param value The retentionLock to set.
+       * @return This builder for chaining.
        */
       public Builder setRetentionLock(long value) {
         
@@ -8447,6 +8875,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 retentionLock = 30;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRetentionLock() {
         
@@ -8458,12 +8887,16 @@ public final class FileInfo {
       private long attributes_ ;
       /**
        * <code>int64 attributes = 31;</code>
+       * @return The attributes.
        */
+      @java.lang.Override
       public long getAttributes() {
         return attributes_;
       }
       /**
        * <code>int64 attributes = 31;</code>
+       * @param value The attributes to set.
+       * @return This builder for chaining.
        */
       public Builder setAttributes(long value) {
         
@@ -8473,6 +8906,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 attributes = 31;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAttributes() {
         
@@ -8484,6 +8918,7 @@ public final class FileInfo {
       private java.lang.Object version_ = "";
       /**
        * <code>string version = 32;</code>
+       * @return The version.
        */
       public java.lang.String getVersion() {
         java.lang.Object ref = version_;
@@ -8499,6 +8934,7 @@ public final class FileInfo {
       }
       /**
        * <code>string version = 32;</code>
+       * @return The bytes for version.
        */
       public com.google.protobuf.ByteString
           getVersionBytes() {
@@ -8515,6 +8951,8 @@ public final class FileInfo {
       }
       /**
        * <code>string version = 32;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
        */
       public Builder setVersion(
           java.lang.String value) {
@@ -8528,6 +8966,7 @@ public final class FileInfo {
       }
       /**
        * <code>string version = 32;</code>
+       * @return This builder for chaining.
        */
       public Builder clearVersion() {
         
@@ -8537,6 +8976,8 @@ public final class FileInfo {
       }
       /**
        * <code>string version = 32;</code>
+       * @param value The bytes for version to set.
+       * @return This builder for chaining.
        */
       public Builder setVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -8553,12 +8994,16 @@ public final class FileInfo {
       private int mode_ ;
       /**
        * <code>int32 mode = 33;</code>
+       * @return The mode.
        */
+      @java.lang.Override
       public int getMode() {
         return mode_;
       }
       /**
        * <code>int32 mode = 33;</code>
+       * @param value The mode to set.
+       * @return This builder for chaining.
        */
       public Builder setMode(int value) {
         
@@ -8568,6 +9013,7 @@ public final class FileInfo {
       }
       /**
        * <code>int32 mode = 33;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMode() {
         
@@ -8579,12 +9025,16 @@ public final class FileInfo {
       private boolean deleteOnClose_ ;
       /**
        * <code>bool delete_on_close = 34;</code>
+       * @return The deleteOnClose.
        */
+      @java.lang.Override
       public boolean getDeleteOnClose() {
         return deleteOnClose_;
       }
       /**
        * <code>bool delete_on_close = 34;</code>
+       * @param value The deleteOnClose to set.
+       * @return This builder for chaining.
        */
       public Builder setDeleteOnClose(boolean value) {
         
@@ -8594,6 +9044,7 @@ public final class FileInfo {
       }
       /**
        * <code>bool delete_on_close = 34;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDeleteOnClose() {
         
@@ -8604,7 +9055,7 @@ public final class FileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -8660,98 +9111,116 @@ public final class FileInfo {
 
     /**
      * <code>int64 virtualBytesWritten = 1;</code>
+     * @return The virtualBytesWritten.
      */
     long getVirtualBytesWritten();
 
     /**
      * <code>int64 actualBytesWritten = 2;</code>
+     * @return The actualBytesWritten.
      */
     long getActualBytesWritten();
 
     /**
      * <code>int64 bytesRead = 3;</code>
+     * @return The bytesRead.
      */
     long getBytesRead();
 
     /**
      * <code>int64 duplicateBlocks = 4;</code>
+     * @return The duplicateBlocks.
      */
     long getDuplicateBlocks();
 
     /**
      * <code>int64 writeOpts = 5;</code>
+     * @return The writeOpts.
      */
     long getWriteOpts();
 
     /**
      * <code>int64 readOpts = 6;</code>
+     * @return The readOpts.
      */
     long getReadOpts();
 
     /**
      * <code>int64 maxReadOps = 7;</code>
+     * @return The maxReadOps.
      */
     long getMaxReadOps();
 
     /**
      * <code>int64 maxWriteOps = 8;</code>
+     * @return The maxWriteOps.
      */
     long getMaxWriteOps();
 
     /**
      * <code>int64 maxIops = 9;</code>
+     * @return The maxIops.
      */
     long getMaxIops();
 
     /**
      * <code>int64 maxReadMbps = 10;</code>
+     * @return The maxReadMbps.
      */
     long getMaxReadMbps();
 
     /**
      * <code>int64 maxWriteMbps = 11;</code>
+     * @return The maxWriteMbps.
      */
     long getMaxWriteMbps();
 
     /**
      * <code>int64 maxMbps = 12;</code>
+     * @return The maxMbps.
      */
     long getMaxMbps();
 
     /**
      * <code>int32 ioQos = 13;</code>
+     * @return The ioQos.
      */
     int getIoQos();
 
     /**
      * <code>string ioProfile = 14;</code>
+     * @return The ioProfile.
      */
     java.lang.String getIoProfile();
     /**
      * <code>string ioProfile = 14;</code>
+     * @return The bytes for ioProfile.
      */
     com.google.protobuf.ByteString
         getIoProfileBytes();
 
     /**
      * <code>int64 maxRbps = 15;</code>
+     * @return The maxRbps.
      */
     long getMaxRbps();
 
     /**
      * <code>int64 maxWbps = 16;</code>
+     * @return The maxWbps.
      */
     long getMaxWbps();
 
     /**
      * <code>int64 maxBps = 17;</code>
+     * @return The maxBps.
      */
     long getMaxBps();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.IOMonitorResponse}
    */
-  public  static final class IOMonitorResponse extends
+  public static final class IOMonitorResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.IOMonitorResponse)
       IOMonitorResponseOrBuilder {
@@ -8761,23 +9230,14 @@ public final class FileInfo {
       super(builder);
     }
     private IOMonitorResponse() {
-      virtualBytesWritten_ = 0L;
-      actualBytesWritten_ = 0L;
-      bytesRead_ = 0L;
-      duplicateBlocks_ = 0L;
-      writeOpts_ = 0L;
-      readOpts_ = 0L;
-      maxReadOps_ = 0L;
-      maxWriteOps_ = 0L;
-      maxIops_ = 0L;
-      maxReadMbps_ = 0L;
-      maxWriteMbps_ = 0L;
-      maxMbps_ = 0L;
-      ioQos_ = 0;
       ioProfile_ = "";
-      maxRbps_ = 0L;
-      maxWbps_ = 0L;
-      maxBps_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new IOMonitorResponse();
     }
 
     @java.lang.Override
@@ -8793,7 +9253,6 @@ public final class FileInfo {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -8891,7 +9350,7 @@ public final class FileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8901,6 +9360,8 @@ public final class FileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -8926,7 +9387,9 @@ public final class FileInfo {
     private long virtualBytesWritten_;
     /**
      * <code>int64 virtualBytesWritten = 1;</code>
+     * @return The virtualBytesWritten.
      */
+    @java.lang.Override
     public long getVirtualBytesWritten() {
       return virtualBytesWritten_;
     }
@@ -8935,7 +9398,9 @@ public final class FileInfo {
     private long actualBytesWritten_;
     /**
      * <code>int64 actualBytesWritten = 2;</code>
+     * @return The actualBytesWritten.
      */
+    @java.lang.Override
     public long getActualBytesWritten() {
       return actualBytesWritten_;
     }
@@ -8944,7 +9409,9 @@ public final class FileInfo {
     private long bytesRead_;
     /**
      * <code>int64 bytesRead = 3;</code>
+     * @return The bytesRead.
      */
+    @java.lang.Override
     public long getBytesRead() {
       return bytesRead_;
     }
@@ -8953,7 +9420,9 @@ public final class FileInfo {
     private long duplicateBlocks_;
     /**
      * <code>int64 duplicateBlocks = 4;</code>
+     * @return The duplicateBlocks.
      */
+    @java.lang.Override
     public long getDuplicateBlocks() {
       return duplicateBlocks_;
     }
@@ -8962,7 +9431,9 @@ public final class FileInfo {
     private long writeOpts_;
     /**
      * <code>int64 writeOpts = 5;</code>
+     * @return The writeOpts.
      */
+    @java.lang.Override
     public long getWriteOpts() {
       return writeOpts_;
     }
@@ -8971,7 +9442,9 @@ public final class FileInfo {
     private long readOpts_;
     /**
      * <code>int64 readOpts = 6;</code>
+     * @return The readOpts.
      */
+    @java.lang.Override
     public long getReadOpts() {
       return readOpts_;
     }
@@ -8980,7 +9453,9 @@ public final class FileInfo {
     private long maxReadOps_;
     /**
      * <code>int64 maxReadOps = 7;</code>
+     * @return The maxReadOps.
      */
+    @java.lang.Override
     public long getMaxReadOps() {
       return maxReadOps_;
     }
@@ -8989,7 +9464,9 @@ public final class FileInfo {
     private long maxWriteOps_;
     /**
      * <code>int64 maxWriteOps = 8;</code>
+     * @return The maxWriteOps.
      */
+    @java.lang.Override
     public long getMaxWriteOps() {
       return maxWriteOps_;
     }
@@ -8998,7 +9475,9 @@ public final class FileInfo {
     private long maxIops_;
     /**
      * <code>int64 maxIops = 9;</code>
+     * @return The maxIops.
      */
+    @java.lang.Override
     public long getMaxIops() {
       return maxIops_;
     }
@@ -9007,7 +9486,9 @@ public final class FileInfo {
     private long maxReadMbps_;
     /**
      * <code>int64 maxReadMbps = 10;</code>
+     * @return The maxReadMbps.
      */
+    @java.lang.Override
     public long getMaxReadMbps() {
       return maxReadMbps_;
     }
@@ -9016,7 +9497,9 @@ public final class FileInfo {
     private long maxWriteMbps_;
     /**
      * <code>int64 maxWriteMbps = 11;</code>
+     * @return The maxWriteMbps.
      */
+    @java.lang.Override
     public long getMaxWriteMbps() {
       return maxWriteMbps_;
     }
@@ -9025,7 +9508,9 @@ public final class FileInfo {
     private long maxMbps_;
     /**
      * <code>int64 maxMbps = 12;</code>
+     * @return The maxMbps.
      */
+    @java.lang.Override
     public long getMaxMbps() {
       return maxMbps_;
     }
@@ -9034,7 +9519,9 @@ public final class FileInfo {
     private int ioQos_;
     /**
      * <code>int32 ioQos = 13;</code>
+     * @return The ioQos.
      */
+    @java.lang.Override
     public int getIoQos() {
       return ioQos_;
     }
@@ -9043,7 +9530,9 @@ public final class FileInfo {
     private volatile java.lang.Object ioProfile_;
     /**
      * <code>string ioProfile = 14;</code>
+     * @return The ioProfile.
      */
+    @java.lang.Override
     public java.lang.String getIoProfile() {
       java.lang.Object ref = ioProfile_;
       if (ref instanceof java.lang.String) {
@@ -9058,7 +9547,9 @@ public final class FileInfo {
     }
     /**
      * <code>string ioProfile = 14;</code>
+     * @return The bytes for ioProfile.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIoProfileBytes() {
       java.lang.Object ref = ioProfile_;
@@ -9077,7 +9568,9 @@ public final class FileInfo {
     private long maxRbps_;
     /**
      * <code>int64 maxRbps = 15;</code>
+     * @return The maxRbps.
      */
+    @java.lang.Override
     public long getMaxRbps() {
       return maxRbps_;
     }
@@ -9086,7 +9579,9 @@ public final class FileInfo {
     private long maxWbps_;
     /**
      * <code>int64 maxWbps = 16;</code>
+     * @return The maxWbps.
      */
+    @java.lang.Override
     public long getMaxWbps() {
       return maxWbps_;
     }
@@ -9095,7 +9590,9 @@ public final class FileInfo {
     private long maxBps_;
     /**
      * <code>int64 maxBps = 17;</code>
+     * @return The maxBps.
      */
+    @java.lang.Override
     public long getMaxBps() {
       return maxBps_;
     }
@@ -9153,7 +9650,7 @@ public final class FileInfo {
       if (ioQos_ != 0) {
         output.writeInt32(13, ioQos_);
       }
-      if (!getIoProfileBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(ioProfile_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 14, ioProfile_);
       }
       if (maxRbps_ != 0L) {
@@ -9226,7 +9723,7 @@ public final class FileInfo {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(13, ioQos_);
       }
-      if (!getIoProfileBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(ioProfile_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, ioProfile_);
       }
       if (maxRbps_ != 0L) {
@@ -9256,43 +9753,42 @@ public final class FileInfo {
       }
       org.opendedup.grpc.FileInfo.IOMonitorResponse other = (org.opendedup.grpc.FileInfo.IOMonitorResponse) obj;
 
-      boolean result = true;
-      result = result && (getVirtualBytesWritten()
-          == other.getVirtualBytesWritten());
-      result = result && (getActualBytesWritten()
-          == other.getActualBytesWritten());
-      result = result && (getBytesRead()
-          == other.getBytesRead());
-      result = result && (getDuplicateBlocks()
-          == other.getDuplicateBlocks());
-      result = result && (getWriteOpts()
-          == other.getWriteOpts());
-      result = result && (getReadOpts()
-          == other.getReadOpts());
-      result = result && (getMaxReadOps()
-          == other.getMaxReadOps());
-      result = result && (getMaxWriteOps()
-          == other.getMaxWriteOps());
-      result = result && (getMaxIops()
-          == other.getMaxIops());
-      result = result && (getMaxReadMbps()
-          == other.getMaxReadMbps());
-      result = result && (getMaxWriteMbps()
-          == other.getMaxWriteMbps());
-      result = result && (getMaxMbps()
-          == other.getMaxMbps());
-      result = result && (getIoQos()
-          == other.getIoQos());
-      result = result && getIoProfile()
-          .equals(other.getIoProfile());
-      result = result && (getMaxRbps()
-          == other.getMaxRbps());
-      result = result && (getMaxWbps()
-          == other.getMaxWbps());
-      result = result && (getMaxBps()
-          == other.getMaxBps());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getVirtualBytesWritten()
+          != other.getVirtualBytesWritten()) return false;
+      if (getActualBytesWritten()
+          != other.getActualBytesWritten()) return false;
+      if (getBytesRead()
+          != other.getBytesRead()) return false;
+      if (getDuplicateBlocks()
+          != other.getDuplicateBlocks()) return false;
+      if (getWriteOpts()
+          != other.getWriteOpts()) return false;
+      if (getReadOpts()
+          != other.getReadOpts()) return false;
+      if (getMaxReadOps()
+          != other.getMaxReadOps()) return false;
+      if (getMaxWriteOps()
+          != other.getMaxWriteOps()) return false;
+      if (getMaxIops()
+          != other.getMaxIops()) return false;
+      if (getMaxReadMbps()
+          != other.getMaxReadMbps()) return false;
+      if (getMaxWriteMbps()
+          != other.getMaxWriteMbps()) return false;
+      if (getMaxMbps()
+          != other.getMaxMbps()) return false;
+      if (getIoQos()
+          != other.getIoQos()) return false;
+      if (!getIoProfile()
+          .equals(other.getIoProfile())) return false;
+      if (getMaxRbps()
+          != other.getMaxRbps()) return false;
+      if (getMaxWbps()
+          != other.getMaxWbps()) return false;
+      if (getMaxBps()
+          != other.getMaxBps()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -9567,35 +10063,35 @@ public final class FileInfo {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -9693,12 +10189,16 @@ public final class FileInfo {
       private long virtualBytesWritten_ ;
       /**
        * <code>int64 virtualBytesWritten = 1;</code>
+       * @return The virtualBytesWritten.
        */
+      @java.lang.Override
       public long getVirtualBytesWritten() {
         return virtualBytesWritten_;
       }
       /**
        * <code>int64 virtualBytesWritten = 1;</code>
+       * @param value The virtualBytesWritten to set.
+       * @return This builder for chaining.
        */
       public Builder setVirtualBytesWritten(long value) {
         
@@ -9708,6 +10208,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 virtualBytesWritten = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearVirtualBytesWritten() {
         
@@ -9719,12 +10220,16 @@ public final class FileInfo {
       private long actualBytesWritten_ ;
       /**
        * <code>int64 actualBytesWritten = 2;</code>
+       * @return The actualBytesWritten.
        */
+      @java.lang.Override
       public long getActualBytesWritten() {
         return actualBytesWritten_;
       }
       /**
        * <code>int64 actualBytesWritten = 2;</code>
+       * @param value The actualBytesWritten to set.
+       * @return This builder for chaining.
        */
       public Builder setActualBytesWritten(long value) {
         
@@ -9734,6 +10239,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 actualBytesWritten = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearActualBytesWritten() {
         
@@ -9745,12 +10251,16 @@ public final class FileInfo {
       private long bytesRead_ ;
       /**
        * <code>int64 bytesRead = 3;</code>
+       * @return The bytesRead.
        */
+      @java.lang.Override
       public long getBytesRead() {
         return bytesRead_;
       }
       /**
        * <code>int64 bytesRead = 3;</code>
+       * @param value The bytesRead to set.
+       * @return This builder for chaining.
        */
       public Builder setBytesRead(long value) {
         
@@ -9760,6 +10270,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 bytesRead = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBytesRead() {
         
@@ -9771,12 +10282,16 @@ public final class FileInfo {
       private long duplicateBlocks_ ;
       /**
        * <code>int64 duplicateBlocks = 4;</code>
+       * @return The duplicateBlocks.
        */
+      @java.lang.Override
       public long getDuplicateBlocks() {
         return duplicateBlocks_;
       }
       /**
        * <code>int64 duplicateBlocks = 4;</code>
+       * @param value The duplicateBlocks to set.
+       * @return This builder for chaining.
        */
       public Builder setDuplicateBlocks(long value) {
         
@@ -9786,6 +10301,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 duplicateBlocks = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDuplicateBlocks() {
         
@@ -9797,12 +10313,16 @@ public final class FileInfo {
       private long writeOpts_ ;
       /**
        * <code>int64 writeOpts = 5;</code>
+       * @return The writeOpts.
        */
+      @java.lang.Override
       public long getWriteOpts() {
         return writeOpts_;
       }
       /**
        * <code>int64 writeOpts = 5;</code>
+       * @param value The writeOpts to set.
+       * @return This builder for chaining.
        */
       public Builder setWriteOpts(long value) {
         
@@ -9812,6 +10332,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 writeOpts = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWriteOpts() {
         
@@ -9823,12 +10344,16 @@ public final class FileInfo {
       private long readOpts_ ;
       /**
        * <code>int64 readOpts = 6;</code>
+       * @return The readOpts.
        */
+      @java.lang.Override
       public long getReadOpts() {
         return readOpts_;
       }
       /**
        * <code>int64 readOpts = 6;</code>
+       * @param value The readOpts to set.
+       * @return This builder for chaining.
        */
       public Builder setReadOpts(long value) {
         
@@ -9838,6 +10363,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 readOpts = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearReadOpts() {
         
@@ -9849,12 +10375,16 @@ public final class FileInfo {
       private long maxReadOps_ ;
       /**
        * <code>int64 maxReadOps = 7;</code>
+       * @return The maxReadOps.
        */
+      @java.lang.Override
       public long getMaxReadOps() {
         return maxReadOps_;
       }
       /**
        * <code>int64 maxReadOps = 7;</code>
+       * @param value The maxReadOps to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxReadOps(long value) {
         
@@ -9864,6 +10394,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 maxReadOps = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxReadOps() {
         
@@ -9875,12 +10406,16 @@ public final class FileInfo {
       private long maxWriteOps_ ;
       /**
        * <code>int64 maxWriteOps = 8;</code>
+       * @return The maxWriteOps.
        */
+      @java.lang.Override
       public long getMaxWriteOps() {
         return maxWriteOps_;
       }
       /**
        * <code>int64 maxWriteOps = 8;</code>
+       * @param value The maxWriteOps to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxWriteOps(long value) {
         
@@ -9890,6 +10425,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 maxWriteOps = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxWriteOps() {
         
@@ -9901,12 +10437,16 @@ public final class FileInfo {
       private long maxIops_ ;
       /**
        * <code>int64 maxIops = 9;</code>
+       * @return The maxIops.
        */
+      @java.lang.Override
       public long getMaxIops() {
         return maxIops_;
       }
       /**
        * <code>int64 maxIops = 9;</code>
+       * @param value The maxIops to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxIops(long value) {
         
@@ -9916,6 +10456,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 maxIops = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxIops() {
         
@@ -9927,12 +10468,16 @@ public final class FileInfo {
       private long maxReadMbps_ ;
       /**
        * <code>int64 maxReadMbps = 10;</code>
+       * @return The maxReadMbps.
        */
+      @java.lang.Override
       public long getMaxReadMbps() {
         return maxReadMbps_;
       }
       /**
        * <code>int64 maxReadMbps = 10;</code>
+       * @param value The maxReadMbps to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxReadMbps(long value) {
         
@@ -9942,6 +10487,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 maxReadMbps = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxReadMbps() {
         
@@ -9953,12 +10499,16 @@ public final class FileInfo {
       private long maxWriteMbps_ ;
       /**
        * <code>int64 maxWriteMbps = 11;</code>
+       * @return The maxWriteMbps.
        */
+      @java.lang.Override
       public long getMaxWriteMbps() {
         return maxWriteMbps_;
       }
       /**
        * <code>int64 maxWriteMbps = 11;</code>
+       * @param value The maxWriteMbps to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxWriteMbps(long value) {
         
@@ -9968,6 +10518,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 maxWriteMbps = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxWriteMbps() {
         
@@ -9979,12 +10530,16 @@ public final class FileInfo {
       private long maxMbps_ ;
       /**
        * <code>int64 maxMbps = 12;</code>
+       * @return The maxMbps.
        */
+      @java.lang.Override
       public long getMaxMbps() {
         return maxMbps_;
       }
       /**
        * <code>int64 maxMbps = 12;</code>
+       * @param value The maxMbps to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxMbps(long value) {
         
@@ -9994,6 +10549,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 maxMbps = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxMbps() {
         
@@ -10005,12 +10561,16 @@ public final class FileInfo {
       private int ioQos_ ;
       /**
        * <code>int32 ioQos = 13;</code>
+       * @return The ioQos.
        */
+      @java.lang.Override
       public int getIoQos() {
         return ioQos_;
       }
       /**
        * <code>int32 ioQos = 13;</code>
+       * @param value The ioQos to set.
+       * @return This builder for chaining.
        */
       public Builder setIoQos(int value) {
         
@@ -10020,6 +10580,7 @@ public final class FileInfo {
       }
       /**
        * <code>int32 ioQos = 13;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIoQos() {
         
@@ -10031,6 +10592,7 @@ public final class FileInfo {
       private java.lang.Object ioProfile_ = "";
       /**
        * <code>string ioProfile = 14;</code>
+       * @return The ioProfile.
        */
       public java.lang.String getIoProfile() {
         java.lang.Object ref = ioProfile_;
@@ -10046,6 +10608,7 @@ public final class FileInfo {
       }
       /**
        * <code>string ioProfile = 14;</code>
+       * @return The bytes for ioProfile.
        */
       public com.google.protobuf.ByteString
           getIoProfileBytes() {
@@ -10062,6 +10625,8 @@ public final class FileInfo {
       }
       /**
        * <code>string ioProfile = 14;</code>
+       * @param value The ioProfile to set.
+       * @return This builder for chaining.
        */
       public Builder setIoProfile(
           java.lang.String value) {
@@ -10075,6 +10640,7 @@ public final class FileInfo {
       }
       /**
        * <code>string ioProfile = 14;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIoProfile() {
         
@@ -10084,6 +10650,8 @@ public final class FileInfo {
       }
       /**
        * <code>string ioProfile = 14;</code>
+       * @param value The bytes for ioProfile to set.
+       * @return This builder for chaining.
        */
       public Builder setIoProfileBytes(
           com.google.protobuf.ByteString value) {
@@ -10100,12 +10668,16 @@ public final class FileInfo {
       private long maxRbps_ ;
       /**
        * <code>int64 maxRbps = 15;</code>
+       * @return The maxRbps.
        */
+      @java.lang.Override
       public long getMaxRbps() {
         return maxRbps_;
       }
       /**
        * <code>int64 maxRbps = 15;</code>
+       * @param value The maxRbps to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxRbps(long value) {
         
@@ -10115,6 +10687,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 maxRbps = 15;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxRbps() {
         
@@ -10126,12 +10699,16 @@ public final class FileInfo {
       private long maxWbps_ ;
       /**
        * <code>int64 maxWbps = 16;</code>
+       * @return The maxWbps.
        */
+      @java.lang.Override
       public long getMaxWbps() {
         return maxWbps_;
       }
       /**
        * <code>int64 maxWbps = 16;</code>
+       * @param value The maxWbps to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxWbps(long value) {
         
@@ -10141,6 +10718,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 maxWbps = 16;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxWbps() {
         
@@ -10152,12 +10730,16 @@ public final class FileInfo {
       private long maxBps_ ;
       /**
        * <code>int64 maxBps = 17;</code>
+       * @return The maxBps.
        */
+      @java.lang.Override
       public long getMaxBps() {
         return maxBps_;
       }
       /**
        * <code>int64 maxBps = 17;</code>
+       * @param value The maxBps to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxBps(long value) {
         
@@ -10167,6 +10749,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 maxBps = 17;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxBps() {
         
@@ -10177,7 +10760,7 @@ public final class FileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10257,23 +10840,26 @@ public final class FileInfo {
 
     /**
      * <code>string filePath = 2;</code>
+     * @return The filePath.
      */
     java.lang.String getFilePath();
     /**
      * <code>string filePath = 2;</code>
+     * @return The bytes for filePath.
      */
     com.google.protobuf.ByteString
         getFilePathBytes();
 
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.WFileAttributesRequest}
    */
-  public  static final class WFileAttributesRequest extends
+  public static final class WFileAttributesRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.WFileAttributesRequest)
       WFileAttributesRequestOrBuilder {
@@ -10285,7 +10871,13 @@ public final class FileInfo {
     private WFileAttributesRequest() {
       fileAttributes_ = java.util.Collections.emptyList();
       filePath_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new WFileAttributesRequest();
     }
 
     @java.lang.Override
@@ -10313,7 +10905,7 @@ public final class FileInfo {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -10333,7 +10925,7 @@ public final class FileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -10343,11 +10935,13 @@ public final class FileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
         }
         this.unknownFields = unknownFields.build();
@@ -10367,18 +10961,19 @@ public final class FileInfo {
               org.opendedup.grpc.FileInfo.WFileAttributesRequest.class, org.opendedup.grpc.FileInfo.WFileAttributesRequest.Builder.class);
     }
 
-    private int bitField0_;
     public static final int FILEATTRIBUTES_FIELD_NUMBER = 1;
     private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_;
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> getFileAttributesList() {
       return fileAttributes_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
         getFileAttributesOrBuilderList() {
       return fileAttributes_;
@@ -10386,18 +10981,21 @@ public final class FileInfo {
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public int getFileAttributesCount() {
       return fileAttributes_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index) {
       return fileAttributes_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
         int index) {
       return fileAttributes_.get(index);
@@ -10407,7 +11005,9 @@ public final class FileInfo {
     private volatile java.lang.Object filePath_;
     /**
      * <code>string filePath = 2;</code>
+     * @return The filePath.
      */
+    @java.lang.Override
     public java.lang.String getFilePath() {
       java.lang.Object ref = filePath_;
       if (ref instanceof java.lang.String) {
@@ -10422,7 +11022,9 @@ public final class FileInfo {
     }
     /**
      * <code>string filePath = 2;</code>
+     * @return The bytes for filePath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFilePathBytes() {
       java.lang.Object ref = filePath_;
@@ -10441,7 +11043,9 @@ public final class FileInfo {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -10463,7 +11067,7 @@ public final class FileInfo {
       for (int i = 0; i < fileAttributes_.size(); i++) {
         output.writeMessage(1, fileAttributes_.get(i));
       }
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, filePath_);
       }
       if (pvolumeID_ != 0L) {
@@ -10482,7 +11086,7 @@ public final class FileInfo {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, fileAttributes_.get(i));
       }
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, filePath_);
       }
       if (pvolumeID_ != 0L) {
@@ -10504,15 +11108,14 @@ public final class FileInfo {
       }
       org.opendedup.grpc.FileInfo.WFileAttributesRequest other = (org.opendedup.grpc.FileInfo.WFileAttributesRequest) obj;
 
-      boolean result = true;
-      result = result && getFileAttributesList()
-          .equals(other.getFileAttributesList());
-      result = result && getFilePath()
-          .equals(other.getFilePath());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getFileAttributesList()
+          .equals(other.getFileAttributesList())) return false;
+      if (!getFilePath()
+          .equals(other.getFilePath())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -10702,9 +11305,8 @@ public final class FileInfo {
       public org.opendedup.grpc.FileInfo.WFileAttributesRequest buildPartial() {
         org.opendedup.grpc.FileInfo.WFileAttributesRequest result = new org.opendedup.grpc.FileInfo.WFileAttributesRequest(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (fileAttributesBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -10714,42 +11316,41 @@ public final class FileInfo {
         }
         result.filePath_ = filePath_;
         result.pvolumeID_ = pvolumeID_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10829,7 +11430,7 @@ public final class FileInfo {
       private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_ =
         java.util.Collections.emptyList();
       private void ensureFileAttributesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>(fileAttributes_);
           bitField0_ |= 0x00000001;
          }
@@ -11058,7 +11659,7 @@ public final class FileInfo {
           fileAttributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder>(
                   fileAttributes_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           fileAttributes_ = null;
@@ -11069,6 +11670,7 @@ public final class FileInfo {
       private java.lang.Object filePath_ = "";
       /**
        * <code>string filePath = 2;</code>
+       * @return The filePath.
        */
       public java.lang.String getFilePath() {
         java.lang.Object ref = filePath_;
@@ -11084,6 +11686,7 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 2;</code>
+       * @return The bytes for filePath.
        */
       public com.google.protobuf.ByteString
           getFilePathBytes() {
@@ -11100,6 +11703,8 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 2;</code>
+       * @param value The filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePath(
           java.lang.String value) {
@@ -11113,6 +11718,7 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFilePath() {
         
@@ -11122,6 +11728,8 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 2;</code>
+       * @param value The bytes for filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePathBytes(
           com.google.protobuf.ByteString value) {
@@ -11138,12 +11746,16 @@ public final class FileInfo {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -11153,6 +11765,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -11163,7 +11776,7 @@ public final class FileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -11219,27 +11832,31 @@ public final class FileInfo {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.WFileAttributesResponse}
    */
-  public  static final class WFileAttributesResponse extends
+  public static final class WFileAttributesResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.WFileAttributesResponse)
       WFileAttributesResponseOrBuilder {
@@ -11251,6 +11868,13 @@ public final class FileInfo {
     private WFileAttributesResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new WFileAttributesResponse();
     }
 
     @java.lang.Override
@@ -11266,7 +11890,6 @@ public final class FileInfo {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -11290,7 +11913,7 @@ public final class FileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -11300,6 +11923,8 @@ public final class FileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -11325,7 +11950,9 @@ public final class FileInfo {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -11340,7 +11967,9 @@ public final class FileInfo {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -11359,14 +11988,16 @@ public final class FileInfo {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -11386,7 +12017,7 @@ public final class FileInfo {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -11401,7 +12032,7 @@ public final class FileInfo {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -11423,12 +12054,11 @@ public final class FileInfo {
       }
       org.opendedup.grpc.FileInfo.WFileAttributesResponse other = (org.opendedup.grpc.FileInfo.WFileAttributesResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -11613,35 +12243,35 @@ public final class FileInfo {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -11694,6 +12324,7 @@ public final class FileInfo {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -11709,6 +12340,7 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -11725,6 +12357,8 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -11738,6 +12372,7 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -11747,6 +12382,8 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -11763,21 +12400,27 @@ public final class FileInfo {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -11785,6 +12428,8 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -11797,6 +12442,7 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -11807,7 +12453,7 @@ public final class FileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -11863,23 +12509,26 @@ public final class FileInfo {
 
     /**
      * <code>string filePath = 1;</code>
+     * @return The filePath.
      */
     java.lang.String getFilePath();
     /**
      * <code>string filePath = 1;</code>
+     * @return The bytes for filePath.
      */
     com.google.protobuf.ByteString
         getFilePathBytes();
 
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.RFileAttributesRequest}
    */
-  public  static final class RFileAttributesRequest extends
+  public static final class RFileAttributesRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RFileAttributesRequest)
       RFileAttributesRequestOrBuilder {
@@ -11890,7 +12539,13 @@ public final class FileInfo {
     }
     private RFileAttributesRequest() {
       filePath_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RFileAttributesRequest();
     }
 
     @java.lang.Override
@@ -11906,7 +12561,6 @@ public final class FileInfo {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -11929,7 +12583,7 @@ public final class FileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -11939,6 +12593,8 @@ public final class FileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -11964,7 +12620,9 @@ public final class FileInfo {
     private volatile java.lang.Object filePath_;
     /**
      * <code>string filePath = 1;</code>
+     * @return The filePath.
      */
+    @java.lang.Override
     public java.lang.String getFilePath() {
       java.lang.Object ref = filePath_;
       if (ref instanceof java.lang.String) {
@@ -11979,7 +12637,9 @@ public final class FileInfo {
     }
     /**
      * <code>string filePath = 1;</code>
+     * @return The bytes for filePath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFilePathBytes() {
       java.lang.Object ref = filePath_;
@@ -11998,7 +12658,9 @@ public final class FileInfo {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -12017,7 +12679,7 @@ public final class FileInfo {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, filePath_);
       }
       if (pvolumeID_ != 0L) {
@@ -12032,7 +12694,7 @@ public final class FileInfo {
       if (size != -1) return size;
 
       size = 0;
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, filePath_);
       }
       if (pvolumeID_ != 0L) {
@@ -12054,13 +12716,12 @@ public final class FileInfo {
       }
       org.opendedup.grpc.FileInfo.RFileAttributesRequest other = (org.opendedup.grpc.FileInfo.RFileAttributesRequest) obj;
 
-      boolean result = true;
-      result = result && getFilePath()
-          .equals(other.getFilePath());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getFilePath()
+          .equals(other.getFilePath())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12246,35 +12907,35 @@ public final class FileInfo {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -12327,6 +12988,7 @@ public final class FileInfo {
       private java.lang.Object filePath_ = "";
       /**
        * <code>string filePath = 1;</code>
+       * @return The filePath.
        */
       public java.lang.String getFilePath() {
         java.lang.Object ref = filePath_;
@@ -12342,6 +13004,7 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @return The bytes for filePath.
        */
       public com.google.protobuf.ByteString
           getFilePathBytes() {
@@ -12358,6 +13021,8 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @param value The filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePath(
           java.lang.String value) {
@@ -12371,6 +13036,7 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFilePath() {
         
@@ -12380,6 +13046,8 @@ public final class FileInfo {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @param value The bytes for filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePathBytes(
           com.google.protobuf.ByteString value) {
@@ -12396,12 +13064,16 @@ public final class FileInfo {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -12411,6 +13083,7 @@ public final class FileInfo {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -12421,7 +13094,7 @@ public final class FileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -12501,27 +13174,31 @@ public final class FileInfo {
 
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.RFileAttributesResponse}
    */
-  public  static final class RFileAttributesResponse extends
+  public static final class RFileAttributesResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RFileAttributesResponse)
       RFileAttributesResponseOrBuilder {
@@ -12534,6 +13211,13 @@ public final class FileInfo {
       fileAttributes_ = java.util.Collections.emptyList();
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RFileAttributesResponse();
     }
 
     @java.lang.Override
@@ -12561,7 +13245,7 @@ public final class FileInfo {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -12582,7 +13266,7 @@ public final class FileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -12592,11 +13276,13 @@ public final class FileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
         }
         this.unknownFields = unknownFields.build();
@@ -12616,18 +13302,19 @@ public final class FileInfo {
               org.opendedup.grpc.FileInfo.RFileAttributesResponse.class, org.opendedup.grpc.FileInfo.RFileAttributesResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int FILEATTRIBUTES_FIELD_NUMBER = 1;
     private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_;
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> getFileAttributesList() {
       return fileAttributes_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.FileInfo.FileAttributesOrBuilder> 
         getFileAttributesOrBuilderList() {
       return fileAttributes_;
@@ -12635,18 +13322,21 @@ public final class FileInfo {
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public int getFileAttributesCount() {
       return fileAttributes_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileAttributes getFileAttributes(int index) {
       return fileAttributes_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileAttributes fileAttributes = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileAttributesOrBuilder getFileAttributesOrBuilder(
         int index) {
       return fileAttributes_.get(index);
@@ -12656,7 +13346,9 @@ public final class FileInfo {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -12671,7 +13363,9 @@ public final class FileInfo {
     }
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -12690,14 +13384,16 @@ public final class FileInfo {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -12720,7 +13416,7 @@ public final class FileInfo {
       for (int i = 0; i < fileAttributes_.size(); i++) {
         output.writeMessage(1, fileAttributes_.get(i));
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -12739,7 +13435,7 @@ public final class FileInfo {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, fileAttributes_.get(i));
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -12761,14 +13457,13 @@ public final class FileInfo {
       }
       org.opendedup.grpc.FileInfo.RFileAttributesResponse other = (org.opendedup.grpc.FileInfo.RFileAttributesResponse) obj;
 
-      boolean result = true;
-      result = result && getFileAttributesList()
-          .equals(other.getFileAttributesList());
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getFileAttributesList()
+          .equals(other.getFileAttributesList())) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12957,9 +13652,8 @@ public final class FileInfo {
       public org.opendedup.grpc.FileInfo.RFileAttributesResponse buildPartial() {
         org.opendedup.grpc.FileInfo.RFileAttributesResponse result = new org.opendedup.grpc.FileInfo.RFileAttributesResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (fileAttributesBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             fileAttributes_ = java.util.Collections.unmodifiableList(fileAttributes_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -12969,42 +13663,41 @@ public final class FileInfo {
         }
         result.error_ = error_;
         result.errorCode_ = errorCode_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -13084,7 +13777,7 @@ public final class FileInfo {
       private java.util.List<org.opendedup.grpc.FileInfo.FileAttributes> fileAttributes_ =
         java.util.Collections.emptyList();
       private void ensureFileAttributesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           fileAttributes_ = new java.util.ArrayList<org.opendedup.grpc.FileInfo.FileAttributes>(fileAttributes_);
           bitField0_ |= 0x00000001;
          }
@@ -13313,7 +14006,7 @@ public final class FileInfo {
           fileAttributesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.FileInfo.FileAttributes, org.opendedup.grpc.FileInfo.FileAttributes.Builder, org.opendedup.grpc.FileInfo.FileAttributesOrBuilder>(
                   fileAttributes_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           fileAttributes_ = null;
@@ -13324,6 +14017,7 @@ public final class FileInfo {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 2;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -13339,6 +14033,7 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 2;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -13355,6 +14050,8 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -13368,6 +14065,7 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -13377,6 +14075,8 @@ public final class FileInfo {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -13393,21 +14093,27 @@ public final class FileInfo {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -13415,6 +14121,8 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -13427,6 +14135,7 @@ public final class FileInfo {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -13437,7 +14146,7 @@ public final class FileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -13493,20 +14202,24 @@ public final class FileInfo {
 
     /**
      * <code>string key = 1;</code>
+     * @return The key.
      */
     java.lang.String getKey();
     /**
      * <code>string key = 1;</code>
+     * @return The bytes for key.
      */
     com.google.protobuf.ByteString
         getKeyBytes();
 
     /**
      * <code>string value = 2;</code>
+     * @return The value.
      */
     java.lang.String getValue();
     /**
      * <code>string value = 2;</code>
+     * @return The bytes for value.
      */
     com.google.protobuf.ByteString
         getValueBytes();
@@ -13514,7 +14227,7 @@ public final class FileInfo {
   /**
    * Protobuf type {@code org.opendedup.grpc.FileAttributes}
    */
-  public  static final class FileAttributes extends
+  public static final class FileAttributes extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileAttributes)
       FileAttributesOrBuilder {
@@ -13526,6 +14239,13 @@ public final class FileInfo {
     private FileAttributes() {
       key_ = "";
       value_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileAttributes();
     }
 
     @java.lang.Override
@@ -13541,7 +14261,6 @@ public final class FileInfo {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -13565,7 +14284,7 @@ public final class FileInfo {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -13575,6 +14294,8 @@ public final class FileInfo {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -13600,7 +14321,9 @@ public final class FileInfo {
     private volatile java.lang.Object key_;
     /**
      * <code>string key = 1;</code>
+     * @return The key.
      */
+    @java.lang.Override
     public java.lang.String getKey() {
       java.lang.Object ref = key_;
       if (ref instanceof java.lang.String) {
@@ -13615,7 +14338,9 @@ public final class FileInfo {
     }
     /**
      * <code>string key = 1;</code>
+     * @return The bytes for key.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getKeyBytes() {
       java.lang.Object ref = key_;
@@ -13634,7 +14359,9 @@ public final class FileInfo {
     private volatile java.lang.Object value_;
     /**
      * <code>string value = 2;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public java.lang.String getValue() {
       java.lang.Object ref = value_;
       if (ref instanceof java.lang.String) {
@@ -13649,7 +14376,9 @@ public final class FileInfo {
     }
     /**
      * <code>string value = 2;</code>
+     * @return The bytes for value.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getValueBytes() {
       java.lang.Object ref = value_;
@@ -13678,10 +14407,10 @@ public final class FileInfo {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, key_);
       }
-      if (!getValueBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_);
       }
       unknownFields.writeTo(output);
@@ -13693,10 +14422,10 @@ public final class FileInfo {
       if (size != -1) return size;
 
       size = 0;
-      if (!getKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, key_);
       }
-      if (!getValueBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, value_);
       }
       size += unknownFields.getSerializedSize();
@@ -13714,13 +14443,12 @@ public final class FileInfo {
       }
       org.opendedup.grpc.FileInfo.FileAttributes other = (org.opendedup.grpc.FileInfo.FileAttributes) obj;
 
-      boolean result = true;
-      result = result && getKey()
-          .equals(other.getKey());
-      result = result && getValue()
-          .equals(other.getValue());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getKey()
+          .equals(other.getKey())) return false;
+      if (!getValue()
+          .equals(other.getValue())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -13905,35 +14633,35 @@ public final class FileInfo {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -13987,6 +14715,7 @@ public final class FileInfo {
       private java.lang.Object key_ = "";
       /**
        * <code>string key = 1;</code>
+       * @return The key.
        */
       public java.lang.String getKey() {
         java.lang.Object ref = key_;
@@ -14002,6 +14731,7 @@ public final class FileInfo {
       }
       /**
        * <code>string key = 1;</code>
+       * @return The bytes for key.
        */
       public com.google.protobuf.ByteString
           getKeyBytes() {
@@ -14018,6 +14748,8 @@ public final class FileInfo {
       }
       /**
        * <code>string key = 1;</code>
+       * @param value The key to set.
+       * @return This builder for chaining.
        */
       public Builder setKey(
           java.lang.String value) {
@@ -14031,6 +14763,7 @@ public final class FileInfo {
       }
       /**
        * <code>string key = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearKey() {
         
@@ -14040,6 +14773,8 @@ public final class FileInfo {
       }
       /**
        * <code>string key = 1;</code>
+       * @param value The bytes for key to set.
+       * @return This builder for chaining.
        */
       public Builder setKeyBytes(
           com.google.protobuf.ByteString value) {
@@ -14056,6 +14791,7 @@ public final class FileInfo {
       private java.lang.Object value_ = "";
       /**
        * <code>string value = 2;</code>
+       * @return The value.
        */
       public java.lang.String getValue() {
         java.lang.Object ref = value_;
@@ -14071,6 +14807,7 @@ public final class FileInfo {
       }
       /**
        * <code>string value = 2;</code>
+       * @return The bytes for value.
        */
       public com.google.protobuf.ByteString
           getValueBytes() {
@@ -14087,6 +14824,8 @@ public final class FileInfo {
       }
       /**
        * <code>string value = 2;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(
           java.lang.String value) {
@@ -14100,6 +14839,7 @@ public final class FileInfo {
       }
       /**
        * <code>string value = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -14109,6 +14849,8 @@ public final class FileInfo {
       }
       /**
        * <code>string value = 2;</code>
+       * @param value The bytes for value to set.
+       * @return This builder for chaining.
        */
       public Builder setValueBytes(
           com.google.protobuf.ByteString value) {
@@ -14124,7 +14866,7 @@ public final class FileInfo {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -14325,18 +15067,10 @@ public final class FileInfo {
       "EIO\020zB0Z.github.com/opendedup/sdfs-clien" +
       "t-go/sdfs/;sdfsb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_org_opendedup_grpc_FileInfoRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_org_opendedup_grpc_FileInfoRequest_fieldAccessorTable = new

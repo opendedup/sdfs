@@ -2530,7 +2530,7 @@ public class HashBlobArchive implements Runnable, Serializable {
 					}
 				}
 			} else {
-				SDFSLogger.getLog().debug("archive for " + uuid + " not found");
+				SDFSLogger.getLog().debug("archive for " + uuid + " not found write archives = " + writableArchives.size());
 				if (!Main.retrievalTier.isEmpty()) {
 					Main.partialTransition = false;
 				}

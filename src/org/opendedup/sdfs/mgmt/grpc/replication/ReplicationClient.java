@@ -50,7 +50,7 @@ public class ReplicationClient {
     public long volumeid;
     public boolean mtls;
     public Map<String, ImportFile> imports = new ConcurrentHashMap<String, ImportFile>();
-    public Map<String, List<ReplicationImportEvent>> activeImports = new HashMap<String,List<ReplicationImportEvent>>();
+    public Map<String, List<ReplicationImportEvent>> activeImports = new HashMap<String, List<ReplicationImportEvent>>();
     private long sequence = 0;
     public Thread syncThread;
     File jsonFile = null;
@@ -180,7 +180,7 @@ public class ReplicationClient {
                             .build();
                 }
 
-                SDFSLogger.getLog().info("Replication connected to " + host + " " + port + " " + channel.toString()
+                SDFSLogger.getLog().debug("Replication connected to " + host + " " + port + " " + channel.toString()
                         + " connection state " + channel.getState(true));
                 storageBlockingStub = StorageServiceGrpc.newBlockingStub(channel);
                 evtBlockingStub = SDFSEventServiceGrpc.newBlockingStub(channel);
@@ -275,7 +275,7 @@ public class ReplicationClient {
                             if (rc == null) {
                                 rc = new ReplicationClient(evt.url, evt.volumeid, evt.mtls, directory.getPath());
                             }
-                            rc.importFile(evt.src, evt.dst, evt);
+                            rc.importFile(evt);
                         } catch (Exception e) {
                             SDFSLogger.getLog().warn("recovery import failed for " + id, e);
                         }
@@ -289,9 +289,6 @@ public class ReplicationClient {
         }
     }
 
-    
-
-
     public SDFSEvent[] replicate(List<ReplicationFileLocation> locations) throws IOException {
         SDFSEvent[] evts = new SDFSEvent[locations.size()];
         if (evts.length > 10) {
@@ -303,7 +300,8 @@ public class ReplicationClient {
                 ReplicationFileLocation location = locations.get(i);
                 ReplicationImportEvent evt = new ReplicationImportEvent(location.getSrcFilePath(),
                         location.getDstFilePath(), this.url, this.volumeid,
-                        this.mtls, true);
+                        this.mtls, true, location.getSrcoffset(), location.getSrcsize(), location.getDstoffset(),
+                        location.getOverwrite());
                 evt.persistEvent();
                 if (activeImports.containsKey(location.getDstFilePath())) {
                     evt.endEvent("Replication already occuring for" + location.getDstFilePath(), SDFSEvent.ERROR);
@@ -320,8 +318,7 @@ public class ReplicationClient {
                             evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
                         }
                     } else {
-                        ImportFile fl = new ImportFile(location.getSrcFilePath(), location.getDstFilePath(), this, evt,
-                                true);
+                        ImportFile fl = new ImportFile(this, evt);
                         Thread th = new Thread(fl);
                         th.start();
                     }
@@ -332,15 +329,15 @@ public class ReplicationClient {
         }
     }
 
-    private SDFSEvent importFile(String src, String dst, ReplicationImportEvent evt) throws IOException {
-        
-        if (activeImports.containsKey(dst)) {
-            evt.endEvent("Replication already occuring for" + dst, SDFSEvent.ERROR);
+    private SDFSEvent importFile(ReplicationImportEvent evt) throws IOException {
+
+        if (activeImports.containsKey(evt.dst)) {
+            evt.endEvent("Replication already occuring for" + evt.dst, SDFSEvent.ERROR);
         } else {
-            SDFSLogger.getLog().info("Will Replicate " + src + " to "
-                    + dst + " from " + url);
+            SDFSLogger.getLog().info("Will Replicate " + evt.src + " to "
+                    + evt.dst + " from " + url);
             evt.persistEvent();
-            if (src.equalsIgnoreCase(".")) {
+            if (evt.src.equalsIgnoreCase(".")) {
                 if (downloadThread == null || !downloadThread.isAlive()) {
                     DownloadAll dl = new DownloadAll(this, evt);
                     downloadThread = new Thread(dl);
@@ -349,8 +346,7 @@ public class ReplicationClient {
                     evt.endEvent("DownloadAll Thread already Active", SDFSEvent.WARN);
                 }
             } else {
-                ImportFile fl = new ImportFile(src, dst, this, evt,
-                        true);
+                ImportFile fl = new ImportFile(this, evt);
                 Thread th = new Thread(fl);
                 th.start();
             }

@@ -36,8 +36,14 @@ public class ReplicationImportEvent extends SDFSEvent {
 	public long fileSize;
 	public long bytesImported;
 	public long bytesProcessed;
+	public long srcOffset;
+	public long dstOffset;
+	public long srcSize;
+	public long dstSize;
+	public boolean overwrite;
 
-	public ReplicationImportEvent(String src, String dst, String url, long volumeid,boolean mtls,boolean onDemand) {
+	public ReplicationImportEvent(String src, String dst, String url, long volumeid,boolean mtls,boolean onDemand,
+	long srcOffset,long srcSize,long dstOffset, boolean overwrite) {
 		super(IMPORT, dst, "Importing " + src + " from " + url + " with volumeid " +
 				volumeid + " to " + dst, SDFSEvent.INFO);
 		this.src = src;
@@ -46,6 +52,10 @@ public class ReplicationImportEvent extends SDFSEvent {
 		this.mtls = mtls;
 		this.volumeid = volumeid;
 		this.onDemand = onDemand;
+		this.srcOffset = srcOffset;
+		this.srcSize = srcSize;
+		this.dstOffset = dstOffset;
+		this.overwrite = overwrite;
 	}
 
 	public ReplicationImportEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt) {
@@ -61,6 +71,11 @@ public class ReplicationImportEvent extends SDFSEvent {
 		this.bytesImported =Long.parseLong(evt.getAttributesMap().get("bytesimported"));
 		this.fileSize =Long.parseLong(evt.getAttributesMap().get("filesize"));
 		this.bytesProcessed =Long.parseLong(evt.getAttributesMap().get("bytesprocessed"));
+		this.srcOffset= Long.parseLong(evt.getAttributesMap().get("srcoffset"));
+		this.srcSize=Long.parseLong(evt.getAttributesMap().get("srcsize"));
+		this.dstOffset=Long.parseLong(evt.getAttributesMap().get("dstoffset"));
+		this.overwrite= Boolean.parseBoolean(evt.getAttributesMap().get("overwrite"));
+
 	}
 
 	public void cancel() {
@@ -94,6 +109,10 @@ public class ReplicationImportEvent extends SDFSEvent {
 		b.putAttributes("bytesimported",  Long.toString(this.bytesImported));
 		b.putAttributes("filesize",  Long.toString(this.fileSize));
 		b.putAttributes("bytesprocessed",  Long.toString(this.bytesProcessed));
+		b.putAttributes("srcoffset",  Long.toString(this.srcOffset));
+		b.putAttributes("srcsize",  Long.toString(this.srcSize));
+		b.putAttributes("dstoffset",  Long.toString(this.dstOffset));
+		b.putAttributes("overwrite",  Boolean.toString(this.overwrite));
 		return b.build();
 	}
 

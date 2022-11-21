@@ -41,6 +41,8 @@ public final class Storage {
     }
 
     /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
@@ -48,6 +50,10 @@ public final class Storage {
       return forNumber(value);
     }
 
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
     public static SparseDataFlags forNumber(int value) {
       switch (value) {
         case 0: return RECONSTRUCTED;
@@ -69,6 +75,10 @@ public final class Storage {
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -162,6 +172,8 @@ public final class Storage {
     }
 
     /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
@@ -169,6 +181,10 @@ public final class Storage {
       return forNumber(value);
     }
 
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
     public static actionType forNumber(int value) {
       switch (value) {
         case 0: return MFILEDELETED;
@@ -194,6 +210,10 @@ public final class Storage {
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -295,6 +315,8 @@ public final class Storage {
     }
 
     /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
@@ -302,6 +324,10 @@ public final class Storage {
       return forNumber(value);
     }
 
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
     public static hashtype forNumber(int value) {
       switch (value) {
         case 0: return SHA256;
@@ -325,6 +351,10 @@ public final class Storage {
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -365,26 +395,31 @@ public final class Storage {
 
     /**
      * <code>repeated bytes hashes = 1;</code>
+     * @return A list containing the hashes.
      */
     java.util.List<com.google.protobuf.ByteString> getHashesList();
     /**
      * <code>repeated bytes hashes = 1;</code>
+     * @return The count of hashes.
      */
     int getHashesCount();
     /**
      * <code>repeated bytes hashes = 1;</code>
+     * @param index The index of the element to return.
+     * @return The hashes at the given index.
      */
     com.google.protobuf.ByteString getHashes(int index);
 
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CheckHashesRequest}
    */
-  public  static final class CheckHashesRequest extends
+  public static final class CheckHashesRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CheckHashesRequest)
       CheckHashesRequestOrBuilder {
@@ -395,7 +430,13 @@ public final class Storage {
     }
     private CheckHashesRequest() {
       hashes_ = java.util.Collections.emptyList();
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CheckHashesRequest();
     }
 
     @java.lang.Override
@@ -423,7 +464,7 @@ public final class Storage {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 hashes_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -436,7 +477,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -446,12 +487,14 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          hashes_ = java.util.Collections.unmodifiableList(hashes_);
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          hashes_ = java.util.Collections.unmodifiableList(hashes_); // C
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -470,24 +513,28 @@ public final class Storage {
               org.opendedup.grpc.Storage.CheckHashesRequest.class, org.opendedup.grpc.Storage.CheckHashesRequest.Builder.class);
     }
 
-    private int bitField0_;
     public static final int HASHES_FIELD_NUMBER = 1;
     private java.util.List<com.google.protobuf.ByteString> hashes_;
     /**
      * <code>repeated bytes hashes = 1;</code>
+     * @return A list containing the hashes.
      */
+    @java.lang.Override
     public java.util.List<com.google.protobuf.ByteString>
         getHashesList() {
       return hashes_;
     }
     /**
      * <code>repeated bytes hashes = 1;</code>
+     * @return The count of hashes.
      */
     public int getHashesCount() {
       return hashes_.size();
     }
     /**
      * <code>repeated bytes hashes = 1;</code>
+     * @param index The index of the element to return.
+     * @return The hashes at the given index.
      */
     public com.google.protobuf.ByteString getHashes(int index) {
       return hashes_.get(index);
@@ -497,7 +544,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -559,13 +608,12 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.CheckHashesRequest other = (org.opendedup.grpc.Storage.CheckHashesRequest) obj;
 
-      boolean result = true;
-      result = result && getHashesList()
-          .equals(other.getHashesList());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getHashesList()
+          .equals(other.getHashesList())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -746,49 +794,47 @@ public final class Storage {
       public org.opendedup.grpc.Storage.CheckHashesRequest buildPartial() {
         org.opendedup.grpc.Storage.CheckHashesRequest result = new org.opendedup.grpc.Storage.CheckHashesRequest(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           hashes_ = java.util.Collections.unmodifiableList(hashes_);
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.hashes_ = hashes_;
         result.pvolumeID_ = pvolumeID_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -847,32 +893,40 @@ public final class Storage {
 
       private java.util.List<com.google.protobuf.ByteString> hashes_ = java.util.Collections.emptyList();
       private void ensureHashesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           hashes_ = new java.util.ArrayList<com.google.protobuf.ByteString>(hashes_);
           bitField0_ |= 0x00000001;
          }
       }
       /**
        * <code>repeated bytes hashes = 1;</code>
+       * @return A list containing the hashes.
        */
       public java.util.List<com.google.protobuf.ByteString>
           getHashesList() {
-        return java.util.Collections.unmodifiableList(hashes_);
+        return ((bitField0_ & 0x00000001) != 0) ?
+                 java.util.Collections.unmodifiableList(hashes_) : hashes_;
       }
       /**
        * <code>repeated bytes hashes = 1;</code>
+       * @return The count of hashes.
        */
       public int getHashesCount() {
         return hashes_.size();
       }
       /**
        * <code>repeated bytes hashes = 1;</code>
+       * @param index The index of the element to return.
+       * @return The hashes at the given index.
        */
       public com.google.protobuf.ByteString getHashes(int index) {
         return hashes_.get(index);
       }
       /**
        * <code>repeated bytes hashes = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The hashes to set.
+       * @return This builder for chaining.
        */
       public Builder setHashes(
           int index, com.google.protobuf.ByteString value) {
@@ -886,6 +940,8 @@ public final class Storage {
       }
       /**
        * <code>repeated bytes hashes = 1;</code>
+       * @param value The hashes to add.
+       * @return This builder for chaining.
        */
       public Builder addHashes(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -898,6 +954,8 @@ public final class Storage {
       }
       /**
        * <code>repeated bytes hashes = 1;</code>
+       * @param values The hashes to add.
+       * @return This builder for chaining.
        */
       public Builder addAllHashes(
           java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
@@ -909,6 +967,7 @@ public final class Storage {
       }
       /**
        * <code>repeated bytes hashes = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHashes() {
         hashes_ = java.util.Collections.emptyList();
@@ -920,12 +979,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -935,6 +998,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -945,7 +1009,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1001,23 +1065,26 @@ public final class Storage {
 
     /**
      * <code>string filePath = 1;</code>
+     * @return The filePath.
      */
     java.lang.String getFilePath();
     /**
      * <code>string filePath = 1;</code>
+     * @return The bytes for filePath.
      */
     com.google.protobuf.ByteString
         getFilePathBytes();
 
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.RestoreArchivesRequest}
    */
-  public  static final class RestoreArchivesRequest extends
+  public static final class RestoreArchivesRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RestoreArchivesRequest)
       RestoreArchivesRequestOrBuilder {
@@ -1028,7 +1095,13 @@ public final class Storage {
     }
     private RestoreArchivesRequest() {
       filePath_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RestoreArchivesRequest();
     }
 
     @java.lang.Override
@@ -1044,7 +1117,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1067,7 +1139,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1077,6 +1149,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1102,7 +1176,9 @@ public final class Storage {
     private volatile java.lang.Object filePath_;
     /**
      * <code>string filePath = 1;</code>
+     * @return The filePath.
      */
+    @java.lang.Override
     public java.lang.String getFilePath() {
       java.lang.Object ref = filePath_;
       if (ref instanceof java.lang.String) {
@@ -1117,7 +1193,9 @@ public final class Storage {
     }
     /**
      * <code>string filePath = 1;</code>
+     * @return The bytes for filePath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFilePathBytes() {
       java.lang.Object ref = filePath_;
@@ -1136,7 +1214,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -1155,7 +1235,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, filePath_);
       }
       if (pvolumeID_ != 0L) {
@@ -1170,7 +1250,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, filePath_);
       }
       if (pvolumeID_ != 0L) {
@@ -1192,13 +1272,12 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.RestoreArchivesRequest other = (org.opendedup.grpc.Storage.RestoreArchivesRequest) obj;
 
-      boolean result = true;
-      result = result && getFilePath()
-          .equals(other.getFilePath());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getFilePath()
+          .equals(other.getFilePath())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1384,35 +1463,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1465,6 +1544,7 @@ public final class Storage {
       private java.lang.Object filePath_ = "";
       /**
        * <code>string filePath = 1;</code>
+       * @return The filePath.
        */
       public java.lang.String getFilePath() {
         java.lang.Object ref = filePath_;
@@ -1480,6 +1560,7 @@ public final class Storage {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @return The bytes for filePath.
        */
       public com.google.protobuf.ByteString
           getFilePathBytes() {
@@ -1496,6 +1577,8 @@ public final class Storage {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @param value The filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePath(
           java.lang.String value) {
@@ -1509,6 +1592,7 @@ public final class Storage {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFilePath() {
         
@@ -1518,6 +1602,8 @@ public final class Storage {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @param value The bytes for filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePathBytes(
           com.google.protobuf.ByteString value) {
@@ -1534,12 +1620,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -1549,6 +1639,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -1559,7 +1650,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1615,29 +1706,35 @@ public final class Storage {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>string eventID = 3;</code>
+     * @return The eventID.
      */
     java.lang.String getEventID();
     /**
      * <code>string eventID = 3;</code>
+     * @return The bytes for eventID.
      */
     com.google.protobuf.ByteString
         getEventIDBytes();
@@ -1645,7 +1742,7 @@ public final class Storage {
   /**
    * Protobuf type {@code org.opendedup.grpc.RestoreArchivesResponse}
    */
-  public  static final class RestoreArchivesResponse extends
+  public static final class RestoreArchivesResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RestoreArchivesResponse)
       RestoreArchivesResponseOrBuilder {
@@ -1661,6 +1758,13 @@ public final class Storage {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RestoreArchivesResponse();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -1673,7 +1777,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1703,7 +1806,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1713,6 +1816,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -1738,7 +1843,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -1753,7 +1860,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -1772,14 +1881,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -1789,7 +1900,9 @@ public final class Storage {
     private volatile java.lang.Object eventID_;
     /**
      * <code>string eventID = 3;</code>
+     * @return The eventID.
      */
+    @java.lang.Override
     public java.lang.String getEventID() {
       java.lang.Object ref = eventID_;
       if (ref instanceof java.lang.String) {
@@ -1804,7 +1917,9 @@ public final class Storage {
     }
     /**
      * <code>string eventID = 3;</code>
+     * @return The bytes for eventID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventIDBytes() {
       java.lang.Object ref = eventID_;
@@ -1833,13 +1948,13 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(2, errorCode_);
       }
-      if (!getEventIDBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventID_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, eventID_);
       }
       unknownFields.writeTo(output);
@@ -1851,14 +1966,14 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, errorCode_);
       }
-      if (!getEventIDBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventID_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, eventID_);
       }
       size += unknownFields.getSerializedSize();
@@ -1876,14 +1991,13 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.RestoreArchivesResponse other = (org.opendedup.grpc.Storage.RestoreArchivesResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && getEventID()
-          .equals(other.getEventID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!getEventID()
+          .equals(other.getEventID())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2073,35 +2187,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2158,6 +2272,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -2173,6 +2288,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -2189,6 +2305,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -2202,6 +2320,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -2211,6 +2330,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -2227,21 +2348,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -2249,6 +2376,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -2261,6 +2390,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -2272,6 +2402,7 @@ public final class Storage {
       private java.lang.Object eventID_ = "";
       /**
        * <code>string eventID = 3;</code>
+       * @return The eventID.
        */
       public java.lang.String getEventID() {
         java.lang.Object ref = eventID_;
@@ -2287,6 +2418,7 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 3;</code>
+       * @return The bytes for eventID.
        */
       public com.google.protobuf.ByteString
           getEventIDBytes() {
@@ -2303,6 +2435,8 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 3;</code>
+       * @param value The eventID to set.
+       * @return This builder for chaining.
        */
       public Builder setEventID(
           java.lang.String value) {
@@ -2316,6 +2450,7 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventID() {
         
@@ -2325,6 +2460,8 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 3;</code>
+       * @param value The bytes for eventID to set.
+       * @return This builder for chaining.
        */
       public Builder setEventIDBytes(
           com.google.protobuf.ByteString value) {
@@ -2340,7 +2477,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2396,40 +2533,48 @@ public final class Storage {
 
     /**
      * <code>repeated int64 locations = 1;</code>
+     * @return A list containing the locations.
      */
     java.util.List<java.lang.Long> getLocationsList();
     /**
      * <code>repeated int64 locations = 1;</code>
+     * @return The count of locations.
      */
     int getLocationsCount();
     /**
      * <code>repeated int64 locations = 1;</code>
+     * @param index The index of the element to return.
+     * @return The locations at the given index.
      */
     long getLocations(int index);
 
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CheckHashesResponse}
    */
-  public  static final class CheckHashesResponse extends
+  public static final class CheckHashesResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CheckHashesResponse)
       CheckHashesResponseOrBuilder {
@@ -2439,9 +2584,16 @@ public final class Storage {
       super(builder);
     }
     private CheckHashesResponse() {
-      locations_ = java.util.Collections.emptyList();
+      locations_ = emptyLongList();
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CheckHashesResponse();
     }
 
     @java.lang.Override
@@ -2469,22 +2621,22 @@ public final class Storage {
               done = true;
               break;
             case 8: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                locations_ = new java.util.ArrayList<java.lang.Long>();
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                locations_ = newLongList();
                 mutable_bitField0_ |= 0x00000001;
               }
-              locations_.add(input.readInt64());
+              locations_.addLong(input.readInt64());
               break;
             }
             case 10: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
-                locations_ = new java.util.ArrayList<java.lang.Long>();
+              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
+                locations_ = newLongList();
                 mutable_bitField0_ |= 0x00000001;
               }
               while (input.getBytesUntilLimit() > 0) {
-                locations_.add(input.readInt64());
+                locations_.addLong(input.readInt64());
               }
               input.popLimit(limit);
               break;
@@ -2502,7 +2654,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2512,12 +2664,14 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          locations_ = java.util.Collections.unmodifiableList(locations_);
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          locations_.makeImmutable(); // C
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -2536,27 +2690,31 @@ public final class Storage {
               org.opendedup.grpc.Storage.CheckHashesResponse.class, org.opendedup.grpc.Storage.CheckHashesResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int LOCATIONS_FIELD_NUMBER = 1;
-    private java.util.List<java.lang.Long> locations_;
+    private com.google.protobuf.Internal.LongList locations_;
     /**
      * <code>repeated int64 locations = 1;</code>
+     * @return A list containing the locations.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Long>
         getLocationsList() {
       return locations_;
     }
     /**
      * <code>repeated int64 locations = 1;</code>
+     * @return The count of locations.
      */
     public int getLocationsCount() {
       return locations_.size();
     }
     /**
      * <code>repeated int64 locations = 1;</code>
+     * @param index The index of the element to return.
+     * @return The locations at the given index.
      */
     public long getLocations(int index) {
-      return locations_.get(index);
+      return locations_.getLong(index);
     }
     private int locationsMemoizedSerializedSize = -1;
 
@@ -2564,7 +2722,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -2579,7 +2739,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -2598,14 +2760,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -2631,9 +2795,9 @@ public final class Storage {
         output.writeUInt32NoTag(locationsMemoizedSerializedSize);
       }
       for (int i = 0; i < locations_.size(); i++) {
-        output.writeInt64NoTag(locations_.get(i));
+        output.writeInt64NoTag(locations_.getLong(i));
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -2652,7 +2816,7 @@ public final class Storage {
         int dataSize = 0;
         for (int i = 0; i < locations_.size(); i++) {
           dataSize += com.google.protobuf.CodedOutputStream
-            .computeInt64SizeNoTag(locations_.get(i));
+            .computeInt64SizeNoTag(locations_.getLong(i));
         }
         size += dataSize;
         if (!getLocationsList().isEmpty()) {
@@ -2662,7 +2826,7 @@ public final class Storage {
         }
         locationsMemoizedSerializedSize = dataSize;
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -2684,14 +2848,13 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.CheckHashesResponse other = (org.opendedup.grpc.Storage.CheckHashesResponse) obj;
 
-      boolean result = true;
-      result = result && getLocationsList()
-          .equals(other.getLocationsList());
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getLocationsList()
+          .equals(other.getLocationsList())) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2842,7 +3005,7 @@ public final class Storage {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        locations_ = java.util.Collections.emptyList();
+        locations_ = emptyLongList();
         bitField0_ = (bitField0_ & ~0x00000001);
         error_ = "";
 
@@ -2875,50 +3038,48 @@ public final class Storage {
       public org.opendedup.grpc.Storage.CheckHashesResponse buildPartial() {
         org.opendedup.grpc.Storage.CheckHashesResponse result = new org.opendedup.grpc.Storage.CheckHashesResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          locations_ = java.util.Collections.unmodifiableList(locations_);
+        if (((bitField0_ & 0x00000001) != 0)) {
+          locations_.makeImmutable();
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.locations_ = locations_;
         result.error_ = error_;
         result.errorCode_ = errorCode_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2979,53 +3140,65 @@ public final class Storage {
       }
       private int bitField0_;
 
-      private java.util.List<java.lang.Long> locations_ = java.util.Collections.emptyList();
+      private com.google.protobuf.Internal.LongList locations_ = emptyLongList();
       private void ensureLocationsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          locations_ = new java.util.ArrayList<java.lang.Long>(locations_);
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          locations_ = mutableCopy(locations_);
           bitField0_ |= 0x00000001;
          }
       }
       /**
        * <code>repeated int64 locations = 1;</code>
+       * @return A list containing the locations.
        */
       public java.util.List<java.lang.Long>
           getLocationsList() {
-        return java.util.Collections.unmodifiableList(locations_);
+        return ((bitField0_ & 0x00000001) != 0) ?
+                 java.util.Collections.unmodifiableList(locations_) : locations_;
       }
       /**
        * <code>repeated int64 locations = 1;</code>
+       * @return The count of locations.
        */
       public int getLocationsCount() {
         return locations_.size();
       }
       /**
        * <code>repeated int64 locations = 1;</code>
+       * @param index The index of the element to return.
+       * @return The locations at the given index.
        */
       public long getLocations(int index) {
-        return locations_.get(index);
+        return locations_.getLong(index);
       }
       /**
        * <code>repeated int64 locations = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The locations to set.
+       * @return This builder for chaining.
        */
       public Builder setLocations(
           int index, long value) {
         ensureLocationsIsMutable();
-        locations_.set(index, value);
+        locations_.setLong(index, value);
         onChanged();
         return this;
       }
       /**
        * <code>repeated int64 locations = 1;</code>
+       * @param value The locations to add.
+       * @return This builder for chaining.
        */
       public Builder addLocations(long value) {
         ensureLocationsIsMutable();
-        locations_.add(value);
+        locations_.addLong(value);
         onChanged();
         return this;
       }
       /**
        * <code>repeated int64 locations = 1;</code>
+       * @param values The locations to add.
+       * @return This builder for chaining.
        */
       public Builder addAllLocations(
           java.lang.Iterable<? extends java.lang.Long> values) {
@@ -3037,9 +3210,10 @@ public final class Storage {
       }
       /**
        * <code>repeated int64 locations = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLocations() {
-        locations_ = java.util.Collections.emptyList();
+        locations_ = emptyLongList();
         bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
@@ -3048,6 +3222,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 2;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -3063,6 +3238,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 2;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -3079,6 +3255,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -3092,6 +3270,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -3101,6 +3280,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -3117,21 +3298,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -3139,6 +3326,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -3151,6 +3340,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -3161,7 +3351,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3241,33 +3431,38 @@ public final class Storage {
 
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
 
     /**
      * <code>int64 rvolumeID = 3;</code>
+     * @return The rvolumeID.
      */
     long getRvolumeID();
 
     /**
      * <code>string url = 4;</code>
+     * @return The url.
      */
     java.lang.String getUrl();
     /**
      * <code>string url = 4;</code>
+     * @return The bytes for url.
      */
     com.google.protobuf.ByteString
         getUrlBytes();
 
     /**
      * <code>bool mtls = 5;</code>
+     * @return The mtls.
      */
     boolean getMtls();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.FileReplicationRequest}
    */
-  public  static final class FileReplicationRequest extends
+  public static final class FileReplicationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileReplicationRequest)
       FileReplicationRequestOrBuilder {
@@ -3278,10 +3473,14 @@ public final class Storage {
     }
     private FileReplicationRequest() {
       fileLocation_ = java.util.Collections.emptyList();
-      pvolumeID_ = 0L;
-      rvolumeID_ = 0L;
       url_ = "";
-      mtls_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileReplicationRequest();
     }
 
     @java.lang.Override
@@ -3309,7 +3508,7 @@ public final class Storage {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 fileLocation_ = new java.util.ArrayList<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -3339,7 +3538,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3349,11 +3548,13 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           fileLocation_ = java.util.Collections.unmodifiableList(fileLocation_);
         }
         this.unknownFields = unknownFields.build();
@@ -3379,28 +3580,56 @@ public final class Storage {
 
       /**
        * <code>string srcFilePath = 1;</code>
+       * @return The srcFilePath.
        */
       java.lang.String getSrcFilePath();
       /**
        * <code>string srcFilePath = 1;</code>
+       * @return The bytes for srcFilePath.
        */
       com.google.protobuf.ByteString
           getSrcFilePathBytes();
 
       /**
        * <code>string dstFilePath = 2;</code>
+       * @return The dstFilePath.
        */
       java.lang.String getDstFilePath();
       /**
        * <code>string dstFilePath = 2;</code>
+       * @return The bytes for dstFilePath.
        */
       com.google.protobuf.ByteString
           getDstFilePathBytes();
+
+      /**
+       * <code>int64 srcoffset = 3;</code>
+       * @return The srcoffset.
+       */
+      long getSrcoffset();
+
+      /**
+       * <code>int64 srcsize = 4;</code>
+       * @return The srcsize.
+       */
+      long getSrcsize();
+
+      /**
+       * <code>int64 dstoffset = 5;</code>
+       * @return The dstoffset.
+       */
+      long getDstoffset();
+
+      /**
+       * <code>bool overwrite = 7;</code>
+       * @return The overwrite.
+       */
+      boolean getOverwrite();
     }
     /**
      * Protobuf type {@code org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation}
      */
-    public  static final class ReplicationFileLocation extends
+    public static final class ReplicationFileLocation extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation)
         ReplicationFileLocationOrBuilder {
@@ -3412,6 +3641,13 @@ public final class Storage {
       private ReplicationFileLocation() {
         srcFilePath_ = "";
         dstFilePath_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new ReplicationFileLocation();
       }
 
       @java.lang.Override
@@ -3427,7 +3663,6 @@ public final class Storage {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
         }
-        int mutable_bitField0_ = 0;
         com.google.protobuf.UnknownFieldSet.Builder unknownFields =
             com.google.protobuf.UnknownFieldSet.newBuilder();
         try {
@@ -3450,8 +3685,28 @@ public final class Storage {
                 dstFilePath_ = s;
                 break;
               }
+              case 24: {
+
+                srcoffset_ = input.readInt64();
+                break;
+              }
+              case 32: {
+
+                srcsize_ = input.readInt64();
+                break;
+              }
+              case 40: {
+
+                dstoffset_ = input.readInt64();
+                break;
+              }
+              case 56: {
+
+                overwrite_ = input.readBool();
+                break;
+              }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -3461,6 +3716,8 @@ public final class Storage {
           }
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
           throw e.setUnfinishedMessage(this);
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
         } catch (java.io.IOException e) {
           throw new com.google.protobuf.InvalidProtocolBufferException(
               e).setUnfinishedMessage(this);
@@ -3486,7 +3743,9 @@ public final class Storage {
       private volatile java.lang.Object srcFilePath_;
       /**
        * <code>string srcFilePath = 1;</code>
+       * @return The srcFilePath.
        */
+      @java.lang.Override
       public java.lang.String getSrcFilePath() {
         java.lang.Object ref = srcFilePath_;
         if (ref instanceof java.lang.String) {
@@ -3501,7 +3760,9 @@ public final class Storage {
       }
       /**
        * <code>string srcFilePath = 1;</code>
+       * @return The bytes for srcFilePath.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getSrcFilePathBytes() {
         java.lang.Object ref = srcFilePath_;
@@ -3520,7 +3781,9 @@ public final class Storage {
       private volatile java.lang.Object dstFilePath_;
       /**
        * <code>string dstFilePath = 2;</code>
+       * @return The dstFilePath.
        */
+      @java.lang.Override
       public java.lang.String getDstFilePath() {
         java.lang.Object ref = dstFilePath_;
         if (ref instanceof java.lang.String) {
@@ -3535,7 +3798,9 @@ public final class Storage {
       }
       /**
        * <code>string dstFilePath = 2;</code>
+       * @return The bytes for dstFilePath.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getDstFilePathBytes() {
         java.lang.Object ref = dstFilePath_;
@@ -3548,6 +3813,50 @@ public final class Storage {
         } else {
           return (com.google.protobuf.ByteString) ref;
         }
+      }
+
+      public static final int SRCOFFSET_FIELD_NUMBER = 3;
+      private long srcoffset_;
+      /**
+       * <code>int64 srcoffset = 3;</code>
+       * @return The srcoffset.
+       */
+      @java.lang.Override
+      public long getSrcoffset() {
+        return srcoffset_;
+      }
+
+      public static final int SRCSIZE_FIELD_NUMBER = 4;
+      private long srcsize_;
+      /**
+       * <code>int64 srcsize = 4;</code>
+       * @return The srcsize.
+       */
+      @java.lang.Override
+      public long getSrcsize() {
+        return srcsize_;
+      }
+
+      public static final int DSTOFFSET_FIELD_NUMBER = 5;
+      private long dstoffset_;
+      /**
+       * <code>int64 dstoffset = 5;</code>
+       * @return The dstoffset.
+       */
+      @java.lang.Override
+      public long getDstoffset() {
+        return dstoffset_;
+      }
+
+      public static final int OVERWRITE_FIELD_NUMBER = 7;
+      private boolean overwrite_;
+      /**
+       * <code>bool overwrite = 7;</code>
+       * @return The overwrite.
+       */
+      @java.lang.Override
+      public boolean getOverwrite() {
+        return overwrite_;
       }
 
       private byte memoizedIsInitialized = -1;
@@ -3564,11 +3873,23 @@ public final class Storage {
       @java.lang.Override
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
-        if (!getSrcFilePathBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(srcFilePath_)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 1, srcFilePath_);
         }
-        if (!getDstFilePathBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dstFilePath_)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 2, dstFilePath_);
+        }
+        if (srcoffset_ != 0L) {
+          output.writeInt64(3, srcoffset_);
+        }
+        if (srcsize_ != 0L) {
+          output.writeInt64(4, srcsize_);
+        }
+        if (dstoffset_ != 0L) {
+          output.writeInt64(5, dstoffset_);
+        }
+        if (overwrite_ != false) {
+          output.writeBool(7, overwrite_);
         }
         unknownFields.writeTo(output);
       }
@@ -3579,11 +3900,27 @@ public final class Storage {
         if (size != -1) return size;
 
         size = 0;
-        if (!getSrcFilePathBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(srcFilePath_)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, srcFilePath_);
         }
-        if (!getDstFilePathBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dstFilePath_)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, dstFilePath_);
+        }
+        if (srcoffset_ != 0L) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(3, srcoffset_);
+        }
+        if (srcsize_ != 0L) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(4, srcsize_);
+        }
+        if (dstoffset_ != 0L) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt64Size(5, dstoffset_);
+        }
+        if (overwrite_ != false) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeBoolSize(7, overwrite_);
         }
         size += unknownFields.getSerializedSize();
         memoizedSize = size;
@@ -3600,13 +3937,20 @@ public final class Storage {
         }
         org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation other = (org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation) obj;
 
-        boolean result = true;
-        result = result && getSrcFilePath()
-            .equals(other.getSrcFilePath());
-        result = result && getDstFilePath()
-            .equals(other.getDstFilePath());
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!getSrcFilePath()
+            .equals(other.getSrcFilePath())) return false;
+        if (!getDstFilePath()
+            .equals(other.getDstFilePath())) return false;
+        if (getSrcoffset()
+            != other.getSrcoffset()) return false;
+        if (getSrcsize()
+            != other.getSrcsize()) return false;
+        if (getDstoffset()
+            != other.getDstoffset()) return false;
+        if (getOverwrite()
+            != other.getOverwrite()) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -3620,6 +3964,18 @@ public final class Storage {
         hash = (53 * hash) + getSrcFilePath().hashCode();
         hash = (37 * hash) + DSTFILEPATH_FIELD_NUMBER;
         hash = (53 * hash) + getDstFilePath().hashCode();
+        hash = (37 * hash) + SRCOFFSET_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getSrcoffset());
+        hash = (37 * hash) + SRCSIZE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getSrcsize());
+        hash = (37 * hash) + DSTOFFSET_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getDstoffset());
+        hash = (37 * hash) + OVERWRITE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getOverwrite());
         hash = (29 * hash) + unknownFields.hashCode();
         memoizedHashCode = hash;
         return hash;
@@ -3757,6 +4113,14 @@ public final class Storage {
 
           dstFilePath_ = "";
 
+          srcoffset_ = 0L;
+
+          srcsize_ = 0L;
+
+          dstoffset_ = 0L;
+
+          overwrite_ = false;
+
           return this;
         }
 
@@ -3785,41 +4149,45 @@ public final class Storage {
           org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation result = new org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation(this);
           result.srcFilePath_ = srcFilePath_;
           result.dstFilePath_ = dstFilePath_;
+          result.srcoffset_ = srcoffset_;
+          result.srcsize_ = srcsize_;
+          result.dstoffset_ = dstoffset_;
+          result.overwrite_ = overwrite_;
           onBuilt();
           return result;
         }
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3840,6 +4208,18 @@ public final class Storage {
           if (!other.getDstFilePath().isEmpty()) {
             dstFilePath_ = other.dstFilePath_;
             onChanged();
+          }
+          if (other.getSrcoffset() != 0L) {
+            setSrcoffset(other.getSrcoffset());
+          }
+          if (other.getSrcsize() != 0L) {
+            setSrcsize(other.getSrcsize());
+          }
+          if (other.getDstoffset() != 0L) {
+            setDstoffset(other.getDstoffset());
+          }
+          if (other.getOverwrite() != false) {
+            setOverwrite(other.getOverwrite());
           }
           this.mergeUnknownFields(other.unknownFields);
           onChanged();
@@ -3873,6 +4253,7 @@ public final class Storage {
         private java.lang.Object srcFilePath_ = "";
         /**
          * <code>string srcFilePath = 1;</code>
+         * @return The srcFilePath.
          */
         public java.lang.String getSrcFilePath() {
           java.lang.Object ref = srcFilePath_;
@@ -3888,6 +4269,7 @@ public final class Storage {
         }
         /**
          * <code>string srcFilePath = 1;</code>
+         * @return The bytes for srcFilePath.
          */
         public com.google.protobuf.ByteString
             getSrcFilePathBytes() {
@@ -3904,6 +4286,8 @@ public final class Storage {
         }
         /**
          * <code>string srcFilePath = 1;</code>
+         * @param value The srcFilePath to set.
+         * @return This builder for chaining.
          */
         public Builder setSrcFilePath(
             java.lang.String value) {
@@ -3917,6 +4301,7 @@ public final class Storage {
         }
         /**
          * <code>string srcFilePath = 1;</code>
+         * @return This builder for chaining.
          */
         public Builder clearSrcFilePath() {
           
@@ -3926,6 +4311,8 @@ public final class Storage {
         }
         /**
          * <code>string srcFilePath = 1;</code>
+         * @param value The bytes for srcFilePath to set.
+         * @return This builder for chaining.
          */
         public Builder setSrcFilePathBytes(
             com.google.protobuf.ByteString value) {
@@ -3942,6 +4329,7 @@ public final class Storage {
         private java.lang.Object dstFilePath_ = "";
         /**
          * <code>string dstFilePath = 2;</code>
+         * @return The dstFilePath.
          */
         public java.lang.String getDstFilePath() {
           java.lang.Object ref = dstFilePath_;
@@ -3957,6 +4345,7 @@ public final class Storage {
         }
         /**
          * <code>string dstFilePath = 2;</code>
+         * @return The bytes for dstFilePath.
          */
         public com.google.protobuf.ByteString
             getDstFilePathBytes() {
@@ -3973,6 +4362,8 @@ public final class Storage {
         }
         /**
          * <code>string dstFilePath = 2;</code>
+         * @param value The dstFilePath to set.
+         * @return This builder for chaining.
          */
         public Builder setDstFilePath(
             java.lang.String value) {
@@ -3986,6 +4377,7 @@ public final class Storage {
         }
         /**
          * <code>string dstFilePath = 2;</code>
+         * @return This builder for chaining.
          */
         public Builder clearDstFilePath() {
           
@@ -3995,6 +4387,8 @@ public final class Storage {
         }
         /**
          * <code>string dstFilePath = 2;</code>
+         * @param value The bytes for dstFilePath to set.
+         * @return This builder for chaining.
          */
         public Builder setDstFilePathBytes(
             com.google.protobuf.ByteString value) {
@@ -4007,10 +4401,134 @@ public final class Storage {
           onChanged();
           return this;
         }
+
+        private long srcoffset_ ;
+        /**
+         * <code>int64 srcoffset = 3;</code>
+         * @return The srcoffset.
+         */
+        @java.lang.Override
+        public long getSrcoffset() {
+          return srcoffset_;
+        }
+        /**
+         * <code>int64 srcoffset = 3;</code>
+         * @param value The srcoffset to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSrcoffset(long value) {
+          
+          srcoffset_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>int64 srcoffset = 3;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearSrcoffset() {
+          
+          srcoffset_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        private long srcsize_ ;
+        /**
+         * <code>int64 srcsize = 4;</code>
+         * @return The srcsize.
+         */
+        @java.lang.Override
+        public long getSrcsize() {
+          return srcsize_;
+        }
+        /**
+         * <code>int64 srcsize = 4;</code>
+         * @param value The srcsize to set.
+         * @return This builder for chaining.
+         */
+        public Builder setSrcsize(long value) {
+          
+          srcsize_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>int64 srcsize = 4;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearSrcsize() {
+          
+          srcsize_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        private long dstoffset_ ;
+        /**
+         * <code>int64 dstoffset = 5;</code>
+         * @return The dstoffset.
+         */
+        @java.lang.Override
+        public long getDstoffset() {
+          return dstoffset_;
+        }
+        /**
+         * <code>int64 dstoffset = 5;</code>
+         * @param value The dstoffset to set.
+         * @return This builder for chaining.
+         */
+        public Builder setDstoffset(long value) {
+          
+          dstoffset_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>int64 dstoffset = 5;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearDstoffset() {
+          
+          dstoffset_ = 0L;
+          onChanged();
+          return this;
+        }
+
+        private boolean overwrite_ ;
+        /**
+         * <code>bool overwrite = 7;</code>
+         * @return The overwrite.
+         */
+        @java.lang.Override
+        public boolean getOverwrite() {
+          return overwrite_;
+        }
+        /**
+         * <code>bool overwrite = 7;</code>
+         * @param value The overwrite to set.
+         * @return This builder for chaining.
+         */
+        public Builder setOverwrite(boolean value) {
+          
+          overwrite_ = value;
+          onChanged();
+          return this;
+        }
+        /**
+         * <code>bool overwrite = 7;</code>
+         * @return This builder for chaining.
+         */
+        public Builder clearOverwrite() {
+          
+          overwrite_ = false;
+          onChanged();
+          return this;
+        }
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -4060,18 +4578,19 @@ public final class Storage {
 
     }
 
-    private int bitField0_;
     public static final int FILELOCATION_FIELD_NUMBER = 1;
     private java.util.List<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation> fileLocation_;
     /**
      * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation> getFileLocationList() {
       return fileLocation_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder> 
         getFileLocationOrBuilderList() {
       return fileLocation_;
@@ -4079,18 +4598,21 @@ public final class Storage {
     /**
      * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
      */
+    @java.lang.Override
     public int getFileLocationCount() {
       return fileLocation_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation getFileLocation(int index) {
       return fileLocation_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.FileReplicationRequest.ReplicationFileLocation fileLocation = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder getFileLocationOrBuilder(
         int index) {
       return fileLocation_.get(index);
@@ -4100,7 +4622,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -4109,7 +4633,9 @@ public final class Storage {
     private long rvolumeID_;
     /**
      * <code>int64 rvolumeID = 3;</code>
+     * @return The rvolumeID.
      */
+    @java.lang.Override
     public long getRvolumeID() {
       return rvolumeID_;
     }
@@ -4118,7 +4644,9 @@ public final class Storage {
     private volatile java.lang.Object url_;
     /**
      * <code>string url = 4;</code>
+     * @return The url.
      */
+    @java.lang.Override
     public java.lang.String getUrl() {
       java.lang.Object ref = url_;
       if (ref instanceof java.lang.String) {
@@ -4133,7 +4661,9 @@ public final class Storage {
     }
     /**
      * <code>string url = 4;</code>
+     * @return The bytes for url.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUrlBytes() {
       java.lang.Object ref = url_;
@@ -4152,7 +4682,9 @@ public final class Storage {
     private boolean mtls_;
     /**
      * <code>bool mtls = 5;</code>
+     * @return The mtls.
      */
+    @java.lang.Override
     public boolean getMtls() {
       return mtls_;
     }
@@ -4180,7 +4712,7 @@ public final class Storage {
       if (rvolumeID_ != 0L) {
         output.writeInt64(3, rvolumeID_);
       }
-      if (!getUrlBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, url_);
       }
       if (mtls_ != false) {
@@ -4207,7 +4739,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, rvolumeID_);
       }
-      if (!getUrlBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, url_);
       }
       if (mtls_ != false) {
@@ -4229,19 +4761,18 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.FileReplicationRequest other = (org.opendedup.grpc.Storage.FileReplicationRequest) obj;
 
-      boolean result = true;
-      result = result && getFileLocationList()
-          .equals(other.getFileLocationList());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && (getRvolumeID()
-          == other.getRvolumeID());
-      result = result && getUrl()
-          .equals(other.getUrl());
-      result = result && (getMtls()
-          == other.getMtls());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getFileLocationList()
+          .equals(other.getFileLocationList())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (getRvolumeID()
+          != other.getRvolumeID()) return false;
+      if (!getUrl()
+          .equals(other.getUrl())) return false;
+      if (getMtls()
+          != other.getMtls()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4441,9 +4972,8 @@ public final class Storage {
       public org.opendedup.grpc.Storage.FileReplicationRequest buildPartial() {
         org.opendedup.grpc.Storage.FileReplicationRequest result = new org.opendedup.grpc.Storage.FileReplicationRequest(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (fileLocationBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             fileLocation_ = java.util.Collections.unmodifiableList(fileLocation_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -4455,42 +4985,41 @@ public final class Storage {
         result.rvolumeID_ = rvolumeID_;
         result.url_ = url_;
         result.mtls_ = mtls_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4576,7 +5105,7 @@ public final class Storage {
       private java.util.List<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation> fileLocation_ =
         java.util.Collections.emptyList();
       private void ensureFileLocationIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           fileLocation_ = new java.util.ArrayList<org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation>(fileLocation_);
           bitField0_ |= 0x00000001;
          }
@@ -4805,7 +5334,7 @@ public final class Storage {
           fileLocationBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocation.Builder, org.opendedup.grpc.Storage.FileReplicationRequest.ReplicationFileLocationOrBuilder>(
                   fileLocation_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           fileLocation_ = null;
@@ -4816,12 +5345,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -4831,6 +5364,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -4842,12 +5376,16 @@ public final class Storage {
       private long rvolumeID_ ;
       /**
        * <code>int64 rvolumeID = 3;</code>
+       * @return The rvolumeID.
        */
+      @java.lang.Override
       public long getRvolumeID() {
         return rvolumeID_;
       }
       /**
        * <code>int64 rvolumeID = 3;</code>
+       * @param value The rvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setRvolumeID(long value) {
         
@@ -4857,6 +5395,7 @@ public final class Storage {
       }
       /**
        * <code>int64 rvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRvolumeID() {
         
@@ -4868,6 +5407,7 @@ public final class Storage {
       private java.lang.Object url_ = "";
       /**
        * <code>string url = 4;</code>
+       * @return The url.
        */
       public java.lang.String getUrl() {
         java.lang.Object ref = url_;
@@ -4883,6 +5423,7 @@ public final class Storage {
       }
       /**
        * <code>string url = 4;</code>
+       * @return The bytes for url.
        */
       public com.google.protobuf.ByteString
           getUrlBytes() {
@@ -4899,6 +5440,8 @@ public final class Storage {
       }
       /**
        * <code>string url = 4;</code>
+       * @param value The url to set.
+       * @return This builder for chaining.
        */
       public Builder setUrl(
           java.lang.String value) {
@@ -4912,6 +5455,7 @@ public final class Storage {
       }
       /**
        * <code>string url = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUrl() {
         
@@ -4921,6 +5465,8 @@ public final class Storage {
       }
       /**
        * <code>string url = 4;</code>
+       * @param value The bytes for url to set.
+       * @return This builder for chaining.
        */
       public Builder setUrlBytes(
           com.google.protobuf.ByteString value) {
@@ -4937,12 +5483,16 @@ public final class Storage {
       private boolean mtls_ ;
       /**
        * <code>bool mtls = 5;</code>
+       * @return The mtls.
        */
+      @java.lang.Override
       public boolean getMtls() {
         return mtls_;
       }
       /**
        * <code>bool mtls = 5;</code>
+       * @param value The mtls to set.
+       * @return This builder for chaining.
        */
       public Builder setMtls(boolean value) {
         
@@ -4952,6 +5502,7 @@ public final class Storage {
       }
       /**
        * <code>bool mtls = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMtls() {
         
@@ -4962,7 +5513,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5018,33 +5569,38 @@ public final class Storage {
 
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
 
     /**
      * <code>int64 rvolumeID = 4;</code>
+     * @return The rvolumeID.
      */
     long getRvolumeID();
 
     /**
      * <code>string url = 5;</code>
+     * @return The url.
      */
     java.lang.String getUrl();
     /**
      * <code>string url = 5;</code>
+     * @return The bytes for url.
      */
     com.google.protobuf.ByteString
         getUrlBytes();
 
     /**
      * <code>bool mtls = 6;</code>
+     * @return The mtls.
      */
     boolean getMtls();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.AddReplicaSourceRequest}
    */
-  public  static final class AddReplicaSourceRequest extends
+  public static final class AddReplicaSourceRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.AddReplicaSourceRequest)
       AddReplicaSourceRequestOrBuilder {
@@ -5054,10 +5610,14 @@ public final class Storage {
       super(builder);
     }
     private AddReplicaSourceRequest() {
-      pvolumeID_ = 0L;
-      rvolumeID_ = 0L;
       url_ = "";
-      mtls_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AddReplicaSourceRequest();
     }
 
     @java.lang.Override
@@ -5073,7 +5633,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -5106,7 +5665,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5116,6 +5675,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -5141,7 +5702,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -5150,7 +5713,9 @@ public final class Storage {
     private long rvolumeID_;
     /**
      * <code>int64 rvolumeID = 4;</code>
+     * @return The rvolumeID.
      */
+    @java.lang.Override
     public long getRvolumeID() {
       return rvolumeID_;
     }
@@ -5159,7 +5724,9 @@ public final class Storage {
     private volatile java.lang.Object url_;
     /**
      * <code>string url = 5;</code>
+     * @return The url.
      */
+    @java.lang.Override
     public java.lang.String getUrl() {
       java.lang.Object ref = url_;
       if (ref instanceof java.lang.String) {
@@ -5174,7 +5741,9 @@ public final class Storage {
     }
     /**
      * <code>string url = 5;</code>
+     * @return The bytes for url.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUrlBytes() {
       java.lang.Object ref = url_;
@@ -5193,7 +5762,9 @@ public final class Storage {
     private boolean mtls_;
     /**
      * <code>bool mtls = 6;</code>
+     * @return The mtls.
      */
+    @java.lang.Override
     public boolean getMtls() {
       return mtls_;
     }
@@ -5218,7 +5789,7 @@ public final class Storage {
       if (rvolumeID_ != 0L) {
         output.writeInt64(4, rvolumeID_);
       }
-      if (!getUrlBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, url_);
       }
       if (mtls_ != false) {
@@ -5241,7 +5812,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(4, rvolumeID_);
       }
-      if (!getUrlBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, url_);
       }
       if (mtls_ != false) {
@@ -5263,17 +5834,16 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.AddReplicaSourceRequest other = (org.opendedup.grpc.Storage.AddReplicaSourceRequest) obj;
 
-      boolean result = true;
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && (getRvolumeID()
-          == other.getRvolumeID());
-      result = result && getUrl()
-          .equals(other.getUrl());
-      result = result && (getMtls()
-          == other.getMtls());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (getRvolumeID()
+          != other.getRvolumeID()) return false;
+      if (!getUrl()
+          .equals(other.getUrl())) return false;
+      if (getMtls()
+          != other.getMtls()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5471,35 +6041,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5558,12 +6128,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -5573,6 +6147,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -5584,12 +6159,16 @@ public final class Storage {
       private long rvolumeID_ ;
       /**
        * <code>int64 rvolumeID = 4;</code>
+       * @return The rvolumeID.
        */
+      @java.lang.Override
       public long getRvolumeID() {
         return rvolumeID_;
       }
       /**
        * <code>int64 rvolumeID = 4;</code>
+       * @param value The rvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setRvolumeID(long value) {
         
@@ -5599,6 +6178,7 @@ public final class Storage {
       }
       /**
        * <code>int64 rvolumeID = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRvolumeID() {
         
@@ -5610,6 +6190,7 @@ public final class Storage {
       private java.lang.Object url_ = "";
       /**
        * <code>string url = 5;</code>
+       * @return The url.
        */
       public java.lang.String getUrl() {
         java.lang.Object ref = url_;
@@ -5625,6 +6206,7 @@ public final class Storage {
       }
       /**
        * <code>string url = 5;</code>
+       * @return The bytes for url.
        */
       public com.google.protobuf.ByteString
           getUrlBytes() {
@@ -5641,6 +6223,8 @@ public final class Storage {
       }
       /**
        * <code>string url = 5;</code>
+       * @param value The url to set.
+       * @return This builder for chaining.
        */
       public Builder setUrl(
           java.lang.String value) {
@@ -5654,6 +6238,7 @@ public final class Storage {
       }
       /**
        * <code>string url = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUrl() {
         
@@ -5663,6 +6248,8 @@ public final class Storage {
       }
       /**
        * <code>string url = 5;</code>
+       * @param value The bytes for url to set.
+       * @return This builder for chaining.
        */
       public Builder setUrlBytes(
           com.google.protobuf.ByteString value) {
@@ -5679,12 +6266,16 @@ public final class Storage {
       private boolean mtls_ ;
       /**
        * <code>bool mtls = 6;</code>
+       * @return The mtls.
        */
+      @java.lang.Override
       public boolean getMtls() {
         return mtls_;
       }
       /**
        * <code>bool mtls = 6;</code>
+       * @param value The mtls to set.
+       * @return This builder for chaining.
        */
       public Builder setMtls(boolean value) {
         
@@ -5694,6 +6285,7 @@ public final class Storage {
       }
       /**
        * <code>bool mtls = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMtls() {
         
@@ -5704,7 +6296,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5760,27 +6352,31 @@ public final class Storage {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.AddReplicaSourceResponse}
    */
-  public  static final class AddReplicaSourceResponse extends
+  public static final class AddReplicaSourceResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.AddReplicaSourceResponse)
       AddReplicaSourceResponseOrBuilder {
@@ -5792,6 +6388,13 @@ public final class Storage {
     private AddReplicaSourceResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AddReplicaSourceResponse();
     }
 
     @java.lang.Override
@@ -5807,7 +6410,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -5831,7 +6433,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5841,6 +6443,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -5866,7 +6470,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -5881,7 +6487,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -5900,14 +6508,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -5927,7 +6537,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -5942,7 +6552,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -5964,12 +6574,11 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.AddReplicaSourceResponse other = (org.opendedup.grpc.Storage.AddReplicaSourceResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6154,35 +6763,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6235,6 +6844,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -6250,6 +6860,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -6266,6 +6877,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -6279,6 +6892,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -6288,6 +6902,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -6304,21 +6920,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -6326,6 +6948,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -6338,6 +6962,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -6348,7 +6973,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6404,20 +7029,24 @@ public final class Storage {
 
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
 
     /**
      * <code>int64 rvolumeID = 4;</code>
+     * @return The rvolumeID.
      */
     long getRvolumeID();
 
     /**
      * <code>string url = 5;</code>
+     * @return The url.
      */
     java.lang.String getUrl();
     /**
      * <code>string url = 5;</code>
+     * @return The bytes for url.
      */
     com.google.protobuf.ByteString
         getUrlBytes();
@@ -6425,7 +7054,7 @@ public final class Storage {
   /**
    * Protobuf type {@code org.opendedup.grpc.RemoveReplicaSourceRequest}
    */
-  public  static final class RemoveReplicaSourceRequest extends
+  public static final class RemoveReplicaSourceRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RemoveReplicaSourceRequest)
       RemoveReplicaSourceRequestOrBuilder {
@@ -6435,9 +7064,14 @@ public final class Storage {
       super(builder);
     }
     private RemoveReplicaSourceRequest() {
-      pvolumeID_ = 0L;
-      rvolumeID_ = 0L;
       url_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RemoveReplicaSourceRequest();
     }
 
     @java.lang.Override
@@ -6453,7 +7087,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -6481,7 +7114,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6491,6 +7124,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -6516,7 +7151,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -6525,7 +7162,9 @@ public final class Storage {
     private long rvolumeID_;
     /**
      * <code>int64 rvolumeID = 4;</code>
+     * @return The rvolumeID.
      */
+    @java.lang.Override
     public long getRvolumeID() {
       return rvolumeID_;
     }
@@ -6534,7 +7173,9 @@ public final class Storage {
     private volatile java.lang.Object url_;
     /**
      * <code>string url = 5;</code>
+     * @return The url.
      */
+    @java.lang.Override
     public java.lang.String getUrl() {
       java.lang.Object ref = url_;
       if (ref instanceof java.lang.String) {
@@ -6549,7 +7190,9 @@ public final class Storage {
     }
     /**
      * <code>string url = 5;</code>
+     * @return The bytes for url.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUrlBytes() {
       java.lang.Object ref = url_;
@@ -6584,7 +7227,7 @@ public final class Storage {
       if (rvolumeID_ != 0L) {
         output.writeInt64(4, rvolumeID_);
       }
-      if (!getUrlBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, url_);
       }
       unknownFields.writeTo(output);
@@ -6604,7 +7247,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(4, rvolumeID_);
       }
-      if (!getUrlBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(url_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, url_);
       }
       size += unknownFields.getSerializedSize();
@@ -6622,15 +7265,14 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.RemoveReplicaSourceRequest other = (org.opendedup.grpc.Storage.RemoveReplicaSourceRequest) obj;
 
-      boolean result = true;
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && (getRvolumeID()
-          == other.getRvolumeID());
-      result = result && getUrl()
-          .equals(other.getUrl());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (getRvolumeID()
+          != other.getRvolumeID()) return false;
+      if (!getUrl()
+          .equals(other.getUrl())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6822,35 +7464,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6906,12 +7548,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -6921,6 +7567,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -6932,12 +7579,16 @@ public final class Storage {
       private long rvolumeID_ ;
       /**
        * <code>int64 rvolumeID = 4;</code>
+       * @return The rvolumeID.
        */
+      @java.lang.Override
       public long getRvolumeID() {
         return rvolumeID_;
       }
       /**
        * <code>int64 rvolumeID = 4;</code>
+       * @param value The rvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setRvolumeID(long value) {
         
@@ -6947,6 +7598,7 @@ public final class Storage {
       }
       /**
        * <code>int64 rvolumeID = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRvolumeID() {
         
@@ -6958,6 +7610,7 @@ public final class Storage {
       private java.lang.Object url_ = "";
       /**
        * <code>string url = 5;</code>
+       * @return The url.
        */
       public java.lang.String getUrl() {
         java.lang.Object ref = url_;
@@ -6973,6 +7626,7 @@ public final class Storage {
       }
       /**
        * <code>string url = 5;</code>
+       * @return The bytes for url.
        */
       public com.google.protobuf.ByteString
           getUrlBytes() {
@@ -6989,6 +7643,8 @@ public final class Storage {
       }
       /**
        * <code>string url = 5;</code>
+       * @param value The url to set.
+       * @return This builder for chaining.
        */
       public Builder setUrl(
           java.lang.String value) {
@@ -7002,6 +7658,7 @@ public final class Storage {
       }
       /**
        * <code>string url = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUrl() {
         
@@ -7011,6 +7668,8 @@ public final class Storage {
       }
       /**
        * <code>string url = 5;</code>
+       * @param value The bytes for url to set.
+       * @return This builder for chaining.
        */
       public Builder setUrlBytes(
           com.google.protobuf.ByteString value) {
@@ -7026,7 +7685,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7082,27 +7741,31 @@ public final class Storage {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.RemoveReplicaSourceResponse}
    */
-  public  static final class RemoveReplicaSourceResponse extends
+  public static final class RemoveReplicaSourceResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.RemoveReplicaSourceResponse)
       RemoveReplicaSourceResponseOrBuilder {
@@ -7114,6 +7777,13 @@ public final class Storage {
     private RemoveReplicaSourceResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RemoveReplicaSourceResponse();
     }
 
     @java.lang.Override
@@ -7129,7 +7799,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -7153,7 +7822,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7163,6 +7832,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -7188,7 +7859,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -7203,7 +7876,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -7222,14 +7897,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -7249,7 +7926,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -7264,7 +7941,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -7286,12 +7963,11 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.RemoveReplicaSourceResponse other = (org.opendedup.grpc.Storage.RemoveReplicaSourceResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7476,35 +8152,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7557,6 +8233,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -7572,6 +8249,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -7588,6 +8266,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -7601,6 +8281,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -7610,6 +8291,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -7626,21 +8309,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -7648,6 +8337,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -7660,6 +8351,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -7670,7 +8362,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7726,38 +8418,48 @@ public final class Storage {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>repeated string eventID = 3;</code>
+     * @return A list containing the eventID.
      */
     java.util.List<java.lang.String>
         getEventIDList();
     /**
      * <code>repeated string eventID = 3;</code>
+     * @return The count of eventID.
      */
     int getEventIDCount();
     /**
      * <code>repeated string eventID = 3;</code>
+     * @param index The index of the element to return.
+     * @return The eventID at the given index.
      */
     java.lang.String getEventID(int index);
     /**
      * <code>repeated string eventID = 3;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the eventID at the given index.
      */
     com.google.protobuf.ByteString
         getEventIDBytes(int index);
@@ -7765,7 +8467,7 @@ public final class Storage {
   /**
    * Protobuf type {@code org.opendedup.grpc.FileReplicationResponse}
    */
-  public  static final class FileReplicationResponse extends
+  public static final class FileReplicationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.FileReplicationResponse)
       FileReplicationResponseOrBuilder {
@@ -7778,6 +8480,13 @@ public final class Storage {
       error_ = "";
       errorCode_ = 0;
       eventID_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FileReplicationResponse();
     }
 
     @java.lang.Override
@@ -7818,15 +8527,15 @@ public final class Storage {
             }
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 eventID_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000001;
               }
               eventID_.add(s);
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7836,11 +8545,13 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           eventID_ = eventID_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -7860,12 +8571,13 @@ public final class Storage {
               org.opendedup.grpc.Storage.FileReplicationResponse.class, org.opendedup.grpc.Storage.FileReplicationResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int ERROR_FIELD_NUMBER = 1;
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -7880,7 +8592,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -7899,14 +8613,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -7916,6 +8632,7 @@ public final class Storage {
     private com.google.protobuf.LazyStringList eventID_;
     /**
      * <code>repeated string eventID = 3;</code>
+     * @return A list containing the eventID.
      */
     public com.google.protobuf.ProtocolStringList
         getEventIDList() {
@@ -7923,18 +8640,23 @@ public final class Storage {
     }
     /**
      * <code>repeated string eventID = 3;</code>
+     * @return The count of eventID.
      */
     public int getEventIDCount() {
       return eventID_.size();
     }
     /**
      * <code>repeated string eventID = 3;</code>
+     * @param index The index of the element to return.
+     * @return The eventID at the given index.
      */
     public java.lang.String getEventID(int index) {
       return eventID_.get(index);
     }
     /**
      * <code>repeated string eventID = 3;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the eventID at the given index.
      */
     public com.google.protobuf.ByteString
         getEventIDBytes(int index) {
@@ -7955,7 +8677,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -7973,7 +8695,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -8003,14 +8725,13 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.FileReplicationResponse other = (org.opendedup.grpc.Storage.FileReplicationResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && getEventIDList()
-          .equals(other.getEventIDList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!getEventIDList()
+          .equals(other.getEventIDList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8166,7 +8887,7 @@ public final class Storage {
         errorCode_ = 0;
 
         eventID_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -8194,50 +8915,48 @@ public final class Storage {
       public org.opendedup.grpc.Storage.FileReplicationResponse buildPartial() {
         org.opendedup.grpc.Storage.FileReplicationResponse result = new org.opendedup.grpc.Storage.FileReplicationResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.error_ = error_;
         result.errorCode_ = errorCode_;
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           eventID_ = eventID_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.eventID_ = eventID_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8261,7 +8980,7 @@ public final class Storage {
         if (!other.eventID_.isEmpty()) {
           if (eventID_.isEmpty()) {
             eventID_ = other.eventID_;
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureEventIDIsMutable();
             eventID_.addAll(other.eventID_);
@@ -8301,6 +9020,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -8316,6 +9036,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -8332,6 +9053,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -8345,6 +9068,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -8354,6 +9078,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -8370,21 +9096,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -8392,6 +9124,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -8404,6 +9138,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -8414,13 +9149,14 @@ public final class Storage {
 
       private com.google.protobuf.LazyStringList eventID_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureEventIDIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           eventID_ = new com.google.protobuf.LazyStringArrayList(eventID_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000001;
          }
       }
       /**
        * <code>repeated string eventID = 3;</code>
+       * @return A list containing the eventID.
        */
       public com.google.protobuf.ProtocolStringList
           getEventIDList() {
@@ -8428,18 +9164,23 @@ public final class Storage {
       }
       /**
        * <code>repeated string eventID = 3;</code>
+       * @return The count of eventID.
        */
       public int getEventIDCount() {
         return eventID_.size();
       }
       /**
        * <code>repeated string eventID = 3;</code>
+       * @param index The index of the element to return.
+       * @return The eventID at the given index.
        */
       public java.lang.String getEventID(int index) {
         return eventID_.get(index);
       }
       /**
        * <code>repeated string eventID = 3;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the eventID at the given index.
        */
       public com.google.protobuf.ByteString
           getEventIDBytes(int index) {
@@ -8447,6 +9188,9 @@ public final class Storage {
       }
       /**
        * <code>repeated string eventID = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The eventID to set.
+       * @return This builder for chaining.
        */
       public Builder setEventID(
           int index, java.lang.String value) {
@@ -8460,6 +9204,8 @@ public final class Storage {
       }
       /**
        * <code>repeated string eventID = 3;</code>
+       * @param value The eventID to add.
+       * @return This builder for chaining.
        */
       public Builder addEventID(
           java.lang.String value) {
@@ -8473,6 +9219,8 @@ public final class Storage {
       }
       /**
        * <code>repeated string eventID = 3;</code>
+       * @param values The eventID to add.
+       * @return This builder for chaining.
        */
       public Builder addAllEventID(
           java.lang.Iterable<java.lang.String> values) {
@@ -8484,15 +9232,18 @@ public final class Storage {
       }
       /**
        * <code>repeated string eventID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventID() {
         eventID_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
       /**
        * <code>repeated string eventID = 3;</code>
+       * @param value The bytes of the eventID to add.
+       * @return This builder for chaining.
        */
       public Builder addEventIDBytes(
           com.google.protobuf.ByteString value) {
@@ -8508,7 +9259,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -8564,23 +9315,26 @@ public final class Storage {
 
     /**
      * <code>string filePath = 1;</code>
+     * @return The filePath.
      */
     java.lang.String getFilePath();
     /**
      * <code>string filePath = 1;</code>
+     * @return The bytes for filePath.
      */
     com.google.protobuf.ByteString
         getFilePathBytes();
 
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.MetaDataDedupeFileRequest}
    */
-  public  static final class MetaDataDedupeFileRequest extends
+  public static final class MetaDataDedupeFileRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.MetaDataDedupeFileRequest)
       MetaDataDedupeFileRequestOrBuilder {
@@ -8591,7 +9345,13 @@ public final class Storage {
     }
     private MetaDataDedupeFileRequest() {
       filePath_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new MetaDataDedupeFileRequest();
     }
 
     @java.lang.Override
@@ -8607,7 +9367,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -8630,7 +9389,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8640,6 +9399,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -8665,7 +9426,9 @@ public final class Storage {
     private volatile java.lang.Object filePath_;
     /**
      * <code>string filePath = 1;</code>
+     * @return The filePath.
      */
+    @java.lang.Override
     public java.lang.String getFilePath() {
       java.lang.Object ref = filePath_;
       if (ref instanceof java.lang.String) {
@@ -8680,7 +9443,9 @@ public final class Storage {
     }
     /**
      * <code>string filePath = 1;</code>
+     * @return The bytes for filePath.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFilePathBytes() {
       java.lang.Object ref = filePath_;
@@ -8699,7 +9464,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -8718,7 +9485,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, filePath_);
       }
       if (pvolumeID_ != 0L) {
@@ -8733,7 +9500,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getFilePathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(filePath_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, filePath_);
       }
       if (pvolumeID_ != 0L) {
@@ -8755,13 +9522,12 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.MetaDataDedupeFileRequest other = (org.opendedup.grpc.Storage.MetaDataDedupeFileRequest) obj;
 
-      boolean result = true;
-      result = result && getFilePath()
-          .equals(other.getFilePath());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getFilePath()
+          .equals(other.getFilePath())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8947,35 +9713,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -9028,6 +9794,7 @@ public final class Storage {
       private java.lang.Object filePath_ = "";
       /**
        * <code>string filePath = 1;</code>
+       * @return The filePath.
        */
       public java.lang.String getFilePath() {
         java.lang.Object ref = filePath_;
@@ -9043,6 +9810,7 @@ public final class Storage {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @return The bytes for filePath.
        */
       public com.google.protobuf.ByteString
           getFilePathBytes() {
@@ -9059,6 +9827,8 @@ public final class Storage {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @param value The filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePath(
           java.lang.String value) {
@@ -9072,6 +9842,7 @@ public final class Storage {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFilePath() {
         
@@ -9081,6 +9852,8 @@ public final class Storage {
       }
       /**
        * <code>string filePath = 1;</code>
+       * @param value The bytes for filePath to set.
+       * @return This builder for chaining.
        */
       public Builder setFilePathBytes(
           com.google.protobuf.ByteString value) {
@@ -9097,12 +9870,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -9112,6 +9889,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -9122,7 +9900,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -9178,10 +9956,12 @@ public final class Storage {
 
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+     * @return Whether the file field is set.
      */
     boolean hasFile();
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+     * @return The file.
      */
     org.opendedup.grpc.FileInfo.FileInfoResponse getFile();
     /**
@@ -9191,29 +9971,35 @@ public final class Storage {
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>string error = 3;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 3;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>string eventID = 4;</code>
+     * @return The eventID.
      */
     java.lang.String getEventID();
     /**
      * <code>string eventID = 4;</code>
+     * @return The bytes for eventID.
      */
     com.google.protobuf.ByteString
         getEventIDBytes();
@@ -9221,7 +10007,7 @@ public final class Storage {
   /**
    * Protobuf type {@code org.opendedup.grpc.MetaDataDedupeFileResponse}
    */
-  public  static final class MetaDataDedupeFileResponse extends
+  public static final class MetaDataDedupeFileResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.MetaDataDedupeFileResponse)
       MetaDataDedupeFileResponseOrBuilder {
@@ -9237,6 +10023,13 @@ public final class Storage {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new MetaDataDedupeFileResponse();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -9249,7 +10042,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -9292,7 +10084,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -9302,6 +10094,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -9327,19 +10121,24 @@ public final class Storage {
     private org.opendedup.grpc.FileInfo.FileInfoResponse file_;
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+     * @return Whether the file field is set.
      */
+    @java.lang.Override
     public boolean hasFile() {
       return file_ != null;
     }
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+     * @return The file.
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileInfoResponse getFile() {
       return file_ == null ? org.opendedup.grpc.FileInfo.FileInfoResponse.getDefaultInstance() : file_;
     }
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getFileOrBuilder() {
       return getFile();
     }
@@ -9348,14 +10147,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -9365,7 +10166,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 3;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -9380,7 +10183,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 3;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -9399,7 +10204,9 @@ public final class Storage {
     private volatile java.lang.Object eventID_;
     /**
      * <code>string eventID = 4;</code>
+     * @return The eventID.
      */
+    @java.lang.Override
     public java.lang.String getEventID() {
       java.lang.Object ref = eventID_;
       if (ref instanceof java.lang.String) {
@@ -9414,7 +10221,9 @@ public final class Storage {
     }
     /**
      * <code>string eventID = 4;</code>
+     * @return The bytes for eventID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventIDBytes() {
       java.lang.Object ref = eventID_;
@@ -9449,10 +10258,10 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(2, errorCode_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, error_);
       }
-      if (!getEventIDBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventID_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, eventID_);
       }
       unknownFields.writeTo(output);
@@ -9472,10 +10281,10 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, errorCode_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, error_);
       }
-      if (!getEventIDBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventID_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, eventID_);
       }
       size += unknownFields.getSerializedSize();
@@ -9493,19 +10302,18 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.MetaDataDedupeFileResponse other = (org.opendedup.grpc.Storage.MetaDataDedupeFileResponse) obj;
 
-      boolean result = true;
-      result = result && (hasFile() == other.hasFile());
+      if (hasFile() != other.hasFile()) return false;
       if (hasFile()) {
-        result = result && getFile()
-            .equals(other.getFile());
+        if (!getFile()
+            .equals(other.getFile())) return false;
       }
-      result = result && errorCode_ == other.errorCode_;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && getEventID()
-          .equals(other.getEventID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (!getEventID()
+          .equals(other.getEventID())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -9710,35 +10518,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -9795,17 +10603,19 @@ public final class Storage {
         return this;
       }
 
-      private org.opendedup.grpc.FileInfo.FileInfoResponse file_ = null;
+      private org.opendedup.grpc.FileInfo.FileInfoResponse file_;
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> fileBuilder_;
       /**
        * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+       * @return Whether the file field is set.
        */
       public boolean hasFile() {
         return fileBuilder_ != null || file_ != null;
       }
       /**
        * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+       * @return The file.
        */
       public org.opendedup.grpc.FileInfo.FileInfoResponse getFile() {
         if (fileBuilder_ == null) {
@@ -9915,21 +10725,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -9937,6 +10753,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -9949,6 +10767,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -9960,6 +10779,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 3;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -9975,6 +10795,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -9991,6 +10812,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -10004,6 +10827,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -10013,6 +10837,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -10029,6 +10855,7 @@ public final class Storage {
       private java.lang.Object eventID_ = "";
       /**
        * <code>string eventID = 4;</code>
+       * @return The eventID.
        */
       public java.lang.String getEventID() {
         java.lang.Object ref = eventID_;
@@ -10044,6 +10871,7 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 4;</code>
+       * @return The bytes for eventID.
        */
       public com.google.protobuf.ByteString
           getEventIDBytes() {
@@ -10060,6 +10888,8 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 4;</code>
+       * @param value The eventID to set.
+       * @return This builder for chaining.
        */
       public Builder setEventID(
           java.lang.String value) {
@@ -10073,6 +10903,7 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventID() {
         
@@ -10082,6 +10913,8 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 4;</code>
+       * @param value The bytes for eventID to set.
+       * @return This builder for chaining.
        */
       public Builder setEventIDBytes(
           com.google.protobuf.ByteString value) {
@@ -10097,7 +10930,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10153,23 +10986,26 @@ public final class Storage {
 
     /**
      * <code>string guid = 1;</code>
+     * @return The guid.
      */
     java.lang.String getGuid();
     /**
      * <code>string guid = 1;</code>
+     * @return The bytes for guid.
      */
     com.google.protobuf.ByteString
         getGuidBytes();
 
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeFileRequest}
    */
-  public  static final class SparseDedupeFileRequest extends
+  public static final class SparseDedupeFileRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SparseDedupeFileRequest)
       SparseDedupeFileRequestOrBuilder {
@@ -10180,7 +11016,13 @@ public final class Storage {
     }
     private SparseDedupeFileRequest() {
       guid_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SparseDedupeFileRequest();
     }
 
     @java.lang.Override
@@ -10196,7 +11038,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -10219,7 +11060,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -10229,6 +11070,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -10254,7 +11097,9 @@ public final class Storage {
     private volatile java.lang.Object guid_;
     /**
      * <code>string guid = 1;</code>
+     * @return The guid.
      */
+    @java.lang.Override
     public java.lang.String getGuid() {
       java.lang.Object ref = guid_;
       if (ref instanceof java.lang.String) {
@@ -10269,7 +11114,9 @@ public final class Storage {
     }
     /**
      * <code>string guid = 1;</code>
+     * @return The bytes for guid.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getGuidBytes() {
       java.lang.Object ref = guid_;
@@ -10288,7 +11135,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -10307,7 +11156,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getGuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(guid_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, guid_);
       }
       if (pvolumeID_ != 0L) {
@@ -10322,7 +11171,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getGuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(guid_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, guid_);
       }
       if (pvolumeID_ != 0L) {
@@ -10344,13 +11193,12 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.SparseDedupeFileRequest other = (org.opendedup.grpc.Storage.SparseDedupeFileRequest) obj;
 
-      boolean result = true;
-      result = result && getGuid()
-          .equals(other.getGuid());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getGuid()
+          .equals(other.getGuid())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -10536,35 +11384,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10617,6 +11465,7 @@ public final class Storage {
       private java.lang.Object guid_ = "";
       /**
        * <code>string guid = 1;</code>
+       * @return The guid.
        */
       public java.lang.String getGuid() {
         java.lang.Object ref = guid_;
@@ -10632,6 +11481,7 @@ public final class Storage {
       }
       /**
        * <code>string guid = 1;</code>
+       * @return The bytes for guid.
        */
       public com.google.protobuf.ByteString
           getGuidBytes() {
@@ -10648,6 +11498,8 @@ public final class Storage {
       }
       /**
        * <code>string guid = 1;</code>
+       * @param value The guid to set.
+       * @return This builder for chaining.
        */
       public Builder setGuid(
           java.lang.String value) {
@@ -10661,6 +11513,7 @@ public final class Storage {
       }
       /**
        * <code>string guid = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGuid() {
         
@@ -10670,6 +11523,8 @@ public final class Storage {
       }
       /**
        * <code>string guid = 1;</code>
+       * @param value The bytes for guid to set.
+       * @return This builder for chaining.
        */
       public Builder setGuidBytes(
           com.google.protobuf.ByteString value) {
@@ -10686,12 +11541,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -10701,6 +11560,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -10711,7 +11571,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10791,19 +11651,23 @@ public final class Storage {
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>string error = 3;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 3;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
@@ -10811,7 +11675,7 @@ public final class Storage {
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeFileResponse}
    */
-  public  static final class SparseDedupeFileResponse extends
+  public static final class SparseDedupeFileResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SparseDedupeFileResponse)
       SparseDedupeFileResponseOrBuilder {
@@ -10824,6 +11688,13 @@ public final class Storage {
       chunks_ = java.util.Collections.emptyList();
       errorCode_ = 0;
       error_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SparseDedupeFileResponse();
     }
 
     @java.lang.Override
@@ -10851,7 +11722,7 @@ public final class Storage {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 chunks_ = new java.util.ArrayList<org.opendedup.grpc.Storage.SparseDataChunkP>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -10872,7 +11743,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -10882,11 +11753,13 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           chunks_ = java.util.Collections.unmodifiableList(chunks_);
         }
         this.unknownFields = unknownFields.build();
@@ -10906,18 +11779,19 @@ public final class Storage {
               org.opendedup.grpc.Storage.SparseDedupeFileResponse.class, org.opendedup.grpc.Storage.SparseDedupeFileResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int CHUNKS_FIELD_NUMBER = 1;
     private java.util.List<org.opendedup.grpc.Storage.SparseDataChunkP> chunks_;
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataChunkP chunks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.Storage.SparseDataChunkP> getChunksList() {
       return chunks_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataChunkP chunks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.Storage.SparseDataChunkPOrBuilder> 
         getChunksOrBuilderList() {
       return chunks_;
@@ -10925,18 +11799,21 @@ public final class Storage {
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataChunkP chunks = 1;</code>
      */
+    @java.lang.Override
     public int getChunksCount() {
       return chunks_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataChunkP chunks = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.SparseDataChunkP getChunks(int index) {
       return chunks_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataChunkP chunks = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.SparseDataChunkPOrBuilder getChunksOrBuilder(
         int index) {
       return chunks_.get(index);
@@ -10946,14 +11823,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -10963,7 +11842,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 3;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -10978,7 +11859,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 3;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -11013,7 +11896,7 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(2, errorCode_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, error_);
       }
       unknownFields.writeTo(output);
@@ -11033,7 +11916,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, errorCode_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, error_);
       }
       size += unknownFields.getSerializedSize();
@@ -11051,14 +11934,13 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.SparseDedupeFileResponse other = (org.opendedup.grpc.Storage.SparseDedupeFileResponse) obj;
 
-      boolean result = true;
-      result = result && getChunksList()
-          .equals(other.getChunksList());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getChunksList()
+          .equals(other.getChunksList())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -11247,9 +12129,8 @@ public final class Storage {
       public org.opendedup.grpc.Storage.SparseDedupeFileResponse buildPartial() {
         org.opendedup.grpc.Storage.SparseDedupeFileResponse result = new org.opendedup.grpc.Storage.SparseDedupeFileResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (chunksBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             chunks_ = java.util.Collections.unmodifiableList(chunks_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -11259,42 +12140,41 @@ public final class Storage {
         }
         result.errorCode_ = errorCode_;
         result.error_ = error_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -11374,7 +12254,7 @@ public final class Storage {
       private java.util.List<org.opendedup.grpc.Storage.SparseDataChunkP> chunks_ =
         java.util.Collections.emptyList();
       private void ensureChunksIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           chunks_ = new java.util.ArrayList<org.opendedup.grpc.Storage.SparseDataChunkP>(chunks_);
           bitField0_ |= 0x00000001;
          }
@@ -11603,7 +12483,7 @@ public final class Storage {
           chunksBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.Storage.SparseDataChunkP, org.opendedup.grpc.Storage.SparseDataChunkP.Builder, org.opendedup.grpc.Storage.SparseDataChunkPOrBuilder>(
                   chunks_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           chunks_ = null;
@@ -11614,21 +12494,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -11636,6 +12522,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -11648,6 +12536,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -11659,6 +12548,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 3;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -11674,6 +12564,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -11690,6 +12581,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -11703,6 +12596,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -11712,6 +12606,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -11727,7 +12623,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -11783,42 +12679,49 @@ public final class Storage {
 
     /**
      * <code>bytes data = 1;</code>
+     * @return The data.
      */
     com.google.protobuf.ByteString getData();
 
     /**
      * <code>int32 len = 2;</code>
+     * @return The len.
      */
     int getLen();
 
     /**
      * <code>string error = 3;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 3;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>bool compressed = 5;</code>
+     * @return The compressed.
      */
     boolean getCompressed();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ChunkResponse}
    */
-  public  static final class ChunkResponse extends
+  public static final class ChunkResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ChunkResponse)
       ChunkResponseOrBuilder {
@@ -11829,10 +12732,15 @@ public final class Storage {
     }
     private ChunkResponse() {
       data_ = com.google.protobuf.ByteString.EMPTY;
-      len_ = 0;
       error_ = "";
       errorCode_ = 0;
-      compressed_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ChunkResponse();
     }
 
     @java.lang.Override
@@ -11848,7 +12756,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -11887,7 +12794,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -11897,6 +12804,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -11922,7 +12831,9 @@ public final class Storage {
     private com.google.protobuf.ByteString data_;
     /**
      * <code>bytes data = 1;</code>
+     * @return The data.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString getData() {
       return data_;
     }
@@ -11931,7 +12842,9 @@ public final class Storage {
     private int len_;
     /**
      * <code>int32 len = 2;</code>
+     * @return The len.
      */
+    @java.lang.Override
     public int getLen() {
       return len_;
     }
@@ -11940,7 +12853,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 3;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -11955,7 +12870,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 3;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -11974,14 +12891,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -11991,7 +12910,9 @@ public final class Storage {
     private boolean compressed_;
     /**
      * <code>bool compressed = 5;</code>
+     * @return The compressed.
      */
+    @java.lang.Override
     public boolean getCompressed() {
       return compressed_;
     }
@@ -12016,7 +12937,7 @@ public final class Storage {
       if (len_ != 0) {
         output.writeInt32(2, len_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -12042,7 +12963,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, len_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -12068,18 +12989,17 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.ChunkResponse other = (org.opendedup.grpc.Storage.ChunkResponse) obj;
 
-      boolean result = true;
-      result = result && getData()
-          .equals(other.getData());
-      result = result && (getLen()
-          == other.getLen());
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && (getCompressed()
-          == other.getCompressed());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getData()
+          .equals(other.getData())) return false;
+      if (getLen()
+          != other.getLen()) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (getCompressed()
+          != other.getCompressed()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12280,35 +13200,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -12370,12 +13290,16 @@ public final class Storage {
       private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>bytes data = 1;</code>
+       * @return The data.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getData() {
         return data_;
       }
       /**
        * <code>bytes data = 1;</code>
+       * @param value The data to set.
+       * @return This builder for chaining.
        */
       public Builder setData(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -12388,6 +13312,7 @@ public final class Storage {
       }
       /**
        * <code>bytes data = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearData() {
         
@@ -12399,12 +13324,16 @@ public final class Storage {
       private int len_ ;
       /**
        * <code>int32 len = 2;</code>
+       * @return The len.
        */
+      @java.lang.Override
       public int getLen() {
         return len_;
       }
       /**
        * <code>int32 len = 2;</code>
+       * @param value The len to set.
+       * @return This builder for chaining.
        */
       public Builder setLen(int value) {
         
@@ -12414,6 +13343,7 @@ public final class Storage {
       }
       /**
        * <code>int32 len = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLen() {
         
@@ -12425,6 +13355,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 3;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -12440,6 +13371,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -12456,6 +13388,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -12469,6 +13403,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -12478,6 +13413,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 3;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -12494,21 +13431,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -12516,6 +13459,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -12528,6 +13473,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -12539,12 +13485,16 @@ public final class Storage {
       private boolean compressed_ ;
       /**
        * <code>bool compressed = 5;</code>
+       * @return The compressed.
        */
+      @java.lang.Override
       public boolean getCompressed() {
         return compressed_;
       }
       /**
        * <code>bool compressed = 5;</code>
+       * @param value The compressed to set.
+       * @return This builder for chaining.
        */
       public Builder setCompressed(boolean value) {
         
@@ -12554,6 +13504,7 @@ public final class Storage {
       }
       /**
        * <code>bool compressed = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCompressed() {
         
@@ -12564,7 +13515,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -12620,44 +13571,53 @@ public final class Storage {
 
     /**
      * <code>bytes hash = 1;</code>
+     * @return The hash.
      */
     com.google.protobuf.ByteString getHash();
 
     /**
      * <code>bytes data = 2;</code>
+     * @return The data.
      */
     com.google.protobuf.ByteString getData();
 
     /**
      * <code>bool compressed = 3;</code>
+     * @return The compressed.
      */
     boolean getCompressed();
 
     /**
      * <code>int32 compressedLength = 4;</code>
+     * @return The compressedLength.
      */
     int getCompressedLength();
 
     /**
      * <code>int64 location = 5;</code>
+     * @return The location.
      */
     long getLocation();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 6;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 6;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>string error = 7;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 7;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
@@ -12665,7 +13625,7 @@ public final class Storage {
   /**
    * Protobuf type {@code org.opendedup.grpc.ChunkEntry}
    */
-  public  static final class ChunkEntry extends
+  public static final class ChunkEntry extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.ChunkEntry)
       ChunkEntryOrBuilder {
@@ -12677,11 +13637,15 @@ public final class Storage {
     private ChunkEntry() {
       hash_ = com.google.protobuf.ByteString.EMPTY;
       data_ = com.google.protobuf.ByteString.EMPTY;
-      compressed_ = false;
-      compressedLength_ = 0;
-      location_ = 0L;
       errorCode_ = 0;
       error_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ChunkEntry();
     }
 
     @java.lang.Override
@@ -12697,7 +13661,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -12746,7 +13709,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -12756,6 +13719,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -12781,7 +13746,9 @@ public final class Storage {
     private com.google.protobuf.ByteString hash_;
     /**
      * <code>bytes hash = 1;</code>
+     * @return The hash.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString getHash() {
       return hash_;
     }
@@ -12790,7 +13757,9 @@ public final class Storage {
     private com.google.protobuf.ByteString data_;
     /**
      * <code>bytes data = 2;</code>
+     * @return The data.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString getData() {
       return data_;
     }
@@ -12799,7 +13768,9 @@ public final class Storage {
     private boolean compressed_;
     /**
      * <code>bool compressed = 3;</code>
+     * @return The compressed.
      */
+    @java.lang.Override
     public boolean getCompressed() {
       return compressed_;
     }
@@ -12808,7 +13779,9 @@ public final class Storage {
     private int compressedLength_;
     /**
      * <code>int32 compressedLength = 4;</code>
+     * @return The compressedLength.
      */
+    @java.lang.Override
     public int getCompressedLength() {
       return compressedLength_;
     }
@@ -12817,7 +13790,9 @@ public final class Storage {
     private long location_;
     /**
      * <code>int64 location = 5;</code>
+     * @return The location.
      */
+    @java.lang.Override
     public long getLocation() {
       return location_;
     }
@@ -12826,14 +13801,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 6;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 6;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -12843,7 +13820,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 7;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -12858,7 +13837,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 7;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -12905,7 +13886,7 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(6, errorCode_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, error_);
       }
       unknownFields.writeTo(output);
@@ -12941,7 +13922,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(6, errorCode_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, error_);
       }
       size += unknownFields.getSerializedSize();
@@ -12959,22 +13940,21 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.ChunkEntry other = (org.opendedup.grpc.Storage.ChunkEntry) obj;
 
-      boolean result = true;
-      result = result && getHash()
-          .equals(other.getHash());
-      result = result && getData()
-          .equals(other.getData());
-      result = result && (getCompressed()
-          == other.getCompressed());
-      result = result && (getCompressedLength()
-          == other.getCompressedLength());
-      result = result && (getLocation()
-          == other.getLocation());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getHash()
+          .equals(other.getHash())) return false;
+      if (!getData()
+          .equals(other.getData())) return false;
+      if (getCompressed()
+          != other.getCompressed()) return false;
+      if (getCompressedLength()
+          != other.getCompressedLength()) return false;
+      if (getLocation()
+          != other.getLocation()) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -13186,35 +14166,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -13282,12 +14262,16 @@ public final class Storage {
       private com.google.protobuf.ByteString hash_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>bytes hash = 1;</code>
+       * @return The hash.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getHash() {
         return hash_;
       }
       /**
        * <code>bytes hash = 1;</code>
+       * @param value The hash to set.
+       * @return This builder for chaining.
        */
       public Builder setHash(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -13300,6 +14284,7 @@ public final class Storage {
       }
       /**
        * <code>bytes hash = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHash() {
         
@@ -13311,12 +14296,16 @@ public final class Storage {
       private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>bytes data = 2;</code>
+       * @return The data.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getData() {
         return data_;
       }
       /**
        * <code>bytes data = 2;</code>
+       * @param value The data to set.
+       * @return This builder for chaining.
        */
       public Builder setData(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -13329,6 +14318,7 @@ public final class Storage {
       }
       /**
        * <code>bytes data = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearData() {
         
@@ -13340,12 +14330,16 @@ public final class Storage {
       private boolean compressed_ ;
       /**
        * <code>bool compressed = 3;</code>
+       * @return The compressed.
        */
+      @java.lang.Override
       public boolean getCompressed() {
         return compressed_;
       }
       /**
        * <code>bool compressed = 3;</code>
+       * @param value The compressed to set.
+       * @return This builder for chaining.
        */
       public Builder setCompressed(boolean value) {
         
@@ -13355,6 +14349,7 @@ public final class Storage {
       }
       /**
        * <code>bool compressed = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCompressed() {
         
@@ -13366,12 +14361,16 @@ public final class Storage {
       private int compressedLength_ ;
       /**
        * <code>int32 compressedLength = 4;</code>
+       * @return The compressedLength.
        */
+      @java.lang.Override
       public int getCompressedLength() {
         return compressedLength_;
       }
       /**
        * <code>int32 compressedLength = 4;</code>
+       * @param value The compressedLength to set.
+       * @return This builder for chaining.
        */
       public Builder setCompressedLength(int value) {
         
@@ -13381,6 +14380,7 @@ public final class Storage {
       }
       /**
        * <code>int32 compressedLength = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCompressedLength() {
         
@@ -13392,12 +14392,16 @@ public final class Storage {
       private long location_ ;
       /**
        * <code>int64 location = 5;</code>
+       * @return The location.
        */
+      @java.lang.Override
       public long getLocation() {
         return location_;
       }
       /**
        * <code>int64 location = 5;</code>
+       * @param value The location to set.
+       * @return This builder for chaining.
        */
       public Builder setLocation(long value) {
         
@@ -13407,6 +14411,7 @@ public final class Storage {
       }
       /**
        * <code>int64 location = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLocation() {
         
@@ -13418,21 +14423,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 6;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 6;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 6;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -13440,6 +14451,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 6;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -13452,6 +14465,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -13463,6 +14477,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 7;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -13478,6 +14493,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 7;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -13494,6 +14510,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 7;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -13507,6 +14525,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -13516,6 +14535,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 7;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -13531,7 +14552,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -13611,18 +14632,20 @@ public final class Storage {
 
     /**
      * <code>int64 fileHandle = 2;</code>
+     * @return The fileHandle.
      */
     long getFileHandle();
 
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.WriteChunksRequest}
    */
-  public  static final class WriteChunksRequest extends
+  public static final class WriteChunksRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.WriteChunksRequest)
       WriteChunksRequestOrBuilder {
@@ -13633,8 +14656,13 @@ public final class Storage {
     }
     private WriteChunksRequest() {
       chunks_ = java.util.Collections.emptyList();
-      fileHandle_ = 0L;
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new WriteChunksRequest();
     }
 
     @java.lang.Override
@@ -13662,7 +14690,7 @@ public final class Storage {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 chunks_ = new java.util.ArrayList<org.opendedup.grpc.Storage.ChunkEntry>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -13681,7 +14709,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -13691,11 +14719,13 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           chunks_ = java.util.Collections.unmodifiableList(chunks_);
         }
         this.unknownFields = unknownFields.build();
@@ -13715,18 +14745,19 @@ public final class Storage {
               org.opendedup.grpc.Storage.WriteChunksRequest.class, org.opendedup.grpc.Storage.WriteChunksRequest.Builder.class);
     }
 
-    private int bitField0_;
     public static final int CHUNKS_FIELD_NUMBER = 1;
     private java.util.List<org.opendedup.grpc.Storage.ChunkEntry> chunks_;
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.Storage.ChunkEntry> getChunksList() {
       return chunks_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.Storage.ChunkEntryOrBuilder> 
         getChunksOrBuilderList() {
       return chunks_;
@@ -13734,18 +14765,21 @@ public final class Storage {
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public int getChunksCount() {
       return chunks_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.ChunkEntry getChunks(int index) {
       return chunks_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.ChunkEntryOrBuilder getChunksOrBuilder(
         int index) {
       return chunks_.get(index);
@@ -13755,7 +14789,9 @@ public final class Storage {
     private long fileHandle_;
     /**
      * <code>int64 fileHandle = 2;</code>
+     * @return The fileHandle.
      */
+    @java.lang.Override
     public long getFileHandle() {
       return fileHandle_;
     }
@@ -13764,7 +14800,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -13828,15 +14866,14 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.WriteChunksRequest other = (org.opendedup.grpc.Storage.WriteChunksRequest) obj;
 
-      boolean result = true;
-      result = result && getChunksList()
-          .equals(other.getChunksList());
-      result = result && (getFileHandle()
-          == other.getFileHandle());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getChunksList()
+          .equals(other.getChunksList())) return false;
+      if (getFileHandle()
+          != other.getFileHandle()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -14027,9 +15064,8 @@ public final class Storage {
       public org.opendedup.grpc.Storage.WriteChunksRequest buildPartial() {
         org.opendedup.grpc.Storage.WriteChunksRequest result = new org.opendedup.grpc.Storage.WriteChunksRequest(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (chunksBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             chunks_ = java.util.Collections.unmodifiableList(chunks_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -14039,42 +15075,41 @@ public final class Storage {
         }
         result.fileHandle_ = fileHandle_;
         result.pvolumeID_ = pvolumeID_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -14153,7 +15188,7 @@ public final class Storage {
       private java.util.List<org.opendedup.grpc.Storage.ChunkEntry> chunks_ =
         java.util.Collections.emptyList();
       private void ensureChunksIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           chunks_ = new java.util.ArrayList<org.opendedup.grpc.Storage.ChunkEntry>(chunks_);
           bitField0_ |= 0x00000001;
          }
@@ -14382,7 +15417,7 @@ public final class Storage {
           chunksBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.Storage.ChunkEntry, org.opendedup.grpc.Storage.ChunkEntry.Builder, org.opendedup.grpc.Storage.ChunkEntryOrBuilder>(
                   chunks_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           chunks_ = null;
@@ -14393,12 +15428,16 @@ public final class Storage {
       private long fileHandle_ ;
       /**
        * <code>int64 fileHandle = 2;</code>
+       * @return The fileHandle.
        */
+      @java.lang.Override
       public long getFileHandle() {
         return fileHandle_;
       }
       /**
        * <code>int64 fileHandle = 2;</code>
+       * @param value The fileHandle to set.
+       * @return This builder for chaining.
        */
       public Builder setFileHandle(long value) {
         
@@ -14408,6 +15447,7 @@ public final class Storage {
       }
       /**
        * <code>int64 fileHandle = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFileHandle() {
         
@@ -14419,12 +15459,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -14434,6 +15478,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -14444,7 +15489,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -14500,20 +15545,24 @@ public final class Storage {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
@@ -14544,7 +15593,7 @@ public final class Storage {
   /**
    * Protobuf type {@code org.opendedup.grpc.WriteChunksResponse}
    */
-  public  static final class WriteChunksResponse extends
+  public static final class WriteChunksResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.WriteChunksResponse)
       WriteChunksResponseOrBuilder {
@@ -14557,6 +15606,13 @@ public final class Storage {
       error_ = "";
       errorCode_ = 0;
       insertRecords_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new WriteChunksResponse();
     }
 
     @java.lang.Override
@@ -14596,16 +15652,16 @@ public final class Storage {
               break;
             }
             case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 insertRecords_ = new java.util.ArrayList<org.opendedup.grpc.Storage.InsertRecord>();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000001;
               }
               insertRecords_.add(
                   input.readMessage(org.opendedup.grpc.Storage.InsertRecord.parser(), extensionRegistry));
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -14615,11 +15671,13 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           insertRecords_ = java.util.Collections.unmodifiableList(insertRecords_);
         }
         this.unknownFields = unknownFields.build();
@@ -14639,12 +15697,13 @@ public final class Storage {
               org.opendedup.grpc.Storage.WriteChunksResponse.class, org.opendedup.grpc.Storage.WriteChunksResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int ERROR_FIELD_NUMBER = 1;
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -14659,7 +15718,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -14678,14 +15739,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -14696,12 +15759,14 @@ public final class Storage {
     /**
      * <code>repeated .org.opendedup.grpc.InsertRecord insertRecords = 3;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.Storage.InsertRecord> getInsertRecordsList() {
       return insertRecords_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.InsertRecord insertRecords = 3;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.Storage.InsertRecordOrBuilder> 
         getInsertRecordsOrBuilderList() {
       return insertRecords_;
@@ -14709,18 +15774,21 @@ public final class Storage {
     /**
      * <code>repeated .org.opendedup.grpc.InsertRecord insertRecords = 3;</code>
      */
+    @java.lang.Override
     public int getInsertRecordsCount() {
       return insertRecords_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.InsertRecord insertRecords = 3;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.InsertRecord getInsertRecords(int index) {
       return insertRecords_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.InsertRecord insertRecords = 3;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.InsertRecordOrBuilder getInsertRecordsOrBuilder(
         int index) {
       return insertRecords_.get(index);
@@ -14740,7 +15808,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -14758,7 +15826,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -14784,14 +15852,13 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.WriteChunksResponse other = (org.opendedup.grpc.Storage.WriteChunksResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && getInsertRecordsList()
-          .equals(other.getInsertRecordsList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!getInsertRecordsList()
+          .equals(other.getInsertRecordsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -14949,7 +16016,7 @@ public final class Storage {
 
         if (insertRecordsBuilder_ == null) {
           insertRecords_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
           insertRecordsBuilder_.clear();
         }
@@ -14980,54 +16047,52 @@ public final class Storage {
       public org.opendedup.grpc.Storage.WriteChunksResponse buildPartial() {
         org.opendedup.grpc.Storage.WriteChunksResponse result = new org.opendedup.grpc.Storage.WriteChunksResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.error_ = error_;
         result.errorCode_ = errorCode_;
         if (insertRecordsBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             insertRecords_ = java.util.Collections.unmodifiableList(insertRecords_);
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.insertRecords_ = insertRecords_;
         } else {
           result.insertRecords_ = insertRecordsBuilder_.build();
         }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -15052,7 +16117,7 @@ public final class Storage {
           if (!other.insertRecords_.isEmpty()) {
             if (insertRecords_.isEmpty()) {
               insertRecords_ = other.insertRecords_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000001);
             } else {
               ensureInsertRecordsIsMutable();
               insertRecords_.addAll(other.insertRecords_);
@@ -15065,7 +16130,7 @@ public final class Storage {
               insertRecordsBuilder_.dispose();
               insertRecordsBuilder_ = null;
               insertRecords_ = other.insertRecords_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000001);
               insertRecordsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getInsertRecordsFieldBuilder() : null;
@@ -15107,6 +16172,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -15122,6 +16188,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -15138,6 +16205,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -15151,6 +16220,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -15160,6 +16230,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -15176,21 +16248,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -15198,6 +16276,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -15210,6 +16290,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -15221,9 +16302,9 @@ public final class Storage {
       private java.util.List<org.opendedup.grpc.Storage.InsertRecord> insertRecords_ =
         java.util.Collections.emptyList();
       private void ensureInsertRecordsIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           insertRecords_ = new java.util.ArrayList<org.opendedup.grpc.Storage.InsertRecord>(insertRecords_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000001;
          }
       }
 
@@ -15373,7 +16454,7 @@ public final class Storage {
       public Builder clearInsertRecords() {
         if (insertRecordsBuilder_ == null) {
           insertRecords_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
           insertRecordsBuilder_.clear();
@@ -15450,7 +16531,7 @@ public final class Storage {
           insertRecordsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.Storage.InsertRecord, org.opendedup.grpc.Storage.InsertRecord.Builder, org.opendedup.grpc.Storage.InsertRecordOrBuilder>(
                   insertRecords_,
-                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           insertRecords_ = null;
@@ -15460,7 +16541,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -15540,13 +16621,14 @@ public final class Storage {
 
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.GetChunksRequest}
    */
-  public  static final class GetChunksRequest extends
+  public static final class GetChunksRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.GetChunksRequest)
       GetChunksRequestOrBuilder {
@@ -15557,7 +16639,13 @@ public final class Storage {
     }
     private GetChunksRequest() {
       chunks_ = java.util.Collections.emptyList();
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetChunksRequest();
     }
 
     @java.lang.Override
@@ -15585,7 +16673,7 @@ public final class Storage {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 chunks_ = new java.util.ArrayList<org.opendedup.grpc.Storage.ChunkEntry>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -15599,7 +16687,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -15609,11 +16697,13 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           chunks_ = java.util.Collections.unmodifiableList(chunks_);
         }
         this.unknownFields = unknownFields.build();
@@ -15633,18 +16723,19 @@ public final class Storage {
               org.opendedup.grpc.Storage.GetChunksRequest.class, org.opendedup.grpc.Storage.GetChunksRequest.Builder.class);
     }
 
-    private int bitField0_;
     public static final int CHUNKS_FIELD_NUMBER = 1;
     private java.util.List<org.opendedup.grpc.Storage.ChunkEntry> chunks_;
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.Storage.ChunkEntry> getChunksList() {
       return chunks_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.Storage.ChunkEntryOrBuilder> 
         getChunksOrBuilderList() {
       return chunks_;
@@ -15652,18 +16743,21 @@ public final class Storage {
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public int getChunksCount() {
       return chunks_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.ChunkEntry getChunks(int index) {
       return chunks_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.ChunkEntryOrBuilder getChunksOrBuilder(
         int index) {
       return chunks_.get(index);
@@ -15673,7 +16767,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -15730,13 +16826,12 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.GetChunksRequest other = (org.opendedup.grpc.Storage.GetChunksRequest) obj;
 
-      boolean result = true;
-      result = result && getChunksList()
-          .equals(other.getChunksList());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getChunksList()
+          .equals(other.getChunksList())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -15922,9 +17017,8 @@ public final class Storage {
       public org.opendedup.grpc.Storage.GetChunksRequest buildPartial() {
         org.opendedup.grpc.Storage.GetChunksRequest result = new org.opendedup.grpc.Storage.GetChunksRequest(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (chunksBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             chunks_ = java.util.Collections.unmodifiableList(chunks_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -15933,42 +17027,41 @@ public final class Storage {
           result.chunks_ = chunksBuilder_.build();
         }
         result.pvolumeID_ = pvolumeID_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -16044,7 +17137,7 @@ public final class Storage {
       private java.util.List<org.opendedup.grpc.Storage.ChunkEntry> chunks_ =
         java.util.Collections.emptyList();
       private void ensureChunksIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           chunks_ = new java.util.ArrayList<org.opendedup.grpc.Storage.ChunkEntry>(chunks_);
           bitField0_ |= 0x00000001;
          }
@@ -16273,7 +17366,7 @@ public final class Storage {
           chunksBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.Storage.ChunkEntry, org.opendedup.grpc.Storage.ChunkEntry.Builder, org.opendedup.grpc.Storage.ChunkEntryOrBuilder>(
                   chunks_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           chunks_ = null;
@@ -16284,12 +17377,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -16299,6 +17396,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -16309,7 +17407,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -16389,32 +17487,37 @@ public final class Storage {
 
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>int64 pvolumeID = 4;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.HashingInfoRequest}
    */
-  public  static final class HashingInfoRequest extends
+  public static final class HashingInfoRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.HashingInfoRequest)
       HashingInfoRequestOrBuilder {
@@ -16427,7 +17530,13 @@ public final class Storage {
       chunks_ = java.util.Collections.emptyList();
       error_ = "";
       errorCode_ = 0;
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new HashingInfoRequest();
     }
 
     @java.lang.Override
@@ -16455,7 +17564,7 @@ public final class Storage {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 chunks_ = new java.util.ArrayList<org.opendedup.grpc.Storage.ChunkEntry>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -16481,7 +17590,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -16491,11 +17600,13 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           chunks_ = java.util.Collections.unmodifiableList(chunks_);
         }
         this.unknownFields = unknownFields.build();
@@ -16515,18 +17626,19 @@ public final class Storage {
               org.opendedup.grpc.Storage.HashingInfoRequest.class, org.opendedup.grpc.Storage.HashingInfoRequest.Builder.class);
     }
 
-    private int bitField0_;
     public static final int CHUNKS_FIELD_NUMBER = 1;
     private java.util.List<org.opendedup.grpc.Storage.ChunkEntry> chunks_;
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.Storage.ChunkEntry> getChunksList() {
       return chunks_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends org.opendedup.grpc.Storage.ChunkEntryOrBuilder> 
         getChunksOrBuilderList() {
       return chunks_;
@@ -16534,18 +17646,21 @@ public final class Storage {
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public int getChunksCount() {
       return chunks_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.ChunkEntry getChunks(int index) {
       return chunks_.get(index);
     }
     /**
      * <code>repeated .org.opendedup.grpc.ChunkEntry chunks = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.ChunkEntryOrBuilder getChunksOrBuilder(
         int index) {
       return chunks_.get(index);
@@ -16555,7 +17670,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -16570,7 +17687,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -16589,14 +17708,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -16606,7 +17727,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 4;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -16628,7 +17751,7 @@ public final class Storage {
       for (int i = 0; i < chunks_.size(); i++) {
         output.writeMessage(1, chunks_.get(i));
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -16650,7 +17773,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, chunks_.get(i));
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -16676,16 +17799,15 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.HashingInfoRequest other = (org.opendedup.grpc.Storage.HashingInfoRequest) obj;
 
-      boolean result = true;
-      result = result && getChunksList()
-          .equals(other.getChunksList());
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getChunksList()
+          .equals(other.getChunksList())) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -16879,9 +18001,8 @@ public final class Storage {
       public org.opendedup.grpc.Storage.HashingInfoRequest buildPartial() {
         org.opendedup.grpc.Storage.HashingInfoRequest result = new org.opendedup.grpc.Storage.HashingInfoRequest(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (chunksBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             chunks_ = java.util.Collections.unmodifiableList(chunks_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -16892,42 +18013,41 @@ public final class Storage {
         result.error_ = error_;
         result.errorCode_ = errorCode_;
         result.pvolumeID_ = pvolumeID_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -17010,7 +18130,7 @@ public final class Storage {
       private java.util.List<org.opendedup.grpc.Storage.ChunkEntry> chunks_ =
         java.util.Collections.emptyList();
       private void ensureChunksIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           chunks_ = new java.util.ArrayList<org.opendedup.grpc.Storage.ChunkEntry>(chunks_);
           bitField0_ |= 0x00000001;
          }
@@ -17239,7 +18359,7 @@ public final class Storage {
           chunksBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               org.opendedup.grpc.Storage.ChunkEntry, org.opendedup.grpc.Storage.ChunkEntry.Builder, org.opendedup.grpc.Storage.ChunkEntryOrBuilder>(
                   chunks_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           chunks_ = null;
@@ -17250,6 +18370,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 2;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -17265,6 +18386,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 2;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -17281,6 +18403,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -17294,6 +18418,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -17303,6 +18428,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -17319,21 +18446,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -17341,6 +18474,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -17353,6 +18488,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -17364,12 +18500,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 4;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 4;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -17379,6 +18519,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -17389,7 +18530,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -17445,48 +18586,56 @@ public final class Storage {
 
     /**
      * <code>bytes hash = 1;</code>
+     * @return The hash.
      */
     com.google.protobuf.ByteString getHash();
 
     /**
      * <code>int64 hashloc = 2;</code>
+     * @return The hashloc.
      */
     long getHashloc();
 
     /**
      * <code>int32 len = 3;</code>
+     * @return The len.
      */
     int getLen();
 
     /**
      * <code>int32 pos = 4;</code>
+     * @return The pos.
      */
     int getPos();
 
     /**
      * <code>int32 offset = 5;</code>
+     * @return The offset.
      */
     int getOffset();
 
     /**
      * <code>int32 nlen = 6;</code>
+     * @return The nlen.
      */
     int getNlen();
 
     /**
      * <code>bool dup = 7;</code>
+     * @return The dup.
      */
     boolean getDup();
 
     /**
      * <code>bool inserted = 8;</code>
+     * @return The inserted.
      */
     boolean getInserted();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.HashLocPairP}
    */
-  public  static final class HashLocPairP extends
+  public static final class HashLocPairP extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.HashLocPairP)
       HashLocPairPOrBuilder {
@@ -17497,13 +18646,13 @@ public final class Storage {
     }
     private HashLocPairP() {
       hash_ = com.google.protobuf.ByteString.EMPTY;
-      hashloc_ = 0L;
-      len_ = 0;
-      pos_ = 0;
-      offset_ = 0;
-      nlen_ = 0;
-      dup_ = false;
-      inserted_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new HashLocPairP();
     }
 
     @java.lang.Override
@@ -17519,7 +18668,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -17571,7 +18719,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -17581,6 +18729,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -17606,7 +18756,9 @@ public final class Storage {
     private com.google.protobuf.ByteString hash_;
     /**
      * <code>bytes hash = 1;</code>
+     * @return The hash.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString getHash() {
       return hash_;
     }
@@ -17615,7 +18767,9 @@ public final class Storage {
     private long hashloc_;
     /**
      * <code>int64 hashloc = 2;</code>
+     * @return The hashloc.
      */
+    @java.lang.Override
     public long getHashloc() {
       return hashloc_;
     }
@@ -17624,7 +18778,9 @@ public final class Storage {
     private int len_;
     /**
      * <code>int32 len = 3;</code>
+     * @return The len.
      */
+    @java.lang.Override
     public int getLen() {
       return len_;
     }
@@ -17633,7 +18789,9 @@ public final class Storage {
     private int pos_;
     /**
      * <code>int32 pos = 4;</code>
+     * @return The pos.
      */
+    @java.lang.Override
     public int getPos() {
       return pos_;
     }
@@ -17642,7 +18800,9 @@ public final class Storage {
     private int offset_;
     /**
      * <code>int32 offset = 5;</code>
+     * @return The offset.
      */
+    @java.lang.Override
     public int getOffset() {
       return offset_;
     }
@@ -17651,7 +18811,9 @@ public final class Storage {
     private int nlen_;
     /**
      * <code>int32 nlen = 6;</code>
+     * @return The nlen.
      */
+    @java.lang.Override
     public int getNlen() {
       return nlen_;
     }
@@ -17660,7 +18822,9 @@ public final class Storage {
     private boolean dup_;
     /**
      * <code>bool dup = 7;</code>
+     * @return The dup.
      */
+    @java.lang.Override
     public boolean getDup() {
       return dup_;
     }
@@ -17669,7 +18833,9 @@ public final class Storage {
     private boolean inserted_;
     /**
      * <code>bool inserted = 8;</code>
+     * @return The inserted.
      */
+    @java.lang.Override
     public boolean getInserted() {
       return inserted_;
     }
@@ -17768,25 +18934,24 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.HashLocPairP other = (org.opendedup.grpc.Storage.HashLocPairP) obj;
 
-      boolean result = true;
-      result = result && getHash()
-          .equals(other.getHash());
-      result = result && (getHashloc()
-          == other.getHashloc());
-      result = result && (getLen()
-          == other.getLen());
-      result = result && (getPos()
-          == other.getPos());
-      result = result && (getOffset()
-          == other.getOffset());
-      result = result && (getNlen()
-          == other.getNlen());
-      result = result && (getDup()
-          == other.getDup());
-      result = result && (getInserted()
-          == other.getInserted());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getHash()
+          .equals(other.getHash())) return false;
+      if (getHashloc()
+          != other.getHashloc()) return false;
+      if (getLen()
+          != other.getLen()) return false;
+      if (getPos()
+          != other.getPos()) return false;
+      if (getOffset()
+          != other.getOffset()) return false;
+      if (getNlen()
+          != other.getNlen()) return false;
+      if (getDup()
+          != other.getDup()) return false;
+      if (getInserted()
+          != other.getInserted()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -18004,35 +19169,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -18102,12 +19267,16 @@ public final class Storage {
       private com.google.protobuf.ByteString hash_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>bytes hash = 1;</code>
+       * @return The hash.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getHash() {
         return hash_;
       }
       /**
        * <code>bytes hash = 1;</code>
+       * @param value The hash to set.
+       * @return This builder for chaining.
        */
       public Builder setHash(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -18120,6 +19289,7 @@ public final class Storage {
       }
       /**
        * <code>bytes hash = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHash() {
         
@@ -18131,12 +19301,16 @@ public final class Storage {
       private long hashloc_ ;
       /**
        * <code>int64 hashloc = 2;</code>
+       * @return The hashloc.
        */
+      @java.lang.Override
       public long getHashloc() {
         return hashloc_;
       }
       /**
        * <code>int64 hashloc = 2;</code>
+       * @param value The hashloc to set.
+       * @return This builder for chaining.
        */
       public Builder setHashloc(long value) {
         
@@ -18146,6 +19320,7 @@ public final class Storage {
       }
       /**
        * <code>int64 hashloc = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHashloc() {
         
@@ -18157,12 +19332,16 @@ public final class Storage {
       private int len_ ;
       /**
        * <code>int32 len = 3;</code>
+       * @return The len.
        */
+      @java.lang.Override
       public int getLen() {
         return len_;
       }
       /**
        * <code>int32 len = 3;</code>
+       * @param value The len to set.
+       * @return This builder for chaining.
        */
       public Builder setLen(int value) {
         
@@ -18172,6 +19351,7 @@ public final class Storage {
       }
       /**
        * <code>int32 len = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLen() {
         
@@ -18183,12 +19363,16 @@ public final class Storage {
       private int pos_ ;
       /**
        * <code>int32 pos = 4;</code>
+       * @return The pos.
        */
+      @java.lang.Override
       public int getPos() {
         return pos_;
       }
       /**
        * <code>int32 pos = 4;</code>
+       * @param value The pos to set.
+       * @return This builder for chaining.
        */
       public Builder setPos(int value) {
         
@@ -18198,6 +19382,7 @@ public final class Storage {
       }
       /**
        * <code>int32 pos = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPos() {
         
@@ -18209,12 +19394,16 @@ public final class Storage {
       private int offset_ ;
       /**
        * <code>int32 offset = 5;</code>
+       * @return The offset.
        */
+      @java.lang.Override
       public int getOffset() {
         return offset_;
       }
       /**
        * <code>int32 offset = 5;</code>
+       * @param value The offset to set.
+       * @return This builder for chaining.
        */
       public Builder setOffset(int value) {
         
@@ -18224,6 +19413,7 @@ public final class Storage {
       }
       /**
        * <code>int32 offset = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOffset() {
         
@@ -18235,12 +19425,16 @@ public final class Storage {
       private int nlen_ ;
       /**
        * <code>int32 nlen = 6;</code>
+       * @return The nlen.
        */
+      @java.lang.Override
       public int getNlen() {
         return nlen_;
       }
       /**
        * <code>int32 nlen = 6;</code>
+       * @param value The nlen to set.
+       * @return This builder for chaining.
        */
       public Builder setNlen(int value) {
         
@@ -18250,6 +19444,7 @@ public final class Storage {
       }
       /**
        * <code>int32 nlen = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNlen() {
         
@@ -18261,12 +19456,16 @@ public final class Storage {
       private boolean dup_ ;
       /**
        * <code>bool dup = 7;</code>
+       * @return The dup.
        */
+      @java.lang.Override
       public boolean getDup() {
         return dup_;
       }
       /**
        * <code>bool dup = 7;</code>
+       * @param value The dup to set.
+       * @return This builder for chaining.
        */
       public Builder setDup(boolean value) {
         
@@ -18276,6 +19475,7 @@ public final class Storage {
       }
       /**
        * <code>bool dup = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDup() {
         
@@ -18287,12 +19487,16 @@ public final class Storage {
       private boolean inserted_ ;
       /**
        * <code>bool inserted = 8;</code>
+       * @return The inserted.
        */
+      @java.lang.Override
       public boolean getInserted() {
         return inserted_;
       }
       /**
        * <code>bool inserted = 8;</code>
+       * @param value The inserted to set.
+       * @return This builder for chaining.
        */
       public Builder setInserted(boolean value) {
         
@@ -18302,6 +19506,7 @@ public final class Storage {
       }
       /**
        * <code>bool inserted = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInserted() {
         
@@ -18312,7 +19517,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -18368,28 +19573,32 @@ public final class Storage {
 
     /**
      * <code>string eventID = 1;</code>
+     * @return The eventID.
      */
     java.lang.String getEventID();
     /**
      * <code>string eventID = 1;</code>
+     * @return The bytes for eventID.
      */
     com.google.protobuf.ByteString
         getEventIDBytes();
 
     /**
      * <code>bool pause = 2;</code>
+     * @return The pause.
      */
     boolean getPause();
 
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.PauseReplicationRequest}
    */
-  public  static final class PauseReplicationRequest extends
+  public static final class PauseReplicationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.PauseReplicationRequest)
       PauseReplicationRequestOrBuilder {
@@ -18400,8 +19609,13 @@ public final class Storage {
     }
     private PauseReplicationRequest() {
       eventID_ = "";
-      pause_ = false;
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PauseReplicationRequest();
     }
 
     @java.lang.Override
@@ -18417,7 +19631,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -18445,7 +19658,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -18455,6 +19668,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -18480,7 +19695,9 @@ public final class Storage {
     private volatile java.lang.Object eventID_;
     /**
      * <code>string eventID = 1;</code>
+     * @return The eventID.
      */
+    @java.lang.Override
     public java.lang.String getEventID() {
       java.lang.Object ref = eventID_;
       if (ref instanceof java.lang.String) {
@@ -18495,7 +19712,9 @@ public final class Storage {
     }
     /**
      * <code>string eventID = 1;</code>
+     * @return The bytes for eventID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventIDBytes() {
       java.lang.Object ref = eventID_;
@@ -18514,7 +19733,9 @@ public final class Storage {
     private boolean pause_;
     /**
      * <code>bool pause = 2;</code>
+     * @return The pause.
      */
+    @java.lang.Override
     public boolean getPause() {
       return pause_;
     }
@@ -18523,7 +19744,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -18542,7 +19765,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getEventIDBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventID_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, eventID_);
       }
       if (pause_ != false) {
@@ -18560,7 +19783,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getEventIDBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventID_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, eventID_);
       }
       if (pause_ != false) {
@@ -18586,15 +19809,14 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.PauseReplicationRequest other = (org.opendedup.grpc.Storage.PauseReplicationRequest) obj;
 
-      boolean result = true;
-      result = result && getEventID()
-          .equals(other.getEventID());
-      result = result && (getPause()
-          == other.getPause());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getEventID()
+          .equals(other.getEventID())) return false;
+      if (getPause()
+          != other.getPause()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -18786,35 +20008,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -18870,6 +20092,7 @@ public final class Storage {
       private java.lang.Object eventID_ = "";
       /**
        * <code>string eventID = 1;</code>
+       * @return The eventID.
        */
       public java.lang.String getEventID() {
         java.lang.Object ref = eventID_;
@@ -18885,6 +20108,7 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 1;</code>
+       * @return The bytes for eventID.
        */
       public com.google.protobuf.ByteString
           getEventIDBytes() {
@@ -18901,6 +20125,8 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 1;</code>
+       * @param value The eventID to set.
+       * @return This builder for chaining.
        */
       public Builder setEventID(
           java.lang.String value) {
@@ -18914,6 +20140,7 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventID() {
         
@@ -18923,6 +20150,8 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 1;</code>
+       * @param value The bytes for eventID to set.
+       * @return This builder for chaining.
        */
       public Builder setEventIDBytes(
           com.google.protobuf.ByteString value) {
@@ -18939,12 +20168,16 @@ public final class Storage {
       private boolean pause_ ;
       /**
        * <code>bool pause = 2;</code>
+       * @return The pause.
        */
+      @java.lang.Override
       public boolean getPause() {
         return pause_;
       }
       /**
        * <code>bool pause = 2;</code>
+       * @param value The pause to set.
+       * @return This builder for chaining.
        */
       public Builder setPause(boolean value) {
         
@@ -18954,6 +20187,7 @@ public final class Storage {
       }
       /**
        * <code>bool pause = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPause() {
         
@@ -18965,12 +20199,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -18980,6 +20218,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -18990,7 +20229,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -19046,27 +20285,31 @@ public final class Storage {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.PauseReplicationResponse}
    */
-  public  static final class PauseReplicationResponse extends
+  public static final class PauseReplicationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.PauseReplicationResponse)
       PauseReplicationResponseOrBuilder {
@@ -19078,6 +20321,13 @@ public final class Storage {
     private PauseReplicationResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PauseReplicationResponse();
     }
 
     @java.lang.Override
@@ -19093,7 +20343,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -19117,7 +20366,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -19127,6 +20376,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -19152,7 +20403,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -19167,7 +20420,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -19186,14 +20441,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -19213,7 +20470,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -19228,7 +20485,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -19250,12 +20507,11 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.PauseReplicationResponse other = (org.opendedup.grpc.Storage.PauseReplicationResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -19440,35 +20696,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -19521,6 +20777,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -19536,6 +20793,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -19552,6 +20810,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -19565,6 +20825,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -19574,6 +20835,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -19590,21 +20853,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -19612,6 +20881,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -19624,6 +20895,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -19634,7 +20906,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -19690,23 +20962,26 @@ public final class Storage {
 
     /**
      * <code>string eventID = 1;</code>
+     * @return The eventID.
      */
     java.lang.String getEventID();
     /**
      * <code>string eventID = 1;</code>
+     * @return The bytes for eventID.
      */
     com.google.protobuf.ByteString
         getEventIDBytes();
 
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CancelReplicationRequest}
    */
-  public  static final class CancelReplicationRequest extends
+  public static final class CancelReplicationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CancelReplicationRequest)
       CancelReplicationRequestOrBuilder {
@@ -19717,7 +20992,13 @@ public final class Storage {
     }
     private CancelReplicationRequest() {
       eventID_ = "";
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CancelReplicationRequest();
     }
 
     @java.lang.Override
@@ -19733,7 +21014,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -19756,7 +21036,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -19766,6 +21046,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -19791,7 +21073,9 @@ public final class Storage {
     private volatile java.lang.Object eventID_;
     /**
      * <code>string eventID = 1;</code>
+     * @return The eventID.
      */
+    @java.lang.Override
     public java.lang.String getEventID() {
       java.lang.Object ref = eventID_;
       if (ref instanceof java.lang.String) {
@@ -19806,7 +21090,9 @@ public final class Storage {
     }
     /**
      * <code>string eventID = 1;</code>
+     * @return The bytes for eventID.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventIDBytes() {
       java.lang.Object ref = eventID_;
@@ -19825,7 +21111,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -19844,7 +21132,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getEventIDBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventID_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, eventID_);
       }
       if (pvolumeID_ != 0L) {
@@ -19859,7 +21147,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getEventIDBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventID_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, eventID_);
       }
       if (pvolumeID_ != 0L) {
@@ -19881,13 +21169,12 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.CancelReplicationRequest other = (org.opendedup.grpc.Storage.CancelReplicationRequest) obj;
 
-      boolean result = true;
-      result = result && getEventID()
-          .equals(other.getEventID());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getEventID()
+          .equals(other.getEventID())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -20073,35 +21360,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -20154,6 +21441,7 @@ public final class Storage {
       private java.lang.Object eventID_ = "";
       /**
        * <code>string eventID = 1;</code>
+       * @return The eventID.
        */
       public java.lang.String getEventID() {
         java.lang.Object ref = eventID_;
@@ -20169,6 +21457,7 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 1;</code>
+       * @return The bytes for eventID.
        */
       public com.google.protobuf.ByteString
           getEventIDBytes() {
@@ -20185,6 +21474,8 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 1;</code>
+       * @param value The eventID to set.
+       * @return This builder for chaining.
        */
       public Builder setEventID(
           java.lang.String value) {
@@ -20198,6 +21489,7 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventID() {
         
@@ -20207,6 +21499,8 @@ public final class Storage {
       }
       /**
        * <code>string eventID = 1;</code>
+       * @param value The bytes for eventID to set.
+       * @return This builder for chaining.
        */
       public Builder setEventIDBytes(
           com.google.protobuf.ByteString value) {
@@ -20223,12 +21517,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -20238,6 +21536,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -20248,7 +21547,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -20304,27 +21603,31 @@ public final class Storage {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CancelReplicationResponse}
    */
-  public  static final class CancelReplicationResponse extends
+  public static final class CancelReplicationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.CancelReplicationResponse)
       CancelReplicationResponseOrBuilder {
@@ -20336,6 +21639,13 @@ public final class Storage {
     private CancelReplicationResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CancelReplicationResponse();
     }
 
     @java.lang.Override
@@ -20351,7 +21661,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -20375,7 +21684,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -20385,6 +21694,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -20410,7 +21721,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -20425,7 +21738,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -20444,14 +21759,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -20471,7 +21788,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -20486,7 +21803,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -20508,12 +21825,11 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.CancelReplicationResponse other = (org.opendedup.grpc.Storage.CancelReplicationResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -20698,35 +22014,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -20779,6 +22095,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -20794,6 +22111,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -20810,6 +22128,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -20823,6 +22143,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -20832,6 +22153,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -20848,21 +22171,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -20870,6 +22199,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -20882,6 +22213,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -20892,7 +22224,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -20948,38 +22280,48 @@ public final class Storage {
 
     /**
      * <code>int64 fpos = 1;</code>
+     * @return The fpos.
      */
     long getFpos();
 
     /**
      * <code>int32 len = 2;</code>
+     * @return The len.
      */
     int getLen();
 
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @return A list containing the flags.
      */
     java.util.List<org.opendedup.grpc.Storage.SparseDataFlags> getFlagsList();
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @return The count of flags.
      */
     int getFlagsCount();
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @param index The index of the element to return.
+     * @return The flags at the given index.
      */
     org.opendedup.grpc.Storage.SparseDataFlags getFlags(int index);
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @return A list containing the enum numeric values on the wire for flags.
      */
     java.util.List<java.lang.Integer>
     getFlagsValueList();
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @param index The index of the value to return.
+     * @return The enum numeric value on the wire of flags at the given index.
      */
     int getFlagsValue(int index);
 
     /**
      * <code>int32 version = 4;</code>
+     * @return The version.
      */
     int getVersion();
 
@@ -21007,9 +22349,11 @@ public final class Storage {
      * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
      */
 
-    org.opendedup.grpc.Storage.HashLocPairP getArOrDefault(
+    /* nullable */
+org.opendedup.grpc.Storage.HashLocPairP getArOrDefault(
         int key,
-        org.opendedup.grpc.Storage.HashLocPairP defaultValue);
+        /* nullable */
+org.opendedup.grpc.Storage.HashLocPairP defaultValue);
     /**
      * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
      */
@@ -21019,42 +22363,49 @@ public final class Storage {
 
     /**
      * <code>int32 doop = 6;</code>
+     * @return The doop.
      */
     int getDoop();
 
     /**
      * <code>int32 prevdoop = 7;</code>
+     * @return The prevdoop.
      */
     int getPrevdoop();
 
     /**
      * <code>int32 compressedLength = 8;</code>
+     * @return The compressedLength.
      */
     int getCompressedLength();
 
     /**
      * <code>string error = 9;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 9;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 10;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 10;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDataChunkP}
    */
-  public  static final class SparseDataChunkP extends
+  public static final class SparseDataChunkP extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SparseDataChunkP)
       SparseDataChunkPOrBuilder {
@@ -21064,15 +22415,16 @@ public final class Storage {
       super(builder);
     }
     private SparseDataChunkP() {
-      fpos_ = 0L;
-      len_ = 0;
       flags_ = java.util.Collections.emptyList();
-      version_ = 0;
-      doop_ = 0;
-      prevdoop_ = 0;
-      compressedLength_ = 0;
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SparseDataChunkP();
     }
 
     @java.lang.Override
@@ -21111,9 +22463,9 @@ public final class Storage {
             }
             case 24: {
               int rawValue = input.readEnum();
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 flags_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000001;
               }
               flags_.add(rawValue);
               break;
@@ -21123,9 +22475,9 @@ public final class Storage {
               int oldLimit = input.pushLimit(length);
               while(input.getBytesUntilLimit() > 0) {
                 int rawValue = input.readEnum();
-                if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                   flags_ = new java.util.ArrayList<java.lang.Integer>();
-                  mutable_bitField0_ |= 0x00000004;
+                  mutable_bitField0_ |= 0x00000001;
                 }
                 flags_.add(rawValue);
               }
@@ -21138,10 +22490,10 @@ public final class Storage {
               break;
             }
             case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 ar_ = com.google.protobuf.MapField.newMapField(
                     ArDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000002;
               }
               com.google.protobuf.MapEntry<java.lang.Integer, org.opendedup.grpc.Storage.HashLocPairP>
               ar__ = input.readMessage(
@@ -21178,7 +22530,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -21188,11 +22540,13 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           flags_ = java.util.Collections.unmodifiableList(flags_);
         }
         this.unknownFields = unknownFields.build();
@@ -21224,12 +22578,13 @@ public final class Storage {
               org.opendedup.grpc.Storage.SparseDataChunkP.class, org.opendedup.grpc.Storage.SparseDataChunkP.Builder.class);
     }
 
-    private int bitField0_;
     public static final int FPOS_FIELD_NUMBER = 1;
     private long fpos_;
     /**
      * <code>int64 fpos = 1;</code>
+     * @return The fpos.
      */
+    @java.lang.Override
     public long getFpos() {
       return fpos_;
     }
@@ -21238,7 +22593,9 @@ public final class Storage {
     private int len_;
     /**
      * <code>int32 len = 2;</code>
+     * @return The len.
      */
+    @java.lang.Override
     public int getLen() {
       return len_;
     }
@@ -21257,33 +22614,45 @@ public final class Storage {
             };
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @return A list containing the flags.
      */
+    @java.lang.Override
     public java.util.List<org.opendedup.grpc.Storage.SparseDataFlags> getFlagsList() {
       return new com.google.protobuf.Internal.ListAdapter<
           java.lang.Integer, org.opendedup.grpc.Storage.SparseDataFlags>(flags_, flags_converter_);
     }
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @return The count of flags.
      */
+    @java.lang.Override
     public int getFlagsCount() {
       return flags_.size();
     }
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @param index The index of the element to return.
+     * @return The flags at the given index.
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.SparseDataFlags getFlags(int index) {
       return flags_converter_.convert(flags_.get(index));
     }
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @return A list containing the enum numeric values on the wire for flags.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Integer>
     getFlagsValueList() {
       return flags_;
     }
     /**
      * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+     * @param index The index of the value to return.
+     * @return The enum numeric value on the wire of flags at the given index.
      */
+    @java.lang.Override
     public int getFlagsValue(int index) {
       return flags_.get(index);
     }
@@ -21293,7 +22662,9 @@ public final class Storage {
     private int version_;
     /**
      * <code>int32 version = 4;</code>
+     * @return The version.
      */
+    @java.lang.Override
     public int getVersion() {
       return version_;
     }
@@ -21328,6 +22699,7 @@ public final class Storage {
      * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
      */
 
+    @java.lang.Override
     public boolean containsAr(
         int key) {
       
@@ -21336,6 +22708,7 @@ public final class Storage {
     /**
      * Use {@link #getArMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.Integer, org.opendedup.grpc.Storage.HashLocPairP> getAr() {
       return getArMap();
@@ -21343,6 +22716,7 @@ public final class Storage {
     /**
      * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.Integer, org.opendedup.grpc.Storage.HashLocPairP> getArMap() {
       return internalGetAr().getMap();
@@ -21350,6 +22724,7 @@ public final class Storage {
     /**
      * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
      */
+    @java.lang.Override
 
     public org.opendedup.grpc.Storage.HashLocPairP getArOrDefault(
         int key,
@@ -21362,6 +22737,7 @@ public final class Storage {
     /**
      * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
      */
+    @java.lang.Override
 
     public org.opendedup.grpc.Storage.HashLocPairP getArOrThrow(
         int key) {
@@ -21378,7 +22754,9 @@ public final class Storage {
     private int doop_;
     /**
      * <code>int32 doop = 6;</code>
+     * @return The doop.
      */
+    @java.lang.Override
     public int getDoop() {
       return doop_;
     }
@@ -21387,7 +22765,9 @@ public final class Storage {
     private int prevdoop_;
     /**
      * <code>int32 prevdoop = 7;</code>
+     * @return The prevdoop.
      */
+    @java.lang.Override
     public int getPrevdoop() {
       return prevdoop_;
     }
@@ -21396,7 +22776,9 @@ public final class Storage {
     private int compressedLength_;
     /**
      * <code>int32 compressedLength = 8;</code>
+     * @return The compressedLength.
      */
+    @java.lang.Override
     public int getCompressedLength() {
       return compressedLength_;
     }
@@ -21405,7 +22787,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 9;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -21420,7 +22804,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 9;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -21439,14 +22825,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 10;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 10;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -21498,7 +22886,7 @@ public final class Storage {
       if (compressedLength_ != 0) {
         output.writeInt32(8, compressedLength_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -21559,7 +22947,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, compressedLength_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -21581,27 +22969,26 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.SparseDataChunkP other = (org.opendedup.grpc.Storage.SparseDataChunkP) obj;
 
-      boolean result = true;
-      result = result && (getFpos()
-          == other.getFpos());
-      result = result && (getLen()
-          == other.getLen());
-      result = result && flags_.equals(other.flags_);
-      result = result && (getVersion()
-          == other.getVersion());
-      result = result && internalGetAr().equals(
-          other.internalGetAr());
-      result = result && (getDoop()
-          == other.getDoop());
-      result = result && (getPrevdoop()
-          == other.getPrevdoop());
-      result = result && (getCompressedLength()
-          == other.getCompressedLength());
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getFpos()
+          != other.getFpos()) return false;
+      if (getLen()
+          != other.getLen()) return false;
+      if (!flags_.equals(other.flags_)) return false;
+      if (getVersion()
+          != other.getVersion()) return false;
+      if (!internalGetAr().equals(
+          other.internalGetAr())) return false;
+      if (getDoop()
+          != other.getDoop()) return false;
+      if (getPrevdoop()
+          != other.getPrevdoop()) return false;
+      if (getCompressedLength()
+          != other.getCompressedLength()) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -21796,7 +23183,7 @@ public final class Storage {
         len_ = 0;
 
         flags_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         version_ = 0;
 
         internalGetMutableAr().clear();
@@ -21837,12 +23224,11 @@ public final class Storage {
       public org.opendedup.grpc.Storage.SparseDataChunkP buildPartial() {
         org.opendedup.grpc.Storage.SparseDataChunkP result = new org.opendedup.grpc.Storage.SparseDataChunkP(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.fpos_ = fpos_;
         result.len_ = len_;
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           flags_ = java.util.Collections.unmodifiableList(flags_);
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.flags_ = flags_;
         result.version_ = version_;
@@ -21853,42 +23239,41 @@ public final class Storage {
         result.compressedLength_ = compressedLength_;
         result.error_ = error_;
         result.errorCode_ = errorCode_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -21911,7 +23296,7 @@ public final class Storage {
         if (!other.flags_.isEmpty()) {
           if (flags_.isEmpty()) {
             flags_ = other.flags_;
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureFlagsIsMutable();
             flags_.addAll(other.flags_);
@@ -21972,12 +23357,16 @@ public final class Storage {
       private long fpos_ ;
       /**
        * <code>int64 fpos = 1;</code>
+       * @return The fpos.
        */
+      @java.lang.Override
       public long getFpos() {
         return fpos_;
       }
       /**
        * <code>int64 fpos = 1;</code>
+       * @param value The fpos to set.
+       * @return This builder for chaining.
        */
       public Builder setFpos(long value) {
         
@@ -21987,6 +23376,7 @@ public final class Storage {
       }
       /**
        * <code>int64 fpos = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFpos() {
         
@@ -21998,12 +23388,16 @@ public final class Storage {
       private int len_ ;
       /**
        * <code>int32 len = 2;</code>
+       * @return The len.
        */
+      @java.lang.Override
       public int getLen() {
         return len_;
       }
       /**
        * <code>int32 len = 2;</code>
+       * @param value The len to set.
+       * @return This builder for chaining.
        */
       public Builder setLen(int value) {
         
@@ -22013,6 +23407,7 @@ public final class Storage {
       }
       /**
        * <code>int32 len = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLen() {
         
@@ -22024,13 +23419,14 @@ public final class Storage {
       private java.util.List<java.lang.Integer> flags_ =
         java.util.Collections.emptyList();
       private void ensureFlagsIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           flags_ = new java.util.ArrayList<java.lang.Integer>(flags_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000001;
         }
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @return A list containing the flags.
        */
       public java.util.List<org.opendedup.grpc.Storage.SparseDataFlags> getFlagsList() {
         return new com.google.protobuf.Internal.ListAdapter<
@@ -22038,18 +23434,24 @@ public final class Storage {
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @return The count of flags.
        */
       public int getFlagsCount() {
         return flags_.size();
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @param index The index of the element to return.
+       * @return The flags at the given index.
        */
       public org.opendedup.grpc.Storage.SparseDataFlags getFlags(int index) {
         return flags_converter_.convert(flags_.get(index));
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The flags to set.
+       * @return This builder for chaining.
        */
       public Builder setFlags(
           int index, org.opendedup.grpc.Storage.SparseDataFlags value) {
@@ -22063,6 +23465,8 @@ public final class Storage {
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @param value The flags to add.
+       * @return This builder for chaining.
        */
       public Builder addFlags(org.opendedup.grpc.Storage.SparseDataFlags value) {
         if (value == null) {
@@ -22075,6 +23479,8 @@ public final class Storage {
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @param values The flags to add.
+       * @return This builder for chaining.
        */
       public Builder addAllFlags(
           java.lang.Iterable<? extends org.opendedup.grpc.Storage.SparseDataFlags> values) {
@@ -22087,15 +23493,17 @@ public final class Storage {
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFlags() {
         flags_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @return A list containing the enum numeric values on the wire for flags.
        */
       public java.util.List<java.lang.Integer>
       getFlagsValueList() {
@@ -22103,12 +23511,17 @@ public final class Storage {
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @param index The index of the value to return.
+       * @return The enum numeric value on the wire of flags at the given index.
        */
       public int getFlagsValue(int index) {
         return flags_.get(index);
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @param index The index of the value to return.
+       * @return The enum numeric value on the wire of flags at the given index.
+       * @return This builder for chaining.
        */
       public Builder setFlagsValue(
           int index, int value) {
@@ -22119,6 +23532,8 @@ public final class Storage {
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @param value The enum numeric value on the wire for flags to add.
+       * @return This builder for chaining.
        */
       public Builder addFlagsValue(int value) {
         ensureFlagsIsMutable();
@@ -22128,6 +23543,8 @@ public final class Storage {
       }
       /**
        * <code>repeated .org.opendedup.grpc.SparseDataFlags flags = 3;</code>
+       * @param values The enum numeric values on the wire for flags to add.
+       * @return This builder for chaining.
        */
       public Builder addAllFlagsValue(
           java.lang.Iterable<java.lang.Integer> values) {
@@ -22142,12 +23559,16 @@ public final class Storage {
       private int version_ ;
       /**
        * <code>int32 version = 4;</code>
+       * @return The version.
        */
+      @java.lang.Override
       public int getVersion() {
         return version_;
       }
       /**
        * <code>int32 version = 4;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
        */
       public Builder setVersion(int value) {
         
@@ -22157,6 +23578,7 @@ public final class Storage {
       }
       /**
        * <code>int32 version = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearVersion() {
         
@@ -22195,6 +23617,7 @@ public final class Storage {
        * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
        */
 
+      @java.lang.Override
       public boolean containsAr(
           int key) {
         
@@ -22203,6 +23626,7 @@ public final class Storage {
       /**
        * Use {@link #getArMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.Integer, org.opendedup.grpc.Storage.HashLocPairP> getAr() {
         return getArMap();
@@ -22210,6 +23634,7 @@ public final class Storage {
       /**
        * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.Integer, org.opendedup.grpc.Storage.HashLocPairP> getArMap() {
         return internalGetAr().getMap();
@@ -22217,6 +23642,7 @@ public final class Storage {
       /**
        * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
        */
+      @java.lang.Override
 
       public org.opendedup.grpc.Storage.HashLocPairP getArOrDefault(
           int key,
@@ -22229,6 +23655,7 @@ public final class Storage {
       /**
        * <code>map&lt;int32, .org.opendedup.grpc.HashLocPairP&gt; ar = 5;</code>
        */
+      @java.lang.Override
 
       public org.opendedup.grpc.Storage.HashLocPairP getArOrThrow(
           int key) {
@@ -22272,7 +23699,10 @@ public final class Storage {
           int key,
           org.opendedup.grpc.Storage.HashLocPairP value) {
         
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableAr().getMutableMap()
             .put(key, value);
         return this;
@@ -22291,12 +23721,16 @@ public final class Storage {
       private int doop_ ;
       /**
        * <code>int32 doop = 6;</code>
+       * @return The doop.
        */
+      @java.lang.Override
       public int getDoop() {
         return doop_;
       }
       /**
        * <code>int32 doop = 6;</code>
+       * @param value The doop to set.
+       * @return This builder for chaining.
        */
       public Builder setDoop(int value) {
         
@@ -22306,6 +23740,7 @@ public final class Storage {
       }
       /**
        * <code>int32 doop = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDoop() {
         
@@ -22317,12 +23752,16 @@ public final class Storage {
       private int prevdoop_ ;
       /**
        * <code>int32 prevdoop = 7;</code>
+       * @return The prevdoop.
        */
+      @java.lang.Override
       public int getPrevdoop() {
         return prevdoop_;
       }
       /**
        * <code>int32 prevdoop = 7;</code>
+       * @param value The prevdoop to set.
+       * @return This builder for chaining.
        */
       public Builder setPrevdoop(int value) {
         
@@ -22332,6 +23771,7 @@ public final class Storage {
       }
       /**
        * <code>int32 prevdoop = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPrevdoop() {
         
@@ -22343,12 +23783,16 @@ public final class Storage {
       private int compressedLength_ ;
       /**
        * <code>int32 compressedLength = 8;</code>
+       * @return The compressedLength.
        */
+      @java.lang.Override
       public int getCompressedLength() {
         return compressedLength_;
       }
       /**
        * <code>int32 compressedLength = 8;</code>
+       * @param value The compressedLength to set.
+       * @return This builder for chaining.
        */
       public Builder setCompressedLength(int value) {
         
@@ -22358,6 +23802,7 @@ public final class Storage {
       }
       /**
        * <code>int32 compressedLength = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCompressedLength() {
         
@@ -22369,6 +23814,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 9;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -22384,6 +23830,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 9;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -22400,6 +23847,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 9;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -22413,6 +23862,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -22422,6 +23872,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 9;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -22438,21 +23890,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 10;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 10;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 10;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -22460,6 +23918,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 10;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -22472,6 +23932,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -22482,7 +23943,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -22538,10 +23999,12 @@ public final class Storage {
 
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 1;</code>
+     * @return Whether the chunk field is set.
      */
     boolean hasChunk();
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 1;</code>
+     * @return The chunk.
      */
     org.opendedup.grpc.Storage.SparseDataChunkP getChunk();
     /**
@@ -22551,38 +24014,44 @@ public final class Storage {
 
     /**
      * <code>int64 fileHandle = 2;</code>
+     * @return The fileHandle.
      */
     long getFileHandle();
 
     /**
      * <code>int64 fileLocation = 3;</code>
+     * @return The fileLocation.
      */
     long getFileLocation();
 
     /**
      * <code>int64 pvolumeID = 4;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
 
     /**
      * <code>bool compressed = 5;</code>
+     * @return The compressed.
      */
     boolean getCompressed();
 
     /**
      * <code>bytes compressedChunk = 6;</code>
+     * @return The compressedChunk.
      */
     com.google.protobuf.ByteString getCompressedChunk();
 
     /**
      * <code>int32 uncompressedLen = 7;</code>
+     * @return The uncompressedLen.
      */
     int getUncompressedLen();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeChunkWriteRequest}
    */
-  public  static final class SparseDedupeChunkWriteRequest extends
+  public static final class SparseDedupeChunkWriteRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SparseDedupeChunkWriteRequest)
       SparseDedupeChunkWriteRequestOrBuilder {
@@ -22592,12 +24061,14 @@ public final class Storage {
       super(builder);
     }
     private SparseDedupeChunkWriteRequest() {
-      fileHandle_ = 0L;
-      fileLocation_ = 0L;
-      pvolumeID_ = 0L;
-      compressed_ = false;
       compressedChunk_ = com.google.protobuf.ByteString.EMPTY;
-      uncompressedLen_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SparseDedupeChunkWriteRequest();
     }
 
     @java.lang.Override
@@ -22613,7 +24084,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -22668,7 +24138,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -22678,6 +24148,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -22703,19 +24175,24 @@ public final class Storage {
     private org.opendedup.grpc.Storage.SparseDataChunkP chunk_;
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 1;</code>
+     * @return Whether the chunk field is set.
      */
+    @java.lang.Override
     public boolean hasChunk() {
       return chunk_ != null;
     }
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 1;</code>
+     * @return The chunk.
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.SparseDataChunkP getChunk() {
       return chunk_ == null ? org.opendedup.grpc.Storage.SparseDataChunkP.getDefaultInstance() : chunk_;
     }
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.SparseDataChunkPOrBuilder getChunkOrBuilder() {
       return getChunk();
     }
@@ -22724,7 +24201,9 @@ public final class Storage {
     private long fileHandle_;
     /**
      * <code>int64 fileHandle = 2;</code>
+     * @return The fileHandle.
      */
+    @java.lang.Override
     public long getFileHandle() {
       return fileHandle_;
     }
@@ -22733,7 +24212,9 @@ public final class Storage {
     private long fileLocation_;
     /**
      * <code>int64 fileLocation = 3;</code>
+     * @return The fileLocation.
      */
+    @java.lang.Override
     public long getFileLocation() {
       return fileLocation_;
     }
@@ -22742,7 +24223,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 4;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -22751,7 +24234,9 @@ public final class Storage {
     private boolean compressed_;
     /**
      * <code>bool compressed = 5;</code>
+     * @return The compressed.
      */
+    @java.lang.Override
     public boolean getCompressed() {
       return compressed_;
     }
@@ -22760,7 +24245,9 @@ public final class Storage {
     private com.google.protobuf.ByteString compressedChunk_;
     /**
      * <code>bytes compressedChunk = 6;</code>
+     * @return The compressedChunk.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString getCompressedChunk() {
       return compressedChunk_;
     }
@@ -22769,7 +24256,9 @@ public final class Storage {
     private int uncompressedLen_;
     /**
      * <code>int32 uncompressedLen = 7;</code>
+     * @return The uncompressedLen.
      */
+    @java.lang.Override
     public int getUncompressedLen() {
       return uncompressedLen_;
     }
@@ -22861,26 +24350,25 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest other = (org.opendedup.grpc.Storage.SparseDedupeChunkWriteRequest) obj;
 
-      boolean result = true;
-      result = result && (hasChunk() == other.hasChunk());
+      if (hasChunk() != other.hasChunk()) return false;
       if (hasChunk()) {
-        result = result && getChunk()
-            .equals(other.getChunk());
+        if (!getChunk()
+            .equals(other.getChunk())) return false;
       }
-      result = result && (getFileHandle()
-          == other.getFileHandle());
-      result = result && (getFileLocation()
-          == other.getFileLocation());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && (getCompressed()
-          == other.getCompressed());
-      result = result && getCompressedChunk()
-          .equals(other.getCompressedChunk());
-      result = result && (getUncompressedLen()
-          == other.getUncompressedLen());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getFileHandle()
+          != other.getFileHandle()) return false;
+      if (getFileLocation()
+          != other.getFileLocation()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (getCompressed()
+          != other.getCompressed()) return false;
+      if (!getCompressedChunk()
+          .equals(other.getCompressedChunk())) return false;
+      if (getUncompressedLen()
+          != other.getUncompressedLen()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -23104,35 +24592,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -23196,17 +24684,19 @@ public final class Storage {
         return this;
       }
 
-      private org.opendedup.grpc.Storage.SparseDataChunkP chunk_ = null;
+      private org.opendedup.grpc.Storage.SparseDataChunkP chunk_;
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.Storage.SparseDataChunkP, org.opendedup.grpc.Storage.SparseDataChunkP.Builder, org.opendedup.grpc.Storage.SparseDataChunkPOrBuilder> chunkBuilder_;
       /**
        * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 1;</code>
+       * @return Whether the chunk field is set.
        */
       public boolean hasChunk() {
         return chunkBuilder_ != null || chunk_ != null;
       }
       /**
        * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 1;</code>
+       * @return The chunk.
        */
       public org.opendedup.grpc.Storage.SparseDataChunkP getChunk() {
         if (chunkBuilder_ == null) {
@@ -23316,12 +24806,16 @@ public final class Storage {
       private long fileHandle_ ;
       /**
        * <code>int64 fileHandle = 2;</code>
+       * @return The fileHandle.
        */
+      @java.lang.Override
       public long getFileHandle() {
         return fileHandle_;
       }
       /**
        * <code>int64 fileHandle = 2;</code>
+       * @param value The fileHandle to set.
+       * @return This builder for chaining.
        */
       public Builder setFileHandle(long value) {
         
@@ -23331,6 +24825,7 @@ public final class Storage {
       }
       /**
        * <code>int64 fileHandle = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFileHandle() {
         
@@ -23342,12 +24837,16 @@ public final class Storage {
       private long fileLocation_ ;
       /**
        * <code>int64 fileLocation = 3;</code>
+       * @return The fileLocation.
        */
+      @java.lang.Override
       public long getFileLocation() {
         return fileLocation_;
       }
       /**
        * <code>int64 fileLocation = 3;</code>
+       * @param value The fileLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setFileLocation(long value) {
         
@@ -23357,6 +24856,7 @@ public final class Storage {
       }
       /**
        * <code>int64 fileLocation = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFileLocation() {
         
@@ -23368,12 +24868,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 4;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 4;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -23383,6 +24887,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -23394,12 +24899,16 @@ public final class Storage {
       private boolean compressed_ ;
       /**
        * <code>bool compressed = 5;</code>
+       * @return The compressed.
        */
+      @java.lang.Override
       public boolean getCompressed() {
         return compressed_;
       }
       /**
        * <code>bool compressed = 5;</code>
+       * @param value The compressed to set.
+       * @return This builder for chaining.
        */
       public Builder setCompressed(boolean value) {
         
@@ -23409,6 +24918,7 @@ public final class Storage {
       }
       /**
        * <code>bool compressed = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCompressed() {
         
@@ -23420,12 +24930,16 @@ public final class Storage {
       private com.google.protobuf.ByteString compressedChunk_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>bytes compressedChunk = 6;</code>
+       * @return The compressedChunk.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getCompressedChunk() {
         return compressedChunk_;
       }
       /**
        * <code>bytes compressedChunk = 6;</code>
+       * @param value The compressedChunk to set.
+       * @return This builder for chaining.
        */
       public Builder setCompressedChunk(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -23438,6 +24952,7 @@ public final class Storage {
       }
       /**
        * <code>bytes compressedChunk = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCompressedChunk() {
         
@@ -23449,12 +24964,16 @@ public final class Storage {
       private int uncompressedLen_ ;
       /**
        * <code>int32 uncompressedLen = 7;</code>
+       * @return The uncompressedLen.
        */
+      @java.lang.Override
       public int getUncompressedLen() {
         return uncompressedLen_;
       }
       /**
        * <code>int32 uncompressedLen = 7;</code>
+       * @param value The uncompressedLen to set.
+       * @return This builder for chaining.
        */
       public Builder setUncompressedLen(int value) {
         
@@ -23464,6 +24983,7 @@ public final class Storage {
       }
       /**
        * <code>int32 uncompressedLen = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUncompressedLen() {
         
@@ -23474,7 +24994,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -23530,27 +25050,31 @@ public final class Storage {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeChunkWriteResponse}
    */
-  public  static final class SparseDedupeChunkWriteResponse extends
+  public static final class SparseDedupeChunkWriteResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SparseDedupeChunkWriteResponse)
       SparseDedupeChunkWriteResponseOrBuilder {
@@ -23562,6 +25086,13 @@ public final class Storage {
     private SparseDedupeChunkWriteResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SparseDedupeChunkWriteResponse();
     }
 
     @java.lang.Override
@@ -23577,7 +25108,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -23601,7 +25131,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -23611,6 +25141,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -23636,7 +25168,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -23651,7 +25185,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -23670,14 +25206,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -23697,7 +25235,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -23712,7 +25250,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -23734,12 +25272,11 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse other = (org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -23924,35 +25461,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -24005,6 +25542,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -24020,6 +25558,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -24036,6 +25575,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -24049,6 +25590,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -24058,6 +25600,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -24074,21 +25618,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -24096,6 +25646,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -24108,6 +25660,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -24118,7 +25671,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -24174,23 +25727,26 @@ public final class Storage {
 
     /**
      * <code>int64 offset = 1;</code>
+     * @return The offset.
      */
     long getOffset();
 
     /**
      * <code>int64 fileHandle = 2;</code>
+     * @return The fileHandle.
      */
     long getFileHandle();
 
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeChunkReadRequest}
    */
-  public  static final class SparseDedupeChunkReadRequest extends
+  public static final class SparseDedupeChunkReadRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SparseDedupeChunkReadRequest)
       SparseDedupeChunkReadRequestOrBuilder {
@@ -24200,9 +25756,13 @@ public final class Storage {
       super(builder);
     }
     private SparseDedupeChunkReadRequest() {
-      offset_ = 0L;
-      fileHandle_ = 0L;
-      pvolumeID_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SparseDedupeChunkReadRequest();
     }
 
     @java.lang.Override
@@ -24218,7 +25778,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -24245,7 +25804,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -24255,6 +25814,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -24280,7 +25841,9 @@ public final class Storage {
     private long offset_;
     /**
      * <code>int64 offset = 1;</code>
+     * @return The offset.
      */
+    @java.lang.Override
     public long getOffset() {
       return offset_;
     }
@@ -24289,7 +25852,9 @@ public final class Storage {
     private long fileHandle_;
     /**
      * <code>int64 fileHandle = 2;</code>
+     * @return The fileHandle.
      */
+    @java.lang.Override
     public long getFileHandle() {
       return fileHandle_;
     }
@@ -24298,7 +25863,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -24362,15 +25929,14 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.SparseDedupeChunkReadRequest other = (org.opendedup.grpc.Storage.SparseDedupeChunkReadRequest) obj;
 
-      boolean result = true;
-      result = result && (getOffset()
-          == other.getOffset());
-      result = result && (getFileHandle()
-          == other.getFileHandle());
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getOffset()
+          != other.getOffset()) return false;
+      if (getFileHandle()
+          != other.getFileHandle()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -24563,35 +26129,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -24646,12 +26212,16 @@ public final class Storage {
       private long offset_ ;
       /**
        * <code>int64 offset = 1;</code>
+       * @return The offset.
        */
+      @java.lang.Override
       public long getOffset() {
         return offset_;
       }
       /**
        * <code>int64 offset = 1;</code>
+       * @param value The offset to set.
+       * @return This builder for chaining.
        */
       public Builder setOffset(long value) {
         
@@ -24661,6 +26231,7 @@ public final class Storage {
       }
       /**
        * <code>int64 offset = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOffset() {
         
@@ -24672,12 +26243,16 @@ public final class Storage {
       private long fileHandle_ ;
       /**
        * <code>int64 fileHandle = 2;</code>
+       * @return The fileHandle.
        */
+      @java.lang.Override
       public long getFileHandle() {
         return fileHandle_;
       }
       /**
        * <code>int64 fileHandle = 2;</code>
+       * @param value The fileHandle to set.
+       * @return This builder for chaining.
        */
       public Builder setFileHandle(long value) {
         
@@ -24687,6 +26262,7 @@ public final class Storage {
       }
       /**
        * <code>int64 fileHandle = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFileHandle() {
         
@@ -24698,12 +26274,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -24713,6 +26293,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -24723,7 +26304,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -24779,29 +26360,35 @@ public final class Storage {
 
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 3;</code>
+     * @return Whether the chunk field is set.
      */
     boolean hasChunk();
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 3;</code>
+     * @return The chunk.
      */
     org.opendedup.grpc.Storage.SparseDataChunkP getChunk();
     /**
@@ -24812,7 +26399,7 @@ public final class Storage {
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeChunkReadResponse}
    */
-  public  static final class SparseDedupeChunkReadResponse extends
+  public static final class SparseDedupeChunkReadResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.SparseDedupeChunkReadResponse)
       SparseDedupeChunkReadResponseOrBuilder {
@@ -24824,6 +26411,13 @@ public final class Storage {
     private SparseDedupeChunkReadResponse() {
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SparseDedupeChunkReadResponse();
     }
 
     @java.lang.Override
@@ -24839,7 +26433,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -24876,7 +26469,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -24886,6 +26479,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -24911,7 +26506,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 1;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -24926,7 +26523,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 1;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -24945,14 +26544,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -24962,19 +26563,24 @@ public final class Storage {
     private org.opendedup.grpc.Storage.SparseDataChunkP chunk_;
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 3;</code>
+     * @return Whether the chunk field is set.
      */
+    @java.lang.Override
     public boolean hasChunk() {
       return chunk_ != null;
     }
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 3;</code>
+     * @return The chunk.
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.SparseDataChunkP getChunk() {
       return chunk_ == null ? org.opendedup.grpc.Storage.SparseDataChunkP.getDefaultInstance() : chunk_;
     }
     /**
      * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 3;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.Storage.SparseDataChunkPOrBuilder getChunkOrBuilder() {
       return getChunk();
     }
@@ -24993,7 +26599,7 @@ public final class Storage {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -25011,7 +26617,7 @@ public final class Storage {
       if (size != -1) return size;
 
       size = 0;
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -25037,17 +26643,16 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.SparseDedupeChunkReadResponse other = (org.opendedup.grpc.Storage.SparseDedupeChunkReadResponse) obj;
 
-      boolean result = true;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && (hasChunk() == other.hasChunk());
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (hasChunk() != other.hasChunk()) return false;
       if (hasChunk()) {
-        result = result && getChunk()
-            .equals(other.getChunk());
+        if (!getChunk()
+            .equals(other.getChunk())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -25247,35 +26852,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -25331,6 +26936,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 1;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -25346,6 +26952,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -25362,6 +26969,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -25375,6 +26984,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -25384,6 +26994,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 1;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -25400,21 +27012,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -25422,6 +27040,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -25434,6 +27054,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -25442,17 +27063,19 @@ public final class Storage {
         return this;
       }
 
-      private org.opendedup.grpc.Storage.SparseDataChunkP chunk_ = null;
+      private org.opendedup.grpc.Storage.SparseDataChunkP chunk_;
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.Storage.SparseDataChunkP, org.opendedup.grpc.Storage.SparseDataChunkP.Builder, org.opendedup.grpc.Storage.SparseDataChunkPOrBuilder> chunkBuilder_;
       /**
        * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 3;</code>
+       * @return Whether the chunk field is set.
        */
       public boolean hasChunk() {
         return chunkBuilder_ != null || chunk_ != null;
       }
       /**
        * <code>.org.opendedup.grpc.SparseDataChunkP chunk = 3;</code>
+       * @return The chunk.
        */
       public org.opendedup.grpc.Storage.SparseDataChunkP getChunk() {
         if (chunkBuilder_ == null) {
@@ -25561,7 +27184,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -25617,66 +27240,78 @@ public final class Storage {
 
     /**
      * <code>int64 chunkSize = 1;</code>
+     * @return The chunkSize.
      */
     long getChunkSize();
 
     /**
      * <code>int64 minSegmentSize = 2;</code>
+     * @return The minSegmentSize.
      */
     long getMinSegmentSize();
 
     /**
      * <code>int64 maxSegmentSize = 3;</code>
+     * @return The maxSegmentSize.
      */
     long getMaxSegmentSize();
 
     /**
      * <code>int64 polyNumber = 4;</code>
+     * @return The polyNumber.
      */
     long getPolyNumber();
 
     /**
      * <code>int64 windowSize = 5;</code>
+     * @return The windowSize.
      */
     long getWindowSize();
 
     /**
      * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
+     * @return The enum numeric value on the wire for hashtype.
      */
     int getHashtypeValue();
     /**
      * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
+     * @return The hashtype.
      */
     org.opendedup.grpc.Storage.hashtype getHashtype();
 
     /**
      * <code>int32 mapVersion = 7;</code>
+     * @return The mapVersion.
      */
     int getMapVersion();
 
     /**
      * <code>string error = 8;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 8;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 9;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 9;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.HashingInfoResponse}
    */
-  public  static final class HashingInfoResponse extends
+  public static final class HashingInfoResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.HashingInfoResponse)
       HashingInfoResponseOrBuilder {
@@ -25686,15 +27321,16 @@ public final class Storage {
       super(builder);
     }
     private HashingInfoResponse() {
-      chunkSize_ = 0L;
-      minSegmentSize_ = 0L;
-      maxSegmentSize_ = 0L;
-      polyNumber_ = 0L;
-      windowSize_ = 0L;
       hashtype_ = 0;
-      mapVersion_ = 0;
       error_ = "";
       errorCode_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new HashingInfoResponse();
     }
 
     @java.lang.Override
@@ -25710,7 +27346,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -25770,7 +27405,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -25780,6 +27415,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -25805,7 +27442,9 @@ public final class Storage {
     private long chunkSize_;
     /**
      * <code>int64 chunkSize = 1;</code>
+     * @return The chunkSize.
      */
+    @java.lang.Override
     public long getChunkSize() {
       return chunkSize_;
     }
@@ -25814,7 +27453,9 @@ public final class Storage {
     private long minSegmentSize_;
     /**
      * <code>int64 minSegmentSize = 2;</code>
+     * @return The minSegmentSize.
      */
+    @java.lang.Override
     public long getMinSegmentSize() {
       return minSegmentSize_;
     }
@@ -25823,7 +27464,9 @@ public final class Storage {
     private long maxSegmentSize_;
     /**
      * <code>int64 maxSegmentSize = 3;</code>
+     * @return The maxSegmentSize.
      */
+    @java.lang.Override
     public long getMaxSegmentSize() {
       return maxSegmentSize_;
     }
@@ -25832,7 +27475,9 @@ public final class Storage {
     private long polyNumber_;
     /**
      * <code>int64 polyNumber = 4;</code>
+     * @return The polyNumber.
      */
+    @java.lang.Override
     public long getPolyNumber() {
       return polyNumber_;
     }
@@ -25841,7 +27486,9 @@ public final class Storage {
     private long windowSize_;
     /**
      * <code>int64 windowSize = 5;</code>
+     * @return The windowSize.
      */
+    @java.lang.Override
     public long getWindowSize() {
       return windowSize_;
     }
@@ -25850,14 +27497,16 @@ public final class Storage {
     private int hashtype_;
     /**
      * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
+     * @return The enum numeric value on the wire for hashtype.
      */
-    public int getHashtypeValue() {
+    @java.lang.Override public int getHashtypeValue() {
       return hashtype_;
     }
     /**
      * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
+     * @return The hashtype.
      */
-    public org.opendedup.grpc.Storage.hashtype getHashtype() {
+    @java.lang.Override public org.opendedup.grpc.Storage.hashtype getHashtype() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.Storage.hashtype result = org.opendedup.grpc.Storage.hashtype.valueOf(hashtype_);
       return result == null ? org.opendedup.grpc.Storage.hashtype.UNRECOGNIZED : result;
@@ -25867,7 +27516,9 @@ public final class Storage {
     private int mapVersion_;
     /**
      * <code>int32 mapVersion = 7;</code>
+     * @return The mapVersion.
      */
+    @java.lang.Override
     public int getMapVersion() {
       return mapVersion_;
     }
@@ -25876,7 +27527,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 8;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -25891,7 +27544,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 8;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -25910,14 +27565,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 9;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 9;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -25958,7 +27615,7 @@ public final class Storage {
       if (mapVersion_ != 0) {
         output.writeInt32(7, mapVersion_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -26001,7 +27658,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, mapVersion_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
@@ -26023,25 +27680,24 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.HashingInfoResponse other = (org.opendedup.grpc.Storage.HashingInfoResponse) obj;
 
-      boolean result = true;
-      result = result && (getChunkSize()
-          == other.getChunkSize());
-      result = result && (getMinSegmentSize()
-          == other.getMinSegmentSize());
-      result = result && (getMaxSegmentSize()
-          == other.getMaxSegmentSize());
-      result = result && (getPolyNumber()
-          == other.getPolyNumber());
-      result = result && (getWindowSize()
-          == other.getWindowSize());
-      result = result && hashtype_ == other.hashtype_;
-      result = result && (getMapVersion()
-          == other.getMapVersion());
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getChunkSize()
+          != other.getChunkSize()) return false;
+      if (getMinSegmentSize()
+          != other.getMinSegmentSize()) return false;
+      if (getMaxSegmentSize()
+          != other.getMaxSegmentSize()) return false;
+      if (getPolyNumber()
+          != other.getPolyNumber()) return false;
+      if (getWindowSize()
+          != other.getWindowSize()) return false;
+      if (hashtype_ != other.hashtype_) return false;
+      if (getMapVersion()
+          != other.getMapVersion()) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -26266,35 +27922,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -26368,12 +28024,16 @@ public final class Storage {
       private long chunkSize_ ;
       /**
        * <code>int64 chunkSize = 1;</code>
+       * @return The chunkSize.
        */
+      @java.lang.Override
       public long getChunkSize() {
         return chunkSize_;
       }
       /**
        * <code>int64 chunkSize = 1;</code>
+       * @param value The chunkSize to set.
+       * @return This builder for chaining.
        */
       public Builder setChunkSize(long value) {
         
@@ -26383,6 +28043,7 @@ public final class Storage {
       }
       /**
        * <code>int64 chunkSize = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearChunkSize() {
         
@@ -26394,12 +28055,16 @@ public final class Storage {
       private long minSegmentSize_ ;
       /**
        * <code>int64 minSegmentSize = 2;</code>
+       * @return The minSegmentSize.
        */
+      @java.lang.Override
       public long getMinSegmentSize() {
         return minSegmentSize_;
       }
       /**
        * <code>int64 minSegmentSize = 2;</code>
+       * @param value The minSegmentSize to set.
+       * @return This builder for chaining.
        */
       public Builder setMinSegmentSize(long value) {
         
@@ -26409,6 +28074,7 @@ public final class Storage {
       }
       /**
        * <code>int64 minSegmentSize = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMinSegmentSize() {
         
@@ -26420,12 +28086,16 @@ public final class Storage {
       private long maxSegmentSize_ ;
       /**
        * <code>int64 maxSegmentSize = 3;</code>
+       * @return The maxSegmentSize.
        */
+      @java.lang.Override
       public long getMaxSegmentSize() {
         return maxSegmentSize_;
       }
       /**
        * <code>int64 maxSegmentSize = 3;</code>
+       * @param value The maxSegmentSize to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxSegmentSize(long value) {
         
@@ -26435,6 +28105,7 @@ public final class Storage {
       }
       /**
        * <code>int64 maxSegmentSize = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxSegmentSize() {
         
@@ -26446,12 +28117,16 @@ public final class Storage {
       private long polyNumber_ ;
       /**
        * <code>int64 polyNumber = 4;</code>
+       * @return The polyNumber.
        */
+      @java.lang.Override
       public long getPolyNumber() {
         return polyNumber_;
       }
       /**
        * <code>int64 polyNumber = 4;</code>
+       * @param value The polyNumber to set.
+       * @return This builder for chaining.
        */
       public Builder setPolyNumber(long value) {
         
@@ -26461,6 +28136,7 @@ public final class Storage {
       }
       /**
        * <code>int64 polyNumber = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPolyNumber() {
         
@@ -26472,12 +28148,16 @@ public final class Storage {
       private long windowSize_ ;
       /**
        * <code>int64 windowSize = 5;</code>
+       * @return The windowSize.
        */
+      @java.lang.Override
       public long getWindowSize() {
         return windowSize_;
       }
       /**
        * <code>int64 windowSize = 5;</code>
+       * @param value The windowSize to set.
+       * @return This builder for chaining.
        */
       public Builder setWindowSize(long value) {
         
@@ -26487,6 +28167,7 @@ public final class Storage {
       }
       /**
        * <code>int64 windowSize = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWindowSize() {
         
@@ -26498,21 +28179,27 @@ public final class Storage {
       private int hashtype_ = 0;
       /**
        * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
+       * @return The enum numeric value on the wire for hashtype.
        */
-      public int getHashtypeValue() {
+      @java.lang.Override public int getHashtypeValue() {
         return hashtype_;
       }
       /**
        * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
+       * @param value The enum numeric value on the wire for hashtype to set.
+       * @return This builder for chaining.
        */
       public Builder setHashtypeValue(int value) {
+        
         hashtype_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
+       * @return The hashtype.
        */
+      @java.lang.Override
       public org.opendedup.grpc.Storage.hashtype getHashtype() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.Storage.hashtype result = org.opendedup.grpc.Storage.hashtype.valueOf(hashtype_);
@@ -26520,6 +28207,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
+       * @param value The hashtype to set.
+       * @return This builder for chaining.
        */
       public Builder setHashtype(org.opendedup.grpc.Storage.hashtype value) {
         if (value == null) {
@@ -26532,6 +28221,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.hashtype hashtype = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHashtype() {
         
@@ -26543,12 +28233,16 @@ public final class Storage {
       private int mapVersion_ ;
       /**
        * <code>int32 mapVersion = 7;</code>
+       * @return The mapVersion.
        */
+      @java.lang.Override
       public int getMapVersion() {
         return mapVersion_;
       }
       /**
        * <code>int32 mapVersion = 7;</code>
+       * @param value The mapVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setMapVersion(int value) {
         
@@ -26558,6 +28252,7 @@ public final class Storage {
       }
       /**
        * <code>int32 mapVersion = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMapVersion() {
         
@@ -26569,6 +28264,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 8;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -26584,6 +28280,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 8;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -26600,6 +28297,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 8;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -26613,6 +28312,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -26622,6 +28322,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 8;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -26638,21 +28340,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 9;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 9;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 9;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -26660,6 +28368,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 9;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -26672,6 +28382,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -26682,7 +28393,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -26738,23 +28449,26 @@ public final class Storage {
 
     /**
      * <code>int64 hashloc = 1;</code>
+     * @return The hashloc.
      */
     long getHashloc();
 
     /**
      * <code>bool inserted = 2;</code>
+     * @return The inserted.
      */
     boolean getInserted();
 
     /**
      * <code>int32 compressedLength = 3;</code>
+     * @return The compressedLength.
      */
     int getCompressedLength();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.InsertRecord}
    */
-  public  static final class InsertRecord extends
+  public static final class InsertRecord extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.InsertRecord)
       InsertRecordOrBuilder {
@@ -26764,9 +28478,13 @@ public final class Storage {
       super(builder);
     }
     private InsertRecord() {
-      hashloc_ = 0L;
-      inserted_ = false;
-      compressedLength_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new InsertRecord();
     }
 
     @java.lang.Override
@@ -26782,7 +28500,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -26809,7 +28526,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -26819,6 +28536,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -26844,7 +28563,9 @@ public final class Storage {
     private long hashloc_;
     /**
      * <code>int64 hashloc = 1;</code>
+     * @return The hashloc.
      */
+    @java.lang.Override
     public long getHashloc() {
       return hashloc_;
     }
@@ -26853,7 +28574,9 @@ public final class Storage {
     private boolean inserted_;
     /**
      * <code>bool inserted = 2;</code>
+     * @return The inserted.
      */
+    @java.lang.Override
     public boolean getInserted() {
       return inserted_;
     }
@@ -26862,7 +28585,9 @@ public final class Storage {
     private int compressedLength_;
     /**
      * <code>int32 compressedLength = 3;</code>
+     * @return The compressedLength.
      */
+    @java.lang.Override
     public int getCompressedLength() {
       return compressedLength_;
     }
@@ -26926,15 +28651,14 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.InsertRecord other = (org.opendedup.grpc.Storage.InsertRecord) obj;
 
-      boolean result = true;
-      result = result && (getHashloc()
-          == other.getHashloc());
-      result = result && (getInserted()
-          == other.getInserted());
-      result = result && (getCompressedLength()
-          == other.getCompressedLength());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getHashloc()
+          != other.getHashloc()) return false;
+      if (getInserted()
+          != other.getInserted()) return false;
+      if (getCompressedLength()
+          != other.getCompressedLength()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -27126,35 +28850,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -27209,12 +28933,16 @@ public final class Storage {
       private long hashloc_ ;
       /**
        * <code>int64 hashloc = 1;</code>
+       * @return The hashloc.
        */
+      @java.lang.Override
       public long getHashloc() {
         return hashloc_;
       }
       /**
        * <code>int64 hashloc = 1;</code>
+       * @param value The hashloc to set.
+       * @return This builder for chaining.
        */
       public Builder setHashloc(long value) {
         
@@ -27224,6 +28952,7 @@ public final class Storage {
       }
       /**
        * <code>int64 hashloc = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHashloc() {
         
@@ -27235,12 +28964,16 @@ public final class Storage {
       private boolean inserted_ ;
       /**
        * <code>bool inserted = 2;</code>
+       * @return The inserted.
        */
+      @java.lang.Override
       public boolean getInserted() {
         return inserted_;
       }
       /**
        * <code>bool inserted = 2;</code>
+       * @param value The inserted to set.
+       * @return This builder for chaining.
        */
       public Builder setInserted(boolean value) {
         
@@ -27250,6 +28983,7 @@ public final class Storage {
       }
       /**
        * <code>bool inserted = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInserted() {
         
@@ -27261,12 +28995,16 @@ public final class Storage {
       private int compressedLength_ ;
       /**
        * <code>int32 compressedLength = 3;</code>
+       * @return The compressedLength.
        */
+      @java.lang.Override
       public int getCompressedLength() {
         return compressedLength_;
       }
       /**
        * <code>int32 compressedLength = 3;</code>
+       * @param value The compressedLength to set.
+       * @return This builder for chaining.
        */
       public Builder setCompressedLength(int value) {
         
@@ -27276,6 +29014,7 @@ public final class Storage {
       }
       /**
        * <code>int32 compressedLength = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCompressedLength() {
         
@@ -27286,7 +29025,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -27342,10 +29081,12 @@ public final class Storage {
 
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+     * @return Whether the file field is set.
      */
     boolean hasFile();
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+     * @return The file.
      */
     org.opendedup.grpc.FileInfo.FileInfoResponse getFile();
     /**
@@ -27355,49 +29096,59 @@ public final class Storage {
 
     /**
      * <code>string uuid = 2;</code>
+     * @return The uuid.
      */
     java.lang.String getUuid();
     /**
      * <code>string uuid = 2;</code>
+     * @return The bytes for uuid.
      */
     com.google.protobuf.ByteString
         getUuidBytes();
 
     /**
      * <code>int64 timeStamp = 3;</code>
+     * @return The timeStamp.
      */
     long getTimeStamp();
 
     /**
      * <code>int64 seq = 4;</code>
+     * @return The seq.
      */
     long getSeq();
 
     /**
      * <code>.org.opendedup.grpc.actionType actionType = 5;</code>
+     * @return The enum numeric value on the wire for actionType.
      */
     int getActionTypeValue();
     /**
      * <code>.org.opendedup.grpc.actionType actionType = 5;</code>
+     * @return The actionType.
      */
     org.opendedup.grpc.Storage.actionType getActionType();
 
     /**
      * <code>string error = 6;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 6;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 7;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
     int getErrorCodeValue();
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 7;</code>
+     * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
 
@@ -27407,6 +29158,7 @@ public final class Storage {
      * </pre>
      *
      * <code>string srcfile = 8;</code>
+     * @return The srcfile.
      */
     java.lang.String getSrcfile();
     /**
@@ -27415,6 +29167,7 @@ public final class Storage {
      * </pre>
      *
      * <code>string srcfile = 8;</code>
+     * @return The bytes for srcfile.
      */
     com.google.protobuf.ByteString
         getSrcfileBytes();
@@ -27425,6 +29178,7 @@ public final class Storage {
      * </pre>
      *
      * <code>string dstfile = 9;</code>
+     * @return The dstfile.
      */
     java.lang.String getDstfile();
     /**
@@ -27433,6 +29187,7 @@ public final class Storage {
      * </pre>
      *
      * <code>string dstfile = 9;</code>
+     * @return The bytes for dstfile.
      */
     com.google.protobuf.ByteString
         getDstfileBytes();
@@ -27440,7 +29195,7 @@ public final class Storage {
   /**
    * Protobuf type {@code org.opendedup.grpc.VolumeEvent}
    */
-  public  static final class VolumeEvent extends
+  public static final class VolumeEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.VolumeEvent)
       VolumeEventOrBuilder {
@@ -27451,13 +29206,18 @@ public final class Storage {
     }
     private VolumeEvent() {
       uuid_ = "";
-      timeStamp_ = 0L;
-      seq_ = 0L;
       actionType_ = 0;
       error_ = "";
       errorCode_ = 0;
       srcfile_ = "";
       dstfile_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new VolumeEvent();
     }
 
     @java.lang.Override
@@ -27473,7 +29233,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -27544,7 +29303,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -27554,6 +29313,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -27579,19 +29340,24 @@ public final class Storage {
     private org.opendedup.grpc.FileInfo.FileInfoResponse file_;
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+     * @return Whether the file field is set.
      */
+    @java.lang.Override
     public boolean hasFile() {
       return file_ != null;
     }
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+     * @return The file.
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileInfoResponse getFile() {
       return file_ == null ? org.opendedup.grpc.FileInfo.FileInfoResponse.getDefaultInstance() : file_;
     }
     /**
      * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
      */
+    @java.lang.Override
     public org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder getFileOrBuilder() {
       return getFile();
     }
@@ -27600,7 +29366,9 @@ public final class Storage {
     private volatile java.lang.Object uuid_;
     /**
      * <code>string uuid = 2;</code>
+     * @return The uuid.
      */
+    @java.lang.Override
     public java.lang.String getUuid() {
       java.lang.Object ref = uuid_;
       if (ref instanceof java.lang.String) {
@@ -27615,7 +29383,9 @@ public final class Storage {
     }
     /**
      * <code>string uuid = 2;</code>
+     * @return The bytes for uuid.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUuidBytes() {
       java.lang.Object ref = uuid_;
@@ -27634,7 +29404,9 @@ public final class Storage {
     private long timeStamp_;
     /**
      * <code>int64 timeStamp = 3;</code>
+     * @return The timeStamp.
      */
+    @java.lang.Override
     public long getTimeStamp() {
       return timeStamp_;
     }
@@ -27643,7 +29415,9 @@ public final class Storage {
     private long seq_;
     /**
      * <code>int64 seq = 4;</code>
+     * @return The seq.
      */
+    @java.lang.Override
     public long getSeq() {
       return seq_;
     }
@@ -27652,14 +29426,16 @@ public final class Storage {
     private int actionType_;
     /**
      * <code>.org.opendedup.grpc.actionType actionType = 5;</code>
+     * @return The enum numeric value on the wire for actionType.
      */
-    public int getActionTypeValue() {
+    @java.lang.Override public int getActionTypeValue() {
       return actionType_;
     }
     /**
      * <code>.org.opendedup.grpc.actionType actionType = 5;</code>
+     * @return The actionType.
      */
-    public org.opendedup.grpc.Storage.actionType getActionType() {
+    @java.lang.Override public org.opendedup.grpc.Storage.actionType getActionType() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.Storage.actionType result = org.opendedup.grpc.Storage.actionType.valueOf(actionType_);
       return result == null ? org.opendedup.grpc.Storage.actionType.UNRECOGNIZED : result;
@@ -27669,7 +29445,9 @@ public final class Storage {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 6;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -27684,7 +29462,9 @@ public final class Storage {
     }
     /**
      * <code>string error = 6;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -27703,14 +29483,16 @@ public final class Storage {
     private int errorCode_;
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 7;</code>
+     * @return The enum numeric value on the wire for errorCode.
      */
-    public int getErrorCodeValue() {
+    @java.lang.Override public int getErrorCodeValue() {
       return errorCode_;
     }
     /**
      * <code>.org.opendedup.grpc.errorCodes errorCode = 7;</code>
+     * @return The errorCode.
      */
-    public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
+    @java.lang.Override public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
       @SuppressWarnings("deprecation")
       org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
@@ -27724,7 +29506,9 @@ public final class Storage {
      * </pre>
      *
      * <code>string srcfile = 8;</code>
+     * @return The srcfile.
      */
+    @java.lang.Override
     public java.lang.String getSrcfile() {
       java.lang.Object ref = srcfile_;
       if (ref instanceof java.lang.String) {
@@ -27743,7 +29527,9 @@ public final class Storage {
      * </pre>
      *
      * <code>string srcfile = 8;</code>
+     * @return The bytes for srcfile.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSrcfileBytes() {
       java.lang.Object ref = srcfile_;
@@ -27766,7 +29552,9 @@ public final class Storage {
      * </pre>
      *
      * <code>string dstfile = 9;</code>
+     * @return The dstfile.
      */
+    @java.lang.Override
     public java.lang.String getDstfile() {
       java.lang.Object ref = dstfile_;
       if (ref instanceof java.lang.String) {
@@ -27785,7 +29573,9 @@ public final class Storage {
      * </pre>
      *
      * <code>string dstfile = 9;</code>
+     * @return The bytes for dstfile.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDstfileBytes() {
       java.lang.Object ref = dstfile_;
@@ -27817,7 +29607,7 @@ public final class Storage {
       if (file_ != null) {
         output.writeMessage(1, getFile());
       }
-      if (!getUuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, uuid_);
       }
       if (timeStamp_ != 0L) {
@@ -27829,16 +29619,16 @@ public final class Storage {
       if (actionType_ != org.opendedup.grpc.Storage.actionType.MFILEDELETED.getNumber()) {
         output.writeEnum(5, actionType_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(7, errorCode_);
       }
-      if (!getSrcfileBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(srcfile_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, srcfile_);
       }
-      if (!getDstfileBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dstfile_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, dstfile_);
       }
       unknownFields.writeTo(output);
@@ -27854,7 +29644,7 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getFile());
       }
-      if (!getUuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, uuid_);
       }
       if (timeStamp_ != 0L) {
@@ -27869,17 +29659,17 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(5, actionType_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, error_);
       }
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(7, errorCode_);
       }
-      if (!getSrcfileBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(srcfile_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, srcfile_);
       }
-      if (!getDstfileBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dstfile_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, dstfile_);
       }
       size += unknownFields.getSerializedSize();
@@ -27897,28 +29687,27 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.VolumeEvent other = (org.opendedup.grpc.Storage.VolumeEvent) obj;
 
-      boolean result = true;
-      result = result && (hasFile() == other.hasFile());
+      if (hasFile() != other.hasFile()) return false;
       if (hasFile()) {
-        result = result && getFile()
-            .equals(other.getFile());
+        if (!getFile()
+            .equals(other.getFile())) return false;
       }
-      result = result && getUuid()
-          .equals(other.getUuid());
-      result = result && (getTimeStamp()
-          == other.getTimeStamp());
-      result = result && (getSeq()
-          == other.getSeq());
-      result = result && actionType_ == other.actionType_;
-      result = result && getError()
-          .equals(other.getError());
-      result = result && errorCode_ == other.errorCode_;
-      result = result && getSrcfile()
-          .equals(other.getSrcfile());
-      result = result && getDstfile()
-          .equals(other.getDstfile());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getUuid()
+          .equals(other.getUuid())) return false;
+      if (getTimeStamp()
+          != other.getTimeStamp()) return false;
+      if (getSeq()
+          != other.getSeq()) return false;
+      if (actionType_ != other.actionType_) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (errorCode_ != other.errorCode_) return false;
+      if (!getSrcfile()
+          .equals(other.getSrcfile())) return false;
+      if (!getDstfile()
+          .equals(other.getDstfile())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -28150,35 +29939,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -28252,17 +30041,19 @@ public final class Storage {
         return this;
       }
 
-      private org.opendedup.grpc.FileInfo.FileInfoResponse file_ = null;
+      private org.opendedup.grpc.FileInfo.FileInfoResponse file_;
       private com.google.protobuf.SingleFieldBuilderV3<
           org.opendedup.grpc.FileInfo.FileInfoResponse, org.opendedup.grpc.FileInfo.FileInfoResponse.Builder, org.opendedup.grpc.FileInfo.FileInfoResponseOrBuilder> fileBuilder_;
       /**
        * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+       * @return Whether the file field is set.
        */
       public boolean hasFile() {
         return fileBuilder_ != null || file_ != null;
       }
       /**
        * <code>.org.opendedup.grpc.FileInfoResponse file = 1;</code>
+       * @return The file.
        */
       public org.opendedup.grpc.FileInfo.FileInfoResponse getFile() {
         if (fileBuilder_ == null) {
@@ -28372,6 +30163,7 @@ public final class Storage {
       private java.lang.Object uuid_ = "";
       /**
        * <code>string uuid = 2;</code>
+       * @return The uuid.
        */
       public java.lang.String getUuid() {
         java.lang.Object ref = uuid_;
@@ -28387,6 +30179,7 @@ public final class Storage {
       }
       /**
        * <code>string uuid = 2;</code>
+       * @return The bytes for uuid.
        */
       public com.google.protobuf.ByteString
           getUuidBytes() {
@@ -28403,6 +30196,8 @@ public final class Storage {
       }
       /**
        * <code>string uuid = 2;</code>
+       * @param value The uuid to set.
+       * @return This builder for chaining.
        */
       public Builder setUuid(
           java.lang.String value) {
@@ -28416,6 +30211,7 @@ public final class Storage {
       }
       /**
        * <code>string uuid = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUuid() {
         
@@ -28425,6 +30221,8 @@ public final class Storage {
       }
       /**
        * <code>string uuid = 2;</code>
+       * @param value The bytes for uuid to set.
+       * @return This builder for chaining.
        */
       public Builder setUuidBytes(
           com.google.protobuf.ByteString value) {
@@ -28441,12 +30239,16 @@ public final class Storage {
       private long timeStamp_ ;
       /**
        * <code>int64 timeStamp = 3;</code>
+       * @return The timeStamp.
        */
+      @java.lang.Override
       public long getTimeStamp() {
         return timeStamp_;
       }
       /**
        * <code>int64 timeStamp = 3;</code>
+       * @param value The timeStamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimeStamp(long value) {
         
@@ -28456,6 +30258,7 @@ public final class Storage {
       }
       /**
        * <code>int64 timeStamp = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimeStamp() {
         
@@ -28467,12 +30270,16 @@ public final class Storage {
       private long seq_ ;
       /**
        * <code>int64 seq = 4;</code>
+       * @return The seq.
        */
+      @java.lang.Override
       public long getSeq() {
         return seq_;
       }
       /**
        * <code>int64 seq = 4;</code>
+       * @param value The seq to set.
+       * @return This builder for chaining.
        */
       public Builder setSeq(long value) {
         
@@ -28482,6 +30289,7 @@ public final class Storage {
       }
       /**
        * <code>int64 seq = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSeq() {
         
@@ -28493,21 +30301,27 @@ public final class Storage {
       private int actionType_ = 0;
       /**
        * <code>.org.opendedup.grpc.actionType actionType = 5;</code>
+       * @return The enum numeric value on the wire for actionType.
        */
-      public int getActionTypeValue() {
+      @java.lang.Override public int getActionTypeValue() {
         return actionType_;
       }
       /**
        * <code>.org.opendedup.grpc.actionType actionType = 5;</code>
+       * @param value The enum numeric value on the wire for actionType to set.
+       * @return This builder for chaining.
        */
       public Builder setActionTypeValue(int value) {
+        
         actionType_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.actionType actionType = 5;</code>
+       * @return The actionType.
        */
+      @java.lang.Override
       public org.opendedup.grpc.Storage.actionType getActionType() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.Storage.actionType result = org.opendedup.grpc.Storage.actionType.valueOf(actionType_);
@@ -28515,6 +30329,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.actionType actionType = 5;</code>
+       * @param value The actionType to set.
+       * @return This builder for chaining.
        */
       public Builder setActionType(org.opendedup.grpc.Storage.actionType value) {
         if (value == null) {
@@ -28527,6 +30343,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.actionType actionType = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearActionType() {
         
@@ -28538,6 +30355,7 @@ public final class Storage {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 6;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -28553,6 +30371,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 6;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -28569,6 +30388,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 6;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -28582,6 +30403,7 @@ public final class Storage {
       }
       /**
        * <code>string error = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -28591,6 +30413,8 @@ public final class Storage {
       }
       /**
        * <code>string error = 6;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -28607,21 +30431,27 @@ public final class Storage {
       private int errorCode_ = 0;
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 7;</code>
+       * @return The enum numeric value on the wire for errorCode.
        */
-      public int getErrorCodeValue() {
+      @java.lang.Override public int getErrorCodeValue() {
         return errorCode_;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 7;</code>
+       * @param value The enum numeric value on the wire for errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCodeValue(int value) {
+        
         errorCode_ = value;
         onChanged();
         return this;
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 7;</code>
+       * @return The errorCode.
        */
+      @java.lang.Override
       public org.opendedup.grpc.FileInfo.errorCodes getErrorCode() {
         @SuppressWarnings("deprecation")
         org.opendedup.grpc.FileInfo.errorCodes result = org.opendedup.grpc.FileInfo.errorCodes.valueOf(errorCode_);
@@ -28629,6 +30459,8 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 7;</code>
+       * @param value The errorCode to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorCode(org.opendedup.grpc.FileInfo.errorCodes value) {
         if (value == null) {
@@ -28641,6 +30473,7 @@ public final class Storage {
       }
       /**
        * <code>.org.opendedup.grpc.errorCodes errorCode = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorCode() {
         
@@ -28656,6 +30489,7 @@ public final class Storage {
        * </pre>
        *
        * <code>string srcfile = 8;</code>
+       * @return The srcfile.
        */
       public java.lang.String getSrcfile() {
         java.lang.Object ref = srcfile_;
@@ -28675,6 +30509,7 @@ public final class Storage {
        * </pre>
        *
        * <code>string srcfile = 8;</code>
+       * @return The bytes for srcfile.
        */
       public com.google.protobuf.ByteString
           getSrcfileBytes() {
@@ -28695,6 +30530,8 @@ public final class Storage {
        * </pre>
        *
        * <code>string srcfile = 8;</code>
+       * @param value The srcfile to set.
+       * @return This builder for chaining.
        */
       public Builder setSrcfile(
           java.lang.String value) {
@@ -28712,6 +30549,7 @@ public final class Storage {
        * </pre>
        *
        * <code>string srcfile = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSrcfile() {
         
@@ -28725,6 +30563,8 @@ public final class Storage {
        * </pre>
        *
        * <code>string srcfile = 8;</code>
+       * @param value The bytes for srcfile to set.
+       * @return This builder for chaining.
        */
       public Builder setSrcfileBytes(
           com.google.protobuf.ByteString value) {
@@ -28745,6 +30585,7 @@ public final class Storage {
        * </pre>
        *
        * <code>string dstfile = 9;</code>
+       * @return The dstfile.
        */
       public java.lang.String getDstfile() {
         java.lang.Object ref = dstfile_;
@@ -28764,6 +30605,7 @@ public final class Storage {
        * </pre>
        *
        * <code>string dstfile = 9;</code>
+       * @return The bytes for dstfile.
        */
       public com.google.protobuf.ByteString
           getDstfileBytes() {
@@ -28784,6 +30626,8 @@ public final class Storage {
        * </pre>
        *
        * <code>string dstfile = 9;</code>
+       * @param value The dstfile to set.
+       * @return This builder for chaining.
        */
       public Builder setDstfile(
           java.lang.String value) {
@@ -28801,6 +30645,7 @@ public final class Storage {
        * </pre>
        *
        * <code>string dstfile = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDstfile() {
         
@@ -28814,6 +30659,8 @@ public final class Storage {
        * </pre>
        *
        * <code>string dstfile = 9;</code>
+       * @param value The bytes for dstfile to set.
+       * @return This builder for chaining.
        */
       public Builder setDstfileBytes(
           com.google.protobuf.ByteString value) {
@@ -28829,7 +30676,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -28885,18 +30732,20 @@ public final class Storage {
 
     /**
      * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
      */
     long getPvolumeID();
 
     /**
      * <code>int64 startSequence = 2;</code>
+     * @return The startSequence.
      */
     long getStartSequence();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.VolumeEventListenRequest}
    */
-  public  static final class VolumeEventListenRequest extends
+  public static final class VolumeEventListenRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:org.opendedup.grpc.VolumeEventListenRequest)
       VolumeEventListenRequestOrBuilder {
@@ -28906,8 +30755,13 @@ public final class Storage {
       super(builder);
     }
     private VolumeEventListenRequest() {
-      pvolumeID_ = 0L;
-      startSequence_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new VolumeEventListenRequest();
     }
 
     @java.lang.Override
@@ -28923,7 +30777,6 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -28945,7 +30798,7 @@ public final class Storage {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -28955,6 +30808,8 @@ public final class Storage {
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
         throw e.setUnfinishedMessage(this);
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(this);
       } catch (java.io.IOException e) {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
@@ -28980,7 +30835,9 @@ public final class Storage {
     private long pvolumeID_;
     /**
      * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
      */
+    @java.lang.Override
     public long getPvolumeID() {
       return pvolumeID_;
     }
@@ -28989,7 +30846,9 @@ public final class Storage {
     private long startSequence_;
     /**
      * <code>int64 startSequence = 2;</code>
+     * @return The startSequence.
      */
+    @java.lang.Override
     public long getStartSequence() {
       return startSequence_;
     }
@@ -29046,13 +30905,12 @@ public final class Storage {
       }
       org.opendedup.grpc.Storage.VolumeEventListenRequest other = (org.opendedup.grpc.Storage.VolumeEventListenRequest) obj;
 
-      boolean result = true;
-      result = result && (getPvolumeID()
-          == other.getPvolumeID());
-      result = result && (getStartSequence()
-          == other.getStartSequence());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (getStartSequence()
+          != other.getStartSequence()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -29239,35 +31097,35 @@ public final class Storage {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -29319,12 +31177,16 @@ public final class Storage {
       private long pvolumeID_ ;
       /**
        * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
        */
+      @java.lang.Override
       public long getPvolumeID() {
         return pvolumeID_;
       }
       /**
        * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
        */
       public Builder setPvolumeID(long value) {
         
@@ -29334,6 +31196,7 @@ public final class Storage {
       }
       /**
        * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPvolumeID() {
         
@@ -29345,12 +31208,16 @@ public final class Storage {
       private long startSequence_ ;
       /**
        * <code>int64 startSequence = 2;</code>
+       * @return The startSequence.
        */
+      @java.lang.Override
       public long getStartSequence() {
         return startSequence_;
       }
       /**
        * <code>int64 startSequence = 2;</code>
+       * @param value The startSequence to set.
+       * @return This builder for chaining.
        */
       public Builder setStartSequence(long value) {
         
@@ -29360,6 +31227,7 @@ public final class Storage {
       }
       /**
        * <code>int64 startSequence = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStartSequence() {
         
@@ -29370,7 +31238,7 @@ public final class Storage {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -29618,172 +31486,166 @@ public final class Storage {
       "pendedup.grpc.errorCodes\022\017\n\007eventID\030\003 \001(" +
       "\t\"j\n\023CheckHashesResponse\022\021\n\tlocations\030\001 " +
       "\003(\003\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036." +
-      "org.opendedup.grpc.errorCodes\"\370\001\n\026FileRe" +
+      "org.opendedup.grpc.errorCodes\"\303\002\n\026FileRe" +
       "plicationRequest\022X\n\014fileLocation\030\001 \003(\0132B" +
       ".org.opendedup.grpc.FileReplicationReque" +
       "st.ReplicationFileLocation\022\021\n\tpvolumeID\030" +
       "\002 \001(\003\022\021\n\trvolumeID\030\003 \001(\003\022\013\n\003url\030\004 \001(\t\022\014\n" +
-      "\004mtls\030\005 \001(\010\032C\n\027ReplicationFileLocation\022\023" +
-      "\n\013srcFilePath\030\001 \001(\t\022\023\n\013dstFilePath\030\002 \001(\t" +
-      "\"Z\n\027AddReplicaSourceRequest\022\021\n\tpvolumeID" +
-      "\030\003 \001(\003\022\021\n\trvolumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\022\014" +
-      "\n\004mtls\030\006 \001(\010\"\\\n\030AddReplicaSourceResponse" +
-      "\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org" +
-      ".opendedup.grpc.errorCodes\"O\n\032RemoveRepl" +
-      "icaSourceRequest\022\021\n\tpvolumeID\030\003 \001(\003\022\021\n\tr" +
-      "volumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\"_\n\033RemoveRep" +
-      "licaSourceResponse\022\r\n\005error\030\001 \001(\t\0221\n\terr" +
-      "orCode\030\002 \001(\0162\036.org.opendedup.grpc.errorC" +
-      "odes\"l\n\027FileReplicationResponse\022\r\n\005error" +
-      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
-      "p.grpc.errorCodes\022\017\n\007eventID\030\003 \003(\t\"@\n\031Me" +
-      "taDataDedupeFileRequest\022\020\n\010filePath\030\001 \001(" +
-      "\t\022\021\n\tpvolumeID\030\002 \001(\003\"\243\001\n\032MetaDataDedupeF" +
-      "ileResponse\0222\n\004file\030\001 \001(\0132$.org.opendedu" +
-      "p.grpc.FileInfoResponse\0221\n\terrorCode\030\002 \001" +
-      "(\0162\036.org.opendedup.grpc.errorCodes\022\r\n\005er" +
-      "ror\030\003 \001(\t\022\017\n\007eventID\030\004 \001(\t\":\n\027SparseDedu" +
-      "peFileRequest\022\014\n\004guid\030\001 \001(\t\022\021\n\tpvolumeID" +
-      "\030\002 \001(\003\"\222\001\n\030SparseDedupeFileResponse\0224\n\006c" +
-      "hunks\030\001 \003(\0132$.org.opendedup.grpc.SparseD" +
-      "ataChunkP\0221\n\terrorCode\030\002 \001(\0162\036.org.opend" +
-      "edup.grpc.errorCodes\022\r\n\005error\030\003 \001(\t\"\200\001\n\r" +
-      "ChunkResponse\022\014\n\004data\030\001 \001(\014\022\013\n\003len\030\002 \001(\005" +
-      "\022\r\n\005error\030\003 \001(\t\0221\n\terrorCode\030\004 \001(\0162\036.org" +
-      ".opendedup.grpc.errorCodes\022\022\n\ncompressed" +
-      "\030\005 \001(\010\"\252\001\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014\022\014\n\004d" +
-      "ata\030\002 \001(\014\022\022\n\ncompressed\030\003 \001(\010\022\030\n\020compres" +
-      "sedLength\030\004 \001(\005\022\020\n\010location\030\005 \001(\003\0221\n\terr" +
-      "orCode\030\006 \001(\0162\036.org.opendedup.grpc.errorC" +
-      "odes\022\r\n\005error\030\007 \001(\t\"k\n\022WriteChunksReques" +
-      "t\022.\n\006chunks\030\001 \003(\0132\036.org.opendedup.grpc.C" +
-      "hunkEntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolume" +
-      "ID\030\003 \001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005erro" +
-      "r\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opended" +
-      "up.grpc.errorCodes\0227\n\rinsertRecords\030\003 \003(" +
-      "\0132 .org.opendedup.grpc.InsertRecord\"U\n\020G" +
-      "etChunksRequest\022.\n\006chunks\030\001 \003(\0132\036.org.op" +
-      "endedup.grpc.ChunkEntry\022\021\n\tpvolumeID\030\002 \001" +
-      "(\003\"\231\001\n\022HashingInfoRequest\022.\n\006chunks\030\001 \003(" +
-      "\0132\036.org.opendedup.grpc.ChunkEntry\022\r\n\005err" +
-      "or\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opende" +
-      "dup.grpc.errorCodes\022\021\n\tpvolumeID\030\004 \001(\003\"\204" +
-      "\001\n\014HashLocPairP\022\014\n\004hash\030\001 \001(\014\022\017\n\007hashloc" +
-      "\030\002 \001(\003\022\013\n\003len\030\003 \001(\005\022\013\n\003pos\030\004 \001(\005\022\016\n\006offs" +
-      "et\030\005 \001(\005\022\014\n\004nlen\030\006 \001(\005\022\013\n\003dup\030\007 \001(\010\022\020\n\010i" +
-      "nserted\030\010 \001(\010\"L\n\027PauseReplicationRequest" +
-      "\022\017\n\007eventID\030\001 \001(\t\022\r\n\005pause\030\002 \001(\010\022\021\n\tpvol" +
-      "umeID\030\003 \001(\003\"\\\n\030PauseReplicationResponse\022" +
-      "\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org." +
-      "opendedup.grpc.errorCodes\">\n\030CancelRepli" +
-      "cationRequest\022\017\n\007eventID\030\001 \001(\t\022\021\n\tpvolum" +
-      "eID\030\002 \001(\003\"]\n\031CancelReplicationResponse\022\r" +
-      "\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.o" +
-      "pendedup.grpc.errorCodes\"\365\002\n\020SparseDataC" +
-      "hunkP\022\014\n\004fpos\030\001 \001(\003\022\013\n\003len\030\002 \001(\005\0222\n\005flag" +
-      "s\030\003 \003(\0162#.org.opendedup.grpc.SparseDataF" +
-      "lags\022\017\n\007version\030\004 \001(\005\0228\n\002ar\030\005 \003(\0132,.org." +
-      "opendedup.grpc.SparseDataChunkP.ArEntry\022" +
-      "\014\n\004doop\030\006 \001(\005\022\020\n\010prevdoop\030\007 \001(\005\022\030\n\020compr" +
-      "essedLength\030\010 \001(\005\022\r\n\005error\030\t \001(\t\0221\n\terro" +
-      "rCode\030\n \001(\0162\036.org.opendedup.grpc.errorCo" +
-      "des\032K\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005value\030\002 \001" +
-      "(\0132 .org.opendedup.grpc.HashLocPairP:\0028\001" +
-      "\"\327\001\n\035SparseDedupeChunkWriteRequest\0223\n\005ch" +
-      "unk\030\001 \001(\0132$.org.opendedup.grpc.SparseDat" +
-      "aChunkP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014fileLocat" +
-      "ion\030\003 \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\022\022\n\ncompress" +
-      "ed\030\005 \001(\010\022\027\n\017compressedChunk\030\006 \001(\014\022\027\n\017unc" +
-      "ompressedLen\030\007 \001(\005\"b\n\036SparseDedupeChunkW" +
-      "riteResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode" +
-      "\030\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"U" +
-      "\n\034SparseDedupeChunkReadRequest\022\016\n\006offset" +
-      "\030\001 \001(\003\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolumeID\030" +
-      "\003 \001(\003\"\226\001\n\035SparseDedupeChunkReadResponse\022" +
-      "\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org." +
-      "opendedup.grpc.errorCodes\0223\n\005chunk\030\003 \001(\013" +
-      "2$.org.opendedup.grpc.SparseDataChunkP\"\206" +
-      "\002\n\023HashingInfoResponse\022\021\n\tchunkSize\030\001 \001(" +
-      "\003\022\026\n\016minSegmentSize\030\002 \001(\003\022\026\n\016maxSegmentS" +
-      "ize\030\003 \001(\003\022\022\n\npolyNumber\030\004 \001(\003\022\022\n\nwindowS" +
-      "ize\030\005 \001(\003\022.\n\010hashtype\030\006 \001(\0162\034.org.opende" +
-      "dup.grpc.hashtype\022\022\n\nmapVersion\030\007 \001(\005\022\r\n" +
-      "\005error\030\010 \001(\t\0221\n\terrorCode\030\t \001(\0162\036.org.op" +
-      "endedup.grpc.errorCodes\"K\n\014InsertRecord\022" +
-      "\017\n\007hashloc\030\001 \001(\003\022\020\n\010inserted\030\002 \001(\010\022\030\n\020co" +
-      "mpressedLength\030\003 \001(\005\"\207\002\n\013VolumeEvent\0222\n\004" +
-      "file\030\001 \001(\0132$.org.opendedup.grpc.FileInfo" +
-      "Response\022\014\n\004uuid\030\002 \001(\t\022\021\n\ttimeStamp\030\003 \001(" +
-      "\003\022\013\n\003seq\030\004 \001(\003\0222\n\nactionType\030\005 \001(\0162\036.org" +
-      ".opendedup.grpc.actionType\022\r\n\005error\030\006 \001(" +
-      "\t\0221\n\terrorCode\030\007 \001(\0162\036.org.opendedup.grp" +
-      "c.errorCodes\022\017\n\007srcfile\030\010 \001(\t\022\017\n\007dstfile" +
-      "\030\t \001(\t\"D\n\030VolumeEventListenRequest\022\021\n\tpv" +
-      "olumeID\030\001 \001(\003\022\025\n\rstartSequence\030\002 \001(\003*$\n\017" +
-      "SparseDataFlags\022\021\n\rRECONSTRUCTED\020\000*f\n\nac" +
-      "tionType\022\020\n\014MFILEDELETED\020\000\022\020\n\014MFILEWRITT" +
-      "EN\020\001\022\020\n\014MFILERENAMED\020\002\022\020\n\014SFILEWRITTEN\020\003" +
-      "\022\020\n\014SFILEDELETED\020\004*0\n\010hashtype\022\n\n\006SHA256" +
-      "\020\000\022\007\n\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\317\r\n\016Storage" +
-      "Service\022^\n\013HashingInfo\022&.org.opendedup.g" +
-      "rpc.HashingInfoRequest\032\'.org.opendedup.g" +
-      "rpc.HashingInfoResponse\022^\n\013CheckHashes\022&" +
-      ".org.opendedup.grpc.CheckHashesRequest\032\'" +
-      ".org.opendedup.grpc.CheckHashesResponse\022" +
-      "^\n\013WriteChunks\022&.org.opendedup.grpc.Writ" +
-      "eChunksRequest\032\'.org.opendedup.grpc.Writ" +
-      "eChunksResponse\022S\n\tGetChunks\022$.org.opend" +
-      "edup.grpc.GetChunksRequest\032\036.org.opended" +
-      "up.grpc.ChunkEntry0\001\022d\n\021SubscribeToVolum" +
-      "e\022,.org.opendedup.grpc.VolumeEventListen" +
-      "Request\032\037.org.opendedup.grpc.VolumeEvent" +
-      "0\001\022}\n\024WriteSparseDataChunk\0221.org.opended" +
-      "up.grpc.SparseDedupeChunkWriteRequest\0322." +
-      "org.opendedup.grpc.SparseDedupeChunkWrit" +
-      "eResponse\022z\n\023ReadSparseDataChunk\0220.org.o" +
-      "pendedup.grpc.SparseDedupeChunkReadReque" +
-      "st\0321.org.opendedup.grpc.SparseDedupeChun" +
-      "kReadResponse\022v\n\025GetMetaDataDedupeFile\022-" +
-      ".org.opendedup.grpc.MetaDataDedupeFileRe" +
-      "quest\032..org.opendedup.grpc.MetaDataDedup" +
-      "eFileResponse\022j\n\023GetSparseDedupeFile\022+.o" +
-      "rg.opendedup.grpc.SparseDedupeFileReques" +
-      "t\032$.org.opendedup.grpc.SparseDataChunkP0" +
-      "\001\022n\n\023ReplicateRemoteFile\022*.org.opendedup" +
-      ".grpc.FileReplicationRequest\032+.org.opend" +
-      "edup.grpc.FileReplicationResponse\022j\n\017Res" +
-      "toreArchives\022*.org.opendedup.grpc.Restor" +
-      "eArchivesRequest\032+.org.opendedup.grpc.Re" +
-      "storeArchivesResponse\022p\n\021CancelReplicati" +
-      "on\022,.org.opendedup.grpc.CancelReplicatio" +
-      "nRequest\032-.org.opendedup.grpc.CancelRepl" +
-      "icationResponse\022m\n\020PauseReplication\022+.or" +
-      "g.opendedup.grpc.PauseReplicationRequest" +
-      "\032,.org.opendedup.grpc.PauseReplicationRe" +
-      "sponse\022_\n\014ListReplLogs\022,.org.opendedup.g" +
-      "rpc.VolumeEventListenRequest\032\037.org.opend" +
-      "edup.grpc.VolumeEvent0\001\022m\n\020AddReplicaSou" +
-      "rce\022+.org.opendedup.grpc.AddReplicaSourc" +
-      "eRequest\032,.org.opendedup.grpc.AddReplica" +
-      "SourceResponse\022v\n\023RemoveReplicaSource\022.." +
-      "org.opendedup.grpc.RemoveReplicaSourceRe" +
-      "quest\032/.org.opendedup.grpc.RemoveReplica" +
-      "SourceResponseB0Z.github.com/opendedup/s" +
-      "dfs-client-go/sdfs/;sdfsb\006proto3"
+      "\004mtls\030\005 \001(\010\032\215\001\n\027ReplicationFileLocation\022" +
+      "\023\n\013srcFilePath\030\001 \001(\t\022\023\n\013dstFilePath\030\002 \001(" +
+      "\t\022\021\n\tsrcoffset\030\003 \001(\003\022\017\n\007srcsize\030\004 \001(\003\022\021\n" +
+      "\tdstoffset\030\005 \001(\003\022\021\n\toverwrite\030\007 \001(\010\"Z\n\027A" +
+      "ddReplicaSourceRequest\022\021\n\tpvolumeID\030\003 \001(" +
+      "\003\022\021\n\trvolumeID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\022\014\n\004mtl" +
+      "s\030\006 \001(\010\"\\\n\030AddReplicaSourceResponse\022\r\n\005e" +
+      "rror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.open" +
+      "dedup.grpc.errorCodes\"O\n\032RemoveReplicaSo" +
+      "urceRequest\022\021\n\tpvolumeID\030\003 \001(\003\022\021\n\trvolum" +
+      "eID\030\004 \001(\003\022\013\n\003url\030\005 \001(\t\"_\n\033RemoveReplicaS" +
+      "ourceResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCod" +
+      "e\030\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"" +
+      "l\n\027FileReplicationResponse\022\r\n\005error\030\001 \001(" +
+      "\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup.grp" +
+      "c.errorCodes\022\017\n\007eventID\030\003 \003(\t\"@\n\031MetaDat" +
+      "aDedupeFileRequest\022\020\n\010filePath\030\001 \001(\t\022\021\n\t" +
+      "pvolumeID\030\002 \001(\003\"\243\001\n\032MetaDataDedupeFileRe" +
+      "sponse\0222\n\004file\030\001 \001(\0132$.org.opendedup.grp" +
+      "c.FileInfoResponse\0221\n\terrorCode\030\002 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\022\r\n\005error\030\003" +
+      " \001(\t\022\017\n\007eventID\030\004 \001(\t\":\n\027SparseDedupeFil" +
+      "eRequest\022\014\n\004guid\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(" +
+      "\003\"\222\001\n\030SparseDedupeFileResponse\0224\n\006chunks" +
+      "\030\001 \003(\0132$.org.opendedup.grpc.SparseDataCh" +
+      "unkP\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup." +
+      "grpc.errorCodes\022\r\n\005error\030\003 \001(\t\"\200\001\n\rChunk" +
+      "Response\022\014\n\004data\030\001 \001(\014\022\013\n\003len\030\002 \001(\005\022\r\n\005e" +
+      "rror\030\003 \001(\t\0221\n\terrorCode\030\004 \001(\0162\036.org.open" +
+      "dedup.grpc.errorCodes\022\022\n\ncompressed\030\005 \001(" +
+      "\010\"\252\001\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014\022\014\n\004data\030\002" +
+      " \001(\014\022\022\n\ncompressed\030\003 \001(\010\022\030\n\020compressedLe" +
+      "ngth\030\004 \001(\005\022\020\n\010location\030\005 \001(\003\0221\n\terrorCod" +
+      "e\030\006 \001(\0162\036.org.opendedup.grpc.errorCodes\022" +
+      "\r\n\005error\030\007 \001(\t\"k\n\022WriteChunksRequest\022.\n\006" +
+      "chunks\030\001 \003(\0132\036.org.opendedup.grpc.ChunkE" +
+      "ntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolumeID\030\003 " +
+      "\001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005error\030\001 \001" +
+      "(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup.gr" +
+      "pc.errorCodes\0227\n\rinsertRecords\030\003 \003(\0132 .o" +
+      "rg.opendedup.grpc.InsertRecord\"U\n\020GetChu" +
+      "nksRequest\022.\n\006chunks\030\001 \003(\0132\036.org.opended" +
+      "up.grpc.ChunkEntry\022\021\n\tpvolumeID\030\002 \001(\003\"\231\001" +
+      "\n\022HashingInfoRequest\022.\n\006chunks\030\001 \003(\0132\036.o" +
+      "rg.opendedup.grpc.ChunkEntry\022\r\n\005error\030\002 " +
+      "\001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.g" +
+      "rpc.errorCodes\022\021\n\tpvolumeID\030\004 \001(\003\"\204\001\n\014Ha" +
+      "shLocPairP\022\014\n\004hash\030\001 \001(\014\022\017\n\007hashloc\030\002 \001(" +
+      "\003\022\013\n\003len\030\003 \001(\005\022\013\n\003pos\030\004 \001(\005\022\016\n\006offset\030\005 " +
+      "\001(\005\022\014\n\004nlen\030\006 \001(\005\022\013\n\003dup\030\007 \001(\010\022\020\n\010insert" +
+      "ed\030\010 \001(\010\"L\n\027PauseReplicationRequest\022\017\n\007e" +
+      "ventID\030\001 \001(\t\022\r\n\005pause\030\002 \001(\010\022\021\n\tpvolumeID" +
+      "\030\003 \001(\003\"\\\n\030PauseReplicationResponse\022\r\n\005er" +
+      "ror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opend" +
+      "edup.grpc.errorCodes\">\n\030CancelReplicatio" +
+      "nRequest\022\017\n\007eventID\030\001 \001(\t\022\021\n\tpvolumeID\030\002" +
+      " \001(\003\"]\n\031CancelReplicationResponse\022\r\n\005err" +
+      "or\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opende" +
+      "dup.grpc.errorCodes\"\365\002\n\020SparseDataChunkP" +
+      "\022\014\n\004fpos\030\001 \001(\003\022\013\n\003len\030\002 \001(\005\0222\n\005flags\030\003 \003" +
+      "(\0162#.org.opendedup.grpc.SparseDataFlags\022" +
+      "\017\n\007version\030\004 \001(\005\0228\n\002ar\030\005 \003(\0132,.org.opend" +
+      "edup.grpc.SparseDataChunkP.ArEntry\022\014\n\004do" +
+      "op\030\006 \001(\005\022\020\n\010prevdoop\030\007 \001(\005\022\030\n\020compressed" +
+      "Length\030\010 \001(\005\022\r\n\005error\030\t \001(\t\0221\n\terrorCode" +
+      "\030\n \001(\0162\036.org.opendedup.grpc.errorCodes\032K" +
+      "\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005value\030\002 \001(\0132 ." +
+      "org.opendedup.grpc.HashLocPairP:\0028\001\"\327\001\n\035" +
+      "SparseDedupeChunkWriteRequest\0223\n\005chunk\030\001" +
+      " \001(\0132$.org.opendedup.grpc.SparseDataChun" +
+      "kP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014fileLocation\030\003" +
+      " \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\022\022\n\ncompressed\030\005 " +
+      "\001(\010\022\027\n\017compressedChunk\030\006 \001(\014\022\027\n\017uncompre" +
+      "ssedLen\030\007 \001(\005\"b\n\036SparseDedupeChunkWriteR" +
+      "esponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(" +
+      "\0162\036.org.opendedup.grpc.errorCodes\"U\n\034Spa" +
+      "rseDedupeChunkReadRequest\022\016\n\006offset\030\001 \001(" +
+      "\003\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolumeID\030\003 \001(\003" +
+      "\"\226\001\n\035SparseDedupeChunkReadResponse\022\r\n\005er" +
+      "ror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opend" +
+      "edup.grpc.errorCodes\0223\n\005chunk\030\003 \001(\0132$.or" +
+      "g.opendedup.grpc.SparseDataChunkP\"\206\002\n\023Ha" +
+      "shingInfoResponse\022\021\n\tchunkSize\030\001 \001(\003\022\026\n\016" +
+      "minSegmentSize\030\002 \001(\003\022\026\n\016maxSegmentSize\030\003" +
+      " \001(\003\022\022\n\npolyNumber\030\004 \001(\003\022\022\n\nwindowSize\030\005" +
+      " \001(\003\022.\n\010hashtype\030\006 \001(\0162\034.org.opendedup.g" +
+      "rpc.hashtype\022\022\n\nmapVersion\030\007 \001(\005\022\r\n\005erro" +
+      "r\030\010 \001(\t\0221\n\terrorCode\030\t \001(\0162\036.org.opended" +
+      "up.grpc.errorCodes\"K\n\014InsertRecord\022\017\n\007ha" +
+      "shloc\030\001 \001(\003\022\020\n\010inserted\030\002 \001(\010\022\030\n\020compres" +
+      "sedLength\030\003 \001(\005\"\207\002\n\013VolumeEvent\0222\n\004file\030" +
+      "\001 \001(\0132$.org.opendedup.grpc.FileInfoRespo" +
+      "nse\022\014\n\004uuid\030\002 \001(\t\022\021\n\ttimeStamp\030\003 \001(\003\022\013\n\003" +
+      "seq\030\004 \001(\003\0222\n\nactionType\030\005 \001(\0162\036.org.open" +
+      "dedup.grpc.actionType\022\r\n\005error\030\006 \001(\t\0221\n\t" +
+      "errorCode\030\007 \001(\0162\036.org.opendedup.grpc.err" +
+      "orCodes\022\017\n\007srcfile\030\010 \001(\t\022\017\n\007dstfile\030\t \001(" +
+      "\t\"D\n\030VolumeEventListenRequest\022\021\n\tpvolume" +
+      "ID\030\001 \001(\003\022\025\n\rstartSequence\030\002 \001(\003*$\n\017Spars" +
+      "eDataFlags\022\021\n\rRECONSTRUCTED\020\000*f\n\nactionT" +
+      "ype\022\020\n\014MFILEDELETED\020\000\022\020\n\014MFILEWRITTEN\020\001\022" +
+      "\020\n\014MFILERENAMED\020\002\022\020\n\014SFILEWRITTEN\020\003\022\020\n\014S" +
+      "FILEDELETED\020\004*0\n\010hashtype\022\n\n\006SHA256\020\000\022\007\n" +
+      "\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\317\r\n\016StorageServi" +
+      "ce\022^\n\013HashingInfo\022&.org.opendedup.grpc.H" +
+      "ashingInfoRequest\032\'.org.opendedup.grpc.H" +
+      "ashingInfoResponse\022^\n\013CheckHashes\022&.org." +
+      "opendedup.grpc.CheckHashesRequest\032\'.org." +
+      "opendedup.grpc.CheckHashesResponse\022^\n\013Wr" +
+      "iteChunks\022&.org.opendedup.grpc.WriteChun" +
+      "ksRequest\032\'.org.opendedup.grpc.WriteChun" +
+      "ksResponse\022S\n\tGetChunks\022$.org.opendedup." +
+      "grpc.GetChunksRequest\032\036.org.opendedup.gr" +
+      "pc.ChunkEntry0\001\022d\n\021SubscribeToVolume\022,.o" +
+      "rg.opendedup.grpc.VolumeEventListenReque" +
+      "st\032\037.org.opendedup.grpc.VolumeEvent0\001\022}\n" +
+      "\024WriteSparseDataChunk\0221.org.opendedup.gr" +
+      "pc.SparseDedupeChunkWriteRequest\0322.org.o" +
+      "pendedup.grpc.SparseDedupeChunkWriteResp" +
+      "onse\022z\n\023ReadSparseDataChunk\0220.org.opende" +
+      "dup.grpc.SparseDedupeChunkReadRequest\0321." +
+      "org.opendedup.grpc.SparseDedupeChunkRead" +
+      "Response\022v\n\025GetMetaDataDedupeFile\022-.org." +
+      "opendedup.grpc.MetaDataDedupeFileRequest" +
+      "\032..org.opendedup.grpc.MetaDataDedupeFile" +
+      "Response\022j\n\023GetSparseDedupeFile\022+.org.op" +
+      "endedup.grpc.SparseDedupeFileRequest\032$.o" +
+      "rg.opendedup.grpc.SparseDataChunkP0\001\022n\n\023" +
+      "ReplicateRemoteFile\022*.org.opendedup.grpc" +
+      ".FileReplicationRequest\032+.org.opendedup." +
+      "grpc.FileReplicationResponse\022j\n\017RestoreA" +
+      "rchives\022*.org.opendedup.grpc.RestoreArch" +
+      "ivesRequest\032+.org.opendedup.grpc.Restore" +
+      "ArchivesResponse\022p\n\021CancelReplication\022,." +
+      "org.opendedup.grpc.CancelReplicationRequ" +
+      "est\032-.org.opendedup.grpc.CancelReplicati" +
+      "onResponse\022m\n\020PauseReplication\022+.org.ope" +
+      "ndedup.grpc.PauseReplicationRequest\032,.or" +
+      "g.opendedup.grpc.PauseReplicationRespons" +
+      "e\022_\n\014ListReplLogs\022,.org.opendedup.grpc.V" +
+      "olumeEventListenRequest\032\037.org.opendedup." +
+      "grpc.VolumeEvent0\001\022m\n\020AddReplicaSource\022+" +
+      ".org.opendedup.grpc.AddReplicaSourceRequ" +
+      "est\032,.org.opendedup.grpc.AddReplicaSourc" +
+      "eResponse\022v\n\023RemoveReplicaSource\022..org.o" +
+      "pendedup.grpc.RemoveReplicaSourceRequest" +
+      "\032/.org.opendedup.grpc.RemoveReplicaSourc" +
+      "eResponseB0Z.github.com/opendedup/sdfs-c" +
+      "lient-go/sdfs/;sdfsb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           org.opendedup.grpc.FileInfo.getDescriptor(),
-        }, assigner);
+        });
     internal_static_org_opendedup_grpc_CheckHashesRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_org_opendedup_grpc_CheckHashesRequest_fieldAccessorTable = new
@@ -29819,7 +31681,7 @@ public final class Storage {
     internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_FileReplicationRequest_ReplicationFileLocation_descriptor,
-        new java.lang.String[] { "SrcFilePath", "DstFilePath", });
+        new java.lang.String[] { "SrcFilePath", "DstFilePath", "Srcoffset", "Srcsize", "Dstoffset", "Overwrite", });
     internal_static_org_opendedup_grpc_AddReplicaSourceRequest_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_org_opendedup_grpc_AddReplicaSourceRequest_fieldAccessorTable = new

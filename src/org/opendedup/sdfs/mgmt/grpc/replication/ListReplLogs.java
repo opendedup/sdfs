@@ -59,7 +59,7 @@ public class ListReplLogs implements Runnable {
                     SDFSLogger.getLog().warn("Downloading all files");
                     ReplicationImportEvent evt = new ReplicationImportEvent(".",
                             ".", client.url, client.volumeid,
-                            client.mtls, false);
+                            client.mtls, false,0,0,0,true);
                     try {
                         new DownloadAll(this.client, evt).replicationSinkAll();
                     } catch (Exception e) {
@@ -73,16 +73,16 @@ public class ListReplLogs implements Runnable {
                     if (rs.getActionType() == actionType.MFILEWRITTEN) {
                         ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                 rs.getFile().getFilePath(),
-                                client.url, client.volumeid, client.mtls, false);
-                        impf = new ImportFile(rs.getFile().getFilePath(), rs.getFile().getFilePath(), client,
-                                evt, true);
+                                client.url, client.volumeid, client.mtls, false,0,0,0,true);
+                        impf = new ImportFile( client,
+                                evt);
 
                     } else if (rs.getActionType() == actionType.MFILEDELETED) {
                         String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
                         File _f = new File(pt);
                         FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                         MetaFileStore.getMF(_f).clearRetentionLock();
-                        MetaFileStore.removeMetaFile(_f.getPath());
+                        MetaFileStore.removeMetaFile(_f.getPath(), false, false, false);
                     } else if (rs.getActionType() == actionType.MFILERENAMED) {
                         String spt = Main.volume.getPath() + File.separator + rs.getSrcfile();
                         File _sf = new File(spt);
