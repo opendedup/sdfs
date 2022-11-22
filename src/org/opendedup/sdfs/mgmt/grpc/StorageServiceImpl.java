@@ -362,12 +362,15 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 try {
                     ddb.setIndexed(true);
                     ddb.iterInit();
+                    long fpos = 0;
                     for (;;) {
                         LongKeyValue kv = ddb.nextKeyValue(false);
                         if (kv == null)
                             break;
                         SparseDataChunk ck = kv.getValue();
+                        ck.setFpos(fpos);
                         responseObserver.onNext(ck.toProtoBuf());
+                        fpos += Main.CHUNK_LENGTH;
                     }
                 } finally {
                     ddb.close();

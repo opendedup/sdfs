@@ -268,6 +268,9 @@ public class ImportFile implements Runnable {
                 throw e;
             }
             long expectedSize = evt.dstOffset + evt.srcSize;
+            if (evt.srcSize == 0) {
+                expectedSize += fi.getSize();
+            }
             evt.addCount(1);
             if (this.evt.canceled) {
                 mf.deleteStub(false);
@@ -284,8 +287,12 @@ public class ImportFile implements Runnable {
             String sguid = fi.getMapGuid();
 
             try {
-                if (sguid != null && sguid.trim().length() > 0 && evt.srcSize > 0) {
-                    downloadDDB(mf, sguid);
+                if (sguid != null && sguid.trim().length() > 0 && fi.getSize() > 0) {
+                    long endPos = evt.srcOffset + evt.srcSize;
+                    if (evt.srcSize == 0) {
+                        endPos += fi.getSize();
+                    }
+                    downloadDDB(mf, sguid, endPos);
                 }
                 mf.setRetentionLock();
                 CloseFile.close(mf, true);
@@ -351,20 +358,18 @@ public class ImportFile implements Runnable {
         }
         String pt = Main.volume.getPath() + File.separator + evt.dst;
         File _f = new File(pt);
-        if (_f.exists() && evt.srcOffset == 0 && evt.dstOffset == 0 && (evt.srcSize ==0 || evt.srcSize ==crs.getFile().getSize())) {
+        if (_f.exists() && evt.srcOffset == 0 && evt.dstOffset == 0
+                && (evt.srcSize == 0 || evt.srcSize == crs.getFile().getSize())) {
             FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
             MetaFileStore.getMF(_f.getAbsolutePath()).clearRetentionLock();
             MetaFileStore.removeMetaFile(_f.getPath(), false, false, false);
-        }
-        if (evt.srcSize == 0) {
-            evt.srcSize = crs.getFile().getSize();
         }
         this.evt.fileSize = crs.getFile().getSize();
 
         return crs.getFile();
     }
 
-    private void downloadDDB(MetaDataDedupFile mf, String guid) throws Exception {
+    private void downloadDDB(MetaDataDedupFile mf, String guid, long endPos) throws Exception {
         if (this.evt.canceled || this.client.removed || this.client.closed) {
             throw new ReplicationCanceledException("Replication Canceled");
         }
@@ -381,18 +386,35 @@ public class ImportFile implements Runnable {
 
         long spos = this.getChuckPosition(evt.srcOffset);
         long dpos = this.getChuckPosition(evt.dstOffset);
-        long endPos = evt.srcOffset + evt.srcSize;
-        ByteBuffer bf = null;
+        ByteBuffer ebf = null;
+        ByteBuffer fbf = null;
 
-        if (evt.dstOffset > 0 && evt.srcOffset > 0) {
+        if (evt.srcSize > 0) {
 
-            int rl = (int) ((int) evt.dstOffset - (int) dpos);
-            if (rl > 0) {
-                DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
-                bf = ByteBuffer.wrap(new byte[rl]);
-                ch.read(bf, 0, rl, dpos);
-                ch.getDedupFile().unRegisterChannel(ch, -2);
-                ch.getDedupFile().forceClose();
+            long expectedSize = evt.dstOffset + evt.srcSize;
+            if (expectedSize < mf.length()) {
+                long edpos = this.getChuckPosition(evt.dstOffset + Main.CHUNK_LENGTH);
+                int el = (int) (edpos - evt.dstOffset);
+                if (expectedSize < (dpos + el)) {
+                    el = (int) (expectedSize - dpos);
+                }
+                if (el > 0) {
+                    DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
+                    fbf = ByteBuffer.wrap(new byte[el]);
+                    ch.read(ebf, 0, el, evt.dstOffset);
+                    ch.getDedupFile().unRegisterChannel(ch, -2);
+                    ch.getDedupFile().forceClose();
+                }
+            }
+            if (expectedSize >= mf.length()) {
+                int rl = (int) (evt.dstOffset - dpos);
+                if (rl > 0) {
+                    DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
+                    ebf = ByteBuffer.wrap(new byte[rl]);
+                    ch.read(ebf, 0, rl, dpos);
+                    ch.getDedupFile().unRegisterChannel(ch, -2);
+                    ch.getDedupFile().forceClose();
+                }
             }
         }
         LongByteArrayMap mp = LongByteArrayMap.getMap(mf.getDfGuid());
@@ -417,6 +439,7 @@ public class ImportFile implements Runnable {
             }
             SparseDataChunk sp = new SparseDataChunk(cr);
             if (sp.getFpos() >= spos && sp.getFpos() < endPos) {
+                SDFSLogger.getLog().debug("fpos = " + sp.getFpos() + " spos = " + spos + " endPos " + endPos + " dpos = " + dpos);
                 SparseDataChunk ck = importSparseDataChunk(sp, mf);
                 mp.put(dpos, ck);
                 dpos += ck.len;
@@ -426,14 +449,23 @@ public class ImportFile implements Runnable {
             }
 
         }
-        
+
         mp.close();
-        if (bf != null) {
+        if (ebf != null) {
             DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
             long place = this.getChuckPosition(evt.dstOffset);
             int rl = (int) ((int) evt.dstOffset - (int) place);
-            bf.position(0);
-            ch.writeFile(bf, rl, 0, place, false);
+            ebf.position(0);
+            ch.writeFile(ebf, rl, 0, place, false);
+            SDFSLogger.getLog().debug("Wrote e " + rl + " at " + evt.dstOffset);
+            ch.getDedupFile().unRegisterChannel(ch, -2);
+            ch.getDedupFile().forceClose();
+        }
+        if (fbf != null) {
+            DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
+            fbf.position(0);
+            ch.writeFile(fbf, fbf.capacity(), 0, evt.dstOffset, false);
+            SDFSLogger.getLog().debug("Wrote f " + fbf.capacity() + " at " + evt.dstOffset);
             ch.getDedupFile().unRegisterChannel(ch, -2);
             ch.getDedupFile().forceClose();
         }
@@ -494,7 +526,7 @@ public class ImportFile implements Runnable {
             HashFunction hf = Hashing.sha256();
             if (!StringUtils.getHexString(hf.hashBytes(dt).asBytes())
                     .equals(StringUtils.getHexString(ce.getHash().toByteArray()))) {
-                SDFSLogger.getLog().info(StringUtils.getHexString(hf.hashBytes(dt).asBytes())
+                SDFSLogger.getLog().warn(StringUtils.getHexString(hf.hashBytes(dt).asBytes())
                         +
                         " = " + StringUtils.getHexString(ce.getHash().toByteArray()));
             }

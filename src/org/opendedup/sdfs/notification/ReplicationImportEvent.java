@@ -41,6 +41,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 	public long srcSize;
 	public long dstSize;
 	public boolean overwrite;
+	public boolean fullFile;
 
 	public ReplicationImportEvent(String src, String dst, String url, long volumeid,boolean mtls,boolean onDemand,
 	long srcOffset,long srcSize,long dstOffset, boolean overwrite) {
@@ -75,7 +76,6 @@ public class ReplicationImportEvent extends SDFSEvent {
 		this.srcSize=Long.parseLong(evt.getAttributesMap().get("srcsize"));
 		this.dstOffset=Long.parseLong(evt.getAttributesMap().get("dstoffset"));
 		this.overwrite= Boolean.parseBoolean(evt.getAttributesMap().get("overwrite"));
-
 	}
 
 	public void cancel() {
