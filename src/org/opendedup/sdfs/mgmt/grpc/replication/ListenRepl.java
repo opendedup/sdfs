@@ -18,6 +18,7 @@ import org.opendedup.grpc.Storage.actionType;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
+import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl;
 import org.opendedup.sdfs.mgmt.grpc.replication.ReplicationClient.ReplicationConnection;
@@ -38,6 +39,20 @@ public class ListenRepl implements Runnable {
 
     private static class ListenReplCanceled extends Exception {
 
+    }
+
+    private boolean replicateFile(VolumeEvent rs) {
+        String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
+        File _f = new File(pt);
+        if(!_f.exists()) {
+            return true;
+        }
+        MetaDataDedupFile mf = MetaFileStore.getMF(_f);
+        if(mf.lastModified() != rs.getFile().getMtime()) {
+            return true;
+        }
+        return false;
+        
     }
 
     public void listen() throws Exception, ListenReplCanceled {
@@ -67,7 +82,7 @@ public class ListenRepl implements Runnable {
                 }
                 ImportFile impf = null;
                 synchronized (client) {
-                    if (rs.getActionType() == actionType.MFILEWRITTEN) {
+                    if (rs.getActionType() == actionType.MFILEWRITTEN && replicateFile(rs)) {
                         ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                 rs.getFile().getFilePath(),
                                 client.url, client.volumeid, client.mtls, false,

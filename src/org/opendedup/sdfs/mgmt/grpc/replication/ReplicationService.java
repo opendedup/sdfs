@@ -95,30 +95,31 @@ public class ReplicationService {
     public void syncEvent(org.opendedup.sdfs.io.events.MFileDownloaded _evt) {
         VolumeEvent.Builder b = VolumeEvent.newBuilder();
         b.setSeq(this.sequence.incrementAndGet()).setUuid(RandomGUID.getGuid())
-        .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILEWRITTEN);
+                .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILEWRITTEN);
         try {
             synchronized (_evt.mf) {
-               b.setFile(_evt.mf.toGRPC(false));
+                b.setFile(_evt.mf.toGRPC(false));
 
             }
         } catch (Exception e) {
-            SDFSLogger.getLog().warn("unable to serialize message",e);
+            SDFSLogger.getLog().warn("unable to serialize message", e);
         }
     }
 
     @Subscribe
     public void syncEvent(org.opendedup.sdfs.io.events.MFileWritten _evt) {
+
         VolumeEvent.Builder b = VolumeEvent.newBuilder();
         b.setSeq(this.sequence.incrementAndGet()).setUuid(RandomGUID.getGuid())
-        .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILEWRITTEN);
+                .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILEWRITTEN);
         try {
             synchronized (_evt.mf) {
-               b.setFile(_evt.mf.toGRPC(false));
+                b.setFile(_evt.mf.toGRPC(false));
 
             }
             persistVolumeEvent(b);
         } catch (Exception e) {
-            SDFSLogger.getLog().warn("unable to serialize message",e);
+            SDFSLogger.getLog().warn("unable to serialize message", e);
         }
     }
 
@@ -126,32 +127,32 @@ public class ReplicationService {
     public void syncEvent(org.opendedup.sdfs.io.events.MFileDeleted _evt) {
         VolumeEvent.Builder b = VolumeEvent.newBuilder();
         b.setSeq(this.sequence.incrementAndGet()).setUuid(RandomGUID.getGuid())
-        .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILEDELETED);
+                .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILEDELETED);
         try {
             synchronized (_evt.mf) {
-               b.setFile(_evt.mf.toGRPC(false));
+                b.setFile(_evt.mf.toGRPC(false));
 
             }
             persistVolumeEvent(b);
         } catch (Exception e) {
-            SDFSLogger.getLog().warn("unable to serialize message",e);
+            SDFSLogger.getLog().warn("unable to serialize message", e);
         }
-        
+
     }
 
     @Subscribe
     public void syncEvent(org.opendedup.sdfs.io.events.MFileRenamed _evt) {
         VolumeEvent.Builder b = VolumeEvent.newBuilder();
         b.setSeq(this.sequence.incrementAndGet()).setUuid(RandomGUID.getGuid())
-        .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILERENAMED);
+                .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILERENAMED);
         try {
             synchronized (_evt.mf) {
-               b.setFile(_evt.mf.toGRPC(false)).setSrcfile(_evt.from.substring(pl))
-               .setDstfile(_evt.to.substring(pl));
+                b.setFile(_evt.mf.toGRPC(false)).setSrcfile(_evt.from.substring(pl))
+                        .setDstfile(_evt.to.substring(pl));
             }
             persistVolumeEvent(b);
         } catch (Exception e) {
-            SDFSLogger.getLog().warn("unable to serialize message",e);
+            SDFSLogger.getLog().warn("unable to serialize message", e);
         }
     }
 

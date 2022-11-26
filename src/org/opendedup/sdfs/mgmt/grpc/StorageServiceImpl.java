@@ -594,6 +594,9 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                                         " " + ch.getFile().length() + " for " + ch.getFile().getPath());
                     }
                 }
+                long tm = System.currentTimeMillis();
+                ch.getFile().setLastAccessed(tm,false);
+                ch.getFile().setLastModified(tm,false);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;

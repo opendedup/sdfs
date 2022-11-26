@@ -304,7 +304,18 @@ public class ReplicationClient {
                         location.getOverwrite());
                 evt.persistEvent();
                 if (activeImports.containsKey(location.getDstFilePath())) {
-                    evt.endEvent("Replication already occuring for" + location.getDstFilePath(), SDFSEvent.ERROR);
+                    List<ReplicationImportEvent> devts = activeImports.get(location.getDstFilePath());
+                    String sev = "";
+                    for (ReplicationImportEvent de : devts) {
+                        if (sev.length() > 0) {
+                            sev = sev + ",";
+
+                        }
+                        sev = sev + de.uid;
+
+                    }
+                    evt.endEvent("Replication already occuring for [" + location.getDstFilePath() + "] event ids ["
+                            + sev + "]", SDFSEvent.ERROR);
                 } else {
                     SDFSLogger.getLog().info("Will Replicate " + location.getSrcFilePath() + " to "
                             + location.getDstFilePath() + " from " + url);
@@ -332,7 +343,17 @@ public class ReplicationClient {
     private SDFSEvent importFile(ReplicationImportEvent evt) throws IOException {
 
         if (activeImports.containsKey(evt.dst)) {
-            evt.endEvent("Replication already occuring for" + evt.dst, SDFSEvent.ERROR);
+            List<ReplicationImportEvent> devts = activeImports.get(evt.dst);
+            String sev = "";
+            for (ReplicationImportEvent de : devts) {
+                if (sev.length() > 0) {
+                    sev = sev + ",";
+
+                }
+                sev = sev + de.uid;
+
+            }
+            evt.endEvent("Replication already occuring for [" + evt.dst + "] event ids [" + sev + "]", SDFSEvent.ERROR);
         } else {
             SDFSLogger.getLog().info("Will Replicate " + evt.src + " to "
                     + evt.dst + " from " + url);
