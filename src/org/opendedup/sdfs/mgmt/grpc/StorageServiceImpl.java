@@ -85,6 +85,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import io.grpc.stub.StreamObserver;
 
@@ -120,7 +121,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
             try {
                 ReplicationClient client = new ReplicationClient(request.getUrl(),
-                        request.getRvolumeID(), request.getMtls(),Main.volume.getReplPath());
+                        request.getRvolumeID(), request.getMtls(), Main.volume.getReplPath());
                 SDFSEvent[] evts = client.replicate(request.getFileLocationList());
                 for (SDFSEvent evt : evts) {
                     b.addEventID(evt.uid);
@@ -226,13 +227,12 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
                 if (SDFSEvent.getEvent(request.getEventID()) != null) {
                     ReplicationImportEvent evt = (ReplicationImportEvent) SDFSEvent.getEvent(request.getEventID());
-                    if(evt.canceled) {
+                    if (evt.canceled) {
                         b.setError("UUID " + request.getEventID() + " alread canceled");
                         b.setErrorCode(errorCodes.EAGAIN);
                         responseObserver.onNext(b.build());
                         responseObserver.onCompleted();
-                    }
-                    else if (evt.getEndTime() > 0) {
+                    } else if (evt.getEndTime() > 0) {
                         b.setError("UUID " + request.getEventID() + " alread done");
                         b.setErrorCode(errorCodes.EALREADY);
                         responseObserver.onNext(b.build());
@@ -329,7 +329,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 responseObserver.onCompleted();
                 return;
             } catch (FileIOError e) {
-                SDFSLogger.getLog().warn("error getting file ",e);
+                SDFSLogger.getLog().warn("error getting file ", e);
                 b.setError(e.message);
                 b.setErrorCode(e.code);
                 responseObserver.onNext(b.build());
@@ -404,8 +404,11 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 List<ByteString> hashes = request.getHashesList();
                 List<Long> responses = new ArrayList<Long>();
                 List<ListenableFuture<Long>> futures = new ArrayList<ListenableFuture<Long>>();
-
+                //long tm = System.currentTimeMillis();
+                //AtomicLong dp = new AtomicLong();
                 for (ByteString bs : hashes) {
+                    //dp.incrementAndGet();
+
                     ListenableFuture<Long> lf = service.submit(() -> {
                         return HCServiceProxy.getHashesMap().get(bs.toByteArray());
                     });
@@ -414,7 +417,8 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 for (ListenableFuture<Long> future : futures) {
                     responses.add(future.get(300, TimeUnit.SECONDS));
                 }
-
+                //long nt = System.currentTimeMillis() - tm;
+                //SDFSLogger.getLog().info("checked " + dp.get() + " in " + nt);
                 b.addAllLocations(responses);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
@@ -428,6 +432,104 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
             }
         }
+    }
+
+    @Override
+    public StreamObserver<WriteChunksRequest> writeChunksStream(StreamObserver<WriteChunksResponse> responseObserver) {
+        return new StreamObserver<WriteChunksRequest>() {
+
+            List<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>> futures = new ArrayList<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>>();
+            List<org.opendedup.grpc.Storage.InsertRecord> responses = new ArrayList<org.opendedup.grpc.Storage.InsertRecord>();
+            //long tm = System.currentTimeMillis();
+            //AtomicLong dp = new AtomicLong();
+
+            @Override
+            public void onNext(WriteChunksRequest request) {
+                if (!AuthUtils.validateUser(AuthUtils.ACTIONS.FILE_WRITE)) {
+                    SDFSLogger.getLog().error("User is not a member of any group with access");
+                    this.onError(new Exception("User is not a member of any group with access"));
+                } else {
+                    if (Main.volume.isOffLine()) {
+                        SDFSLogger.getLog().error("Volume is Offline");
+                        this.onError(new Exception("Volume is Offline"));
+                    }
+                    if (Main.volume.isFull()) {
+                        SDFSLogger.getLog().error("Volume Full");
+                        this.onError(new Exception("Volume Full"));
+                    }
+                    try {
+                        DedupFileChannel ch = FileIOServiceImpl.dedupChannels.get(request.getFileHandle());
+                        for (ChunkEntry ent : request.getChunksList()) {
+                            ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf = service.submit(() -> {
+                                byte[] chunk = ent.getData().toByteArray();
+                                //dp.addAndGet(chunk.length);
+                                if (chunk.length > 0) {
+                                    // return new InsertRecord(true, 12312543L, chunk.length).toProtoBuf();
+
+                                    if (ent.getCompressed()) {
+                                        chunk = CompressionUtils.decompressLz4(chunk, ent.getCompressedLength());
+                                    }
+
+                                    ChunkData cm = new ChunkData(ent.getHash().toByteArray(), chunk.length, chunk,
+                                            ch.getDedupFile().getGUID());
+                                    InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, true);
+                                    SDFSLogger.getLog()
+                                            .debug("write archive is " + Longs.fromByteArray(ir.getHashLocs()));
+                                    ch.setWrittenTo(true);
+                                    return ir.toProtoBuf();
+                                } else {
+                                    return new InsertRecord(false, -1, 0).toProtoBuf();
+                                }
+                            });
+                            futures.add(lf);
+                        }
+                    } catch (Exception e) {
+                        SDFSLogger.getLog().error("Error while stream writing", e);
+                        this.onError(e);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                SDFSLogger.getLog().error("error while writing", t);
+
+            }
+
+            @Override
+            public void onCompleted() {
+                try {
+                    WriteChunksResponse.Builder b = WriteChunksResponse.newBuilder();
+                    for (ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf : futures) {
+                        responses.add(lf.get(300, TimeUnit.SECONDS));
+                    }
+                    //float nt = System.currentTimeMillis() - tm;
+                    //float bpm = dp.get() / (nt * 1000);
+                    //SDFSLogger.getLog().info("Wrote " + dp.get() + " in " + nt + " mbps " + bpm);
+                    b.addAllInsertRecords(responses);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+                } catch (Exception e) {
+                    WriteChunksResponse.Builder b = WriteChunksResponse.newBuilder();
+                    if (e.getMessage().contains("Disk is full")
+                            || e.getMessage().contains("There is not enough space on the disk")) {
+                        b.setError("Volume Full");
+                        b.setErrorCode(errorCodes.ENOSPC);
+                        responseObserver.onNext(b.build());
+                        responseObserver.onCompleted();
+                        return;
+                    }
+                    SDFSLogger.getLog().error("unable to write chunks ", e);
+                    b.setError("unable to write chunks");
+                    b.setErrorCode(errorCodes.EACCES);
+                    responseObserver.onNext(b.build());
+                    responseObserver.onCompleted();
+
+                }
+
+            }
+
+        };
     }
 
     @Override
@@ -459,10 +561,15 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 }
                 List<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>> futures = new ArrayList<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>>();
                 List<org.opendedup.grpc.Storage.InsertRecord> responses = new ArrayList<org.opendedup.grpc.Storage.InsertRecord>();
+                //long tm = System.currentTimeMillis();
+                //AtomicLong dp = new AtomicLong();
                 for (ChunkEntry ent : request.getChunksList()) {
                     ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf = service.submit(() -> {
                         byte[] chunk = ent.getData().toByteArray();
+                        //dp.addAndGet(chunk.length);
                         if (chunk.length > 0) {
+                            // return new InsertRecord(true, 12312543L, chunk.length).toProtoBuf();
+
                             if (ent.getCompressed()) {
                                 chunk = CompressionUtils.decompressLz4(chunk, ent.getCompressedLength());
                             }
@@ -482,6 +589,9 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 for (ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf : futures) {
                     responses.add(lf.get(300, TimeUnit.SECONDS));
                 }
+                //float nt = System.currentTimeMillis() - tm;
+                //float bpm = dp.get() / (nt * 1000);
+                //SDFSLogger.getLog().info("Wrote " + dp.get() + " in " + nt + " mbps " + bpm);
                 b.addAllInsertRecords(responses);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
@@ -533,6 +643,8 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     responseObserver.onCompleted();
                     return;
                 }
+                //long xtm = System.currentTimeMillis();
+                //AtomicLong dp = new AtomicLong();
                 SparseDataChunk sp = null;
                 if (request.getCompressed()) {
                     byte[] chunk = CompressionUtils.decompressLz4(request.getCompressedChunk().toByteArray(),
@@ -544,6 +656,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 }
                 HashMap<String, kv> hs = new HashMap<String, kv>();
                 for (Entry<Integer, HashLocPair> e : sp.getFingers().entrySet()) {
+                    //dp.incrementAndGet();
                     if (!e.getValue().inserted) {
                         String key = BaseEncoding.base64().encode(e.getValue().hash);
                         if (!hs.containsKey(key)) {
@@ -595,8 +708,10 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     }
                 }
                 long tm = System.currentTimeMillis();
-                ch.getFile().setLastAccessed(tm,false);
-                ch.getFile().setLastModified(tm,false);
+                ch.getFile().setLastAccessed(tm, false);
+                ch.getFile().setLastModified(tm, false);
+                //long nt = System.currentTimeMillis() - xtm;
+                //SDFSLogger.getLog().info("SDD Wrote " + dp.get() + " in " + nt);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
@@ -774,7 +889,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 responseObserver.onNext(evt.getVolumeEvent());
             } catch (Exception e) {
                 VolumeEvent.Builder b = VolumeEvent.newBuilder();
-                SDFSLogger.getLog().info("nSent Event");
+                SDFSLogger.getLog().error("nSent Event",e);
                 b.setError("Unable to marshal event");
                 b.setErrorCode(errorCodes.EIO);
                 responseObserver.onNext(b.build());

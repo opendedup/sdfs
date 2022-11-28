@@ -50,7 +50,7 @@ public class ReplicationClient {
     public long volumeid;
     public boolean mtls;
     public Map<String, ImportFile> imports = new ConcurrentHashMap<String, ImportFile>();
-    public Map<String, List<ReplicationImportEvent>> activeImports = new HashMap<String, List<ReplicationImportEvent>>();
+    public static Map<String, List<ReplicationImportEvent>> activeImports = new HashMap<String, List<ReplicationImportEvent>>();
     private long sequence = 0;
     public Thread syncThread;
     File jsonFile = null;
@@ -62,7 +62,7 @@ public class ReplicationClient {
     private Thread downloadThread;
 
     public ReplicationConnection getReplicationConnection() throws Exception {
-        synchronized (this.activeImports) {
+        synchronized (this) {
             ReplicationConnection rc = new ReplicationConnection();
             rc.rc = this;
             rc.connect();
@@ -383,7 +383,7 @@ public class ReplicationClient {
     }
 
     public void shutDown() {
-        synchronized (this.activeImports) {
+        synchronized (this) {
             this.closed = true;
             for (ReplicationConnection ce : this.connections.values()) {
                 try {
@@ -404,7 +404,6 @@ public class ReplicationClient {
             } catch (IOException e) {
                 SDFSLogger.getLog().warn("Unable to persist active imports", e);
             }
-            this.activeImports.clear();
         }
     }
 
@@ -414,7 +413,7 @@ public class ReplicationClient {
             if (syncThread != null && syncThread.isAlive()) {
                 syncThread.interrupt();
             }
-            synchronized (this.activeImports) {
+            synchronized (this) {
                 ArrayList<ReplicationImportEvent> ie = new ArrayList<ReplicationImportEvent>();
                 for (String uuid : this.imports.keySet()) {
                     try {

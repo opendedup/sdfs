@@ -220,7 +220,8 @@ public class RocksDBMap implements AbstractMap, AbstractHashesMap {
 				int version =4;
 				blockConfig.setFormatVersion(version);
 				if (version == 4) {
-					blockConfig.setIndexType(IndexType.kBinarySearch);
+					options.optimizeForPointLookup(100L);
+					//blockConfig.setIndexType(IndexType.kHashSearch);
 				} else {
 					blockConfig.setIndexType(IndexType.kTwoLevelIndexSearch);
 				}

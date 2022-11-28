@@ -111,6 +111,37 @@ public final class StorageServiceGrpc {
     return getWriteChunksMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.WriteChunksRequest,
+      org.opendedup.grpc.Storage.WriteChunksResponse> getWriteChunksStreamMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "WriteChunksStream",
+      requestType = org.opendedup.grpc.Storage.WriteChunksRequest.class,
+      responseType = org.opendedup.grpc.Storage.WriteChunksResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+  public static io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.WriteChunksRequest,
+      org.opendedup.grpc.Storage.WriteChunksResponse> getWriteChunksStreamMethod() {
+    io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.WriteChunksRequest, org.opendedup.grpc.Storage.WriteChunksResponse> getWriteChunksStreamMethod;
+    if ((getWriteChunksStreamMethod = StorageServiceGrpc.getWriteChunksStreamMethod) == null) {
+      synchronized (StorageServiceGrpc.class) {
+        if ((getWriteChunksStreamMethod = StorageServiceGrpc.getWriteChunksStreamMethod) == null) {
+          StorageServiceGrpc.getWriteChunksStreamMethod = getWriteChunksStreamMethod =
+              io.grpc.MethodDescriptor.<org.opendedup.grpc.Storage.WriteChunksRequest, org.opendedup.grpc.Storage.WriteChunksResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "WriteChunksStream"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.WriteChunksRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  org.opendedup.grpc.Storage.WriteChunksResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new StorageServiceMethodDescriptorSupplier("WriteChunksStream"))
+              .build();
+        }
+      }
+    }
+    return getWriteChunksStreamMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<org.opendedup.grpc.Storage.GetChunksRequest,
       org.opendedup.grpc.Storage.ChunkEntry> getGetChunksMethod;
 
@@ -588,6 +619,13 @@ public final class StorageServiceGrpc {
 
     /**
      */
+    public io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.WriteChunksRequest> writeChunksStream(
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.WriteChunksResponse> responseObserver) {
+      return io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall(getWriteChunksStreamMethod(), responseObserver);
+    }
+
+    /**
+     */
     public void getChunks(org.opendedup.grpc.Storage.GetChunksRequest request,
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.ChunkEntry> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetChunksMethod(), responseObserver);
@@ -700,6 +738,13 @@ public final class StorageServiceGrpc {
                 org.opendedup.grpc.Storage.WriteChunksRequest,
                 org.opendedup.grpc.Storage.WriteChunksResponse>(
                   this, METHODID_WRITE_CHUNKS)))
+          .addMethod(
+            getWriteChunksStreamMethod(),
+            io.grpc.stub.ServerCalls.asyncClientStreamingCall(
+              new MethodHandlers<
+                org.opendedup.grpc.Storage.WriteChunksRequest,
+                org.opendedup.grpc.Storage.WriteChunksResponse>(
+                  this, METHODID_WRITE_CHUNKS_STREAM)))
           .addMethod(
             getGetChunksMethod(),
             io.grpc.stub.ServerCalls.asyncServerStreamingCall(
@@ -834,6 +879,14 @@ public final class StorageServiceGrpc {
         io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.WriteChunksResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getWriteChunksMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.WriteChunksRequest> writeChunksStream(
+        io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.WriteChunksResponse> responseObserver) {
+      return io.grpc.stub.ClientCalls.asyncClientStreamingCall(
+          getChannel().newCall(getWriteChunksStreamMethod(), getCallOptions()), responseObserver);
     }
 
     /**
@@ -1205,6 +1258,7 @@ public final class StorageServiceGrpc {
   private static final int METHODID_LIST_REPL_LOGS = 13;
   private static final int METHODID_ADD_REPLICA_SOURCE = 14;
   private static final int METHODID_REMOVE_REPLICA_SOURCE = 15;
+  private static final int METHODID_WRITE_CHUNKS_STREAM = 16;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1297,6 +1351,9 @@ public final class StorageServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_WRITE_CHUNKS_STREAM:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.writeChunksStream(
+              (io.grpc.stub.StreamObserver<org.opendedup.grpc.Storage.WriteChunksResponse>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -1351,6 +1408,7 @@ public final class StorageServiceGrpc {
               .addMethod(getHashingInfoMethod())
               .addMethod(getCheckHashesMethod())
               .addMethod(getWriteChunksMethod())
+              .addMethod(getWriteChunksStreamMethod())
               .addMethod(getGetChunksMethod())
               .addMethod(getSubscribeToVolumeMethod())
               .addMethod(getWriteSparseDataChunkMethod())

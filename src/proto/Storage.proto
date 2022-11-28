@@ -277,6 +277,7 @@ service StorageService {
   rpc HashingInfo(HashingInfoRequest) returns (HashingInfoResponse);
   rpc CheckHashes(CheckHashesRequest) returns (CheckHashesResponse);
   rpc WriteChunks(WriteChunksRequest) returns (WriteChunksResponse);
+  rpc WriteChunksStream(stream WriteChunksRequest) returns (WriteChunksResponse);
   rpc GetChunks(GetChunksRequest) returns (stream ChunkEntry);
   rpc SubscribeToVolume(VolumeEventListenRequest) returns (stream VolumeEvent);
   rpc WriteSparseDataChunk(SparseDedupeChunkWriteRequest) returns (SparseDedupeChunkWriteResponse);

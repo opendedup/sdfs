@@ -95,15 +95,15 @@ public class ImportFile implements Runnable {
         Exception e = null;
         for (int i = 0; i < client.failRetries; i++) {
             active.lock();
-            synchronized (client.activeImports) {
+            synchronized (ReplicationClient.activeImports) {
                 List<ReplicationImportEvent> al = null;
-                if (client.activeImports.containsKey(evt.dst)) {
-                    al = client.activeImports.get(evt.dst);
+                if (ReplicationClient.activeImports.containsKey(evt.dst)) {
+                    al = ReplicationClient.activeImports.get(evt.dst);
                 } else {
                     al = new ArrayList<ReplicationImportEvent>();
                 }
                 al.add(evt);
-                client.activeImports.put(evt.dst, al);
+                ReplicationClient.activeImports.put(evt.dst, al);
             }
             try {
                 replicate();
@@ -118,16 +118,16 @@ public class ImportFile implements Runnable {
                 }
                 SDFSLogger.getLog().info("Replication Canceled");
                 try {
-                    synchronized (client.activeImports) {
+                    synchronized (ReplicationClient.activeImports) {
                         List<ReplicationImportEvent> al = null;
-                        if (client.activeImports.containsKey(evt.dst)) {
-                            al = client.activeImports.get(evt.dst);
+                        if (ReplicationClient.activeImports.containsKey(evt.dst)) {
+                            al = ReplicationClient.activeImports.get(evt.dst);
                             al.remove(this.evt);
                         } else {
                             al = new ArrayList<ReplicationImportEvent>();
                         }
                         if (al.size() == 0) {
-                            client.activeImports.remove(evt.dst);
+                            ReplicationClient.activeImports.remove(evt.dst);
                         }
                         if (client.imports.remove(this.evt.uid) != null) {
                             String mapToJson = objGson.toJson(client.imports.keySet());
@@ -179,9 +179,9 @@ public class ImportFile implements Runnable {
                 try {
                     for (int z = 0; z < 5 * 60; z++) {
                         Thread.sleep(1000);
-                        if (this.canceled) {
-                            synchronized (client.activeImports) {
-                                client.activeImports.remove(evt.dst);
+                        if (this.evt.canceled) {
+                            synchronized (ReplicationClient.activeImports) {
+                                ReplicationClient.activeImports.remove(evt.dst);
                                 if (client.imports.remove(this.evt.uid) != null) {
                                     String mapToJson = objGson.toJson(client.imports.keySet());
                                     try {
@@ -203,8 +203,8 @@ public class ImportFile implements Runnable {
             if (e != null) {
                 SDFSLogger.getLog().warn("replication failed for " + client.url + " volume id "
                         + client.volumeid + " for " + evt.src, e);
-                synchronized (client.activeImports) {
-                    client.activeImports.remove(evt.dst);
+                synchronized (ReplicationClient.activeImports) {
+                    ReplicationClient.activeImports.remove(evt.dst);
                     if (client.imports.remove(this.evt.uid) != null) {
                         String mapToJson = objGson.toJson(client.imports.keySet());
                         try {
@@ -313,8 +313,8 @@ public class ImportFile implements Runnable {
             evt.endEvent("Import Successful for " + evt.dst, SDFSEvent.INFO);
             SDFSLogger.getLog().info("Imported " + evt.dst);
 
-            synchronized (client.activeImports) {
-                client.activeImports.remove(evt.dst);
+            synchronized (ReplicationClient.activeImports) {
+                ReplicationClient.activeImports.remove(evt.dst);
                 if (client.imports.remove(this.evt.uid) != null) {
                     String mapToJson = objGson.toJson(client.imports.keySet());
                     try {

@@ -31594,7 +31594,7 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
       "ype\022\020\n\014MFILEDELETED\020\000\022\020\n\014MFILEWRITTEN\020\001\022" +
       "\020\n\014MFILERENAMED\020\002\022\020\n\014SFILEWRITTEN\020\003\022\020\n\014S" +
       "FILEDELETED\020\004*0\n\010hashtype\022\n\n\006SHA256\020\000\022\007\n" +
-      "\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\317\r\n\016StorageServi" +
+      "\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\267\016\n\016StorageServi" +
       "ce\022^\n\013HashingInfo\022&.org.opendedup.grpc.H" +
       "ashingInfoRequest\032\'.org.opendedup.grpc.H" +
       "ashingInfoResponse\022^\n\013CheckHashes\022&.org." +
@@ -31602,44 +31602,47 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
       "opendedup.grpc.CheckHashesResponse\022^\n\013Wr" +
       "iteChunks\022&.org.opendedup.grpc.WriteChun" +
       "ksRequest\032\'.org.opendedup.grpc.WriteChun" +
-      "ksResponse\022S\n\tGetChunks\022$.org.opendedup." +
-      "grpc.GetChunksRequest\032\036.org.opendedup.gr" +
-      "pc.ChunkEntry0\001\022d\n\021SubscribeToVolume\022,.o" +
-      "rg.opendedup.grpc.VolumeEventListenReque" +
-      "st\032\037.org.opendedup.grpc.VolumeEvent0\001\022}\n" +
-      "\024WriteSparseDataChunk\0221.org.opendedup.gr" +
-      "pc.SparseDedupeChunkWriteRequest\0322.org.o" +
-      "pendedup.grpc.SparseDedupeChunkWriteResp" +
-      "onse\022z\n\023ReadSparseDataChunk\0220.org.opende" +
-      "dup.grpc.SparseDedupeChunkReadRequest\0321." +
-      "org.opendedup.grpc.SparseDedupeChunkRead" +
-      "Response\022v\n\025GetMetaDataDedupeFile\022-.org." +
-      "opendedup.grpc.MetaDataDedupeFileRequest" +
-      "\032..org.opendedup.grpc.MetaDataDedupeFile" +
-      "Response\022j\n\023GetSparseDedupeFile\022+.org.op" +
-      "endedup.grpc.SparseDedupeFileRequest\032$.o" +
-      "rg.opendedup.grpc.SparseDataChunkP0\001\022n\n\023" +
-      "ReplicateRemoteFile\022*.org.opendedup.grpc" +
-      ".FileReplicationRequest\032+.org.opendedup." +
-      "grpc.FileReplicationResponse\022j\n\017RestoreA" +
-      "rchives\022*.org.opendedup.grpc.RestoreArch" +
-      "ivesRequest\032+.org.opendedup.grpc.Restore" +
-      "ArchivesResponse\022p\n\021CancelReplication\022,." +
-      "org.opendedup.grpc.CancelReplicationRequ" +
-      "est\032-.org.opendedup.grpc.CancelReplicati" +
-      "onResponse\022m\n\020PauseReplication\022+.org.ope" +
-      "ndedup.grpc.PauseReplicationRequest\032,.or" +
-      "g.opendedup.grpc.PauseReplicationRespons" +
-      "e\022_\n\014ListReplLogs\022,.org.opendedup.grpc.V" +
-      "olumeEventListenRequest\032\037.org.opendedup." +
-      "grpc.VolumeEvent0\001\022m\n\020AddReplicaSource\022+" +
-      ".org.opendedup.grpc.AddReplicaSourceRequ" +
-      "est\032,.org.opendedup.grpc.AddReplicaSourc" +
-      "eResponse\022v\n\023RemoveReplicaSource\022..org.o" +
-      "pendedup.grpc.RemoveReplicaSourceRequest" +
-      "\032/.org.opendedup.grpc.RemoveReplicaSourc" +
-      "eResponseB0Z.github.com/opendedup/sdfs-c" +
-      "lient-go/sdfs/;sdfsb\006proto3"
+      "ksResponse\022f\n\021WriteChunksStream\022&.org.op" +
+      "endedup.grpc.WriteChunksRequest\032\'.org.op" +
+      "endedup.grpc.WriteChunksResponse(\001\022S\n\tGe" +
+      "tChunks\022$.org.opendedup.grpc.GetChunksRe" +
+      "quest\032\036.org.opendedup.grpc.ChunkEntry0\001\022" +
+      "d\n\021SubscribeToVolume\022,.org.opendedup.grp" +
+      "c.VolumeEventListenRequest\032\037.org.opended" +
+      "up.grpc.VolumeEvent0\001\022}\n\024WriteSparseData" +
+      "Chunk\0221.org.opendedup.grpc.SparseDedupeC" +
+      "hunkWriteRequest\0322.org.opendedup.grpc.Sp" +
+      "arseDedupeChunkWriteResponse\022z\n\023ReadSpar" +
+      "seDataChunk\0220.org.opendedup.grpc.SparseD" +
+      "edupeChunkReadRequest\0321.org.opendedup.gr" +
+      "pc.SparseDedupeChunkReadResponse\022v\n\025GetM" +
+      "etaDataDedupeFile\022-.org.opendedup.grpc.M" +
+      "etaDataDedupeFileRequest\032..org.opendedup" +
+      ".grpc.MetaDataDedupeFileResponse\022j\n\023GetS" +
+      "parseDedupeFile\022+.org.opendedup.grpc.Spa" +
+      "rseDedupeFileRequest\032$.org.opendedup.grp" +
+      "c.SparseDataChunkP0\001\022n\n\023ReplicateRemoteF" +
+      "ile\022*.org.opendedup.grpc.FileReplication" +
+      "Request\032+.org.opendedup.grpc.FileReplica" +
+      "tionResponse\022j\n\017RestoreArchives\022*.org.op" +
+      "endedup.grpc.RestoreArchivesRequest\032+.or" +
+      "g.opendedup.grpc.RestoreArchivesResponse" +
+      "\022p\n\021CancelReplication\022,.org.opendedup.gr" +
+      "pc.CancelReplicationRequest\032-.org.opende" +
+      "dup.grpc.CancelReplicationResponse\022m\n\020Pa" +
+      "useReplication\022+.org.opendedup.grpc.Paus" +
+      "eReplicationRequest\032,.org.opendedup.grpc" +
+      ".PauseReplicationResponse\022_\n\014ListReplLog" +
+      "s\022,.org.opendedup.grpc.VolumeEventListen" +
+      "Request\032\037.org.opendedup.grpc.VolumeEvent" +
+      "0\001\022m\n\020AddReplicaSource\022+.org.opendedup.g" +
+      "rpc.AddReplicaSourceRequest\032,.org.opende" +
+      "dup.grpc.AddReplicaSourceResponse\022v\n\023Rem" +
+      "oveReplicaSource\022..org.opendedup.grpc.Re" +
+      "moveReplicaSourceRequest\032/.org.opendedup" +
+      ".grpc.RemoveReplicaSourceResponseB0Z.git" +
+      "hub.com/opendedup/sdfs-client-go/sdfs/;s" +
+      "dfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

@@ -96,8 +96,8 @@ public class ListenRepl implements Runnable {
                         pt = pt.replaceFirst("\\.\\/", "");
                         pt = pt.replaceFirst("\\.\\\\", "");
                         File _f = new File(pt);
-                        if (client.activeImports.containsKey(_f.getPath())) {
-                            List<ReplicationImportEvent> al = client.activeImports.get(_f.getPath());
+                        if (ReplicationClient.activeImports.containsKey(_f.getPath())) {
+                            List<ReplicationImportEvent> al = ReplicationClient.activeImports.get(_f.getPath());
                             for (ReplicationImportEvent evt : al) {
                                 evt.cancel();
                             }
@@ -133,8 +133,8 @@ public class ListenRepl implements Runnable {
                             impf = new ImportFile(
                                     client,evt);
                         } else {
-                            if (client.activeImports.containsKey(_sf.getPath())) {
-                                List<ReplicationImportEvent> al = client.activeImports.get(_sf.getPath());
+                            if (ReplicationClient.activeImports.containsKey(_sf.getPath())) {
+                                List<ReplicationImportEvent> al = ReplicationClient.activeImports.get(_sf.getPath());
                                 for (ReplicationImportEvent evt : al) {
                                     evt.cancel();
                                 }
@@ -174,7 +174,7 @@ public class ListenRepl implements Runnable {
             } catch (InterruptedException e) {
 
             }
-            synchronized (client.activeImports) {
+            synchronized (ReplicationClient.activeImports) {
                 if (client.getSeq() < seq) {
                     client.setSequence(seq);
                 }

@@ -106,7 +106,7 @@ public class ListReplLogs implements Runnable {
             } catch (InterruptedException e) {
                 throw new IOException(e);
             }
-            synchronized (client.activeImports) {
+            synchronized (ReplicationClient.activeImports) {
                 if (client.getSeq() < seq) {
                     client.setSequence(seq);
                 }
