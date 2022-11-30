@@ -792,7 +792,13 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 					if (f.getParentFile() == null || !f.getParentFile().exists())
 						f.getParentFile().mkdirs();
-					FileOutputStream fout = new FileOutputStream(this.path);
+					FileOutputStream fout = null;
+					try {
+						fout = new FileOutputStream(this.path);
+					} catch(java.io.FileNotFoundException e) {
+						this.setMode(777,false);
+						fout = new FileOutputStream(this.path);
+					}
 					out = new ObjectOutputStream(fout);
 					out.writeObject(this);
 					out.flush();

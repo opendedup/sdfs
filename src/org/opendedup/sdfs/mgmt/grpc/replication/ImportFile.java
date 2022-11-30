@@ -255,6 +255,7 @@ public class ImportFile implements Runnable {
                     mf.setDfGuid(ng);
                     mf.sync();
                 } else {
+                    FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                     mf = MetaFileStore.getMF(_f);
                     if (mf.getGUID() == null) {
                         String ng = UUID.randomUUID().toString();
@@ -309,7 +310,7 @@ public class ImportFile implements Runnable {
             MetaFileStore.removedCachedMF(mf.getPath());
             MetaFileStore.addToCache(mf);
             evt.addCount(1);
-            FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
+            
             evt.endEvent("Import Successful for " + evt.dst, SDFSEvent.INFO);
             SDFSLogger.getLog().info("Imported " + evt.dst);
 
@@ -324,6 +325,7 @@ public class ImportFile implements Runnable {
                     }
                 }
             }
+            FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
         } finally {
             try {
                 client.closeReplicationConnection(rc);
@@ -402,6 +404,7 @@ public class ImportFile implements Runnable {
                     DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
                     fbf = ByteBuffer.wrap(new byte[el]);
                     ch.read(ebf, 0, el, evt.dstOffset);
+                    
                     ch.getDedupFile().unRegisterChannel(ch, -2);
                     ch.getDedupFile().forceClose();
                 }
