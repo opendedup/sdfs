@@ -1135,7 +1135,7 @@ public class BatchAzureChunkStore implements AbstractChunkStore, AbstractBatchSt
 							this.delLock.lock();
 							try {
 								if (!this.activeDeleteEvents.contains(entry.evt.uid))
-									entry.evt.endEvent();
+									entry.evt.endEvent("garbage collection completed successfully");
 							} finally {
 								this.delLock.unlock();
 							}
