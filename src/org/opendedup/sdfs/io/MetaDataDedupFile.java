@@ -405,15 +405,14 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			} catch (IOException e) {
 				SDFSLogger.getLog().warn(e);
 			}
-		} else if(!f.exists() && FileReplicationService.MetaFileExists(f.getPath().substring(pl))) {
+		} else if (!f.exists() && FileReplicationService.MetaFileExists(f.getPath().substring(pl))) {
 			GetCloudFile cf = new GetCloudFile();
-			cf.getResult(f.getPath().substring(pl),f.getPath().substring(pl));
+			cf.getResult(f.getPath().substring(pl), f.getPath().substring(pl));
 			cf.downloadAll();
 		} else if (!f.exists() || f.isDirectory()) {
 			mf = new MetaDataDedupFile(path);
 			MetaFileStore.addToCache(mf);
-		}
-		else {
+		} else {
 			ObjectInputStream in = null;
 			try {
 				in = new ObjectInputStream(new FileInputStream(path));
@@ -793,12 +792,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					if (f.getParentFile() == null || !f.getParentFile().exists())
 						f.getParentFile().mkdirs();
 					FileOutputStream fout = null;
-					try {
 						fout = new FileOutputStream(this.path);
-					} catch(java.io.FileNotFoundException e) {
-						this.setMode(777,false);
-						fout = new FileOutputStream(this.path);
-					}
 					out = new ObjectOutputStream(fout);
 					out.writeObject(this);
 					out.flush();
@@ -1380,15 +1374,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public static MetaDataDedupFile fromProtoBuf(FileInfoResponse resp, String path) throws IOException {
 		MetaDataDedupFile mf = new MetaDataDedupFile(path);
-		mf.setGroup_id((int)resp.getGroupId(),false);
-		mf.setOwner_id((int)resp.getUserId(),false);
-		mf.setPermissions(resp.getPermissions(),false);
-		mf.setLastAccessed(resp.getAtime(),false);
-		mf.setDfGuid(resp.getMapGuid(),false);
+		mf.setGroup_id((int) resp.getGroupId(), false);
+		mf.setOwner_id((int) resp.getUserId(), false);
+		mf.setPermissions(resp.getPermissions(), false);
+		mf.setLastAccessed(resp.getAtime(), false);
+		mf.setDfGuid(resp.getMapGuid(), false);
 		mf.setExecutable(resp.getExecute(), false);
 		mf.setHidden(resp.getHidden(), false);
 		mf.setImporting(resp.getImporting());
-		mf.setLastModified(resp.getMtime(),false);
+		mf.setLastModified(resp.getMtime(), false);
 		mf.setLength(resp.getSize(), false);
 		mf.setMode(resp.getMode(), false);
 		mf.setReadable(resp.getRead(), false);
@@ -1426,7 +1420,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					.setSize(this.length()).setRead(this.read).setWrite(this.write).setLocalOwner(this.isFile())
 					.setExecute(this.execute);
 			b.setIoMonitor(this.getIOMonitor().toGRPC()).setLocalOwner(true).setAttributes(this.attributes)
-					.setVersion(this.version).setMode(this.getMode()).setDeleteOnClose(this.deleteOnClose);
+					.setVersion(this.version).setDeleteOnClose(this.deleteOnClose);
+			if (OSValidator.isWindows()) {
+				b.setMode(511);
+			} else {
+				b.setMode(this.getMode());
+			}
 			try {
 				b.setOpen(DedupFileStore.fileOpen(this));
 			} catch (NullPointerException e) {
@@ -1457,7 +1456,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 			b.setAtime(attrs.lastAccessTime().toMillis()).setMtime(attrs.lastModifiedTime().toMillis())
 					.setCtime(attrs.creationTime().toMillis()).setHidden(f.isHidden()).setSize(f.length())
-					.setSymlink(this.symlink).setMode(this.getMode());
+					.setSymlink(this.symlink);
+			if (OSValidator.isWindows()) {
+				b.setMode(511);
+			} else {
+				b.setMode(this.getMode());
+			}
 			if (this.symlink) {
 				b.setSymlinkPath(this.getSymlinkPath());
 			}
@@ -1469,7 +1473,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			BasicFileAttributes attrs = Files.readAttributes(p, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
 			b.setAtime(attrs.lastAccessTime().toMillis()).setMtime(attrs.lastModifiedTime().toMillis())
 					.setCtime(attrs.creationTime().toMillis()).setHidden(f.isHidden()).setSize(f.length())
-					.setSymlink(this.symlink).setMode(this.getMode());
+					.setSymlink(this.symlink);
+			if (OSValidator.isWindows()) {
+				b.setMode(511);
+			} else {
+				b.setMode(this.getMode());
+			}
 		}
 		return b.build();
 	}
