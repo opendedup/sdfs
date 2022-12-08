@@ -39,3 +39,4 @@ pkgs/*.deb
 pkgs/*.jar
 .project
 install-packages/docker run --name sdfs-gcs -e TYPE=GOOGL.sh
+.vscode*
