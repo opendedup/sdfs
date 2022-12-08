@@ -92,12 +92,14 @@ public class ListenRepl implements Runnable {
                                 evt);
 
                     } else if (rs.getActionType() == actionType.MFILEDELETED) {
+                       
                         String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
                         pt = pt.replaceFirst("\\.\\/", "");
                         pt = pt.replaceFirst("\\.\\\\", "");
                         File _f = new File(pt);
-                        if (ReplicationClient.activeImports.containsKey(_f.getPath())) {
-                            List<ReplicationImportEvent> al = ReplicationClient.activeImports.get(_f.getPath());
+                        SDFSLogger.getLog().info("Deleting " + _f.getPath());
+                        if (ReplicationClient.activeImports.containsKey(rs.getFile().getFilePath())) {
+                            List<ReplicationImportEvent> al = ReplicationClient.activeImports.get(rs.getFile().getFilePath());
                             for (ReplicationImportEvent evt : al) {
                                 evt.cancel();
                             }
@@ -133,6 +135,7 @@ public class ListenRepl implements Runnable {
                             impf = new ImportFile(
                                     client,evt);
                         } else {
+                            
                             if (ReplicationClient.activeImports.containsKey(_sf.getPath())) {
                                 List<ReplicationImportEvent> al = ReplicationClient.activeImports.get(_sf.getPath());
                                 for (ReplicationImportEvent evt : al) {

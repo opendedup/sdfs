@@ -20,6 +20,8 @@ package org.opendedup.sdfs.notification;
 
 import java.io.IOException;
 
+import org.opendedup.logging.SDFSLogger;
+
 
 public class ReplicationImportEvent extends SDFSEvent {
 
@@ -79,6 +81,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 	}
 
 	public void cancel() {
+		SDFSLogger.getLog().info("Replication Import Canceled for " + this.src + " to " + this.dst);
 		this.canceled = true;
 		this.endEvent("Replication Import Canceled", SDFSEvent.WARN);
 	}
