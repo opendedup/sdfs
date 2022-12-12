@@ -86,19 +86,7 @@ public class VolumeFullThread implements Runnable {
 			this.full = true;
 			return true;
 		}
-		if ((vol.getCurrentSize() + offset) >= vol.getCapacity()) {
-			if (!full) {
-				SDFSLogger.getLog().warn(
-						"Drive is almost full. Current Size ["
-								+ vol.getCurrentSize() + "] and capacity is ["
-								+ vol.getCapacity() + "]");
-				this.createDiskFillEvent("Drive is almost full. Current Size ["
-						+ vol.getCurrentSize() + "] and capacity is ["
-						+ vol.getCapacity() + "]");
-			}
-			full = true;
-			return true;
-		} else if (!Main.ignoreDSEHTSize && (HCServiceProxy.getDSESize() + offset) >= HCServiceProxy
+		if ( (HCServiceProxy.getDSESize() + offset) >= HCServiceProxy
 				.getDSEMaxSize()) {
 			if (!full) {
 				SDFSLogger.getLog().warn(
@@ -110,21 +98,6 @@ public class VolumeFullThread implements Runnable {
 				this.createDiskFillEvent("Drive is almost full. DSE Size ["
 						+ HCServiceProxy.getDSESize() + "] and DSE Max Size is ["
 						+ HCServiceProxy.getDSEMaxSize() + "]");
-			}
-			full = true;
-			return true;
-		} else if ((HCServiceProxy.getSize() + 10000) >= HCServiceProxy
-				.getMaxSize()) {
-			if (!full) {
-				SDFSLogger.getLog().warn(
-						"Drive is almost full. DSE HashMap Size ["
-								+ HCServiceProxy.getSize()
-								+ "] and DSE HashMap Max Size is ["
-								+ HCServiceProxy.getMaxSize() + "]");
-				this.createDiskFillEvent("Drive is almost full. DSE HashMap Size ["
-						+ HCServiceProxy.getSize()
-						+ "] and DSE HashMap Max Size is ["
-						+ HCServiceProxy.getMaxSize() + "]");
 			}
 			full = true;
 			return true;
