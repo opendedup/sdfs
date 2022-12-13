@@ -777,7 +777,6 @@ public class FileReplicationService {
 							throw new IOException("only files version 2 or later can be imported");
 						try {
 							ddb.iterInit();
-							SDFSLogger.getLog().info("1 " + this.guid);
 							for (;;) {
 								LongKeyValue kv = ddb.nextKeyValue(false);
 								if (kv == null)
@@ -806,7 +805,6 @@ public class FileReplicationService {
 								if (dirty)
 									ddb.put(kv.getKey(), ck);
 							}
-							SDFSLogger.getLog().info("2 " + this.guid);
 							for (Long l : blks) {
 								boolean inserted = false;
 								int trs = 0;
@@ -825,7 +823,6 @@ public class FileReplicationService {
 									}
 								}
 							}
-							SDFSLogger.getLog().info("3 " + this.guid);
 						} catch (Throwable e) {
 							SDFSLogger.getLog().warn("error while checking file [" + ddb + "]", e);
 							throw new IOException(e);

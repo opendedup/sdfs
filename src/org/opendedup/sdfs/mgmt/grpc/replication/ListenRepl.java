@@ -44,15 +44,15 @@ public class ListenRepl implements Runnable {
     private boolean replicateFile(VolumeEvent rs) {
         String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
         File _f = new File(pt);
-        if(!_f.exists()) {
+        if (!_f.exists()) {
             return true;
         }
         MetaDataDedupFile mf = MetaFileStore.getMF(_f);
-        if(mf.lastModified() != rs.getFile().getMtime()) {
+        if (mf.lastModified() != rs.getFile().getMtime()) {
             return true;
         }
         return false;
-        
+
     }
 
     public void listen() throws Exception, ListenReplCanceled {
@@ -83,23 +83,27 @@ public class ListenRepl implements Runnable {
                 ImportFile impf = null;
                 synchronized (client) {
                     if (rs.getActionType() == actionType.MFILEWRITTEN && replicateFile(rs)) {
-                        ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
-                                rs.getFile().getFilePath(),
-                                client.url, client.volumeid, client.mtls, false,
-                                0,0,0,true);
-                        evt.persistEvent();
-                        impf = new ImportFile(client,
-                                evt);
+                        if (rs.getDirty()) {
+                            ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
+                                    rs.getFile().getFilePath(),
+                                    client.url, client.volumeid, client.mtls, false,
+                                    0, 0, 0, true);
+                            evt.persistEvent();
+
+                            impf = new ImportFile(client,
+                                    evt);
+                        }
 
                     } else if (rs.getActionType() == actionType.MFILEDELETED) {
-                       
+
                         String pt = Main.volume.getPath() + File.separator + rs.getFile().getFilePath();
                         pt = pt.replaceFirst("\\.\\/", "");
                         pt = pt.replaceFirst("\\.\\\\", "");
                         File _f = new File(pt);
                         SDFSLogger.getLog().info("Deleting " + _f.getPath());
                         if (ReplicationClient.activeImports.containsKey(rs.getFile().getFilePath())) {
-                            List<ReplicationImportEvent> al = ReplicationClient.activeImports.get(rs.getFile().getFilePath());
+                            List<ReplicationImportEvent> al = ReplicationClient.activeImports
+                                    .get(rs.getFile().getFilePath());
                             for (ReplicationImportEvent evt : al) {
                                 evt.cancel();
                             }
@@ -130,12 +134,12 @@ public class ListenRepl implements Runnable {
 
                             ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                     rs.getFile().getFilePath(),
-                                    client.url, client.volumeid, client.mtls, false,0,0,0,true);
+                                    client.url, client.volumeid, client.mtls, false, 0, 0, 0, true);
                             evt.persistEvent();
                             impf = new ImportFile(
-                                    client,evt);
+                                    client, evt);
                         } else {
-                            
+
                             if (ReplicationClient.activeImports.containsKey(_sf.getPath())) {
                                 List<ReplicationImportEvent> al = ReplicationClient.activeImports.get(_sf.getPath());
                                 for (ReplicationImportEvent evt : al) {
@@ -262,7 +266,7 @@ public class ListenRepl implements Runnable {
                     }
                     ReplicationImportEvent evt = new ReplicationImportEvent(".",
                             ".", this.client.url, this.client.volumeid,
-                            this.client.mtls, false,0,0,0,true);
+                            this.client.mtls, false, 0, 0, 0, true);
                     dl = new DownloadAll(this.client, evt);
                     downloadThread = new Thread(dl);
                     downloadThread.start();

@@ -359,21 +359,23 @@ public class StorageServiceImpl extends StorageServiceImplBase {
         } else {
             try {
                 LongByteArrayMap ddb = LongByteArrayMap.getMap(request.getGuid());
-                try {
-                    ddb.setIndexed(true);
-                    ddb.iterInit();
-                    long fpos = 0;
-                    for (;;) {
-                        LongKeyValue kv = ddb.nextKeyValue(false);
-                        if (kv == null)
-                            break;
-                        SparseDataChunk ck = kv.getValue();
-                        ck.setFpos(fpos);
-                        responseObserver.onNext(ck.toProtoBuf());
-                        fpos += Main.CHUNK_LENGTH;
+                synchronized (ddb) {
+                    try {
+                        ddb.setIndexed(true);
+                        ddb.iterInit();
+                        long fpos = 0;
+                        for (;;) {
+                            LongKeyValue kv = ddb.nextKeyValue(false);
+                            if (kv == null)
+                                break;
+                            SparseDataChunk ck = kv.getValue();
+                            ck.setFpos(fpos);
+                            responseObserver.onNext(ck.toProtoBuf());
+                            fpos += Main.CHUNK_LENGTH;
+                        }
+                    } finally {
+                        ddb.close();
                     }
-                } finally {
-                    ddb.close();
                 }
                 responseObserver.onCompleted();
             } catch (Exception e) {
@@ -404,10 +406,10 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 List<ByteString> hashes = request.getHashesList();
                 List<Long> responses = new ArrayList<Long>();
                 List<ListenableFuture<Long>> futures = new ArrayList<ListenableFuture<Long>>();
-                //long tm = System.currentTimeMillis();
-                //AtomicLong dp = new AtomicLong();
+                // long tm = System.currentTimeMillis();
+                // AtomicLong dp = new AtomicLong();
                 for (ByteString bs : hashes) {
-                    //dp.incrementAndGet();
+                    // dp.incrementAndGet();
 
                     ListenableFuture<Long> lf = service.submit(() -> {
                         return HCServiceProxy.getHashesMap().get(bs.toByteArray());
@@ -417,8 +419,8 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 for (ListenableFuture<Long> future : futures) {
                     responses.add(future.get(300, TimeUnit.SECONDS));
                 }
-                //long nt = System.currentTimeMillis() - tm;
-                //SDFSLogger.getLog().info("checked " + dp.get() + " in " + nt);
+                // long nt = System.currentTimeMillis() - tm;
+                // SDFSLogger.getLog().info("checked " + dp.get() + " in " + nt);
                 b.addAllLocations(responses);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
@@ -440,8 +442,8 @@ public class StorageServiceImpl extends StorageServiceImplBase {
 
             List<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>> futures = new ArrayList<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>>();
             List<org.opendedup.grpc.Storage.InsertRecord> responses = new ArrayList<org.opendedup.grpc.Storage.InsertRecord>();
-            //long tm = System.currentTimeMillis();
-            //AtomicLong dp = new AtomicLong();
+            // long tm = System.currentTimeMillis();
+            // AtomicLong dp = new AtomicLong();
 
             @Override
             public void onNext(WriteChunksRequest request) {
@@ -462,7 +464,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                         for (ChunkEntry ent : request.getChunksList()) {
                             ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf = service.submit(() -> {
                                 byte[] chunk = ent.getData().toByteArray();
-                                //dp.addAndGet(chunk.length);
+                                // dp.addAndGet(chunk.length);
                                 if (chunk.length > 0) {
                                     // return new InsertRecord(true, 12312543L, chunk.length).toProtoBuf();
 
@@ -503,9 +505,9 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     for (ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf : futures) {
                         responses.add(lf.get(300, TimeUnit.SECONDS));
                     }
-                    //float nt = System.currentTimeMillis() - tm;
-                    //float bpm = dp.get() / (nt * 1000);
-                    //SDFSLogger.getLog().info("Wrote " + dp.get() + " in " + nt + " mbps " + bpm);
+                    // float nt = System.currentTimeMillis() - tm;
+                    // float bpm = dp.get() / (nt * 1000);
+                    // SDFSLogger.getLog().info("Wrote " + dp.get() + " in " + nt + " mbps " + bpm);
                     b.addAllInsertRecords(responses);
                     responseObserver.onNext(b.build());
                     responseObserver.onCompleted();
@@ -561,12 +563,12 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 }
                 List<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>> futures = new ArrayList<ListenableFuture<org.opendedup.grpc.Storage.InsertRecord>>();
                 List<org.opendedup.grpc.Storage.InsertRecord> responses = new ArrayList<org.opendedup.grpc.Storage.InsertRecord>();
-                //long tm = System.currentTimeMillis();
-                //AtomicLong dp = new AtomicLong();
+                // long tm = System.currentTimeMillis();
+                // AtomicLong dp = new AtomicLong();
                 for (ChunkEntry ent : request.getChunksList()) {
                     ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf = service.submit(() -> {
                         byte[] chunk = ent.getData().toByteArray();
-                        //dp.addAndGet(chunk.length);
+                        // dp.addAndGet(chunk.length);
                         if (chunk.length > 0) {
                             // return new InsertRecord(true, 12312543L, chunk.length).toProtoBuf();
 
@@ -589,9 +591,9 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 for (ListenableFuture<org.opendedup.grpc.Storage.InsertRecord> lf : futures) {
                     responses.add(lf.get(300, TimeUnit.SECONDS));
                 }
-                //float nt = System.currentTimeMillis() - tm;
-                //float bpm = dp.get() / (nt * 1000);
-                //SDFSLogger.getLog().info("Wrote " + dp.get() + " in " + nt + " mbps " + bpm);
+                // float nt = System.currentTimeMillis() - tm;
+                // float bpm = dp.get() / (nt * 1000);
+                // SDFSLogger.getLog().info("Wrote " + dp.get() + " in " + nt + " mbps " + bpm);
                 b.addAllInsertRecords(responses);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
@@ -643,8 +645,8 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                     responseObserver.onCompleted();
                     return;
                 }
-                //long xtm = System.currentTimeMillis();
-                //AtomicLong dp = new AtomicLong();
+                // long xtm = System.currentTimeMillis();
+                // AtomicLong dp = new AtomicLong();
                 SparseDataChunk sp = null;
                 if (request.getCompressed()) {
                     byte[] chunk = CompressionUtils.decompressLz4(request.getCompressedChunk().toByteArray(),
@@ -656,7 +658,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 }
                 HashMap<String, kv> hs = new HashMap<String, kv>();
                 for (Entry<Integer, HashLocPair> e : sp.getFingers().entrySet()) {
-                    //dp.incrementAndGet();
+                    // dp.incrementAndGet();
                     if (!e.getValue().inserted) {
                         String key = BaseEncoding.base64().encode(e.getValue().hash);
                         if (!hs.containsKey(key)) {
@@ -710,8 +712,8 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 long tm = System.currentTimeMillis();
                 ch.getFile().setLastAccessed(tm, false);
                 ch.getFile().setLastModified(tm, false);
-                //long nt = System.currentTimeMillis() - xtm;
-                //SDFSLogger.getLog().info("SDD Wrote " + dp.get() + " in " + nt);
+                // long nt = System.currentTimeMillis() - xtm;
+                // SDFSLogger.getLog().info("SDD Wrote " + dp.get() + " in " + nt);
                 responseObserver.onNext(b.build());
                 responseObserver.onCompleted();
                 return;
@@ -889,7 +891,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 responseObserver.onNext(evt.getVolumeEvent());
             } catch (Exception e) {
                 VolumeEvent.Builder b = VolumeEvent.newBuilder();
-                SDFSLogger.getLog().error("nSent Event",e);
+                SDFSLogger.getLog().error("nSent Event", e);
                 b.setError("Unable to marshal event");
                 b.setErrorCode(errorCodes.EIO);
                 responseObserver.onNext(b.build());

@@ -251,6 +251,7 @@ message VolumeEvent {
   errorCodes errorCode = 7;
   string srcfile=8; //Source file for renames
   string dstfile=9; //Source file for renames
+  bool dirty=10;
 }
 
 message VolumeEventListenRequest {

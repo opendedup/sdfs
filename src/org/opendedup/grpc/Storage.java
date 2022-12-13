@@ -29191,6 +29191,12 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
      */
     com.google.protobuf.ByteString
         getDstfileBytes();
+
+    /**
+     * <code>bool dirty = 10;</code>
+     * @return The dirty.
+     */
+    boolean getDirty();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.VolumeEvent}
@@ -29300,6 +29306,11 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
               java.lang.String s = input.readStringRequireUtf8();
 
               dstfile_ = s;
+              break;
+            }
+            case 80: {
+
+              dirty_ = input.readBool();
               break;
             }
             default: {
@@ -29590,6 +29601,17 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
       }
     }
 
+    public static final int DIRTY_FIELD_NUMBER = 10;
+    private boolean dirty_;
+    /**
+     * <code>bool dirty = 10;</code>
+     * @return The dirty.
+     */
+    @java.lang.Override
+    public boolean getDirty() {
+      return dirty_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -29630,6 +29652,9 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dstfile_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, dstfile_);
+      }
+      if (dirty_ != false) {
+        output.writeBool(10, dirty_);
       }
       unknownFields.writeTo(output);
     }
@@ -29672,6 +29697,10 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dstfile_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, dstfile_);
       }
+      if (dirty_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(10, dirty_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -29706,6 +29735,8 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
           .equals(other.getSrcfile())) return false;
       if (!getDstfile()
           .equals(other.getDstfile())) return false;
+      if (getDirty()
+          != other.getDirty()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -29739,6 +29770,9 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
       hash = (53 * hash) + getSrcfile().hashCode();
       hash = (37 * hash) + DSTFILE_FIELD_NUMBER;
       hash = (53 * hash) + getDstfile().hashCode();
+      hash = (37 * hash) + DIRTY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getDirty());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -29894,6 +29928,8 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
 
         dstfile_ = "";
 
+        dirty_ = false;
+
         return this;
       }
 
@@ -29933,6 +29969,7 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
         result.errorCode_ = errorCode_;
         result.srcfile_ = srcfile_;
         result.dstfile_ = dstfile_;
+        result.dirty_ = dirty_;
         onBuilt();
         return result;
       }
@@ -30011,6 +30048,9 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
         if (!other.getDstfile().isEmpty()) {
           dstfile_ = other.dstfile_;
           onChanged();
+        }
+        if (other.getDirty() != false) {
+          setDirty(other.getDirty());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -30670,6 +30710,37 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
   checkByteStringIsUtf8(value);
         
         dstfile_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean dirty_ ;
+      /**
+       * <code>bool dirty = 10;</code>
+       * @return The dirty.
+       */
+      @java.lang.Override
+      public boolean getDirty() {
+        return dirty_;
+      }
+      /**
+       * <code>bool dirty = 10;</code>
+       * @param value The dirty to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDirty(boolean value) {
+        
+        dirty_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool dirty = 10;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDirty() {
+        
+        dirty_ = false;
         onChanged();
         return this;
       }
@@ -31581,68 +31652,68 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
       "r\030\010 \001(\t\0221\n\terrorCode\030\t \001(\0162\036.org.opended" +
       "up.grpc.errorCodes\"K\n\014InsertRecord\022\017\n\007ha" +
       "shloc\030\001 \001(\003\022\020\n\010inserted\030\002 \001(\010\022\030\n\020compres" +
-      "sedLength\030\003 \001(\005\"\207\002\n\013VolumeEvent\0222\n\004file\030" +
+      "sedLength\030\003 \001(\005\"\226\002\n\013VolumeEvent\0222\n\004file\030" +
       "\001 \001(\0132$.org.opendedup.grpc.FileInfoRespo" +
       "nse\022\014\n\004uuid\030\002 \001(\t\022\021\n\ttimeStamp\030\003 \001(\003\022\013\n\003" +
       "seq\030\004 \001(\003\0222\n\nactionType\030\005 \001(\0162\036.org.open" +
       "dedup.grpc.actionType\022\r\n\005error\030\006 \001(\t\0221\n\t" +
       "errorCode\030\007 \001(\0162\036.org.opendedup.grpc.err" +
       "orCodes\022\017\n\007srcfile\030\010 \001(\t\022\017\n\007dstfile\030\t \001(" +
-      "\t\"D\n\030VolumeEventListenRequest\022\021\n\tpvolume" +
-      "ID\030\001 \001(\003\022\025\n\rstartSequence\030\002 \001(\003*$\n\017Spars" +
-      "eDataFlags\022\021\n\rRECONSTRUCTED\020\000*f\n\nactionT" +
-      "ype\022\020\n\014MFILEDELETED\020\000\022\020\n\014MFILEWRITTEN\020\001\022" +
-      "\020\n\014MFILERENAMED\020\002\022\020\n\014SFILEWRITTEN\020\003\022\020\n\014S" +
-      "FILEDELETED\020\004*0\n\010hashtype\022\n\n\006SHA256\020\000\022\007\n" +
-      "\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\267\016\n\016StorageServi" +
-      "ce\022^\n\013HashingInfo\022&.org.opendedup.grpc.H" +
-      "ashingInfoRequest\032\'.org.opendedup.grpc.H" +
-      "ashingInfoResponse\022^\n\013CheckHashes\022&.org." +
-      "opendedup.grpc.CheckHashesRequest\032\'.org." +
-      "opendedup.grpc.CheckHashesResponse\022^\n\013Wr" +
-      "iteChunks\022&.org.opendedup.grpc.WriteChun" +
-      "ksRequest\032\'.org.opendedup.grpc.WriteChun" +
-      "ksResponse\022f\n\021WriteChunksStream\022&.org.op" +
-      "endedup.grpc.WriteChunksRequest\032\'.org.op" +
-      "endedup.grpc.WriteChunksResponse(\001\022S\n\tGe" +
-      "tChunks\022$.org.opendedup.grpc.GetChunksRe" +
-      "quest\032\036.org.opendedup.grpc.ChunkEntry0\001\022" +
-      "d\n\021SubscribeToVolume\022,.org.opendedup.grp" +
-      "c.VolumeEventListenRequest\032\037.org.opended" +
-      "up.grpc.VolumeEvent0\001\022}\n\024WriteSparseData" +
-      "Chunk\0221.org.opendedup.grpc.SparseDedupeC" +
-      "hunkWriteRequest\0322.org.opendedup.grpc.Sp" +
-      "arseDedupeChunkWriteResponse\022z\n\023ReadSpar" +
-      "seDataChunk\0220.org.opendedup.grpc.SparseD" +
-      "edupeChunkReadRequest\0321.org.opendedup.gr" +
-      "pc.SparseDedupeChunkReadResponse\022v\n\025GetM" +
-      "etaDataDedupeFile\022-.org.opendedup.grpc.M" +
-      "etaDataDedupeFileRequest\032..org.opendedup" +
-      ".grpc.MetaDataDedupeFileResponse\022j\n\023GetS" +
-      "parseDedupeFile\022+.org.opendedup.grpc.Spa" +
-      "rseDedupeFileRequest\032$.org.opendedup.grp" +
-      "c.SparseDataChunkP0\001\022n\n\023ReplicateRemoteF" +
-      "ile\022*.org.opendedup.grpc.FileReplication" +
-      "Request\032+.org.opendedup.grpc.FileReplica" +
-      "tionResponse\022j\n\017RestoreArchives\022*.org.op" +
-      "endedup.grpc.RestoreArchivesRequest\032+.or" +
-      "g.opendedup.grpc.RestoreArchivesResponse" +
-      "\022p\n\021CancelReplication\022,.org.opendedup.gr" +
-      "pc.CancelReplicationRequest\032-.org.opende" +
-      "dup.grpc.CancelReplicationResponse\022m\n\020Pa" +
-      "useReplication\022+.org.opendedup.grpc.Paus" +
-      "eReplicationRequest\032,.org.opendedup.grpc" +
-      ".PauseReplicationResponse\022_\n\014ListReplLog" +
-      "s\022,.org.opendedup.grpc.VolumeEventListen" +
-      "Request\032\037.org.opendedup.grpc.VolumeEvent" +
-      "0\001\022m\n\020AddReplicaSource\022+.org.opendedup.g" +
-      "rpc.AddReplicaSourceRequest\032,.org.opende" +
-      "dup.grpc.AddReplicaSourceResponse\022v\n\023Rem" +
-      "oveReplicaSource\022..org.opendedup.grpc.Re" +
-      "moveReplicaSourceRequest\032/.org.opendedup" +
-      ".grpc.RemoveReplicaSourceResponseB0Z.git" +
-      "hub.com/opendedup/sdfs-client-go/sdfs/;s" +
-      "dfsb\006proto3"
+      "\t\022\r\n\005dirty\030\n \001(\010\"D\n\030VolumeEventListenReq" +
+      "uest\022\021\n\tpvolumeID\030\001 \001(\003\022\025\n\rstartSequence" +
+      "\030\002 \001(\003*$\n\017SparseDataFlags\022\021\n\rRECONSTRUCT" +
+      "ED\020\000*f\n\nactionType\022\020\n\014MFILEDELETED\020\000\022\020\n\014" +
+      "MFILEWRITTEN\020\001\022\020\n\014MFILERENAMED\020\002\022\020\n\014SFIL" +
+      "EWRITTEN\020\003\022\020\n\014SFILEDELETED\020\004*0\n\010hashtype" +
+      "\022\n\n\006SHA256\020\000\022\007\n\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\267" +
+      "\016\n\016StorageService\022^\n\013HashingInfo\022&.org.o" +
+      "pendedup.grpc.HashingInfoRequest\032\'.org.o" +
+      "pendedup.grpc.HashingInfoResponse\022^\n\013Che" +
+      "ckHashes\022&.org.opendedup.grpc.CheckHashe" +
+      "sRequest\032\'.org.opendedup.grpc.CheckHashe" +
+      "sResponse\022^\n\013WriteChunks\022&.org.opendedup" +
+      ".grpc.WriteChunksRequest\032\'.org.opendedup" +
+      ".grpc.WriteChunksResponse\022f\n\021WriteChunks" +
+      "Stream\022&.org.opendedup.grpc.WriteChunksR" +
+      "equest\032\'.org.opendedup.grpc.WriteChunksR" +
+      "esponse(\001\022S\n\tGetChunks\022$.org.opendedup.g" +
+      "rpc.GetChunksRequest\032\036.org.opendedup.grp" +
+      "c.ChunkEntry0\001\022d\n\021SubscribeToVolume\022,.or" +
+      "g.opendedup.grpc.VolumeEventListenReques" +
+      "t\032\037.org.opendedup.grpc.VolumeEvent0\001\022}\n\024" +
+      "WriteSparseDataChunk\0221.org.opendedup.grp" +
+      "c.SparseDedupeChunkWriteRequest\0322.org.op" +
+      "endedup.grpc.SparseDedupeChunkWriteRespo" +
+      "nse\022z\n\023ReadSparseDataChunk\0220.org.opended" +
+      "up.grpc.SparseDedupeChunkReadRequest\0321.o" +
+      "rg.opendedup.grpc.SparseDedupeChunkReadR" +
+      "esponse\022v\n\025GetMetaDataDedupeFile\022-.org.o" +
+      "pendedup.grpc.MetaDataDedupeFileRequest\032" +
+      "..org.opendedup.grpc.MetaDataDedupeFileR" +
+      "esponse\022j\n\023GetSparseDedupeFile\022+.org.ope" +
+      "ndedup.grpc.SparseDedupeFileRequest\032$.or" +
+      "g.opendedup.grpc.SparseDataChunkP0\001\022n\n\023R" +
+      "eplicateRemoteFile\022*.org.opendedup.grpc." +
+      "FileReplicationRequest\032+.org.opendedup.g" +
+      "rpc.FileReplicationResponse\022j\n\017RestoreAr" +
+      "chives\022*.org.opendedup.grpc.RestoreArchi" +
+      "vesRequest\032+.org.opendedup.grpc.RestoreA" +
+      "rchivesResponse\022p\n\021CancelReplication\022,.o" +
+      "rg.opendedup.grpc.CancelReplicationReque" +
+      "st\032-.org.opendedup.grpc.CancelReplicatio" +
+      "nResponse\022m\n\020PauseReplication\022+.org.open" +
+      "dedup.grpc.PauseReplicationRequest\032,.org" +
+      ".opendedup.grpc.PauseReplicationResponse" +
+      "\022_\n\014ListReplLogs\022,.org.opendedup.grpc.Vo" +
+      "lumeEventListenRequest\032\037.org.opendedup.g" +
+      "rpc.VolumeEvent0\001\022m\n\020AddReplicaSource\022+." +
+      "org.opendedup.grpc.AddReplicaSourceReque" +
+      "st\032,.org.opendedup.grpc.AddReplicaSource" +
+      "Response\022v\n\023RemoveReplicaSource\022..org.op" +
+      "endedup.grpc.RemoveReplicaSourceRequest\032" +
+      "/.org.opendedup.grpc.RemoveReplicaSource" +
+      "ResponseB0Z.github.com/opendedup/sdfs-cl" +
+      "ient-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -31858,7 +31929,7 @@ org.opendedup.grpc.Storage.HashLocPairP defaultValue);
     internal_static_org_opendedup_grpc_VolumeEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_VolumeEvent_descriptor,
-        new java.lang.String[] { "File", "Uuid", "TimeStamp", "Seq", "ActionType", "Error", "ErrorCode", "Srcfile", "Dstfile", });
+        new java.lang.String[] { "File", "Uuid", "TimeStamp", "Seq", "ActionType", "Error", "ErrorCode", "Srcfile", "Dstfile", "Dirty", });
     internal_static_org_opendedup_grpc_VolumeEventListenRequest_descriptor =
       getDescriptor().getMessageTypes().get(33);
     internal_static_org_opendedup_grpc_VolumeEventListenRequest_fieldAccessorTable = new

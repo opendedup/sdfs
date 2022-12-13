@@ -110,7 +110,7 @@ public class ReplicationService {
     public void syncEvent(org.opendedup.sdfs.io.events.MFileWritten _evt) {
 
         VolumeEvent.Builder b = VolumeEvent.newBuilder();
-        b.setSeq(this.sequence.incrementAndGet()).setUuid(RandomGUID.getGuid())
+        b.setSeq(this.sequence.incrementAndGet()).setUuid(RandomGUID.getGuid()).setDirty(_evt.dirty)
                 .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILEWRITTEN);
         try {
             synchronized (_evt.mf) {

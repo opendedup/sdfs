@@ -295,9 +295,10 @@ public class DedupFileChannel {
 		Lock l = df.getReadLock();
 		l.lock();
 		try {
-
+			df.mf.setDirty(true);
 			buf.position(pos);
 			this.writtenTo = true;
+
 			long _cp = offset;
 			// ByteBuffer buf = ByteBuffer.wrap(bbuf, pos, len);
 			int bytesLeft = len;
@@ -425,8 +426,10 @@ public class DedupFileChannel {
 							df.sync(false);
 
 						}
-						if (mf.canWrite())
-							mf.sync();
+						/*
+						 * if (mf.canWrite())
+						 * mf.sync();
+						 */
 					} catch (Exception e) {
 
 					} finally {

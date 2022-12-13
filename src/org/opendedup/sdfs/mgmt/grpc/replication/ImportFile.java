@@ -312,8 +312,9 @@ public class ImportFile implements Runnable {
             evt.addCount(1);
             
             evt.endEvent("Import Successful for " + evt.dst, SDFSEvent.INFO);
-            SDFSLogger.getLog().info("Imported " + evt.dst);
-
+            
+            SDFSLogger.getLog().info("Imported " + evt.dst  + " size = " + mf.length() + 
+                " bytesimported = " + evt.bytesImported + " bytesprocessed = " + evt.bytesProcessed);
             synchronized (ReplicationClient.activeImports) {
                 ReplicationClient.activeImports.remove(evt.dst);
                 if (client.imports.remove(this.evt.uid) != null) {
