@@ -65,6 +65,7 @@ import org.opendedup.sdfs.io.events.MFileRenamed;
 import org.opendedup.sdfs.io.events.MFileWritten;
 import org.opendedup.sdfs.io.events.MMetaUpdated;
 import org.opendedup.sdfs.mgmt.GetCloudFile;
+import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl;
 import org.opendedup.sdfs.monitor.IOMonitor;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.ByteUtils;
@@ -791,6 +792,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 					if (f.getParentFile() == null || !f.getParentFile().exists())
 						f.getParentFile().mkdirs();
+					FileIOServiceImpl.ImmuteLinuxFDFileFile(f.getPath(), false);
 					FileOutputStream fout = null;
 						fout = new FileOutputStream(this.path);
 					out = new ObjectOutputStream(fout);
@@ -802,6 +804,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					} catch (Exception e) {
 
 					}
+					FileIOServiceImpl.ImmuteLinuxFDFileFile(f.getPath(), true);
 					if (notify) {
 						try {
 							eventBus.post(new MFileWritten(this, this.dirty));
