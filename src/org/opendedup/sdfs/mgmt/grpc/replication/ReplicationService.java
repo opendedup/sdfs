@@ -125,6 +125,7 @@ public class ReplicationService {
 
     @Subscribe
     public void syncEvent(org.opendedup.sdfs.io.events.MFileDeleted _evt) {
+        SDFSLogger.getLog().info("Delete called for " + _evt.mf.getPath());
         VolumeEvent.Builder b = VolumeEvent.newBuilder();
         b.setSeq(this.sequence.incrementAndGet()).setUuid(RandomGUID.getGuid())
                 .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILEDELETED);

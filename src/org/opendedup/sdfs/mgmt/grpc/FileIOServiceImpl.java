@@ -724,7 +724,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
                     if (diff_period >= main_period || diff_period < 1) {
                         try {
-                           // SDFSLogger.getLog().debug("Unlink::chattr set non-Immutable file: " + f.getPath());
+                            SDFSLogger.getLog().info("Unlink::chattr set non-Immutable file: " + f.getPath());
                             ImmuteLinuxFDFileFile(f.getPath(), false);
                             MetaFileStore.getMF(f).clearRetentionLock();
                             if (MetaFileStore.removeMetaFile(f.getPath(), false, false, true)) {
