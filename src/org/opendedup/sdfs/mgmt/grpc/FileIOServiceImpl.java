@@ -976,9 +976,10 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                             mf.setMode(request.getMode());
                         }
                     } finally {
+                        FileIOServiceImpl.ImmuteLinuxFDFileFile(f.getPath(), true);
                         f = null;
                     }
-                    FileIOServiceImpl.ImmuteLinuxFDFileFile(f.getPath(), true);
+                    
                     mf.unmarshal();
                     responseObserver.onNext(b.build());
                     responseObserver.onCompleted();
