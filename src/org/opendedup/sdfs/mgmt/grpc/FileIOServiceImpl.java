@@ -967,6 +967,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     return;
                 } else {
                     SDFSLogger.getLog().debug("creating file " + f.getPath());
+                    FileIOServiceImpl.ImmuteLinuxFDFileFile(f.getPath(), false);
                     MetaDataDedupFile mf = MetaFileStore.getMF(f);
                     try {
                         if (request.getMode() == 0) {
@@ -977,6 +978,7 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
                     } finally {
                         f = null;
                     }
+                    FileIOServiceImpl.ImmuteLinuxFDFileFile(f.getPath(), true);
                     mf.unmarshal();
                     responseObserver.onNext(b.build());
                     responseObserver.onCompleted();
