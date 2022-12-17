@@ -293,7 +293,7 @@ public class ImportFile implements Runnable {
                     if (evt.srcSize == 0) {
                         endPos += fi.getSize();
                     }
-                    downloadDDB(mf, sguid, endPos);
+                    downloadDDB(mf, sguid, endPos,expectedSize);
                 }
                 mf.setRetentionLock();
                 CloseFile.close(mf, true);
@@ -372,7 +372,7 @@ public class ImportFile implements Runnable {
         return crs.getFile();
     }
 
-    private void downloadDDB(MetaDataDedupFile mf, String guid, long endPos) throws Exception {
+    private void downloadDDB(MetaDataDedupFile mf, String guid, long endPos, long mfExpectedSize) throws Exception {
         if (this.evt.canceled || this.client.removed || this.client.closed) {
             throw new ReplicationCanceledException("Replication Canceled");
         }
@@ -444,7 +444,7 @@ public class ImportFile implements Runnable {
             SparseDataChunk sp = new SparseDataChunk(cr);
             if (sp.getFpos() >= spos && sp.getFpos() < endPos) {
                 SDFSLogger.getLog().debug("fpos = " + sp.getFpos() + " spos = " + spos + " endPos " + endPos + " dpos = " + dpos);
-                SparseDataChunk ck = importSparseDataChunk(sp, mf);
+                SparseDataChunk ck = importSparseDataChunk(sp, mf,mfExpectedSize);
                 mp.put(dpos, ck);
                 dpos += ck.len;
             } else if (sp.getFpos() >= endPos) {
@@ -482,7 +482,7 @@ public class ImportFile implements Runnable {
         return place;
     }
 
-    private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf)
+    private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf,long expectedSize)
             throws IOException, HashtableFullException {
 
         TreeMap<Integer, HashLocPair> al = ck.getFingers();
@@ -561,7 +561,12 @@ public class ImportFile implements Runnable {
                 ctl.loc = Longs.fromByteArray(ir.getHashLocs());
             }
             p.hashloc = Longs.toByteArray(ctl.loc);
-            evt.bytesProcessed += p.nlen;
+            if((evt.bytesProcessed + p.nlen) > expectedSize) {
+                evt.bytesProcessed = expectedSize;
+            } else {
+                evt.bytesProcessed += p.nlen;
+            }
+            
             mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
             mf.setLength(mf.length() + p.nlen, false);
         }
