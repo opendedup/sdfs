@@ -112,9 +112,11 @@ public class ImportFile implements Runnable {
                 active.unlock();
 
                 break;
-            } catch (FileNotFoundException | ReplicationCanceledException e1) {
+            } catch (FileNotFoundException | ReplicationCanceledException | ImportError e1) {
                 if (e1 instanceof FileNotFoundException) {
                     SDFSLogger.getLog().warn("File " + evt.src + " not found on source");
+                } if(e1 instanceof ImportError) {
+                    SDFSLogger.getLog().warn("File " + evt.src + " has import error. Aborting import");
                 }
                 SDFSLogger.getLog().info("Replication Canceled");
                 try {
@@ -304,7 +306,8 @@ public class ImportFile implements Runnable {
                     MetaFileStore.removeMetaFile(mf.getPath(), false, false, false);
                 }
                 throw e;
-            }
+            } 
+
             mf.setLength(expectedSize, true);
 
             MetaFileStore.removedCachedMF(mf.getPath());
@@ -483,7 +486,7 @@ public class ImportFile implements Runnable {
     }
 
     private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf,long expectedSize)
-            throws IOException, HashtableFullException {
+            throws IOException, HashtableFullException, ImportError {
 
         TreeMap<Integer, HashLocPair> al = ck.getFingers();
         HashMap<ByteString, ChunkEntry> ces = new HashMap<ByteString, ChunkEntry>();
@@ -523,7 +526,7 @@ public class ImportFile implements Runnable {
                 String msg = "error code returned :" + ce.getErrorCode() +
                         " message : " + ce.getError();
                 SDFSLogger.getLog().warn(msg);
-                throw new IOException(msg);
+                throw new ImportError(msg);
             }
             byte[] dt = ce.getData().toByteArray();
             // SDFSLogger.getLog().info("dt len " + dt.length + " dt = " + new String(dt));
@@ -625,5 +628,12 @@ public class ImportFile implements Runnable {
         int ct;
         long loc;
         boolean newdata;
+    }
+
+    public static class ImportError extends Exception {
+        public  ImportError(String message) {
+            super(message);
+
+        }
     }
 }
