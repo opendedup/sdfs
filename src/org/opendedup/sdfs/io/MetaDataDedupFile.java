@@ -124,6 +124,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private boolean dirty = false;
 	private long attributes = 0;
 	private long retentionLock = -1;
+	private boolean aborted = false;
 	private static final int pl = Main.volume.getPath().length();
 
 
@@ -150,6 +151,15 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setMode(int mode) throws IOException {
 		setMode(mode, true);
 	}
+
+	public void setAborted(boolean aborted) {
+		this.aborted = aborted;
+	}
+
+	public boolean getAborted() {
+		return this.aborted;
+	}
+
 
 	public void setMode(int mode, boolean propigateEvent) throws IOException {
 		this.mode = mode;
@@ -1391,9 +1401,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		mf.setReadable(resp.getRead(), false);
 		mf.setSymlink(false);
 		mf.setWritable(resp.getWrite(), false);
+		mf.setAborted(resp.getAborted());
 		mf.unmarshal();
 		return mf;
-
 	}
 
 	public FileInfoResponse toGRPC(boolean compact) throws IOException {
@@ -1423,7 +1433,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 					.setSize(this.length()).setRead(this.read).setWrite(this.write).setLocalOwner(this.isFile())
 					.setExecute(this.execute);
 			b.setIoMonitor(this.getIOMonitor().toGRPC()).setLocalOwner(true).setAttributes(this.attributes)
-					.setVersion(this.version).setDeleteOnClose(this.deleteOnClose);
+					.setVersion(this.version).setDeleteOnClose(this.deleteOnClose).setAborted(this.aborted);
 			if (OSValidator.isWindows()) {
 				b.setMode(511);
 			} else {
@@ -1524,6 +1534,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			dataset.addProperty("write", this.write);
 			dataset.addProperty("localowner", true);
 			dataset.addProperty("execute", this.execute);
+			dataset.addProperty("aborted", this.aborted);
 			this.getIOMonitor().toJson(dataset);
 			try {
 				dataset.addProperty("open", DedupFileStore.fileOpen(this));
@@ -1599,6 +1610,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			root.setAttribute("read", Boolean.toString(this.read));
 			root.setAttribute("write", Boolean.toString(this.write));
 			root.setAttribute("importing", Boolean.toString(this.importing));
+			root.setAttribute("aborted", Boolean.toString(this.aborted));
 			if (!this.extendedAttrs.isEmpty()) {
 				Element ear = doc.createElement("extended-attributes");
 				for (Entry<String, String> en : this.extendedAttrs.entrySet()) {
@@ -1758,6 +1770,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.permissions = in.readInt();
 				}
+				if (in.available() > 0) {
+					this.aborted = in.readBoolean();
+				}
 
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb = new byte[vlen];
@@ -1828,6 +1843,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			out.writeLong(this.retentionLock);
 			out.writeBoolean(this.importing);
 			out.writeInt(this.permissions);
+			out.writeBoolean(this.aborted);
 			/*
 			 * if(this.backingFile == null) out.writeInt(0); else { byte [] bb =
 			 * this.backingFile.getBytes(); out.writeInt(bb.length); out.write(bb); }

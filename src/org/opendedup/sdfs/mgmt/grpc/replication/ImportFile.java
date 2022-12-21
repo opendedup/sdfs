@@ -154,6 +154,14 @@ public class ImportFile implements Runnable {
                     active.unlock();
                 }
                 break;
+            }catch (AbortedAlready e1) {
+                try {
+                    SDFSLogger.getLog().warn("Import already aborted for " + evt.dst, e);
+                    this.evt.endEvent("Import already aborted", SDFSEvent.WARN);
+                } finally {
+                    active.unlock();
+                }
+                break;
             } catch (Exception e1) {
                 try {
                     SDFSLogger.getLog().warn("unable to complete replication to " + client.url + " volume id "
@@ -259,6 +267,10 @@ public class ImportFile implements Runnable {
                 } else {
                     FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                     mf = MetaFileStore.getMF(_f);
+                    if(mf.getAborted()) {
+                        throw new AbortedAlready("Import Ignored for aborted file " + evt.dst + " import aborted");
+
+                    }
                     if (mf.getGUID() == null) {
                         String ng = UUID.randomUUID().toString();
                         mf.setLength(0, true);
@@ -306,7 +318,17 @@ public class ImportFile implements Runnable {
                     MetaFileStore.removeMetaFile(mf.getPath(), false, false, false);
                 }
                 throw e;
-            } 
+            } catch(ImportError e) {
+                if (_f.exists()) {
+                    FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+                    mf.setAborted(true);
+                    mf.setLength(evt.bytesProcessed, true);
+                    mf.unmarshal();
+                    FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+
+                }
+                throw e;
+            }
 
             mf.setLength(expectedSize, true);
 
@@ -632,6 +654,13 @@ public class ImportFile implements Runnable {
 
     public static class ImportError extends Exception {
         public  ImportError(String message) {
+            super(message);
+
+        }
+    }
+
+    public static class AbortedAlready extends Exception {
+        public  AbortedAlready(String message) {
             super(message);
 
         }

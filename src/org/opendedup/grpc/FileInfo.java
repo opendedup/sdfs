@@ -4992,6 +4992,12 @@ public final class FileInfo {
      * @return The deleteOnClose.
      */
     boolean getDeleteOnClose();
+
+    /**
+     * <code>bool aborted = 35;</code>
+     * @return The aborted.
+     */
+    boolean getAborted();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.FileInfoResponse}
@@ -5245,6 +5251,11 @@ public final class FileInfo {
             case 272: {
 
               deleteOnClose_ = input.readBool();
+              break;
+            }
+            case 280: {
+
+              aborted_ = input.readBool();
               break;
             }
             default: {
@@ -6093,6 +6104,17 @@ public final class FileInfo {
       return deleteOnClose_;
     }
 
+    public static final int ABORTED_FIELD_NUMBER = 35;
+    private boolean aborted_;
+    /**
+     * <code>bool aborted = 35;</code>
+     * @return The aborted.
+     */
+    @java.lang.Override
+    public boolean getAborted() {
+      return aborted_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -6208,6 +6230,9 @@ public final class FileInfo {
       }
       if (deleteOnClose_ != false) {
         output.writeBool(34, deleteOnClose_);
+      }
+      if (aborted_ != false) {
+        output.writeBool(35, aborted_);
       }
       unknownFields.writeTo(output);
     }
@@ -6345,6 +6370,10 @@ public final class FileInfo {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(34, deleteOnClose_);
       }
+      if (aborted_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(35, aborted_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -6430,6 +6459,8 @@ public final class FileInfo {
           != other.getMode()) return false;
       if (getDeleteOnClose()
           != other.getDeleteOnClose()) return false;
+      if (getAborted()
+          != other.getAborted()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -6534,6 +6565,9 @@ public final class FileInfo {
       hash = (37 * hash) + DELETE_ON_CLOSE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getDeleteOnClose());
+      hash = (37 * hash) + ABORTED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getAborted());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -6749,6 +6783,8 @@ public final class FileInfo {
 
         deleteOnClose_ = false;
 
+        aborted_ = false;
+
         return this;
       }
 
@@ -6830,6 +6866,7 @@ public final class FileInfo {
         result.version_ = version_;
         result.mode_ = mode_;
         result.deleteOnClose_ = deleteOnClose_;
+        result.aborted_ = aborted_;
         onBuilt();
         return result;
       }
@@ -7034,6 +7071,9 @@ public final class FileInfo {
         }
         if (other.getDeleteOnClose() != false) {
           setDeleteOnClose(other.getDeleteOnClose());
+        }
+        if (other.getAborted() != false) {
+          setAborted(other.getAborted());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -9049,6 +9089,37 @@ public final class FileInfo {
       public Builder clearDeleteOnClose() {
         
         deleteOnClose_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean aborted_ ;
+      /**
+       * <code>bool aborted = 35;</code>
+       * @return The aborted.
+       */
+      @java.lang.Override
+      public boolean getAborted() {
+        return aborted_;
+      }
+      /**
+       * <code>bool aborted = 35;</code>
+       * @param value The aborted to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAborted(boolean value) {
+        
+        aborted_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool aborted = 35;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAborted() {
+        
+        aborted_ = false;
         onChanged();
         return this;
       }
@@ -14979,7 +15050,7 @@ public final class FileInfo {
       "p.grpc.FileInfoResponse\0221\n\terrorCode\030\004 \001" +
       "(\0162\036.org.opendedup.grpc.errorCodes\022\030\n\020ma" +
       "xNumberOfFiles\030\005 \001(\005\022.\n\006action\030\006 \001(\0162\036.o" +
-      "rg.opendedup.grpc.syncaction\"\247\006\n\020FileInf" +
+      "rg.opendedup.grpc.syncaction\"\270\006\n\020FileInf" +
       "oResponse\022\020\n\010fileName\030\001 \001(\t\022\020\n\010filePath\030" +
       "\002 \001(\t\022;\n\004type\030\003 \001(\0162-.org.opendedup.grpc" +
       ".FileInfoResponse.fileType\022\020\n\010sdfsPath\030\004" +
@@ -14999,73 +15070,73 @@ public final class FileInfo {
       "ions\030\034 \001(\005\022\020\n\010hashcode\030\035 \001(\003\022\025\n\rretentio" +
       "nLock\030\036 \001(\003\022\022\n\nattributes\030\037 \001(\003\022\017\n\007versi" +
       "on\030  \001(\t\022\014\n\004mode\030! \001(\005\022\027\n\017delete_on_clos" +
-      "e\030\" \001(\010\"\035\n\010fileType\022\010\n\004FILE\020\000\022\007\n\003DIR\020\001\"\347" +
-      "\002\n\021IOMonitorResponse\022\033\n\023virtualBytesWrit" +
-      "ten\030\001 \001(\003\022\032\n\022actualBytesWritten\030\002 \001(\003\022\021\n" +
-      "\tbytesRead\030\003 \001(\003\022\027\n\017duplicateBlocks\030\004 \001(" +
-      "\003\022\021\n\twriteOpts\030\005 \001(\003\022\020\n\010readOpts\030\006 \001(\003\022\022" +
-      "\n\nmaxReadOps\030\007 \001(\003\022\023\n\013maxWriteOps\030\010 \001(\003\022" +
-      "\017\n\007maxIops\030\t \001(\003\022\023\n\013maxReadMbps\030\n \001(\003\022\024\n" +
-      "\014maxWriteMbps\030\013 \001(\003\022\017\n\007maxMbps\030\014 \001(\003\022\r\n\005" +
-      "ioQos\030\r \001(\005\022\021\n\tioProfile\030\016 \001(\t\022\017\n\007maxRbp" +
-      "s\030\017 \001(\003\022\017\n\007maxWbps\030\020 \001(\003\022\016\n\006maxBps\030\021 \001(\003" +
-      "\"y\n\026WFileAttributesRequest\022:\n\016fileAttrib" +
-      "utes\030\001 \003(\0132\".org.opendedup.grpc.FileAttr" +
-      "ibutes\022\020\n\010filePath\030\002 \001(\t\022\021\n\tpvolumeID\030\003 " +
-      "\001(\003\"[\n\027WFileAttributesResponse\022\r\n\005error\030" +
-      "\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedup" +
-      ".grpc.errorCodes\"=\n\026RFileAttributesReque" +
-      "st\022\020\n\010filePath\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"" +
-      "\227\001\n\027RFileAttributesResponse\022:\n\016fileAttri" +
-      "butes\030\001 \003(\0132\".org.opendedup.grpc.FileAtt" +
-      "ributes\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(" +
-      "\0162\036.org.opendedup.grpc.errorCodes\",\n\016Fil" +
-      "eAttributes\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t*" +
-      "L\n\nsyncaction\022\014\n\010DOWNLOAD\020\000\022\t\n\005WRITE\020\001\022\n" +
-      "\n\006DELETE\020\002\022\n\n\006UPLOAD\020\003\022\r\n\tKEEPALIVE\020\004*\355\014" +
-      "\n\nerrorCodes\022\t\n\005NOERR\020\000\022\t\n\005EPERM\020\001\022\n\n\006EN" +
-      "OENT\020\002\022\t\n\005ESRCH\020\003\022\t\n\005EINTR\020\004\022\007\n\003EIO\020\005\022\t\n" +
-      "\005ENXIO\020\006\022\t\n\005E2BIG\020\007\022\013\n\007ENOEXEC\020\010\022\t\n\005EBAD" +
-      "F\020\t\022\n\n\006ECHILD\020\n\022\n\n\006EAGAIN\020\013\022\n\n\006ENOMEM\020\014\022" +
-      "\n\n\006EACCES\020\r\022\n\n\006EFAULT\020\016\022\013\n\007ENOTBLK\020\017\022\t\n\005" +
-      "EBUSY\020\020\022\n\n\006EEXIST\020\021\022\t\n\005EXDEV\020\022\022\n\n\006ENODEV" +
-      "\020\023\022\013\n\007ENOTDIR\020\024\022\n\n\006EISDIR\020\025\022\n\n\006EINVAL\020\026\022" +
-      "\n\n\006ENFILE\020\027\022\n\n\006EMFILE\020\030\022\n\n\006ENOTTY\020\031\022\013\n\007E" +
-      "TXTBSY\020\032\022\t\n\005EFBIG\020\033\022\n\n\006ENOSPC\020\034\022\n\n\006ESPIP" +
-      "E\020\035\022\t\n\005EROFS\020\036\022\n\n\006EMLINK\020\037\022\t\n\005EPIPE\020 \022\010\n" +
-      "\004EDOM\020!\022\n\n\006ERANGE\020\"\022\013\n\007EDEADLK\020#\022\020\n\014ENAM" +
-      "ETOOLONG\020$\022\n\n\006ENOLCK\020%\022\n\n\006ENOSYS\020&\022\r\n\tEN" +
-      "OTEMPTY\020\'\022\t\n\005ELOOP\020(\022\017\n\013EWOULDBLOCK\020)\022\n\n" +
-      "\006ENOMSG\020*\022\t\n\005EIDRM\020+\022\n\n\006ECHRNG\020,\022\014\n\010EL2N" +
-      "SYNC\020-\022\n\n\006EL3HLT\020.\022\n\n\006EL3RST\020/\022\n\n\006ELNRNG" +
-      "\0200\022\013\n\007EUNATCH\0201\022\n\n\006ENOCSI\0202\022\n\n\006EL2HLT\0203\022" +
-      "\t\n\005EBADE\0204\022\t\n\005EBADR\0205\022\n\n\006EXFULL\0206\022\n\n\006ENO" +
-      "ANO\0207\022\013\n\007EBADRQC\0208\022\013\n\007EBADSLT\0209\022\r\n\tEDEAD" +
-      "LOCK\020:\022\n\n\006EBFONT\020;\022\n\n\006ENOSTR\020<\022\013\n\007ENODAT" +
-      "A\020=\022\t\n\005ETIME\020>\022\t\n\005ENOSR\020?\022\n\n\006ENONET\020@\022\n\n" +
-      "\006ENOPKG\020A\022\013\n\007EREMOTE\020B\022\013\n\007ENOLINK\020C\022\010\n\004E" +
-      "ADV\020D\022\n\n\006ESRMNT\020E\022\t\n\005ECOMM\020F\022\n\n\006EPROTO\020G" +
-      "\022\r\n\tEMULTIHOP\020H\022\013\n\007EDOTDOT\020I\022\013\n\007EBADMSG\020" +
-      "J\022\r\n\tEOVERFLOW\020K\022\014\n\010ENOTUNIQ\020L\022\n\n\006EBADFD" +
-      "\020M\022\013\n\007EREMCHG\020N\022\013\n\007ELIBACC\020O\022\013\n\007ELIBBAD\020" +
-      "P\022\013\n\007ELIBSCN\020Q\022\013\n\007ELIBMAX\020R\022\014\n\010ELIBEXEC\020" +
-      "S\022\n\n\006EILSEQ\020T\022\014\n\010ERESTART\020U\022\014\n\010ESTRPIPE\020" +
-      "V\022\n\n\006EUSERS\020W\022\014\n\010ENOTSOCK\020X\022\020\n\014EDESTADDR" +
-      "REQ\020Y\022\014\n\010EMSGSIZE\020Z\022\016\n\nEPROTOTYPE\020[\022\017\n\013E" +
-      "NOPROTOOPT\020\\\022\023\n\017EPROTONOSUPPORT\020]\022\023\n\017ESO" +
-      "CKTNOSUPPORT\020^\022\016\n\nEOPNOTSUPP\020_\022\020\n\014EPFNOS" +
-      "UPPORT\020`\022\020\n\014EAFNOSUPPORT\020a\022\016\n\nEADDRINUSE" +
-      "\020b\022\021\n\rEADDRNOTAVAIL\020c\022\014\n\010ENETDOWN\020d\022\017\n\013E" +
-      "NETUNREACH\020e\022\r\n\tENETRESET\020f\022\020\n\014ECONNABOR" +
-      "TED\020g\022\016\n\nECONNRESET\020h\022\013\n\007ENOBUFS\020i\022\013\n\007EI" +
-      "SCONN\020j\022\014\n\010ENOTCONN\020k\022\r\n\tESHUTDOWN\020l\022\020\n\014" +
-      "ETOOMANYREFS\020m\022\r\n\tETIMEDOUT\020n\022\020\n\014ECONNRE" +
-      "FUSED\020o\022\r\n\tEHOSTDOWN\020p\022\020\n\014EHOSTUNREACH\020q" +
-      "\022\014\n\010EALREADY\020r\022\017\n\013EINPROGRESS\020s\022\n\n\006ESTAL" +
-      "E\020t\022\013\n\007EUCLEAN\020u\022\013\n\007ENOTNAM\020v\022\013\n\007ENAVAIL" +
-      "\020w\022\n\n\006EISNAM\020x\022\r\n\tEREMOTEIO\020y\022\016\n\nEARCHIV" +
-      "EIO\020zB0Z.github.com/opendedup/sdfs-clien" +
-      "t-go/sdfs/;sdfsb\006proto3"
+      "e\030\" \001(\010\022\017\n\007aborted\030# \001(\010\"\035\n\010fileType\022\010\n\004" +
+      "FILE\020\000\022\007\n\003DIR\020\001\"\347\002\n\021IOMonitorResponse\022\033\n" +
+      "\023virtualBytesWritten\030\001 \001(\003\022\032\n\022actualByte" +
+      "sWritten\030\002 \001(\003\022\021\n\tbytesRead\030\003 \001(\003\022\027\n\017dup" +
+      "licateBlocks\030\004 \001(\003\022\021\n\twriteOpts\030\005 \001(\003\022\020\n" +
+      "\010readOpts\030\006 \001(\003\022\022\n\nmaxReadOps\030\007 \001(\003\022\023\n\013m" +
+      "axWriteOps\030\010 \001(\003\022\017\n\007maxIops\030\t \001(\003\022\023\n\013max" +
+      "ReadMbps\030\n \001(\003\022\024\n\014maxWriteMbps\030\013 \001(\003\022\017\n\007" +
+      "maxMbps\030\014 \001(\003\022\r\n\005ioQos\030\r \001(\005\022\021\n\tioProfil" +
+      "e\030\016 \001(\t\022\017\n\007maxRbps\030\017 \001(\003\022\017\n\007maxWbps\030\020 \001(" +
+      "\003\022\016\n\006maxBps\030\021 \001(\003\"y\n\026WFileAttributesRequ" +
+      "est\022:\n\016fileAttributes\030\001 \003(\0132\".org.opende" +
+      "dup.grpc.FileAttributes\022\020\n\010filePath\030\002 \001(" +
+      "\t\022\021\n\tpvolumeID\030\003 \001(\003\"[\n\027WFileAttributesR" +
+      "esponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(" +
+      "\0162\036.org.opendedup.grpc.errorCodes\"=\n\026RFi" +
+      "leAttributesRequest\022\020\n\010filePath\030\001 \001(\t\022\021\n" +
+      "\tpvolumeID\030\002 \001(\003\"\227\001\n\027RFileAttributesResp" +
+      "onse\022:\n\016fileAttributes\030\001 \003(\0132\".org.opend" +
+      "edup.grpc.FileAttributes\022\r\n\005error\030\002 \001(\t\022" +
+      "1\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc." +
+      "errorCodes\",\n\016FileAttributes\022\013\n\003key\030\001 \001(" +
+      "\t\022\r\n\005value\030\002 \001(\t*L\n\nsyncaction\022\014\n\010DOWNLO" +
+      "AD\020\000\022\t\n\005WRITE\020\001\022\n\n\006DELETE\020\002\022\n\n\006UPLOAD\020\003\022" +
+      "\r\n\tKEEPALIVE\020\004*\355\014\n\nerrorCodes\022\t\n\005NOERR\020\000" +
+      "\022\t\n\005EPERM\020\001\022\n\n\006ENOENT\020\002\022\t\n\005ESRCH\020\003\022\t\n\005EI" +
+      "NTR\020\004\022\007\n\003EIO\020\005\022\t\n\005ENXIO\020\006\022\t\n\005E2BIG\020\007\022\013\n\007" +
+      "ENOEXEC\020\010\022\t\n\005EBADF\020\t\022\n\n\006ECHILD\020\n\022\n\n\006EAGA" +
+      "IN\020\013\022\n\n\006ENOMEM\020\014\022\n\n\006EACCES\020\r\022\n\n\006EFAULT\020\016" +
+      "\022\013\n\007ENOTBLK\020\017\022\t\n\005EBUSY\020\020\022\n\n\006EEXIST\020\021\022\t\n\005" +
+      "EXDEV\020\022\022\n\n\006ENODEV\020\023\022\013\n\007ENOTDIR\020\024\022\n\n\006EISD" +
+      "IR\020\025\022\n\n\006EINVAL\020\026\022\n\n\006ENFILE\020\027\022\n\n\006EMFILE\020\030" +
+      "\022\n\n\006ENOTTY\020\031\022\013\n\007ETXTBSY\020\032\022\t\n\005EFBIG\020\033\022\n\n\006" +
+      "ENOSPC\020\034\022\n\n\006ESPIPE\020\035\022\t\n\005EROFS\020\036\022\n\n\006EMLIN" +
+      "K\020\037\022\t\n\005EPIPE\020 \022\010\n\004EDOM\020!\022\n\n\006ERANGE\020\"\022\013\n\007" +
+      "EDEADLK\020#\022\020\n\014ENAMETOOLONG\020$\022\n\n\006ENOLCK\020%\022" +
+      "\n\n\006ENOSYS\020&\022\r\n\tENOTEMPTY\020\'\022\t\n\005ELOOP\020(\022\017\n" +
+      "\013EWOULDBLOCK\020)\022\n\n\006ENOMSG\020*\022\t\n\005EIDRM\020+\022\n\n" +
+      "\006ECHRNG\020,\022\014\n\010EL2NSYNC\020-\022\n\n\006EL3HLT\020.\022\n\n\006E" +
+      "L3RST\020/\022\n\n\006ELNRNG\0200\022\013\n\007EUNATCH\0201\022\n\n\006ENOC" +
+      "SI\0202\022\n\n\006EL2HLT\0203\022\t\n\005EBADE\0204\022\t\n\005EBADR\0205\022\n" +
+      "\n\006EXFULL\0206\022\n\n\006ENOANO\0207\022\013\n\007EBADRQC\0208\022\013\n\007E" +
+      "BADSLT\0209\022\r\n\tEDEADLOCK\020:\022\n\n\006EBFONT\020;\022\n\n\006E" +
+      "NOSTR\020<\022\013\n\007ENODATA\020=\022\t\n\005ETIME\020>\022\t\n\005ENOSR" +
+      "\020?\022\n\n\006ENONET\020@\022\n\n\006ENOPKG\020A\022\013\n\007EREMOTE\020B\022" +
+      "\013\n\007ENOLINK\020C\022\010\n\004EADV\020D\022\n\n\006ESRMNT\020E\022\t\n\005EC" +
+      "OMM\020F\022\n\n\006EPROTO\020G\022\r\n\tEMULTIHOP\020H\022\013\n\007EDOT" +
+      "DOT\020I\022\013\n\007EBADMSG\020J\022\r\n\tEOVERFLOW\020K\022\014\n\010ENO" +
+      "TUNIQ\020L\022\n\n\006EBADFD\020M\022\013\n\007EREMCHG\020N\022\013\n\007ELIB" +
+      "ACC\020O\022\013\n\007ELIBBAD\020P\022\013\n\007ELIBSCN\020Q\022\013\n\007ELIBM" +
+      "AX\020R\022\014\n\010ELIBEXEC\020S\022\n\n\006EILSEQ\020T\022\014\n\010ERESTA" +
+      "RT\020U\022\014\n\010ESTRPIPE\020V\022\n\n\006EUSERS\020W\022\014\n\010ENOTSO" +
+      "CK\020X\022\020\n\014EDESTADDRREQ\020Y\022\014\n\010EMSGSIZE\020Z\022\016\n\n" +
+      "EPROTOTYPE\020[\022\017\n\013ENOPROTOOPT\020\\\022\023\n\017EPROTON" +
+      "OSUPPORT\020]\022\023\n\017ESOCKTNOSUPPORT\020^\022\016\n\nEOPNO" +
+      "TSUPP\020_\022\020\n\014EPFNOSUPPORT\020`\022\020\n\014EAFNOSUPPOR" +
+      "T\020a\022\016\n\nEADDRINUSE\020b\022\021\n\rEADDRNOTAVAIL\020c\022\014" +
+      "\n\010ENETDOWN\020d\022\017\n\013ENETUNREACH\020e\022\r\n\tENETRES" +
+      "ET\020f\022\020\n\014ECONNABORTED\020g\022\016\n\nECONNRESET\020h\022\013" +
+      "\n\007ENOBUFS\020i\022\013\n\007EISCONN\020j\022\014\n\010ENOTCONN\020k\022\r" +
+      "\n\tESHUTDOWN\020l\022\020\n\014ETOOMANYREFS\020m\022\r\n\tETIME" +
+      "DOUT\020n\022\020\n\014ECONNREFUSED\020o\022\r\n\tEHOSTDOWN\020p\022" +
+      "\020\n\014EHOSTUNREACH\020q\022\014\n\010EALREADY\020r\022\017\n\013EINPR" +
+      "OGRESS\020s\022\n\n\006ESTALE\020t\022\013\n\007EUCLEAN\020u\022\013\n\007ENO" +
+      "TNAM\020v\022\013\n\007ENAVAIL\020w\022\n\n\006EISNAM\020x\022\r\n\tEREMO" +
+      "TEIO\020y\022\016\n\nEARCHIVEIO\020zB0Z.github.com/ope" +
+      "ndedup/sdfs-client-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -15088,7 +15159,7 @@ public final class FileInfo {
     internal_static_org_opendedup_grpc_FileInfoResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_FileInfoResponse_descriptor,
-        new java.lang.String[] { "FileName", "FilePath", "Type", "SdfsPath", "Atime", "Mtime", "Ctime", "Hidden", "Size", "Open", "FileGuild", "MapGuid", "LocalOwner", "Execute", "Read", "Write", "Importing", "Symlink", "FileAttributes", "Id", "Files", "ParentPath", "PvolumeID", "IoMonitor", "SymlinkPath", "GroupId", "UserId", "Permissions", "Hashcode", "RetentionLock", "Attributes", "Version", "Mode", "DeleteOnClose", });
+        new java.lang.String[] { "FileName", "FilePath", "Type", "SdfsPath", "Atime", "Mtime", "Ctime", "Hidden", "Size", "Open", "FileGuild", "MapGuid", "LocalOwner", "Execute", "Read", "Write", "Importing", "Symlink", "FileAttributes", "Id", "Files", "ParentPath", "PvolumeID", "IoMonitor", "SymlinkPath", "GroupId", "UserId", "Permissions", "Hashcode", "RetentionLock", "Attributes", "Version", "Mode", "DeleteOnClose", "Aborted", });
     internal_static_org_opendedup_grpc_IOMonitorResponse_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_org_opendedup_grpc_IOMonitorResponse_fieldAccessorTable = new

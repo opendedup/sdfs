@@ -195,6 +195,7 @@ message FileInfoResponse {
     string version = 32;
     int32 mode = 33;
     bool delete_on_close = 34;
+	bool aborted = 35;
 
 }
 
