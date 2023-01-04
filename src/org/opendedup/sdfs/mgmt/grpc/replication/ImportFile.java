@@ -319,12 +319,13 @@ public class ImportFile implements Runnable {
                 }
                 throw e;
             } catch (ImportError e) {
-                FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
-                mf.setAborted(true);
-                mf.setLength(evt.bytesProcessed, true);
-                mf.unmarshal();
-                FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+                    FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+                    mf.setAborted(true);
+                    mf.setLength(evt.bytesProcessed, true);
+                    mf.sync();
+                    MetaFileStore.addToCache(mf);
 
+                    FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
                 throw e;
             }
 
@@ -386,7 +387,7 @@ public class ImportFile implements Runnable {
         File _f = new File(pt);
         if (_f.exists() && evt.srcOffset == 0 && evt.dstOffset == 0
                 && (evt.srcSize == 0 || evt.srcSize == crs.getFile().getSize())) {
-            MetaDataDedupFile mf = MetaFileStore.getMF(_f.getAbsolutePath());
+            MetaDataDedupFile mf = MetaFileStore.getMF(_f);
             if (!mf.getAborted()) {
                 FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                 mf.clearRetentionLock();
