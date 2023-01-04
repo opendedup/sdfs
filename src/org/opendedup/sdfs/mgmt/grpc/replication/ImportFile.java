@@ -115,7 +115,8 @@ public class ImportFile implements Runnable {
             } catch (FileNotFoundException | ReplicationCanceledException | ImportError e1) {
                 if (e1 instanceof FileNotFoundException) {
                     SDFSLogger.getLog().warn("File " + evt.src + " not found on source");
-                } if(e1 instanceof ImportError) {
+                }
+                if (e1 instanceof ImportError) {
                     SDFSLogger.getLog().warn("File " + evt.src + " has import error. Aborting import");
                 }
                 SDFSLogger.getLog().info("Replication Canceled");
@@ -154,7 +155,7 @@ public class ImportFile implements Runnable {
                     active.unlock();
                 }
                 break;
-            }catch (AbortedAlready e1) {
+            } catch (AbortedAlready e1) {
                 try {
                     SDFSLogger.getLog().warn("Import already aborted for " + evt.dst, e);
                     this.evt.endEvent("Import already aborted", SDFSEvent.WARN);
@@ -267,7 +268,7 @@ public class ImportFile implements Runnable {
                 } else {
                     FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                     mf = MetaFileStore.getMF(_f);
-                    if(mf.getAborted()) {
+                    if (mf.getAborted()) {
                         throw new AbortedAlready("Import Ignored for aborted file " + evt.dst + " import aborted");
 
                     }
@@ -278,8 +279,7 @@ public class ImportFile implements Runnable {
                         mf.sync();
                     }
                 }
-            } catch (ReplicationCanceledException e) {
-
+            } catch (ReplicationCanceledException | AbortedAlready e) {
                 throw e;
             }
             long expectedSize = evt.dstOffset + evt.srcSize;
@@ -307,7 +307,7 @@ public class ImportFile implements Runnable {
                     if (evt.srcSize == 0) {
                         endPos += fi.getSize();
                     }
-                    downloadDDB(mf, sguid, endPos,expectedSize);
+                    downloadDDB(mf, sguid, endPos, expectedSize);
                 }
                 mf.setRetentionLock();
                 CloseFile.close(mf, true);
@@ -318,15 +318,13 @@ public class ImportFile implements Runnable {
                     MetaFileStore.removeMetaFile(mf.getPath(), false, false, false);
                 }
                 throw e;
-            } catch(ImportError e) {
-                if (_f.exists()) {
-                    FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
-                    mf.setAborted(true);
-                    mf.setLength(evt.bytesProcessed, true);
-                    mf.unmarshal();
-                    FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+            } catch (ImportError e) {
+                FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+                mf.setAborted(true);
+                mf.setLength(evt.bytesProcessed, true);
+                mf.unmarshal();
+                FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
 
-                }
                 throw e;
             }
 
@@ -335,11 +333,11 @@ public class ImportFile implements Runnable {
             MetaFileStore.removedCachedMF(mf.getPath());
             MetaFileStore.addToCache(mf);
             evt.addCount(1);
-            
+
             evt.endEvent("Import Successful for " + evt.dst, SDFSEvent.INFO);
-            
-            SDFSLogger.getLog().info("Imported " + evt.dst  + " size = " + mf.length() + 
-                " bytesimported = " + evt.bytesImported + " bytesprocessed = " + evt.bytesProcessed);
+
+            SDFSLogger.getLog().info("Imported " + evt.dst + " size = " + mf.length() +
+                    " bytesimported = " + evt.bytesImported + " bytesprocessed = " + evt.bytesProcessed);
             synchronized (ReplicationClient.activeImports) {
                 ReplicationClient.activeImports.remove(evt.dst);
                 if (client.imports.remove(this.evt.uid) != null) {
@@ -388,9 +386,15 @@ public class ImportFile implements Runnable {
         File _f = new File(pt);
         if (_f.exists() && evt.srcOffset == 0 && evt.dstOffset == 0
                 && (evt.srcSize == 0 || evt.srcSize == crs.getFile().getSize())) {
-            FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
-            MetaFileStore.getMF(_f.getAbsolutePath()).clearRetentionLock();
-            MetaFileStore.removeMetaFile(_f.getPath(), false, false, false);
+            MetaDataDedupFile mf = MetaFileStore.getMF(_f.getAbsolutePath());
+            if (!mf.getAborted()) {
+                FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
+                mf.clearRetentionLock();
+                MetaFileStore.removeMetaFile(_f.getPath(), false, false, false);
+                mf = null;
+            } else {
+                throw new AbortedAlready("File Import for " + mf.getName() + "already aborted");
+            }
         }
         this.evt.fileSize = crs.getFile().getSize();
 
@@ -430,7 +434,7 @@ public class ImportFile implements Runnable {
                     DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
                     fbf = ByteBuffer.wrap(new byte[el]);
                     ch.read(ebf, 0, el, evt.dstOffset);
-                    
+
                     ch.getDedupFile().unRegisterChannel(ch, -2);
                     ch.getDedupFile().forceClose();
                 }
@@ -468,8 +472,9 @@ public class ImportFile implements Runnable {
             }
             SparseDataChunk sp = new SparseDataChunk(cr);
             if (sp.getFpos() >= spos && sp.getFpos() < endPos) {
-                SDFSLogger.getLog().debug("fpos = " + sp.getFpos() + " spos = " + spos + " endPos " + endPos + " dpos = " + dpos);
-                SparseDataChunk ck = importSparseDataChunk(sp, mf,mfExpectedSize);
+                SDFSLogger.getLog()
+                        .debug("fpos = " + sp.getFpos() + " spos = " + spos + " endPos " + endPos + " dpos = " + dpos);
+                SparseDataChunk ck = importSparseDataChunk(sp, mf, mfExpectedSize);
                 mp.put(dpos, ck);
                 dpos += ck.len;
             } else if (sp.getFpos() >= endPos) {
@@ -507,7 +512,7 @@ public class ImportFile implements Runnable {
         return place;
     }
 
-    private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf,long expectedSize)
+    private SparseDataChunk importSparseDataChunk(SparseDataChunk ck, MetaDataDedupFile mf, long expectedSize)
             throws IOException, HashtableFullException, ImportError {
 
         TreeMap<Integer, HashLocPair> al = ck.getFingers();
@@ -586,12 +591,12 @@ public class ImportFile implements Runnable {
                 ctl.loc = Longs.fromByteArray(ir.getHashLocs());
             }
             p.hashloc = Longs.toByteArray(ctl.loc);
-            if((evt.bytesProcessed + p.nlen) > expectedSize) {
+            if ((evt.bytesProcessed + p.nlen) > expectedSize) {
                 evt.bytesProcessed = expectedSize;
             } else {
                 evt.bytesProcessed += p.nlen;
             }
-            
+
             mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
             mf.setLength(mf.length() + p.nlen, false);
         }
@@ -653,14 +658,14 @@ public class ImportFile implements Runnable {
     }
 
     public static class ImportError extends Exception {
-        public  ImportError(String message) {
+        public ImportError(String message) {
             super(message);
 
         }
     }
 
     public static class AbortedAlready extends Exception {
-        public  AbortedAlready(String message) {
+        public AbortedAlready(String message) {
             super(message);
 
         }
