@@ -355,6 +355,13 @@ public class Config {
 			Main.sdfsCliSSL = false;
 			Main.sdfsCliListenAddr = "localhost";
 		}
+		if (Main.useDedicatedPort) {
+			Main.sdfsCliRequireMutualTLSAuth = true;
+			Main.sdfsCliSSL = true;
+			Main.sdfsCliListenAddr = "0.0.0.0";
+			Main.prodConfigVariable = "OB2PORTRANGE";
+		}
+
 		if (Main.chunkStoreEncryptionEnabled)
 			SDFSLogger.getLog().info("################## Encryption is enabled ##################");
 		else
@@ -430,6 +437,7 @@ public class Config {
 		cli.setAttribute("prod-config-file-path", Main.prodConfigFilePath);
 		cli.setAttribute("prod-config-variable", Main.prodConfigVariable);
 		cli.setAttribute("use-ssl", Boolean.toString(Main.sdfsCliSSL));
+		cli.setAttribute("enable-mutual-tls-auth", Boolean.toString(Main.sdfsCliRequireMutualTLSAuth));
 
 		Element localChunkStore = (Element) doc.getElementsByTagName("local-chunkstore").item(0);
 		if (localChunkStore.getElementsByTagName("extended-config").getLength() > 0) {

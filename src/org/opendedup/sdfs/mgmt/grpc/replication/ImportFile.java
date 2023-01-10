@@ -169,7 +169,7 @@ public class ImportFile implements Runnable {
                             + client.volumeid + " for " + evt.src + " will retry in 5 minutes", e1);
                     e = e1;
                     this.evt.setShortMsg("unable to complete replication to " + client.url + " volume id "
-                            + client.volumeid + " for " + evt.src + " will retry in 5 minutes");
+                            + client.volumeid + " for " + evt.src + " due to : " + e + ", will retry in 5 minutes");
                     String pt = Main.volume.getPath() + File.separator + evt.dst;
                     File _f = new File(pt);
                     try {

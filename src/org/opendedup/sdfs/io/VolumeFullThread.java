@@ -86,29 +86,59 @@ public class VolumeFullThread implements Runnable {
 			this.full = true;
 			return true;
 		}
-		if ( (HCServiceProxy.getDSESize() + offset) >= HCServiceProxy
-				.getDSEMaxSize()) {
-			if (!full) {
-				SDFSLogger.getLog().warn(
-						"Drive is almost full. DSE Size ["
-								+ HCServiceProxy.getDSESize()
-								+ "] and DSE Max Size is ["
+		if (!Main.cloudChunkStore) {
+			if (!Main.cloudChunkStore) {
+				if ((HCServiceProxy.getDSESize() + offset) >= HCServiceProxy
+						.getDSEMaxSize()) {
+					if (!full) {
+						SDFSLogger.getLog().warn(
+								"Drive is almost full. DSE Size ["
+										+ HCServiceProxy.getDSESize()
+										+ "] and DSE Max Size is ["
+										+ HCServiceProxy.getDSEMaxSize() + "]");
+						this.createDiskFillEvent("Drive is almost full. DSE Size ["
+								+ HCServiceProxy.getDSESize() + "] and DSE Max Size is ["
 								+ HCServiceProxy.getDSEMaxSize() + "]");
+					}
+					full = true;
+					return true;
+				} else {
+					if (this.full) {
+						SDFSLogger.getLog().warn(
+								"Drive is no longer full");
+						this.createDiskFillEvent("Drive is no longer full");
+					}
+					this.full = false;
 
-				this.createDiskFillEvent("Drive is almost full. DSE Size ["
-						+ HCServiceProxy.getDSESize() + "] and DSE Max Size is ["
-						+ HCServiceProxy.getDSEMaxSize() + "]");
+					return false;
+				}
+			} else {
+				if (avail > (offset)) {
+					if (this.full) {
+						SDFSLogger.getLog().warn(
+								"Drive is no longer full");
+						this.createDiskFillEvent("Drive is no longer full");
+					}
+					this.full = false;
+
+					return false;
+				}
+				this.full = false;
+
+				return false;
 			}
-			full = true;
-			return true;
 		} else {
-			if (this.full) {
-				SDFSLogger.getLog().warn(
-						"Drive is no longer full");
-				this.createDiskFillEvent("Drive is no longer full");
+			if (avail > (offset)) {
+				if (this.full) {
+					SDFSLogger.getLog().warn(
+							"Drive is no longer full");
+					this.createDiskFillEvent("Drive is no longer full");
+				}
+				this.full = false;
+
+				return false;
 			}
 			this.full = false;
-
 			return false;
 		}
 	}

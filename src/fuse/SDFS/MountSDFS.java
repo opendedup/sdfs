@@ -55,6 +55,7 @@ public class MountSDFS implements Daemon, Runnable {
 		options.addOption("t", true, "Temporary directory for sdfs to be used in linux os. \n e.g. /tmp");
 		options.addOption("a", false, "Runs Consistency Check Periodically");
 		options.addOption("u", false, "Disables TLS and forces localhost");
+		options.addOption("d", false, "Enables TLS and forces 0.0.0.0");
 		return options;
 	}
 
@@ -206,6 +207,9 @@ public class MountSDFS implements Daemon, Runnable {
 		}
 		if(cmd.hasOption("u")) {
 			Main.usePortRedirector = true;
+		}
+		if(cmd.hasOption("d")) {
+			Main.useDedicatedPort = true;
 		}
 		//Main.logPath = "/var/log/sdfs/" + volname + ".log";
 		if (OSValidator.isWindows()) {

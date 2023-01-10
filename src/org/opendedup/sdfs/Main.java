@@ -118,6 +118,8 @@ public class Main {
 
 	public static boolean usePortRedirector;
 
+	public static boolean useDedicatedPort;
+
 	/**
 	 * Future implementation for pluggable chunkstores
 	 */

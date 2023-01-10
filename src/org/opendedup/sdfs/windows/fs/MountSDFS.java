@@ -58,6 +58,7 @@ public class MountSDFS {
 				"comma separated list of remote volumes that should also be accounted for when doing garbage collection. "
 						+ "If not entered the volume will attempt to identify other volumes in the cluster.");
 		options.addOption("use-portredirector", false, "Disables TLS and forces localhost");
+		options.addOption("use-dedicatedport", false, "Enables TLS and forces 0.0.0.0");
 		options.addOption("h", false, "display available options");
 		return options;
 	}
@@ -148,6 +149,9 @@ public class MountSDFS {
 		}
 		if(cmd.hasOption("use-portredirector")) {
 			Main.usePortRedirector = true;
+		}
+		if(cmd.hasOption("use-dedicatedport")) {
+			Main.useDedicatedPort = true;
 		}
 
 
