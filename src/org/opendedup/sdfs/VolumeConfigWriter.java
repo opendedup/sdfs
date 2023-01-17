@@ -119,7 +119,6 @@ public class VolumeConfigWriter {
 	String authJarFilePath = "";
 	String authClassInfo = "";
 	String prodConfigFilePath = "";
-	String prodConfigVariable = "";
 	boolean s3ApiCompatible = false;
 	boolean sdfsCliSSL = true;
 	boolean sdfsCliRequireAuth = false;
@@ -244,8 +243,7 @@ public class VolumeConfigWriter {
 			this.authClassInfo = cmd.getOptionValue("auth-class-info");
 		if (cmd.hasOption("prod-config-file-path"))
 			this.prodConfigFilePath = cmd.getOptionValue("prod-config-file-path");
-		if (cmd.hasOption("prod-config-variable"))
-			this.prodConfigVariable = cmd.getOptionValue("prod-config-variable");
+
 		if (cmd.hasOption("s3-compatible-target"))
 			this.s3ApiCompatible = Boolean.parseBoolean(cmd.getOptionValue("s3-compatible-target"));
 		if (cmd.hasOption("immutabilityPeriod"))
@@ -862,7 +860,6 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("auth-utility-jar-file-path", this.authJarFilePath);
 		sdfscli.setAttribute("auth-class-info", this.authClassInfo);
 		sdfscli.setAttribute("prod-config-file-path", this.prodConfigFilePath);
-		sdfscli.setAttribute("prod-config-variable", this.prodConfigVariable);
 		sdfscli.setAttribute("use-ssl", Boolean.toString(this.sdfsCliSSL));
 		sdfscli.setAttribute("permissions-file", this.permissionsFile);
 		sdfscli.setAttribute("encrypt-config", Boolean.toString(this.encryptConfig));

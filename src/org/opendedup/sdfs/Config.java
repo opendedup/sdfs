@@ -99,12 +99,10 @@ public class Config {
 		Main.authJarFilePath = cli.getAttribute("auth-utility-jar-file-path");
 		Main.authClassInfo = cli.getAttribute("auth-class-info");
 		Main.prodConfigFilePath = cli.getAttribute("prod-config-file-path");
-		Main.prodConfigVariable = cli.getAttribute("prod-config-variable");
 		SDFSLogger.getLog().debug("listen-address=" + Main.sdfsCliListenAddr);
 		SDFSLogger.getLog().debug("auth-utility-jar-file-path=" + Main.authJarFilePath);
 		SDFSLogger.getLog().debug("auth-class-info=" + Main.authClassInfo);
 		SDFSLogger.getLog().debug("prod-config-file-path=" + Main.prodConfigFilePath);
-		SDFSLogger.getLog().debug("prod-config-variable=" + Main.prodConfigVariable);
 		Main.version = version;
 		SDFSLogger.getLog().info("Parsing volume " + doc.getDocumentElement().getNodeName() + " version " + version);
 		Element locations = (Element) doc.getElementsByTagName("locations").item(0);
@@ -359,7 +357,6 @@ public class Config {
 			Main.sdfsCliRequireMutualTLSAuth = true;
 			Main.sdfsCliSSL = true;
 			Main.sdfsCliListenAddr = "0.0.0.0";
-			Main.prodConfigVariable = "OB2PORTRANGE";
 		}
 
 		if (Main.chunkStoreEncryptionEnabled)
@@ -435,7 +432,6 @@ public class Config {
 		cli.setAttribute("auth-utility-jar-file-path", Main.authJarFilePath);
 		cli.setAttribute("auth-class-info", Main.authClassInfo);
 		cli.setAttribute("prod-config-file-path", Main.prodConfigFilePath);
-		cli.setAttribute("prod-config-variable", Main.prodConfigVariable);
 		cli.setAttribute("use-ssl", Boolean.toString(Main.sdfsCliSSL));
 		cli.setAttribute("enable-mutual-tls-auth", Boolean.toString(Main.sdfsCliRequireMutualTLSAuth));
 

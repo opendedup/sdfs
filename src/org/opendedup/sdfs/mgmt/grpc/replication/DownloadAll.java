@@ -73,19 +73,19 @@ public class DownloadAll implements Runnable {
                     if (MetaFileStore.getMF(_f).lastModified() != file.getMtime()) {
                         ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                                 file.getFilePath(),
-                                client.url, client.volumeid, client.mtls, false,0,0,0,true);
+                                client.url, client.volumeid, client.mtls, false,0,0,0,true,false);
                         evt.persistEvent();
                         impf = new ImportFile(client, evt);
                     } else {
                         ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                                 file.getFilePath(),
-                                client.url, client.volumeid, client.mtls, false,0,0,0,true);
+                                client.url, client.volumeid, client.mtls, false,0,0,0,true,false);
                         evt.endEvent("File Already Exists and looks like the same " + file.getFilePath());
                     }
                 } else {
                     ReplicationImportEvent evt = new ReplicationImportEvent(file.getFilePath(),
                             file.getFilePath(),
-                            client.url, client.volumeid, client.mtls, false,0,0,0,true);
+                            client.url, client.volumeid, client.mtls, false,0,0,0,true,false);
                     evt.persistEvent();
                     impf = new ImportFile(client, evt);
                 }

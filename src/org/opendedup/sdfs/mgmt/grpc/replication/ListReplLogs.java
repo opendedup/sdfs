@@ -59,7 +59,7 @@ public class ListReplLogs implements Runnable {
                     SDFSLogger.getLog().warn("Downloading all files");
                     ReplicationImportEvent evt = new ReplicationImportEvent(".",
                             ".", client.url, client.volumeid,
-                            client.mtls, false,0,0,0,true);
+                            client.mtls, false,0,0,0,true,false);
                     try {
                         new DownloadAll(this.client, evt).replicationSinkAll();
                     } catch (Exception e) {
@@ -73,7 +73,7 @@ public class ListReplLogs implements Runnable {
                     if (rs.getActionType() == actionType.MFILEWRITTEN) {
                         ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                 rs.getFile().getFilePath(),
-                                client.url, client.volumeid, client.mtls, false,0,0,0,true);
+                                client.url, client.volumeid, client.mtls, false,0,0,0,true,false);
                         impf = new ImportFile( client,
                                 evt);
 

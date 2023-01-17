@@ -940,12 +940,13 @@ public class SparseDedupFile implements DedupFile {
 					if (this.channels.size() == 0) {
 						SDFSLogger.getLog().debug("Closinging " + this.mf.getPath());
 						this.forceClose();
-					}
-					try {
-						//MetaFileStore.getMF(mf.getPath()).sync();
-						eventBus.post(new SFileWritten(this));
-					} catch (Exception e) {
-						SDFSLogger.getLog().error("error while syncing file in close", e);
+					} else {
+						try {
+							// MetaFileStore.getMF(mf.getPath()).sync();
+							eventBus.post(new SFileWritten(this));
+						} catch (Exception e) {
+							SDFSLogger.getLog().error("error while syncing file in close", e);
+						}
 					}
 
 				} catch (Exception e) {

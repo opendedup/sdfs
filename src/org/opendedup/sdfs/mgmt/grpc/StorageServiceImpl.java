@@ -891,7 +891,7 @@ public class StorageServiceImpl extends StorageServiceImplBase {
                 responseObserver.onNext(evt.getVolumeEvent());
             } catch (Exception e) {
                 VolumeEvent.Builder b = VolumeEvent.newBuilder();
-                SDFSLogger.getLog().error("nSent Event", e);
+                SDFSLogger.getLog().error("Error Sending Event", e);
                 b.setError("Unable to marshal event");
                 b.setErrorCode(errorCodes.EIO);
                 responseObserver.onNext(b.build());

@@ -22,7 +22,6 @@ import java.io.IOException;
 
 import org.opendedup.logging.SDFSLogger;
 
-
 public class ReplicationImportEvent extends SDFSEvent {
 
 	private static final long serialVersionUID = 1L;
@@ -44,9 +43,10 @@ public class ReplicationImportEvent extends SDFSEvent {
 	public long dstSize;
 	public boolean overwrite;
 	public boolean fullFile;
+	public boolean metadataOnly;
 
-	public ReplicationImportEvent(String src, String dst, String url, long volumeid,boolean mtls,boolean onDemand,
-	long srcOffset,long srcSize,long dstOffset, boolean overwrite) {
+	public ReplicationImportEvent(String src, String dst, String url, long volumeid, boolean mtls, boolean onDemand,
+			long srcOffset, long srcSize, long dstOffset, boolean overwrite, boolean metadataOnly) {
 		super(IMPORT, dst, "Importing " + src + " from " + url + " with volumeid " +
 				volumeid + " to " + dst, SDFSEvent.INFO);
 		this.src = src;
@@ -59,6 +59,7 @@ public class ReplicationImportEvent extends SDFSEvent {
 		this.srcSize = srcSize;
 		this.dstOffset = dstOffset;
 		this.overwrite = overwrite;
+		this.metadataOnly = metadataOnly;
 	}
 
 	public ReplicationImportEvent(org.opendedup.grpc.SDFSEventOuterClass.SDFSEvent evt) {
@@ -66,18 +67,19 @@ public class ReplicationImportEvent extends SDFSEvent {
 		this.src = evt.getAttributesMap().get("src");
 		this.dst = evt.getAttributesMap().get("dst");
 		this.url = evt.getAttributesMap().get("url");
+		this.metadataOnly = Boolean.parseBoolean(evt.getAttributesMap().get("metadataOnly"));
 		this.mtls = Boolean.parseBoolean(evt.getAttributesMap().get("mtls"));
 		this.volumeid = Long.parseLong(evt.getAttributesMap().get("volumeid"));
 		this.paused = Boolean.parseBoolean(evt.getAttributesMap().get("paused"));
 		this.pausets = Long.parseLong(evt.getAttributesMap().get("pausets"));
 		this.onDemand = Boolean.parseBoolean(evt.getAttributesMap().get("onDemand"));
-		this.bytesImported =Long.parseLong(evt.getAttributesMap().get("bytesimported"));
-		this.fileSize =Long.parseLong(evt.getAttributesMap().get("filesize"));
-		this.bytesProcessed =Long.parseLong(evt.getAttributesMap().get("bytesprocessed"));
-		this.srcOffset= Long.parseLong(evt.getAttributesMap().get("srcoffset"));
-		this.srcSize=Long.parseLong(evt.getAttributesMap().get("srcsize"));
-		this.dstOffset=Long.parseLong(evt.getAttributesMap().get("dstoffset"));
-		this.overwrite= Boolean.parseBoolean(evt.getAttributesMap().get("overwrite"));
+		this.bytesImported = Long.parseLong(evt.getAttributesMap().get("bytesimported"));
+		this.fileSize = Long.parseLong(evt.getAttributesMap().get("filesize"));
+		this.bytesProcessed = Long.parseLong(evt.getAttributesMap().get("bytesprocessed"));
+		this.srcOffset = Long.parseLong(evt.getAttributesMap().get("srcoffset"));
+		this.srcSize = Long.parseLong(evt.getAttributesMap().get("srcsize"));
+		this.dstOffset = Long.parseLong(evt.getAttributesMap().get("dstoffset"));
+		this.overwrite = Boolean.parseBoolean(evt.getAttributesMap().get("overwrite"));
 	}
 
 	public void cancel() {
@@ -109,13 +111,14 @@ public class ReplicationImportEvent extends SDFSEvent {
 		b.putAttributes("paused", Boolean.toString(this.paused));
 		b.putAttributes("pausets", Long.toString(this.pausets));
 		b.putAttributes("onDemand", Boolean.toString(this.onDemand));
-		b.putAttributes("bytesimported",  Long.toString(this.bytesImported));
-		b.putAttributes("filesize",  Long.toString(this.fileSize));
-		b.putAttributes("bytesprocessed",  Long.toString(this.bytesProcessed));
-		b.putAttributes("srcoffset",  Long.toString(this.srcOffset));
-		b.putAttributes("srcsize",  Long.toString(this.srcSize));
-		b.putAttributes("dstoffset",  Long.toString(this.dstOffset));
-		b.putAttributes("overwrite",  Boolean.toString(this.overwrite));
+		b.putAttributes("bytesimported", Long.toString(this.bytesImported));
+		b.putAttributes("filesize", Long.toString(this.fileSize));
+		b.putAttributes("bytesprocessed", Long.toString(this.bytesProcessed));
+		b.putAttributes("srcoffset", Long.toString(this.srcOffset));
+		b.putAttributes("srcsize", Long.toString(this.srcSize));
+		b.putAttributes("dstoffset", Long.toString(this.dstOffset));
+		b.putAttributes("overwrite", Boolean.toString(this.overwrite));
+		b.putAttributes("metadataOnly", Boolean.toString(this.metadataOnly));
 		return b.build();
 	}
 

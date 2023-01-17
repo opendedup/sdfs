@@ -87,12 +87,22 @@ public class ListenRepl implements Runnable {
                             ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                     rs.getFile().getFilePath(),
                                     client.url, client.volumeid, client.mtls, false,
-                                    0, 0, 0, true);
+                                    0, 0, 0, true,true);
                             evt.persistEvent();
 
                             impf = new ImportFile(client,
                                     evt);
                         }
+
+                    }if (rs.getActionType() == actionType.SFILEWRITTEN) {
+                            ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
+                                    rs.getFile().getFilePath(),
+                                    client.url, client.volumeid, client.mtls, false,
+                                    0, 0, 0, true,false);
+                            evt.persistEvent();
+
+                            impf = new ImportFile(client,
+                                    evt);
 
                     } else if (rs.getActionType() == actionType.MFILEDELETED) {
 
@@ -134,7 +144,7 @@ public class ListenRepl implements Runnable {
 
                             ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                     rs.getFile().getFilePath(),
-                                    client.url, client.volumeid, client.mtls, false, 0, 0, 0, true);
+                                    client.url, client.volumeid, client.mtls, false, 0, 0, 0, true,false);
                             evt.persistEvent();
                             impf = new ImportFile(
                                     client, evt);
@@ -266,7 +276,7 @@ public class ListenRepl implements Runnable {
                     }
                     ReplicationImportEvent evt = new ReplicationImportEvent(".",
                             ".", this.client.url, this.client.volumeid,
-                            this.client.mtls, false, 0, 0, 0, true);
+                            this.client.mtls, false, 0, 0, 0, true,false);
                     dl = new DownloadAll(this.client, evt);
                     downloadThread = new Thread(dl);
                     downloadThread.start();

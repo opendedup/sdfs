@@ -272,6 +272,7 @@ public class ReplicationClient {
                     for (String id : jsonToMap) {
                         try {
                             ReplicationImportEvent evt = (ReplicationImportEvent) SDFSEvent.getEvent(id);
+                            evt.overwrite = true;
                             if (rc == null) {
                                 rc = new ReplicationClient(evt.url, evt.volumeid, evt.mtls, directory.getPath());
                             }
@@ -301,7 +302,7 @@ public class ReplicationClient {
                 ReplicationImportEvent evt = new ReplicationImportEvent(location.getSrcFilePath(),
                         location.getDstFilePath(), this.url, this.volumeid,
                         this.mtls, true, location.getSrcoffset(), location.getSrcsize(), location.getDstoffset(),
-                        location.getOverwrite());
+                        location.getOverwrite(),false);
                 evt.persistEvent();
                 if (activeImports.containsKey(location.getDstFilePath())) {
                     List<ReplicationImportEvent> devts = activeImports.get(location.getDstFilePath());

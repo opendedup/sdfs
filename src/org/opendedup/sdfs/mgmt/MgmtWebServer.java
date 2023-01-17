@@ -69,21 +69,20 @@ public class MgmtWebServer {
 	}
 
 	public static int[] readPortRange() throws IOException {
-		if (Main.prodConfigFilePath.equals("") || Main.prodConfigVariable.equals("")) {
+		if (Main.prodConfigFilePath.equals("")) {
 			SDFSLogger.getLog().info("Port Range Not Specified");
 			return null;
 		}
 
 		String strfilePath = Main.prodConfigFilePath;
 		if ((new File(strfilePath).exists())) {
-			String strfieldName = Main.prodConfigVariable;
 			BufferedReader bufRdr = new BufferedReader(
 					new InputStreamReader(new FileInputStream(strfilePath), "ISO-8859-1"));
 			try {
 				// Read File Line By Line
 				for (String line; (line = bufRdr.readLine()) != null;) {
 					line = line.replaceAll("[^a-zA-Z0-9#=-]", "");
-					if (!line.startsWith("#") && line.contains(strfieldName)) {
+					if (!line.startsWith("#")) {
 						String[] arrOfStr = line.split("=", 2);
 						String strPort = arrOfStr[1].toString().strip();
 						if (strPort != null && !strPort.isBlank() && !strPort.isEmpty()) {
