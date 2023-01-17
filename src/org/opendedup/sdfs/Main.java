@@ -36,7 +36,6 @@ public class Main {
 	public static String authJarFilePath="";
 	public static String authClassInfo="";
 	public static String prodConfigFilePath = "";
-	public static String prodConfigVariable = "";
 	public static boolean s3ApiCompatible = false;
 	public static int immutabilityPeriod=10;//by default set to 10 days
 	public static boolean partialTransition = false;
