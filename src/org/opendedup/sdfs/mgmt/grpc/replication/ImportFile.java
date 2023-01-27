@@ -3,6 +3,7 @@ package org.opendedup.sdfs.mgmt.grpc.replication;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.FileAlreadyExistsException;
@@ -319,7 +320,7 @@ public class ImportFile implements Runnable {
             evt.endEvent("Import Successful for " + evt.dst, SDFSEvent.INFO);
             if(!evt.metadataOnly) {
                 SDFSLogger.getLog().info("Imported " + evt.dst + " size = " + mf.length() +
-                    " bytesimported = " + evt.bytesImported + " bytesprocessed = " + evt.bytesProcessed);
+                    " bytesimported = " + evt.bytesImported + " bytesprocessed = " + evt.bytesProcessed + " dstOffset " + evt.dstOffset);
             } else {
                 SDFSLogger.getLog().info("Imported metadata for " + evt.dst);
             }
@@ -401,35 +402,41 @@ public class ImportFile implements Runnable {
 
         long spos = this.getChuckPosition(evt.srcOffset);
         long dpos = this.getChuckPosition(evt.dstOffset);
-        ByteBuffer ebf = null;
-        ByteBuffer fbf = null;
+        File efl = new File(Main.volume.getReplPath() + File.separator + mf.getName() + ".ebf");
+        File ffl = new File(Main.volume.getReplPath() + File.separator + mf.getName() + ".fbf");
 
         if (evt.srcSize > 0) {
-
             long expectedSize = evt.dstOffset + evt.srcSize;
-            if (expectedSize < mf.length()) {
+            
+            if (expectedSize < mf.length()&& !ffl.exists()) {
                 long edpos = this.getChuckPosition(evt.dstOffset + Main.CHUNK_LENGTH);
                 int el = (int) (edpos - evt.dstOffset);
                 if (expectedSize < (dpos + el)) {
                     el = (int) (expectedSize - dpos);
                 }
                 if (el > 0) {
-                    DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
-                    fbf = ByteBuffer.wrap(new byte[el]);
-                    ch.read(ebf, 0, el, evt.dstOffset);
 
+                    DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
+                    ByteBuffer fbf = ByteBuffer.wrap(new byte[el]);
+                    ch.read(fbf, 0, el, evt.dstOffset);
                     ch.getDedupFile().unRegisterChannel(ch, -2);
                     ch.getDedupFile().forceClose();
+                    RandomAccessFile rf = new RandomAccessFile(efl, "rw");
+                    rf.write(fbf.array());
+                    rf.close();
                 }
             }
-            if (expectedSize >= mf.length()) {
+            if (expectedSize >= mf.length()&& !efl.exists()) {
                 int rl = (int) (evt.dstOffset - dpos);
                 if (rl > 0) {
                     DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
-                    ebf = ByteBuffer.wrap(new byte[rl]);
+                    ByteBuffer ebf = ByteBuffer.wrap(new byte[rl]);
                     ch.read(ebf, 0, rl, dpos);
                     ch.getDedupFile().unRegisterChannel(ch, -2);
                     ch.getDedupFile().forceClose();
+                    RandomAccessFile rf = new RandomAccessFile(efl, "rw");
+                    rf.write(ebf.array());
+                    rf.close();
                 }
             }
         }
@@ -468,23 +475,33 @@ public class ImportFile implements Runnable {
         }
 
         mp.close();
-        if (ebf != null) {
+        if (efl.exists()) {
+            RandomAccessFile rf = new RandomAccessFile(efl, "r");
+            byte [] eb = new byte[(int)efl.length()];
+            rf.readFully(eb);
+            rf.close();
             DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
             long place = this.getChuckPosition(evt.dstOffset);
             int rl = (int) ((int) evt.dstOffset - (int) place);
-            ebf.position(0);
+            ByteBuffer ebf = ByteBuffer.wrap(eb);
             ch.writeFile(ebf, rl, 0, place, false);
             SDFSLogger.getLog().debug("Wrote e " + rl + " at " + evt.dstOffset);
             ch.getDedupFile().unRegisterChannel(ch, -2);
             ch.getDedupFile().forceClose();
+            efl.delete();
         }
-        if (fbf != null) {
+        if (ffl.exists()) {
+            RandomAccessFile rf = new RandomAccessFile(ffl, "r");
+            byte [] eb = new byte[(int)efl.length()];
+            rf.readFully(eb);
+            rf.close();
             DedupFileChannel ch = mf.getDedupFile(false).getChannel(-2);
-            fbf.position(0);
+            ByteBuffer fbf = ByteBuffer.wrap(eb);
             ch.writeFile(fbf, fbf.capacity(), 0, evt.dstOffset, false);
             SDFSLogger.getLog().debug("Wrote f " + fbf.capacity() + " at " + evt.dstOffset);
             ch.getDedupFile().unRegisterChannel(ch, -2);
             ch.getDedupFile().forceClose();
+            ffl.delete();
         }
         HashBlobArchive.sync(mf.getDfGuid());
     }
