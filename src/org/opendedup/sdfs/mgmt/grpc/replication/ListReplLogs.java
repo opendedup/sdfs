@@ -44,7 +44,7 @@ public class ListReplLogs implements Runnable {
             Iterator<VolumeEvent> fi = rc.getStorageBlockingStub().listReplLogs(VolumeEventListenRequest.newBuilder()
                     .setPvolumeID(this.client.volumeid).setStartSequence(this.client.getSeq()).build());
             BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
-            arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
+            arExecutor = new ThreadPoolExecutor(1, 3,
                     10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
                     executionHandler);
             long seq = 0;

@@ -47,7 +47,7 @@ public class DownloadAll implements Runnable {
             Iterator<FileMessageResponse> fi = rc.getIoBlockingStub().getaAllFileInfo(
                     FileInfoRequest.newBuilder().setPvolumeID(client.volumeid).setFileName(".").build());
             BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(2);
-            arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
+            arExecutor = new ThreadPoolExecutor(1, 3,
                     10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
                     executionHandler);
             while (fi.hasNext()) {

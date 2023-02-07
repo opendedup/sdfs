@@ -54,6 +54,9 @@ public class ListenRepl implements Runnable {
         return false;
 
     }
+    protected static BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(100);
+    protected static ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(1, 2,
+            10, TimeUnit.SECONDS, aworksQueue);
 
     public void listen() throws Exception, ListenReplCanceled {
         if (this.client.removed) {
@@ -65,10 +68,6 @@ public class ListenRepl implements Runnable {
             Iterator<VolumeEvent> fi = rc.getStorageBlockingStub()
                     .subscribeToVolume(VolumeEventListenRequest.newBuilder()
                             .setPvolumeID(this.client.volumeid).setStartSequence(this.client.getSeq()).build());
-            BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(100);
-            ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(Main.writeThreads, Main.writeThreads + 1,
-                    10, TimeUnit.SECONDS, aworksQueue, new ProcessPriorityThreadFactory(Thread.NORM_PRIORITY),
-                    executionHandler);
             long seq = 0;
             while (fi.hasNext()) {
                 if (this.client.removed) {

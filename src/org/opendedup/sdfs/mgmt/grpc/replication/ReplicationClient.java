@@ -331,8 +331,7 @@ public class ReplicationClient {
                         }
                     } else {
                         ImportFile fl = new ImportFile(this, evt);
-                        Thread th = new Thread(fl);
-                        th.start();
+                        ListenRepl.arExecutor.execute(fl);
                     }
                 }
                 evts[i] = evt;
