@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.opendedup.collections.DataArchivedException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.StringUtils;
+
+import com.google.common.primitives.Longs;
 
 /**
  * 
@@ -108,17 +111,21 @@ public class ChunkData {
 		return buf;
 	}
 
-	public void persistData(boolean clear) throws IOException {
+	public InsertRecord persistData(boolean clear) throws IOException {
 		if (this.chunk != null) {
 			if (writeStore == null)
 				writeStore = HCServiceProxy.getChunkStore();
 			if (this.mDelete) {
 				chunk = new byte[cLen];
 			}
-			this.cPos = writeStore.writeChunk(hash, chunk, cLen,this.uuid);
+			InsertRecord rec = writeStore.writeChunk(hash, chunk, cLen,this.uuid);
+			this.cPos = Longs.fromByteArray(rec.getHashLocs());
+			
 			if (clear)
 				this.chunk = null;
+			return rec;
 		}
+		return new InsertRecord(0, cPos);
 	}
 
 	public boolean ismDelete() {

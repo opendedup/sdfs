@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -30,6 +30,7 @@ import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.io.HashLocPair;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
 import org.opendedup.sdfs.notification.SDFSEvent;
@@ -46,7 +47,7 @@ public class RestoreArchive implements Runnable {
 	private HashMap<String, String> restoreRequests = new HashMap<String, String>();
 
 	public RestoreArchive(MetaDataDedupFile f,long id) throws IOException {
-		
+
 		this.f = f;
 		fEvt = SDFSEvent.archiveRestoreEvent(f);
 		fEvt.setMaxCount(FileCounts.getSize(new File(f.getPath()), false));
@@ -90,7 +91,7 @@ public class RestoreArchive implements Runnable {
 
 	private void initiateArchive() throws IOException {
 		LongByteArrayMap ddb = LongByteArrayMap.getMap(f.getDfGuid());
-		
+
 		if (ddb.getVersion() < 2)
 			throw new IOException("only files version 2 or later can be imported");
 		try {
@@ -102,11 +103,11 @@ public class RestoreArchive implements Runnable {
 				SparseDataChunk ck = kv.getValue();
 				TreeMap<Integer, HashLocPair> al = ck.getFingers();
 				for (HashLocPair p : al.values()) {
-		
+
 					Long bw = Long.valueOf(Longs.fromByteArray(p.hashloc));
 					if (!this.restoreRequests.containsKey(Long.toString(bw))) {
 						SDFSLogger.getLog().debug("check = " + bw + " for restore.");
-						
+
 						String req = HCServiceProxy.restoreBlock(p.hash,bw);
 						if (req != null) {
 							SDFSLogger.getLog().info("will restore " + req + " for " + f.getPath());
@@ -114,9 +115,9 @@ public class RestoreArchive implements Runnable {
 							this.totalArchives.incrementAndGet();
 						}
 						this.restoreRequests.put(Long.toString(bw), req);
-					} 
+					}
 				}
-				
+
 			}
 			SDFSLogger.getLog().info("Restore Initiated for " + this.restoreRequests.size() + " for " + f.getPath());
 
@@ -139,8 +140,9 @@ public class RestoreArchive implements Runnable {
 			long start = System.currentTimeMillis();
 			this.init();
 			while (this.restoreRequests.size() > 0) {
+				HCServiceProxy.set_move_blob(true);
 				ArrayList<String> al = new ArrayList<String>();
-				
+
 				for (Entry<String, String> key : this.restoreRequests.entrySet()) {
 					try {
 						if (key.getValue() == null)
@@ -169,6 +171,7 @@ public class RestoreArchive implements Runnable {
 				if (this.restoreRequests.size() > 0)
 					Thread.sleep(2 * 60 * 1000);
 			}
+			Main.rehydrateBlobs = false;
 			SDFSLogger.getLog().info("took [" + (System.currentTimeMillis() - start) / (1000 * 60)
 					+ "] Minutes to import [" + totalArchives.get() + "]");
 			fEvt.endEvent("Archive Restore Succeeded for " + f.getPath());

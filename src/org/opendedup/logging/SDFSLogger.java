@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -18,74 +18,96 @@
  *******************************************************************************/
 package org.opendedup.logging;
 
-import java.io.IOException;
+import java.util.Map;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
+import org.apache.logging.log4j.core.appender.rolling.RolloverStrategy;
+import org.apache.logging.log4j.core.appender.rolling.SizeBasedTriggeringPolicy;
+import org.apache.logging.log4j.core.appender.rolling.TriggeringPolicy;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.opendedup.sdfs.Main;
 
-import io.grpc.netty.shaded.io.netty.util.internal.logging.InternalLoggerFactory;
-import io.grpc.netty.shaded.io.netty.util.internal.logging.Log4JLoggerFactory;
-
 public class SDFSLogger {
-
-	private static Logger log = Logger.getLogger("sdfs");
-	private static Logger awslog = Logger.getLogger("com.amazonaws");
-	private static Logger quartzLog = Logger.getLogger("org.quartz");
-	private static Logger fslog = Logger.getLogger("fs");
-	private static Logger basicLog = Logger.getLogger("bsdfs");
-	private static boolean debug = false;
-	private static boolean fsdebug = false;
-	private static LoggerConfig grpcLoggerConfig;
-	static RollingFileAppender app = null;
+	private static Logger log = LogManager.getLogger("sdfs");
 	private static String msgPattern = "%d [%p] [%c] [%C] [%L] [%t] %x - %m%n";
+	private static boolean cl = false;
 	static {
-		InternalLoggerFactory.setDefaultFactory(Log4JLoggerFactory.INSTANCE);
-        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        Configuration config = ctx.getConfiguration();
-		
-        grpcLoggerConfig = config.getLoggerConfig("io.netty");
-        grpcLoggerConfig.setLevel(org.apache.logging.log4j.Level.ERROR);
-        ctx.updateLoggers();
+		// createSdfsLogger();
+	}
 
-		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout("%m%n"));
-		basicLog.addAppender(bapp);
-
-		basicLog.setLevel(Level.WARN);
-		try {
-			//Todo: log-index-size
-			app = new RollingFileAppender(new PatternLayout(
-					msgPattern), Main.logPath, true);
-			app.setMaxBackupIndex(Main.logFiles);
-			app.setMaxFileSize(Main.logSize);
-		} catch (IOException e) {
-			log.debug("unable to change appender", e);
+	protected static void removeAllAppenders(org.apache.logging.log4j.core.Logger logger) {
+		Map<String, Appender> appenders = logger.getAppenders();
+		if (appenders != null) {
+			for (Appender appender : appenders.values()) {
+				logger.removeAppender(appender);
+			}
 		}
-		awslog.setLevel(Level.WARN);
-
-		quartzLog.setLevel(Level.INFO);
-		awslog.removeAllAppenders();
-		quartzLog.removeAllAppenders();
-		log.setLevel(Level.INFO);
-		fsdebug = true;
-		fslog.setLevel(Level.INFO);
-		Logger rootLogger = Logger.getRootLogger();
-		rootLogger.setLevel(Level.INFO);
-		rootLogger.addAppender(app);
 	}
 
 	public static void useConsoleLogger() {
-		ConsoleAppender bapp = new ConsoleAppender(new PatternLayout(msgPattern));
-		log.removeAllAppenders();
-		log.addAppender(bapp);
+		LoggerContext context = LoggerContext.getContext(false);
+		org.apache.logging.log4j.core.Logger clog = (org.apache.logging.log4j.core.Logger) log;
+		removeAllAppenders(clog);
+		PatternLayout layout = PatternLayout.newBuilder().withPattern(msgPattern).build();
+		Appender appender = ConsoleAppender.newBuilder().setLayout(layout).setName("consoleappender").build();
+		appender.start();
+		removeAllAppenders(clog);
+		clog.addAppender(appender);
+		context.updateLoggers();
+		cl = true;
 
+	}
+
+	public static void setLevel(int level) {
+		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+		Configuration config = ctx.getConfiguration();
+		LoggerConfig loggerConfig = config.getLoggerConfig("sdfs");
+		if (level == 0) {
+			loggerConfig.setLevel(Level.DEBUG);
+		} else {
+			loggerConfig.setLevel(Level.INFO);
+		}
+		ctx.updateLoggers();
+	}
+
+	public static void setLogSize(String size) {
+		Main.logSize = size;
+		createSdfsLogger();
+	}
+
+	public static void createSdfsLogger() {
+		if (!cl) {
+			LoggerContext context = (LoggerContext) LogManager.getContext();
+			Configuration config = context.getConfiguration();
+
+			PatternLayout layout = PatternLayout.newBuilder().withPattern(msgPattern)
+					.withConfiguration(config).withAlwaysWriteExceptions(true)
+					.withNoConsoleNoAnsi(false).build();
+			TriggeringPolicy tp = SizeBasedTriggeringPolicy.createPolicy(Main.logSize);
+			RolloverStrategy st = DefaultRolloverStrategy.newBuilder()
+					.withMax(Integer.toString(Main.logFiles))
+					.withMin("1")
+					.withConfig(config)
+					.withCompressionLevelStr("0")
+					.build();
+			Appender appender = RollingFileAppender.newBuilder().setLayout(layout).setName("rollingfileappender")
+					.withFileName(Main.logPath).withFilePattern(Main.logPath + ".%i").withAppend(true)
+					.withStrategy(st).withPolicy(tp).build();
+			appender.start();
+			org.apache.logging.log4j.core.Logger clog = (org.apache.logging.log4j.core.Logger) log;
+			removeAllAppenders(clog);
+			clog.addAppender(appender);
+			context.updateLoggers();
+		}
 	}
 
 	public static Logger getLog() {
@@ -94,7 +116,7 @@ public class SDFSLogger {
 	}
 
 	public static Logger getFSLog() {
-		return fslog;
+		return log;
 	}
 
 	public static void infoConsoleMsg(String msg) {
@@ -103,60 +125,21 @@ public class SDFSLogger {
 	}
 
 	public static Logger getBasicLog() {
-		return basicLog;
+		return log;
 	}
 
-	public static boolean isDebug() {
-		return debug;
-	}
+	public static void main(String[] args) {
 
-	public static boolean isFSDebug() {
-		return fsdebug;
-	}
-	
-	public static void setLogSize(String size) {
-		app.setMaxFileSize(size);
-	}
-
-	public static void setLevel(int level) {
-		if (level == 0) {
-			log.setLevel(Level.DEBUG);
-			debug = true;
-		} else {
-			log.setLevel(Level.INFO);
-			debug = false;
+		Main.logPath = "test.log";
+		Main.logFiles = 10;
+		Main.logSize = "10K";
+		Main.logFiles = 10;
+		createSdfsLogger();
+		for (int i = 0; i < 1000000; i++) {
+			SDFSLogger.getLog().error("wow " + i);
 		}
+		System.out.println("1111");
+
 	}
 
-	public static void setFSLevel(int level) {
-		if (level == 0) {
-			fslog.setLevel(Level.DEBUG);
-			fsdebug = true;
-		} else {
-			fslog.setLevel(Level.INFO);
-			fsdebug = false;
-		}
-	}
-
-	public static void setToFileAppender(String file) {
-		try {
-			log.removeAllAppenders();
-		} catch (Exception e) {
-
-		}
-		RollingFileAppender app = null;
-		try {
-			app = new RollingFileAppender(new PatternLayout(
-					"%d [%c] [%t] %x - %m%n"), file, true);
-			app.setMaxBackupIndex(Main.logFiles);
-			app.setMaxFileSize(Main.logSize);
-		} catch (IOException e) {
-			System.out.println("Unable to initialize logger");
-			e.printStackTrace();
-		}
-		log.addAppender(app);
-		fslog.addAppender(app);
-		log.setLevel(Level.INFO);
-		fslog.setLevel(Level.DEBUG);
-	}
 }

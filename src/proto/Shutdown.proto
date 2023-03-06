@@ -6,6 +6,7 @@ import "FileInfo.proto";
 
 // Request payload
 message ShutdownRequest {
+    int64 pvolumeID =1;
 
 }
 

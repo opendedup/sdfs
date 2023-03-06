@@ -15,6 +15,7 @@ import org.opendedup.collections.LongByteArrayMap;
 import org.opendedup.collections.LongKeyValue;
 import org.opendedup.collections.SparseDataChunk;
 import org.opendedup.logging.SDFSLogger;
+import org.opendedup.rabin.utils.StringUtils;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.ChunkData;
 import org.opendedup.sdfs.filestore.HashBlobArchive;
@@ -53,7 +54,7 @@ public class GetCloudFile implements Runnable {
 					root.setAttribute("action", "ignored");
 					fevt.endEvent("ignoring file");
 					return (Element) root.cloneNode(true);
-					
+
 				} catch (Exception e) {
 					fevt.endEvent("unable to download file " + file, SDFSEvent.ERROR);
 					throw new IOException(e);
@@ -102,7 +103,7 @@ public class GetCloudFile implements Runnable {
 				if (f.exists()) {
 					if (df == null) {
 						MetaFileStore.removeMetaFile(new File(Main.volume.getPath() + File.separator + sfile).getPath(),
-								true, true,false);
+								true, true, false);
 						SDFSLogger.getLog()
 								.debug("Removed " + new File(Main.volume.getPath() + File.separator + sfile).getPath());
 					}
@@ -112,7 +113,7 @@ public class GetCloudFile implements Runnable {
 					} catch (Exception e) {
 						SDFSLogger.getLog().warn("File [" + f.getPath() + "] retention lock could not be removed ", e);
 					}
-					boolean removed = MetaFileStore.removeMetaFile(f.getPath(), true, true,false);
+					boolean removed = MetaFileStore.removeMetaFile(f.getPath(), true, true, false);
 					SDFSLogger.getLog().info("removed " + f.getPath() + " success=" + removed);
 
 					if (removed) {
@@ -130,22 +131,42 @@ public class GetCloudFile implements Runnable {
 				SDFSLogger.getLog().debug("downloaded " + sfile);
 				fevt.shortMsg = "Downloading Map Metadata for [" + sfile + "]";
 				SDFSLogger.getLog().debug("downloading ddb " + _mf.getDfGuid());
-				if(_mf.getDfGuid() == null) {
+				if (_mf.getDfGuid() == null) {
 					throw new IOException("File " + sfile + " has no data");
 				}
 				LongByteArrayMap mp = FileReplicationService.getDDB(_mf.getDfGuid());
 				mp.setIndexed(false);
 				mf = MetaFileStore.getMF(_mf.getPath());
-				SDFSLogger.getLog().info("downloaded ddb " + mf.getDfGuid());
-				if (df != null) {
-					sdf = mf.snapshot(df.getPath(), overwrite, fevt);
-				} else {
-					SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" + mf.getDfGuid());
 
-				}
 				fevt.addCount(1);
 
 			}
+		} catch (IOException e) {
+
+			if (sdf != null) {
+				sdf.deleteStub(true);
+			}
+			throw e;
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("unable to get file " + sfile, e);
+			fevt.endEvent("unable to get file " + sfile, SDFSEvent.ERROR);
+			throw new IOException("request to fetch attributes failed because " + e.toString());
+
+		}
+	}
+
+	private void snapshotFile(SDFSEvent fevt) throws IOException {
+		try {
+			File df = null;
+			if (dstfile != null)
+				df = new File(Main.volume.getPath() + File.separator + dstfile);
+			if (df != null) {
+				sdf = mf.snapshot(df.getPath(), overwrite, fevt);
+			} else {
+				SDFSLogger.getLog().info("checking dedupe file " + sfile + " sdd=" + mf.getDfGuid());
+
+			}
+			fevt.addCount(1);
 		} catch (IOException e) {
 
 			if (sdf != null) {
@@ -189,13 +210,13 @@ public class GetCloudFile implements Runnable {
 					InsertRecord ir = HCServiceProxy.getHashesMap().put(cm, false);
 					mf.getIOMonitor().addVirtualBytesWritten(p.nlen, false);
 					if (ir.getInserted()) {
-						mf.getIOMonitor().addActualBytesWritten(p.nlen, false);
+						mf.getIOMonitor().addActualBytesWritten(ir.getCompressedLength(), false);
 						blks.add(Longs.fromByteArray(ir.getHashLocs()));
 					} else {
 						mf.getIOMonitor().addDulicateData(p.nlen, false);
 						if (!Arrays.equals(p.hashloc, ir.getHashLocs())) {
-							SDFSLogger.getLog().debug("importing " + Longs.fromByteArray( ir.getHashLocs()) + " "
-							 +Longs.fromByteArray( p.hashloc) );
+							SDFSLogger.getLog().debug("importing " + Longs.fromByteArray(ir.getHashLocs()) + " "
+									+ Longs.fromByteArray(p.hashloc));
 							p.hashloc = ir.getHashLocs();
 							blks.add(Longs.fromByteArray(ir.getHashLocs()));
 							dirty = true;
@@ -233,6 +254,7 @@ public class GetCloudFile implements Runnable {
 			synchronized (obj) {
 				this.downloadFile();
 				this.checkDedupFile(fevt);
+				this.snapshotFile(fevt);
 				fevt.endEvent("imported [" + mf.getPath() + "]");
 			}
 		} catch (Exception e) {
@@ -242,8 +264,8 @@ public class GetCloudFile implements Runnable {
 			try {
 				File f = new File(Main.volume.getPath() + File.separator + sfile);
 				if (f.exists()) {
-					
-						f.delete();
+
+					f.delete();
 				}
 			} catch (Exception e1) {
 

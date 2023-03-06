@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -21,6 +21,7 @@ package org.opendedup.mtools;
 import java.io.File;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -38,6 +39,7 @@ import org.opendedup.sdfs.io.events.MFileSync;
 import org.opendedup.sdfs.io.events.SFileSync;
 import org.opendedup.sdfs.notification.FDiskEvent;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.FileCounts;
 
 import com.google.common.eventbus.EventBus;
@@ -58,14 +60,14 @@ public class SyncFS {
 	public SyncFS() throws IOException {
 		fEvt = SDFSEvent
 				.fdiskInfoEvent("Starting Cloud Storage Conistancy Check for "
-						+ Main.volume.getName() );
+						+ Main.volume.getName());
 		this.init();
 	}
 
 	public SyncFS(String now) throws IOException {
 		fEvt = SDFSEvent
 				.fdiskInfoEvent("Starting Cloud Storage Conistancy Check for "
-						+ Main.volume.getName() );
+						+ Main.volume.getName());
 	}
 
 	public static void registerListener(Object obj) {
@@ -73,6 +75,20 @@ public class SyncFS {
 	}
 
 	public void init() throws IOException {
+		if (Main.runConsistancyCheckPeriodically || Main.runConsistancyCheck) {
+			try {
+				SDFSLogger.getLog().info(
+						"Initializing HCServiceProxy");
+				Main.sdfsSyncEnabled = true;
+				Main.syncDL = true;
+				ArrayList<String> volumes = new ArrayList<String>();
+				HCServiceProxy.init(volumes);
+			} catch (Exception e) {
+				SDFSLogger.getLog().fatal(
+						"Caught exception while Initializing HCServiceProxy", e);
+				e.printStackTrace();
+			}
+		}
 		File f = new File(Main.volume.getPath());
 		long entries = FileCounts.getCount(f, false);
 		try {
@@ -111,8 +127,12 @@ public class SyncFS {
 					.info("Cloud Storage Conistancy Check failed", e);
 			fEvt.endEvent(
 					"Cloud Storage Conistancy Check Failed because ["
-							+ e.toString() + "]", SDFSEvent.ERROR);
+							+ e.toString() + "]",
+					SDFSEvent.ERROR);
 
+		} finally {
+			Main.sdfsSyncEnabled = false;
+			//Main.syncDL = false;
 		}
 	}
 
@@ -170,7 +190,7 @@ public class SyncFS {
 				fd.checkDedupFile(MetaDataDedupFile.getFile(f.getPath()));
 			} catch (IOException e) {
 				SDFSLogger.getLog()
-				.error("Cloud Storage Conistancy Check failed", e);
+						.error("Cloud Storage Conistancy Check failed", e);
 			}
 		}
 	}

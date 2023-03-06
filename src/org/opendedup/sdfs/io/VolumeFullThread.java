@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -44,8 +44,7 @@ public class VolumeFullThread implements Runnable {
 				Thread.sleep(duration);
 				vol.setVolumeFull(this.isFull());
 			} catch (Exception e) {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("Unable to check if full.", e);
+				SDFSLogger.getLog().debug("Unable to check if full.", e);
 				this.closed = true;
 			}
 		}
@@ -77,66 +76,66 @@ public class VolumeFullThread implements Runnable {
 	public synchronized boolean isFull() throws Exception {
 		long avail = vol.pathF.getUsableSpace();
 		if (avail < (offset)) {
-			if(!full) {
-			SDFSLogger.getLog().warn(
-					"Drive is almost full space left is [" + avail + "]");
-			this.createDiskFillEvent("Drive is almost full space left is ["
-					+ avail + "]");
-			
+			if (!full) {
+				SDFSLogger.getLog().warn(
+						"Drive is almost full space left is [" + avail + "]");
+				this.createDiskFillEvent("Drive is almost full space left is ["
+						+ avail + "]");
+
 			}
 			this.full = true;
 			return true;
 		}
 		if ((vol.getCurrentSize() + offset) >= vol.getCapacity()) {
-			if(!full) {
-			SDFSLogger.getLog().warn(
-					"Drive is almost full. Current Size ["
-							+ vol.getCurrentSize() + "] and capacity is ["
-							+ vol.getCapacity() + "]");
-			this.createDiskFillEvent("Drive is almost full. Current Size ["
-					+ vol.getCurrentSize() + "] and capacity is ["
-					+ vol.getCapacity() + "]");
+			if (!full) {
+				SDFSLogger.getLog().warn(
+						"Drive is almost full. Current Size ["
+								+ vol.getCurrentSize() + "] and capacity is ["
+								+ vol.getCapacity() + "]");
+				this.createDiskFillEvent("Drive is almost full. Current Size ["
+						+ vol.getCurrentSize() + "] and capacity is ["
+						+ vol.getCapacity() + "]");
 			}
 			full = true;
 			return true;
-		} else if (!Main.ignoreDSEHTSize &&(HCServiceProxy.getDSESize() + offset) >= HCServiceProxy
+		} else if (!Main.ignoreDSEHTSize && (HCServiceProxy.getDSESize() + offset) >= HCServiceProxy
 				.getDSEMaxSize()) {
-			if(!full) {
-			SDFSLogger.getLog().warn(
-					"Drive is almost full. DSE Size ["
-							+ HCServiceProxy.getDSESize()
-							+ "] and DSE Max Size is ["
-							+ HCServiceProxy.getDSEMaxSize() + "]");
+			if (!full) {
+				SDFSLogger.getLog().warn(
+						"Drive is almost full. DSE Size ["
+								+ HCServiceProxy.getDSESize()
+								+ "] and DSE Max Size is ["
+								+ HCServiceProxy.getDSEMaxSize() + "]");
 
-			this.createDiskFillEvent("Drive is almost full. DSE Size ["
-					+ HCServiceProxy.getDSESize() + "] and DSE Max Size is ["
-					+ HCServiceProxy.getDSEMaxSize() + "]");
+				this.createDiskFillEvent("Drive is almost full. DSE Size ["
+						+ HCServiceProxy.getDSESize() + "] and DSE Max Size is ["
+						+ HCServiceProxy.getDSEMaxSize() + "]");
 			}
 			full = true;
 			return true;
 		} else if ((HCServiceProxy.getSize() + 10000) >= HCServiceProxy
 				.getMaxSize()) {
-			if(!full) {
-			SDFSLogger.getLog().warn(
-					"Drive is almost full. DSE HashMap Size ["
-							+ HCServiceProxy.getSize()
-							+ "] and DSE HashMap Max Size is ["
-							+ HCServiceProxy.getMaxSize() + "]");
-			this.createDiskFillEvent("Drive is almost full. DSE HashMap Size ["
-					+ HCServiceProxy.getSize()
-					+ "] and DSE HashMap Max Size is ["
-					+ HCServiceProxy.getMaxSize() + "]");
+			if (!full) {
+				SDFSLogger.getLog().warn(
+						"Drive is almost full. DSE HashMap Size ["
+								+ HCServiceProxy.getSize()
+								+ "] and DSE HashMap Max Size is ["
+								+ HCServiceProxy.getMaxSize() + "]");
+				this.createDiskFillEvent("Drive is almost full. DSE HashMap Size ["
+						+ HCServiceProxy.getSize()
+						+ "] and DSE HashMap Max Size is ["
+						+ HCServiceProxy.getMaxSize() + "]");
 			}
 			full = true;
 			return true;
 		} else {
-			if(this.full) {
+			if (this.full) {
 				SDFSLogger.getLog().warn(
 						"Drive is no longer full");
 				this.createDiskFillEvent("Drive is no longer full");
 			}
 			this.full = false;
-		
+
 			return false;
 		}
 	}

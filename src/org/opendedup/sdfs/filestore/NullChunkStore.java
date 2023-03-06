@@ -4,22 +4,23 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.opendedup.collections.DataArchivedException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.sdfs.Main;
 import org.w3c.dom.Element;
 
 /**
- * 
+ *
  * @author Sam Silverberg
- * 
+ *
  *         The NullChunkStore does not write data do a filesystem at all. It can
  *         be used for testing.
- * 
- * 
+ *
+ *
  */
 
 public class NullChunkStore implements AbstractChunkStore {
 	// AtomicLong sz = new AtomicLong(0);
-	
+
 	AtomicLong sz = new AtomicLong();
 	@Override
 	public long bytesRead() {
@@ -91,10 +92,11 @@ public class NullChunkStore implements AbstractChunkStore {
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
+	public InsertRecord writeChunk(byte[] hash, byte[] chunk, int len,String uuid)
 			throws IOException {
 		this.sz.addAndGet(chunk.length);
-		return 0;
+
+		return new InsertRecord(true, 0,0);
 	}
 
 	@Override
@@ -203,13 +205,25 @@ public class NullChunkStore implements AbstractChunkStore {
 	@Override
 	public void clearCounters() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public long getAllObjSummary(String pp, long id) throws IOException {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public boolean get_move_blob() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void set_move_blob(boolean status) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

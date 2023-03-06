@@ -17,6 +17,12 @@ public final class Shutdown {
   public interface ShutdownRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.ShutdownRequest)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * <pre>
@@ -67,6 +73,11 @@ public final class Shutdown {
             case 0:
               done = true;
               break;
+            case 8: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -99,6 +110,17 @@ public final class Shutdown {
               org.opendedup.grpc.Shutdown.ShutdownRequest.class, org.opendedup.grpc.Shutdown.ShutdownRequest.Builder.class);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 1;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -113,6 +135,9 @@ public final class Shutdown {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(1, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -122,6 +147,10 @@ public final class Shutdown {
       if (size != -1) return size;
 
       size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -137,6 +166,8 @@ public final class Shutdown {
       }
       org.opendedup.grpc.Shutdown.ShutdownRequest other = (org.opendedup.grpc.Shutdown.ShutdownRequest) obj;
 
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -148,6 +179,9 @@ public final class Shutdown {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -285,6 +319,8 @@ public final class Shutdown {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -311,6 +347,7 @@ public final class Shutdown {
       @java.lang.Override
       public org.opendedup.grpc.Shutdown.ShutdownRequest buildPartial() {
         org.opendedup.grpc.Shutdown.ShutdownRequest result = new org.opendedup.grpc.Shutdown.ShutdownRequest(this);
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -359,6 +396,9 @@ public final class Shutdown {
 
       public Builder mergeFrom(org.opendedup.grpc.Shutdown.ShutdownRequest other) {
         if (other == org.opendedup.grpc.Shutdown.ShutdownRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -385,6 +425,37 @@ public final class Shutdown {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -1135,11 +1206,11 @@ public final class Shutdown {
   static {
     java.lang.String[] descriptorData = {
       "\n\016Shutdown.proto\022\022org.opendedup.grpc\032\016Fi" +
-      "leInfo.proto\"\021\n\017ShutdownRequest\"T\n\020Shutd" +
-      "ownResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
-      "\004 \001(\0162\036.org.opendedup.grpc.errorCodesB0Z" +
-      ".github.com/opendedup/sdfs-client-go/sdf" +
-      "s/;sdfsb\006proto3"
+      "leInfo.proto\"$\n\017ShutdownRequest\022\021\n\tpvolu" +
+      "meID\030\001 \001(\003\"T\n\020ShutdownResponse\022\r\n\005error\030" +
+      "\001 \001(\t\0221\n\terrorCode\030\004 \001(\0162\036.org.opendedup" +
+      ".grpc.errorCodesB0Z.github.com/opendedup" +
+      "/sdfs-client-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -1151,7 +1222,7 @@ public final class Shutdown {
     internal_static_org_opendedup_grpc_ShutdownRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ShutdownRequest_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_ShutdownResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_org_opendedup_grpc_ShutdownResponse_fieldAccessorTable = new

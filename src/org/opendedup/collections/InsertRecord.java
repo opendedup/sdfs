@@ -24,15 +24,27 @@ import com.google.common.primitives.Longs;
 public class InsertRecord {
 	private boolean inserted;
 	private byte[] hashlocs;
+	private int compressedLen;
 
-	public InsertRecord(boolean inserted, long pos) {
+	public InsertRecord(int compressedLen, long pos) {
+		this.compressedLen = compressedLen;
+		this.inserted = true;
+		this.hashlocs = Longs.toByteArray(pos);
+	}
+
+	public InsertRecord(boolean inserted, long pos, int compressedLen) {
 		this.inserted = inserted;
 		this.hashlocs = Longs.toByteArray(pos);
+		this.compressedLen = compressedLen;
 	}
 
 	public InsertRecord(boolean inserted, byte[] locs) {
 		this.inserted = inserted;
 		this.hashlocs = locs;
+	}
+
+	public void setCompressedLength(int len) {
+		this.compressedLen = len;
 	}
 
 	public boolean getInserted() {
@@ -47,10 +59,15 @@ public class InsertRecord {
 		return this.hashlocs;
 	}
 
+	public int getCompressedLength() {
+		return this.compressedLen;
+	}
+
 	public org.opendedup.grpc.Storage.InsertRecord toProtoBuf() {
 		org.opendedup.grpc.Storage.InsertRecord.Builder b = org.opendedup.grpc.Storage.InsertRecord.newBuilder();
 		b.setHashloc(Longs.fromByteArray(this.hashlocs));
 		b.setInserted(this.inserted);
+		b.setCompressedLength(this.compressedLen);
 		return b.build();
 	}
 

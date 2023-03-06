@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -87,7 +87,6 @@ public class MetaDataPush {
 		publisher = b.build();
 		FileReplicationService.registerEvents(this);
 
-		
 		new MetaDataSubscriber(topicName, subName, project, credsPath);
 	}
 
@@ -119,8 +118,7 @@ public class MetaDataPush {
 					l.unlock();
 			}
 		} finally {
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("hmpa size=" + this.activeTasks.size());
+			SDFSLogger.getLog().debug("hmpa size=" + this.activeTasks.size());
 			iLock.unlock();
 		}
 	}

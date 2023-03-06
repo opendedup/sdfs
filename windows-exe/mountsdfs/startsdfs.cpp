@@ -115,7 +115,7 @@ int _tmain(int argc, TCHAR *argv[])
 	if (!SetHandleInformation(g_hChildStd_IN_Wr, HANDLE_FLAG_INHERIT, 0))
 		ErrorExit(TEXT("Stdin SetHandleInformation"));
 	TCHAR cmd[2048];
-	TCHAR *val = ReadRegValue(HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\SDFS", "path");
+	TCHAR *val = ReadRegValue(HKEY_LOCAL_MACHINE, "SOFTWARE\\SDFS", "path");
 	
 	TCHAR path[512];
 	_tcscpy_s(path, val);
@@ -124,7 +124,8 @@ int _tmain(int argc, TCHAR *argv[])
 	
 	TCHAR configFile[512];
 	__int64 mem = 256;
-	__int64 basemem = 3000;
+
+	__int64 basemem = 6000;
 	for (int i = 1; i < argc; i++) {
 		if (!_tcsncmp(argv[i], _T("-z"), 4)) {
 			mem = _ttoi(argv[i + 1]);

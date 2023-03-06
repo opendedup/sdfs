@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -192,10 +192,13 @@ public class Volume {
 		this.path = pathF.getPath();
 		this.connicalPath = pathF.getCanonicalPath();
 		this.capacity = StringUtils.parseSize(vol.getAttribute("capacity"));
-		if (vol.hasAttribute("name"))
+		if (vol.hasAttribute("name")) {
 			this.name = vol.getAttribute("name");
-		else
+			Main.sdfsVolName=this.name;
+		} else {
 			this.name = pathF.getParentFile().getName();
+			Main.sdfsVolName=this.name;
+		}
 		if (vol.hasAttribute("read-timeout-seconds"))
 			Main.readTimeoutSeconds = Integer.parseInt(vol.getAttribute("read-timeout-seconds"));
 		if (vol.hasAttribute("write-timeout-seconds"))
@@ -377,10 +380,26 @@ public class Volume {
 		 * long avail = pathF.getUsableSpace(); if(avail < minFree) {
 		 * SDFSLogger.getLog().warn("Drive is almost full space left is [" + avail +
 		 * "]"); return true;
-		 * 
+		 *
 		 * } if (this.fullPercentage < 0 || this.currentSize == 0) return false; else {
 		 * return (this.currentSize > this.absoluteLength); }
 		 */
+	}
+
+	public boolean isPartitionFull()
+	{
+		long avail = pathF.getUsableSpace();
+
+		if (avail < (1400000000)) {
+			if(!this.volumeFull) {
+			SDFSLogger.getLog().warn(
+					"Volume - Drive is almost full space left is [" + avail + "]");
+
+			}
+			this.volumeFull = true;
+			return true;
+		}
+		return false;
 	}
 
 	public void setPath(String path) {
@@ -466,7 +485,7 @@ public class Volume {
 		root.setAttribute("path", path);
 		root.setAttribute("name", this.name);
 		root.setAttribute("current-size", Long.toString(this.currentSize.get()));
-		root.setAttribute("capacity", StorageUnit.of(this.capacity).format(this.capacity));
+		root.setAttribute("capacity", StorageUnit.of(this.capacity).number_format(this.capacity));
 		root.setAttribute("maximum-percentage-full", Double.toString(this.fullPercentage));
 
 		root.setAttribute("duplicate-bytes", Long.toString(this.duplicateBytes.get()));

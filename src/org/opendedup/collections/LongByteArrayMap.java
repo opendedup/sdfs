@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -125,8 +125,7 @@ public class LongByteArrayMap implements DataMapInterface {
 					l.unlock();
 			}
 		} finally {
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("hmpa size=" + activeTasks.size());
+			SDFSLogger.getLog().debug("hmpa size=" + activeTasks.size());
 			iLock.unlock();
 		}
 	}
@@ -216,7 +215,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#iterInit()
 	 */
 	@Override
@@ -237,7 +236,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#getIterPos()
 	 */
 	@Override
@@ -258,7 +257,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#nextKey()
 	 */
 	@Override
@@ -281,9 +280,8 @@ public class LongByteArrayMap implements DataMapInterface {
 						return pos;
 					}
 				} catch (Exception e1) {
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("unable to iterate through key at " + iterPos.get() * arrayLength,
-								e1);
+					SDFSLogger.getLog().debug("unable to iterate through key at " + iterPos.get() * arrayLength,
+							e1);
 				} finally {
 					iterPos.incrementAndGet();
 					_cpos = getInternalIterFPos();
@@ -301,7 +299,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#nextValue()
 	 */
 	byte[][] nbufs = null;
@@ -338,7 +336,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						if (index) {
 							for (HashLocPair p : ck.getFingers().values()) {
 								long v = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc), 1);
-								if(v != -1)
+								if (v != -1)
 									p.hashloc = Longs.toByteArray(v);
 							}
 						}
@@ -357,7 +355,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	}
 
-	public void setIndexed(boolean indexed) throws IOException{
+	public void setIndexed(boolean indexed) throws IOException {
 		FileChannel bdb = (FileChannel) Files.newByteChannel(bdbf, StandardOpenOption.CREATE, StandardOpenOption.WRITE,
 				StandardOpenOption.READ, StandardOpenOption.SPARSE);
 		if (version > 0) {
@@ -366,7 +364,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			ByteBuffer buf = ByteBuffer.allocate(4);
 			buf.putShort(magicnumber);
 			buf.put(this.version);
-			if(indexed) {
+			if (indexed) {
 				buf.put((byte) 1);
 			} else {
 				buf.put((byte) 0);
@@ -383,7 +381,6 @@ public class LongByteArrayMap implements DataMapInterface {
 	public boolean isIndexed() {
 		return this.indexed;
 	}
-
 
 	public LongKeyValue nextKeyValue(boolean index) throws IOException, FileClosedException {
 		ReadLock l = this.hashlock.readLock();
@@ -405,7 +402,7 @@ public class LongByteArrayMap implements DataMapInterface {
 							for (HashLocPair p : ck.getFingers().values()) {
 								long archiveId = Longs.fromByteArray(p.hashloc);
 								long v = DedupFileStore.addRef(p.hash, Longs.fromByteArray(p.hashloc), 1);
-								if(v != -1 && archiveId != v)
+								if (v != -1 && archiveId != v)
 									p.hashloc = Longs.toByteArray(v);
 
 							}
@@ -426,7 +423,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#isClosed()
 	 */
 	@Override
@@ -479,8 +476,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 					dbFile = new File(filePath);
 					boolean fileExists = dbFile.exists();
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("opening [" + this.filePath + "]");
+					SDFSLogger.getLog().debug("opening [" + this.filePath + "]");
 					if (!fileExists) {
 						if (!dbFile.getParentFile().exists()) {
 							dbFile.getParentFile().mkdirs();
@@ -544,7 +540,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#put(long, byte[])
 	 */
 	@Override
@@ -592,7 +588,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#trim(long, int)
 	 */
 	@Override
@@ -608,8 +604,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			if (es <= ls)
 				return;
 			else {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("will trim from " + ls + " to " + es);
+				SDFSLogger.getLog().debug("will trim from " + ls + " to " + es);
 				FileChannel _bdb = null;
 				ByteBuffer buff = ByteBuffer.wrap(this.FREE);
 				try {
@@ -634,8 +629,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						_bdb.position(_pos);
 						_bdb.write(buff);
 					}
-					if (SDFSLogger.isDebug())
-						SDFSLogger.getLog().debug("trimed from " + ls + " to " + _bdb.position());
+					SDFSLogger.getLog().debug("trimed from " + ls + " to " + _bdb.position());
 				}
 
 				catch (Exception e) {
@@ -655,7 +649,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#truncate(long)
 	 */
 	@Override
@@ -695,12 +689,12 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.collections.AbstractMap#remove(long)
 	 */
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#remove(long)
 	 */
 	@Override
@@ -735,12 +729,12 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.collections.AbstractMap#get(long)
 	 */
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#get(long)
 	 */
 	@Override
@@ -786,7 +780,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#sync()
 	 */
 	@Override
@@ -803,20 +797,20 @@ public class LongByteArrayMap implements DataMapInterface {
 		 * FileChannel _bdb = null; try { _bdb = (FileChannel)
 		 * bdbf.newByteChannel(StandardOpenOption.WRITE, StandardOpenOption.READ,
 		 * StandardOpenOption.SPARSE); _bdb.force(true); } catch (IOException e) {
-		 * 
+		 *
 		 * } finally { try { _bdb.close(); } catch (Exception e) { } }
 		 */
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see com.annesam.collections.AbstractMap#vanish()
 	 */
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#vanish()
 	 */
 	@Override
@@ -825,33 +819,37 @@ public class LongByteArrayMap implements DataMapInterface {
 		l.lock();
 		try {
 			AtomicLong rmct = new AtomicLong();
-			if(!this.indexed) {
-				
-				SDFSLogger.getLog().debug("Not dereferencing " + this.filePath);
+			AtomicLong dct = new AtomicLong();
+			if (!this.indexed) {
+
+				SDFSLogger.getLog().info("Not dereferencing " + this.filePath);
 			}
 			if (index && this.indexed) {
-				File f = new File(this.dbFile.getParentFile(),"cpos.txt");
+				File f = new File(this.dbFile.getParentFile(), "cpos.txt");
 
 				RandomAccessFile raf = null;
 				long ip = 0;
-				if(f.exists()) {
+				if (f.exists()) {
 					raf = new RandomAccessFile(f, "rw");
 					raf.seek(0);
 					ip = raf.readLong();
 				} else {
 					raf = new RandomAccessFile(f, "rw");
 				}
-				
+
 				this.iterPos.set(ip);
 				raf.seek(0);
 				raf.writeLong(ip);
-				
+
 				SparseDataChunk ck = this.nextValue(false);
 				while (ck != null) {
 					for (HashLocPair p : ck.getFingers().values()) {
 						long rm = DedupFileStore.removeRef(p.hash, Longs.fromByteArray(p.hashloc), 1);
+
 						if (rm == -1) {
 							rmct.incrementAndGet();
+						} else {
+							dct.incrementAndGet();
 						}
 					}
 					raf.seek(0);
@@ -863,7 +861,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			}
 			if (!this.isClosed())
 				this.forceClose();
-			
+
 			File f = new File(this.filePath);
 			f.delete();
 			File cf = new File(this.filePath + ".lz4");
@@ -874,6 +872,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			if (rmct.get() > 0) {
 				SDFSLogger.getLog().warn("unable to remove orphaned reference total=" + rmct.get());
 			}
+			SDFSLogger.getLog().debug("decremented " + dct.get() + " for " + this.filePath);
 
 		} catch (Exception e) {
 			throw new IOException(e);
@@ -892,7 +891,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#copy(java.lang.String)
 	 */
 	@Override
@@ -902,11 +901,11 @@ public class LongByteArrayMap implements DataMapInterface {
 		FileChannel srcC = null;
 		FileChannel dstC = null;
 		try {
-			try{
-			this.sync();
-			}catch(Exception e) {}
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("copying to " + destFilePath);
+			try {
+				this.sync();
+			} catch (Exception e) {
+			}
+			SDFSLogger.getLog().debug("copying to " + destFilePath);
 			File dest = new File(destFilePath);
 			File src = new File(this.filePath);
 			if (dest.exists())
@@ -920,8 +919,7 @@ public class LongByteArrayMap implements DataMapInterface {
 						StandardOpenOption.WRITE, StandardOpenOption.SPARSE);
 				srcC.transferTo(0, src.length(), dstC);
 			} else {
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("snapping on unix/linux volume");
+				SDFSLogger.getLog().debug("snapping on unix/linux volume");
 				String cpCmd = "cp --sparse=always --reflink=auto " + src.getPath() + " " + dest.getPath();
 				SDFSLogger.getLog().debug(cpCmd);
 				Process p = Runtime.getRuntime().exec(cpCmd);
@@ -930,8 +928,7 @@ public class LongByteArrayMap implements DataMapInterface {
 					throw new IOException("unable to copy " + src.getPath() + " to  " + dest.getPath()
 							+ " exit value was " + exitValue);
 				}
-				if (SDFSLogger.isDebug())
-					SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
+				SDFSLogger.getLog().debug("copy exit value is " + p.waitFor());
 			}
 			if (index) {
 				LongByteArrayMap m = new LongByteArrayMap(dest.getPath());
@@ -940,8 +937,7 @@ public class LongByteArrayMap implements DataMapInterface {
 			} else if (Main.COMPRESS_METADATA) {
 				CompressionUtils.compressFile(dest, new File(dest.getPath() + ".lz4"));
 			}
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("snapped map to [" + dest.getPath() + "]");
+			SDFSLogger.getLog().debug("snapped map to [" + dest.getPath() + "]");
 		} catch (Exception e) {
 			throw new IOException(e);
 		} finally {
@@ -959,7 +955,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#size()
 	 */
 	@Override
@@ -976,7 +972,7 @@ public class LongByteArrayMap implements DataMapInterface {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see org.opendedup.collections.DataMap#close()
 	 */
 	@Override
@@ -1005,7 +1001,7 @@ public class LongByteArrayMap implements DataMapInterface {
 					} catch (Exception e) {
 					}
 					if (Main.COMPRESS_METADATA) {
-						
+
 						File df = new File(this.filePath);
 						File cf = new File(this.filePath + ".lz4");
 						SDFSLogger.getLog().debug("will compress " + df.getPath() + " to " + cf.getPath());
@@ -1018,7 +1014,7 @@ public class LongByteArrayMap implements DataMapInterface {
 							SDFSLogger.getLog().debug("compressing " + df.getPath() + " to " + cf.getPath());
 							CompressionUtils.compressFile(df, cf);
 							df.delete();
-							SDFSLogger.getLog().debug("compressed "+ cf.getPath());
+							SDFSLogger.getLog().debug("compressed " + cf.getPath());
 						}
 					}
 					mp.remove(this.filePath);
@@ -1061,14 +1057,14 @@ public class LongByteArrayMap implements DataMapInterface {
 	 * _ck = new SparseDataChunk(ck.getDoop(), ck.getHash(), ck.isLocalData(),
 	 * ck.getHashLoc(),m.version); long fpose = (map.getIterPos() /map.arrayLength)*
 	 * Main.CHUNK_LENGTH; m.put(fpose, _ck.getBytes()); val = map.nextValue();
-	 * 
+	 *
 	 * } m.close(); map.close(); of.delete(); Files.move(nf.toPath(), of.toPath());
 	 * m = new LongByteArrayMap(of.getPath(),(byte)1);
 	 * evt.endEvent("Complete migration."); } catch(IOException e) {
 	 * evt.endEvent("Unable to complete migration because : " +e.getMessage(),
 	 * SDFSEvent.ERROR); throw e; } finally { try { m.close(); }catch(Exception e) {
 	 * SDFSLogger.getLog().debug("unable to close map file", e); }
-	 * 
+	 *
 	 * nf.delete(); map.hashlock.unlock(); } return m; }
 	 */
 }

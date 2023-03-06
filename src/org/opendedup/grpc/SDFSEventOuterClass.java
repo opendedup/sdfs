@@ -2611,6 +2611,12 @@ public final class SDFSEventOuterClass {
      */
     com.google.protobuf.ByteString
         getUuidBytes();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SDFSEventRequest}
@@ -2662,6 +2668,11 @@ public final class SDFSEventOuterClass {
               java.lang.String s = input.readStringRequireUtf8();
 
               uuid_ = s;
+              break;
+            }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -2734,6 +2745,17 @@ public final class SDFSEventOuterClass {
       }
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2751,6 +2773,9 @@ public final class SDFSEventOuterClass {
       if (!getUuidBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, uuid_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -2762,6 +2787,10 @@ public final class SDFSEventOuterClass {
       size = 0;
       if (!getUuidBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, uuid_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2780,6 +2809,8 @@ public final class SDFSEventOuterClass {
 
       if (!getUuid()
           .equals(other.getUuid())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -2793,6 +2824,9 @@ public final class SDFSEventOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + UUID_FIELD_NUMBER;
       hash = (53 * hash) + getUuid().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2928,6 +2962,8 @@ public final class SDFSEventOuterClass {
         super.clear();
         uuid_ = "";
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -2955,6 +2991,7 @@ public final class SDFSEventOuterClass {
       public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest buildPartial() {
         org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest result = new org.opendedup.grpc.SDFSEventOuterClass.SDFSEventRequest(this);
         result.uuid_ = uuid_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -3006,6 +3043,9 @@ public final class SDFSEventOuterClass {
         if (!other.getUuid().isEmpty()) {
           uuid_ = other.uuid_;
           onChanged();
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -3108,6 +3148,37 @@ public final class SDFSEventOuterClass {
   checkByteStringIsUtf8(value);
         
         uuid_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -4045,6 +4116,12 @@ public final class SDFSEventOuterClass {
   public interface SDFSEventListRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.SDFSEventListRequest)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SDFSEventListRequest}
@@ -4091,6 +4168,11 @@ public final class SDFSEventOuterClass {
             case 0:
               done = true;
               break;
+            case 8: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -4123,6 +4205,17 @@ public final class SDFSEventOuterClass {
               org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest.class, org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest.Builder.class);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 1;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4137,6 +4230,9 @@ public final class SDFSEventOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(1, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -4146,6 +4242,10 @@ public final class SDFSEventOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -4161,6 +4261,8 @@ public final class SDFSEventOuterClass {
       }
       org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest other = (org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest) obj;
 
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4172,6 +4274,9 @@ public final class SDFSEventOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4305,6 +4410,8 @@ public final class SDFSEventOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -4331,6 +4438,7 @@ public final class SDFSEventOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest buildPartial() {
         org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest result = new org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest(this);
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -4379,6 +4487,9 @@ public final class SDFSEventOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest other) {
         if (other == org.opendedup.grpc.SDFSEventOuterClass.SDFSEventListRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -4405,6 +4516,37 @@ public final class SDFSEventOuterClass {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -5560,24 +5702,25 @@ public final class SDFSEventOuterClass {
       "\030\016 \003(\t\022\017\n\007success\030\017 \001(\010\022A\n\nattributes\030\020 " +
       "\003(\0132-.org.opendedup.grpc.SDFSEvent.Attri" +
       "butesEntry\0321\n\017AttributesEntry\022\013\n\003key\030\001 \001" +
-      "(\t\022\r\n\005value\030\002 \001(\t:\0028\001\" \n\020SDFSEventReques" +
-      "t\022\014\n\004uuid\030\001 \001(\t\"\203\001\n\021SDFSEventResponse\022\r\n" +
+      "(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"3\n\020SDFSEventReques" +
+      "t\022\014\n\004uuid\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"\203\001\n\021S" +
+      "DFSEventResponse\022\r\n\005error\030\001 \001(\t\0221\n\terror" +
+      "Code\030\002 \001(\0162\036.org.opendedup.grpc.errorCod" +
+      "es\022,\n\005event\030\003 \001(\0132\035.org.opendedup.grpc.S" +
+      "DFSEvent\")\n\024SDFSEventListRequest\022\021\n\tpvol" +
+      "umeID\030\001 \001(\003\"\210\001\n\025SDFSEventListResponse\022\r\n" +
       "\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.op" +
-      "endedup.grpc.errorCodes\022,\n\005event\030\003 \001(\0132\035" +
-      ".org.opendedup.grpc.SDFSEvent\"\026\n\024SDFSEve" +
-      "ntListRequest\"\210\001\n\025SDFSEventListResponse\022" +
-      "\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org." +
-      "opendedup.grpc.errorCodes\022-\n\006events\030\003 \003(" +
-      "\0132\035.org.opendedup.grpc.SDFSEvent2\257\002\n\020SDF" +
-      "SEventService\022W\n\010GetEvent\022$.org.opendedu" +
-      "p.grpc.SDFSEventRequest\032%.org.opendedup." +
-      "grpc.SDFSEventResponse\022a\n\nListEvents\022(.o" +
-      "rg.opendedup.grpc.SDFSEventListRequest\032)" +
-      ".org.opendedup.grpc.SDFSEventListRespons" +
-      "e\022_\n\016SubscribeEvent\022$.org.opendedup.grpc" +
-      ".SDFSEventRequest\032%.org.opendedup.grpc.S" +
-      "DFSEventResponse0\001B0Z.github.com/opended" +
-      "up/sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "endedup.grpc.errorCodes\022-\n\006events\030\003 \003(\0132" +
+      "\035.org.opendedup.grpc.SDFSEvent2\257\002\n\020SDFSE" +
+      "ventService\022W\n\010GetEvent\022$.org.opendedup." +
+      "grpc.SDFSEventRequest\032%.org.opendedup.gr" +
+      "pc.SDFSEventResponse\022a\n\nListEvents\022(.org" +
+      ".opendedup.grpc.SDFSEventListRequest\032).o" +
+      "rg.opendedup.grpc.SDFSEventListResponse\022" +
+      "_\n\016SubscribeEvent\022$.org.opendedup.grpc.S" +
+      "DFSEventRequest\032%.org.opendedup.grpc.SDF" +
+      "SEventResponse0\001B0Z.github.com/opendedup" +
+      "/sdfs-client-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5601,7 +5744,7 @@ public final class SDFSEventOuterClass {
     internal_static_org_opendedup_grpc_SDFSEventRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SDFSEventRequest_descriptor,
-        new java.lang.String[] { "Uuid", });
+        new java.lang.String[] { "Uuid", "PvolumeID", });
     internal_static_org_opendedup_grpc_SDFSEventResponse_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_org_opendedup_grpc_SDFSEventResponse_fieldAccessorTable = new
@@ -5613,7 +5756,7 @@ public final class SDFSEventOuterClass {
     internal_static_org_opendedup_grpc_SDFSEventListRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SDFSEventListRequest_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_SDFSEventListResponse_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_org_opendedup_grpc_SDFSEventListResponse_fieldAccessorTable = new

@@ -7,9 +7,8 @@ import "FileInfo.proto";
 
 message CheckHashesRequest {
   repeated bytes hashes =1;
+  int64 pvolumeID =2;
 }
-
-
 
 message CheckHashesResponse {
   repeated int64 locations = 1;
@@ -19,10 +18,12 @@ message CheckHashesResponse {
 
 message MetaDataDedupeFileRequest {
   string filePath =1;
+  int64 pvolumeID =2;
 }
 
 message SparseDedupeFileRequest {
   string guid =1;
+  int64 pvolumeID =2;
 }
 
 message ChunkResponse {
@@ -35,12 +36,14 @@ message ChunkResponse {
 message ChunkEntry {
   bytes hash = 1;
   bytes data = 2;
+  bool compressed = 3;
+  int32 compressedLength = 4;
 }
 
 message WriteChunksRequest {
- 
   repeated ChunkEntry chunks= 1;
   int64 fileHandle =2;
+  int64 pvolumeID =3;
 }
 
 message WriteChunksResponse {
@@ -52,6 +55,7 @@ message WriteChunksResponse {
 
 message ReadChunksRequest {
   repeated ChunkEntry chunks= 1;
+  int64 pvolumeID =2;
 }
 
 message ReadChunksResponse {
@@ -63,6 +67,7 @@ message HashingInfoRequest {
   repeated ChunkEntry chunks = 1;
   string error = 2;
   errorCodes errorCode = 3;
+  int64 pvolumeID =4;
 }
 
 message HashLocPairP {
@@ -88,22 +93,29 @@ message SparseDataChunkP {
   map<int32,HashLocPairP> ar =5;
   int32 doop = 6;
   int32 prevdoop = 7;
+  int32 compressedLength = 8;
 }
 
 message SparseDedupeChunkWriteRequest {
   SparseDataChunkP chunk = 1;
   int64 fileHandle = 2;
   int64 fileLocation = 3;
+  int64 pvolumeID =4;
+  bool compressed =5;
+  bytes compressedChunk = 6;
+  int32 uncompressedLen =7;
 }
 
 message SparseDedupeChunkWriteResponse {
   string error = 1;
   errorCodes errorCode = 2;
+  repeated HashLocPairP missedAr =3;
 }
 
 message SparseDedupeChunkReadRequest {
   int64 offset = 1;
   int64 fileHandle = 2;
+  int64 pvolumeID =3;
 }
 
 message SparseDedupeChunkReadResponse {
@@ -127,6 +139,7 @@ message HashingInfoResponse {
 message InsertRecord {
   int64 hashloc = 1;
   bool inserted =2;
+  int32 compressedLength=3;
 }
 
 enum hashtype {

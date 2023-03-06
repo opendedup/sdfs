@@ -23,7 +23,6 @@ import static java.lang.Math.toIntExact;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -101,6 +100,11 @@ import com.amazonaws.services.s3.model.RestoreObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.amazonaws.services.s3.model.SSEAlgorithm;
+import com.amazonaws.services.s3.model.ServerSideEncryptionByDefault;
+import com.amazonaws.services.s3.model.ServerSideEncryptionConfiguration;
+import com.amazonaws.services.s3.model.ServerSideEncryptionRule;
+import com.amazonaws.services.s3.model.SetBucketEncryptionRequest;
 import com.amazonaws.services.s3.model.StorageClass;
 import com.amazonaws.services.s3.model.Tier;
 import com.amazonaws.services.s3.model.UploadPartRequest;
@@ -126,6 +130,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.opendedup.collections.DataArchivedException;
 import org.opendedup.collections.HashExistsException;
+import org.opendedup.collections.InsertRecord;
 import org.opendedup.fsync.SyncFSScheduler;
 import org.opendedup.grpc.CloudFileInfo.CloudMetaData;
 import org.opendedup.grpc.FileInfo.FileInfoResponse;
@@ -142,6 +147,7 @@ import org.opendedup.sdfs.filestore.cloud.utils.FileUtils;
 import org.opendedup.sdfs.servers.HCServiceProxy;
 import org.opendedup.util.CompressionUtils;
 import org.opendedup.util.EncryptUtils;
+import org.opendedup.util.FileHashing;
 import org.opendedup.util.OSValidator;
 import org.opendedup.util.PassPhrase;
 import org.opendedup.util.RandomGUID;
@@ -169,6 +175,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	boolean deleteUnclaimed = true;
 	boolean md5sum = true;
 	boolean simpleS3 = false;
+	boolean encryptBucket = false;
 	private int glacierDays = 0;
 	private boolean useGlacier = false;
 	private int infrequentAccess = 0;
@@ -186,7 +193,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	private String secretKey = Main.cloudSecretKey;
 	private boolean standAlone = true;
 	private int transferSize = 10 * 1024 * 1024;
-	private com.amazonaws.services.s3.model.Tier glacierTier = Tier.Standard;
+	private com.amazonaws.services.s3.model.Tier glacierTier = Tier.Bulk;
 	boolean gcsSigner = false;
 	TransferManager tx = null;
 	static {
@@ -254,13 +261,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 	@Override
 	public void close() {
-		this.closed = true;
+		
 		try {
 			SDFSLogger.getLog().info("############ Closing Bucket##################");
 			if (this.standAlone) {
 				HashBlobArchive.close();
 
-				ObjectMetadata omd = s3Service.getObjectMetadata(name, binm);
 				Map<String, String> md = null;
 				md = this.getUserMetaData(binm);
 
@@ -299,6 +305,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} catch (Exception e) {
 			SDFSLogger.getLog().warn("error while closing bucket " + this.name, e);
 		} finally {
+			this.closed = true;
 			try {
 				tx.shutdownNow(false);
 				s3Service.shutdown();
@@ -346,7 +353,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	}
 
 	@Override
-	public long writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
+	public InsertRecord writeChunk(byte[] hash, byte[] chunk, int len, String uuid) throws IOException {
 		try {
 			return HashBlobArchive.writeBlock(hash, chunk, uuid);
 		} catch (HashExistsException e) {
@@ -447,7 +454,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 				if (config.hasAttribute("allow-sync")) {
 					HashBlobArchive.allowSync = Boolean.parseBoolean(config.getAttribute("allow-sync"));
-					if (config.hasAttribute("sync-check-schedule")) {
+					if (config.hasAttribute("sync-check-schedule")
+							&& !config.getAttribute("sync-check-schedule").equalsIgnoreCase("none")) {
 						try {
 							new SyncFSScheduler(config.getAttribute("sync-check-schedule"));
 						} catch (Exception e) {
@@ -574,9 +582,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			} else if (config.hasAttribute("use-basic-signer")) {
 				boolean v4s = Boolean.parseBoolean(config.getAttribute("use-basic-signer"));
-				if (v4s) {
-					clientConfig.setSignerOverride("S3SignerType");
-				}
+				// if (v4s) {
+				// clientConfig.setSignerOverride("S3SignerType");
+				// }
 			} else if (gcsSigner) {
 				System.out.println("Target is GCS Storage");
 				Map<String, String> env = System.getenv();
@@ -703,9 +711,15 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					System.out.println("bucketLocation=" + bucketLocation.toString());
 					builder = builder.withRegion(bl);
 				} else if (s3Target != null) {
-					EndpointConfiguration ep = new EndpointConfiguration(s3Target, "us-east-1");
+					String[] tokens = s3Target.split("\\.");
+					String region = "us-west-2";
+					if (tokens.length > 1) {
+						region = tokens[1];
+					}
+					SDFSLogger.getLog().info("region=" + region);
+					EndpointConfiguration ep = new EndpointConfiguration(s3Target, region);
 					builder = builder.withEndpointConfiguration(ep);
-					System.out.println("target=" + s3Target);
+					SDFSLogger.getLog().info("target=" + s3Target);
 				} else {
 					String bl = "us-west-2";
 					System.out.println("bucketLocation=" + bl);
@@ -746,8 +760,18 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				throw new IOException("Failed to connect to storage bucket. Exiting");
 			}
 			if (!s3Service.doesBucketExist(this.name)) {
+				this.encryptBucket = Main.encryptBucket;
 				s3Service.createBucket(this.name);
 				SDFSLogger.getLog().info("created new store " + name);
+				if (Main.encryptBucket) {
+					SDFSLogger.getLog().info("Setting server-side encryption on the store " + name);
+					s3Service.setBucketEncryption(new SetBucketEncryptionRequest()
+							.withBucketName(this.name)
+							.withServerSideEncryptionConfiguration(new ServerSideEncryptionConfiguration()
+									.withRules(new ServerSideEncryptionRule()
+											.withApplyServerSideEncryptionByDefault(new ServerSideEncryptionByDefault()
+													.withSSEAlgorithm(SSEAlgorithm.AES256)))));
+				}
 				if (this.standAlone) {
 					ObjectMetadata md = new ObjectMetadata();
 					md.addUserMetadata("currentsize", "0");
@@ -866,7 +890,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				}
 			}
 			ArrayList<Transition> trs = new ArrayList<Transition>();
-			if (this.useGlacier && s3Target == null) {
+			if (this.useGlacier && s3Target != null) {
 				Transition transToArchive = new Transition().withDays(this.glacierDays)
 						.withStorageClass(StorageClass.Glacier);
 				trs.add(transToArchive);
@@ -879,6 +903,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 			}
 			if (trs.size() > 0) {
+				SDFSLogger.getLog().info("Setting S3 bucket lifecycle configuration");
 				BucketLifecycleConfiguration.Rule ruleArchiveAndExpire = new BucketLifecycleConfiguration.Rule()
 						.withId("SDFS Automated Archive Rule for Block Data")
 						.withFilter(new LifecycleFilter(new LifecyclePrefixPredicate("blocks/"))).withTransitions(trs)
@@ -959,6 +984,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			throw new IOException(e);
 		} finally {
 			try {
+				in.abort();
 				in.close();
 				sobj.close();
 			} catch (Exception e) {
@@ -1265,6 +1291,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (ncl != cl) {
 				SDFSLogger.getLog().warn("Read less bytes that expected. Expected " + cl + " read " + ncl);
 			}
+			in.abort();
 			IOUtils.closeQuietly(in);
 			double dtm = (System.currentTimeMillis() - tm) / 1000d;
 			double bps = (ncl / 1024) / dtm;
@@ -1317,6 +1344,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			try {
 				if (sobj != null) {
+					sobj.getObjectContent().abort();
 					sobj.close();
 				}
 			} catch (Exception e) {
@@ -1370,7 +1398,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			if (this.simpleS3) {
 
 				FileOutputStream out = null;
-				InputStream in = null;
+				S3ObjectInputStream in = null;
 				try {
 
 					out = new FileOutputStream(f);
@@ -1383,6 +1411,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					f.delete();
 					throw new IOException(e);
 				} finally {
+					in.abort();
 					IOUtils.closeQuietly(out);
 					IOUtils.closeQuietly(in);
 				}
@@ -1481,6 +1510,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			try {
 				if (sobj != null) {
+					sobj.getObjectContent().abort();
 					sobj.close();
 				}
 			} catch (Exception e) {
@@ -1543,8 +1573,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
-				if (in != null)
+				if (in != null) {
+					in.abort();
 					IOUtils.closeQuietly(in);
+				}
 				sobj.close();
 			}
 		} else {
@@ -1774,8 +1806,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			} catch (Exception e) {
 				throw new IOException(e);
 			} finally {
-				if (in != null)
+				if (in != null) {
+					in.abort();
 					in.close();
+				}
 				if (sobj != null) {
 					sobj.close();
 				}
@@ -1861,6 +1895,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			if (sobj != null)
 				try {
+					sobj.getObjectContent().close();
 					sobj.close();
 				} catch (Exception e) {
 				}
@@ -2030,7 +2065,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					try {
 						md.setContentType("binary/octet-stream");
 						in = new BufferedInputStream(new FileInputStream(p), 32768);
-						byte[] md5Hash = Hashing.md5().hashBytes(in.readAllBytes()).asBytes();
+						byte[] md5Hash = FileHashing.checksuMD5(p.getPath());
 						in.close();
 						String mds = BaseEncoding.base64().encode(md5Hash);
 						md.setContentMD5(mds);
@@ -2129,11 +2164,13 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			throws AmazonServiceException, AmazonClientException, InterruptedException, IOException {
 		if (this.gcsSigner) {
 			S3Object obj = s3Service.getObject(this.name, keyName);
+			S3ObjectInputStream is = obj.getObjectContent();
 			BufferedInputStream in = new BufferedInputStream(obj.getObjectContent());
 			BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
 			IOUtils.copy(in, out);
 			out.flush();
 			out.close();
+			is.abort();
 			in.close();
 			obj.close();
 		} else {
@@ -2181,6 +2218,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 				IOUtils.copy(in, out);
 				out.flush();
 				out.close();
+				obj.getObjectContent().abort();
 				in.close();
 				mp = this.getUserMetaData(pp + "/" + haName);
 				SDFSLogger.getLog().debug("mp sz=" + mp.size());
@@ -2481,6 +2519,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		} finally {
 			// this.s3clientLock.readLock().unlock();
 			try {
+				kobj.getObjectContent().abort();
 				kobj.close();
 			} catch (Exception e) {
 			}
@@ -2554,6 +2593,16 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 	@Override
 	public synchronized String restoreBlock(long id, byte[] hash) throws IOException {
 		SDFSLogger.getLog().info("restoring block " + id);
+		if (!Main.retrievalTier.equals("")) {
+			String ts = Main.retrievalTier;
+			if (ts.equalsIgnoreCase("standard"))
+				this.glacierTier = Tier.Standard;
+			if (ts.equalsIgnoreCase("expedited"))
+				this.glacierTier = Tier.Expedited;
+			if (ts.equalsIgnoreCase("bulk"))
+				this.glacierTier = Tier.Bulk;
+			SDFSLogger.getLog().info("restoring block using retrieval policy: " + this.glacierTier);
+		}
 		if (id == -1) {
 			SDFSLogger.getLog().warn("Hash not found for " + StringUtils.getHexString(hash));
 			return null;
@@ -2571,7 +2620,7 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		for (int i = 0; i < 9; i++) {
 			try {
 
-				RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName + this.dExt, 2);
+				RestoreObjectRequest request = new RestoreObjectRequest(this.name, "blocks/" + haName + this.dExt, 30);
 				GlacierJobParameters params = new GlacierJobParameters();
 				params.setTier(this.glacierTier);
 				request.setGlacierJobParameters(params);
@@ -2584,7 +2633,10 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 					return null;
 				}
 				request = new RestoreObjectRequest(this.name, "blocks/" + haName + mdExt, 2);
+				request.setGlacierJobParameters(params);
 				s3Service.restoreObject(request);
+				SDFSLogger.getLog().info("restoring block [" + id + "] at [blocks/" + haName + mdExt + "] from glacier "
+						+ this.glacierTier.toString());
 				restoreRequests.put(Long.valueOf(id), haName);
 				return haName;
 			} catch (AmazonS3Exception e) {
@@ -2630,24 +2682,29 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 
 		try {
 			ObjectMetadata omd = s3Service.getObjectMetadata(this.name, "blocks/" + id + this.dExt);
-			ObjectMetadata momd = omd;
-			momd = s3Service.getObjectMetadata(this.name, "blocks/" + id + mdExt);
+			ObjectMetadata momd = s3Service.getObjectMetadata(this.name, "blocks/" + id + mdExt);
 			if (omd == null || momd == null) {
 				SDFSLogger.getLog().warn("Object with id " + id + " is null");
 				return false;
-			} else if (omd.getStorageClass() == null) {
-				return true;
-			} else if (!omd.getStorageClass().equalsIgnoreCase("GLACIER")
-					&& !momd.getStorageClass().equalsIgnoreCase("GLACIER")) {
-				SDFSLogger.getLog().warn("Object with id " + id + " is restored");
-				return true;
-			} else if (omd.getOngoingRestore() || momd.getOngoingRestore()) {
+			}
+			if (omd.getOngoingRestore() || momd.getOngoingRestore()) {
 				SDFSLogger.getLog().warn("Object with id " + id + " is still restoring");
 				return false;
-			} else
+			} else if (omd.getStorageClass() == null && omd.getStorageClass() == null) {
+				SDFSLogger.getLog().warn("Block Object and md with id " + id + " is restored sc = null");
 				return true;
+			} else if (omd.getStorageClass() != null && omd.getStorageClass().equalsIgnoreCase("GLACIER")) {
+				SDFSLogger.getLog().warn("Block Object with id " + id + " is still glacier");
+				return false;
+			} else if (momd.getStorageClass() != null && !momd.getStorageClass().equalsIgnoreCase("GLACIER")) {
+				SDFSLogger.getLog().warn("Metadata Object with id " + id + " is still glacier");
+				return false;
+			} else {
+				SDFSLogger.getLog().warn("Object with id " + id + " preconditions met for glacier restore");
+				return true;
+			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().warn("error while checking block restored", e);
+			SDFSLogger.getLog().error("error while checking block restored", e);
 			return false;
 		}
 	}
@@ -2691,9 +2748,9 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 			}
 			if (props.containsKey("use-basic-signer")) {
 				boolean v4s = Boolean.parseBoolean(props.getProperty("use-basic-signer"));
-				if (v4s) {
-					clientConfig.setSignerOverride("S3SignerType");
-				}
+				// if (v4s) {
+				// clientConfig.setSignerOverride("S3SignerType");
+				// }
 			}
 			if (props.containsKey("protocol")) {
 				String pr = props.getProperty("protocol");
@@ -3124,7 +3181,8 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		@Override
 		public void run() {
 			try {
-				String hashString = EncyptUtils.encHashArchiveName(k.longValue(), Main.chunkStoreEncryptionEnabled);
+				// String hashString = EncyptUtils.encHashArchiveName(k.longValue(),
+				// Main.chunkStoreEncryptionEnabled);
 
 				String name = st.getClaimName(k.longValue());
 				if (st.s3Service.doesObjectExist(st.name, name)) {
@@ -3303,4 +3361,12 @@ public class BatchAwsS3ChunkStore implements AbstractChunkStore, AbstractBatchSt
 		return null;
 	}
 
+	@Override
+	public boolean get_move_blob() {
+		return false;
+	}
+
+	@Override
+	public void set_move_blob(boolean status) {
+	}
 }

@@ -28,15 +28,19 @@ public class Main {
 	public static boolean checkArchiveOnRead = true;
 	public static int hashSeed=6442;
 	public static double fpp = .01;
-	public static String jarFilePath="";
-	public static String classInfo="";
-	public static String logSize="10MB";
-	public static int logFiles=10;
 	public static boolean ignoreDSEHTSize = true;
 	public static long GLOBAL_CACHE_SIZE=512*1024L*1024L;
 	public static int readAheadThreads = 16;
 	public static boolean refCount = true;
 	public static boolean useLegacy = false;
+	public static String authJarFilePath="";
+	public static String authClassInfo="";
+	public static String prodConfigFilePath = "";
+	public static String prodConfigVariable = "";
+	public static boolean s3ApiCompatible = false;
+	public static int immutabilityPeriod=10;//by default set to 10 days
+	public static boolean encryptBucket = false;
+	public static boolean rehydrateBlobs = false;
 
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout
@@ -59,6 +63,8 @@ public class Main {
 	public static StandAloneGCScheduler pFullSched = null;
 
 	public static String logPath = "/var/log/sdfs/sdfs.log";
+	public static String logSize="10MB";
+	public static int logFiles=10;
 	public static byte MAPVERSION = 0;
 	public static int MAX_OPEN_SST_FILES=-1;
 	public static String sdfsPassword = "";
@@ -78,6 +84,7 @@ public class Main {
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
 	public static String sdfsBasePath = "";
+	public static String volumeConfigFile = "";
 
 	public static SDFSEvent mountEvent = null;
 
@@ -105,6 +112,8 @@ public class Main {
 	 * located. This is used for the chunk stores.
 	 */
 	public static String chunkStore = "";
+
+	public static boolean usePortRedirector;
 
 	/**
 	 * Future implementation for pluggable chunkstores
@@ -149,6 +158,12 @@ public class Main {
 	public static String lookupfilterStore = null;
 	public static String dedupDBTrashStore = null;
 	public static boolean DDB_TRASH_ENABLED = false;
+	public static boolean sdfsSyncEnabled = false;
+	public static boolean runConsistancyCheckPeriodically = false;
+	public static String sdfsVolName = "";
+	public static String retrievalTier = "";
+	public static long CLEANUP_THREAD_INTERVAL=30*1000;
+	public static boolean PRINT_CACHESTATS=true;
 	/**
 	 * The location where the model of the virtual file structure will be held.
 	 * The virtual file structure maps what will be presented as the filesystem
@@ -309,7 +324,7 @@ public class Main {
 	public static boolean useAim;
 
 	/** Azure login info **/
-	
+
 	public static boolean AZUREChunkStore = false;
 	public static String AZURE_ACCOUNT_NAME = "MyAccountName";
 	public static String AZURE_ACCOUNT_KEY = "MyAccountKey";

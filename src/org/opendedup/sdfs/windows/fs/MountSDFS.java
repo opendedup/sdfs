@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -33,7 +33,6 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.servers.SDFSService;
-import org.opendedup.sdfs.windows.utils.DriveIcon;
 import org.opendedup.util.OSValidator;
 
 public class MountSDFS {
@@ -44,6 +43,7 @@ public class MountSDFS {
 		options.addOption("v", true, "sdfs volume to mount \ne.g. dedup");
 		options.addOption("p", true, "port to use for sdfs cli");
 		options.addOption("e", true, "password to decrypt config");
+		options.addOption("j", true, "environmental variable to decrypt config");
 		options.addOption("d", false, "turn on filesystem debugging");
 		options.addOption("nm", false, "disable drive mount");
 		options.addOption("cfr", false, "Restores files from cloud storage if the backend cloud store supports it");
@@ -57,6 +57,7 @@ public class MountSDFS {
 		options.addOption("rv", true,
 				"comma separated list of remote volumes that should also be accounted for when doing garbage collection. "
 						+ "If not entered the volume will attempt to identify other volumes in the cluster.");
+		options.addOption("use-portredirector", false, "Disables TLS and forces localhost");
 		options.addOption("h", false, "display available options");
 		return options;
 	}
@@ -98,6 +99,10 @@ public class MountSDFS {
 		}
 		if (cmd.hasOption("e")) {
 			password = cmd.getOptionValue("e");
+		}
+		if (cmd.hasOption("j")) {
+			String jv = cmd.getOptionValue("j");
+			password = System.getenv(jv);
 		}
 		if (cmd.hasOption("cfr")) {
 			Main.syncDL = true;
@@ -141,7 +146,10 @@ public class MountSDFS {
 			}
 			volumeConfigFile = f.getPath();
 		}
-		
+		if(cmd.hasOption("use-portredirector")) {
+			Main.usePortRedirector = true;
+		}
+
 
 		if (volumeConfigFile == null) {
 			System.out.println("error : volume or path to volume configuration file not defined");
@@ -182,7 +190,7 @@ public class MountSDFS {
 					// System.out.println(sFal[i]);
 				}
 				try {
-					DriveIcon.addIcon(cmd.getOptionValue("m"));
+					//DriveIcon.addIcon(cmd.getOptionValue("m"));
 				} catch (Exception e) {
 					e.printStackTrace();
 					System.err.println("Unable to add icon for drive " + cmd.getOptionValue("m"));

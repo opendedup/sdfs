@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com	
+ * Copyright (C) 2016 Sam Silverberg sam.silverberg@gmail.com
  *
  * This file is part of OpenDedupe SDFS.
  *
@@ -31,6 +31,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.opendedup.hashing.HashFunctions;
 import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
@@ -44,9 +45,9 @@ public class EncryptUtils {
 	private static final IvParameterSpec spec = new IvParameterSpec(iv);
 	static {
 		try {
+			//Security.addProvider(new BouncyCastleProvider());
 			keyBytes = HashFunctions.getSHAHashBytes(Main.chunkStoreEncryptionKey.getBytes());
 			oldKeyBytes = HashFunctions.getSHAHashBytes("Password".getBytes());
-			Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 			key = new SecretKeySpec(keyBytes, "AES");
 			oldKey = new SecretKeySpec(oldKeyBytes, "AES");
 		} catch (Exception e) {
@@ -68,7 +69,7 @@ public class EncryptUtils {
 	public static byte[] encryptCBC(byte[] chunk) throws IOException {
 		return encryptCBC(chunk,false);
 	}
-	
+
 	public static byte[] encryptCBC(byte[] chunk,boolean useOldKey) throws IOException {
 
 		try {
@@ -85,7 +86,7 @@ public class EncryptUtils {
 		}
 
 	}
-	
+
 
 	public static byte[] decryptCBC(byte[] encChunk) throws IOException {
 
@@ -256,7 +257,7 @@ public class EncryptUtils {
 		fos.close();
 		cis.close();
 		}catch (Exception e) {
-			
+
 
 			Cipher encrypt = Cipher.getInstance("AES/CBC/PKCS5Padding");
 			encrypt.init(Cipher.DECRYPT_MODE, oldKey, ivspec);

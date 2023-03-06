@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -35,6 +36,9 @@ import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.s3.AmazonS3Client;
+
 import com.google.common.io.BaseEncoding;
 
 public class VolumeConfigWriter {
@@ -54,8 +58,6 @@ public class VolumeConfigWriter {
 	boolean safe_close = true;
 	boolean vrts_appliance = false;
 	boolean safe_sync = true;
-	String jarFilePath = "";
-	String classInfo = "";
 	int write_threads = (short) (Runtime.getRuntime().availableProcessors());
 	boolean dedup_files = true;
 	int chunk_size = 256;
@@ -69,6 +71,7 @@ public class VolumeConfigWriter {
 	String owner = "0";
 	String group = "0";
 	boolean simpleS3 = false;
+	boolean encryptBucket = false;
 	String volume_capacity = null;
 	int avgPgSz = 8192;
 	boolean mdCompresstion = false;
@@ -80,7 +83,7 @@ public class VolumeConfigWriter {
 	// String fdisk_schedule = "0 59 23 * * ?";
 	String fdisk_schedule = "0 0 12 ? * SUN";
 	String ltrfdisk_schedule = "0 15 10 L * ?";
-	String syncfs_schedule = "4 59 23 * * ?";
+	String syncfs_schedule = null;
 	private String dExt = null;
 	boolean azureEnabled = false;
 	boolean tcpKeepAlive = true;
@@ -93,6 +96,7 @@ public class VolumeConfigWriter {
 	int maxSegSize = 32;
 	int windowSize = 48;
 	int cloudThreads = 8;
+	int immutabilityPeriod = 10;
 	private int glacierInDays = 0;
 	private int aruzreArchiveInDays = 0;
 	private String azurestorageTier = null;
@@ -102,13 +106,18 @@ public class VolumeConfigWriter {
 	String chunk_store_encryption_key = PassPhrase.getNext();
 	String chunk_store_iv = PassPhrase.getIV();
 	boolean chunk_store_encrypt = false;
-	String hashType = HashFunctionPool.VARIABLE_MD5;
+	String hashType = HashFunctionPool.VARIABLE_SHA256;
 	String chunk_store_class = "org.opendedup.sdfs.filestore.BatchFileChunkStore";
 	String gc_class = "org.opendedup.sdfs.filestore.gc.PFullGC";
 	String hash_db_class = Main.hashesDBClass;
 	String sdfsCliPassword = "admin";
 	String sdfsCliSalt = HashFunctions.getRandomString(24);
 	String sdfsCliListenAddr = "0.0.0.0";
+	String authJarFilePath = "";
+	String authClassInfo = "";
+	String prodConfigFilePath = "";
+	String prodConfigVariable = "";
+	boolean s3ApiCompatible = false;
 	boolean sdfsCliSSL = true;
 	boolean sdfsCliRequireAuth = false;
 	boolean sdfsCliRequireMutualTLSAuth = false;
@@ -146,7 +155,7 @@ public class VolumeConfigWriter {
 	private String subscription;
 	private String gcpProject;
 	private String permissionsFile;
-	private long rmthreashold = 15 * 60 * 1000;
+	private long rmthreashold = 5 * 60 * 1000;
 	private String sdfsBasePath = "";
 
 	public VolumeConfigWriter() {
@@ -163,6 +172,31 @@ public class VolumeConfigWriter {
 			printHelp(options);
 			System.exit(1);
 		}
+		if (cmd.hasOption("update-cloud-creds")) {
+			System.out.println("Updating cloud credentials...");
+			if (!cmd.hasOption("volume-name") || !cmd.hasOption("cloud-access-key") ||
+					!cmd.hasOption("cloud-secret-key")) {
+				System.out.println("--volume-name, --cloud-access-key and --cloud-secret-key are required");
+				printHelp(options);
+				System.exit(-1);
+			}
+
+			Main.sdfsVolName = cmd.getOptionValue("volume-name");
+			Main.cloudAccessKey = cmd.getOptionValue("cloud-access-key");
+			Main.cloudSecretKey = cmd.getOptionValue("cloud-secret-key");
+
+			if (cmd.hasOption("encrypt-config"))
+				Main.sdfsPassword = cmd.getOptionValue("encrypt-config");
+
+			if (cmd.hasOption("chunk-store-encryption-key"))
+				Main.chunkStoreEncryptionKey = cmd.getOptionValue("chunk-store-encryption-key");
+			else
+				Main.chunkStoreEncryptionKey = this.chunk_store_encryption_key;
+
+			int returnCode = Config.updateCloudCreds();
+			System.exit(returnCode);
+		}
+		
 		if (cmd.hasOption("encrypt-config")) {
 			if (cmd.getOptionValue("encrypt-config").length() < 6) {
 				System.out.println("--encrypt-config must be greater than 6 characters");
@@ -200,9 +234,17 @@ public class VolumeConfigWriter {
 		if (cmd.hasOption("sdfscli-listen-addr"))
 			this.sdfsCliListenAddr = cmd.getOptionValue("sdfscli-listen-addr");
 		if (cmd.hasOption("auth-utility-jar-file-path"))
-			this.jarFilePath = cmd.getOptionValue("auth-utility-jar-file-path");
+			this.authJarFilePath = cmd.getOptionValue("auth-utility-jar-file-path");
 		if (cmd.hasOption("auth-class-info"))
-			this.classInfo = cmd.getOptionValue("auth-class-info");
+			this.authClassInfo = cmd.getOptionValue("auth-class-info");
+		if (cmd.hasOption("prod-config-file-path"))
+			this.prodConfigFilePath = cmd.getOptionValue("prod-config-file-path");
+		if (cmd.hasOption("prod-config-variable"))
+			this.prodConfigVariable = cmd.getOptionValue("prod-config-variable");
+		if (cmd.hasOption("s3-compatible-target"))
+			this.s3ApiCompatible = Boolean.parseBoolean(cmd.getOptionValue("s3-compatible-target"));
+		if (cmd.hasOption("immutabilityPeriod"))
+			this.immutabilityPeriod = Integer.parseInt(cmd.getOptionValue("immutabilityPeriod"));
 		if (cmd.hasOption("sdfs-base-path"))
 			this.sdfsBasePath = cmd.getOptionValue("sdfs-base-path");
 		Main.sdfsBasePath = this.sdfsBasePath;
@@ -277,9 +319,21 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("dedup-db-store")) {
 			this.dedup_db_store = cmd.getOptionValue("dedup-db-store");
+			if (OSValidator.isUnix()) {
+				this.dedup_db_store = this.dedup_db_store + File.separator + "." + volume_name + File.separator + "ddb";
+			} else {
+				this.dedup_db_store = this.dedup_db_store + File.separator + volume_name + File.separator + "ddb";
+			}
 		}
 		if (cmd.hasOption("dedup-dbtrash-store")) {
 			this.dedup_dbtrash_store = cmd.getOptionValue("dedup-dbtrash-store");
+			if (cmd.hasOption("azure-storage-tier")) {
+				String cln = cmd.getOptionValue("azure-storage-tier");
+				if (cln.equalsIgnoreCase("hot") || cln.equalsIgnoreCase("cool")
+						|| cln.equalsIgnoreCase("archive")) {
+					this.azurestorageTier = cln;
+				}
+			}
 		}
 		if (cmd.hasOption("enable-batch-gc")) {
 			this.dedup_db_trash_enabled = true;
@@ -370,6 +424,13 @@ public class VolumeConfigWriter {
 			this.aruzreArchiveInDays = Integer.parseInt(cmd.getOptionValue("azurearchive-in-days"));
 			this.azurestorageTier = "archive";
 			this.refreshBlobs = true;
+			if (cmd.hasOption("azure-storage-tier")) {
+				String cln = cmd.getOptionValue("azure-storage-tier");
+				if (cln.equalsIgnoreCase("hot") || cln.equalsIgnoreCase("cool")
+						|| cln.equalsIgnoreCase("archive")) {
+					this.azurestorageTier = cln;
+				}
+			}
 		}
 
 		if (cmd.hasOption("no-simple-metadata")) {
@@ -421,6 +482,15 @@ public class VolumeConfigWriter {
 		}
 		if (cmd.hasOption("chunk-store-hashdb-location")) {
 			this.chunk_store_hashdb_location = cmd.getOptionValue("chunk-store-hashdb-location");
+			if (OSValidator.isUnix()) {
+				this.chunk_store_hashdb_location = this.chunk_store_hashdb_location + File.separator + "." + volume_name
+						+ File.separator + "chunkstore" + File.separator + "hdb-"
+						+ this.sn;
+			} else {
+				this.chunk_store_hashdb_location = this.chunk_store_hashdb_location + File.separator + volume_name
+						+ File.separator + "chunkstore" + File.separator + "hdb-"
+						+ this.sn;
+			}
 		}
 		if (cmd.hasOption("chunk-store-hashdb-class")) {
 			this.hash_db_class = cmd.getOptionValue("chunk-store-hashdb-class");
@@ -476,6 +546,33 @@ public class VolumeConfigWriter {
 					this.simpleS3 = true;
 					this.usebasicsigner = true;
 				}
+
+				if (cmd.hasOption("encrypt-bucket") && this.awsEnabled && !this.s3ApiCompatible) {
+					BasicAWSCredentials creds = null;
+					try {
+						creds = new BasicAWSCredentials(this.cloudAccessKey, this.cloudSecretKey);
+						AmazonS3Client s3Service = new AmazonS3Client(creds);
+						if (!s3Service.doesBucketExist(this.cloudBucketName))
+							this.encryptBucket = true;
+						else {
+							String result = s3Service.getBucketEncryption(this.cloudBucketName).toString();
+							if (result.contains("AES256"))
+								this.encryptBucket = true;
+							else
+								System.out.println(
+										"Warn : Unable to set AES256 encryption as bucket already exists without ServerSideEncryption enabled.");
+							this.encryptBucket = false;
+						}
+					} catch (Exception e) {
+						if (e.toString().contains("ServerSideEncryptionConfigurationNotFound"))
+							this.encryptBucket = false;
+						else {
+							System.err.println("Unable to authenticate to AWS " + e.toString());
+							e.printStackTrace();
+							System.exit(-1);
+						}
+					}
+				}
 				/*
 				 * if (!this.aliEnabled && !minIOEnabled && !awsAim &&
 				 * !cmd.hasOption("cloud-disable-test") &&
@@ -524,6 +621,10 @@ public class VolumeConfigWriter {
 				System.exit(-1);
 			}
 		}
+
+		byte[] b = new byte[16];
+		b = Arrays.copyOf(this.cloudBucketName.getBytes(), 16);
+		this.chunk_store_iv = StringUtils.getHexString(b);
 		if (cmd.hasOption("chunk-store-io-threads")) {
 			this.cloudThreads = Integer.parseInt(cmd.getOptionValue("chunk-store-io-threads"));
 		}
@@ -638,6 +739,10 @@ public class VolumeConfigWriter {
 			this.chunk_store_encryption_key = BaseEncoding.base64Url().encode(ec);
 			ec = EncryptUtils.encryptCBC(this.cloudSecretKey.getBytes(), password, iv);
 			this.cloudSecretKey = BaseEncoding.base64Url().encode(ec);
+			ec = EncryptUtils.encryptCBC(this.sdfsCliPassword.getBytes(), password, iv);
+			this.sdfsCliPassword = BaseEncoding.base64Url().encode(ec);
+			ec = EncryptUtils.encryptCBC(this.sdfsCliSalt.getBytes(), password, iv);
+			this.sdfsCliSalt = BaseEncoding.base64Url().encode(ec);
 		}
 
 		if (vrts_appliance) {
@@ -752,10 +857,13 @@ public class VolumeConfigWriter {
 		sdfscli.setAttribute("enable-auth", Boolean.toString(this.sdfsCliRequireAuth));
 		sdfscli.setAttribute("enable-mutual-tls-auth", Boolean.toString(this.sdfsCliRequireMutualTLSAuth));
 		sdfscli.setAttribute("listen-address", this.sdfsCliListenAddr);
-		sdfscli.setAttribute("auth-utility-jar-file-path", this.jarFilePath);
-		sdfscli.setAttribute("auth-class-info", this.classInfo);
+		sdfscli.setAttribute("auth-utility-jar-file-path", this.authJarFilePath);
+		sdfscli.setAttribute("auth-class-info", this.authClassInfo);
+		sdfscli.setAttribute("prod-config-file-path", this.prodConfigFilePath);
+		sdfscli.setAttribute("prod-config-variable", this.prodConfigVariable);
 		sdfscli.setAttribute("use-ssl", Boolean.toString(this.sdfsCliSSL));
 		sdfscli.setAttribute("permissions-file", this.permissionsFile);
+		sdfscli.setAttribute("encrypt-config", Boolean.toString(this.encryptConfig));
 		try {
 			sdfscli.setAttribute("password",
 					HashFunctions.getSHAHash(this.sdfsCliPassword.getBytes(), this.sdfsCliSalt.getBytes()));
@@ -766,6 +874,7 @@ public class VolumeConfigWriter {
 		}
 		sdfscli.setAttribute("salt", this.sdfsCliSalt);
 		sdfscli.setAttribute("port", Integer.toString(this.sdfsCliPort));
+		sdfscli.setAttribute("immutabilityPeriod", Integer.toString(this.immutabilityPeriod));
 		sdfscli.setAttribute("enable", Boolean.toString(this.sdfsCliEnabled));
 
 		root.appendChild(sdfscli);
@@ -795,7 +904,9 @@ public class VolumeConfigWriter {
 			extended.setAttribute("map-cache-size", "200");
 			extended.setAttribute("io-threads", "16");
 			extended.setAttribute("delete-unclaimed", "true");
-			extended.setAttribute("sync-check-schedule", syncfs_schedule);
+			if (syncfs_schedule != null) {
+				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+			}
 			extended.setAttribute("backlog-size", this.backlogSize);
 			cs.appendChild(extended);
 
@@ -806,6 +917,7 @@ public class VolumeConfigWriter {
 			Element aws = xmldoc.createElement("aws");
 			aws.setAttribute("enabled", "true");
 			aws.setAttribute("aws-aim", Boolean.toString(this.awsAim));
+			aws.setAttribute("s3-compatible-target", Boolean.toString(this.s3ApiCompatible));
 			if (!awsAim) {
 				aws.setAttribute("aws-access-key", this.cloudAccessKey);
 				aws.setAttribute("aws-secret-key", this.cloudSecretKey);
@@ -834,7 +946,9 @@ public class VolumeConfigWriter {
 				extended.setAttribute("glacier-archive-days", Integer.toString(this.glacierInDays));
 				extended.setAttribute("glacier-tier", this.glacierClass);
 				extended.setAttribute("simple-metadata", Boolean.toString(this.simpleMD));
-				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				if (syncfs_schedule != null) {
+					extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				}
 				extended.setAttribute("use-basic-signer", Boolean.toString(this.usebasicsigner));
 				extended.setAttribute("backlog-size", this.backlogSize);
 				if (this.genericS3) {
@@ -844,9 +958,13 @@ public class VolumeConfigWriter {
 
 					extended.appendChild(cp);
 				}
-				if (this.simpleS3)
+				if (this.simpleS3) {
 					extended.setAttribute("simple-s3", "true");
-				else
+					if (this.encryptBucket)
+						aws.setAttribute("encrypt-bucket", "true");
+					else
+						aws.setAttribute("encrypt-bucket", "false");
+				} else
 					extended.setAttribute("simple-s3", "false");
 				if (this.basicS3Signer)
 					extended.setAttribute("use-basic-signer", "true");
@@ -891,7 +1009,9 @@ public class VolumeConfigWriter {
 				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
-				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				if (syncfs_schedule != null) {
+					extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				}
 				extended.setAttribute("backlog-size", this.backlogSize);
 				if (this.bucketLocation != null)
 					extended.setAttribute("default-bucket-location", this.bucketLocation);
@@ -922,7 +1042,9 @@ public class VolumeConfigWriter {
 				extended.setAttribute("map-cache-size", "100");
 				extended.setAttribute("io-threads", "16");
 				extended.setAttribute("delete-unclaimed", "true");
-				extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				if (syncfs_schedule != null) {
+					extended.setAttribute("sync-check-schedule", syncfs_schedule);
+				}
 				extended.setAttribute("azure-tier-in-days", Integer.toString(aruzreArchiveInDays));
 				extended.setAttribute("backlog-size", this.backlogSize);
 				if (this.azurestorageTier != null) {
@@ -1011,6 +1133,34 @@ public class VolumeConfigWriter {
 				.withDescription(
 						"IP Listenting address for the sdfscli management interface. This defaults to \"localhost\"")
 				.hasArg(true).withArgName("ip address or host name").create());
+		options.addOption(OptionBuilder.withLongOpt("auth-utility-jar-file-path")
+				.withDescription(
+						"Authentication Utility jar file path."
+								+ " \n e.g. --auth-utility-jar-file-path=C:\\odd\\utilitly\\tool.jar")
+				.hasArg(true).withArgName("AUTH-JAR-PATH").create());
+		options.addOption(OptionBuilder.withLongOpt("auth-class-info")
+				.withDescription(
+						"Authentication Class to load and its methods separated by ;;."
+								+ " \n e.g.--auth-class-info=com.odd.KeyInfo;;getInfo1;;getInfo2")
+				.hasArg(true).withArgName("AUTH-CLASS-INFO").create());
+		options.addOption(OptionBuilder.withLongOpt("prod-config-file-path")
+				.withDescription(
+						"Product configuration file path.")
+				.hasArg(true).withArgName("CONFIG-FILE-PATH").create());
+		options.addOption(OptionBuilder.withLongOpt("prod-config-variable")
+				.withDescription(
+						"Product configuration variable.")
+				.hasArg(true).withArgName("CONF-VARIABLE").create());
+		options.addOption(OptionBuilder.withLongOpt("s3-compatible-target")
+				.withDescription(
+						"Set it to true to specify volume is S3 compatible cloud target (Defaults to false for Amazon S3).")
+				.hasArg(true).withArgName("true|false").create());
+		options.addOption(OptionBuilder.withLongOpt("immutabilityPeriod")
+				.withDescription("Set it to specify the immutability period of the files to x number of days.")
+				.hasArg(true)
+				.withArgName("number of days e.g. 10").create());
+		options.addOption(OptionBuilder.withLongOpt("update-cloud-creds")
+				.withDescription("If set, the volumes cloud credentials will be updated.").create());
 		options.addOption(OptionBuilder.withLongOpt("hashtable-rm-threshold").withDescription(
 				"The threashold in milliseconds to wait for unclaimed chucks to be available for garbage collection"
 						+ "The default is 15 minutes or 900000 ms,")
@@ -1018,15 +1168,15 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("sdfs-base-path").withDescription(
 				"Folder basepath for sdfs to be used in linux os.\n Defaults to: \n " + OSValidator.getConfigPath())
 				.hasArgs().withArgName("PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("auth-utility-jar-file-path")
-				.withDescription("Utility jar file path.").hasArg(true).withArgName("JAR-PATH").create());
-		options.addOption(OptionBuilder.withLongOpt("auth-class-info")
-				.withDescription("Class to load and its methods separated by ;;.").hasArg(true)
-				.withArgName("CLASS-INFO").create());
 		options.addOption(
 				OptionBuilder.withLongOpt("base-path")
 						.withDescription("the folder path for all volume data and meta data.\n Defaults to: \n "
 								+ OSValidator.getProgramBasePath() + "<volume name>")
+						.hasArgs().withArgName("PATH").create());
+		options.addOption(
+				OptionBuilder.withLongOpt("sdfs-base-path")
+						.withDescription("Folder basepath for sdfs to be used in linux os.\n Defaults to: \n "
+								+ OSValidator.getConfigPath())
 						.hasArgs().withArgName("PATH").create());
 		options.addOption(OptionBuilder.withLongOpt("cloud-url")
 				.withDescription("The url of the blob server. e.g. http://s3server.localdomain/s3/").hasArg()
@@ -1179,6 +1329,9 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("encrypt-config")
 				.withDescription("Encrypt security sensitive encryption parameters with the password provided")
 				.hasArg(true).withArgName("a password").create());
+		options.addOption(OptionBuilder.withLongOpt("encrypt-bucket").withDescription(
+				"Set to enable server-side encryption by deafult(AES256 SSE Algorithm) on the bucket in Amazon S3 Cloud Storage. ")
+				.hasArg(false).create());
 		options.addOption(OptionBuilder.withLongOpt("aws-enabled").withDescription(
 				"Set to true to enable this volume to store to Amazon S3 Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
@@ -1224,6 +1377,9 @@ public class VolumeConfigWriter {
 		options.addOption(OptionBuilder.withLongOpt("azure-enabled").withDescription(
 				"Set to true to enable this volume to store to Microsoft Azure Cloud Storage. cloud-secret-key, cloud-access-key, and cloud-bucket-name will also need to be set. ")
 				.hasArg().withArgName("true|false").create());
+		options.addOption(OptionBuilder.withLongOpt("azure-storage-tier")
+				.withDescription("Set the tier type to move from hot storage tier. ").hasArg()
+				.withArgName("hot|cool|archive").create());
 		options.addOption(OptionBuilder.withLongOpt("glacier-restore-class")
 				.withDescription("Set the class used to restore glacier data. ").hasArg()
 				.withArgName("expedited|standard|bulk").create());

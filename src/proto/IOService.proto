@@ -10,16 +10,20 @@ message DataWriteRequest {
     int64 start =2;
     int32 len = 3;
     bytes data = 4;
+    int64 pvolumeID =5;
+    bool compressed =6;
 }
 
 message DataWriteResponse {
     string error = 1;
     errorCodes errorCode = 2;
+    int64 written = 3;
 }
 
 message MkDirRequest {
     string path = 1;
     int32 mode = 2;
+    int64 pvolumeID =3;
 }
 
 message MkDirResponse {
@@ -29,6 +33,7 @@ message MkDirResponse {
 
 message RmDirRequest {
     string path = 1;
+    int64 pvolumeID =2;
 }
 
 message RmDirResponse {
@@ -38,6 +43,7 @@ message RmDirResponse {
 
 message UnlinkRequest {
     string path = 1;
+    int64 pvolumeID =2;
 }
 
 message UnlinkResponse {
@@ -49,6 +55,8 @@ message DataReadRequest {
     int64 fileHandle = 1;
     int64 start =2;
     int32 len = 3;
+    int64 pvolumeID =4;
+    bool compress =5;
 }
 
 message DataReadResponse {
@@ -56,10 +64,13 @@ message DataReadResponse {
     int32 read = 2;
     string error = 3;
     errorCodes errorCode = 4;
+    bool compressed = 5;
 }
 
 message FileCloseRequest {
     int64 fileHandle = 1;
+    int64 pvolumeID =2;
+
 }
 
 message FileCloseResponse {
@@ -71,6 +82,8 @@ message MkNodRequest {
     string path = 1;
     int32 mode = 2;
     int32 rdev =3;
+    int64 pvolumeID =4;
+
 }
 
 message MkNodResponse {
@@ -81,16 +94,21 @@ message MkNodResponse {
 message FileOpenRequest {
     string path = 1;
     int32 flags =2;
+    int64 pvolumeID =3;
+
 }
 
 message FileExistsRequest {
     string path = 1;
+    int64 pvolumeID =2;
+
 }
 
 message FileExistsResponse {
     bool exists = 1;
     string error = 2;
     errorCodes errorCode = 3;
+    int64 pvolumeID =4;
 
 }
 
@@ -103,6 +121,7 @@ message FileOpenResponse {
 message FileSnapshotRequest {
     string src =1;
     string dest = 2;
+    int64 pvolumeID =3;
 }
 
 message FileSnapshotResponse {
@@ -114,6 +133,7 @@ message FileSnapshotResponse {
 message FileRenameRequest {
     string src =1;
     string dest = 2;
+    int64 pvolumeID =3;
 }
 
 message FileRenameResponse {
@@ -127,6 +147,7 @@ message CopyExtentRequest {
     int64 srcStart = 3;
     int64 dstStart = 4;
     int64 length = 5;
+    int64 pvolumeID =6;
 }
 
 message CopyExtentResponse {
@@ -138,11 +159,13 @@ message CopyExtentResponse {
 message SetUserMetaDataRequest {
     repeated FileAttributes fileAttributes = 1;
     string Path =2;
+    int64 pvolumeID =3;
 }
 
 message SetUserMetaDataResponse {
     string error = 1;
     errorCodes errorCode = 2;
+
 }
 
 message GetCloudFileRequest {
@@ -150,6 +173,7 @@ message GetCloudFileRequest {
     string dstfile = 2;
     bool overwrite = 3;
     string changeid = 4;
+    int64 pvolumeID =5;
 }
 
 message GetCloudFileResponse {
@@ -161,6 +185,7 @@ message GetCloudFileResponse {
 message ChmodRequest {
     string path = 1;
     int32 mode = 2;
+    int64 pvolumeID =3;
 }
 
 message ChmodResponse {
@@ -172,6 +197,7 @@ message ChownRequest {
     string path = 1;
     int32 uid = 2;
     int32 gid = 3;
+    int64 pvolumeID =4;
 }
 
 message ChownResponse {
@@ -182,6 +208,7 @@ message ChownResponse {
 message FlushRequest {
     string path = 1;
     int64 fd = 2;
+    int64 pvolumeID =3;
 }
 
 message FlushResponse {
@@ -207,6 +234,7 @@ message Stat {
 
 message StatRequest {
     string path =1;
+    int64 pvolumeID =2;
 }
 
 message StatResponse {
@@ -217,6 +245,7 @@ message StatResponse {
 
 message LinkRequest {
     string path = 1;
+    int64 pvolumeID =2;
 }
 
 message LinkResponse {
@@ -232,14 +261,16 @@ message StatFS {
     int64 bavail = 4;/* Free blocks available to unprivileged user */
     int64 files = 5; /* Total inodes in filesystem */
     int64 ffree = 6; /* Free inodes in filesystem */
-    int64 fsid = 7; /* Filesystem ID */ 
+    int64 fsid = 7; /* Filesystem ID */
     int32 namelen = 8; /* Maximum length of filenames */
     int32 frsize = 9; /* Fragment size (since Linux 2.6) */
     int32 flags = 10;  /* Mount flags of filesystem */
     int32 type = 11; /* Type of filesystem (see below) */
 }
 
-message StatFSRequest {}
+message StatFSRequest {
+    int64 pvolumeID =1;
+}
 
 message StatFSResponse {
     StatFS stat = 1;
@@ -250,6 +281,7 @@ message StatFSResponse {
 message SymLinkRequest {
     string from =1;
     string to = 2;
+    int64 pvolumeID =3;
 }
 
 message SymLinkResponse {
@@ -260,6 +292,7 @@ message SymLinkResponse {
 message TruncateRequest {
     string path = 1;
     int64 length = 2;
+    int64 pvolumeID =3;
 }
 
 message TruncateResponse {
@@ -271,6 +304,7 @@ message UtimeRequest {
     string path = 1;
     int64 atime = 2;
     int64 mtime = 3;
+    int64 pvolumeID =4;
 }
 
 message UtimeResponse {
@@ -281,6 +315,7 @@ message UtimeResponse {
 message GetXAttrRequest {
     string attr = 1;
     string path = 2;
+    int64 pvolumeID =3;
 }
 
 message GetXAttrResponse {
@@ -293,6 +328,7 @@ message SetXAttrRequest {
     string attr = 1;
     string value = 2;
     string path = 3;
+    int64 pvolumeID =4;
 }
 
 message SetXAttrResponse {
@@ -309,6 +345,7 @@ message SetXAttrResponse {
 message RemoveXAttrRequest {
     string attr = 1;
     string path = 2;
+    int64 pvolumeID =3;
 }
 
 message RemoveXAttrResponse {
@@ -319,6 +356,7 @@ message RemoveXAttrResponse {
 message GetXAttrSizeRequest {
     string attr = 1;
     string path = 2;
+    int64 pvolumeID =3;
 }
 
 message GetXAttrSizeResponse {
@@ -331,6 +369,7 @@ message FsyncRequest {
     string path = 1;
     int64 fh = 2;
     bool datasync = 3;
+    int64 pvolumeID =4;
 }
 
 message FsyncResponse {
@@ -340,6 +379,27 @@ message FsyncResponse {
 
 message SyncNotificationSubscription {
     string uid = 1;
+    int64 pvolumeID =2;
+}
+
+message SetRetrievalTierRequest {
+    string tierType = 1;
+    int64 pvolumeID = 2;
+}
+
+message SetRetrievalTierResponse {
+    string error = 1;
+    errorCodes errorCode = 2;
+}
+
+message GetRetrievalTierRequest {
+     int64 pvolumeID = 1;
+}
+
+message GetRetrievalTierResponse {
+    string tierType = 1;
+    string error = 2;
+    errorCodes errorCode = 3;
 }
 
 
@@ -362,6 +422,7 @@ service FileIOService {
     rpc RmDir(RmDirRequest) returns (RmDirResponse);
     rpc Unlink(UnlinkRequest) returns (UnlinkResponse);
     rpc Write(DataWriteRequest) returns (DataWriteResponse);
+    rpc StreamWrite(stream DataWriteRequest) returns (DataWriteResponse) {}
     rpc Read(DataReadRequest) returns (DataReadResponse);
     rpc Release(FileCloseRequest) returns (FileCloseResponse);
     rpc Mknod(MkNodRequest) returns (MkNodResponse);
@@ -378,5 +439,7 @@ service FileIOService {
     rpc GetCloudMetaFile(GetCloudFileRequest) returns (GetCloudFileResponse);
     rpc StatFS(StatFSRequest) returns (StatFSResponse);
     rpc fileNotification (SyncNotificationSubscription) returns (stream FileMessageResponse) {};
+    rpc SetRetrievalTier(SetRetrievalTierRequest) returns (SetRetrievalTierResponse);
+	rpc GetRetrievalTier(GetRetrievalTierRequest) returns (GetRetrievalTierResponse);
   }
 

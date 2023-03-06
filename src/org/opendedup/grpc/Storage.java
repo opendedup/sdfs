@@ -274,6 +274,12 @@ public final class Storage {
      * @return The hashes at the given index.
      */
     com.google.protobuf.ByteString getHashes(int index);
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CheckHashesRequest}
@@ -328,6 +334,11 @@ public final class Storage {
                 mutable_bitField0_ |= 0x00000001;
               }
               hashes_.add(input.readBytes());
+              break;
+            }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -392,6 +403,17 @@ public final class Storage {
       return hashes_.get(index);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -408,6 +430,9 @@ public final class Storage {
                         throws java.io.IOException {
       for (int i = 0; i < hashes_.size(); i++) {
         output.writeBytes(1, hashes_.get(i));
+      }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
       }
       unknownFields.writeTo(output);
     }
@@ -427,6 +452,10 @@ public final class Storage {
         size += dataSize;
         size += 1 * getHashesList().size();
       }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -444,6 +473,8 @@ public final class Storage {
 
       if (!getHashesList()
           .equals(other.getHashesList())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -459,6 +490,9 @@ public final class Storage {
         hash = (37 * hash) + HASHES_FIELD_NUMBER;
         hash = (53 * hash) + getHashesList().hashCode();
       }
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -594,6 +628,8 @@ public final class Storage {
         super.clear();
         hashes_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -626,6 +662,7 @@ public final class Storage {
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.hashes_ = hashes_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -683,6 +720,9 @@ public final class Storage {
             hashes_.addAll(other.hashes_);
           }
           onChanged();
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -795,6 +835,37 @@ public final class Storage {
       public Builder clearHashes() {
         hashes_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -1738,6 +1809,12 @@ public final class Storage {
      */
     com.google.protobuf.ByteString
         getFilePathBytes();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.MetaDataDedupeFileRequest}
@@ -1789,6 +1866,11 @@ public final class Storage {
               java.lang.String s = input.readStringRequireUtf8();
 
               filePath_ = s;
+              break;
+            }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -1861,6 +1943,17 @@ public final class Storage {
       }
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -1878,6 +1971,9 @@ public final class Storage {
       if (!getFilePathBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, filePath_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1889,6 +1985,10 @@ public final class Storage {
       size = 0;
       if (!getFilePathBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, filePath_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -1907,6 +2007,8 @@ public final class Storage {
 
       if (!getFilePath()
           .equals(other.getFilePath())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -1920,6 +2022,9 @@ public final class Storage {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + FILEPATH_FIELD_NUMBER;
       hash = (53 * hash) + getFilePath().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2055,6 +2160,8 @@ public final class Storage {
         super.clear();
         filePath_ = "";
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -2082,6 +2189,7 @@ public final class Storage {
       public org.opendedup.grpc.Storage.MetaDataDedupeFileRequest buildPartial() {
         org.opendedup.grpc.Storage.MetaDataDedupeFileRequest result = new org.opendedup.grpc.Storage.MetaDataDedupeFileRequest(this);
         result.filePath_ = filePath_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -2133,6 +2241,9 @@ public final class Storage {
         if (!other.getFilePath().isEmpty()) {
           filePath_ = other.filePath_;
           onChanged();
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -2238,6 +2349,37 @@ public final class Storage {
         onChanged();
         return this;
       }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2306,6 +2448,12 @@ public final class Storage {
      */
     com.google.protobuf.ByteString
         getGuidBytes();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeFileRequest}
@@ -2357,6 +2505,11 @@ public final class Storage {
               java.lang.String s = input.readStringRequireUtf8();
 
               guid_ = s;
+              break;
+            }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -2429,6 +2582,17 @@ public final class Storage {
       }
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2446,6 +2610,9 @@ public final class Storage {
       if (!getGuidBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, guid_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -2457,6 +2624,10 @@ public final class Storage {
       size = 0;
       if (!getGuidBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, guid_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2475,6 +2646,8 @@ public final class Storage {
 
       if (!getGuid()
           .equals(other.getGuid())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -2488,6 +2661,9 @@ public final class Storage {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + GUID_FIELD_NUMBER;
       hash = (53 * hash) + getGuid().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2623,6 +2799,8 @@ public final class Storage {
         super.clear();
         guid_ = "";
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -2650,6 +2828,7 @@ public final class Storage {
       public org.opendedup.grpc.Storage.SparseDedupeFileRequest buildPartial() {
         org.opendedup.grpc.Storage.SparseDedupeFileRequest result = new org.opendedup.grpc.Storage.SparseDedupeFileRequest(this);
         result.guid_ = guid_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -2701,6 +2880,9 @@ public final class Storage {
         if (!other.getGuid().isEmpty()) {
           guid_ = other.guid_;
           onChanged();
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -2803,6 +2985,37 @@ public final class Storage {
   checkByteStringIsUtf8(value);
         
         guid_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -3693,6 +3906,18 @@ public final class Storage {
      * @return The data.
      */
     com.google.protobuf.ByteString getData();
+
+    /**
+     * <code>bool compressed = 3;</code>
+     * @return The compressed.
+     */
+    boolean getCompressed();
+
+    /**
+     * <code>int32 compressedLength = 4;</code>
+     * @return The compressedLength.
+     */
+    int getCompressedLength();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ChunkEntry}
@@ -3751,6 +3976,16 @@ public final class Storage {
               data_ = input.readBytes();
               break;
             }
+            case 24: {
+
+              compressed_ = input.readBool();
+              break;
+            }
+            case 32: {
+
+              compressedLength_ = input.readInt32();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -3805,6 +4040,28 @@ public final class Storage {
       return data_;
     }
 
+    public static final int COMPRESSED_FIELD_NUMBER = 3;
+    private boolean compressed_;
+    /**
+     * <code>bool compressed = 3;</code>
+     * @return The compressed.
+     */
+    @java.lang.Override
+    public boolean getCompressed() {
+      return compressed_;
+    }
+
+    public static final int COMPRESSEDLENGTH_FIELD_NUMBER = 4;
+    private int compressedLength_;
+    /**
+     * <code>int32 compressedLength = 4;</code>
+     * @return The compressedLength.
+     */
+    @java.lang.Override
+    public int getCompressedLength() {
+      return compressedLength_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -3825,6 +4082,12 @@ public final class Storage {
       if (!data_.isEmpty()) {
         output.writeBytes(2, data_);
       }
+      if (compressed_ != false) {
+        output.writeBool(3, compressed_);
+      }
+      if (compressedLength_ != 0) {
+        output.writeInt32(4, compressedLength_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -3841,6 +4104,14 @@ public final class Storage {
       if (!data_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, data_);
+      }
+      if (compressed_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, compressed_);
+      }
+      if (compressedLength_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, compressedLength_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -3861,6 +4132,10 @@ public final class Storage {
           .equals(other.getHash())) return false;
       if (!getData()
           .equals(other.getData())) return false;
+      if (getCompressed()
+          != other.getCompressed()) return false;
+      if (getCompressedLength()
+          != other.getCompressedLength()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -3876,6 +4151,11 @@ public final class Storage {
       hash = (53 * hash) + getHash().hashCode();
       hash = (37 * hash) + DATA_FIELD_NUMBER;
       hash = (53 * hash) + getData().hashCode();
+      hash = (37 * hash) + COMPRESSED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCompressed());
+      hash = (37 * hash) + COMPRESSEDLENGTH_FIELD_NUMBER;
+      hash = (53 * hash) + getCompressedLength();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4013,6 +4293,10 @@ public final class Storage {
 
         data_ = com.google.protobuf.ByteString.EMPTY;
 
+        compressed_ = false;
+
+        compressedLength_ = 0;
+
         return this;
       }
 
@@ -4041,6 +4325,8 @@ public final class Storage {
         org.opendedup.grpc.Storage.ChunkEntry result = new org.opendedup.grpc.Storage.ChunkEntry(this);
         result.hash_ = hash_;
         result.data_ = data_;
+        result.compressed_ = compressed_;
+        result.compressedLength_ = compressedLength_;
         onBuilt();
         return result;
       }
@@ -4094,6 +4380,12 @@ public final class Storage {
         }
         if (other.getData() != com.google.protobuf.ByteString.EMPTY) {
           setData(other.getData());
+        }
+        if (other.getCompressed() != false) {
+          setCompressed(other.getCompressed());
+        }
+        if (other.getCompressedLength() != 0) {
+          setCompressedLength(other.getCompressedLength());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -4191,6 +4483,68 @@ public final class Storage {
         onChanged();
         return this;
       }
+
+      private boolean compressed_ ;
+      /**
+       * <code>bool compressed = 3;</code>
+       * @return The compressed.
+       */
+      @java.lang.Override
+      public boolean getCompressed() {
+        return compressed_;
+      }
+      /**
+       * <code>bool compressed = 3;</code>
+       * @param value The compressed to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressed(boolean value) {
+        
+        compressed_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool compressed = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressed() {
+        
+        compressed_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int compressedLength_ ;
+      /**
+       * <code>int32 compressedLength = 4;</code>
+       * @return The compressedLength.
+       */
+      @java.lang.Override
+      public int getCompressedLength() {
+        return compressedLength_;
+      }
+      /**
+       * <code>int32 compressedLength = 4;</code>
+       * @param value The compressedLength to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressedLength(int value) {
+        
+        compressedLength_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 compressedLength = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressedLength() {
+        
+        compressedLength_ = 0;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -4277,6 +4631,12 @@ public final class Storage {
      * @return The fileHandle.
      */
     long getFileHandle();
+
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.WriteChunksRequest}
@@ -4337,6 +4697,11 @@ public final class Storage {
             case 16: {
 
               fileHandle_ = input.readInt64();
+              break;
+            }
+            case 24: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -4425,6 +4790,17 @@ public final class Storage {
       return fileHandle_;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4445,6 +4821,9 @@ public final class Storage {
       if (fileHandle_ != 0L) {
         output.writeInt64(2, fileHandle_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(3, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -4461,6 +4840,10 @@ public final class Storage {
       if (fileHandle_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, fileHandle_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -4481,6 +4864,8 @@ public final class Storage {
           .equals(other.getChunksList())) return false;
       if (getFileHandle()
           != other.getFileHandle()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -4499,6 +4884,9 @@ public final class Storage {
       hash = (37 * hash) + FILEHANDLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getFileHandle());
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4641,6 +5029,8 @@ public final class Storage {
         }
         fileHandle_ = 0L;
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -4678,6 +5068,7 @@ public final class Storage {
           result.chunks_ = chunksBuilder_.build();
         }
         result.fileHandle_ = fileHandle_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -4754,6 +5145,9 @@ public final class Storage {
         }
         if (other.getFileHandle() != 0L) {
           setFileHandle(other.getFileHandle());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -5052,6 +5446,37 @@ public final class Storage {
       public Builder clearFileHandle() {
         
         fileHandle_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -6185,6 +6610,12 @@ public final class Storage {
      */
     org.opendedup.grpc.Storage.ChunkEntryOrBuilder getChunksOrBuilder(
         int index);
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.ReadChunksRequest}
@@ -6240,6 +6671,11 @@ public final class Storage {
               }
               chunks_.add(
                   input.readMessage(org.opendedup.grpc.Storage.ChunkEntry.parser(), extensionRegistry));
+              break;
+            }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -6317,6 +6753,17 @@ public final class Storage {
       return chunks_.get(index);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -6334,6 +6781,9 @@ public final class Storage {
       for (int i = 0; i < chunks_.size(); i++) {
         output.writeMessage(1, chunks_.get(i));
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -6346,6 +6796,10 @@ public final class Storage {
       for (int i = 0; i < chunks_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, chunks_.get(i));
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -6364,6 +6818,8 @@ public final class Storage {
 
       if (!getChunksList()
           .equals(other.getChunksList())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -6379,6 +6835,9 @@ public final class Storage {
         hash = (37 * hash) + CHUNKS_FIELD_NUMBER;
         hash = (53 * hash) + getChunksList().hashCode();
       }
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -6519,6 +6978,8 @@ public final class Storage {
         } else {
           chunksBuilder_.clear();
         }
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -6555,6 +7016,7 @@ public final class Storage {
         } else {
           result.chunks_ = chunksBuilder_.build();
         }
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -6628,6 +7090,9 @@ public final class Storage {
               chunksBuilder_.addAllMessages(other.chunks_);
             }
           }
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -6897,6 +7362,37 @@ public final class Storage {
           chunks_ = null;
         }
         return chunksBuilder_;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -7794,6 +8290,12 @@ public final class Storage {
      * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+
+    /**
+     * <code>int64 pvolumeID = 4;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.HashingInfoRequest}
@@ -7863,6 +8365,11 @@ public final class Storage {
               int rawValue = input.readEnum();
 
               errorCode_ = rawValue;
+              break;
+            }
+            case 32: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -7997,6 +8504,17 @@ public final class Storage {
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 4;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 4;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8020,6 +8538,9 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(3, errorCode_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(4, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -8039,6 +8560,10 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, errorCode_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -8060,6 +8585,8 @@ public final class Storage {
       if (!getError()
           .equals(other.getError())) return false;
       if (errorCode_ != other.errorCode_) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -8079,6 +8606,9 @@ public final class Storage {
       hash = (53 * hash) + getError().hashCode();
       hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
       hash = (53 * hash) + errorCode_;
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8223,6 +8753,8 @@ public final class Storage {
 
         errorCode_ = 0;
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -8261,6 +8793,7 @@ public final class Storage {
         }
         result.error_ = error_;
         result.errorCode_ = errorCode_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -8341,6 +8874,9 @@ public final class Storage {
         }
         if (other.errorCode_ != 0) {
           setErrorCodeValue(other.getErrorCodeValue());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -8738,6 +9274,37 @@ public final class Storage {
       public Builder clearErrorCode() {
         
         errorCode_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 4;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 4;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -9875,6 +10442,12 @@ public final class Storage {
      * @return The prevdoop.
      */
     int getPrevdoop();
+
+    /**
+     * <code>int32 compressedLength = 8;</code>
+     * @return The compressedLength.
+     */
+    int getCompressedLength();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDataChunkP}
@@ -9982,6 +10555,11 @@ public final class Storage {
             case 56: {
 
               prevdoop_ = input.readInt32();
+              break;
+            }
+            case 64: {
+
+              compressedLength_ = input.readInt32();
               break;
             }
             default: {
@@ -10225,6 +10803,17 @@ public final class Storage {
       return prevdoop_;
     }
 
+    public static final int COMPRESSEDLENGTH_FIELD_NUMBER = 8;
+    private int compressedLength_;
+    /**
+     * <code>int32 compressedLength = 8;</code>
+     * @return The compressedLength.
+     */
+    @java.lang.Override
+    public int getCompressedLength() {
+      return compressedLength_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -10267,6 +10856,9 @@ public final class Storage {
       }
       if (prevdoop_ != 0) {
         output.writeInt32(7, prevdoop_);
+      }
+      if (compressedLength_ != 0) {
+        output.writeInt32(8, compressedLength_);
       }
       unknownFields.writeTo(output);
     }
@@ -10319,6 +10911,10 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(7, prevdoop_);
       }
+      if (compressedLength_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, compressedLength_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -10347,6 +10943,8 @@ public final class Storage {
           != other.getDoop()) return false;
       if (getPrevdoop()
           != other.getPrevdoop()) return false;
+      if (getCompressedLength()
+          != other.getCompressedLength()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -10377,6 +10975,8 @@ public final class Storage {
       hash = (53 * hash) + getDoop();
       hash = (37 * hash) + PREVDOOP_FIELD_NUMBER;
       hash = (53 * hash) + getPrevdoop();
+      hash = (37 * hash) + COMPRESSEDLENGTH_FIELD_NUMBER;
+      hash = (53 * hash) + getCompressedLength();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -10545,6 +11145,8 @@ public final class Storage {
 
         prevdoop_ = 0;
 
+        compressedLength_ = 0;
+
         return this;
       }
 
@@ -10584,6 +11186,7 @@ public final class Storage {
         result.ar_.makeImmutable();
         result.doop_ = doop_;
         result.prevdoop_ = prevdoop_;
+        result.compressedLength_ = compressedLength_;
         onBuilt();
         return result;
       }
@@ -10658,6 +11261,9 @@ public final class Storage {
         }
         if (other.getPrevdoop() != 0) {
           setPrevdoop(other.getPrevdoop());
+        }
+        if (other.getCompressedLength() != 0) {
+          setCompressedLength(other.getCompressedLength());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -11111,6 +11717,37 @@ public final class Storage {
         onChanged();
         return this;
       }
+
+      private int compressedLength_ ;
+      /**
+       * <code>int32 compressedLength = 8;</code>
+       * @return The compressedLength.
+       */
+      @java.lang.Override
+      public int getCompressedLength() {
+        return compressedLength_;
+      }
+      /**
+       * <code>int32 compressedLength = 8;</code>
+       * @param value The compressedLength to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressedLength(int value) {
+        
+        compressedLength_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 compressedLength = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressedLength() {
+        
+        compressedLength_ = 0;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -11194,6 +11831,30 @@ public final class Storage {
      * @return The fileLocation.
      */
     long getFileLocation();
+
+    /**
+     * <code>int64 pvolumeID = 4;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
+
+    /**
+     * <code>bool compressed = 5;</code>
+     * @return The compressed.
+     */
+    boolean getCompressed();
+
+    /**
+     * <code>bytes compressedChunk = 6;</code>
+     * @return The compressedChunk.
+     */
+    com.google.protobuf.ByteString getCompressedChunk();
+
+    /**
+     * <code>int32 uncompressedLen = 7;</code>
+     * @return The uncompressedLen.
+     */
+    int getUncompressedLen();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeChunkWriteRequest}
@@ -11208,6 +11869,7 @@ public final class Storage {
       super(builder);
     }
     private SparseDedupeChunkWriteRequest() {
+      compressedChunk_ = com.google.protobuf.ByteString.EMPTY;
     }
 
     @java.lang.Override
@@ -11261,6 +11923,26 @@ public final class Storage {
             case 24: {
 
               fileLocation_ = input.readInt64();
+              break;
+            }
+            case 32: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
+            case 40: {
+
+              compressed_ = input.readBool();
+              break;
+            }
+            case 50: {
+
+              compressedChunk_ = input.readBytes();
+              break;
+            }
+            case 56: {
+
+              uncompressedLen_ = input.readInt32();
               break;
             }
             default: {
@@ -11343,6 +12025,50 @@ public final class Storage {
       return fileLocation_;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 4;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 4;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
+    public static final int COMPRESSED_FIELD_NUMBER = 5;
+    private boolean compressed_;
+    /**
+     * <code>bool compressed = 5;</code>
+     * @return The compressed.
+     */
+    @java.lang.Override
+    public boolean getCompressed() {
+      return compressed_;
+    }
+
+    public static final int COMPRESSEDCHUNK_FIELD_NUMBER = 6;
+    private com.google.protobuf.ByteString compressedChunk_;
+    /**
+     * <code>bytes compressedChunk = 6;</code>
+     * @return The compressedChunk.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getCompressedChunk() {
+      return compressedChunk_;
+    }
+
+    public static final int UNCOMPRESSEDLEN_FIELD_NUMBER = 7;
+    private int uncompressedLen_;
+    /**
+     * <code>int32 uncompressedLen = 7;</code>
+     * @return The uncompressedLen.
+     */
+    @java.lang.Override
+    public int getUncompressedLen() {
+      return uncompressedLen_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -11366,6 +12092,18 @@ public final class Storage {
       if (fileLocation_ != 0L) {
         output.writeInt64(3, fileLocation_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(4, pvolumeID_);
+      }
+      if (compressed_ != false) {
+        output.writeBool(5, compressed_);
+      }
+      if (!compressedChunk_.isEmpty()) {
+        output.writeBytes(6, compressedChunk_);
+      }
+      if (uncompressedLen_ != 0) {
+        output.writeInt32(7, uncompressedLen_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -11386,6 +12124,22 @@ public final class Storage {
       if (fileLocation_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, fileLocation_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, pvolumeID_);
+      }
+      if (compressed_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, compressed_);
+      }
+      if (!compressedChunk_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(6, compressedChunk_);
+      }
+      if (uncompressedLen_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(7, uncompressedLen_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -11411,6 +12165,14 @@ public final class Storage {
           != other.getFileHandle()) return false;
       if (getFileLocation()
           != other.getFileLocation()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
+      if (getCompressed()
+          != other.getCompressed()) return false;
+      if (!getCompressedChunk()
+          .equals(other.getCompressedChunk())) return false;
+      if (getUncompressedLen()
+          != other.getUncompressedLen()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -11432,6 +12194,16 @@ public final class Storage {
       hash = (37 * hash) + FILELOCATION_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getFileLocation());
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
+      hash = (37 * hash) + COMPRESSED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCompressed());
+      hash = (37 * hash) + COMPRESSEDCHUNK_FIELD_NUMBER;
+      hash = (53 * hash) + getCompressedChunk().hashCode();
+      hash = (37 * hash) + UNCOMPRESSEDLEN_FIELD_NUMBER;
+      hash = (53 * hash) + getUncompressedLen();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -11575,6 +12347,14 @@ public final class Storage {
 
         fileLocation_ = 0L;
 
+        pvolumeID_ = 0L;
+
+        compressed_ = false;
+
+        compressedChunk_ = com.google.protobuf.ByteString.EMPTY;
+
+        uncompressedLen_ = 0;
+
         return this;
       }
 
@@ -11608,6 +12388,10 @@ public final class Storage {
         }
         result.fileHandle_ = fileHandle_;
         result.fileLocation_ = fileLocation_;
+        result.pvolumeID_ = pvolumeID_;
+        result.compressed_ = compressed_;
+        result.compressedChunk_ = compressedChunk_;
+        result.uncompressedLen_ = uncompressedLen_;
         onBuilt();
         return result;
       }
@@ -11664,6 +12448,18 @@ public final class Storage {
         }
         if (other.getFileLocation() != 0L) {
           setFileLocation(other.getFileLocation());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
+        if (other.getCompressed() != false) {
+          setCompressed(other.getCompressed());
+        }
+        if (other.getCompressedChunk() != com.google.protobuf.ByteString.EMPTY) {
+          setCompressedChunk(other.getCompressedChunk());
+        }
+        if (other.getUncompressedLen() != 0) {
+          setUncompressedLen(other.getUncompressedLen());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -11874,6 +12670,133 @@ public final class Storage {
         onChanged();
         return this;
       }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 4;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 4;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private boolean compressed_ ;
+      /**
+       * <code>bool compressed = 5;</code>
+       * @return The compressed.
+       */
+      @java.lang.Override
+      public boolean getCompressed() {
+        return compressed_;
+      }
+      /**
+       * <code>bool compressed = 5;</code>
+       * @param value The compressed to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressed(boolean value) {
+        
+        compressed_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool compressed = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressed() {
+        
+        compressed_ = false;
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString compressedChunk_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>bytes compressedChunk = 6;</code>
+       * @return The compressedChunk.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getCompressedChunk() {
+        return compressedChunk_;
+      }
+      /**
+       * <code>bytes compressedChunk = 6;</code>
+       * @param value The compressedChunk to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressedChunk(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        compressedChunk_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bytes compressedChunk = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressedChunk() {
+        
+        compressedChunk_ = getDefaultInstance().getCompressedChunk();
+        onChanged();
+        return this;
+      }
+
+      private int uncompressedLen_ ;
+      /**
+       * <code>int32 uncompressedLen = 7;</code>
+       * @return The uncompressedLen.
+       */
+      @java.lang.Override
+      public int getUncompressedLen() {
+        return uncompressedLen_;
+      }
+      /**
+       * <code>int32 uncompressedLen = 7;</code>
+       * @param value The uncompressedLen to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUncompressedLen(int value) {
+        
+        uncompressedLen_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 uncompressedLen = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUncompressedLen() {
+        
+        uncompressedLen_ = 0;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -11953,6 +12876,30 @@ public final class Storage {
      * @return The errorCode.
      */
     org.opendedup.grpc.FileInfo.errorCodes getErrorCode();
+
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    java.util.List<org.opendedup.grpc.Storage.HashLocPairP> 
+        getMissedArList();
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    org.opendedup.grpc.Storage.HashLocPairP getMissedAr(int index);
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    int getMissedArCount();
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    java.util.List<? extends org.opendedup.grpc.Storage.HashLocPairPOrBuilder> 
+        getMissedArOrBuilderList();
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    org.opendedup.grpc.Storage.HashLocPairPOrBuilder getMissedArOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeChunkWriteResponse}
@@ -11969,6 +12916,7 @@ public final class Storage {
     private SparseDedupeChunkWriteResponse() {
       error_ = "";
       errorCode_ = 0;
+      missedAr_ = java.util.Collections.emptyList();
     }
 
     @java.lang.Override
@@ -11991,6 +12939,7 @@ public final class Storage {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
+      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -12013,6 +12962,15 @@ public final class Storage {
               errorCode_ = rawValue;
               break;
             }
+            case 26: {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                missedAr_ = new java.util.ArrayList<org.opendedup.grpc.Storage.HashLocPairP>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              missedAr_.add(
+                  input.readMessage(org.opendedup.grpc.Storage.HashLocPairP.parser(), extensionRegistry));
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -12028,6 +12986,9 @@ public final class Storage {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          missedAr_ = java.util.Collections.unmodifiableList(missedAr_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -12102,6 +13063,46 @@ public final class Storage {
       return result == null ? org.opendedup.grpc.FileInfo.errorCodes.UNRECOGNIZED : result;
     }
 
+    public static final int MISSEDAR_FIELD_NUMBER = 3;
+    private java.util.List<org.opendedup.grpc.Storage.HashLocPairP> missedAr_;
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<org.opendedup.grpc.Storage.HashLocPairP> getMissedArList() {
+      return missedAr_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends org.opendedup.grpc.Storage.HashLocPairPOrBuilder> 
+        getMissedArOrBuilderList() {
+      return missedAr_;
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public int getMissedArCount() {
+      return missedAr_.size();
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.Storage.HashLocPairP getMissedAr(int index) {
+      return missedAr_.get(index);
+    }
+    /**
+     * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+     */
+    @java.lang.Override
+    public org.opendedup.grpc.Storage.HashLocPairPOrBuilder getMissedArOrBuilder(
+        int index) {
+      return missedAr_.get(index);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -12122,6 +13123,9 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         output.writeEnum(2, errorCode_);
       }
+      for (int i = 0; i < missedAr_.size(); i++) {
+        output.writeMessage(3, missedAr_.get(i));
+      }
       unknownFields.writeTo(output);
     }
 
@@ -12137,6 +13141,10 @@ public final class Storage {
       if (errorCode_ != org.opendedup.grpc.FileInfo.errorCodes.NOERR.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, errorCode_);
+      }
+      for (int i = 0; i < missedAr_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, missedAr_.get(i));
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -12156,6 +13164,8 @@ public final class Storage {
       if (!getError()
           .equals(other.getError())) return false;
       if (errorCode_ != other.errorCode_) return false;
+      if (!getMissedArList()
+          .equals(other.getMissedArList())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -12171,6 +13181,10 @@ public final class Storage {
       hash = (53 * hash) + getError().hashCode();
       hash = (37 * hash) + ERRORCODE_FIELD_NUMBER;
       hash = (53 * hash) + errorCode_;
+      if (getMissedArCount() > 0) {
+        hash = (37 * hash) + MISSEDAR_FIELD_NUMBER;
+        hash = (53 * hash) + getMissedArList().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -12299,6 +13313,7 @@ public final class Storage {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
+          getMissedArFieldBuilder();
         }
       }
       @java.lang.Override
@@ -12308,6 +13323,12 @@ public final class Storage {
 
         errorCode_ = 0;
 
+        if (missedArBuilder_ == null) {
+          missedAr_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          missedArBuilder_.clear();
+        }
         return this;
       }
 
@@ -12334,8 +13355,18 @@ public final class Storage {
       @java.lang.Override
       public org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse buildPartial() {
         org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse result = new org.opendedup.grpc.Storage.SparseDedupeChunkWriteResponse(this);
+        int from_bitField0_ = bitField0_;
         result.error_ = error_;
         result.errorCode_ = errorCode_;
+        if (missedArBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            missedAr_ = java.util.Collections.unmodifiableList(missedAr_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.missedAr_ = missedAr_;
+        } else {
+          result.missedAr_ = missedArBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -12391,6 +13422,32 @@ public final class Storage {
         if (other.errorCode_ != 0) {
           setErrorCodeValue(other.getErrorCodeValue());
         }
+        if (missedArBuilder_ == null) {
+          if (!other.missedAr_.isEmpty()) {
+            if (missedAr_.isEmpty()) {
+              missedAr_ = other.missedAr_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureMissedArIsMutable();
+              missedAr_.addAll(other.missedAr_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.missedAr_.isEmpty()) {
+            if (missedArBuilder_.isEmpty()) {
+              missedArBuilder_.dispose();
+              missedArBuilder_ = null;
+              missedAr_ = other.missedAr_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              missedArBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getMissedArFieldBuilder() : null;
+            } else {
+              missedArBuilder_.addAllMessages(other.missedAr_);
+            }
+          }
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -12419,6 +13476,7 @@ public final class Storage {
         }
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object error_ = "";
       /**
@@ -12549,6 +13607,246 @@ public final class Storage {
         onChanged();
         return this;
       }
+
+      private java.util.List<org.opendedup.grpc.Storage.HashLocPairP> missedAr_ =
+        java.util.Collections.emptyList();
+      private void ensureMissedArIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          missedAr_ = new java.util.ArrayList<org.opendedup.grpc.Storage.HashLocPairP>(missedAr_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.Storage.HashLocPairP, org.opendedup.grpc.Storage.HashLocPairP.Builder, org.opendedup.grpc.Storage.HashLocPairPOrBuilder> missedArBuilder_;
+
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public java.util.List<org.opendedup.grpc.Storage.HashLocPairP> getMissedArList() {
+        if (missedArBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(missedAr_);
+        } else {
+          return missedArBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public int getMissedArCount() {
+        if (missedArBuilder_ == null) {
+          return missedAr_.size();
+        } else {
+          return missedArBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairP getMissedAr(int index) {
+        if (missedArBuilder_ == null) {
+          return missedAr_.get(index);
+        } else {
+          return missedArBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder setMissedAr(
+          int index, org.opendedup.grpc.Storage.HashLocPairP value) {
+        if (missedArBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMissedArIsMutable();
+          missedAr_.set(index, value);
+          onChanged();
+        } else {
+          missedArBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder setMissedAr(
+          int index, org.opendedup.grpc.Storage.HashLocPairP.Builder builderForValue) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          missedAr_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          missedArBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addMissedAr(org.opendedup.grpc.Storage.HashLocPairP value) {
+        if (missedArBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMissedArIsMutable();
+          missedAr_.add(value);
+          onChanged();
+        } else {
+          missedArBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addMissedAr(
+          int index, org.opendedup.grpc.Storage.HashLocPairP value) {
+        if (missedArBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMissedArIsMutable();
+          missedAr_.add(index, value);
+          onChanged();
+        } else {
+          missedArBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addMissedAr(
+          org.opendedup.grpc.Storage.HashLocPairP.Builder builderForValue) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          missedAr_.add(builderForValue.build());
+          onChanged();
+        } else {
+          missedArBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addMissedAr(
+          int index, org.opendedup.grpc.Storage.HashLocPairP.Builder builderForValue) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          missedAr_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          missedArBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder addAllMissedAr(
+          java.lang.Iterable<? extends org.opendedup.grpc.Storage.HashLocPairP> values) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, missedAr_);
+          onChanged();
+        } else {
+          missedArBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder clearMissedAr() {
+        if (missedArBuilder_ == null) {
+          missedAr_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          missedArBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public Builder removeMissedAr(int index) {
+        if (missedArBuilder_ == null) {
+          ensureMissedArIsMutable();
+          missedAr_.remove(index);
+          onChanged();
+        } else {
+          missedArBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairP.Builder getMissedArBuilder(
+          int index) {
+        return getMissedArFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairPOrBuilder getMissedArOrBuilder(
+          int index) {
+        if (missedArBuilder_ == null) {
+          return missedAr_.get(index);  } else {
+          return missedArBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public java.util.List<? extends org.opendedup.grpc.Storage.HashLocPairPOrBuilder> 
+           getMissedArOrBuilderList() {
+        if (missedArBuilder_ != null) {
+          return missedArBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(missedAr_);
+        }
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairP.Builder addMissedArBuilder() {
+        return getMissedArFieldBuilder().addBuilder(
+            org.opendedup.grpc.Storage.HashLocPairP.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public org.opendedup.grpc.Storage.HashLocPairP.Builder addMissedArBuilder(
+          int index) {
+        return getMissedArFieldBuilder().addBuilder(
+            index, org.opendedup.grpc.Storage.HashLocPairP.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .org.opendedup.grpc.HashLocPairP missedAr = 3;</code>
+       */
+      public java.util.List<org.opendedup.grpc.Storage.HashLocPairP.Builder> 
+           getMissedArBuilderList() {
+        return getMissedArFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          org.opendedup.grpc.Storage.HashLocPairP, org.opendedup.grpc.Storage.HashLocPairP.Builder, org.opendedup.grpc.Storage.HashLocPairPOrBuilder> 
+          getMissedArFieldBuilder() {
+        if (missedArBuilder_ == null) {
+          missedArBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              org.opendedup.grpc.Storage.HashLocPairP, org.opendedup.grpc.Storage.HashLocPairP.Builder, org.opendedup.grpc.Storage.HashLocPairPOrBuilder>(
+                  missedAr_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          missedAr_ = null;
+        }
+        return missedArBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -12617,6 +13915,12 @@ public final class Storage {
      * @return The fileHandle.
      */
     long getFileHandle();
+
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SparseDedupeChunkReadRequest}
@@ -12673,6 +13977,11 @@ public final class Storage {
               fileHandle_ = input.readInt64();
               break;
             }
+            case 24: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -12727,6 +14036,17 @@ public final class Storage {
       return fileHandle_;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -12747,6 +14067,9 @@ public final class Storage {
       if (fileHandle_ != 0L) {
         output.writeInt64(2, fileHandle_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(3, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -12763,6 +14086,10 @@ public final class Storage {
       if (fileHandle_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, fileHandle_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -12783,6 +14110,8 @@ public final class Storage {
           != other.getOffset()) return false;
       if (getFileHandle()
           != other.getFileHandle()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -12800,6 +14129,9 @@ public final class Storage {
       hash = (37 * hash) + FILEHANDLE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getFileHandle());
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -12937,6 +14269,8 @@ public final class Storage {
 
         fileHandle_ = 0L;
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -12965,6 +14299,7 @@ public final class Storage {
         org.opendedup.grpc.Storage.SparseDedupeChunkReadRequest result = new org.opendedup.grpc.Storage.SparseDedupeChunkReadRequest(this);
         result.offset_ = offset_;
         result.fileHandle_ = fileHandle_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -13018,6 +14353,9 @@ public final class Storage {
         }
         if (other.getFileHandle() != 0L) {
           setFileHandle(other.getFileHandle());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -13106,6 +14444,37 @@ public final class Storage {
       public Builder clearFileHandle() {
         
         fileHandle_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -15262,6 +16631,12 @@ public final class Storage {
      * @return The inserted.
      */
     boolean getInserted();
+
+    /**
+     * <code>int32 compressedLength = 3;</code>
+     * @return The compressedLength.
+     */
+    int getCompressedLength();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.InsertRecord}
@@ -15318,6 +16693,11 @@ public final class Storage {
               inserted_ = input.readBool();
               break;
             }
+            case 24: {
+
+              compressedLength_ = input.readInt32();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -15372,6 +16752,17 @@ public final class Storage {
       return inserted_;
     }
 
+    public static final int COMPRESSEDLENGTH_FIELD_NUMBER = 3;
+    private int compressedLength_;
+    /**
+     * <code>int32 compressedLength = 3;</code>
+     * @return The compressedLength.
+     */
+    @java.lang.Override
+    public int getCompressedLength() {
+      return compressedLength_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -15392,6 +16783,9 @@ public final class Storage {
       if (inserted_ != false) {
         output.writeBool(2, inserted_);
       }
+      if (compressedLength_ != 0) {
+        output.writeInt32(3, compressedLength_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -15408,6 +16802,10 @@ public final class Storage {
       if (inserted_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, inserted_);
+      }
+      if (compressedLength_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, compressedLength_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -15428,6 +16826,8 @@ public final class Storage {
           != other.getHashloc()) return false;
       if (getInserted()
           != other.getInserted()) return false;
+      if (getCompressedLength()
+          != other.getCompressedLength()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -15445,6 +16845,8 @@ public final class Storage {
       hash = (37 * hash) + INSERTED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getInserted());
+      hash = (37 * hash) + COMPRESSEDLENGTH_FIELD_NUMBER;
+      hash = (53 * hash) + getCompressedLength();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -15582,6 +16984,8 @@ public final class Storage {
 
         inserted_ = false;
 
+        compressedLength_ = 0;
+
         return this;
       }
 
@@ -15610,6 +17014,7 @@ public final class Storage {
         org.opendedup.grpc.Storage.InsertRecord result = new org.opendedup.grpc.Storage.InsertRecord(this);
         result.hashloc_ = hashloc_;
         result.inserted_ = inserted_;
+        result.compressedLength_ = compressedLength_;
         onBuilt();
         return result;
       }
@@ -15663,6 +17068,9 @@ public final class Storage {
         }
         if (other.getInserted() != false) {
           setInserted(other.getInserted());
+        }
+        if (other.getCompressedLength() != 0) {
+          setCompressedLength(other.getCompressedLength());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -15751,6 +17159,37 @@ public final class Storage {
       public Builder clearInserted() {
         
         inserted_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int compressedLength_ ;
+      /**
+       * <code>int32 compressedLength = 3;</code>
+       * @return The compressedLength.
+       */
+      @java.lang.Override
+      public int getCompressedLength() {
+        return compressedLength_;
+      }
+      /**
+       * <code>int32 compressedLength = 3;</code>
+       * @param value The compressedLength to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCompressedLength(int value) {
+        
+        compressedLength_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 compressedLength = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCompressedLength() {
+        
+        compressedLength_ = 0;
         onChanged();
         return this;
       }
@@ -15917,84 +17356,93 @@ public final class Storage {
   static {
     java.lang.String[] descriptorData = {
       "\n\rStorage.proto\022\022org.opendedup.grpc\032\016Fil" +
-      "eInfo.proto\"$\n\022CheckHashesRequest\022\016\n\006has" +
-      "hes\030\001 \003(\014\"j\n\023CheckHashesResponse\022\021\n\tloca" +
-      "tions\030\001 \003(\003\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030" +
-      "\003 \001(\0162\036.org.opendedup.grpc.errorCodes\"-\n" +
-      "\031MetaDataDedupeFileRequest\022\020\n\010filePath\030\001" +
-      " \001(\t\"\'\n\027SparseDedupeFileRequest\022\014\n\004guid\030" +
-      "\001 \001(\t\"l\n\rChunkResponse\022\014\n\004data\030\001 \001(\014\022\013\n\003" +
-      "len\030\002 \001(\005\022\r\n\005error\030\003 \001(\t\0221\n\terrorCode\030\004 " +
-      "\001(\0162\036.org.opendedup.grpc.errorCodes\"(\n\nC" +
-      "hunkEntry\022\014\n\004hash\030\001 \001(\014\022\014\n\004data\030\002 \001(\014\"X\n" +
-      "\022WriteChunksRequest\022.\n\006chunks\030\001 \003(\0132\036.or" +
-      "g.opendedup.grpc.ChunkEntry\022\022\n\nfileHandl" +
-      "e\030\002 \001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005error" +
-      "\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opendedu" +
-      "p.grpc.errorCodes\0227\n\rinsertRecords\030\003 \003(\013" +
-      "2 .org.opendedup.grpc.InsertRecord\"C\n\021Re" +
-      "adChunksRequest\022.\n\006chunks\030\001 \003(\0132\036.org.op" +
-      "endedup.grpc.ChunkEntry\"D\n\022ReadChunksRes" +
-      "ponse\022.\n\006chunks\030\001 \003(\0132\036.org.opendedup.gr" +
-      "pc.ChunkEntry\"\206\001\n\022HashingInfoRequest\022.\n\006" +
-      "chunks\030\001 \003(\0132\036.org.opendedup.grpc.ChunkE" +
-      "ntry\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036" +
-      ".org.opendedup.grpc.errorCodes\"\204\001\n\014HashL" +
+      "eInfo.proto\"7\n\022CheckHashesRequest\022\016\n\006has" +
+      "hes\030\001 \003(\014\022\021\n\tpvolumeID\030\002 \001(\003\"j\n\023CheckHas" +
+      "hesResponse\022\021\n\tlocations\030\001 \003(\003\022\r\n\005error\030" +
+      "\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup" +
+      ".grpc.errorCodes\"@\n\031MetaDataDedupeFileRe" +
+      "quest\022\020\n\010filePath\030\001 \001(\t\022\021\n\tpvolumeID\030\002 \001" +
+      "(\003\":\n\027SparseDedupeFileRequest\022\014\n\004guid\030\001 " +
+      "\001(\t\022\021\n\tpvolumeID\030\002 \001(\003\"l\n\rChunkResponse\022" +
+      "\014\n\004data\030\001 \001(\014\022\013\n\003len\030\002 \001(\005\022\r\n\005error\030\003 \001(" +
+      "\t\0221\n\terrorCode\030\004 \001(\0162\036.org.opendedup.grp" +
+      "c.errorCodes\"V\n\nChunkEntry\022\014\n\004hash\030\001 \001(\014" +
+      "\022\014\n\004data\030\002 \001(\014\022\022\n\ncompressed\030\003 \001(\010\022\030\n\020co" +
+      "mpressedLength\030\004 \001(\005\"k\n\022WriteChunksReque" +
+      "st\022.\n\006chunks\030\001 \003(\0132\036.org.opendedup.grpc." +
+      "ChunkEntry\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolum" +
+      "eID\030\003 \001(\003\"\220\001\n\023WriteChunksResponse\022\r\n\005err" +
+      "or\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opende" +
+      "dup.grpc.errorCodes\0227\n\rinsertRecords\030\003 \003" +
+      "(\0132 .org.opendedup.grpc.InsertRecord\"V\n\021" +
+      "ReadChunksRequest\022.\n\006chunks\030\001 \003(\0132\036.org." +
+      "opendedup.grpc.ChunkEntry\022\021\n\tpvolumeID\030\002" +
+      " \001(\003\"D\n\022ReadChunksResponse\022.\n\006chunks\030\001 \003" +
+      "(\0132\036.org.opendedup.grpc.ChunkEntry\"\231\001\n\022H" +
+      "ashingInfoRequest\022.\n\006chunks\030\001 \003(\0132\036.org." +
+      "opendedup.grpc.ChunkEntry\022\r\n\005error\030\002 \001(\t" +
+      "\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc" +
+      ".errorCodes\022\021\n\tpvolumeID\030\004 \001(\003\"\204\001\n\014HashL" +
       "ocPairP\022\014\n\004hash\030\001 \001(\014\022\017\n\007hashloc\030\002 \001(\003\022\013" +
       "\n\003len\030\003 \001(\005\022\013\n\003pos\030\004 \001(\005\022\016\n\006offset\030\005 \001(\005" +
       "\022\014\n\004nlen\030\006 \001(\005\022\013\n\003dup\030\007 \001(\010\022\020\n\010inserted\030" +
-      "\010 \001(\010\"\231\002\n\020SparseDataChunkP\022\014\n\004fpos\030\001 \001(\003" +
+      "\010 \001(\010\"\263\002\n\020SparseDataChunkP\022\014\n\004fpos\030\001 \001(\003" +
       "\022\013\n\003len\030\002 \001(\005\0222\n\005flags\030\003 \003(\0162#.org.opend" +
       "edup.grpc.SparseDataFlags\022\017\n\007version\030\004 \001" +
       "(\005\0228\n\002ar\030\005 \003(\0132,.org.opendedup.grpc.Spar" +
       "seDataChunkP.ArEntry\022\014\n\004doop\030\006 \001(\005\022\020\n\010pr" +
-      "evdoop\030\007 \001(\005\032K\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005" +
-      "value\030\002 \001(\0132 .org.opendedup.grpc.HashLoc" +
-      "PairP:\0028\001\"~\n\035SparseDedupeChunkWriteReque" +
-      "st\0223\n\005chunk\030\001 \001(\0132$.org.opendedup.grpc.S" +
-      "parseDataChunkP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014f" +
-      "ileLocation\030\003 \001(\003\"b\n\036SparseDedupeChunkWr" +
-      "iteResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
-      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"B\n" +
-      "\034SparseDedupeChunkReadRequest\022\016\n\006offset\030" +
-      "\001 \001(\003\022\022\n\nfileHandle\030\002 \001(\003\"\226\001\n\035SparseDedu" +
-      "peChunkReadResponse\022\r\n\005error\030\001 \001(\t\0221\n\ter" +
-      "rorCode\030\002 \001(\0162\036.org.opendedup.grpc.error" +
-      "Codes\0223\n\005chunk\030\003 \001(\0132$.org.opendedup.grp" +
-      "c.SparseDataChunkP\"\206\002\n\023HashingInfoRespon" +
-      "se\022\021\n\tchunkSize\030\001 \001(\003\022\026\n\016minSegmentSize\030" +
-      "\002 \001(\003\022\026\n\016maxSegmentSize\030\003 \001(\003\022\022\n\npolyNum" +
-      "ber\030\004 \001(\003\022\022\n\nwindowSize\030\005 \001(\003\022.\n\010hashtyp" +
-      "e\030\006 \001(\0162\034.org.opendedup.grpc.hashtype\022\022\n" +
-      "\nmapVersion\030\007 \001(\005\022\r\n\005error\030\010 \001(\t\0221\n\terro" +
-      "rCode\030\t \001(\0162\036.org.opendedup.grpc.errorCo" +
-      "des\"1\n\014InsertRecord\022\017\n\007hashloc\030\001 \001(\003\022\020\n\010" +
-      "inserted\030\002 \001(\010*$\n\017SparseDataFlags\022\021\n\rREC" +
-      "ONSTRUCTED\020\000*0\n\010hashtype\022\n\n\006SHA256\020\000\022\007\n\003" +
-      "MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\336\006\n\016StorageServic" +
-      "e\022^\n\013HashingInfo\022&.org.opendedup.grpc.Ha" +
-      "shingInfoRequest\032\'.org.opendedup.grpc.Ha" +
-      "shingInfoResponse\022^\n\013CheckHashes\022&.org.o" +
-      "pendedup.grpc.CheckHashesRequest\032\'.org.o" +
-      "pendedup.grpc.CheckHashesResponse\022^\n\013Wri" +
-      "teChunks\022&.org.opendedup.grpc.WriteChunk" +
-      "sRequest\032\'.org.opendedup.grpc.WriteChunk" +
-      "sResponse\022[\n\nReadChunks\022%.org.opendedup." +
-      "grpc.ReadChunksRequest\032&.org.opendedup.g" +
-      "rpc.ReadChunksResponse\022}\n\024WriteSparseDat" +
-      "aChunk\0221.org.opendedup.grpc.SparseDedupe" +
-      "ChunkWriteRequest\0322.org.opendedup.grpc.S" +
-      "parseDedupeChunkWriteResponse\022z\n\023ReadSpa" +
-      "rseDataChunk\0220.org.opendedup.grpc.Sparse" +
-      "DedupeChunkReadRequest\0321.org.opendedup.g" +
-      "rpc.SparseDedupeChunkReadResponse\022k\n\025Get" +
-      "MetaDataDedupeFile\022-.org.opendedup.grpc." +
-      "MetaDataDedupeFileRequest\032!.org.opendedu" +
-      "p.grpc.ChunkResponse0\001\022g\n\023GetSparseDedup" +
-      "eFile\022+.org.opendedup.grpc.SparseDedupeF" +
-      "ileRequest\032!.org.opendedup.grpc.ChunkRes" +
-      "ponse0\001B0Z.github.com/opendedup/sdfs-cli" +
-      "ent-go/sdfs/;sdfsb\006proto3"
+      "evdoop\030\007 \001(\005\022\030\n\020compressedLength\030\010 \001(\005\032K" +
+      "\n\007ArEntry\022\013\n\003key\030\001 \001(\005\022/\n\005value\030\002 \001(\0132 ." +
+      "org.opendedup.grpc.HashLocPairP:\0028\001\"\327\001\n\035" +
+      "SparseDedupeChunkWriteRequest\0223\n\005chunk\030\001" +
+      " \001(\0132$.org.opendedup.grpc.SparseDataChun" +
+      "kP\022\022\n\nfileHandle\030\002 \001(\003\022\024\n\014fileLocation\030\003" +
+      " \001(\003\022\021\n\tpvolumeID\030\004 \001(\003\022\022\n\ncompressed\030\005 " +
+      "\001(\010\022\027\n\017compressedChunk\030\006 \001(\014\022\027\n\017uncompre" +
+      "ssedLen\030\007 \001(\005\"b\n\036SparseDedupeChunkWriteR" +
+      "esponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(" +
+      "\0162\036.org.opendedup.grpc.errorCodes\"U\n\034Spa" +
+      "rseDedupeChunkReadRequest\022\016\n\006offset\030\001 \001(" +
+      "\003\022\022\n\nfileHandle\030\002 \001(\003\022\021\n\tpvolumeID\030\003 \001(\003" +
+      "\"\226\001\n\035SparseDedupeChunkReadResponse\022\r\n\005er" +
+      "ror\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opend" +
+      "edup.grpc.errorCodes\0223\n\005chunk\030\003 \001(\0132$.or" +
+      "g.opendedup.grpc.SparseDataChunkP\"\206\002\n\023Ha" +
+      "shingInfoResponse\022\021\n\tchunkSize\030\001 \001(\003\022\026\n\016" +
+      "minSegmentSize\030\002 \001(\003\022\026\n\016maxSegmentSize\030\003" +
+      " \001(\003\022\022\n\npolyNumber\030\004 \001(\003\022\022\n\nwindowSize\030\005" +
+      " \001(\003\022.\n\010hashtype\030\006 \001(\0162\034.org.opendedup.g" +
+      "rpc.hashtype\022\022\n\nmapVersion\030\007 \001(\005\022\r\n\005erro" +
+      "r\030\010 \001(\t\0221\n\terrorCode\030\t \001(\0162\036.org.opended" +
+      "up.grpc.errorCodes\"K\n\014InsertRecord\022\017\n\007ha" +
+      "shloc\030\001 \001(\003\022\020\n\010inserted\030\002 \001(\010\022\030\n\020compres" +
+      "sedLength\030\003 \001(\005*$\n\017SparseDataFlags\022\021\n\rRE" +
+      "CONSTRUCTED\020\000*0\n\010hashtype\022\n\n\006SHA256\020\000\022\007\n" +
+      "\003MD5\020\001\022\017\n\013UNSUPPORTED\020\0022\336\006\n\016StorageServi" +
+      "ce\022^\n\013HashingInfo\022&.org.opendedup.grpc.H" +
+      "ashingInfoRequest\032\'.org.opendedup.grpc.H" +
+      "ashingInfoResponse\022^\n\013CheckHashes\022&.org." +
+      "opendedup.grpc.CheckHashesRequest\032\'.org." +
+      "opendedup.grpc.CheckHashesResponse\022^\n\013Wr" +
+      "iteChunks\022&.org.opendedup.grpc.WriteChun" +
+      "ksRequest\032\'.org.opendedup.grpc.WriteChun" +
+      "ksResponse\022[\n\nReadChunks\022%.org.opendedup" +
+      ".grpc.ReadChunksRequest\032&.org.opendedup." +
+      "grpc.ReadChunksResponse\022}\n\024WriteSparseDa" +
+      "taChunk\0221.org.opendedup.grpc.SparseDedup" +
+      "eChunkWriteRequest\0322.org.opendedup.grpc." +
+      "SparseDedupeChunkWriteResponse\022z\n\023ReadSp" +
+      "arseDataChunk\0220.org.opendedup.grpc.Spars" +
+      "eDedupeChunkReadRequest\0321.org.opendedup." +
+      "grpc.SparseDedupeChunkReadResponse\022k\n\025Ge" +
+      "tMetaDataDedupeFile\022-.org.opendedup.grpc" +
+      ".MetaDataDedupeFileRequest\032!.org.opended" +
+      "up.grpc.ChunkResponse0\001\022g\n\023GetSparseDedu" +
+      "peFile\022+.org.opendedup.grpc.SparseDedupe" +
+      "FileRequest\032!.org.opendedup.grpc.ChunkRe" +
+      "sponse0\001B0Z.github.com/opendedup/sdfs-cl" +
+      "ient-go/sdfs/;sdfsb\006proto3"
+
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -16006,7 +17454,7 @@ public final class Storage {
     internal_static_org_opendedup_grpc_CheckHashesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CheckHashesRequest_descriptor,
-        new java.lang.String[] { "Hashes", });
+        new java.lang.String[] { "Hashes", "PvolumeID", });
     internal_static_org_opendedup_grpc_CheckHashesResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_org_opendedup_grpc_CheckHashesResponse_fieldAccessorTable = new
@@ -16018,13 +17466,13 @@ public final class Storage {
     internal_static_org_opendedup_grpc_MetaDataDedupeFileRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_MetaDataDedupeFileRequest_descriptor,
-        new java.lang.String[] { "FilePath", });
+        new java.lang.String[] { "FilePath", "PvolumeID", });
     internal_static_org_opendedup_grpc_SparseDedupeFileRequest_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_org_opendedup_grpc_SparseDedupeFileRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeFileRequest_descriptor,
-        new java.lang.String[] { "Guid", });
+        new java.lang.String[] { "Guid", "PvolumeID", });
     internal_static_org_opendedup_grpc_ChunkResponse_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_org_opendedup_grpc_ChunkResponse_fieldAccessorTable = new
@@ -16036,13 +17484,13 @@ public final class Storage {
     internal_static_org_opendedup_grpc_ChunkEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ChunkEntry_descriptor,
-        new java.lang.String[] { "Hash", "Data", });
+        new java.lang.String[] { "Hash", "Data", "Compressed", "CompressedLength", });
     internal_static_org_opendedup_grpc_WriteChunksRequest_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_org_opendedup_grpc_WriteChunksRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_WriteChunksRequest_descriptor,
-        new java.lang.String[] { "Chunks", "FileHandle", });
+        new java.lang.String[] { "Chunks", "FileHandle", "PvolumeID", });
     internal_static_org_opendedup_grpc_WriteChunksResponse_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_org_opendedup_grpc_WriteChunksResponse_fieldAccessorTable = new
@@ -16054,7 +17502,7 @@ public final class Storage {
     internal_static_org_opendedup_grpc_ReadChunksRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_ReadChunksRequest_descriptor,
-        new java.lang.String[] { "Chunks", });
+        new java.lang.String[] { "Chunks", "PvolumeID", });
     internal_static_org_opendedup_grpc_ReadChunksResponse_descriptor =
       getDescriptor().getMessageTypes().get(9);
     internal_static_org_opendedup_grpc_ReadChunksResponse_fieldAccessorTable = new
@@ -16066,7 +17514,7 @@ public final class Storage {
     internal_static_org_opendedup_grpc_HashingInfoRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_HashingInfoRequest_descriptor,
-        new java.lang.String[] { "Chunks", "Error", "ErrorCode", });
+        new java.lang.String[] { "Chunks", "Error", "ErrorCode", "PvolumeID", });
     internal_static_org_opendedup_grpc_HashLocPairP_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_org_opendedup_grpc_HashLocPairP_fieldAccessorTable = new
@@ -16078,7 +17526,7 @@ public final class Storage {
     internal_static_org_opendedup_grpc_SparseDataChunkP_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDataChunkP_descriptor,
-        new java.lang.String[] { "Fpos", "Len", "Flags", "Version", "Ar", "Doop", "Prevdoop", });
+        new java.lang.String[] { "Fpos", "Len", "Flags", "Version", "Ar", "Doop", "Prevdoop", "CompressedLength", });
     internal_static_org_opendedup_grpc_SparseDataChunkP_ArEntry_descriptor =
       internal_static_org_opendedup_grpc_SparseDataChunkP_descriptor.getNestedTypes().get(0);
     internal_static_org_opendedup_grpc_SparseDataChunkP_ArEntry_fieldAccessorTable = new
@@ -16090,19 +17538,19 @@ public final class Storage {
     internal_static_org_opendedup_grpc_SparseDedupeChunkWriteRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeChunkWriteRequest_descriptor,
-        new java.lang.String[] { "Chunk", "FileHandle", "FileLocation", });
+        new java.lang.String[] { "Chunk", "FileHandle", "FileLocation", "PvolumeID", "Compressed", "CompressedChunk", "UncompressedLen", });
     internal_static_org_opendedup_grpc_SparseDedupeChunkWriteResponse_descriptor =
       getDescriptor().getMessageTypes().get(14);
     internal_static_org_opendedup_grpc_SparseDedupeChunkWriteResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeChunkWriteResponse_descriptor,
-        new java.lang.String[] { "Error", "ErrorCode", });
+        new java.lang.String[] { "Error", "ErrorCode", "MissedAr", });
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadRequest_descriptor =
       getDescriptor().getMessageTypes().get(15);
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SparseDedupeChunkReadRequest_descriptor,
-        new java.lang.String[] { "Offset", "FileHandle", });
+        new java.lang.String[] { "Offset", "FileHandle", "PvolumeID", });
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadResponse_descriptor =
       getDescriptor().getMessageTypes().get(16);
     internal_static_org_opendedup_grpc_SparseDedupeChunkReadResponse_fieldAccessorTable = new
@@ -16120,7 +17568,7 @@ public final class Storage {
     internal_static_org_opendedup_grpc_InsertRecord_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_InsertRecord_descriptor,
-        new java.lang.String[] { "Hashloc", "Inserted", });
+        new java.lang.String[] { "Hashloc", "Inserted", "CompressedLength", });
     org.opendedup.grpc.FileInfo.getDescriptor();
   }
 

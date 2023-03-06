@@ -57,6 +57,12 @@ public final class CloudFileInfo {
 
     java.lang.String getAttributesOrThrow(
         java.lang.String key);
+
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CloudMetaData}
@@ -120,6 +126,11 @@ public final class CloudFileInfo {
                   AttributesDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
               attributes_.getMutableMap().put(
                   attributes__.getKey(), attributes__.getValue());
+              break;
+            }
+            case 24: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -258,6 +269,17 @@ public final class CloudFileInfo {
       return map.get(key);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -281,6 +303,9 @@ public final class CloudFileInfo {
           internalGetAttributes(),
           AttributesDefaultEntryHolder.defaultEntry,
           2);
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(3, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -304,6 +329,10 @@ public final class CloudFileInfo {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(2, attributes__);
       }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -323,6 +352,8 @@ public final class CloudFileInfo {
           != other.getDate()) return false;
       if (!internalGetAttributes().equals(
           other.internalGetAttributes())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -341,6 +372,9 @@ public final class CloudFileInfo {
         hash = (37 * hash) + ATTRIBUTES_FIELD_NUMBER;
         hash = (53 * hash) + internalGetAttributes().hashCode();
       }
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -499,6 +533,8 @@ public final class CloudFileInfo {
         date_ = 0L;
 
         internalGetMutableAttributes().clear();
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -529,6 +565,7 @@ public final class CloudFileInfo {
         result.date_ = date_;
         result.attributes_ = internalGetAttributes();
         result.attributes_.makeImmutable();
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -582,6 +619,9 @@ public final class CloudFileInfo {
         }
         internalGetMutableAttributes().mergeFrom(
             other.internalGetAttributes());
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -770,6 +810,37 @@ public final class CloudFileInfo {
             .putAll(values);
         return this;
       }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -843,12 +914,12 @@ public final class CloudFileInfo {
   static {
     java.lang.String[] descriptorData = {
       "\n\023CloudFileInfo.proto\022\022org.opendedup.grp" +
-      "c\"\227\001\n\rCloudMetaData\022\014\n\004date\030\001 \001(\003\022E\n\natt" +
+      "c\"\252\001\n\rCloudMetaData\022\014\n\004date\030\001 \001(\003\022E\n\natt" +
       "ributes\030\002 \003(\01321.org.opendedup.grpc.Cloud" +
-      "MetaData.AttributesEntry\0321\n\017AttributesEn" +
-      "try\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B0Z.g" +
-      "ithub.com/opendedup/sdfs-client-go/sdfs/" +
-      ";sdfsb\006proto3"
+      "MetaData.AttributesEntry\022\021\n\tpvolumeID\030\003 " +
+      "\001(\003\0321\n\017AttributesEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005v" +
+      "alue\030\002 \001(\t:\0028\001B0Z.github.com/opendedup/s" +
+      "dfs-client-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -859,7 +930,7 @@ public final class CloudFileInfo {
     internal_static_org_opendedup_grpc_CloudMetaData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CloudMetaData_descriptor,
-        new java.lang.String[] { "Date", "Attributes", });
+        new java.lang.String[] { "Date", "Attributes", "PvolumeID", });
     internal_static_org_opendedup_grpc_CloudMetaData_AttributesEntry_descriptor =
       internal_static_org_opendedup_grpc_CloudMetaData_descriptor.getNestedTypes().get(0);
     internal_static_org_opendedup_grpc_CloudMetaData_AttributesEntry_fieldAccessorTable = new

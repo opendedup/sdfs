@@ -1,11 +1,14 @@
 /bin/
 install-packages/windows/SDFS-2.0.13-Setup.exe
 install-packages/windows/bin/jre/
+install-packages/windows/wix/
 install-packages/SDFS-3.0.1-Setup.exe
 windows-exe/*/x64
 windows-exe/*/Debug/
 windows-exe/*/Release/
 windows-exe/*/ipch/
+windows-exe/WindowsSetup/WindowsSetup/bin/
+windows-exe/WindowsSetup/WindowsSetup/obj/
 windows-exe/x64
 windows-exe/Debug/
 windows-exe/Release/
@@ -35,3 +38,4 @@ pkgs/*.rpm
 pkgs/*.deb
 pkgs/*.jar
 .project
+install-packages/docker run --name sdfs-gcs -e TYPE=GOOGL.sh

@@ -38,7 +38,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 /**
  * This is a very fast, non-cryptographic hash suitable for general hash-based
  * lookup. See http://murmurhash.googlepages.com/ for more details.
- * 
+ *
  * <p>
  * The C version of MurmurHash 2.0 found at that site was ported to Java by
  * Andrzej Bialecki (ab at getopt org).
@@ -51,7 +51,6 @@ public class HashFunctions {
 	static {
 
 		try {
-			Security.addProvider(new BouncyCastleProvider());
 			algorithm = MessageDigest.getInstance("Tiger", "BC");
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
@@ -218,7 +217,7 @@ public class HashFunctions {
 		 * = System.currentTimeMillis() - start; System.out.println("Took " +
 		 * duration + " ms"); System.out.println("Hashes per ms = " +
 		 * (numberOfTries / duration));
-		 * 
+		 *
 		 * ?
 		 */
 		String rndStr = getRandomString(12);
@@ -280,7 +279,7 @@ public class HashFunctions {
 	/*
 	 * public static String getMD5Hash(byte[] input) { MD5 md5 = new MD5();
 	 * md5.Update(input); return md5.asHex(); }
-	 * 
+	 *
 	 * public static byte[] getMD5ByteHash(byte[] input) { MD5 md5 = new MD5();
 	 * md5.Update(input); byte[] b = md5.Final(); md5 = null; return b; }
 	 */

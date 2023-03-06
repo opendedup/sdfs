@@ -32,14 +32,14 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.eventbus.EventBus;
 
 /**
- * 
+ *
  * @author Sam Silverberg
- * 
+ *
  *         The MetaFileStore is a static class used to get, update, create, or
  *         clone MetaDataDedup files. MetaDataDedupFile(s) are serialized to a
  *         JDBM database with a key of the uuid for the MetaDataDedupFile.
- * 
- * 
+ *
+ *
  */
 public class MetaFileStore {
 	private static EventBus eventBus = new EventBus();
@@ -95,8 +95,8 @@ public class MetaFileStore {
 		WriteLock l = getMFLock.writeLock();
 		l.lock();
 		try {
-			if (SDFSLogger.isDebug())
-				SDFSLogger.getLog().debug("removing [" + dst + "] and replacing with [" + src + "]");
+
+			SDFSLogger.getLog().debug("removing [" + dst + "] and replacing with [" + src + "]");
 			MetaDataDedupFile mf = getMF(src);
 			if (new File(dst).exists()) {
 				MetaDataDedupFile _mf = getMF(dst);
@@ -127,7 +127,7 @@ public class MetaFileStore {
 
 	/**
 	 * Removes a cached file from the pathmap
-	 * 
+	 *
 	 * @param path the path of the MetaDataDedupFile
 	 */
 	public static void removedCachedMF(String path) {
@@ -139,7 +139,7 @@ public class MetaFileStore {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param path the path to the MetaDataDedupFile
 	 * @return the MetaDataDedupFile
 	 */
@@ -233,7 +233,7 @@ public class MetaFileStore {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param parent path for the parent
 	 * @param child  the child file
 	 * @return the MetaDataDedupFile associated with this path.
@@ -245,7 +245,7 @@ public class MetaFileStore {
 
 	/**
 	 * Clones a MetaDataDedupFile and the DedupFile.
-	 * 
+	 *
 	 * @param origionalPath the path of the source
 	 * @param snapPath      the path of the destination
 	 * @param overwrite     whether or not to overwrite the destination if it exists
@@ -259,7 +259,7 @@ public class MetaFileStore {
 
 	/**
 	 * Clones a MetaDataDedupFile and the DedupFile.
-	 * 
+	 *
 	 * @param origionalPath  the path of the source
 	 * @param snapPath       the path of the destination
 	 * @param overwrite      whether or not to overwrite the destination if it
@@ -286,7 +286,7 @@ public class MetaFileStore {
 				} catch (IOException e) {
 					SDFSLogger.getLog().error("error symlinking " + origionalPath + " to " + snapPath, e);
 				}
-				
+
 				return getMF(new File(snapPath));
 			} else {
 
@@ -301,18 +301,20 @@ public class MetaFileStore {
 					return _mf;
 				}
 			}
-		} catch(Exception e) {
-			SDFSLogger.getLog().error("error creating snapshot for" + origionalPath + " to " + snapPath,e);
-			evt.endEvent("Error Creating snapshot for" + origionalPath + " to " + snapPath + " error: " +e.getMessage(), SDFSEvent.ERROR);
+		} catch (Exception e) {
+			SDFSLogger.getLog().error("error creating snapshot for" + origionalPath + " to " + snapPath, e);
+			evt.endEvent(
+					"Error Creating snapshot for" + origionalPath + " to " + snapPath + " error: " + e.getMessage(),
+					SDFSEvent.ERROR);
 			throw new IOException(e);
-		}finally {
+		} finally {
 
 		}
 	}
 
 	/**
 	 * Commits data to the jdbm database
-	 * 
+	 *
 	 * @return true if committed
 	 */
 	public static boolean commit() {
@@ -327,7 +329,7 @@ public class MetaFileStore {
 
 	/**
 	 * Removes a file from the jdbm db
-	 * 
+	 *
 	 * @param guid the guid for the MetaDataDedupFile
 	 */
 
@@ -337,8 +339,7 @@ public class MetaFileStore {
 
 	public static boolean removeMetaFile(String path, boolean localOnly, boolean force, boolean async) {
 
-		if (SDFSLogger.isDebug())
-			SDFSLogger.getLog().debug("deleting " + path);
+		SDFSLogger.getLog().debug("deleting " + path);
 		WriteLock l = getMFLock.writeLock();
 		l.lock();
 		try {
@@ -384,10 +385,10 @@ public class MetaFileStore {
 						}
 						mf = getMF(new File(path));
 						pathMap.invalidate(mf.getPath());
-						if (!localOnly){
-							try{
-							eventBus.post(new MFileDeleted(mf, true));
-							}catch(Exception e) {
+						if (!localOnly) {
+							try {
+								eventBus.post(new MFileDeleted(mf, true));
+							} catch (Exception e) {
 								SDFSLogger.getLog().error("unable to delete file " + path, e);
 							}
 						}

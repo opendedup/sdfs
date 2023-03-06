@@ -17,6 +17,12 @@ public final class VolumeServiceOuterClass {
   public interface VolumeInfoRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.VolumeInfoRequest)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * <pre>
@@ -67,6 +73,11 @@ public final class VolumeServiceOuterClass {
             case 0:
               done = true;
               break;
+            case 8: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -99,6 +110,17 @@ public final class VolumeServiceOuterClass {
               org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest.Builder.class);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 1;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -113,6 +135,9 @@ public final class VolumeServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(1, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -122,6 +147,10 @@ public final class VolumeServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -137,6 +166,8 @@ public final class VolumeServiceOuterClass {
       }
       org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest) obj;
 
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -148,6 +179,9 @@ public final class VolumeServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -285,6 +319,8 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -311,6 +347,7 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest(this);
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -359,6 +396,9 @@ public final class VolumeServiceOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest other) {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.VolumeInfoRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -385,6 +425,37 @@ public final class VolumeServiceOuterClass {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -4929,6 +5000,12 @@ public final class VolumeServiceOuterClass {
   public interface SystemInfoRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.SystemInfoRequest)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SystemInfoRequest}
@@ -4975,6 +5052,11 @@ public final class VolumeServiceOuterClass {
             case 0:
               done = true;
               break;
+            case 8: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -5007,6 +5089,17 @@ public final class VolumeServiceOuterClass {
               org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest.Builder.class);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 1;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -5021,6 +5114,9 @@ public final class VolumeServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(1, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -5030,6 +5126,10 @@ public final class VolumeServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -5045,6 +5145,8 @@ public final class VolumeServiceOuterClass {
       }
       org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest) obj;
 
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -5056,6 +5158,9 @@ public final class VolumeServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -5189,6 +5294,8 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -5215,6 +5322,7 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest(this);
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -5263,6 +5371,9 @@ public final class VolumeServiceOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest other) {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.SystemInfoRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -5289,6 +5400,37 @@ public final class VolumeServiceOuterClass {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -6560,6 +6702,12 @@ public final class VolumeServiceOuterClass {
   public interface GCScheduleRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.GCScheduleRequest)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.GCScheduleRequest}
@@ -6606,6 +6754,11 @@ public final class VolumeServiceOuterClass {
             case 0:
               done = true;
               break;
+            case 8: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -6638,6 +6791,17 @@ public final class VolumeServiceOuterClass {
               org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest.Builder.class);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 1;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -6652,6 +6816,9 @@ public final class VolumeServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(1, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -6661,6 +6828,10 @@ public final class VolumeServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -6676,6 +6847,8 @@ public final class VolumeServiceOuterClass {
       }
       org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest) obj;
 
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -6687,6 +6860,9 @@ public final class VolumeServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -6820,6 +6996,8 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -6846,6 +7024,7 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest(this);
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -6894,6 +7073,9 @@ public final class VolumeServiceOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest other) {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.GCScheduleRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -6920,6 +7102,37 @@ public final class VolumeServiceOuterClass {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -7803,6 +8016,12 @@ public final class VolumeServiceOuterClass {
   public interface CloudVolumesRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.CloudVolumesRequest)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CloudVolumesRequest}
@@ -7849,6 +8068,11 @@ public final class VolumeServiceOuterClass {
             case 0:
               done = true;
               break;
+            case 8: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -7881,6 +8105,17 @@ public final class VolumeServiceOuterClass {
               org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest.Builder.class);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 1;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -7895,6 +8130,9 @@ public final class VolumeServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(1, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -7904,6 +8142,10 @@ public final class VolumeServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -7919,6 +8161,8 @@ public final class VolumeServiceOuterClass {
       }
       org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest) obj;
 
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -7930,6 +8174,9 @@ public final class VolumeServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8063,6 +8310,8 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -8089,6 +8338,7 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest(this);
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -8137,6 +8387,9 @@ public final class VolumeServiceOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest other) {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.CloudVolumesRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -8163,6 +8416,37 @@ public final class VolumeServiceOuterClass {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -10311,6 +10595,78 @@ public final class VolumeServiceOuterClass {
      * @return The maxAge.
      */
     long getMaxAge();
+
+    /**
+     * <code>double averageLoadPenalty = 21;</code>
+     * @return The averageLoadPenalty.
+     */
+    double getAverageLoadPenalty();
+
+    /**
+     * <code>int64 evictionCount = 22;</code>
+     * @return The evictionCount.
+     */
+    long getEvictionCount();
+
+    /**
+     * <code>int64 hitCount = 23;</code>
+     * @return The hitCount.
+     */
+    long getHitCount();
+
+    /**
+     * <code>double hitRate = 24;</code>
+     * @return The hitRate.
+     */
+    double getHitRate();
+
+    /**
+     * <code>int64 loadCount = 25;</code>
+     * @return The loadCount.
+     */
+    long getLoadCount();
+
+    /**
+     * <code>int64 loadExceptionCount = 26;</code>
+     * @return The loadExceptionCount.
+     */
+    long getLoadExceptionCount();
+
+    /**
+     * <code>double loadExceptionRate = 27;</code>
+     * @return The loadExceptionRate.
+     */
+    double getLoadExceptionRate();
+
+    /**
+     * <code>int64 loadSuccessCount = 28;</code>
+     * @return The loadSuccessCount.
+     */
+    long getLoadSuccessCount();
+
+    /**
+     * <code>int64 missCount = 29;</code>
+     * @return The missCount.
+     */
+    long getMissCount();
+
+    /**
+     * <code>double missRate = 30;</code>
+     * @return The missRate.
+     */
+    double getMissRate();
+
+    /**
+     * <code>int64 requestCount = 31;</code>
+     * @return The requestCount.
+     */
+    long getRequestCount();
+
+    /**
+     * <code>int64 totalLoadTime = 32;</code>
+     * @return The totalLoadTime.
+     */
+    long getTotalLoadTime();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DSEInfo}
@@ -10469,6 +10825,66 @@ public final class VolumeServiceOuterClass {
             case 160: {
 
               maxAge_ = input.readInt64();
+              break;
+            }
+            case 169: {
+
+              averageLoadPenalty_ = input.readDouble();
+              break;
+            }
+            case 176: {
+
+              evictionCount_ = input.readInt64();
+              break;
+            }
+            case 184: {
+
+              hitCount_ = input.readInt64();
+              break;
+            }
+            case 193: {
+
+              hitRate_ = input.readDouble();
+              break;
+            }
+            case 200: {
+
+              loadCount_ = input.readInt64();
+              break;
+            }
+            case 208: {
+
+              loadExceptionCount_ = input.readInt64();
+              break;
+            }
+            case 217: {
+
+              loadExceptionRate_ = input.readDouble();
+              break;
+            }
+            case 224: {
+
+              loadSuccessCount_ = input.readInt64();
+              break;
+            }
+            case 232: {
+
+              missCount_ = input.readInt64();
+              break;
+            }
+            case 241: {
+
+              missRate_ = input.readDouble();
+              break;
+            }
+            case 248: {
+
+              requestCount_ = input.readInt64();
+              break;
+            }
+            case 256: {
+
+              totalLoadTime_ = input.readInt64();
               break;
             }
             default: {
@@ -10912,6 +11328,138 @@ public final class VolumeServiceOuterClass {
       return maxAge_;
     }
 
+    public static final int AVERAGELOADPENALTY_FIELD_NUMBER = 21;
+    private double averageLoadPenalty_;
+    /**
+     * <code>double averageLoadPenalty = 21;</code>
+     * @return The averageLoadPenalty.
+     */
+    @java.lang.Override
+    public double getAverageLoadPenalty() {
+      return averageLoadPenalty_;
+    }
+
+    public static final int EVICTIONCOUNT_FIELD_NUMBER = 22;
+    private long evictionCount_;
+    /**
+     * <code>int64 evictionCount = 22;</code>
+     * @return The evictionCount.
+     */
+    @java.lang.Override
+    public long getEvictionCount() {
+      return evictionCount_;
+    }
+
+    public static final int HITCOUNT_FIELD_NUMBER = 23;
+    private long hitCount_;
+    /**
+     * <code>int64 hitCount = 23;</code>
+     * @return The hitCount.
+     */
+    @java.lang.Override
+    public long getHitCount() {
+      return hitCount_;
+    }
+
+    public static final int HITRATE_FIELD_NUMBER = 24;
+    private double hitRate_;
+    /**
+     * <code>double hitRate = 24;</code>
+     * @return The hitRate.
+     */
+    @java.lang.Override
+    public double getHitRate() {
+      return hitRate_;
+    }
+
+    public static final int LOADCOUNT_FIELD_NUMBER = 25;
+    private long loadCount_;
+    /**
+     * <code>int64 loadCount = 25;</code>
+     * @return The loadCount.
+     */
+    @java.lang.Override
+    public long getLoadCount() {
+      return loadCount_;
+    }
+
+    public static final int LOADEXCEPTIONCOUNT_FIELD_NUMBER = 26;
+    private long loadExceptionCount_;
+    /**
+     * <code>int64 loadExceptionCount = 26;</code>
+     * @return The loadExceptionCount.
+     */
+    @java.lang.Override
+    public long getLoadExceptionCount() {
+      return loadExceptionCount_;
+    }
+
+    public static final int LOADEXCEPTIONRATE_FIELD_NUMBER = 27;
+    private double loadExceptionRate_;
+    /**
+     * <code>double loadExceptionRate = 27;</code>
+     * @return The loadExceptionRate.
+     */
+    @java.lang.Override
+    public double getLoadExceptionRate() {
+      return loadExceptionRate_;
+    }
+
+    public static final int LOADSUCCESSCOUNT_FIELD_NUMBER = 28;
+    private long loadSuccessCount_;
+    /**
+     * <code>int64 loadSuccessCount = 28;</code>
+     * @return The loadSuccessCount.
+     */
+    @java.lang.Override
+    public long getLoadSuccessCount() {
+      return loadSuccessCount_;
+    }
+
+    public static final int MISSCOUNT_FIELD_NUMBER = 29;
+    private long missCount_;
+    /**
+     * <code>int64 missCount = 29;</code>
+     * @return The missCount.
+     */
+    @java.lang.Override
+    public long getMissCount() {
+      return missCount_;
+    }
+
+    public static final int MISSRATE_FIELD_NUMBER = 30;
+    private double missRate_;
+    /**
+     * <code>double missRate = 30;</code>
+     * @return The missRate.
+     */
+    @java.lang.Override
+    public double getMissRate() {
+      return missRate_;
+    }
+
+    public static final int REQUESTCOUNT_FIELD_NUMBER = 31;
+    private long requestCount_;
+    /**
+     * <code>int64 requestCount = 31;</code>
+     * @return The requestCount.
+     */
+    @java.lang.Override
+    public long getRequestCount() {
+      return requestCount_;
+    }
+
+    public static final int TOTALLOADTIME_FIELD_NUMBER = 32;
+    private long totalLoadTime_;
+    /**
+     * <code>int64 totalLoadTime = 32;</code>
+     * @return The totalLoadTime.
+     */
+    @java.lang.Override
+    public long getTotalLoadTime() {
+      return totalLoadTime_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -10985,6 +11533,42 @@ public final class VolumeServiceOuterClass {
       }
       if (maxAge_ != 0L) {
         output.writeInt64(20, maxAge_);
+      }
+      if (averageLoadPenalty_ != 0D) {
+        output.writeDouble(21, averageLoadPenalty_);
+      }
+      if (evictionCount_ != 0L) {
+        output.writeInt64(22, evictionCount_);
+      }
+      if (hitCount_ != 0L) {
+        output.writeInt64(23, hitCount_);
+      }
+      if (hitRate_ != 0D) {
+        output.writeDouble(24, hitRate_);
+      }
+      if (loadCount_ != 0L) {
+        output.writeInt64(25, loadCount_);
+      }
+      if (loadExceptionCount_ != 0L) {
+        output.writeInt64(26, loadExceptionCount_);
+      }
+      if (loadExceptionRate_ != 0D) {
+        output.writeDouble(27, loadExceptionRate_);
+      }
+      if (loadSuccessCount_ != 0L) {
+        output.writeInt64(28, loadSuccessCount_);
+      }
+      if (missCount_ != 0L) {
+        output.writeInt64(29, missCount_);
+      }
+      if (missRate_ != 0D) {
+        output.writeDouble(30, missRate_);
+      }
+      if (requestCount_ != 0L) {
+        output.writeInt64(31, requestCount_);
+      }
+      if (totalLoadTime_ != 0L) {
+        output.writeInt64(32, totalLoadTime_);
       }
       unknownFields.writeTo(output);
     }
@@ -11068,6 +11652,54 @@ public final class VolumeServiceOuterClass {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(20, maxAge_);
       }
+      if (averageLoadPenalty_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(21, averageLoadPenalty_);
+      }
+      if (evictionCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(22, evictionCount_);
+      }
+      if (hitCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(23, hitCount_);
+      }
+      if (hitRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(24, hitRate_);
+      }
+      if (loadCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(25, loadCount_);
+      }
+      if (loadExceptionCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(26, loadExceptionCount_);
+      }
+      if (loadExceptionRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(27, loadExceptionRate_);
+      }
+      if (loadSuccessCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(28, loadSuccessCount_);
+      }
+      if (missCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(29, missCount_);
+      }
+      if (missRate_ != 0D) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeDoubleSize(30, missRate_);
+      }
+      if (requestCount_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(31, requestCount_);
+      }
+      if (totalLoadTime_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(32, totalLoadTime_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -11123,6 +11755,34 @@ public final class VolumeServiceOuterClass {
           .equals(other.getBucketName())) return false;
       if (getMaxAge()
           != other.getMaxAge()) return false;
+      if (java.lang.Double.doubleToLongBits(getAverageLoadPenalty())
+          != java.lang.Double.doubleToLongBits(
+              other.getAverageLoadPenalty())) return false;
+      if (getEvictionCount()
+          != other.getEvictionCount()) return false;
+      if (getHitCount()
+          != other.getHitCount()) return false;
+      if (java.lang.Double.doubleToLongBits(getHitRate())
+          != java.lang.Double.doubleToLongBits(
+              other.getHitRate())) return false;
+      if (getLoadCount()
+          != other.getLoadCount()) return false;
+      if (getLoadExceptionCount()
+          != other.getLoadExceptionCount()) return false;
+      if (java.lang.Double.doubleToLongBits(getLoadExceptionRate())
+          != java.lang.Double.doubleToLongBits(
+              other.getLoadExceptionRate())) return false;
+      if (getLoadSuccessCount()
+          != other.getLoadSuccessCount()) return false;
+      if (getMissCount()
+          != other.getMissCount()) return false;
+      if (java.lang.Double.doubleToLongBits(getMissRate())
+          != java.lang.Double.doubleToLongBits(
+              other.getMissRate())) return false;
+      if (getRequestCount()
+          != other.getRequestCount()) return false;
+      if (getTotalLoadTime()
+          != other.getTotalLoadTime()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -11184,6 +11844,42 @@ public final class VolumeServiceOuterClass {
       hash = (37 * hash) + MAXAGE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getMaxAge());
+      hash = (37 * hash) + AVERAGELOADPENALTY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getAverageLoadPenalty()));
+      hash = (37 * hash) + EVICTIONCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getEvictionCount());
+      hash = (37 * hash) + HITCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getHitCount());
+      hash = (37 * hash) + HITRATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getHitRate()));
+      hash = (37 * hash) + LOADCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLoadCount());
+      hash = (37 * hash) + LOADEXCEPTIONCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLoadExceptionCount());
+      hash = (37 * hash) + LOADEXCEPTIONRATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getLoadExceptionRate()));
+      hash = (37 * hash) + LOADSUCCESSCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getLoadSuccessCount());
+      hash = (37 * hash) + MISSCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getMissCount());
+      hash = (37 * hash) + MISSRATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          java.lang.Double.doubleToLongBits(getMissRate()));
+      hash = (37 * hash) + REQUESTCOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getRequestCount());
+      hash = (37 * hash) + TOTALLOADTIME_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTotalLoadTime());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -11357,6 +12053,30 @@ public final class VolumeServiceOuterClass {
 
         maxAge_ = 0L;
 
+        averageLoadPenalty_ = 0D;
+
+        evictionCount_ = 0L;
+
+        hitCount_ = 0L;
+
+        hitRate_ = 0D;
+
+        loadCount_ = 0L;
+
+        loadExceptionCount_ = 0L;
+
+        loadExceptionRate_ = 0D;
+
+        loadSuccessCount_ = 0L;
+
+        missCount_ = 0L;
+
+        missRate_ = 0D;
+
+        requestCount_ = 0L;
+
+        totalLoadTime_ = 0L;
+
         return this;
       }
 
@@ -11403,6 +12123,18 @@ public final class VolumeServiceOuterClass {
         result.cloudSecretKey_ = cloudSecretKey_;
         result.bucketName_ = bucketName_;
         result.maxAge_ = maxAge_;
+        result.averageLoadPenalty_ = averageLoadPenalty_;
+        result.evictionCount_ = evictionCount_;
+        result.hitCount_ = hitCount_;
+        result.hitRate_ = hitRate_;
+        result.loadCount_ = loadCount_;
+        result.loadExceptionCount_ = loadExceptionCount_;
+        result.loadExceptionRate_ = loadExceptionRate_;
+        result.loadSuccessCount_ = loadSuccessCount_;
+        result.missCount_ = missCount_;
+        result.missRate_ = missRate_;
+        result.requestCount_ = requestCount_;
+        result.totalLoadTime_ = totalLoadTime_;
         onBuilt();
         return result;
       }
@@ -11517,6 +12249,42 @@ public final class VolumeServiceOuterClass {
         }
         if (other.getMaxAge() != 0L) {
           setMaxAge(other.getMaxAge());
+        }
+        if (other.getAverageLoadPenalty() != 0D) {
+          setAverageLoadPenalty(other.getAverageLoadPenalty());
+        }
+        if (other.getEvictionCount() != 0L) {
+          setEvictionCount(other.getEvictionCount());
+        }
+        if (other.getHitCount() != 0L) {
+          setHitCount(other.getHitCount());
+        }
+        if (other.getHitRate() != 0D) {
+          setHitRate(other.getHitRate());
+        }
+        if (other.getLoadCount() != 0L) {
+          setLoadCount(other.getLoadCount());
+        }
+        if (other.getLoadExceptionCount() != 0L) {
+          setLoadExceptionCount(other.getLoadExceptionCount());
+        }
+        if (other.getLoadExceptionRate() != 0D) {
+          setLoadExceptionRate(other.getLoadExceptionRate());
+        }
+        if (other.getLoadSuccessCount() != 0L) {
+          setLoadSuccessCount(other.getLoadSuccessCount());
+        }
+        if (other.getMissCount() != 0L) {
+          setMissCount(other.getMissCount());
+        }
+        if (other.getMissRate() != 0D) {
+          setMissRate(other.getMissRate());
+        }
+        if (other.getRequestCount() != 0L) {
+          setRequestCount(other.getRequestCount());
+        }
+        if (other.getTotalLoadTime() != 0L) {
+          setTotalLoadTime(other.getTotalLoadTime());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -12481,6 +13249,378 @@ public final class VolumeServiceOuterClass {
         onChanged();
         return this;
       }
+
+      private double averageLoadPenalty_ ;
+      /**
+       * <code>double averageLoadPenalty = 21;</code>
+       * @return The averageLoadPenalty.
+       */
+      @java.lang.Override
+      public double getAverageLoadPenalty() {
+        return averageLoadPenalty_;
+      }
+      /**
+       * <code>double averageLoadPenalty = 21;</code>
+       * @param value The averageLoadPenalty to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAverageLoadPenalty(double value) {
+        
+        averageLoadPenalty_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double averageLoadPenalty = 21;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAverageLoadPenalty() {
+        
+        averageLoadPenalty_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private long evictionCount_ ;
+      /**
+       * <code>int64 evictionCount = 22;</code>
+       * @return The evictionCount.
+       */
+      @java.lang.Override
+      public long getEvictionCount() {
+        return evictionCount_;
+      }
+      /**
+       * <code>int64 evictionCount = 22;</code>
+       * @param value The evictionCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEvictionCount(long value) {
+        
+        evictionCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 evictionCount = 22;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEvictionCount() {
+        
+        evictionCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long hitCount_ ;
+      /**
+       * <code>int64 hitCount = 23;</code>
+       * @return The hitCount.
+       */
+      @java.lang.Override
+      public long getHitCount() {
+        return hitCount_;
+      }
+      /**
+       * <code>int64 hitCount = 23;</code>
+       * @param value The hitCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHitCount(long value) {
+        
+        hitCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 hitCount = 23;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHitCount() {
+        
+        hitCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private double hitRate_ ;
+      /**
+       * <code>double hitRate = 24;</code>
+       * @return The hitRate.
+       */
+      @java.lang.Override
+      public double getHitRate() {
+        return hitRate_;
+      }
+      /**
+       * <code>double hitRate = 24;</code>
+       * @param value The hitRate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setHitRate(double value) {
+        
+        hitRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double hitRate = 24;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearHitRate() {
+        
+        hitRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private long loadCount_ ;
+      /**
+       * <code>int64 loadCount = 25;</code>
+       * @return The loadCount.
+       */
+      @java.lang.Override
+      public long getLoadCount() {
+        return loadCount_;
+      }
+      /**
+       * <code>int64 loadCount = 25;</code>
+       * @param value The loadCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLoadCount(long value) {
+        
+        loadCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 loadCount = 25;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLoadCount() {
+        
+        loadCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long loadExceptionCount_ ;
+      /**
+       * <code>int64 loadExceptionCount = 26;</code>
+       * @return The loadExceptionCount.
+       */
+      @java.lang.Override
+      public long getLoadExceptionCount() {
+        return loadExceptionCount_;
+      }
+      /**
+       * <code>int64 loadExceptionCount = 26;</code>
+       * @param value The loadExceptionCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLoadExceptionCount(long value) {
+        
+        loadExceptionCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 loadExceptionCount = 26;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLoadExceptionCount() {
+        
+        loadExceptionCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private double loadExceptionRate_ ;
+      /**
+       * <code>double loadExceptionRate = 27;</code>
+       * @return The loadExceptionRate.
+       */
+      @java.lang.Override
+      public double getLoadExceptionRate() {
+        return loadExceptionRate_;
+      }
+      /**
+       * <code>double loadExceptionRate = 27;</code>
+       * @param value The loadExceptionRate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLoadExceptionRate(double value) {
+        
+        loadExceptionRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double loadExceptionRate = 27;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLoadExceptionRate() {
+        
+        loadExceptionRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private long loadSuccessCount_ ;
+      /**
+       * <code>int64 loadSuccessCount = 28;</code>
+       * @return The loadSuccessCount.
+       */
+      @java.lang.Override
+      public long getLoadSuccessCount() {
+        return loadSuccessCount_;
+      }
+      /**
+       * <code>int64 loadSuccessCount = 28;</code>
+       * @param value The loadSuccessCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setLoadSuccessCount(long value) {
+        
+        loadSuccessCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 loadSuccessCount = 28;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearLoadSuccessCount() {
+        
+        loadSuccessCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long missCount_ ;
+      /**
+       * <code>int64 missCount = 29;</code>
+       * @return The missCount.
+       */
+      @java.lang.Override
+      public long getMissCount() {
+        return missCount_;
+      }
+      /**
+       * <code>int64 missCount = 29;</code>
+       * @param value The missCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMissCount(long value) {
+        
+        missCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 missCount = 29;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMissCount() {
+        
+        missCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private double missRate_ ;
+      /**
+       * <code>double missRate = 30;</code>
+       * @return The missRate.
+       */
+      @java.lang.Override
+      public double getMissRate() {
+        return missRate_;
+      }
+      /**
+       * <code>double missRate = 30;</code>
+       * @param value The missRate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMissRate(double value) {
+        
+        missRate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>double missRate = 30;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMissRate() {
+        
+        missRate_ = 0D;
+        onChanged();
+        return this;
+      }
+
+      private long requestCount_ ;
+      /**
+       * <code>int64 requestCount = 31;</code>
+       * @return The requestCount.
+       */
+      @java.lang.Override
+      public long getRequestCount() {
+        return requestCount_;
+      }
+      /**
+       * <code>int64 requestCount = 31;</code>
+       * @param value The requestCount to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRequestCount(long value) {
+        
+        requestCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 requestCount = 31;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRequestCount() {
+        
+        requestCount_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long totalLoadTime_ ;
+      /**
+       * <code>int64 totalLoadTime = 32;</code>
+       * @return The totalLoadTime.
+       */
+      @java.lang.Override
+      public long getTotalLoadTime() {
+        return totalLoadTime_;
+      }
+      /**
+       * <code>int64 totalLoadTime = 32;</code>
+       * @param value The totalLoadTime to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTotalLoadTime(long value) {
+        
+        totalLoadTime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 totalLoadTime = 32;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearTotalLoadTime() {
+        
+        totalLoadTime_ = 0L;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -12537,6 +13677,12 @@ public final class VolumeServiceOuterClass {
   public interface DSERequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.DSERequest)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DSERequest}
@@ -12583,6 +13729,11 @@ public final class VolumeServiceOuterClass {
             case 0:
               done = true;
               break;
+            case 8: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -12615,6 +13766,17 @@ public final class VolumeServiceOuterClass {
               org.opendedup.grpc.VolumeServiceOuterClass.DSERequest.class, org.opendedup.grpc.VolumeServiceOuterClass.DSERequest.Builder.class);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 1;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -12629,6 +13791,9 @@ public final class VolumeServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(1, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -12638,6 +13803,10 @@ public final class VolumeServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -12653,6 +13822,8 @@ public final class VolumeServiceOuterClass {
       }
       org.opendedup.grpc.VolumeServiceOuterClass.DSERequest other = (org.opendedup.grpc.VolumeServiceOuterClass.DSERequest) obj;
 
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -12664,6 +13835,9 @@ public final class VolumeServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -12797,6 +13971,8 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -12823,6 +13999,7 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.VolumeServiceOuterClass.DSERequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.DSERequest result = new org.opendedup.grpc.VolumeServiceOuterClass.DSERequest(this);
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -12871,6 +14048,9 @@ public final class VolumeServiceOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.DSERequest other) {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.DSERequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -12897,6 +14077,37 @@ public final class VolumeServiceOuterClass {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -13857,6 +15068,12 @@ public final class VolumeServiceOuterClass {
      */
     com.google.protobuf.ByteString
         getPasswordBytes();
+
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.AuthenticationRequest}
@@ -13915,6 +15132,11 @@ public final class VolumeServiceOuterClass {
               java.lang.String s = input.readStringRequireUtf8();
 
               password_ = s;
+              break;
+            }
+            case 24: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -14025,6 +15247,17 @@ public final class VolumeServiceOuterClass {
       }
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 3;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 3;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -14045,6 +15278,9 @@ public final class VolumeServiceOuterClass {
       if (!getPasswordBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, password_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(3, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -14059,6 +15295,10 @@ public final class VolumeServiceOuterClass {
       }
       if (!getPasswordBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, password_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -14079,6 +15319,8 @@ public final class VolumeServiceOuterClass {
           .equals(other.getUsername())) return false;
       if (!getPassword()
           .equals(other.getPassword())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -14094,6 +15336,9 @@ public final class VolumeServiceOuterClass {
       hash = (53 * hash) + getUsername().hashCode();
       hash = (37 * hash) + PASSWORD_FIELD_NUMBER;
       hash = (53 * hash) + getPassword().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -14231,6 +15476,8 @@ public final class VolumeServiceOuterClass {
 
         password_ = "";
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -14259,6 +15506,7 @@ public final class VolumeServiceOuterClass {
         org.opendedup.grpc.VolumeServiceOuterClass.AuthenticationRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.AuthenticationRequest(this);
         result.username_ = username_;
         result.password_ = password_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -14314,6 +15562,9 @@ public final class VolumeServiceOuterClass {
         if (!other.getPassword().isEmpty()) {
           password_ = other.password_;
           onChanged();
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -14492,6 +15743,37 @@ public final class VolumeServiceOuterClass {
   checkByteStringIsUtf8(value);
         
         password_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -16835,6 +18117,12 @@ public final class VolumeServiceOuterClass {
      * @return The compact.
      */
     boolean getCompact();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.CleanStoreRequest}
@@ -16886,6 +18174,11 @@ public final class VolumeServiceOuterClass {
               compact_ = input.readBool();
               break;
             }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -16929,6 +18222,17 @@ public final class VolumeServiceOuterClass {
       return compact_;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -16946,6 +18250,9 @@ public final class VolumeServiceOuterClass {
       if (compact_ != false) {
         output.writeBool(1, compact_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -16958,6 +18265,10 @@ public final class VolumeServiceOuterClass {
       if (compact_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, compact_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -16976,6 +18287,8 @@ public final class VolumeServiceOuterClass {
 
       if (getCompact()
           != other.getCompact()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -16990,6 +18303,9 @@ public final class VolumeServiceOuterClass {
       hash = (37 * hash) + COMPACT_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getCompact());
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -17125,6 +18441,8 @@ public final class VolumeServiceOuterClass {
         super.clear();
         compact_ = false;
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -17152,6 +18470,7 @@ public final class VolumeServiceOuterClass {
       public org.opendedup.grpc.VolumeServiceOuterClass.CleanStoreRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.CleanStoreRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.CleanStoreRequest(this);
         result.compact_ = compact_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -17202,6 +18521,9 @@ public final class VolumeServiceOuterClass {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.CleanStoreRequest.getDefaultInstance()) return this;
         if (other.getCompact() != false) {
           setCompact(other.getCompact());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -17259,6 +18581,37 @@ public final class VolumeServiceOuterClass {
       public Builder clearCompact() {
         
         compact_ = false;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -18149,6 +19502,12 @@ public final class VolumeServiceOuterClass {
      * @return The cacheSize.
      */
     long getCacheSize();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetCacheSizeRequest}
@@ -18200,6 +19559,11 @@ public final class VolumeServiceOuterClass {
               cacheSize_ = input.readInt64();
               break;
             }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -18243,6 +19607,17 @@ public final class VolumeServiceOuterClass {
       return cacheSize_;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -18260,6 +19635,9 @@ public final class VolumeServiceOuterClass {
       if (cacheSize_ != 0L) {
         output.writeInt64(1, cacheSize_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -18272,6 +19650,10 @@ public final class VolumeServiceOuterClass {
       if (cacheSize_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(1, cacheSize_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -18290,6 +19672,8 @@ public final class VolumeServiceOuterClass {
 
       if (getCacheSize()
           != other.getCacheSize()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -18304,6 +19688,9 @@ public final class VolumeServiceOuterClass {
       hash = (37 * hash) + CACHESIZE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getCacheSize());
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -18439,6 +19826,8 @@ public final class VolumeServiceOuterClass {
         super.clear();
         cacheSize_ = 0L;
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -18466,6 +19855,7 @@ public final class VolumeServiceOuterClass {
       public org.opendedup.grpc.VolumeServiceOuterClass.SetCacheSizeRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.SetCacheSizeRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SetCacheSizeRequest(this);
         result.cacheSize_ = cacheSize_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -18516,6 +19906,9 @@ public final class VolumeServiceOuterClass {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.SetCacheSizeRequest.getDefaultInstance()) return this;
         if (other.getCacheSize() != 0L) {
           setCacheSize(other.getCacheSize());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -18573,6 +19966,37 @@ public final class VolumeServiceOuterClass {
       public Builder clearCacheSize() {
         
         cacheSize_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -19459,10 +20883,16 @@ public final class VolumeServiceOuterClass {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>int64 volumeid = 1;</code>
-     * @return The volumeid.
+     * <code>int64 rmvolume = 1;</code>
+     * @return The rmvolume.
      */
-    long getVolumeid();
+    long getRmvolume();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.DeleteCloudVolumeRequest}
@@ -19511,7 +20941,12 @@ public final class VolumeServiceOuterClass {
               break;
             case 8: {
 
-              volumeid_ = input.readInt64();
+              rmvolume_ = input.readInt64();
+              break;
+            }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -19546,15 +20981,26 @@ public final class VolumeServiceOuterClass {
               org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest.Builder.class);
     }
 
-    public static final int VOLUMEID_FIELD_NUMBER = 1;
-    private long volumeid_;
+    public static final int RMVOLUME_FIELD_NUMBER = 1;
+    private long rmvolume_;
     /**
-     * <code>int64 volumeid = 1;</code>
-     * @return The volumeid.
+     * <code>int64 rmvolume = 1;</code>
+     * @return The rmvolume.
      */
     @java.lang.Override
-    public long getVolumeid() {
-      return volumeid_;
+    public long getRmvolume() {
+      return rmvolume_;
+    }
+
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
     }
 
     private byte memoizedIsInitialized = -1;
@@ -19571,8 +21017,11 @@ public final class VolumeServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (volumeid_ != 0L) {
-        output.writeInt64(1, volumeid_);
+      if (rmvolume_ != 0L) {
+        output.writeInt64(1, rmvolume_);
+      }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
       }
       unknownFields.writeTo(output);
     }
@@ -19583,9 +21032,13 @@ public final class VolumeServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
-      if (volumeid_ != 0L) {
+      if (rmvolume_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(1, volumeid_);
+          .computeInt64Size(1, rmvolume_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -19602,8 +21055,10 @@ public final class VolumeServiceOuterClass {
       }
       org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest) obj;
 
-      if (getVolumeid()
-          != other.getVolumeid()) return false;
+      if (getRmvolume()
+          != other.getRmvolume()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -19615,9 +21070,12 @@ public final class VolumeServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      hash = (37 * hash) + VOLUMEID_FIELD_NUMBER;
+      hash = (37 * hash) + RMVOLUME_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-          getVolumeid());
+          getRmvolume());
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -19751,7 +21209,9 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        volumeid_ = 0L;
+        rmvolume_ = 0L;
+
+        pvolumeID_ = 0L;
 
         return this;
       }
@@ -19779,7 +21239,8 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest(this);
-        result.volumeid_ = volumeid_;
+        result.rmvolume_ = rmvolume_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -19828,8 +21289,11 @@ public final class VolumeServiceOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest other) {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.DeleteCloudVolumeRequest.getDefaultInstance()) return this;
-        if (other.getVolumeid() != 0L) {
-          setVolumeid(other.getVolumeid());
+        if (other.getRmvolume() != 0L) {
+          setRmvolume(other.getRmvolume());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -19860,33 +21324,64 @@ public final class VolumeServiceOuterClass {
         return this;
       }
 
-      private long volumeid_ ;
+      private long rmvolume_ ;
       /**
-       * <code>int64 volumeid = 1;</code>
-       * @return The volumeid.
+       * <code>int64 rmvolume = 1;</code>
+       * @return The rmvolume.
        */
       @java.lang.Override
-      public long getVolumeid() {
-        return volumeid_;
+      public long getRmvolume() {
+        return rmvolume_;
       }
       /**
-       * <code>int64 volumeid = 1;</code>
-       * @param value The volumeid to set.
+       * <code>int64 rmvolume = 1;</code>
+       * @param value The rmvolume to set.
        * @return This builder for chaining.
        */
-      public Builder setVolumeid(long value) {
+      public Builder setRmvolume(long value) {
         
-        volumeid_ = value;
+        rmvolume_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>int64 volumeid = 1;</code>
+       * <code>int64 rmvolume = 1;</code>
        * @return This builder for chaining.
        */
-      public Builder clearVolumeid() {
+      public Builder clearRmvolume() {
         
-        volumeid_ = 0L;
+        rmvolume_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -20777,6 +22272,12 @@ public final class VolumeServiceOuterClass {
      * @return The size.
      */
     long getSize();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetVolumeCapacityRequest}
@@ -20828,6 +22329,11 @@ public final class VolumeServiceOuterClass {
               size_ = input.readInt64();
               break;
             }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -20871,6 +22377,17 @@ public final class VolumeServiceOuterClass {
       return size_;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -20888,6 +22405,9 @@ public final class VolumeServiceOuterClass {
       if (size_ != 0L) {
         output.writeInt64(1, size_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -20900,6 +22420,10 @@ public final class VolumeServiceOuterClass {
       if (size_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(1, size_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -20918,6 +22442,8 @@ public final class VolumeServiceOuterClass {
 
       if (getSize()
           != other.getSize()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -20932,6 +22458,9 @@ public final class VolumeServiceOuterClass {
       hash = (37 * hash) + SIZE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getSize());
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -21067,6 +22596,8 @@ public final class VolumeServiceOuterClass {
         super.clear();
         size_ = 0L;
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -21094,6 +22625,7 @@ public final class VolumeServiceOuterClass {
       public org.opendedup.grpc.VolumeServiceOuterClass.SetVolumeCapacityRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.SetVolumeCapacityRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SetVolumeCapacityRequest(this);
         result.size_ = size_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -21144,6 +22676,9 @@ public final class VolumeServiceOuterClass {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.SetVolumeCapacityRequest.getDefaultInstance()) return this;
         if (other.getSize() != 0L) {
           setSize(other.getSize());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -21201,6 +22736,37 @@ public final class VolumeServiceOuterClass {
       public Builder clearSize() {
         
         size_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -21947,6 +23513,12 @@ public final class VolumeServiceOuterClass {
      */
     com.google.protobuf.ByteString
         getPasswordBytes();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetPasswordRequest}
@@ -21998,6 +23570,11 @@ public final class VolumeServiceOuterClass {
               java.lang.String s = input.readStringRequireUtf8();
 
               password_ = s;
+              break;
+            }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
               break;
             }
             default: {
@@ -22070,6 +23647,17 @@ public final class VolumeServiceOuterClass {
       }
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -22087,6 +23675,9 @@ public final class VolumeServiceOuterClass {
       if (!getPasswordBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, password_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -22098,6 +23689,10 @@ public final class VolumeServiceOuterClass {
       size = 0;
       if (!getPasswordBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, password_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -22116,6 +23711,8 @@ public final class VolumeServiceOuterClass {
 
       if (!getPassword()
           .equals(other.getPassword())) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -22129,6 +23726,9 @@ public final class VolumeServiceOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + PASSWORD_FIELD_NUMBER;
       hash = (53 * hash) + getPassword().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -22264,6 +23864,8 @@ public final class VolumeServiceOuterClass {
         super.clear();
         password_ = "";
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -22291,6 +23893,7 @@ public final class VolumeServiceOuterClass {
       public org.opendedup.grpc.VolumeServiceOuterClass.SetPasswordRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.SetPasswordRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SetPasswordRequest(this);
         result.password_ = password_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -22342,6 +23945,9 @@ public final class VolumeServiceOuterClass {
         if (!other.getPassword().isEmpty()) {
           password_ = other.password_;
           onChanged();
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -22444,6 +24050,37 @@ public final class VolumeServiceOuterClass {
   checkByteStringIsUtf8(value);
         
         password_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -23184,6 +24821,12 @@ public final class VolumeServiceOuterClass {
      * @return The requestedSpeed.
      */
     int getRequestedSpeed();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SpeedRequest}
@@ -23235,6 +24878,11 @@ public final class VolumeServiceOuterClass {
               requestedSpeed_ = input.readInt32();
               break;
             }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -23278,6 +24926,17 @@ public final class VolumeServiceOuterClass {
       return requestedSpeed_;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -23295,6 +24954,9 @@ public final class VolumeServiceOuterClass {
       if (requestedSpeed_ != 0) {
         output.writeInt32(1, requestedSpeed_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -23307,6 +24969,10 @@ public final class VolumeServiceOuterClass {
       if (requestedSpeed_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(1, requestedSpeed_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -23325,6 +24991,8 @@ public final class VolumeServiceOuterClass {
 
       if (getRequestedSpeed()
           != other.getRequestedSpeed()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -23338,6 +25006,9 @@ public final class VolumeServiceOuterClass {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + REQUESTEDSPEED_FIELD_NUMBER;
       hash = (53 * hash) + getRequestedSpeed();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -23473,6 +25144,8 @@ public final class VolumeServiceOuterClass {
         super.clear();
         requestedSpeed_ = 0;
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -23500,6 +25173,7 @@ public final class VolumeServiceOuterClass {
       public org.opendedup.grpc.VolumeServiceOuterClass.SpeedRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.SpeedRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SpeedRequest(this);
         result.requestedSpeed_ = requestedSpeed_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -23550,6 +25224,9 @@ public final class VolumeServiceOuterClass {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.SpeedRequest.getDefaultInstance()) return this;
         if (other.getRequestedSpeed() != 0) {
           setRequestedSpeed(other.getRequestedSpeed());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -23607,6 +25284,37 @@ public final class VolumeServiceOuterClass {
       public Builder clearRequestedSpeed() {
         
         requestedSpeed_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -24497,6 +26205,12 @@ public final class VolumeServiceOuterClass {
      * @return The volumeid.
      */
     long getVolumeid();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SyncFromVolRequest}
@@ -24548,6 +26262,11 @@ public final class VolumeServiceOuterClass {
               volumeid_ = input.readInt64();
               break;
             }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -24591,6 +26310,17 @@ public final class VolumeServiceOuterClass {
       return volumeid_;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -24608,6 +26338,9 @@ public final class VolumeServiceOuterClass {
       if (volumeid_ != 0L) {
         output.writeInt64(1, volumeid_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -24620,6 +26353,10 @@ public final class VolumeServiceOuterClass {
       if (volumeid_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(1, volumeid_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -24638,6 +26375,8 @@ public final class VolumeServiceOuterClass {
 
       if (getVolumeid()
           != other.getVolumeid()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -24652,6 +26391,9 @@ public final class VolumeServiceOuterClass {
       hash = (37 * hash) + VOLUMEID_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getVolumeid());
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -24787,6 +26529,8 @@ public final class VolumeServiceOuterClass {
         super.clear();
         volumeid_ = 0L;
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -24814,6 +26558,7 @@ public final class VolumeServiceOuterClass {
       public org.opendedup.grpc.VolumeServiceOuterClass.SyncFromVolRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.SyncFromVolRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SyncFromVolRequest(this);
         result.volumeid_ = volumeid_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -24864,6 +26609,9 @@ public final class VolumeServiceOuterClass {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.SyncFromVolRequest.getDefaultInstance()) return this;
         if (other.getVolumeid() != 0L) {
           setVolumeid(other.getVolumeid());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -24921,6 +26669,37 @@ public final class VolumeServiceOuterClass {
       public Builder clearVolumeid() {
         
         volumeid_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -25805,6 +27584,12 @@ public final class VolumeServiceOuterClass {
   public interface SyncVolRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:org.opendedup.grpc.SyncVolRequest)
       com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SyncVolRequest}
@@ -25851,6 +27636,11 @@ public final class VolumeServiceOuterClass {
             case 0:
               done = true;
               break;
+            case 8: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -25883,6 +27673,17 @@ public final class VolumeServiceOuterClass {
               org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest.class, org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest.Builder.class);
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 1;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 1;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -25897,6 +27698,9 @@ public final class VolumeServiceOuterClass {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(1, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -25906,6 +27710,10 @@ public final class VolumeServiceOuterClass {
       if (size != -1) return size;
 
       size = 0;
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(1, pvolumeID_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -25921,6 +27729,8 @@ public final class VolumeServiceOuterClass {
       }
       org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest other = (org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest) obj;
 
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -25932,6 +27742,9 @@ public final class VolumeServiceOuterClass {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -26065,6 +27878,8 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -26091,6 +27906,7 @@ public final class VolumeServiceOuterClass {
       @java.lang.Override
       public org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest(this);
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -26139,6 +27955,9 @@ public final class VolumeServiceOuterClass {
 
       public Builder mergeFrom(org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest other) {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.SyncVolRequest.getDefaultInstance()) return this;
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -26165,6 +27984,37 @@ public final class VolumeServiceOuterClass {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -27054,6 +28904,12 @@ public final class VolumeServiceOuterClass {
      * @return The maxAge.
      */
     long getMaxAge();
+
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    long getPvolumeID();
   }
   /**
    * Protobuf type {@code org.opendedup.grpc.SetMaxAgeRequest}
@@ -27105,6 +28961,11 @@ public final class VolumeServiceOuterClass {
               maxAge_ = input.readInt64();
               break;
             }
+            case 16: {
+
+              pvolumeID_ = input.readInt64();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -27148,6 +29009,17 @@ public final class VolumeServiceOuterClass {
       return maxAge_;
     }
 
+    public static final int PVOLUMEID_FIELD_NUMBER = 2;
+    private long pvolumeID_;
+    /**
+     * <code>int64 pvolumeID = 2;</code>
+     * @return The pvolumeID.
+     */
+    @java.lang.Override
+    public long getPvolumeID() {
+      return pvolumeID_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -27165,6 +29037,9 @@ public final class VolumeServiceOuterClass {
       if (maxAge_ != 0L) {
         output.writeInt64(1, maxAge_);
       }
+      if (pvolumeID_ != 0L) {
+        output.writeInt64(2, pvolumeID_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -27177,6 +29052,10 @@ public final class VolumeServiceOuterClass {
       if (maxAge_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(1, maxAge_);
+      }
+      if (pvolumeID_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, pvolumeID_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -27195,6 +29074,8 @@ public final class VolumeServiceOuterClass {
 
       if (getMaxAge()
           != other.getMaxAge()) return false;
+      if (getPvolumeID()
+          != other.getPvolumeID()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -27209,6 +29090,9 @@ public final class VolumeServiceOuterClass {
       hash = (37 * hash) + MAXAGE_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getMaxAge());
+      hash = (37 * hash) + PVOLUMEID_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getPvolumeID());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -27344,6 +29228,8 @@ public final class VolumeServiceOuterClass {
         super.clear();
         maxAge_ = 0L;
 
+        pvolumeID_ = 0L;
+
         return this;
       }
 
@@ -27371,6 +29257,7 @@ public final class VolumeServiceOuterClass {
       public org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest buildPartial() {
         org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest result = new org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest(this);
         result.maxAge_ = maxAge_;
+        result.pvolumeID_ = pvolumeID_;
         onBuilt();
         return result;
       }
@@ -27421,6 +29308,9 @@ public final class VolumeServiceOuterClass {
         if (other == org.opendedup.grpc.VolumeServiceOuterClass.SetMaxAgeRequest.getDefaultInstance()) return this;
         if (other.getMaxAge() != 0L) {
           setMaxAge(other.getMaxAge());
+        }
+        if (other.getPvolumeID() != 0L) {
+          setPvolumeID(other.getPvolumeID());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -27478,6 +29368,37 @@ public final class VolumeServiceOuterClass {
       public Builder clearMaxAge() {
         
         maxAge_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long pvolumeID_ ;
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return The pvolumeID.
+       */
+      @java.lang.Override
+      public long getPvolumeID() {
+        return pvolumeID_;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @param value The pvolumeID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPvolumeID(long value) {
+        
+        pvolumeID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 pvolumeID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPvolumeID() {
+        
+        pvolumeID_ = 0L;
         onChanged();
         return this;
       }
@@ -28389,146 +30310,160 @@ public final class VolumeServiceOuterClass {
   static {
     java.lang.String[] descriptorData = {
       "\n\023VolumeService.proto\022\022org.opendedup.grp" +
-      "c\032\016Shutdown.proto\032\016FileInfo.proto\"\023\n\021Vol" +
-      "umeInfoRequest\"\350\005\n\022VolumeInfoResponse\022\014\n" +
-      "\004path\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\023\n\013currentSize" +
-      "\030\003 \001(\003\022\021\n\tcapactity\030\004 \001(\003\022\031\n\021maxPercenta" +
-      "geFull\030\005 \001(\001\022\026\n\016duplicateBytes\030\006 \001(\003\022\021\n\t" +
-      "readBytes\030\007 \001(\001\022\022\n\nwriteBytes\030\010 \001(\003\022\024\n\014s" +
-      "erialNumber\030\t \001(\003\022\017\n\007dseSize\030\n \001(\003\022\023\n\013ds" +
-      "eCompSize\030\013 \001(\003\022\017\n\007readOps\030\014 \001(\001\022\020\n\010writ" +
-      "eOps\030\r \001(\001\022\022\n\nreadErrors\030\016 \001(\003\022\023\n\013writeE" +
-      "rrors\030\017 \001(\003\022\r\n\005files\030\020 \001(\003\022\030\n\020closedGrac" +
-      "efully\030\021 \001(\010\022\032\n\022allowExternalLinks\030\022 \001(\010" +
-      "\022\022\n\nusePerfMon\030\023 \001(\010\022\021\n\tclusterId\030\024 \001(\t\022" +
-      "\027\n\017VolumeClustered\030\025 \001(\010\022\032\n\022readTimeoutS" +
-      "econds\030\026 \001(\005\022\033\n\023writeTimeoutSeconds\030\027 \001(" +
-      "\005\022\032\n\022compressedMetaData\030\030 \001(\010\022\021\n\tsyncFil" +
-      "es\030\031 \001(\010\022\023\n\013maxPageSize\030\032 \001(\003\022B\n\014message" +
-      "Queue\030\033 \003(\0132,.org.opendedup.grpc.Message" +
-      "QueueInfoResponse\022\023\n\013perfMonFile\030\034 \001(\t\022\017" +
-      "\n\007offline\030\035 \001(\010\022\r\n\005error\030\036 \001(\t\0221\n\terrorC" +
-      "ode\030\037 \001(\0162\036.org.opendedup.grpc.errorCode" +
-      "s\"\337\001\n\nSystemInfo\022\025\n\ractiveThreads\030\001 \001(\005\022" +
-      "\024\n\014blocksStored\030\002 \001(\005\022\027\n\017maxBlocksStored" +
-      "\030\003 \001(\005\022\022\n\ntotalSpace\030\004 \001(\003\022\021\n\tfreeSpace\030" +
-      "\005 \001(\003\022\024\n\014totalCpuLoad\030\006 \001(\001\022\020\n\010cpuCores\030" +
-      "\007 \001(\001\022\023\n\013sdfsCpuLoad\030\010 \001(\001\022\023\n\013totalMemor" +
-      "y\030\n \001(\001\022\022\n\nfreeMemory\030\013 \001(\001\"\023\n\021SystemInf" +
-      "oRequest\"\260\001\n\023ConnectedVolumeInfo\022\n\n\002id\030\001" +
-      " \001(\003\022\r\n\005local\030\002 \001(\010\022\020\n\010hostname\030\003 \001(\t\022\014\n" +
-      "\004port\030\004 \001(\005\022\014\n\004size\030\005 \001(\003\022\026\n\016compressedS" +
-      "ize\030\006 \001(\003\022\023\n\013sdfsVersion\030\007 \001(\t\022\022\n\nlastUp" +
-      "date\030\010 \001(\003\022\017\n\007version\030\t \001(\005\"\023\n\021GCSchedul" +
-      "eRequest\"h\n\022GCScheduleResponse\022\020\n\010schedu" +
-      "le\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001" +
-      "(\0162\036.org.opendedup.grpc.errorCodes\"\025\n\023Cl" +
-      "oudVolumesRequest\"\225\001\n\024CloudVolumesRespon" +
-      "se\022;\n\nvolumeInfo\030\001 \003(\0132\'.org.opendedup.g" +
-      "rpc.ConnectedVolumeInfo\022\r\n\005error\030\002 \001(\t\0221" +
-      "\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc.e" +
-      "rrorCodes\"\204\001\n\022SystemInfoResponse\022,\n\004info" +
-      "\030\001 \001(\0132\036.org.opendedup.grpc.SystemInfo\022\r" +
+      "c\032\016Shutdown.proto\032\016FileInfo.proto\"&\n\021Vol" +
+      "umeInfoRequest\022\021\n\tpvolumeID\030\001 \001(\003\"\350\005\n\022Vo" +
+      "lumeInfoResponse\022\014\n\004path\030\001 \001(\t\022\014\n\004name\030\002" +
+      " \001(\t\022\023\n\013currentSize\030\003 \001(\003\022\021\n\tcapactity\030\004" +
+      " \001(\003\022\031\n\021maxPercentageFull\030\005 \001(\001\022\026\n\016dupli" +
+      "cateBytes\030\006 \001(\003\022\021\n\treadBytes\030\007 \001(\001\022\022\n\nwr" +
+      "iteBytes\030\010 \001(\003\022\024\n\014serialNumber\030\t \001(\003\022\017\n\007" +
+      "dseSize\030\n \001(\003\022\023\n\013dseCompSize\030\013 \001(\003\022\017\n\007re" +
+      "adOps\030\014 \001(\001\022\020\n\010writeOps\030\r \001(\001\022\022\n\nreadErr" +
+      "ors\030\016 \001(\003\022\023\n\013writeErrors\030\017 \001(\003\022\r\n\005files\030" +
+      "\020 \001(\003\022\030\n\020closedGracefully\030\021 \001(\010\022\032\n\022allow" +
+      "ExternalLinks\030\022 \001(\010\022\022\n\nusePerfMon\030\023 \001(\010\022" +
+      "\021\n\tclusterId\030\024 \001(\t\022\027\n\017VolumeClustered\030\025 " +
+      "\001(\010\022\032\n\022readTimeoutSeconds\030\026 \001(\005\022\033\n\023write" +
+      "TimeoutSeconds\030\027 \001(\005\022\032\n\022compressedMetaDa" +
+      "ta\030\030 \001(\010\022\021\n\tsyncFiles\030\031 \001(\010\022\023\n\013maxPageSi" +
+      "ze\030\032 \001(\003\022B\n\014messageQueue\030\033 \003(\0132,.org.ope" +
+      "ndedup.grpc.MessageQueueInfoResponse\022\023\n\013" +
+      "perfMonFile\030\034 \001(\t\022\017\n\007offline\030\035 \001(\010\022\r\n\005er" +
+      "ror\030\036 \001(\t\0221\n\terrorCode\030\037 \001(\0162\036.org.opend" +
+      "edup.grpc.errorCodes\"\337\001\n\nSystemInfo\022\025\n\ra" +
+      "ctiveThreads\030\001 \001(\005\022\024\n\014blocksStored\030\002 \001(\005" +
+      "\022\027\n\017maxBlocksStored\030\003 \001(\005\022\022\n\ntotalSpace\030" +
+      "\004 \001(\003\022\021\n\tfreeSpace\030\005 \001(\003\022\024\n\014totalCpuLoad" +
+      "\030\006 \001(\001\022\020\n\010cpuCores\030\007 \001(\001\022\023\n\013sdfsCpuLoad\030" +
+      "\010 \001(\001\022\023\n\013totalMemory\030\n \001(\001\022\022\n\nfreeMemory" +
+      "\030\013 \001(\001\"&\n\021SystemInfoRequest\022\021\n\tpvolumeID" +
+      "\030\001 \001(\003\"\260\001\n\023ConnectedVolumeInfo\022\n\n\002id\030\001 \001" +
+      "(\003\022\r\n\005local\030\002 \001(\010\022\020\n\010hostname\030\003 \001(\t\022\014\n\004p" +
+      "ort\030\004 \001(\005\022\014\n\004size\030\005 \001(\003\022\026\n\016compressedSiz" +
+      "e\030\006 \001(\003\022\023\n\013sdfsVersion\030\007 \001(\t\022\022\n\nlastUpda" +
+      "te\030\010 \001(\003\022\017\n\007version\030\t \001(\005\"&\n\021GCScheduleR" +
+      "equest\022\021\n\tpvolumeID\030\001 \001(\003\"h\n\022GCScheduleR" +
+      "esponse\022\020\n\010schedule\030\001 \001(\t\022\r\n\005error\030\002 \001(\t" +
+      "\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc" +
+      ".errorCodes\"(\n\023CloudVolumesRequest\022\021\n\tpv" +
+      "olumeID\030\001 \001(\003\"\225\001\n\024CloudVolumesResponse\022;" +
+      "\n\nvolumeInfo\030\001 \003(\0132\'.org.opendedup.grpc." +
+      "ConnectedVolumeInfo\022\r\n\005error\030\002 \001(\t\0221\n\ter" +
+      "rorCode\030\003 \001(\0162\036.org.opendedup.grpc.error" +
+      "Codes\"\204\001\n\022SystemInfoResponse\022,\n\004info\030\001 \001" +
+      "(\0132\036.org.opendedup.grpc.SystemInfo\022\r\n\005er" +
+      "ror\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opend" +
+      "edup.grpc.errorCodes\"\261\005\n\007DSEInfo\022\017\n\007maxS" +
+      "ize\030\001 \001(\003\022\023\n\013currentSize\030\002 \001(\003\022\017\n\007entrie" +
+      "s\030\003 \001(\003\022\026\n\016compressedSize\030\004 \001(\003\022\022\n\nfreeB" +
+      "locks\030\005 \001(\003\022\020\n\010pageSize\030\006 \001(\003\022\023\n\013storage" +
+      "Type\030\007 \001(\t\022\022\n\nlistenPort\030\010 \001(\005\022\022\n\nlisten" +
+      "Host\030\t \001(\t\022\021\n\treadSpeed\030\n \001(\005\022\022\n\nwriteSp" +
+      "eed\030\013 \001(\005\022\021\n\tcacheSize\030\014 \001(\003\022\024\n\014maxCache" +
+      "Size\030\r \001(\003\022\027\n\017listenEncrypted\030\016 \001(\010\022\025\n\re" +
+      "ncryptionKey\030\017 \001(\t\022\024\n\014encryptionIV\030\020 \001(\t" +
+      "\022\026\n\016cloudAccessKey\030\021 \001(\t\022\026\n\016cloudSecretK" +
+      "ey\030\022 \001(\t\022\022\n\nbucketName\030\023 \001(\t\022\016\n\006maxAge\030\024" +
+      " \001(\003\022\032\n\022averageLoadPenalty\030\025 \001(\001\022\025\n\revic" +
+      "tionCount\030\026 \001(\003\022\020\n\010hitCount\030\027 \001(\003\022\017\n\007hit" +
+      "Rate\030\030 \001(\001\022\021\n\tloadCount\030\031 \001(\003\022\032\n\022loadExc" +
+      "eptionCount\030\032 \001(\003\022\031\n\021loadExceptionRate\030\033" +
+      " \001(\001\022\030\n\020loadSuccessCount\030\034 \001(\003\022\021\n\tmissCo" +
+      "unt\030\035 \001(\003\022\020\n\010missRate\030\036 \001(\001\022\024\n\014requestCo" +
+      "unt\030\037 \001(\003\022\025\n\rtotalLoadTime\030  \001(\003\"\037\n\nDSER" +
+      "equest\022\021\n\tpvolumeID\030\001 \001(\003\"z\n\013DSEResponse" +
+      "\022)\n\004info\030\001 \001(\0132\033.org.opendedup.grpc.DSEI" +
+      "nfo\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\"N\n\025Authent" +
+      "icationRequest\022\020\n\010username\030\001 \001(\t\022\020\n\010pass" +
+      "word\030\002 \001(\t\022\021\n\tpvolumeID\030\003 \001(\003\"i\n\026Authent" +
+      "icationResponse\022\r\n\005token\030\001 \001(\t\022\r\n\005error\030" +
+      "\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup" +
+      ".grpc.errorCodes\"\353\001\n\030MessageQueueInfoRes" +
+      "ponse\022\020\n\010hostName\030\001 \001(\t\022C\n\006mqType\030\002 \001(\0162" +
+      "3.org.opendedup.grpc.MessageQueueInfoRes" +
+      "ponse.MQType\022\014\n\004port\030\003 \001(\005\022\r\n\005topic\030\004 \001(" +
+      "\t\022\020\n\010authInfo\030\005 \001(\t\022\024\n\014subScription\030\006 \001(" +
+      "\t\022\017\n\007project\030\007 \001(\t\"\"\n\006MQType\022\014\n\010RabbitMQ" +
+      "\020\000\022\n\n\006PubSub\020\001\"7\n\021CleanStoreRequest\022\017\n\007c" +
+      "ompact\030\001 \001(\010\022\021\n\tpvolumeID\030\002 \001(\003\"g\n\022Clean" +
+      "StoreResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030" +
+      "\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup" +
+      ".grpc.errorCodes\";\n\023SetCacheSizeRequest\022" +
+      "\021\n\tcacheSize\030\001 \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"i\n" +
+      "\024SetCacheSizeResponse\022\017\n\007eventID\030\001 \001(\t\022\r" +
       "\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.o" +
-      "pendedup.grpc.errorCodes\"\245\003\n\007DSEInfo\022\017\n\007" +
-      "maxSize\030\001 \001(\003\022\023\n\013currentSize\030\002 \001(\003\022\017\n\007en" +
-      "tries\030\003 \001(\003\022\026\n\016compressedSize\030\004 \001(\003\022\022\n\nf" +
-      "reeBlocks\030\005 \001(\003\022\020\n\010pageSize\030\006 \001(\003\022\023\n\013sto" +
-      "rageType\030\007 \001(\t\022\022\n\nlistenPort\030\010 \001(\005\022\022\n\nli" +
-      "stenHost\030\t \001(\t\022\021\n\treadSpeed\030\n \001(\005\022\022\n\nwri" +
-      "teSpeed\030\013 \001(\005\022\021\n\tcacheSize\030\014 \001(\003\022\024\n\014maxC" +
-      "acheSize\030\r \001(\003\022\027\n\017listenEncrypted\030\016 \001(\010\022" +
-      "\025\n\rencryptionKey\030\017 \001(\t\022\024\n\014encryptionIV\030\020" +
-      " \001(\t\022\026\n\016cloudAccessKey\030\021 \001(\t\022\026\n\016cloudSec" +
-      "retKey\030\022 \001(\t\022\022\n\nbucketName\030\023 \001(\t\022\016\n\006maxA" +
-      "ge\030\024 \001(\003\"\014\n\nDSERequest\"z\n\013DSEResponse\022)\n" +
-      "\004info\030\001 \001(\0132\033.org.opendedup.grpc.DSEInfo" +
-      "\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org" +
-      ".opendedup.grpc.errorCodes\";\n\025Authentica" +
-      "tionRequest\022\020\n\010username\030\001 \001(\t\022\020\n\010passwor" +
-      "d\030\002 \001(\t\"i\n\026AuthenticationResponse\022\r\n\005tok" +
-      "en\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001" +
-      "(\0162\036.org.opendedup.grpc.errorCodes\"\353\001\n\030M" +
-      "essageQueueInfoResponse\022\020\n\010hostName\030\001 \001(" +
-      "\t\022C\n\006mqType\030\002 \001(\01623.org.opendedup.grpc.M" +
-      "essageQueueInfoResponse.MQType\022\014\n\004port\030\003" +
-      " \001(\005\022\r\n\005topic\030\004 \001(\t\022\020\n\010authInfo\030\005 \001(\t\022\024\n" +
-      "\014subScription\030\006 \001(\t\022\017\n\007project\030\007 \001(\t\"\"\n\006" +
-      "MQType\022\014\n\010RabbitMQ\020\000\022\n\n\006PubSub\020\001\"$\n\021Clea" +
-      "nStoreRequest\022\017\n\007compact\030\001 \001(\010\"g\n\022CleanS" +
-      "toreResponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002" +
-      " \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.opendedup." +
-      "grpc.errorCodes\"(\n\023SetCacheSizeRequest\022\021" +
-      "\n\tcacheSize\030\001 \001(\003\"i\n\024SetCacheSizeRespons" +
-      "e\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terr" +
-      "orCode\030\003 \001(\0162\036.org.opendedup.grpc.errorC" +
-      "odes\",\n\030DeleteCloudVolumeRequest\022\020\n\010volu" +
-      "meid\030\001 \001(\003\"n\n\031DeleteCloudVolumeResponse\022" +
-      "\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terror" +
-      "Code\030\003 \001(\0162\036.org.opendedup.grpc.errorCod" +
-      "es\"(\n\030SetVolumeCapacityRequest\022\014\n\004size\030\001" +
-      " \001(\003\"]\n\031SetVolumeCapacityResponse\022\r\n\005err" +
-      "or\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org.opende" +
-      "dup.grpc.errorCodes\"&\n\022SetPasswordReques" +
-      "t\022\020\n\010password\030\001 \001(\t\"W\n\023SetPasswordRespon" +
-      "se\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.o" +
-      "rg.opendedup.grpc.errorCodes\"&\n\014SpeedReq" +
-      "uest\022\026\n\016requestedSpeed\030\001 \001(\005\"b\n\rSpeedRes" +
+      "pendedup.grpc.errorCodes\"?\n\030DeleteCloudV" +
+      "olumeRequest\022\020\n\010rmvolume\030\001 \001(\003\022\021\n\tpvolum" +
+      "eID\030\002 \001(\003\"n\n\031DeleteCloudVolumeResponse\022\017" +
+      "\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorC" +
+      "ode\030\003 \001(\0162\036.org.opendedup.grpc.errorCode" +
+      "s\";\n\030SetVolumeCapacityRequest\022\014\n\004size\030\001 " +
+      "\001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"]\n\031SetVolumeCapac" +
+      "ityResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
+      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes\"9\n" +
+      "\022SetPasswordRequest\022\020\n\010password\030\001 \001(\t\022\021\n" +
+      "\tpvolumeID\030\002 \001(\003\"W\n\023SetPasswordResponse\022" +
+      "\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036.org." +
+      "opendedup.grpc.errorCodes\"9\n\014SpeedReques" +
+      "t\022\026\n\016requestedSpeed\030\001 \001(\005\022\021\n\tpvolumeID\030\002" +
+      " \001(\003\"b\n\rSpeedResponse\022\017\n\007eventID\030\001 \001(\t\022\r" +
+      "\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036.org.o" +
+      "pendedup.grpc.errorCodes\"9\n\022SyncFromVolR" +
+      "equest\022\020\n\010volumeid\030\001 \001(\003\022\021\n\tpvolumeID\030\002 " +
+      "\001(\003\"h\n\023SyncFromVolResponse\022\017\n\007eventID\030\001 " +
+      "\001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001(\0162\036." +
+      "org.opendedup.grpc.errorCodes\"#\n\016SyncVol" +
+      "Request\022\021\n\tpvolumeID\030\001 \001(\003\"d\n\017SyncVolRes" +
       "ponse\022\017\n\007eventID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n" +
       "\terrorCode\030\003 \001(\0162\036.org.opendedup.grpc.er" +
-      "rorCodes\"&\n\022SyncFromVolRequest\022\020\n\010volume" +
-      "id\030\001 \001(\003\"h\n\023SyncFromVolResponse\022\017\n\007event" +
-      "ID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001" +
-      "(\0162\036.org.opendedup.grpc.errorCodes\"\020\n\016Sy" +
-      "ncVolRequest\"d\n\017SyncVolResponse\022\017\n\007event" +
-      "ID\030\001 \001(\t\022\r\n\005error\030\002 \001(\t\0221\n\terrorCode\030\003 \001" +
-      "(\0162\036.org.opendedup.grpc.errorCodes\"\"\n\020Se" +
-      "tMaxAgeRequest\022\016\n\006maxAge\030\001 \001(\003\"U\n\021SetMax" +
-      "AgeResponse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030" +
-      "\002 \001(\0162\036.org.opendedup.grpc.errorCodes2\367\014" +
-      "\n\rVolumeService\022i\n\020AuthenticateUser\022).or" +
-      "g.opendedup.grpc.AuthenticationRequest\032*" +
-      ".org.opendedup.grpc.AuthenticationRespon" +
-      "se\022^\n\rGetVolumeInfo\022%.org.opendedup.grpc" +
-      ".VolumeInfoRequest\032&.org.opendedup.grpc." +
-      "VolumeInfoResponse\022[\n\016ShutdownVolume\022#.o" +
-      "rg.opendedup.grpc.ShutdownRequest\032$.org." +
-      "opendedup.grpc.ShutdownResponse\022[\n\nClean" +
-      "Store\022%.org.opendedup.grpc.CleanStoreReq" +
-      "uest\032&.org.opendedup.grpc.CleanStoreResp" +
-      "onse\022p\n\021DeleteCloudVolume\022,.org.opendedu" +
-      "p.grpc.DeleteCloudVolumeRequest\032-.org.op" +
-      "endedup.grpc.DeleteCloudVolumeResponse\022J" +
-      "\n\007DSEInfo\022\036.org.opendedup.grpc.DSEReques" +
-      "t\032\037.org.opendedup.grpc.DSEResponse\022[\n\nSy" +
-      "stemInfo\022%.org.opendedup.grpc.SystemInfo" +
-      "Request\032&.org.opendedup.grpc.SystemInfoR" +
-      "esponse\022p\n\021SetVolumeCapacity\022,.org.opend" +
-      "edup.grpc.SetVolumeCapacityRequest\032-.org" +
-      ".opendedup.grpc.SetVolumeCapacityRespons" +
-      "e\022h\n\023GetConnectedVolumes\022\'.org.opendedup" +
-      ".grpc.CloudVolumesRequest\032(.org.opendedu" +
-      "p.grpc.CloudVolumesResponse\022^\n\rGetGCSche" +
-      "dule\022%.org.opendedup.grpc.GCScheduleRequ" +
-      "est\032&.org.opendedup.grpc.GCScheduleRespo" +
-      "nse\022a\n\014SetCacheSize\022\'.org.opendedup.grpc" +
-      ".SetCacheSizeRequest\032(.org.opendedup.grp" +
-      "c.SetCacheSizeResponse\022^\n\013SetPassword\022&." +
-      "org.opendedup.grpc.SetPasswordRequest\032\'." +
-      "org.opendedup.grpc.SetPasswordResponse\022S" +
-      "\n\014SetReadSpeed\022 .org.opendedup.grpc.Spee" +
-      "dRequest\032!.org.opendedup.grpc.SpeedRespo" +
-      "nse\022T\n\rSetWriteSpeed\022 .org.opendedup.grp" +
-      "c.SpeedRequest\032!.org.opendedup.grpc.Spee" +
-      "dResponse\022f\n\023SyncFromCloudVolume\022&.org.o" +
-      "pendedup.grpc.SyncFromVolRequest\032\'.org.o" +
-      "pendedup.grpc.SyncFromVolResponse\022Z\n\017Syn" +
-      "cCloudVolume\022\".org.opendedup.grpc.SyncVo" +
-      "lRequest\032#.org.opendedup.grpc.SyncVolRes" +
-      "ponse\022X\n\tSetMaxAge\022$.org.opendedup.grpc." +
-      "SetMaxAgeRequest\032%.org.opendedup.grpc.Se" +
-      "tMaxAgeResponseB0Z.github.com/opendedup/" +
-      "sdfs-client-go/sdfs/;sdfsb\006proto3"
+      "rorCodes\"5\n\020SetMaxAgeRequest\022\016\n\006maxAge\030\001" +
+      " \001(\003\022\021\n\tpvolumeID\030\002 \001(\003\"U\n\021SetMaxAgeResp" +
+      "onse\022\r\n\005error\030\001 \001(\t\0221\n\terrorCode\030\002 \001(\0162\036" +
+      ".org.opendedup.grpc.errorCodes2\367\014\n\rVolum" +
+      "eService\022i\n\020AuthenticateUser\022).org.opend" +
+      "edup.grpc.AuthenticationRequest\032*.org.op" +
+      "endedup.grpc.AuthenticationResponse\022^\n\rG" +
+      "etVolumeInfo\022%.org.opendedup.grpc.Volume" +
+      "InfoRequest\032&.org.opendedup.grpc.VolumeI" +
+      "nfoResponse\022[\n\016ShutdownVolume\022#.org.open" +
+      "dedup.grpc.ShutdownRequest\032$.org.opended" +
+      "up.grpc.ShutdownResponse\022[\n\nCleanStore\022%" +
+      ".org.opendedup.grpc.CleanStoreRequest\032&." +
+      "org.opendedup.grpc.CleanStoreResponse\022p\n" +
+      "\021DeleteCloudVolume\022,.org.opendedup.grpc." +
+      "DeleteCloudVolumeRequest\032-.org.opendedup" +
+      ".grpc.DeleteCloudVolumeResponse\022J\n\007DSEIn" +
+      "fo\022\036.org.opendedup.grpc.DSERequest\032\037.org" +
+      ".opendedup.grpc.DSEResponse\022[\n\nSystemInf" +
+      "o\022%.org.opendedup.grpc.SystemInfoRequest" +
+      "\032&.org.opendedup.grpc.SystemInfoResponse" +
+      "\022p\n\021SetVolumeCapacity\022,.org.opendedup.gr" +
+      "pc.SetVolumeCapacityRequest\032-.org.opende" +
+      "dup.grpc.SetVolumeCapacityResponse\022h\n\023Ge" +
+      "tConnectedVolumes\022\'.org.opendedup.grpc.C" +
+      "loudVolumesRequest\032(.org.opendedup.grpc." +
+      "CloudVolumesResponse\022^\n\rGetGCSchedule\022%." +
+      "org.opendedup.grpc.GCScheduleRequest\032&.o" +
+      "rg.opendedup.grpc.GCScheduleResponse\022a\n\014" +
+      "SetCacheSize\022\'.org.opendedup.grpc.SetCac" +
+      "heSizeRequest\032(.org.opendedup.grpc.SetCa" +
+      "cheSizeResponse\022^\n\013SetPassword\022&.org.ope" +
+      "ndedup.grpc.SetPasswordRequest\032\'.org.ope" +
+      "ndedup.grpc.SetPasswordResponse\022S\n\014SetRe" +
+      "adSpeed\022 .org.opendedup.grpc.SpeedReques" +
+      "t\032!.org.opendedup.grpc.SpeedResponse\022T\n\r" +
+      "SetWriteSpeed\022 .org.opendedup.grpc.Speed" +
+      "Request\032!.org.opendedup.grpc.SpeedRespon" +
+      "se\022f\n\023SyncFromCloudVolume\022&.org.opendedu" +
+      "p.grpc.SyncFromVolRequest\032\'.org.opendedu" +
+      "p.grpc.SyncFromVolResponse\022Z\n\017SyncCloudV" +
+      "olume\022\".org.opendedup.grpc.SyncVolReques" +
+      "t\032#.org.opendedup.grpc.SyncVolResponse\022X" +
+      "\n\tSetMaxAge\022$.org.opendedup.grpc.SetMaxA" +
+      "geRequest\032%.org.opendedup.grpc.SetMaxAge" +
+      "ResponseB0Z.github.com/opendedup/sdfs-cl" +
+      "ient-go/sdfs/;sdfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -28541,7 +30476,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_VolumeInfoRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_VolumeInfoRequest_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_VolumeInfoResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_org_opendedup_grpc_VolumeInfoResponse_fieldAccessorTable = new
@@ -28559,7 +30494,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_SystemInfoRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SystemInfoRequest_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_ConnectedVolumeInfo_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_org_opendedup_grpc_ConnectedVolumeInfo_fieldAccessorTable = new
@@ -28571,7 +30506,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_GCScheduleRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_GCScheduleRequest_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_GCScheduleResponse_descriptor =
       getDescriptor().getMessageTypes().get(6);
     internal_static_org_opendedup_grpc_GCScheduleResponse_fieldAccessorTable = new
@@ -28583,7 +30518,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_CloudVolumesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CloudVolumesRequest_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_CloudVolumesResponse_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_org_opendedup_grpc_CloudVolumesResponse_fieldAccessorTable = new
@@ -28601,13 +30536,13 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_DSEInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSEInfo_descriptor,
-        new java.lang.String[] { "MaxSize", "CurrentSize", "Entries", "CompressedSize", "FreeBlocks", "PageSize", "StorageType", "ListenPort", "ListenHost", "ReadSpeed", "WriteSpeed", "CacheSize", "MaxCacheSize", "ListenEncrypted", "EncryptionKey", "EncryptionIV", "CloudAccessKey", "CloudSecretKey", "BucketName", "MaxAge", });
+        new java.lang.String[] { "MaxSize", "CurrentSize", "Entries", "CompressedSize", "FreeBlocks", "PageSize", "StorageType", "ListenPort", "ListenHost", "ReadSpeed", "WriteSpeed", "CacheSize", "MaxCacheSize", "ListenEncrypted", "EncryptionKey", "EncryptionIV", "CloudAccessKey", "CloudSecretKey", "BucketName", "MaxAge", "AverageLoadPenalty", "EvictionCount", "HitCount", "HitRate", "LoadCount", "LoadExceptionCount", "LoadExceptionRate", "LoadSuccessCount", "MissCount", "MissRate", "RequestCount", "TotalLoadTime", });
     internal_static_org_opendedup_grpc_DSERequest_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_org_opendedup_grpc_DSERequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DSERequest_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_DSEResponse_descriptor =
       getDescriptor().getMessageTypes().get(12);
     internal_static_org_opendedup_grpc_DSEResponse_fieldAccessorTable = new
@@ -28619,7 +30554,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_AuthenticationRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_AuthenticationRequest_descriptor,
-        new java.lang.String[] { "Username", "Password", });
+        new java.lang.String[] { "Username", "Password", "PvolumeID", });
     internal_static_org_opendedup_grpc_AuthenticationResponse_descriptor =
       getDescriptor().getMessageTypes().get(14);
     internal_static_org_opendedup_grpc_AuthenticationResponse_fieldAccessorTable = new
@@ -28637,7 +30572,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_CleanStoreRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_CleanStoreRequest_descriptor,
-        new java.lang.String[] { "Compact", });
+        new java.lang.String[] { "Compact", "PvolumeID", });
     internal_static_org_opendedup_grpc_CleanStoreResponse_descriptor =
       getDescriptor().getMessageTypes().get(17);
     internal_static_org_opendedup_grpc_CleanStoreResponse_fieldAccessorTable = new
@@ -28649,7 +30584,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_SetCacheSizeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetCacheSizeRequest_descriptor,
-        new java.lang.String[] { "CacheSize", });
+        new java.lang.String[] { "CacheSize", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetCacheSizeResponse_descriptor =
       getDescriptor().getMessageTypes().get(19);
     internal_static_org_opendedup_grpc_SetCacheSizeResponse_fieldAccessorTable = new
@@ -28661,7 +30596,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_DeleteCloudVolumeRequest_descriptor,
-        new java.lang.String[] { "Volumeid", });
+        new java.lang.String[] { "Rmvolume", "PvolumeID", });
     internal_static_org_opendedup_grpc_DeleteCloudVolumeResponse_descriptor =
       getDescriptor().getMessageTypes().get(21);
     internal_static_org_opendedup_grpc_DeleteCloudVolumeResponse_fieldAccessorTable = new
@@ -28673,7 +30608,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetVolumeCapacityRequest_descriptor,
-        new java.lang.String[] { "Size", });
+        new java.lang.String[] { "Size", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetVolumeCapacityResponse_descriptor =
       getDescriptor().getMessageTypes().get(23);
     internal_static_org_opendedup_grpc_SetVolumeCapacityResponse_fieldAccessorTable = new
@@ -28685,7 +30620,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_SetPasswordRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetPasswordRequest_descriptor,
-        new java.lang.String[] { "Password", });
+        new java.lang.String[] { "Password", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetPasswordResponse_descriptor =
       getDescriptor().getMessageTypes().get(25);
     internal_static_org_opendedup_grpc_SetPasswordResponse_fieldAccessorTable = new
@@ -28697,7 +30632,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_SpeedRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SpeedRequest_descriptor,
-        new java.lang.String[] { "RequestedSpeed", });
+        new java.lang.String[] { "RequestedSpeed", "PvolumeID", });
     internal_static_org_opendedup_grpc_SpeedResponse_descriptor =
       getDescriptor().getMessageTypes().get(27);
     internal_static_org_opendedup_grpc_SpeedResponse_fieldAccessorTable = new
@@ -28709,7 +30644,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_SyncFromVolRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncFromVolRequest_descriptor,
-        new java.lang.String[] { "Volumeid", });
+        new java.lang.String[] { "Volumeid", "PvolumeID", });
     internal_static_org_opendedup_grpc_SyncFromVolResponse_descriptor =
       getDescriptor().getMessageTypes().get(29);
     internal_static_org_opendedup_grpc_SyncFromVolResponse_fieldAccessorTable = new
@@ -28721,7 +30656,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_SyncVolRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SyncVolRequest_descriptor,
-        new java.lang.String[] { });
+        new java.lang.String[] { "PvolumeID", });
     internal_static_org_opendedup_grpc_SyncVolResponse_descriptor =
       getDescriptor().getMessageTypes().get(31);
     internal_static_org_opendedup_grpc_SyncVolResponse_fieldAccessorTable = new
@@ -28733,7 +30668,7 @@ public final class VolumeServiceOuterClass {
     internal_static_org_opendedup_grpc_SetMaxAgeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_org_opendedup_grpc_SetMaxAgeRequest_descriptor,
-        new java.lang.String[] { "MaxAge", });
+        new java.lang.String[] { "MaxAge", "PvolumeID", });
     internal_static_org_opendedup_grpc_SetMaxAgeResponse_descriptor =
       getDescriptor().getMessageTypes().get(33);
     internal_static_org_opendedup_grpc_SetMaxAgeResponse_fieldAccessorTable = new

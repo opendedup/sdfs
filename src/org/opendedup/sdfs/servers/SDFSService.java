@@ -46,6 +46,7 @@ public class SDFSService {
 	public SDFSService(String configFile, ArrayList<String> volumes) {
 
 		this.configFile = configFile;
+		Main.volumeConfigFile = configFile;
 		this.volumes = volumes;
 		String ts = "";
 		Properties props = new Properties();
@@ -74,6 +75,7 @@ public class SDFSService {
 			System.err.println("Exiting");
 			System.exit(-1);
 		}
+		SDFSLogger.createSdfsLogger();
 		SDFSLogger.getLog().debug("############# SDFSService Starting ##################");
 
 		Main.mountEvent = SDFSEvent
