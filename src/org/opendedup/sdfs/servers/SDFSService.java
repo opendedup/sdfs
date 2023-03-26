@@ -32,6 +32,7 @@ import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.mgmt.MgmtWebServer;
 import org.opendedup.sdfs.notification.SDFSEvent;
 import org.opendedup.util.OSValidator;
+import org.opendedup.sdfs.mgmt.ExpandVolumeCmd;
 
 public class SDFSService {
 	String configFile;
@@ -89,6 +90,18 @@ public class SDFSService {
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");
+		if(!Main.extendCapacity.isEmpty())
+		{
+			try
+			{
+				ExpandVolumeCmd extCap = new ExpandVolumeCmd();
+				extCap.getResult("extendCapacity", Main.extendCapacity);
+			}
+			catch (Exception e)
+			{
+				SDFSLogger.getLog().warn("unable to extend capacity ", e);
+			}
+		}
 		MgmtWebServer.start(Main.sdfsCliSSL);
 
 		Main.pFullSched = new StandAloneGCScheduler();

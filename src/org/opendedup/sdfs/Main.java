@@ -85,6 +85,7 @@ public class Main {
 	public static byte [] decKey = null;
 	public static boolean forceCompact = false;
 	public static int MAX_REPL_BATCH_SZ = 128;
+	public static String extendCapacity = "";
 	public static String sdfsBasePath = "";
 	public static String volumeConfigFile = "";
 

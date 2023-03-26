@@ -54,6 +54,7 @@ public class MountSDFS implements Daemon, Runnable {
 				"Folder basepath for sdfs to be used in linux os, same as sdfs-base-path in mkfs.sdfs. \n e.g. /opt/test");
 		options.addOption("t", true, "Temporary directory for sdfs to be used in linux os. \n e.g. /tmp");
 		options.addOption("a", false, "Runs Consistency Check Periodically");
+		options.addOption("x", true, "Capacity of the store to be extended");
 		options.addOption("u", false, "Disables TLS and forces localhost");
 		options.addOption("d", false, "Enables TLS and forces 0.0.0.0");
 		return options;
@@ -218,6 +219,9 @@ public class MountSDFS implements Daemon, Runnable {
 			Main.logPath = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + fn;
 			File lf = new File(Main.logPath);
 			lf.getParentFile().mkdirs();
+		}
+		if(cmd.hasOption("x")) {
+						Main.extendCapacity = cmd.getOptionValue("x");
 		}
 		sdfsService = new SDFSService(volumeConfigFile, volumes);
 		try {

@@ -355,10 +355,23 @@ public class Volume {
 			return capacity;
 	}
 
+	
+
 	public void setCapacity(long capacity, boolean propigateEvent) throws Exception {
 		if (capacity <= this.currentSize.get())
-			throw new IOException("Cannot resize volume to something less than current size. Current Size ["
-					+ this.currentSize + "] requested capacity [" + capacity + "]");
+		{
+			if(!Main.extendCapacity.isEmpty())
+			{
+				if(capacity <= HCServiceProxy.getDSEMaxSize())
+					throw new IOException("Cannot resize volume to something less than current DSE MaxSize. Current DSE MaxSize ["
+							+ HCServiceProxy.getDSEMaxSize() + "] requested capacity [" + capacity + "]");	
+			}
+			else
+			{
+				throw new IOException("Cannot resize volume to something less than current size. Current Size ["
+			 		+ this.currentSize + "] requested capacity [" + capacity + "]");
+			}
+		}
 		this.capacity = capacity;
 		Main.chunkStoreAllocationSize = capacity;
 		HCServiceProxy.setDseSize((capacity / HashFunctionPool.avg_page_size) + 8000);
