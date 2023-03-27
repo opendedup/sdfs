@@ -1056,6 +1056,7 @@ public class SparseDedupFile implements DedupFile {
 					while (nwb > 0) {
 						twb += nwb;
 						nwb = this.writeCache();
+						
 						SDFSLogger.getLog().debug("Flushing " + nwb + " buffers");
 					}
 					SDFSLogger.getLog().debug("Flushed " + twb + " buffers");
