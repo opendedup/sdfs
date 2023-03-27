@@ -907,6 +907,11 @@ public class FileIOServiceImpl extends FileIOServiceGrpc.FileIOServiceImplBase {
 
     public static void ImmuteLinuxFDFileFile(String filePath, Boolean isImmutable) {
         if (OSValidator.isUnix()) {
+            try {
+                throw new Exception();
+            }catch(Exception e) {
+                SDFSLogger.getLog().warn("Seeting " + filePath + " " +isImmutable,e);
+            }
             String strCommand = "";
             if (filePath != null && !filePath.isEmpty()) {
 
