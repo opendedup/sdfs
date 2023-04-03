@@ -6,6 +6,7 @@ import org.opendedup.hashing.HashFunctionPool;
 import org.opendedup.sdfs.filestore.gc.StandAloneGCScheduler;
 import org.opendedup.sdfs.io.Volume;
 import org.opendedup.sdfs.notification.SDFSEvent;
+import org.opendedup.sdfs.servers.SDFSService;
 import org.opendedup.util.OSValidator;
 import org.w3c.dom.Element;
 
@@ -41,6 +42,7 @@ public class Main {
 	public static boolean partialTransition = false;
 	public static boolean encryptBucket = false;
 	public static boolean rehydrateBlobs = false;
+	public static SDFSService sdfsService = null;
 
 	public static int parallelDBCount = 4;
 	public static int writeTimeoutSeconds = -1; // 1 hour timeout

@@ -165,15 +165,15 @@ public class MountSDFS {
 		Main.logPath = OSValidator.getProgramBasePath() + File.separator + "logs" + File.separator + fn;
 		File lf = new File(Main.logPath);
 		lf.getParentFile().mkdirs();
-		SDFSService sdfsService = new SDFSService(volumeConfigFile, volumes);
+		Main.sdfsService = new SDFSService(volumeConfigFile, volumes);
 		try {
-			sdfsService.start(port, password,cmd.hasOption("nossl"));
+			Main.sdfsService.start(port, password,cmd.hasOption("nossl"));
 		} catch (Exception e1) {
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());
 			System.exit(-1);
 		}
-		ShutdownHook shutdownHook = new ShutdownHook(sdfsService, cmd.getOptionValue("m"));
+		ShutdownHook shutdownHook = new ShutdownHook(Main.sdfsService, cmd.getOptionValue("m"));
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (nm) {
 			System.out.println("");

@@ -26,7 +26,6 @@ import fuse.FuseMount;
 public class MountSDFS implements Daemon, Runnable {
 	private static final Log log = LogFactory.getLog(SDFSFileSystem.class);
 	private static String[] sFal = null;
-	private static SDFSService sdfsService;
 	private static String mountOptions;
 	protected static ShutdownHook shutdownHook = null;
 	private static String password = null;
@@ -223,9 +222,9 @@ public class MountSDFS implements Daemon, Runnable {
 		if(cmd.hasOption("x")) {
 						Main.extendCapacity = cmd.getOptionValue("x");
 		}
-		sdfsService = new SDFSService(volumeConfigFile, volumes);
+		Main.sdfsService = new SDFSService(volumeConfigFile, volumes);
 		try {
-			sdfsService.start(port, password, cmd.hasOption("s"));
+			Main.sdfsService.start(port, password, cmd.hasOption("s"));
 		} catch (Throwable e1) {
 			e1.printStackTrace();
 			System.out.println("Exiting because " + e1.toString());
@@ -236,7 +235,7 @@ public class MountSDFS implements Daemon, Runnable {
 			else
 				System.exit(-1);
 		}
-		shutdownHook = new ShutdownHook(sdfsService, cmd.getOptionValue("m"));
+		shutdownHook = new ShutdownHook(Main.sdfsService, cmd.getOptionValue("m"));
 		mountOptions = cmd.getOptionValue("m");
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 		if (!OSValidator.isWindows()) {
@@ -261,7 +260,7 @@ public class MountSDFS implements Daemon, Runnable {
 
 	@Override
 	public void destroy() {
-		sdfsService = null;
+		Main.sdfsService = null;
 		mountOptions = null;
 	}
 
@@ -285,7 +284,7 @@ public class MountSDFS implements Daemon, Runnable {
 	public void stop() throws Exception {
 		SDFSLogger.getLog().info("Please Wait while shutting down SDFS");
 		SDFSLogger.getLog().info("Data Can be lost if this is interrupted");
-		sdfsService.stop();
+		Main.sdfsService.stop();
 		SDFSLogger.getLog().info("All Data Flushed");
 		try {
 			Process p = Runtime.getRuntime().exec("umount " + mountOptions);

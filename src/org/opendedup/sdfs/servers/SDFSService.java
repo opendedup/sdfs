@@ -64,9 +64,9 @@ public class SDFSService {
 		System.out.println("reading config file = " + this.configFile);
 	}
 
-	public void start(int port, String password,boolean disableSSL) throws Exception {
+	public void start(int port, String password, boolean disableSSL) throws Exception {
 		Config.parseSDFSConfigFile(this.configFile, password);
-		if(disableSSL) {
+		if (disableSSL) {
 			Main.sdfsCliSSL = false;
 		}
 		if (port != -1)
@@ -90,15 +90,11 @@ public class SDFSService {
 		SDFSLogger.getLog().debug("HCServiceProxy Starting");
 		HCServiceProxy.init(volumes);
 		SDFSLogger.getLog().debug("HCServiceProxy Started");
-		if(!Main.extendCapacity.isEmpty())
-		{
-			try
-			{
+		if (!Main.extendCapacity.isEmpty()) {
+			try {
 				ExpandVolumeCmd extCap = new ExpandVolumeCmd();
 				extCap.getResult("extendCapacity", Main.extendCapacity);
-			}
-			catch (Exception e)
-			{
+			} catch (Exception e) {
 				SDFSLogger.getLog().warn("unable to extend capacity ", e);
 			}
 		}
@@ -118,76 +114,78 @@ public class SDFSService {
 		SDFSLogger.getLog().debug("############### SDFSService Started ##################");
 	}
 
-	public void stop() {
-		stopped = true;
-		SDFSEvent evt = SDFSEvent.umountEvent("Unmounting Volume");
-		SDFSLogger.getLog().info("Shutting Down SDFS");
-		SDFSLogger.getLog().info("Stopping FDISK scheduler");
+	public synchronized void stop() {
+		if (!stopped) {
+			stopped = true;
+			SDFSEvent evt = SDFSEvent.umountEvent("Unmounting Volume");
+			SDFSLogger.getLog().info("Shutting Down SDFS");
+			SDFSLogger.getLog().info("Stopping FDISK scheduler");
 
-		try {
-			// BloomFDisk.closed = true;
-			Main.pFullSched.close();
-			Main.pFullSched = null;
+			try {
+				// BloomFDisk.closed = true;
+				Main.pFullSched.close();
+				Main.pFullSched = null;
 
-		} catch (Exception e) {
-		}
-		SDFSLogger.getLog().info("Flushing and Closing Write Caches");
-		try {
-			DedupFileStore.close();
-		} catch (Exception e) {
-			System.out.println("Dedupe File store did not close correctly");
-			SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
-		}
-		SDFSLogger.getLog().info("Write Caches Flushed and Closed");
-		SDFSLogger.getLog().info("Committing open Files");
-		try {
-			MetaFileStore.close();
-		} catch (Exception e) {
-			System.out.println("Meta File store did not close correctly");
-			SDFSLogger.getLog().error("Meta File store did not close correctly", e);
-		}
-		SDFSLogger.getLog().info("Open File Committed");
-		SDFSLogger.getLog().info("Writing Config File");
-
-		/*
-		 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
-		 */
-		try {
-			MgmtWebServer.stop();
-		} catch (Exception e) {
-			System.out.println("Web Server did not close correctly");
-			SDFSLogger.getLog().error("Web server did not close correctly", e);
-		}
-		try {
-			if (OSValidator.isUnix()) {
-				Process p = Runtime.getRuntime().exec("umount " + Main.volumeMountPoint);
-				p.waitFor();
+			} catch (Exception e) {
 			}
-		} catch (Exception e) {
+			SDFSLogger.getLog().info("Flushing and Closing Write Caches");
+			try {
+				DedupFileStore.close();
+			} catch (Exception e) {
+				System.out.println("Dedupe File store did not close correctly");
+				SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
+			}
+			SDFSLogger.getLog().info("Write Caches Flushed and Closed");
+			SDFSLogger.getLog().info("Committing open Files");
+			try {
+				MetaFileStore.close();
+			} catch (Exception e) {
+				System.out.println("Meta File store did not close correctly");
+				SDFSLogger.getLog().error("Meta File store did not close correctly", e);
+			}
+			SDFSLogger.getLog().info("Open File Committed");
+			SDFSLogger.getLog().info("Writing Config File");
 
-		}
-		SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
-		try {
-			HCServiceProxy.close();
-		} catch (Exception e) {
-			System.out.println("HashStore did not close correctly");
-			SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
-		}
-		SDFSLogger.getLog().info("######### HashStore Closed ###################");
-		Main.volume.setClosedGracefully(true);
-		try {
-			Config.writeSDFSConfigFile(configFile);
-		} catch (Exception e) {
+			/*
+			 * try { MD5CudaHash.freeMem(); } catch (Exception e) { }
+			 */
+			try {
+				MgmtWebServer.stop();
+			} catch (Exception e) {
+				System.out.println("Web Server did not close correctly");
+				SDFSLogger.getLog().error("Web server did not close correctly", e);
+			}
+			try {
+				if (OSValidator.isUnix()) {
+					Process p = Runtime.getRuntime().exec("umount " + Main.volumeMountPoint);
+					p.waitFor();
+				}
+			} catch (Exception e) {
 
-		}
-		try {
+			}
+			SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
+			try {
+				HCServiceProxy.close();
+			} catch (Exception e) {
+				System.out.println("HashStore did not close correctly");
+				SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
+			}
+			SDFSLogger.getLog().info("######### HashStore Closed ###################");
 			Main.volume.setClosedGracefully(true);
-			Config.writeSDFSConfigFile(configFile);
-		} catch (Throwable e) {
-			SDFSLogger.getLog().error("Unable to write volume config.", e);
+			try {
+				Config.writeSDFSConfigFile(configFile);
+			} catch (Exception e) {
+
+			}
+			try {
+				Main.volume.setClosedGracefully(true);
+				Config.writeSDFSConfigFile(configFile);
+			} catch (Throwable e) {
+				SDFSLogger.getLog().error("Unable to write volume config.", e);
+			}
+			evt.endEvent("Volume Unmounted");
+			SDFSEvent.close();
+			SDFSLogger.getLog().info("SDFS is Shut Down");
 		}
-		evt.endEvent("Volume Unmounted");
-		SDFSEvent.close();
-		SDFSLogger.getLog().info("SDFS is Shut Down");
 	}
 }
