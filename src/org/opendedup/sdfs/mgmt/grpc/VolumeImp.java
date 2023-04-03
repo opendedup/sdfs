@@ -709,49 +709,8 @@ class VolumeImpl extends VolumeServiceGrpc.VolumeServiceImplBase {
 
     @Override
     public void run() {
-      SDFSEvent evt = SDFSEvent.umountEvent("Shutting down Volume");
-      SDFSLogger.getLog().info("Shutting Down SDFS");
-      SDFSLogger.getLog().info("Stopping FDISK scheduler");
-      SDFSLogger.getLog().info("Flushing and Closing Write Caches");
-      try {
-        DedupFileStore.close();
-      } catch (Exception e) {
-        System.out.println("Dedupe File store did not close correctly");
-        SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
-      }
-      SDFSLogger.getLog().info("Write Caches Flushed and Closed");
-      SDFSLogger.getLog().info("Committing open Files");
-      try {
-        MetaFileStore.close();
-      } catch (Exception e) {
-        System.out.println("Meta File store did not close correctly");
-        SDFSLogger.getLog().error("Meta File store did not close correctly", e);
-      }
-      SDFSLogger.getLog().info("Open File Committed");
-      SDFSLogger.getLog().info("Writing Config File");
 
-      SDFSLogger.getLog().info("######### Shutting down HashStore ###################");
-      try {
-        HCServiceProxy.close();
-      } catch (Exception e) {
-        System.out.println("HashStore did not close correctly");
-        SDFSLogger.getLog().error("Dedupe File store did not close correctly", e);
-      }
-      SDFSLogger.getLog().info("######### HashStore Closed ###################");
-      Main.volume.setClosedGracefully(true);
-      try {
-        Config.writeSDFSConfigFile(Main.volumeConfigFile);
-      } catch (Exception e) {
-
-      }
-      try {
-        Main.volume.setClosedGracefully(true);
-        Config.writeSDFSConfigFile(Main.volumeConfigFile);
-      } catch (Throwable e) {
-        SDFSLogger.getLog().error("Unable to write volume config.", e);
-      }
-      evt.endEvent("Volume Unmounted");
-      SDFSLogger.getLog().info("SDFS is Shut Down");
+      Main.sdfsService.stop();
       System.exit(0);
 
     }
