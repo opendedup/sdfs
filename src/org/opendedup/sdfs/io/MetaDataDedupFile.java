@@ -1378,8 +1378,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public static MetaDataDedupFile fromProtoBuf(FileInfoResponse resp, String path) throws IOException {
 		MetaDataDedupFile mf = new MetaDataDedupFile(path);
-		mf.setGroup_id((int) resp.getGroupId(), false);
-		mf.setOwner_id((int) resp.getUserId(), false);
+		if (resp.getGroupId() >= 0) {
+			mf.setGroup_id((int) resp.getGroupId(), false);
+		}
+		if (resp.getUserId() >= 0) {
+			mf.setOwner_id((int) resp.getUserId(), false);
+		}
 		mf.setPermissions(resp.getPermissions(), false);
 		mf.setLastAccessed(resp.getAtime(), false);
 		mf.setDfGuid(resp.getMapGuid(), false);
@@ -1388,7 +1392,9 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		mf.setImporting(resp.getImporting());
 		mf.setLastModified(resp.getMtime(), false);
 		mf.setLength(resp.getSize(), false);
-		mf.setMode(resp.getMode(), false);
+		if (resp.getMode() >= 0) {
+			mf.setMode(resp.getMode(), false);
+		}
 		mf.setReadable(resp.getRead(), false);
 		mf.setSymlink(false);
 		mf.setWritable(resp.getWrite(), false);
