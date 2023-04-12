@@ -126,7 +126,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	private long retentionLock = -1;
 	private static final int pl = Main.volume.getPath().length();
 
-
 	public static void registerListener(Object obj) {
 		eventBus.register(obj);
 	}
@@ -150,9 +149,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 	public void setMode(int mode) throws IOException {
 		setMode(mode, true);
 	}
-
-	
-
 
 	public void setMode(int mode, boolean propigateEvent) throws IOException {
 		this.mode = mode;
@@ -797,7 +793,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 						f.getParentFile().mkdirs();
 					FileIOServiceImpl.ImmuteLinuxFDFileFile(f.getPath(), false);
 					FileOutputStream fout = null;
-						fout = new FileOutputStream(this.path);
+					fout = new FileOutputStream(this.path);
 					out = new ObjectOutputStream(fout);
 					out.writeObject(this);
 					out.flush();
@@ -914,9 +910,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			File f = new File(this.path);
 			if (f.exists()) {
 				boolean del = f.delete();
-				Main.volume.removeFile();
-				if (!localonly)
-					eventBus.post(new MFileDeleted(this));
+				if (del) {
+					Main.volume.removeFile();
+					if (!localonly)
+						eventBus.post(new MFileDeleted(this));
+				}
 				return del;
 			} else
 				return true;
@@ -1760,7 +1758,6 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				if (in.available() > 0) {
 					this.permissions = in.readInt();
 				}
-				
 
 				/*
 				 * if(in.available() > 0) { int vlen = in.readInt(); byte[] vb = new byte[vlen];

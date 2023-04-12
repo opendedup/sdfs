@@ -146,7 +146,13 @@ public class ReplicationService {
 
     @Subscribe
     public void syncEvent(org.opendedup.sdfs.io.events.MFileDeleted _evt) {
-        SDFSLogger.getLog().debug("Delete called for " + _evt.mf.getPath());
+        SDFSLogger.getLog().info("Delete called for " + _evt.mf.getPath());
+        try {
+            throw new Exception("this is a debug exception");
+        }catch(Exception e) {
+            SDFSLogger.getLog().warn("this is not a real exception.", e);
+        }
+
         VolumeEvent.Builder b = VolumeEvent.newBuilder();
         b.setSeq(this.sequence.incrementAndGet()).setUuid(RandomGUID.getGuid())
                 .setTimeStamp(System.currentTimeMillis()).setActionType(actionType.MFILEDELETED);
