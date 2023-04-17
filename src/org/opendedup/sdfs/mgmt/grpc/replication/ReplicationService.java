@@ -150,7 +150,7 @@ public class ReplicationService {
         try {
             throw new Exception("this is a debug exception");
         }catch(Exception e) {
-            SDFSLogger.getLog().warn("this is not a real exception.", e);
+            SDFSLogger.getLog().debug("this is not a real exception.", e);
         }
 
         VolumeEvent.Builder b = VolumeEvent.newBuilder();
