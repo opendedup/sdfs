@@ -1378,11 +1378,19 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public static MetaDataDedupFile fromProtoBuf(FileInfoResponse resp, String path) throws IOException {
 		MetaDataDedupFile mf = new MetaDataDedupFile(path);
-		if (resp.getGroupId() >= 0) {
-			mf.setGroup_id((int) resp.getGroupId(), false);
+		try {
+			if (resp.getGroupId() >= 0) {
+				mf.setGroup_id((int) resp.getGroupId(), false);
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().debug("unable to set groupid " + resp.getGroupId(), e);
 		}
-		if (resp.getUserId() >= 0) {
-			mf.setOwner_id((int) resp.getUserId(), false);
+		try {
+			if (resp.getUserId() >= 0) {
+				mf.setOwner_id((int) resp.getUserId(), false);
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().debug("unable to set user id  " + resp.getGroupId(), e);
 		}
 		mf.setPermissions(resp.getPermissions(), false);
 		mf.setLastAccessed(resp.getAtime(), false);
@@ -1392,8 +1400,12 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		mf.setImporting(resp.getImporting());
 		mf.setLastModified(resp.getMtime(), false);
 		mf.setLength(resp.getSize(), false);
-		if (resp.getMode() >= 0) {
-			mf.setMode(resp.getMode(), false);
+		try {
+			if (resp.getMode() >= 0) {
+				mf.setMode(resp.getMode(), false);
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().debug("unable to set user id  " + resp.getGroupId(), e);
 		}
 		mf.setReadable(resp.getRead(), false);
 		mf.setSymlink(false);
