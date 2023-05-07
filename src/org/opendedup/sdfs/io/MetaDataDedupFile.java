@@ -1389,10 +1389,11 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 			if (resp.getUserId() >= 0) {
 				mf.setOwner_id((int) resp.getUserId(), false);
 			}
+			mf.setPermissions(resp.getPermissions(), false);
 		} catch (Exception e) {
 			SDFSLogger.getLog().debug("unable to set user id  " + resp.getGroupId(), e);
 		}
-		mf.setPermissions(resp.getPermissions(), false);
+		
 		mf.setLastAccessed(resp.getAtime(), false);
 		mf.setDfGuid(resp.getMapGuid(), false);
 		mf.setExecutable(resp.getExecute(), false);
@@ -1405,7 +1406,8 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 				mf.setMode(resp.getMode(), false);
 			}
 		} catch (Exception e) {
-			SDFSLogger.getLog().debug("unable to set user id  " + resp.getGroupId(), e);
+			SDFSLogger.getLog().debug("unable to set mode setting to 0003  " + resp.getGroupId(), e);
+			mf.setMode(0003,false);
 		}
 		mf.setReadable(resp.getRead(), false);
 		mf.setSymlink(false);

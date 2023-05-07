@@ -265,6 +265,7 @@ public class ImportFile implements Runnable {
             evt.setShortMsg("Importing metadata file for " + evt.dst);
             MetaDataDedupFile mf = null;
             FileInfoResponse fi = null;
+            boolean alreadyDownloaded = this.CheckAlreadyDownloaded();
             try {
                 fi = downloadMetaFile();
                 if (!_f.exists()) {
@@ -276,6 +277,7 @@ public class ImportFile implements Runnable {
                 } else {
                     FileIOServiceImpl.ImmuteLinuxFDFileFile(_f.getPath(), false);
                     mf = MetaFileStore.getMF(_f);
+
                     if (mf.getGUID() == null) {
                         String ng = UUID.randomUUID().toString();
                         mf.setLength(0, true);
@@ -286,7 +288,7 @@ public class ImportFile implements Runnable {
             } catch (ReplicationCanceledException e) {
                 throw e;
             }
-            if (!evt.metadataOnly) {
+            if (!evt.metadataOnly && !alreadyDownloaded) {
                 long expectedSize = evt.dstOffset + evt.srcSize;
                 if (evt.srcSize == 0) {
                     expectedSize += fi.getSize();
@@ -324,7 +326,8 @@ public class ImportFile implements Runnable {
                     }
                     throw e;
                 }
-
+                mf.setLastModified(fi.getMtime(), false);
+                mf.setLastAccessed(fi.getAtime(), false);
                 mf.setLength(expectedSize, true);
             }
 
@@ -333,10 +336,13 @@ public class ImportFile implements Runnable {
             evt.addCount(1);
 
             evt.endEvent("Import Successful for " + evt.dst, SDFSEvent.INFO);
-            if (!evt.metadataOnly) {
+            if (!evt.metadataOnly && !alreadyDownloaded) {
                 SDFSLogger.getLog().info("Imported " + evt.dst + " size = " + mf.length() +
                         " bytesimported = " + evt.bytesImported + " bytesprocessed = " + evt.bytesProcessed
                         + " dstOffset " + evt.dstOffset);
+            } else if (!evt.metadataOnly && alreadyDownloaded) {
+                SDFSLogger.getLog()
+                        .info("Import request ignored for " + evt.dst + " because it was already downloaded");
             } else {
                 SDFSLogger.getLog().info("Imported metadata for " + evt.dst);
             }
@@ -359,6 +365,37 @@ public class ImportFile implements Runnable {
             } catch (Exception e) {
 
             }
+        }
+
+    }
+
+    private boolean CheckAlreadyDownloaded() throws IOException, FileNotFoundException {
+        MetaDataDedupeFileRequest mr = MetaDataDedupeFileRequest.newBuilder().setPvolumeID(client.volumeid)
+                .setFilePath(evt.src).build();
+        MetaDataDedupeFileResponse crs = this.rc.getStorageBlockingStub().getMetaDataDedupeFile(mr);
+        if (crs.getErrorCode() != errorCodes.NOERR) {
+            if (crs.getErrorCode() == errorCodes.ENOENT) {
+                throw new FileNotFoundException(crs.getError());
+            } else {
+                throw new IOException(
+                        "Error found during file request " + crs.getErrorCode() + " err : " + crs.getError());
+            }
+        }
+        String pt = Main.volume.getPath() + File.separator + evt.dst;
+        File _f = new File(pt);
+        if (_f.exists()) {
+            MetaDataDedupFile mf = MetaFileStore.getMF(_f);
+            FileInfoResponse fi = crs.getFile();
+            if (mf.length() == fi.getSize() && mf.lastModified() == fi.getMtime()) {
+                return true;
+            } else {
+                SDFSLogger.getLog()
+                        .info(" Updating mfl=" + mf.length() + " fl=" + fi.getSize() + " mlm=" + mf.lastModified()
+                                + " flm=" + fi.getMtime());
+                return false;
+            }
+        } else {
+            return false;
         }
 
     }
@@ -716,9 +753,9 @@ public class ImportFile implements Runnable {
                 mp.put(dpos, ck);
             } catch (HashtableFullException e2) {
                 e1 = e2;
-            }  catch (IOException e2) {
+            } catch (IOException e2) {
                 e = e2;
-            }catch (Exception e2) {
+            } catch (Exception e2) {
                 e = new IOException(e2);
             }
 

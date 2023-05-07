@@ -146,7 +146,7 @@ public class ReplicationService {
 
     @Subscribe
     public void syncEvent(org.opendedup.sdfs.io.events.MFileDeleted _evt) {
-        SDFSLogger.getLog().info("Delete called for " + _evt.mf.getPath());
+        SDFSLogger.getLog().debug("Delete called for " + _evt.mf.getPath());
         try {
             throw new Exception("this is a debug exception");
         }catch(Exception e) {

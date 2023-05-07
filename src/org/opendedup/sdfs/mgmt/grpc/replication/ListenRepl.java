@@ -6,11 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.opendedup.collections.RocksDBMap.ProcessPriorityThreadFactory;
 import org.opendedup.grpc.FileInfo.errorCodes;
 import org.opendedup.grpc.Storage.VolumeEvent;
 import org.opendedup.grpc.Storage.VolumeEventListenRequest;
@@ -19,7 +17,6 @@ import org.opendedup.logging.SDFSLogger;
 import org.opendedup.sdfs.Main;
 import org.opendedup.sdfs.filestore.MetaFileStore;
 import org.opendedup.sdfs.io.MetaDataDedupFile;
-import org.opendedup.sdfs.io.WritableCacheBuffer.BlockPolicy;
 import org.opendedup.sdfs.mgmt.grpc.FileIOServiceImpl;
 import org.opendedup.sdfs.mgmt.grpc.replication.ReplicationClient.ReplicationConnection;
 import org.opendedup.sdfs.notification.ReplicationImportEvent;
@@ -27,7 +24,6 @@ import org.opendedup.sdfs.notification.ReplicationImportEvent;
 public class ListenRepl implements Runnable {
     ReplicationClient client;
     ReplicationConnection rc = null;
-    private transient RejectedExecutionHandler executionHandler = new BlockPolicy();
     private Thread listThread;
     private Thread downloadThread;
     ListReplLogs ll;
@@ -54,6 +50,7 @@ public class ListenRepl implements Runnable {
         return false;
 
     }
+
     protected static BlockingQueue<Runnable> aworksQueue = new ArrayBlockingQueue<Runnable>(100);
     protected static ThreadPoolExecutor arExecutor = new ThreadPoolExecutor(1, 2,
             10, TimeUnit.SECONDS, aworksQueue);
@@ -143,14 +140,15 @@ public class ListenRepl implements Runnable {
 
                             ReplicationImportEvent evt = new ReplicationImportEvent(rs.getFile().getFilePath(),
                                     rs.getFile().getFilePath(),
-                                    client.url, client.volumeid, client.mtls, false, 0, 0, 0, true,false);
+                                    client.url, client.volumeid, client.mtls, false, 0, 0, 0, true, false);
                             evt.persistEvent();
                             impf = new ImportFile(
                                     client, evt);
                         } else {
 
                             if (ReplicationClient.activeImports.containsKey(_sf.getPath())) {
-                                List<ReplicationImportEvent> al = ReplicationClient.activeImports.get(_sf.getPath());
+                                List<ReplicationImportEvent> al = ReplicationClient.activeImports
+                                        .get(_sf.getPath());
                                 for (ReplicationImportEvent evt : al) {
                                     evt.cancel();
                                 }
@@ -275,7 +273,7 @@ public class ListenRepl implements Runnable {
                     }
                     ReplicationImportEvent evt = new ReplicationImportEvent(".",
                             ".", this.client.url, this.client.volumeid,
-                            this.client.mtls, false, 0, 0, 0, true,false);
+                            this.client.mtls, false, 0, 0, 0, true, false);
                     dl = new DownloadAll(this.client, evt);
                     downloadThread = new Thread(dl);
                     downloadThread.start();
