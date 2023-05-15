@@ -1378,6 +1378,28 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 
 	public static MetaDataDedupFile fromProtoBuf(FileInfoResponse resp, String path) throws IOException {
 		MetaDataDedupFile mf = new MetaDataDedupFile(path);
+		
+		
+		mf.setLastAccessed(resp.getAtime(), false);
+		mf.setDfGuid(resp.getMapGuid(), false);
+		mf.setExecutable(resp.getExecute(), false);
+		mf.setHidden(resp.getHidden(), false);
+		mf.setImporting(resp.getImporting());
+		mf.setLastModified(resp.getMtime(), false);
+		mf.setLength(resp.getSize(), false);
+		mf.setReadable(resp.getRead(), false);
+		mf.setSymlink(false);
+		mf.setWritable(resp.getWrite(), false);
+		mf.unmarshal();
+		FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), false);
+		try {
+			if (resp.getMode() >= 0) {
+				mf.setMode(resp.getMode(), false);
+			}
+		} catch (Exception e) {
+			SDFSLogger.getLog().info("unable to set mode to " + resp.getMode() +" setting to 003  " + resp.getGroupId(), e);
+			mf.setMode(0003,false);
+		}
 		try {
 			if (resp.getGroupId() >= 0) {
 				mf.setGroup_id((int) resp.getGroupId(), false);
@@ -1393,25 +1415,7 @@ public class MetaDataDedupFile implements java.io.Externalizable {
 		} catch (Exception e) {
 			SDFSLogger.getLog().debug("unable to set user id  " + resp.getGroupId(), e);
 		}
-		
-		mf.setLastAccessed(resp.getAtime(), false);
-		mf.setDfGuid(resp.getMapGuid(), false);
-		mf.setExecutable(resp.getExecute(), false);
-		mf.setHidden(resp.getHidden(), false);
-		mf.setImporting(resp.getImporting());
-		mf.setLastModified(resp.getMtime(), false);
-		mf.setLength(resp.getSize(), false);
-		try {
-			if (resp.getMode() >= 0) {
-				mf.setMode(resp.getMode(), false);
-			}
-		} catch (Exception e) {
-			SDFSLogger.getLog().debug("unable to set mode setting to 0003  " + resp.getGroupId(), e);
-			mf.setMode(0003,false);
-		}
-		mf.setReadable(resp.getRead(), false);
-		mf.setSymlink(false);
-		mf.setWritable(resp.getWrite(), false);
+		FileIOServiceImpl.ImmuteLinuxFDFileFile(mf.getPath(), true);
 		mf.unmarshal();
 		return mf;
 	}
